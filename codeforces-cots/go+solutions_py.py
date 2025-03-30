@@ -200,11 +200,6 @@ def find_code(response: str) -> tuple[list[str], str | None]:
 
     return think_code_blocks, final_answer
 
-
-
-
-
-
 # s = """
 # Thus, the code should handle all cases correctly.
 # </think>
@@ -229,6 +224,8 @@ def find_code(response: str) -> tuple[list[str], str | None]:
 # find_answer_candidates(s)
 
 def main(input_gen):
+    from test_code_maker import make_test_code
+
     global CUR_ITEM_IDX
     backtick_or_end_think = re.compile(r'(```|</think>)')
     # the file handle is closed on program exit :)
@@ -308,7 +305,7 @@ def main(input_gen):
             print(row['prompt'], file=fh)
             print("# Response", file=fh)
             print(row['generation'], file=fh)
-            print("\n# Answer candidates", file=fh)
+            print("\n# Think code blocks", file=fh)
             not_first = False
             for ans in think_code_blocks:
                 if not_first:
@@ -317,12 +314,25 @@ def main(input_gen):
                 print(ans, file=fh)
                 print('```', file=fh)
                 not_first = True
+            del not_first
+
+
             print('\n# Final answer', file=fh)
             if final_answer is not None:
                 print('```python', file=fh)
                 print(final_answer, file=fh)
                 print('```', file=fh)
 
+        if row['examples']:
+            answer_check_dir = item_outd/'answer_checks'
+            answer_check_dir.mkdir(parents=True, exist_ok=True)
+            for ans_idx, ans in enumerate(answer_candidates):
+                with (answer_check_dir/f'candidate-{ans_idx}.py').open('w') as fh:
+                    print(make_test_code(ans, row['examples']), file=fh)
+
+            if final_answer is not None:
+                with (answer_check_dir/'final_answer.py').open('w') as fh:
+                    print(make_test_code(final_answer, row['examples']), file=fh)
 
 if __name__ == '__main__' and 'NOGO' not in env:
     import datasets
