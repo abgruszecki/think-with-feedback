@@ -24,7 +24,7 @@ Hello, world!
 ```\
 """
 
-variant = "variant-3"
+variant = "variant-6"
 
 messages = []
 
@@ -79,6 +79,6 @@ outd.mkdir(parents=True, exist_ok=True)
 with open(outd / f"{timestamp}--r1--{variant}.md", "w") as f:
     print_msg(msg, f)
 
-import json
-with open(outd / f"{timestamp}--r1--{variant}.json", "w") as f:
-    json.dump(response.model_dump(mode='json'), f)
+# import json
+# with open(outd / f"{timestamp}--r1--{variant}.json", "w") as f:
+#     json.dump(response.model_dump(mode='json'), f)

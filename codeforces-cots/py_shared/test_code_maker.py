@@ -1,4 +1,5 @@
 import re
+import sys
 
 
 TESTS_PREFIX = '''\
@@ -43,6 +44,7 @@ print('Tests passed 😎')
 # this only very rarely doesn't work, so it's fine
 sys_stdin_rx = re.compile(r'(?<=\W)(sys\.)?stdin(?=\W)')
 sys_stdout_rx = re.compile(r'(?<=\W)(sys\.)?stdout(?=\W)')
+nonspace_char_rx = re.compile(r'\S')
 
 
 def gen_instrumented_code_parts(code: str):
@@ -50,11 +52,27 @@ def gen_instrumented_code_parts(code: str):
     yield '  from builtins import print as _print\n'
     yield '  input = input_stream.readline\n'
     yield '  print = lambda *args, **kwargs: _print(*args, **kwargs, file=output_stream)\n'
+    is_first = True
+    first_offset = 0
     for line in code.splitlines(keepends=True):
-        # TODO use index of first non-whitespace character as offset
+        offset = nonspace_char_rx.search(line)
+        if offset is None:
+            # drop insignificant empty lines
+            yield '\n'
+            continue
+        offset = offset.start()
+        if is_first:
+            first_offset = offset
+            is_first = False
+        if offset < first_offset:
+            print(f'Bad offset {offset} < first_offset ({first_offset}); line: {line!r}', file=sys.stderr)
+        # TODO this is a temporary hack in case lines with bad offsets show up.
+        resolved_offset = min(first_offset, offset)
+        # trim the leading whitespace
+        line = line[resolved_offset:]
+        offset -= resolved_offset
         yield '  '
-        unindented = line.lstrip()
-        if unindented.startswith('from ') or unindented.startswith('import '):
+        if line.startswith(('from ', 'import '), offset):
             yield line
         else:
             # Grug virtualize standard streams

@@ -31,13 +31,12 @@ def async_exec(
     timeout_s: int = DEFAULT_TIMEOUT_S,
     report_path: Path = Path('exec-report.jsonl'),
 ):
-    if max_workers is None:
-        max_workers = max(1, cpu_count() - 1)
-        logger.info('Defaulting worker count to: {}', max_workers)
-
-    report_path_suffix = report_path.suffix
-    if report_path_suffix not in ('.jsonl', '.yaml'):
-        raise typer.BadParameter(f'Report path should end in .jsonl or .yaml. Got: {report_path}')
+    real_max_workers = max_workers
+    if max_workers in (None, 0):
+        real_max_workers = max(1, cpu_count() - 1)
+        if max_workers is None:
+            real_max_workers = min(real_max_workers, 16)
+        logger.info('Defaulting worker count to: {}', real_max_workers)
 
     # A file's id is normally its path except the extension,
     # but for convenience if the only input source is a directory
@@ -75,7 +74,7 @@ def async_exec(
     async def do_exec(file: Path) -> StepResult:
         # Sanity check: make sure the container count is as expected.
         # If this is a problem for you, comment out this block.
-        await _wait_for_running_containers(image_name=executor_image_name, max_containers=max_workers, sleep_secs=10)
+        await _wait_for_running_containers(image_name=executor_image_name, max_containers=real_max_workers, sleep_secs=10)
 
         problem_id = file_id(file)
 
@@ -123,22 +122,23 @@ def async_exec(
             if confirm and confirm.lower() != 'y':
                 return
 
-        async def log_bad_results(res: dict):
-            if res['status'] != 'success':
-                problem_name = res['problem']
-                stdout = res.get('stdout', None)
-                stderr = res.get('stderr', None)
-                if stdout is not None:
-                    assert stderr is not None
-                    logger.warning('Got bad result ({}) for problem `{}`\n#STDOUT#\n{}#STDERR#\n{}', res['status'], problem_name, stdout, stderr)
-                else:
-                    logger.warning('Got bad result ({}) for problem `{}`', res['status'], problem_name)
+        # TODO maybe just count the bad results, show the count with the tqdm bar?
+        # async def log_bad_results(res: dict):
+        #     if res['status'] != 'success':
+        #         problem_name = res['problem']
+        #         stdout = res.get('stdout', None)
+        #         stderr = res.get('stderr', None)
+        #         if stdout is not None:
+        #             assert stderr is not None
+        #             logger.warning('Got bad result ({}) for problem `{}`\n#STDOUT#\n{}#STDERR#\n{}', res['status'], problem_name, stdout, stderr)
+        #         else:
+        #             logger.warning('Got bad result ({}) for problem `{}`', res['status'], problem_name)
 
         await __go(
             do_exec, files_to_exec, None, 'evaluation',
             log_file=report_path,
-            concurrency_limit=max_workers,
-            completion_callback=log_bad_results,
+            concurrency_limit=real_max_workers,
+            # completion_callback=log_bad_results,
         )
 
     asyncio.run(__really_go())
