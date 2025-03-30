@@ -6,10 +6,6 @@ def main(in_stream, out_stream):
     else:
         print(min(abs(x) for x in a), file=out_stream)
 
-if __name__ == "__main__":
-    import sys
-    main(sys.stdin, sys.stdout)
-
 
 import io
 
