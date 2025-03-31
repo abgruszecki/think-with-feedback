@@ -1,7 +1,7 @@
 from collections import namedtuple
 from pathlib import Path
 
-import regex as reg # compatible with the re module, we need the reverse flag
+import regex as reg # regex is compatible with the re module; we need the reverse flag
 
 from py_shared.schema.solutions_py import SolutionsRow
 from py_shared import ser
@@ -14,7 +14,7 @@ outf = root_outd / '4--simulations.jsonl'
 boths_data = ser.jsonl_loadf(boths_file)
 boths_by_problem = {int(r['problem']): r for r in boths_data}
 
-response_t = namedtuple('response_t', ['idx', 'response'])
+response_t = namedtuple('response_t', ['idx', 'response', 'final_answer_len'])
 
 def gen_responses():
     with open(solutions_py_file, 'r') as fh:
@@ -25,6 +25,7 @@ def gen_responses():
             yield response_t(
                 idx=r.idx,
                 response=r.inputs.response,
+                final_answer_len=len(r.final_answer),
             )
 
 responses = list(gen_responses())
