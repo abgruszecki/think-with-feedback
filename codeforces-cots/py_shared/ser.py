@@ -7,12 +7,14 @@ def json_dumpf(obj, pathlike):
         json.dump(obj, fh)
 
 
-def jsonl_loadf(pathlike):
-    data = []
+def jsonl_streamf(pathlike):
     with open(pathlike, 'r') as fh:
         for line in fh:
-            data.append(json.loads(line))
-    return data
+            yield json.loads(line)
+
+
+def jsonl_loadf(pathlike):
+    return list(jsonl_streamf(pathlike))
 
 
 def jsonl_dumpf(data, pathlike):

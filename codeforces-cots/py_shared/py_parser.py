@@ -1,5 +1,5 @@
 import tree_sitter_python as tspython
-from tree_sitter import Language, Parser, Tree
+from tree_sitter import Language, Parser, Tree, Node
 
 
 py_language = Language(tspython.language())

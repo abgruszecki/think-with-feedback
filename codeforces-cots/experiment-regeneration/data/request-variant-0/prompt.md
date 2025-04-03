@@ -1,0 +1,1 @@
+Write a Python "Hello, world!" snippet.

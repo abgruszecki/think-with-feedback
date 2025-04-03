@@ -2,7 +2,8 @@ import re
 import sys
 
 
-TESTS_PREFIX = '''\
+TESTS_PREFIX = \
+    '''\
 import io
 
 TEST_CASES = [\
@@ -13,18 +14,21 @@ TEST_CASE_PREFIX = '''\
     "input": """\\
 '''
 
-TEST_CASE_INFIX = '''\
-\\
+TEST_CASE_INFIX = \
+'''\
+
 """,
     "output": """\\
 '''
 
-TEST_CASE_SUFFIX = '''\
-\\
+TEST_CASE_SUFFIX = \
+'''\
+
 """,
 }, '''
 
-TESTS_SUFFIX = '''\
+TESTS_SUFFIX = \
+'''\
 ]
 
 for i, test_case in enumerate(TEST_CASES):
@@ -32,7 +36,7 @@ for i, test_case in enumerate(TEST_CASES):
     expected_output = test_case["output"].rstrip()
 
     out_stream = io.StringIO()
-    not_main(in_stream, out_stream)
+    test_program(in_stream, out_stream)
     real_output = out_stream.getvalue().rstrip()
 
     assert real_output == expected_output, \\
@@ -48,10 +52,10 @@ nonspace_char_rx = re.compile(r'\S')
 
 
 def gen_instrumented_code_parts(code: str):
-    yield 'def not_main(input_stream, output_stream):\n'
-    yield '  from builtins import print as _print\n'
-    yield '  input = input_stream.readline\n'
-    yield '  print = lambda *args, **kwargs: _print(*args, **kwargs, file=output_stream)\n'
+    yield 'def test_program(input_stream, output_stream):\n'
+    yield '    import builtins\n'
+    yield '    input = lambda: input_stream.readline()[:-1]\n'
+    yield '    print = lambda *args, **kwargs: builtins.print(*args, **kwargs, file=output_stream)\n'
     is_first = True
     first_offset = 0
     for line in code.splitlines(keepends=True):
@@ -71,11 +75,12 @@ def gen_instrumented_code_parts(code: str):
         # trim the leading whitespace
         line = line[resolved_offset:]
         offset -= resolved_offset
-        yield '  '
+        yield ' '*4
         if line.startswith(('from ', 'import '), offset):
             yield line
         else:
             # Grug virtualize standard streams
+            # TODO also handle `exit()`
             yield sys_stdout_rx.sub('output_stream', sys_stdin_rx.sub('input_stream', line))
 
 def gen_test_code_parts(examples: list[dict]):

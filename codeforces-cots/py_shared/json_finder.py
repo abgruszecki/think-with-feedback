@@ -20,12 +20,13 @@ def clean_backtick_fences(string: str) -> str:
 def find_final_backticked_block(
     response: str,
     offset: int | None = None,
+    skip_thinks: bool = True,
 ) -> str | None:
     # early exit on valid input
     if offset == len(response):
         return None
 
-    if offset is None:
+    if offset is None and skip_thinks:
         if m := thinks_end_re.search(response):
             offset = m.end()
         else:
@@ -40,6 +41,7 @@ def find_final_backticked_block(
     cur_match = fence_start_re.search(response, cur_idx)
     loop = True
     while loop:
+        par = None
         if cur_match:
             cur_par_start = cur_match.end()
             fence_end_match = fence_end_re.search(response, cur_match.end())
@@ -52,24 +54,29 @@ def find_final_backticked_block(
             cur_par_end = fence_end_match.start()
 
             par = response[cur_par_start:cur_par_end]
+            par = clean_backtick_fences(par)
+            results.append(par)
 
             # prepare for next par
             cur_idx = fence_end_match.end()
             cur_match = fence_start_re.search(response, cur_idx)
         else:
             loop = False
-            if cur_match:
-                cur_par_end = cur_match.start()
-                cur_idx = cur_match.end()
-            else:
-                cur_idx = cur_par_end = len(response)
-            par = response[cur_par_start:cur_par_end]
+            cur_idx = cur_par_end = len(response)
 
-        par = clean_backtick_fences(par)
-        results.append(par)
 
     return results[-1] if results else None
 
 
-def find_json(response: str, offset: int | None = None) -> str | None:
-    return find_final_backticked_block(response, offset)
+def find_json(
+    response: str,
+    offset: int | None = None,
+    skip_thinks: bool = True,
+) -> str | None:
+    """
+    Finds the final backticked block in the response.
+
+    By default skips the "think" section as an optimization.
+    """
+
+    return find_final_backticked_block(response, offset, skip_thinks)

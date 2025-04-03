@@ -21,11 +21,12 @@ def clean_backtick_fences(string: str) -> str:
     return string
 
 
-def find_think_code_blocks(
+def find_code_blocks(
     response: str,
     offset: int = 0,
-) -> tuple[list[str], int]:
-    results = []
+    only_process_thinks: bool = True,
+) -> tuple[list[tuple[str, int]], int]:
+    results: list[tuple[str, int]] = []
 
     cur_idx = offset
     cur_par_start = cur_idx
@@ -34,9 +35,14 @@ def find_think_code_blocks(
     loop = True
     # next_match = None
     while loop:
+        par = None
+        # the start of the current "logical" code block,
+        # which may be the start of a *previous* paragraph
+        # if we're currently working through R1's newline-separated code block
+        cur_log_block_start = cur_par_start
         # start of match is cur par's end
         # end of match is next par's start
-        if cur_match and cur_match.group(1) is None:
+        if cur_match and (cur_match.group(1) is None or not only_process_thinks):
             cur_par_end = cur_match.start()
 
             cur_idx = cur_match.end()
@@ -58,16 +64,21 @@ def find_think_code_blocks(
             if cur_match:
                 cur_par_end = cur_match.start()
                 cur_idx = cur_match.end()
+                par = response[cur_par_start:cur_par_end]
             else:
+                # we set cur_idx, cur_par_end and
+                # let the last iteration set other variables
                 cur_idx = cur_par_end = len(response)
-            par = response[cur_par_start:cur_par_end]
 
 
         found_code = False
-        # Par should be non-empty.
-        whitespace_offset = nonspace_char_rx.search(par).start()
+        if par is not None:
+            # Par should be non-empty.
+            m = nonspace_char_rx.search(par)
+            assert m is not None
+            whitespace_offset = m.start()
 
-        if (
+        if par and (
             # listing more keywords is unimportant: Python lines are usually short
             # and checking the len is a better heuristic.
             # OTOH checking for # can matter since sometimes R1 adds newlines
@@ -78,13 +89,15 @@ def find_think_code_blocks(
         ):
             par = clean_backtick_fences(par)
             if last_par_was_code:
-                par = ''.join((results[-1], '\n\n', par))
+                last_par_str, cur_log_block_start = results[-1]
+                par = ''.join((last_par_str, '\n\n', par))
 
             if check_is_python(par)[0]:
+                cur_res = (par, cur_log_block_start)
                 if last_par_was_code:
-                    results[-1] = par
+                    results[-1] = cur_res
                 else:
-                    results.append(par)
+                    results.append(cur_res)
                 found_code = True
 
         last_par_was_code = found_code
@@ -101,7 +114,7 @@ def find_final_answer_block(
         return None
 
     # NOTE we just accumulate all the blocks b/c this is copypasta, clean up as needed
-    results = []
+    results: list[tuple[str, int]] = []
 
     cur_idx = offset
     cur_par_start = cur_idx
@@ -151,8 +164,8 @@ def find_code(response: str) -> tuple[list[str], str | None]:
     if m := offset_re.search(response):
         offset = m.end()
 
-    think_code_blocks, offset = find_think_code_blocks(response, offset)
+    think_code_blocks, offset = find_code_blocks(response, offset)
 
     final_answer = find_final_answer_block(response, offset)
 
-    return think_code_blocks, final_answer
+    return [r[0] for r in think_code_blocks], final_answer

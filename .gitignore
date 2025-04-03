@@ -1,5 +1,8 @@
+.vscode
+
 .venv
 __pycache__
 
+datasets/
 out/
 out+*/
