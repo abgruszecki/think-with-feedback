@@ -1,32 +1,29 @@
 import json
 from pathlib import Path
 
-
 from loguru import logger
+import typer
 
-
+from py_shared import ser
 from py_shared.json_finder import find_json
 
 
-def jsonl_streamf(pathlike):
-    with open(pathlike, 'r') as fh:
-        for line in fh:
-            yield json.loads(line)
+app = typer.Typer()
 
 
-def jsonl_loadf(pathlike):
-    return list(jsonl_streamf(pathlike))
-
-
-root_ds_d = Path('./datasets')
-root_out_d = Path('./out')
+subproject_d = Path('flow_checker_classification')
+assert subproject_d.exists(), 'this looks like the wrong dir'
+root_ds_d = subproject_d/'datasets'
+root_out_d = subproject_d/'out'
 raw_checker_ds = root_ds_d / 'raw-checker-classifications.jsonl'
 root_out_d.mkdir(parents=True, exist_ok=True)
 outf = root_out_d / '1--processed-checker-classifications.jsonl'
 
 
-from os import environ as env
-if __name__ == '__main__' and 'NOGO' not in env:
+@app.command()
+def main(
+    input: Path = raw_checker_ds,
+):
     def process_batch(
         batch: list[dict],
         out_fh,
@@ -65,7 +62,7 @@ if __name__ == '__main__' and 'NOGO' not in env:
     cur_batch = []
 
     with outf.open('w') as out_fh:
-        for in_r in jsonl_streamf(raw_checker_ds):
+        for in_r in ser.jsonl_streamf(input):
             in_r_idx = in_r['idx']
             if cur_idx != in_r_idx:
                 if cur_idx != -1:
@@ -77,3 +74,8 @@ if __name__ == '__main__' and 'NOGO' not in env:
 
         if cur_batch:
             process_batch(cur_batch, out_fh)
+
+
+from os import environ as env
+if __name__ == '__main__' and 'NOGO' not in env:
+    app()

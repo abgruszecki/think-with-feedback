@@ -1,7 +1,6 @@
 import json
 from pathlib import Path
 import sys
-from typing import Iterable
 
 from py_shared import ser
 from py_shared.json_finder import find_json

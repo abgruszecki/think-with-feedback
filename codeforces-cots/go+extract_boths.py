@@ -1,5 +1,3 @@
-import sys
-import json
 from pathlib import Path
 
 from py_shared import ser

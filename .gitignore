@@ -1,7 +1,8 @@
 .vscode
 
-.venv
 __pycache__
+.venv
+.ruff_cache
 
 datasets/
 out/

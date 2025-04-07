@@ -4,11 +4,9 @@ import datetime
 import io
 import json
 import os
-import sys
 from pathlib import Path
 from typing import Annotated, Literal
 
-import openai
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionMessage, ChatCompletionMessageParam
 import typer

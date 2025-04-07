@@ -1,8 +1,10 @@
-from dataclasses import dataclass
+import io
 import json
 from pathlib import Path
 
-
+# TODO add the problem statement, it seems to often be necessary
+# TODO explain: we mean a line-by-line diff
+# TODO add another type for a "smart" comparer (booleans or floats)
 INSTRUCTIONS = \
 '''\
 # Request
@@ -39,7 +41,7 @@ Think carefully before giving your answer.
 
 EXAMPLE_TEMPLATE = \
 '''\
-## Example
+## Example{heading_extension}
 ```input
 {example_input}
 ```
@@ -59,17 +61,19 @@ NOTE_TEMPLATE = \
 PROMPT_TEMPLATE = \
 '''\
 # Problem
+{description}
+
 ## Input Format
 {input_format}
 
 ## Output Format
 {output_format}
 
-{example}{note}{instructions}\
+{examples}{note}{instructions}\
 '''
 
 
-root_outd = Path('./out')
+root_outd = Path(__file__).parent/'out'
 root_outd.mkdir(parents=True, exist_ok=True)
 outf = root_outd/'0--checker-decision-prompts.jsonl'
 
@@ -80,13 +84,21 @@ if __name__ == '__main__':
     with outf.open('w') as fh:
         for idx, in_row in enumerate(ds):
             examples_data = in_row['examples']
-            example_str = ''
-            if examples_data:
-                example_row = examples_data[0]
-                example_str = EXAMPLE_TEMPLATE.format(
-                    example_input=example_row['input'],
-                    example_output=example_row['output'],
+            if examples_data is None:
+                examples_data = []
+            examples_buf = io.StringIO()
+            examples_count = len(examples_data)
+            for ex_idx, ex_row in enumerate(examples_data):
+                heading_extension = f' {ex_idx+1}' if examples_count > 1 else ''
+                examples_buf.write(
+                    EXAMPLE_TEMPLATE.format(
+                        heading_extension=heading_extension,
+                        example_input=ex_row['input'],
+                        example_output=ex_row['output'],
+                    )
                 )
+            examples_str = examples_buf.getvalue()
+
             note_str = ''
             if in_row['note']:
                 note_str = NOTE_TEMPLATE.format(
@@ -96,12 +108,12 @@ if __name__ == '__main__':
                 'idx': idx,
                 'id': in_row['id'],
                 'prompt': PROMPT_TEMPLATE.format(
-                    example=example_str,
+                    **{k: in_row[k] for k in ['description', 'input_format', 'output_format']},
+                    examples=examples_str,
                     note=note_str,
-                    input_format=in_row['input_format'],
-                    output_format=in_row['output_format'],
                     instructions=INSTRUCTIONS,
                 ),
             }
             json.dump(r, fh)
             print(file=fh)
+    print(f'Wrote {idx+1} prompts to: {outf}')
