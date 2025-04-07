@@ -5,7 +5,7 @@ from typing import Any
 from pydantic import BaseModel
 import regex as reg # regex is compatible with the re module
 
-from py_shared import code_finder, ser
+from py_shared import code_finder
 
 
 class SigPointData(BaseModel):
@@ -32,7 +32,8 @@ outf = root_outd / 'x--sig-points.jsonl'
 # sometimes with "(Sample|Example) (numeral)",
 # and there's always a colon.
 #
-# Lines like "id_ent is 0." and "id=1." are considered code. May be a problem.
+# We only consider code blocks which look like answers, here's why.
+# Lines like "id_ent is 0." and "id=1." are considered code.
 # If the code block comprises only lines like that, it's probably not a code block.
 # Also there's things like this:
 # ```
@@ -68,6 +69,11 @@ simulation_case_rx = reg.compile(
     flags=reg.IGNORECASE | reg.MULTILINE,
 )
 
+thinks_end_rx = reg.compile(
+    r'^.*?<\/think>.*$',
+    flags=reg.MULTILINE,
+)
+
 
 def process_response(
     response: str
@@ -98,13 +104,34 @@ def process_response(
                 'line_len': len(m.group(0)),
             },
         ))
-    for _, offset in code_finder.find_code_blocks(response)[0]:
+    for code_block, offset in code_finder.find_code_blocks(response)[0]:
+        if not code_finder.looks_like_answer(code_block):
+            continue
+        results.extend([
+            SigPointData(offset=offset, type='code'),
+            SigPointData(offset=offset + len(code_block), type='code-end'),
+        ])
+    for m in thinks_end_rx.finditer(response):
         results.append(SigPointData(
-            offset=offset,
-            type='code',
+            offset=m.start(),
+            type='response-proper',
         ))
 
     results.sort(key=lambda x: x.offset)
+
+    # there's *one* case where we find a sim in code.
+    # so we get rid of all points inside code blocks
+    def _cleaned_results_gen(results: list[SigPointData]):
+        inside_code = False
+        for item in results:
+            if item.type == 'code':
+                inside_code = True
+                yield item
+            elif item.type == 'code-end':
+                inside_code = False
+            if not inside_code:
+                yield item
+    results = list(_cleaned_results_gen(results))
 
     # cut the response at each sig point
     res_iter = iter(results)

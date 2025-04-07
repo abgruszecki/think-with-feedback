@@ -8,7 +8,19 @@ offset_re = re.compile(r'^<think>\n?')
 par_sep_re = re.compile(r'\n\n+|(\n?</think>\n*)', re.MULTILINE)
 fence_start_re = re.compile(r'^```(.*)\n+', re.MULTILINE)
 fence_end_re = re.compile(r'^```($|\n+)', re.MULTILINE)
+has_input_rx = re.compile(r'input\(\)|stdin')
+has_output_rx = re.compile(r'print\(|stdout')
 nonspace_char_rx = re.compile(r'\S')
+
+
+def looks_like_answer(code: str) -> bool:
+    """
+    Allows filtering the results of find_code_blocks.
+    """
+    return bool(
+        has_input_rx.search(code) and
+        has_output_rx.search(code)
+    )
 
 
 def clean_backtick_fences(string: str) -> str:
@@ -70,13 +82,14 @@ def find_code_blocks(
                 # let the last iteration set other variables
                 cur_idx = cur_par_end = len(response)
 
-
         found_code = False
         if par is not None:
-            # Par should be non-empty.
-            m = nonspace_char_rx.search(par)
-            assert m is not None
-            whitespace_offset = m.start()
+            # Par should be non-empty, but right now it sometimes is.
+            # TODO figure out why par is sometimes empty
+            if m := nonspace_char_rx.search(par):
+                whitespace_offset = m.start()
+            else:
+                whitespace_offset = 0
 
         if par and (
             # listing more keywords is unimportant: Python lines are usually short
@@ -114,7 +127,7 @@ def find_final_answer_block(
         return None
 
     # NOTE we just accumulate all the blocks b/c this is copypasta, clean up as needed
-    results: list[tuple[str, int]] = []
+    results = []
 
     cur_idx = offset
     cur_par_start = cur_idx

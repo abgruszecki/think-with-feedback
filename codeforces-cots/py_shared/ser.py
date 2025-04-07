@@ -1,4 +1,4 @@
-import json
+import json as json # re-export
 from pathlib import Path
 
 
