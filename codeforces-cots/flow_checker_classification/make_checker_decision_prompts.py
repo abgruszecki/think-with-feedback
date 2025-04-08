@@ -1,38 +1,45 @@
+#!/usr/bin/env python3
 import io
 import json
 from pathlib import Path
 
-# TODO add the problem statement, it seems to often be necessary
-# TODO explain: we mean a line-by-line diff
-# TODO add another type for a "smart" comparer (booleans or floats)
+# The idea is that if the checker needs to do _anything_ more complicated than a line-wise diff,
+# the problem is marked with "checker".
+# We can later filter out the "checker" problems where it looks like a standard checker is enough.
+# ("Standard" checker tries to compare floats or booleans.)
+# ((1) it seems rare for floats/booleans to occur in problems which allow multiple valid outputs,
+#  (2) we don't really know if floats/booleans are the only )
 INSTRUCTIONS = \
 '''\
 # Request
-
-You were given a description of a competetive programming problem: \
-input/output formats, and also example inputs/outputs and notes if available.
+You were given a description of a competetive programming problem, \
+together with input/output formats, input/output examples and notes, if available.
 
 Decide how to check the program output's correctness. \
-You have three options: "diff", "checker", and "interaction".
+Pick one of three "types": "diff", "checker", and "interaction". \
+Also, you can "tag" a problem as "many-valid-outputs" if there are many valid outputs for one input.
 
-"diff" means that just comparing each character is enough. \
-"checker" means a more complex procedure is needed, for instance to compare floating point numbers or to make the comparison case-insensitive. \
-Finally, "interaction" means that it's not enough to just send the entire input to a submitted program and read the entire output.
+"diff" means that comparing each line character-by-character is enough. \
+"checker" means we need to do a more complicated comparison, \
+for instance to compare floating point numbers or to make the comparison case-insensitive. \
+Finally, "interaction" means that it's not enough to \
+send the entire input to a submitted program and read the entire output.
 
 Remember, if the output is case-insensitive in any way, \
-or if floating point numbers are involved, or if more than one output is allowed, \
-your answer should be "checker".
+or if floating point numbers are involved, \
+the "type" should be "checker". \
+If there are many valid outputs for one input, also add the "many-valid-outputs" tag.
 
-Format your answer as JSON and put it in fences like this:
+Format your answer as JSON with two fields, "type" and "tags", and put it in fences like this:
 ```json
-{ "type": "checker" }
+{ "type": "checker", "tags": ["many-valid-outputs"] }
 ```
 or like this:
 ```json
-{ "type": "diff" }
+{ "type": "diff", "tags": []}
 ```
 
-Remember, your task is to describe how to check the program output's correctness. \
+Remember, your task is to describe how to check if the output is correct. \
 Don't try to solve the problem itself. \
 If you start solving the problem, go back to your task instead.
 
@@ -74,8 +81,9 @@ PROMPT_TEMPLATE = \
 
 
 root_outd = Path(__file__).parent/'out'
-root_outd.mkdir(parents=True, exist_ok=True)
-outf = root_outd/'0--checker-decision-prompts.jsonl'
+step_outd = root_outd/'make_checker_decision_prompts'
+step_outd.mkdir(parents=True, exist_ok=True)
+outf = step_outd/'checker-decision-prompts.jsonl'
 
 
 if __name__ == '__main__':
@@ -116,4 +124,4 @@ if __name__ == '__main__':
             }
             json.dump(r, fh)
             print(file=fh)
-    print(f'Wrote {idx+1} prompts to: {outf}')
+    print(f'Wrote {idx+1} prompts to: {outf.relative_to(Path.cwd())}')

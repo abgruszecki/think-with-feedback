@@ -5,7 +5,9 @@ from sys import argv
 
 from vllm import LLM, SamplingParams
 
-
+# This is here because we run this script on a remote machine with GPUs
+# and it's easier to paste the code here rather than cleanly load the shared code.
+# TODO how to run this script with access to other Python code in this repo?
 def jsonl_streamf(pathlike):
     with open(pathlike, 'r') as fh:
         for line in fh:
@@ -17,13 +19,17 @@ def jsonl_loadf(pathlike):
 
 
 flowd = Path(__file__).parent
-root_outd = flowd/'out'
-root_outd.mkdir(parents=True, exist_ok=True)
-outf = root_outd / '{timestamp}--raw-checker-classifications.jsonl'.format(
+flow_outd = flowd/'out'
+dep_outd = flow_outd/'make_checker_decision_prompts'
+
+step_outd = flowd/'out'/'make_checker_classifications'
+step_outd.mkdir(parents=True, exist_ok=True)
+outf = step_outd / '{timestamp}--raw-checker-classifications.jsonl'.format(
     timestamp=datetime.now().strftime('%Y%m%dT%H%M%S'),
 )
 
-input_data = jsonl_loadf(flowd/'datasets/inputs.jsonl')
+# TODO add a CLI flag for switching between inputs. Or ask interactively?
+input_data = jsonl_loadf(dep_outd/'checker-decision-prompts.jsonl')
 
 llm = LLM(
     str((Path.home()/'models/Qwen--QwQ-32B').absolute()),
@@ -35,7 +41,7 @@ sp = SamplingParams(
     n=4,
     temperature=0.9,
     top_p=0.95,
-    max_tokens=1024,
+    max_tokens=2048,
 )
 
 def make_messages(r):

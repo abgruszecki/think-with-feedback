@@ -1,7 +1,9 @@
+#!/usr/bin/env python3
 import json
 from pathlib import Path
 from typing import Any
 
+from tqdm import tqdm
 from pydantic import BaseModel
 import regex as reg # regex is compatible with the re module
 
@@ -17,9 +19,9 @@ class SigPointData(BaseModel):
     text: str = ''
 
 
-root_outd = Path('out+v2')
-root_outd.mkdir(parents=True, exist_ok=True)
-outf = root_outd / 'x--sig-points.jsonl'
+step_outd = Path(__file__).parent/'out/find_sig_points'
+step_outd.mkdir(parents=True, exist_ok=True)
+outf = step_outd / 'result.jsonl'
 
 
 # Observations
@@ -157,7 +159,7 @@ if __name__ == '__main__':
     import datasets
     ds: Any = datasets.load_dataset('open-r1/codeforces-cots', 'solutions_py', split='train[:1000]')
     with outf.open('w') as fh:
-        for idx, in_r in enumerate(ds):
+        for idx, in_r in enumerate(tqdm(ds)):
             points = process_response(in_r['generation'])
             for p in points:
                 r = {

@@ -3,4 +3,13 @@ scriptd=$(dirname "$(realpath "$0")")
 rootd=$(dirname "$scriptd")
 
 source "$rootd/.venv/bin/activate"
-exec env PYTHONPATH="$PYTHONPATH:$PWD" "$@"
+
+cmd=$1
+shift
+# Fix paths to local files.
+# Local files are preferred over global commands, too bad.
+[[ "$cmd" != ./* && "$cmd" != ../* && -f ./"$cmd" ]] && {
+    cmd=./"$cmd"
+}
+
+exec env PYTHONPATH="$PYTHONPATH:$rootd" "$cmd" "$@"

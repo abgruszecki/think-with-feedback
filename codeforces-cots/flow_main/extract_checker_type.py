@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import json
 from pathlib import Path
 import sys
@@ -6,9 +7,10 @@ from py_shared import ser
 from py_shared.json_finder import find_json
 
 
-root_outd = Path(__file__).parent/'out'
-root_outd.mkdir(parents=True, exist_ok=True)
-outf = root_outd / 'checker_types.jsonl'
+flow_outd = Path(__file__).parent/'out'
+step_outd = flow_outd/'extract_checker_type'
+step_outd.mkdir(parents=True, exist_ok=True)
+outf = step_outd / 'checker-types.jsonl'
 
 
 from os import environ as env

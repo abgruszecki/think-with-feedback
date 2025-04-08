@@ -1,12 +1,16 @@
+#!/usr/bin/env python3
 from pathlib import Path
 import json
 
 from py_shared import ser
 
 
-root_outd = Path('out+v2')
-input_f = root_outd / 'x--sig-points.jsonl'
-outf = root_outd / 'x--interest-sig-points-by-idx.jsonl'
+flow_outd = Path(__file__).parent/'out'
+dep_outd = flow_outd/'find_sig_points'
+step_outd = flow_outd/'find_interest_items'
+step_outd.mkdir(parents=True, exist_ok=True)
+dep_f = dep_outd / 'result.jsonl'
+out_f = step_outd / 'result.jsonl'
 
 
 if __name__ == '__main__':
@@ -72,14 +76,13 @@ if __name__ == '__main__':
 
         if len(r) > 0:
             r_base.update(r)
-            json.dump(r_base, out_fh)
-            print(file=out_fh)
+            print(json.dumps(r_base), file=out_fh)
 
     cur_idx = -1
     cur_batch = []
 
-    with outf.open('w') as out_fh:
-        for in_r in ser.jsonl_streamf(input_f):
+    with out_f.open('w') as out_fh:
+        for in_r in ser.jsonl_streamf(dep_f):
             in_r_idx = in_r['idx']
             if cur_idx != in_r_idx:
                 if cur_idx != -1:
