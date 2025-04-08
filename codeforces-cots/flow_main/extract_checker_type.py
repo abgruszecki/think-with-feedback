@@ -6,8 +6,9 @@ from py_shared import ser
 from py_shared.json_finder import find_json
 
 
-root_outd = Path('out+v2')
-outf = root_outd / '0--checker_types.jsonl'
+root_outd = Path(__file__).parent/'out'
+root_outd.mkdir(parents=True, exist_ok=True)
+outf = root_outd / 'checker_types.jsonl'
 
 
 from os import environ as env

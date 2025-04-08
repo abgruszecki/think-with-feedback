@@ -12,20 +12,20 @@ type StepResult = None | str | tuple[str, dict]
 
 async def run_proc(
     *cmd: str,
-    input: str,
+    input: str | None,
     timeout: float,
     **kwargs: Any,
 ) -> tuple[asyncio.subprocess.Process, str, str]:
     proc = await asyncio.create_subprocess_exec(
         *cmd,
-        stdin=asyncio.subprocess.PIPE,
+        stdin=asyncio.subprocess.PIPE if input is not None else None,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
         **kwargs,
     )
     try:
         stdout, stderr = await asyncio.wait_for(
-            proc.communicate(input.encode()),
+            proc.communicate(input.encode() if input is not None else None),
             timeout=timeout
         )
         return proc, stdout.decode(), stderr.decode()
@@ -40,28 +40,28 @@ async def run_proc(
         raise e
 
 
-async def __process(
+async def __process[X](
     limiter: asyncio.Semaphore,
-    p: Path,
-    process_fn: Callable[[Path], Awaitable[StepResult]],
+    it: X,
+    item_id: str,
+    process_fn: Callable[[X, str], Awaitable[StepResult]],
 ) -> tuple[dict, Exception|None]:
-    problem_name: str = p.name
     async with limiter:
         try:
-            res0 = await process_fn(p)
+            res0 = await process_fn(it, item_id)
             if not res0:
                 res = {
-                    'problem': problem_name,
+                    'item': item_id,
                     'status': 'success',
                 }
             elif isinstance(res0, str):
                 res = {
-                    'problem': problem_name,
+                    'item': item_id,
                     'status': res0,
                 }
             else:
                 res = {
-                    'problem': problem_name,
+                    'item': item_id,
                     'status': res0[0],
                 }
                 res.update(res0[1])
@@ -69,7 +69,7 @@ async def __process(
             return res, None
         except Exception as e:
             res = {
-                'problem': problem_name,
+                'item': item_id,
                 'status': 'fail:exception',
                 'details': str(e),
             }
@@ -77,9 +77,9 @@ async def __process(
 
 
 # TODO(alex): change the argument order and refactor the callsites...
-async def __go(
-    process_fn: Callable[[Path], Awaitable[StepResult]],
-    problems: list[Path],
+async def __go[X](
+    process_fn: Callable[[X, str], Awaitable[StepResult]],
+    items: list[tuple[X, str]],
     work_dir: Path | None, # for logging
     phase_name: str, # as above
     log_file: Path | None = None,
@@ -92,15 +92,15 @@ async def __go(
     logger.info('Starting {}...', phase_name)
     limiter = asyncio.Semaphore(concurrency_limit)
     with open(log_file, 'w+') as f:
-        with tqdm_async(total=len(problems)) as pbar:
-            for res in asyncio.as_completed(__process(limiter, p, process_fn) for p in problems):
+        with tqdm_async(total=len(items)) as pbar:
+            for res in asyncio.as_completed(__process(limiter, item, item_id, process_fn) for item, item_id in items):
                 res, e = await res
                 if e:
                     try:
                         # Use Loguru, it formats traces well. Also: we log here not when e is caught,
                         # that way redrawing the progress bar doesn't interfere with the trace.
                         logger.opt(exception=e) \
-                            .error('Exception in {} for problem {}', phase_name, res['problem'])
+                            .error('Exception in {} for item {}', phase_name, res['item'])
                     except Exception:
                         logger.exception('Failed to log exception')
                 if completion_callback:

@@ -1,11 +1,14 @@
+"""
+Extracts responses where both the candidate and the final answer produce wrong outputs on a sample input.
+"""
 from pathlib import Path
 
 from py_shared import ser
 
 
-root_outd = Path('out+v2')
-exec_report_file = root_outd / '2--exec-report.jsonl'
-outf = root_outd / '3--extract-boths.jsonl'
+root_outd = Path(__file__).parent/'out'
+exec_report_file = root_outd / 'exec-report.jsonl'
+outf = root_outd / 'extract-boths.jsonl'
 
 data = ser.jsonl_loadf(exec_report_file)
 data_by_problem = {}

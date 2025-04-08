@@ -6,10 +6,10 @@ import regex as reg # regex is compatible with the re module; we need the revers
 from py_shared.schema.solutions_py import SolutionsRow
 from py_shared import ser
 
-root_outd = Path('out+v2')
-solutions_py_file = root_outd / '1--solutions_py.jsonl'
-boths_file = root_outd / '3--extract-boths.jsonl'
-outf = root_outd / '4--simulations.jsonl'
+root_outd = Path(__file__).parent/'out'
+solutions_py_file = root_outd / 'process_solutions_py' / 'report.jsonl'
+boths_file = root_outd / 'extract-boths.jsonl'
+outf = root_outd / 'simulations.jsonl'
 
 boths_data = ser.jsonl_loadf(boths_file)
 boths_by_problem = {int(r['problem']): r for r in boths_data}

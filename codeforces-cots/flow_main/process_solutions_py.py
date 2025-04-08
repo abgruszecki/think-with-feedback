@@ -1,3 +1,8 @@
+"""
+Processes the solutions_py part of the dataset:
+extracts the answer candidates from the CoTs and the final answer,
+and prepares them to be tested (turns them into executable files).
+"""
 from pathlib import Path
 import re
 from typing import Iterable
@@ -8,11 +13,13 @@ from py_shared.code_finder import find_code, looks_like_answer
 from py_shared.ser import json_dumpf, str_dumpf
 
 
-root_outd = Path('out+lots')
-outf = root_outd / '1--solutions_py.jsonl'
-exploded_root_outd = root_outd / '1--solutions_py+exploded'
+root_outd = Path(__file__).parent/'out'
+step_outd = root_outd/'process_solutions_py'
+step_outd.mkdir(parents=True, exist_ok=True)
+outf = step_outd / 'report.jsonl'
+exploded_root_outd = step_outd / 'exploded'
 exploded_root_outd.mkdir(parents=True, exist_ok=True)
-answer_checks_root_outd = root_outd / '1--solutions_py+answer_checks'
+answer_checks_root_outd = step_outd / 'answer-checks'
 answer_checks_root_outd.mkdir(parents=True, exist_ok=True)
 
 
@@ -107,5 +114,5 @@ def main(ds):
 from os import environ as env
 if __name__ == '__main__' and 'NOGO' not in env:
     import datasets
-    ds = datasets.load_dataset('open-r1/codeforces-cots', 'solutions_py', split='train')
+    ds = datasets.load_dataset('open-r1/codeforces-cots', 'solutions_py', split='train[:1000]')
     main(ds)
