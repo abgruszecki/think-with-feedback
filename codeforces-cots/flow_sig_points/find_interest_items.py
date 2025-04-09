@@ -2,6 +2,8 @@
 from pathlib import Path
 import json
 
+from loguru import logger
+
 from py_shared import ser
 
 
@@ -16,17 +18,22 @@ out_f = step_outd / 'result.jsonl'
 if __name__ == '__main__':
     def process_batch(batch: list[dict], out_fh):
         b0 = batch[0]
-        r_base = {
+        r_tmpl = {
             'idx': b0['idx'],
             'id': b0['id'],
-            'has_candidate_sim': False,
-            # 'has_code_sim500': False,
-            # 'has_code_sim1500': False,
-            'has_answer_sim': False,
-            'has_caseless_sim': False,
-            # 'has_sim_in_code': False,
+            'offset': -1, # here just for key ordering
+            'is_candidate_sim': False,
+            'is_answer_sim': False,
+            # 'is_caseless_sim': False,
         }
-        r = {}
+        rows = []
+        # TODO fix: this is wrong in general, one point can have many props
+        # it's ok for now because is_candidate_sim and is_answer_sim are exclusive
+        def add_row(in_r: dict, updates: dict):
+            r = r_tmpl.copy()
+            r['offset'] = in_r['offset']
+            r.update(updates)
+            rows.append(r)
 
         code_end_distance = 0
         for i in range(len(batch)):
@@ -39,9 +46,10 @@ if __name__ == '__main__':
             else:
                 prev = batch[i - 1]
                 cand_sim = False
+                code_end_distance += cur['rel_offset']
                 if code_end_distance < 2000:
                     cand_sim = True
-                    r['has_candidate_sim'] = True
+                    add_row(cur, {'is_candidate_sim': True})
                 sim_cases = 0
                 thinks_end_distance = 0
                 do_count_cases = True
@@ -69,14 +77,15 @@ if __name__ == '__main__':
                         # comment out if this is trouble
                         raise ValueError(f'Unexpected sig point type: {nested["type"]}')
 
-                if sim_cases == 0:
-                    r['has_caseless_sim'] = True
+                # See comment in find_sig_points.py, grep @case
+                # if sim_cases == 0:
+                #     r['has_caseless_sim'] = True
                 if not cand_sim and do_measure_thinks_end_distance and thinks_end_distance < 2500:
-                    r['has_answer_sim'] = True
+                    # logger.warning('here! {}', thinks_end_distance)
+                    add_row(cur, {'is_answer_sim': True})
 
-        if len(r) > 0:
-            r_base.update(r)
-            print(json.dumps(r_base), file=out_fh)
+        for r in rows:
+            print(json.dumps(r), file=out_fh)
 
     cur_idx = -1
     cur_batch = []
