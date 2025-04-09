@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
+from collections import namedtuple
+import json
 from pathlib import Path
 
 from py_shared import ser
+
+
+key_t = namedtuple('key_t', ['idx', 'offset'])
 
 
 flow_outd = Path(__file__).parent/'out'
@@ -13,16 +18,18 @@ out_f = step_outd / 'result.jsonl'
 
 
 if __name__ == '__main__':
-    interest_items_by_idx = {}
+    interest_items_by_idx_offset = {}
     for in_row in ser.jsonl_streamf(dep_interest_f):
         idx = in_row['idx']
+        offset = in_row['offset']
         del in_row['idx']
         del in_row['id']
-        interest_items_by_idx[idx] = in_row
+        del in_row['offset']
+        interest_items_by_idx_offset[key_t(idx=idx, offset=offset)] = in_row
 
     with out_f.open('w') as out_fh:
         for in_row in ser.jsonl_streamf(dep_sig_points_f):
-            extras = interest_items_by_idx.get(in_row['idx'], {})
+            key = key_t(**{k: in_row[k] for k in ('idx', 'offset')})
+            extras = interest_items_by_idx_offset.get(key, {})
             in_row.update(extras)
-            ser.json.dump(in_row, out_fh)
-            print(file=out_fh)
+            print(json.dumps(in_row), file=out_fh)
