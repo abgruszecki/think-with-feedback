@@ -2,6 +2,8 @@
 import json
 from pathlib import Path
 
+from loguru import logger
+
 from py_shared import ser
 
 
@@ -44,7 +46,6 @@ if __name__ == '__main__':
             elif is_answer_sim(in_r):
                 r = make_r(in_r, ds_by_idx[in_r['idx']]['final_answer'])
                 print(json.dumps(r), file=out_fh)
-
 
     cur_idx = -1
     cur_batch = []

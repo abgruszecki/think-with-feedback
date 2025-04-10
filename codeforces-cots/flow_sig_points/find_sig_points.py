@@ -97,16 +97,16 @@ def process_response(
             },
         ))
     # Cases are temporarily commented out, they make later steps harder. @case
-    # for m in simulation_case_rx.finditer(response):
-    #     prefix_g = m.group('prefix')
-    #     results.append(SigPointData(
-    #         offset=m.start(),
-    #         type='case',
-    #         extra={
-    #             'prefix_len': len(prefix_g) if prefix_g else 0,
-    #             'line_len': len(m.group(0)),
-    #         },
-    #     ))
+    for m in simulation_case_rx.finditer(response):
+        prefix_g = m.group('prefix')
+        results.append(SigPointData(
+            offset=m.start(),
+            type='case',
+            extra={
+                'prefix_len': len(prefix_g) if prefix_g else 0,
+                'line_len': len(m.group(0)),
+            },
+        ))
     for code_block, offset in code_finder.find_code_blocks(response)[0]:
         if not code_finder.looks_like_answer(code_block):
             continue
