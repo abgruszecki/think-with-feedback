@@ -12,7 +12,8 @@ dep_ext_sigpts_f = flow_outd/'extend_sig_points_with_interests/result.jsonl'
 out_f = flow_outd/'extract_simulation_snippets/result.jsonl'
 out_f.parent.mkdir(parents=True, exist_ok=True)
 
-ds_by_idx = {in_r['idx']-1: in_r for in_r in ser.jsonl_streamf(dep_ds_f)}
+
+ds_by_idx = {in_r['idx']: in_r for in_r in ser.jsonl_streamf(dep_ds_f)}
 
 if __name__ == '__main__':
     def is_candidate_sim(in_r: dict) -> bool:

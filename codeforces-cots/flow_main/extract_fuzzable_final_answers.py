@@ -24,7 +24,7 @@ dep_eval_outf = flow_outd/'exec_snippets_via_workdir'/'report.jsonl'
 # dep_ds_data = []
 dep_ds_data_by_idx = {}
 for in_r in ser.jsonl_streamf(dep_ds_outf):
-    idx = in_r['idx'] - 1 # make the index 0-based
+    idx = in_r['idx']
     # r = { 'idx': idx, }
     r = {}
     examples = in_r['inputs']['examples']
@@ -44,7 +44,7 @@ for r in ser.jsonl_streamf(dep_checker_outf):
     r['diff_votes'] = sum(1 for v in votes if v == 'diff')
     r['checker_votes'] = sum(1 for v in votes if v == 'checker')
     r['null_votes'] = sum(1 for v in votes if v == None)
-    idx = r['idx'] # already 0-based
+    idx = r['idx']
     # dep_checker_data.append(r)
     dep_checker_data_by_idx[idx] = r
 # dep_checker_data.sort(key=lambda r: r['idx'])
@@ -59,7 +59,7 @@ dep_eval_data = []
 for in_r in ser.jsonl_streamf(dep_eval_outf):
     # if in_r['status'] == 'success' and in_r['item'].endswith('/final-answer'):
     if in_r['item'].endswith('/final-answer'):
-        idx = int(in_r['item'].split('/', 1)[0]) - 1 # make the index 0-based
+        idx = int(in_r['item'].split('/', 1)[0])
         in_r['idx'] = idx
         dep_eval_data.append(in_r)
         # dep_eval_data_by_idx[idx] = r
