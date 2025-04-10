@@ -52,18 +52,27 @@ def _def_prompts_kvgen(dir: Path):
 for p in dep_cases_dirs:
     logger.info('Processing: {}', p.stem)
     prompts_by_idx_offset = dict(_def_prompts_kvgen(p))
-    with open(step_outd/f'{p.stem}--processed-simulation-cases.jsonl', 'w') as fh:
+    cur_outd = step_outd/p.stem
+    cur_outd.mkdir(parents=True, exist_ok=True)
+    with (
+        open(cur_outd/'processed-simulation-cases.jsonl', 'w') as main_fh,
+        open(cur_outd/'exploded-cases.jsonl', 'w') as exploded_fh,
+    ):
         for in_r in ser.jsonl_streamf(p/'result.jsonl'):
             r = {}
             idx      = r['idx']      = in_r['idx']
             offset   = r['offset']   = in_r['offset']
             n        = r['n']        = in_r['n']
+            r['len_reasoning'] = -1 # here for key ordering, set below
             response = r['response'] = in_r['response']
+
+            reasoning: str = prompts_by_idx_offset[(idx, offset)]['inputs']['reasoning']
+            r['len_reasoning'] = len(reasoning)
 
             def emit(early: bool = False):
                 if early:
                     logger.warning('An issue with case {}/{}/{}', idx, offset, n)
-                print(json.dumps(r), file=fh)
+                print(json.dumps(r), file=main_fh)
             ans_str = find_json(in_r['response'])
             if ans_str is None:
                 emit(early=True)
@@ -71,20 +80,35 @@ for p in dep_cases_dirs:
             r['raw_ans'] = ans_str
             try:
                 ans = json.loads(ans_str)
-                r['ans'] = ans
-                r['num_cases'] = ans['prediction-count']
-                cases = r['cases'] = ans['predictions']
+                assert isinstance(ans, list)
+                assert all(isinstance(c, dict) for c in ans)
+                cases = r['cases'] = ans
             except Exception:
                 emit(early=True)
                 continue
 
-            prompt: str = prompts_by_idx_offset[(idx, offset)]['prompt']
             def _gen_case_check_data():
+                def find_extracted_io(substr: str | None, offset: int) -> int:
+                    if substr is None:
+                        return -1
+                    # the last trailing newline is definitely not significant
+                    substr = substr.removesuffix('\n')
+                    pos = reasoning.find(substr, offset)
+                    if pos == -1 and '\n' in substr:
+                        # 4o-mini sometimes collapses newlines (I guess it follows the IO samples)
+                        substr = substr.replace('\n', '\n\n')
+                        pos = reasoning.find(substr, offset)
+                    return pos
+
                 for c in cases:
-                    res = {}
-                    input_pos = res['input_pos'] = prompt.find(c['input'])
-                    res['output_pos'] = prompt.find(c['output'], input_pos)
-                    yield res
+                    input_pos = find_extracted_io(c['input'], offset=0)
+                    cur_pos = input_pos if input_pos != -1 else 0
+                    output_pos = find_extracted_io(c['output'], offset=cur_pos)
+
+                    yield {
+                        'input_pos': input_pos,
+                        'output_pos': output_pos,
+                    }
             case_check_data = r['case_check_data'] = list(_gen_case_check_data())
 
             def _one_case_ok(data: dict) -> bool:
@@ -92,7 +116,24 @@ for p in dep_cases_dirs:
                 output_pos = data['output_pos']
                 return input_pos != -1 and output_pos != -1
 
-            r['cases_ok'] = all(_one_case_ok(d) for d in case_check_data)
+            cases_ok = r['cases_ok'] = all(_one_case_ok(d) for d in case_check_data)
 
             emit()
+            for case_idx, (c, check_data) in enumerate(zip(cases, case_check_data)):
+                expl_r = {}
+                for k in ('idx', 'offset', 'n'):
+                    expl_r[k] = r[k]
+                expl_r.update({
+                    'case_idx': case_idx,
+                    'len_reasoning': len(reasoning),
+                    'source_sample_id': c.get('source_sample_id', None),
+                    'input': c.get('input', None),
+                    'output': c.get('output', None),
+                    'is_correct': c.get('is_correct', None),
+                    'input_pos': check_data['input_pos'],
+                    'output_pos': check_data['output_pos'],
+                    'is_ok': _one_case_ok(check_data),
+                })
+                print(json.dumps(expl_r), file=exploded_fh)
+
     logger.success('Processed: {}', p.stem)

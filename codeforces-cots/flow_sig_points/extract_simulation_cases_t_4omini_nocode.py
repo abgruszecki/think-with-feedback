@@ -36,35 +36,52 @@ The user is solving a competetive programming problem and and put their reasonin
 {reasoning}
 
 ```
-
-{instructions}\
 {examples_header}\
 {formatted_examples}\
+{instructions}\
 '''
 
 INSTRUCTIONS=\
 '''\
+
+# Instructions
 The text is reasoning about a Python program which reads from the standard input and writes to the standard output. \
-The text fragment should start by predicting what output the program produces on some inputs. \
-Your task is to find those input and output predictions in the text, and put them into this JSON format:
+The text fragment may predict what output the program produces on some inputs. \
+Your task is to find those input and output predictions in the text, \
+and extract information from them into this JSON format:
 ```json
-{
-    "prediction-count": <int>,
-    "predictions": [
-        {
-            "input": <str>,
-            "output": <str>,
-        },
-        ...
-    ]
-}
+[
+    {
+            "source_sample_id": <int or null>,
+            "input": <str or null>,
+            "output": <str or null>,
+            "is_correct": <bool or null>,
+    },
+    ...
+]
 ```
+
+You can output many predictions, or none.
+
+The user may say the prediction is for an input/output pair sample from the problem statement, \
+for instance by starting the prediction with "For example, sample/example 3:". \
+In that case, set the `source_sample_id` to the sample id, \
+otherwise set it to null.
+
+If the prediction doesn't directly specify the input or the output, \
+then use null for the `input` and `output` fields. \
+For instance, do this if the prediction just says "the output is correct", \
+or only starts with "Let's consider n=3" without saying what the standard input is.
+
+If the text directly says the output is correct or incorrect, \
+then set the `is_correct` field appropriately, \
+otherwise leave it null.
 '''
 
 EXAMPLES_HEADER=\
 '''\
 
-Here are some examples of what inputs and outputs should look like for the problem the user is solving:
+Here are some samples of what inputs and outputs should look like for the problem the user is solving:
 '''
 
 ONE_EXAMPLE_TEMPLATE=\
@@ -95,6 +112,7 @@ def make_prompt(
         examples_header=examples_header,
         formatted_examples=formatted_examples,
     )
+
 
 async def make_request(
     prompt: str,
@@ -127,13 +145,14 @@ async def process_prompt(in_r, semaphore, client):
             logger.exception('Exn at prompt {}/{}', in_r['idx'], in_r['offset'])
             return None
 
+
 async def main():
     client = AsyncOpenAI()
 
     prompts = []
     with open(out_prompts_f, 'w') as prompts_fh:
         for in_r in jsonl_streamf(dep_f):
-            if not in_r['code']:
+            if not in_r['text']:
                 continue
             r = { k: in_r[k] for k in ('idx', 'offset') }
             r_inputs = r['inputs'] = {}
@@ -142,12 +161,13 @@ async def main():
             r['prompt']    = make_prompt(**r_inputs)
             prompts.append(r)
             print(json.dumps(r), file=prompts_fh)
+    logger.success('Wrote: {}', out_prompts_f.relative_to(flowd))
 
     semaphore = asyncio.Semaphore(20)
     tasks = []
     with open(out_res_f, 'w') as res_fh:
         for i, in_r in enumerate(prompts):
-            if i % 25 != 0:
+            if i % 8 != 0:
                 continue
             task = asyncio.create_task(process_prompt(in_r, semaphore, client))
             tasks.append(task)
