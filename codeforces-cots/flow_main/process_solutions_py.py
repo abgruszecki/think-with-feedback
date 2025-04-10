@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Processes the solutions_py part of the dataset:
 extracts the answer candidates from the CoTs and the final answer,
@@ -25,10 +26,8 @@ answer_checks_root_outd.mkdir(parents=True, exist_ok=True)
 
 def gen_rows(input_gen):
     backtick_or_end_think = re.compile(r'(```|</think>)')
-    idx = 0
 
-    for in_row in input_gen:
-        idx += 1
+    for idx, in_row in enumerate(input_gen):
         response: str = in_row['generation']
 
         has_extra_backticks_in_thinks = False
