@@ -7,6 +7,7 @@ dependencies = [
     "datasets==3.4.1",
     "ipykernel>=6.29.5",
     "loguru>=0.7.3",
+    "mutmut>=3.2.3",
     "openai==1.68.2",
     "regex>=2024.11.6",
     "tree-sitter==0.24.0",
