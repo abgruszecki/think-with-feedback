@@ -22,3 +22,8 @@ Steps to extract "fuzzable final answers":
 2. exec_snippets_via_workdir.py
 3. fetch_checker_classification.py
 4. extract_fuzzable_final_answers.py
+
+Steps to get mutants from "fuzzable final answers":
+
+0. run mutate_solutions.py to generate mutants (mutants may pass or fail tests)
+1. run exec_mutants.py to get a report of which mutants fail tests
