@@ -42,3 +42,11 @@ Sorry, ATTW there's no readme for these, I'd have to read the source again.
 - `experiment-icl`
 - `experiment-regeneration`
 - `experiment-repair`
+
+# Future improvements
+## Better dataset keys
+I think it's a good idea for all datasets to have a structured "key" column.
+That avoids issues with using the wrong key.
+It can easily be exploded.
+(The names are lost, but maybe that's ok...)
+(Maybe put the field names as the first cell elt?)
