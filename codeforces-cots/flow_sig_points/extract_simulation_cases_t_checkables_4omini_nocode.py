@@ -6,6 +6,7 @@ from pathlib import Path
 import asyncio
 
 from loguru import logger
+import typer
 from tqdm import tqdm
 from openai import AsyncOpenAI
 from openai.types.chat.chat_completion import CompletionUsage
@@ -17,14 +18,19 @@ def jsonl_streamf(pathlike):
             yield json.loads(line)
 
 
-tag = '+4o-mini+nocode'
-if _tagname := environ.get('STEP_TAG'):
-    tag = '+'+_tagname
+app = typer.Typer()
+
+
+base_tag_suffix = '+checkables'
+tag_suffix = base_tag_suffix+'+4o-mini+nocode'
+# TODO consider: assert environ.get('STEP_TAG') in (None, 'checkables')
+# if _tagname := environ.get('STEP_TAG'):
+#     tag_suffix = '+'+_tagname
 flowd = Path(__file__).parent
 flow_outd = flowd/'out'
-dep_f = flow_outd/'extract_simulation_snippets/result.jsonl'
+dep_f = flow_outd/f'extract_simulation_snippets{base_tag_suffix}/result.jsonl'
 
-run_outd = flow_outd/f'extract_simulation_cases{tag}'/datetime.now().strftime("%Y%m%dT%H%M%S")
+run_outd = flow_outd/f'extract_simulation_cases{tag_suffix}'/datetime.now().strftime('%Y%m%dT%H%M%S')
 run_outd.mkdir(parents=True, exist_ok=True)
 out_prompts_f = run_outd/'prompts.jsonl'
 out_res_f = run_outd/'result.jsonl'
@@ -160,12 +166,22 @@ def test_openai():
     )
     print(response.choices[0].message.content)
 
-async def main():
-    # model = 'openai/'+openai_model
-    model = openai_model
+async def async_main(
+    partial_run: bool = True,
+    use_fireworks: bool = False,
+):
+    if use_fireworks:
+        model = 'openai/'+openai_model
+        base_url='https://openrouter.ai/api/v1'
+        api_key=environ['OPENROUTER_API_KEY']
+    else:
+        model = openai_model
+        base_url = None
+        api_key = None
+
     client = AsyncOpenAI(
-        # base_url='https://openrouter.ai/api/v1',
-        # api_key=environ['OPENROUTER_API_KEY'],
+        base_url=base_url,
+        api_key=api_key,
     )
     api = (model, client)
     used_prompt_toks = 0
@@ -188,7 +204,7 @@ async def main():
     tasks = []
     with open(out_res_f, 'w') as res_fh:
         for i, in_r in enumerate(prompts):
-            if i % 8 != 0:
+            if partial_run and i % 8 != 0:
                 continue
             task = asyncio.create_task(process_prompt(in_r, semaphore, api))
             tasks.append(task)
@@ -218,5 +234,18 @@ async def main():
     logger.success('Usage cost: ${:.2f}', usage_cost)
 
 
+@app.command()
+def main(
+    # Keep in sync with async_main ( typer doesn't allow async commands :( )
+    partial_run: bool = True,
+    use_fireworks: bool = False,
+):
+    # TODO ask Sonnet to check with reflection that main, async_main are in sync?
+    asyncio.run(async_main(
+        partial_run=partial_run,
+        use_fireworks=use_fireworks,
+    ))
+
+
 if __name__ == '__main__':
-    asyncio.run(main())
+    app()

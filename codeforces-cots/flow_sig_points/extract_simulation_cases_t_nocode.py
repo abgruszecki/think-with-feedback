@@ -120,14 +120,11 @@ if __name__ == '__main__':
     prompts = []
     with open(out_prompts_f, 'w') as prompts_fh:
         for in_r in jsonl_streamf(dep_f):
-            if not in_r['code']:
-                # we skip this anyway because it can't be evaluated
-                continue
             r = { k: in_r[k] for k in ('idx', 'offset') }
             r_inputs = r['inputs'] = {}
             r_inputs['reasoning'] = in_r['text'][:3000]
             r_inputs['examples']  = in_r['examples']
-            r['prompt']    = make_prompt(**r_inputs)
+            r['prompt'] = make_prompt(**r_inputs)
             prompts.append(r)
             print(json.dumps(r), file=prompts_fh)
 
