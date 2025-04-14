@@ -3,6 +3,7 @@ import pydantic
 
 class SolutionsRow(pydantic.BaseModel):
     idx: int
+    id: str
 
     inputs: 'SolutionsInputs'
 
@@ -25,10 +26,19 @@ class SolutionsInputs(pydantic.BaseModel):
     prompt: str
     response: str
 
+    # prompt parts
+    problem_statement: str
+    time_limit: float|None
+    memory_limit: float|None
+    input_format: str|None
+    output_format: str|None
+    examples: list[dict]
+    problem_notes: str|None
+
+    # problem metadata
     title: str
     contest_name: str
     contest_start_year: int
-    examples: list[dict]
 
 
 def make_rendered(row: SolutionsRow, out):

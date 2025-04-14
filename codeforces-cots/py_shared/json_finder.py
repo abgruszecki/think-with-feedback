@@ -21,6 +21,7 @@ def find_final_backticked_block(
     response: str,
     offset: int | None = None,
     skip_thinks: bool = True,
+    expect_thinks: bool = True, # just for warning/double-checking
 ) -> str | None:
     # early exit on valid input
     if offset == len(response):
@@ -30,7 +31,8 @@ def find_final_backticked_block(
         if m := thinks_end_re.search(response):
             offset = m.end()
         else:
-            print('No thinks end found!', file=sys.stderr)
+            if expect_thinks:
+                print('No thinks end found!', file=sys.stderr)
             offset = 0
 
     # NOTE we just accumulate all the blocks b/c this is copypasta, clean up as needed
@@ -72,6 +74,7 @@ def find_json(
     response: str,
     offset: int | None = None,
     skip_thinks: bool = True,
+    expect_thinks: bool = True, # just for warning/double-checking
 ) -> str | None:
     """
     Finds the final backticked block in the response.
@@ -79,4 +82,4 @@ def find_json(
     By default skips the "think" section as an optimization.
     """
 
-    return find_final_backticked_block(response, offset, skip_thinks)
+    return find_final_backticked_block(response, offset, skip_thinks, expect_thinks)

@@ -21,7 +21,7 @@ def _dirs(file_attr, tag: str = ''):
 tag = ''
 if _tag_arg := environ.get('STEP_TAG'):
     tag = '+'+_tag_arg
-_, flow_outd, step_outd = _dirs(__file__, tag)
+flowd, flow_outd, step_outd = _dirs(__file__, tag)
 # dep_ds_f = flow_outd/'fetch_process_solutions_py/report.jsonl'
 # dep_sims_f = flow_outd/'extract_simulation_snippets/result.jsonl'
 dep_cases_stepd = flow_outd/f'extract_simulation_cases{tag}'
@@ -54,9 +54,13 @@ for p in dep_cases_dirs:
     prompts_by_idx_offset = dict(_def_prompts_kvgen(p))
     cur_outd = step_outd/p.stem
     cur_outd.mkdir(parents=True, exist_ok=True)
+    main_f = cur_outd/'processed-simulation-cases.jsonl'
+    exploded_f = cur_outd/'exploded-cases.jsonl'
+    trustworthy_f = cur_outd/'trustworthy-cases.jsonl'
     with (
-        open(cur_outd/'processed-simulation-cases.jsonl', 'w') as main_fh,
-        open(cur_outd/'exploded-cases.jsonl', 'w') as exploded_fh,
+        open(main_f, 'w') as main_fh,
+        open(exploded_f, 'w') as exploded_fh,
+        open(trustworthy_f, 'w') as trustworthy_fh,
     ):
         for in_r in ser.jsonl_streamf(p/'result.jsonl'):
             r = {}
@@ -73,7 +77,7 @@ for p in dep_cases_dirs:
                 if early:
                     logger.warning('An issue with case {}/{}/{}', idx, offset, n)
                 print(json.dumps(r), file=main_fh)
-            ans_str = find_json(in_r['response'])
+            ans_str = find_json(in_r['response'], expect_thinks=False)
             if ans_str is None:
                 emit(early=True)
                 continue
@@ -135,5 +139,10 @@ for p in dep_cases_dirs:
                     'is_ok': _one_case_ok(check_data),
                 })
                 print(json.dumps(expl_r), file=exploded_fh)
+                is_trustworthy = cases_ok
+                if is_trustworthy:
+                    print(json.dumps(expl_r), file=trustworthy_fh)
 
-    logger.success('Processed: {}', p.stem)
+    logger.success('Wrote: {}', main_f.relative_to(flowd, walk_up=True))
+    logger.success('Wrote: {}', exploded_f.relative_to(flowd, walk_up=True))
+    logger.success('Wrote: {}', trustworthy_f.relative_to(flowd, walk_up=True))

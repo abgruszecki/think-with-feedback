@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 from pathlib import Path
 import json
 
@@ -6,12 +7,16 @@ from loguru import logger
 
 from py_shared import ser
 
-
+tag_suffix = ''
+if tag := os.environ.get('STEP_TAG'):
+    tag_suffix = f'+{tag}'
 flow_outd = Path(__file__).parent/'out'
-dep_outd = flow_outd/'find_sig_points'
-step_outd = flow_outd/'find_interest_items'
+step_outd = flow_outd/f'find_interest_items{tag_suffix}'
 step_outd.mkdir(parents=True, exist_ok=True)
+
+dep_outd = flow_outd/f'find_sig_points{tag_suffix}'
 dep_f = dep_outd / 'result.jsonl'
+
 out_f = step_outd / 'result.jsonl'
 
 
@@ -35,7 +40,7 @@ if __name__ == '__main__':
         r_tmpl.update(default_sim_attrs)
 
         rows = []
-        code_end_distance = 0
+        code_end_distance = -1
         cur_tp = None
         # TODO fix: this is wrong in general, one point can have many attributes
         # it's ok for now because is_candidate_sim and is_answer_sim are exclusive
@@ -52,20 +57,23 @@ if __name__ == '__main__':
             for k in ('offset', 'sigpt_idx'):
                 r[k] = in_r[k]
             r.update(updates)
+            # if in_r['id'] == '162/J':
+            #     logger.info('Outputting row with (CED={}) {!r}', code_end_distance, r)
             rows.append(r)
 
         for i in range(len(batch)):
             cur = batch[i]
             cur_tp = cur['type']
             if cur_tp in ('code-end', 'start', 'response-proper'):
-                code_end_distance = 0
+                code_end_distance = 0 if cur_tp == 'code-end' else -1
                 last_sim_attrs = None
             elif cur_tp != 'sim':
-                code_end_distance += cur['rel_offset']
-                if last_sim_attrs and cur_tp == 'case':
+                if code_end_distance > -1:
+                    code_end_distance += cur['rel_offset']
+                if last_sim_attrs and cur_tp in ('case', 'post-reflection'):
                     if ((
                             last_sim_attrs['is_candidate_sim']
-                            and code_end_distance <= (2000 + 3000)
+                            and -1 < code_end_distance <= (2000 + 3000)
                         ) or (
                             last_sim_attrs['is_answer_sim'] # defensive coding, ATTW always true
                         )
@@ -74,10 +82,11 @@ if __name__ == '__main__':
             else:
                 prev = batch[i - 1]
                 cand_sim = False
-                code_end_distance += cur['rel_offset']
-                if code_end_distance < 2000:
-                    cand_sim = True
-                    add_row(cur, {'is_candidate_sim': True})
+                if code_end_distance > -1:
+                    code_end_distance += cur['rel_offset']
+                    if code_end_distance < 2000:
+                        cand_sim = True
+                        add_row(cur, {'is_candidate_sim': True})
 
                 sim_cases = 0
                 thinks_end_distance = 0
@@ -93,7 +102,7 @@ if __name__ == '__main__':
                             sim_cases += 1
                         if do_measure_thinks_end_distance:
                             thinks_end_distance += nested_rel_offset
-                    elif nested_tp in ('code', 'code-end', 'sim', 'response-proper'):
+                    elif nested_tp in ('code', 'code-end', 'sim', 'post-reflection', 'response-proper'):
                         # we go here for 'code' because in rare cases we're inside a code block already
                         do_count_cases = False
                         if nested_tp in ('code', 'sim'):
@@ -101,6 +110,7 @@ if __name__ == '__main__':
                         elif do_measure_thinks_end_distance:
                             thinks_end_distance += nested_rel_offset
                         if nested_tp == 'response-proper':
+                            # NOTE we don't break at post-reflection because a case may follow
                             break
                     else:
                         # comment out if this is trouble

@@ -28,6 +28,10 @@ def gen_rows(input_gen):
     backtick_or_end_think = re.compile(r'(```|</think>)')
 
     for idx, in_row in enumerate(input_gen):
+        if in_row['description'] is None:
+            # Yes, there are some rows with no problem statement...
+            continue
+
         response: str = in_row['generation']
 
         has_extra_backticks_in_thinks = False
@@ -47,13 +51,22 @@ def gen_rows(input_gen):
 
         r = SolutionsRow(
             idx=idx,
+            id=in_row['id'],
             inputs=SolutionsInputs(
                 prompt=in_row['prompt'],
                 response=response,
+
+                problem_statement=in_row['description'],
+                time_limit=in_row['time_limit'],
+                memory_limit=in_row['memory_limit'],
+                input_format=in_row['input_format'],
+                output_format=in_row['output_format'],
+                examples=in_row['examples'] or [],
+                problem_notes=in_row['note'],
+
                 title=in_row['title'],
                 contest_name=in_row['contest_name'],
                 contest_start_year=in_row['contest_start_year'],
-                examples=in_row['examples'] or [],
             ),
             response_len=len(response),
             think_code_blocks=think_code_blocks,
