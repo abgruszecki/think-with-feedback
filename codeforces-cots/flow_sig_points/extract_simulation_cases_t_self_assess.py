@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from collections import namedtuple
 from datetime import datetime
 from os import environ
 import json
@@ -20,18 +21,13 @@ def jsonl_streamf(pathlike):
 
 app = typer.Typer()
 
+tag_suffix = '+self-assess'
 
-base_tag_suffix = '+checkables'
-tag_suffix = base_tag_suffix+'+4o-mini+nocode'
-# TODO consider: assert environ.get('STEP_TAG') in (None, 'checkables')
-# if _tagname := environ.get('STEP_TAG'):
-#     tag_suffix = '+'+_tagname
 flowd = Path(__file__).parent
 flow_outd = flowd/'out'
-dep_f = flow_outd/f'extract_simulation_snippets{base_tag_suffix}/result.jsonl'
+dep_f = flow_outd/f'extract_simulation_snippets/result.jsonl'
 
 run_outd = flow_outd/f'extract_simulation_cases{tag_suffix}'/datetime.now().strftime('%Y%m%dT%H%M%S')
-run_outd.mkdir(parents=True, exist_ok=True)
 out_prompts_f = run_outd/'prompts.jsonl'
 out_res_f = run_outd/'result.jsonl'
 
@@ -39,13 +35,17 @@ openai_model = 'gpt-4o-mini'
 
 PROMPT_TEMPLATE =\
 '''\
-The user is solving a competetive programming problem and and put their reasoning in text.
+The user is solving a competetive programming problem and put their reasoning in text.
 
+# User's code
+```python
+{code}
+```
+
+# User's reasoning about the code
 ```text
 {reasoning}
 ```
-{examples_header}\
-{formatted_examples}\
 {instructions}\
 '''
 
@@ -53,43 +53,45 @@ INSTRUCTIONS=\
 '''\
 
 # Instructions
-The text is reasoning about a Python program which reads from the standard input and writes to the standard output. \
-The text fragment may predict what output the program produces on some inputs. \
-Your task is to find those input and output predictions in the text, \
-and extract information from them into this JSON format:
+The user is reasoning about a Python program which reads from the standard input and writes to the standard output. \
+The reasoning text fragment may predict what the program does on some inputs. \
+Your task is to extract information from those predictions into this JSON format:
 ```json
 [
     {
-            "source_sample_id": <int or null>,
-            "input": <str or null>,
-            "output": <str or null>,
-            "is_correct": <bool or null>,
+            "assessment": <str or null>,
     },
     ...
 ]
 ```
 
-You can output many predictions, or none.
+You can output information about multiple predictions (if there are any).
 
-The user may say the prediction is for an input/output pair sample from the problem statement, \
-for instance by starting the prediction with "For example, sample/example 3:". \
-In that case, set the `source_sample_id` to the sample id, \
-otherwise set it to null.
+If the user directly says that the output is correct or incorrect, \
+then put 'correct' or 'incorrect' in the `assessment` field. \
+Otherwise, if the user just says what the output is, \
+put 'output' instead. \
+Otherwise, put null.
+'''
 
-If the prediction doesn't directly specify the input or the output, \
-then use null for the `input` and `output` fields. \
-For instance, do this if the prediction just says "the output is correct", \
-or only starts with "Let's consider n=3" without saying what the standard input is.
+INPUT_FORMAT_TEMPLATE=\
+'''\
 
-If the text directly says the output is correct or incorrect, \
-then set the `is_correct` field appropriately, \
-otherwise leave it null.
+## Input format
+{input_format}
+'''
+
+OUTPUT_FORMAT_TEMPLATE=\
+'''\
+
+## Output format
+{output_format}
 '''
 
 EXAMPLES_HEADER=\
 '''\
 
-Here are some samples of what inputs and outputs should look like for the problem the user is solving:
+## Input/output examples
 '''
 
 ONE_EXAMPLE_TEMPLATE=\
@@ -99,26 +101,51 @@ ONE_EXAMPLE_TEMPLATE=\
 ```
 '''
 
+NOTES_TEMPLATE=\
+'''\
+
+## Notes
+{notes}
+'''
+
 
 def make_prompt(
     reasoning: str,
-    examples: list[dict],
+    code: str,
+    # problem_statement: str,
+    # input_format: str|None,
+    # output_format: str|None,
+    # examples: list[dict],
+    # problem_notes: str|None,
 ) -> str:
-    examples_header = ''
-    formatted_examples = ''
-    if examples:
-        examples_header = EXAMPLES_HEADER
-        formatted_examples = ''.join(
-            ONE_EXAMPLE_TEMPLATE.format(
-                formatted_json=json.dumps(e, indent=4)
-            )
-            for e in examples
-        )
+    # input_format_section = ''
+    # output_format_section = ''
+    # if input_format:
+    #     input_format_section = INPUT_FORMAT_TEMPLATE.format(input_format=input_format)
+    # if output_format:
+    #     output_format_section = OUTPUT_FORMAT_TEMPLATE.format(output_format=output_format)
+
+    # examples_section = ''
+    # if examples:
+    #     examples_section = EXAMPLES_HEADER + ''.join(
+    #         ONE_EXAMPLE_TEMPLATE.format(
+    #             formatted_json=json.dumps(e, indent=4)
+    #         )
+    #         for e in examples
+    #     )
+    # notes_section = ''
+    # if problem_notes:
+    #     notes_section = NOTES_TEMPLATE.format(notes=problem_notes)
+
     return PROMPT_TEMPLATE.format(
         reasoning=reasoning,
+        code=code,
+        # problem_statement=problem_statement,
+        # input_format_section=input_format_section,
+        # output_format_section=output_format_section,
+        # problem_examples_section=examples_section,
+        # problem_notes_section=notes_section,
         instructions=INSTRUCTIONS,
-        examples_header=examples_header,
-        formatted_examples=formatted_examples,
     )
 
 
@@ -155,22 +182,30 @@ async def process_prompt(in_r, semaphore, api: tuple[str, AsyncOpenAI]):
             return None
 
 
-def test_openai():
-    from openai import OpenAI
-    client = OpenAI()
-    response = client.chat.completions.create(
-        model='gpt-4o-mini',
-        messages=[
-            {'role': 'user', 'content': 'Hello, world!'},
-        ],
-    )
-    print(response.choices[0].message.content)
+_pricing_nt = namedtuple('pricing_nt', ['input_tok', 'output_tok'])
+pricings = {
+    'gpt-4o-mini': _pricing_nt(input_tok=0.15/1e6, output_tok=0.6/1e6),
+    'gpt-4.1-mini': _pricing_nt(input_tok=0.4/1e6, output_tok=1.6/1e6),
+}
+def total_cost(
+    model: str,
+    used_prompt_toks: int,
+    used_compl_toks: int,
+) -> float | None:
+    pricing = pricings.get(model)
+    if not pricing:
+        return None
+    return sum((
+        used_prompt_toks*pricing.input_tok,
+        used_compl_toks*pricing.output_tok,
+    ))
+
 
 async def async_main(
     partial_run: bool = True,
-    use_fireworks: bool = False,
+    use_openrouter: bool = False,
 ):
-    if use_fireworks:
+    if use_openrouter:
         model = 'openai/'+openai_model
         base_url='https://openrouter.ai/api/v1'
         api_key=environ['OPENROUTER_API_KEY']
@@ -188,13 +223,24 @@ async def async_main(
     used_compl_toks = 0
     used_total_toks = 0 # we can use this to make sure things add up
 
+    run_outd.mkdir(parents=True, exist_ok=True)
+
     prompts = []
     with open(out_prompts_f, 'w') as prompts_fh:
         for in_r in jsonl_streamf(dep_f):
             r = { k: in_r[k] for k in ('idx', 'offset') }
             r_inputs = r['inputs'] = {}
             r_inputs['reasoning'] = in_r['text'][:3000]
-            r_inputs['examples']  = in_r['examples']
+            for k in (
+                'code',
+                # 'problem_statement',
+                # 'input_format',
+                # 'output_format',
+                # 'examples',
+                # 'problem_notes',
+            ):
+                r_inputs[k] = in_r[k]
+            r['num'] = in_r.get('num')
             r['prompt'] = make_prompt(**r_inputs)
             prompts.append(r)
             print(json.dumps(r), file=prompts_fh)
@@ -205,6 +251,7 @@ async def async_main(
     with open(out_res_f, 'w') as res_fh:
         for i, in_r in enumerate(prompts):
             if partial_run and i % 8 != 0:
+                # TODO: should a partial run be "just" c. 100 rows?
                 continue
             task = asyncio.create_task(process_prompt(in_r, semaphore, api))
             tasks.append(task)
@@ -226,24 +273,36 @@ async def async_main(
     if used_total_toks != used_total_toks_check:
         logger.warning('Token usage does not add up (cache or reasoning?): {} != {}', used_total_toks, used_total_toks_check)
 
-    if openai_model != 'gpt-4o-mini':
-        logger.warning('Used a different model than expected, costs may be off.')
-    input_tok_price = 0.15/1e6
-    output_tok_price = 0.6/1e6
-    usage_cost = (used_prompt_toks*input_tok_price) + (used_compl_toks*output_tok_price)
-    logger.success('Usage cost: ${:.2f}', usage_cost)
+    usage_cost = total_cost(
+        openai_model,
+        used_prompt_toks,
+        used_compl_toks,
+    )
+    if usage_cost:
+        logger.success('Usage cost: ${:.2f}', usage_cost)
+    else:
+        usage_dict = {
+            'prompt': used_prompt_toks,
+            'compl': used_compl_toks,
+            'total': used_total_toks,
+        }
+        logger.warning(
+            'Unknown costs, since model is unknown: model={}, usage={!r}',
+            openai_model,
+            usage_dict,
+        )
 
 
 @app.command()
 def main(
     # Keep in sync with async_main ( typer doesn't allow async commands :( )
     partial_run: bool = True,
-    use_fireworks: bool = False,
+    use_openrouter: bool = False,
 ):
     # TODO ask Sonnet to check with reflection that main, async_main are in sync?
     asyncio.run(async_main(
         partial_run=partial_run,
-        use_fireworks=use_fireworks,
+        use_openrouter=use_openrouter,
     ))
 
 
