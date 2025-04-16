@@ -3,6 +3,10 @@ from pathlib import Path
 step_data_t = namedtuple('step_data_t', ['flowd', 'flow_outd', 'step_outd'])
 def step_dirs(file_attr, tag: str|None = None) -> step_data_t:
     p = Path(file_attr)
+    if '_t_' in p.stem:
+        untagged_prefix = p.stem.split('_t_', 1)[0]
+        p = p.parent/untagged_prefix
+
     flowd = p.parent
     flow_outd = flowd/'out'
     tag_suffix = ''

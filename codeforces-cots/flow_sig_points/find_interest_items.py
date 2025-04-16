@@ -57,8 +57,6 @@ if __name__ == '__main__':
             for k in ('offset', 'sigpt_idx'):
                 r[k] = in_r[k]
             r.update(updates)
-            # if in_r['id'] == '162/J':
-            #     logger.info('Outputting row with (CED={}) {!r}', code_end_distance, r)
             rows.append(r)
 
         for i in range(len(batch)):
@@ -70,7 +68,10 @@ if __name__ == '__main__':
             elif cur_tp != 'sim':
                 if code_end_distance > -1:
                     code_end_distance += cur['rel_offset']
-                if last_sim_attrs and cur_tp in ('case', 'post-reflection'):
+                if last_sim_attrs and (
+                    cur_tp == 'case'
+                    or cur_tp == 'post-reflection' and last_sim_affects_reflection
+                ):
                     if ((
                             last_sim_attrs['is_candidate_sim']
                             and -1 < code_end_distance <= (2000 + 3000)
@@ -78,21 +79,30 @@ if __name__ == '__main__':
                             last_sim_attrs['is_answer_sim'] # defensive coding, ATTW always true
                         )
                     ):
+                        match cur_tp:
+                            case 'case':
+                                last_sim_affects_reflection = True
+                            case 'post-reflection':
+                                last_sim_affects_reflection = False
+                            case _:
+                                # defensive coding...
+                                raise ValueError(f'Unexpected sig point type: {cur_tp}')
                         add_row(cur, last_sim_attrs)
             else:
-                prev = batch[i - 1]
-                cand_sim = False
+                last_sim_attrs = None
+                last_sim_affects_reflection = True
+
+                is_candidate_sim = False
                 if code_end_distance > -1:
                     code_end_distance += cur['rel_offset']
                     if code_end_distance < 2000:
-                        cand_sim = True
+                        is_candidate_sim = True
                         add_row(cur, {'is_candidate_sim': True})
 
                 sim_cases = 0
                 thinks_end_distance = 0
                 do_count_cases = True
                 do_measure_thinks_end_distance = True
-                # saw_code = False
                 for j in range(i + 1, len(batch)):
                     nested = batch[j]
                     nested_tp = nested['type']
@@ -116,11 +126,7 @@ if __name__ == '__main__':
                         # comment out if this is trouble
                         raise ValueError(f'Unexpected sig point type: {nested["type"]}')
 
-                # See comment in find_sig_points.py, grep @case
-                # if sim_cases == 0:
-                #     r['has_caseless_sim'] = True
-                if not cand_sim and do_measure_thinks_end_distance and thinks_end_distance < 2500:
-                    # logger.warning('here! {}', thinks_end_distance)
+                if not is_candidate_sim and do_measure_thinks_end_distance and thinks_end_distance < 2500:
                     add_row(cur, {'is_answer_sim': True})
 
         for r in rows:

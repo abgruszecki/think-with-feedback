@@ -66,26 +66,37 @@ simulation_start_rx = reg.compile(
     flags=reg.IGNORECASE | reg.MULTILINE,
 )
 
-# TODO there's also "first test case" etc. look for them in the retrieved snippets?
 _case_markers = [
-    r'((first|second|third|fourth|fifth|sixth|seventh|eighth|ninth) (sample|example|case))',
-    r'((1st|2nd|3rd|4th|5th|6th|7th|8th|9th) (sample|example|case))',
-    r'((another|next) (sample|example|case))',
-    r'((sample|example|case)\W.{,15}(1|2|3|4|5|6|7|8|9|10))',
-    r'((sample|example|case) input)',
-    r'(input (sample|example|case))',
+    r'((?P<num>first|second|third|fourth|fifth|sixth|seventh|eighth|ninth) (test )?(sample|example|case).*?)',
+    r'((?P<num>1st|2nd|3rd|4th|5th|6th|7th|8th|9th) (test )?(sample|example|case).*?)',
+    # NOTE the negative lookbehinds just reduce the number of false positives a bit,
+    # but they're not strictly necessary.
+    r'((?<!for )(sample|example|case) ?(test )?(input ?)?(?P<num>1|2|3|4|5|6|7|8|9|10).*?)',
+    r'((?<!for )(sample|example|case) ?(test )?input ?(?P<num>1|2|3|4|5|6|7|8|9|10)?.*?)',
+    r'(input (sample|example|case) ?(?P<num>1|2|3|4|5|6|7|8|9|10)?.*?)',
+    # TODO R1 *sometimes* writes "another sample: first input.", etc; see extra.extra_num
+    r'(another ((test | edge )?case|example|sample))'
 ]
 
 simulation_case_rx = reg.compile(
-    fr'^(?P<prefix>.*?)({"|".join(_case_markers)}).*?:.*$',
+    fr'^(?P<prefix>.*?)(?P<marker>{"|".join(_case_markers)}):.*$',
     flags=reg.IGNORECASE | reg.MULTILINE,
 )
+
+_numerators = [
+    r'(?P<num>first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)',
+    r'(?P<num>1st|2nd|3rd|4th|5th|6th|7th|8th|9th|10th)',
+    # r'(?P<num>1|2|3|4|5|6|7|8|9|10)',
+]
+
+numerator_rx = reg.compile(fr'{"|".join(_numerators)}', flags=reg.IGNORECASE)
 
 thinks_end_rx = reg.compile(
     r'^.*?<\/think>.*$',
     flags=reg.MULTILINE,
 )
 
+# TODO this may cut off too much.
 reflection_par_rx = reg.compile(
     r'\n.*?\W(?P<kw>(in)?correct|fails?|wrong)\W.*\n\n+(?=\w)',
     flags=reg.IGNORECASE,
@@ -108,13 +119,9 @@ def processed_response_gen(
         )
     ]
 
-    # valid_code_blocks = [
-    #     (block, offset)
-    #     for block, offset in code_finder.find_code_blocks(response)[0]
-    #     if code_finder.looks_like_answer(block)
-    # ]
-
     code_block_search_res = code_finder.find_code_blocks(response)[0]
+    # NOTE using numpy here help performance a bit,
+    # but really it's more important not to watch YT while running the script
     valid_code_ranges = np.empty((0, 2), dtype=int)
     if code_block_search_res:
         valid_code_ranges = np.array([
@@ -137,14 +144,6 @@ def processed_response_gen(
             (valid_code_ranges[:, 0] <= offset)
             & (offset < valid_code_ranges[:, 1])
         )
-
-    # def is_inside_code_blocks(offset: int) -> bool:
-    #     """Check if an offset is inside any code block."""
-    #     for code_block, code_start in valid_code_blocks:
-    #         code_end = code_start + len(code_block)
-    #         if code_start <= offset < code_end:
-    #             return True
-    #     return False
 
     def finditer_notin_code_blocks(
         rx: reg.Pattern,
@@ -172,12 +171,21 @@ def processed_response_gen(
     # Find simulation case points, but only if they're not inside code blocks
     for pt, m in finditer_notin_code_blocks(simulation_case_rx, response):
         prefix_g = m.group('prefix')
+        num = m.group('num')
+        extra_num = None
+        if not num:
+            extra_num = numerator_rx.search(m.group(0))
+            if extra_num:
+                extra_num = extra_num.group('num')
         results.append(SigPointData(
             offset=pt,
             type='case',
             extra={
                 'prefix_len': len(prefix_g) if prefix_g else 0,
                 'line_len': len(m.group(0)),
+                'marker': m.group('marker'),
+                'num': num,
+                'extra_num': extra_num,
             },
         ))
 
@@ -216,13 +224,20 @@ def processed_response_gen(
                 # since Python list sort preserves the order of equal elements
                 if cur_item.type == 'sim':
                     if next_item.type == 'case':
+                        new_extras = next_item.extra.copy()
+                        new_extras.update(cur_item.extra)
+                        cur_item.extra = new_extras
+                        cur_item.extra['is_also_case'] = True
+
                         next_item = next(res_iter)
                         next_item.rel_offset = next_item.offset - cur_item.offset
                     if next_item.rel_offset == 0 and next_item.type == 'post-reflection':
+                        # NOTE ATTW we don't care about merging extras of post-reflection
                         next_item = next(res_iter)
                         next_item.rel_offset = next_item.offset - cur_item.offset
                 if cur_item.type == 'case':
                     if next_item.type == 'post-reflection':
+                        # NOTE ATTW we don't care about merging extras of post-reflection
                         next_item = next(res_iter)
                         next_item.rel_offset = next_item.offset - cur_item.offset
         except StopIteration:
@@ -239,23 +254,23 @@ def processed_response_gen(
 
 if __name__ == '__main__':
     from sys import argv
-    data_src = 'ds'
+    data_src = 'checkables'
     if len(argv) > 1:
         arg = argv[1]
-        assert arg in ('ds', 'checkables')
+        assert arg in ('unfiltered-ds', 'checkables')
         data_src = arg
 
-    if data_src == 'ds':
+    if data_src == 'unfiltered-ds':
         import datasets
         ds: Any = datasets.load_dataset('open-r1/codeforces-cots', 'solutions_py', split='train[:1000]')
         data_len = len(ds)
         data_gen = ((idx, r) for idx, r in enumerate(ds))
-        tag = ''
+        tag = '+unfiltered-ds'
     else:
         data = ser.jsonl_loadf(opt_dep_f)
         data_len = len(data)
         data_gen = ((r['idx'], r) for r in data)
-        tag = 'checkables'
+        tag = ''
 
     outf = make_outf(tag)
     with outf.open('w') as fh:

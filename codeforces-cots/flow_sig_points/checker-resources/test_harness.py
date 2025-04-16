@@ -1,5 +1,6 @@
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 cwd = Path(__file__).parent
@@ -12,6 +13,8 @@ def test_snippet(input_str: str) -> str:
         text=True,
         capture_output=True
     )
+    if process.stderr:
+        print(process.stderr, file=sys.stderr)
     return process.stdout
 
 
