@@ -57,7 +57,8 @@ def _def_prompts_kvgen(dir: Path):
 
 @app.command()
 def main(
-    only_explode: bool = False
+    only_explode: bool = False,
+    add_code: bool = False,
 ):
     for p in dep_cases_dirs:
         logger.info('Processing: {}', p.stem)
@@ -154,10 +155,12 @@ def main(
                         'input_pos': check_data['input_pos'] if check_data else None,
                         'output_pos': check_data['output_pos'] if check_data else None,
                         'assessment': c.get('assessment', None),
-                        'code': prompt_r['inputs']['code'], # TODO move this to a different file
                     })
                     if not only_explode:
                         expl_r['is_ok'] = _one_case_ok(check_data)
+                    if add_code:
+                        # TODO move this to another script
+                        expl_r['code'] = prompt_r['inputs']['code']
                     print(json.dumps(expl_r), file=exploded_fh)
 
                     if not only_explode:

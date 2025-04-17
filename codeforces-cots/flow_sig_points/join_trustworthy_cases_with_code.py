@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+This effectively prepares a dataset of Python code snippets to be executed.
+"""
 
 import json
 from pathlib import Path
@@ -19,6 +22,7 @@ def _dirs(file_attr, tag: str|None = None) -> step_data_t:
     step_outd.mkdir(parents=True, exist_ok=True)
     return step_data_t(flowd, flow_outd, step_outd)
 
+# TODO outdated code, +checkables are the default now
 base_tag_suffix = '+checkables'
 tag_suffix = base_tag_suffix+'+4o-mini+nocode'
 flowd, flow_outd, step_outd = _dirs(__file__, tag_suffix)

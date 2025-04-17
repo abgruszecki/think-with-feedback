@@ -131,8 +131,9 @@ if __name__ == '__main__':
             if not any((is_candidate_sim, is_answer_sim)):
                 continue
 
-            # Join short sims with the following case
+            # Merge short sims with the following case
             # TODO move this logic to find_sig_points.py
+            # TODO don't merge sigpts with different enumerators
             if buffered_rows and tp == 'sim':
                 emit_buffer()
 
