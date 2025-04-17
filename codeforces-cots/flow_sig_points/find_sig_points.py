@@ -30,7 +30,9 @@ def make_outf(tag: str = '') -> Path:
     step_outd.mkdir(parents=True, exist_ok=True)
     return step_outd / 'result.jsonl'
 
-opt_dep_f = flow_outd/'extract_checkable_responses'/'clean-result.jsonl'
+# TODO allow alternative dependencies
+opt_dep_checkables_f = flow_outd/'extract_checkable_responses'/'clean-result.jsonl'
+opt_dep_checkables_wrong_f = flow_outd/'select_checkable_wrong_responses'/'report.jsonl'
 
 
 # Observations
@@ -257,19 +259,29 @@ if __name__ == '__main__':
     data_src = 'checkables'
     if len(argv) > 1:
         arg = argv[1]
-        assert arg in ('unfiltered-ds', 'checkables')
+        assert arg in ('checkables', 'unfiltered-ds', 'checkables-wrong')
         data_src = arg
 
-    if data_src == 'unfiltered-ds':
+    if data_src == 'checkables':
+        data = ser.jsonl_loadf(opt_dep_checkables_f)
+        data_len = len(data)
+        data_gen = ((r['idx'], r) for r in data)
+        get_response = lambda r: r['generation']
+        tag = ''
+    elif data_src == 'unfiltered-ds':
         import datasets
         ds: Any = datasets.load_dataset('open-r1/codeforces-cots', 'solutions_py', split='train[:1000]')
         data_len = len(ds)
         data_gen = ((idx, r) for idx, r in enumerate(ds))
+        get_response = lambda r: r['generation']
         tag = '+unfiltered-ds'
-    else:
-        data = ser.jsonl_loadf(opt_dep_f)
+    elif data_src == 'checkables-wrong':
+        data = ser.jsonl_loadf(opt_dep_checkables_wrong_f)
         data_len = len(data)
         data_gen = ((r['idx'], r) for r in data)
+        get_response = lambda r: r['inputs']['response']
+        # NOTE right now we're not tagging the step output dir here, these tags propagate way too much.
+        # I think I'd rather tag the output dir.
         tag = ''
 
     outf = make_outf(tag)
@@ -279,6 +291,6 @@ if __name__ == '__main__':
                 'idx': idx,
                 'id': in_r['id'],
             }
-            for p in processed_response_gen(in_r['generation']):
+            for p in processed_response_gen(get_response(in_r)):
                 r.update(p.model_dump())
                 print(json.dumps(r), file=fh)

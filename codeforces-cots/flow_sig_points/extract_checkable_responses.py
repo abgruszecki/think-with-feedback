@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-This script extracts "fuzzable final answers" from the CoTs,
-i.e., final answers to problems which we know how to check and which pass all the examples.
-"""
 import json
 from pathlib import Path
 
@@ -22,7 +18,7 @@ full_outf = step_outd/'full-result.jsonl'
 clean_outf = step_outd/'clean-result.jsonl'
 
 
-# dep_checker_data = []
+dep_checker_data = []
 dep_checker_data_by_idx = {}
 for r in ser.jsonl_streamf(dep_checker_f):
     del r['responses']
@@ -34,14 +30,16 @@ for r in ser.jsonl_streamf(dep_checker_f):
     idx = r['idx']
     # dep_checker_data.append(r)
     dep_checker_data_by_idx[idx] = r
-# dep_checker_data.sort(key=lambda r: r['idx'])
+dep_checker_data.sort(key=lambda r: r['idx'])
+
 
 clean_cols = [ 'idx', 'id', 'generation', ]
 with open(full_outf, 'w') as full_fh, open(clean_outf, 'w') as clean_fh:
+    diff_rows_count = 0
     for in_r in ser.jsonl_streamf(dep_ds_f):
         idx = in_r['idx']
         if idx not in dep_checker_data_by_idx:
-            logger.warning('idx not in dep_checker_data_by_idx: {}', idx)
+            logger.warning('no checker data for idx: {}', idx)
             continue
         pre_out_r = {k: in_r[k] for k in ('idx', 'id')}
         pre_out_r['generation'] = in_r['inputs']['response']

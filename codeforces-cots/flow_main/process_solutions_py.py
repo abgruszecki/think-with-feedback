@@ -8,20 +8,30 @@ from pathlib import Path
 import re
 from typing import Iterable
 
+import typer
+
 from py_shared.schema.solutions_py import SolutionsInputs, SolutionsRow, make_rendered
 from py_shared.test_code_maker import make_test_code
 from py_shared.code_finder import find_code, looks_like_answer
 from py_shared.ser import json_dumpf, str_dumpf
 
 
+app = typer.Typer()
+
+
 root_outd = Path(__file__).parent/'out'
-step_outd = root_outd/'process_solutions_py'
-step_outd.mkdir(parents=True, exist_ok=True)
-outf = step_outd / 'report.jsonl'
-exploded_root_outd = step_outd / 'exploded'
-exploded_root_outd.mkdir(parents=True, exist_ok=True)
-answer_checks_root_outd = step_outd / 'answer-checks'
-answer_checks_root_outd.mkdir(parents=True, exist_ok=True)
+def get_dirs(tag: str):
+    tag_suffix = ''
+    if tag:
+        tag_suffix = '+'+tag
+    step_outd = root_outd/f'process_solutions_py{tag_suffix}'
+    step_outd.mkdir(parents=True, exist_ok=True)
+    outf = step_outd / 'report.jsonl'
+    exploded_root_outd = step_outd / 'exploded'
+    exploded_root_outd.mkdir(parents=True, exist_ok=True)
+    answer_checks_root_outd = step_outd / 'answer-checks'
+    answer_checks_root_outd.mkdir(parents=True, exist_ok=True)
+    return outf, exploded_root_outd, answer_checks_root_outd
 
 
 def gen_rows(input_gen):
@@ -82,13 +92,22 @@ def gen_rows(input_gen):
         yield r
 
 
-def write_rows(rows_gen: Iterable[SolutionsRow]):
+def write_rows(
+    rows_gen: Iterable[SolutionsRow],
+    only_report: bool,
+    tag: str,
+):
     def format_item_dirname(idx: int) -> str:
         return f'{idx:05d}' # digits for sorting
+
+    outf, exploded_root_outd, answer_checks_root_outd = get_dirs(tag)
 
     with outf.open('w') as outf_fh:
         for r in rows_gen:
             print(r.model_dump_json(), file=outf_fh)
+
+            if only_report:
+                continue
 
             item_outd = exploded_root_outd / format_item_dirname(r.idx)
             item_outd.mkdir(parents=True, exist_ok=True)
@@ -119,12 +138,32 @@ def write_rows(rows_gen: Iterable[SolutionsRow]):
                         print(make_test_code(r.final_answer, r.inputs.examples), file=fh)
 
 
-def main(ds):
-    write_rows(gen_rows(ds))
+@app.command()
+def main(
+    range: str = 'normal',
+    only_report: bool = False,
+):
+    if range not in ('normal', 'full'):
+        raise typer.BadParameter(f'Expected --range to be one of: "normal", "full"; got: {range}')
+
+    import datasets
+    ds_range = ''
+    if range == 'normal':
+        ds_range = '[:1000]'
+    ds = datasets.load_dataset('open-r1/codeforces-cots', 'solutions_py', split=f'train{ds_range}')
+
+    tag = ''
+    if range == 'full':
+        tag = 'full'
+
+    # TODO use tqdm here? on ds?
+    write_rows(
+        gen_rows(ds),
+        only_report,
+        tag,
+    )
 
 
 from os import environ as env
 if __name__ == '__main__' and 'NOGO' not in env:
-    import datasets
-    ds = datasets.load_dataset('open-r1/codeforces-cots', 'solutions_py', split='train[:1000]')
-    main(ds)
+    app()
