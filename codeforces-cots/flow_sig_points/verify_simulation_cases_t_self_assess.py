@@ -9,6 +9,7 @@ import typer
 
 from dockerinator.run_in_containers import run_items_in_workdir_containers, ExecutionArgs
 from py_shared import ser
+from py_shared.test_code_maker2 import make_test_code
 from py_shared.misc import step_dirs
 
 
@@ -31,6 +32,7 @@ py_indent_re = re.compile(r'^ *')
 @app.command()
 def main(
     data: Path,
+    use_test_harness: bool = True,
     max_workers: int | None = None,
 ):
     assert data.is_file(), f'expected a file: {data}'
@@ -106,23 +108,30 @@ def main(
         local_workdir: Path
     ) -> None:
         assert local_workdir.exists(), f'expected to exist: {local_workdir}'
-        shutil.copytree(flowd/'checker-resources', local_workdir, dirs_exist_ok=True)
-        ser.json_dumpf(item.examples, local_workdir/'examples.json')
-        with open(local_workdir/'snippet.py', 'w') as fh:
-            first_indent = None
-            for line in str(item.code).splitlines():
-                if first_indent is None:
-                    first_indent = py_indent_re.match(line).group(0)
-                print(line.removeprefix(first_indent), file=fh)
+        if use_test_harness:
+            shutil.copytree(flowd/'checker-resources', local_workdir, dirs_exist_ok=True)
+            ser.json_dumpf(item.examples, local_workdir/'examples.json')
+            with open(local_workdir/'snippet.py', 'w') as fh:
+                first_indent = None
+                for line in str(item.code).splitlines():
+                    if first_indent is None:
+                        first_indent = py_indent_re.match(line).group(0)
+                    print(line.removeprefix(first_indent), file=fh)
+        else:
+            test_code = make_test_code(item.code, item.examples)
+            (local_workdir/'snippet.py').write_text(test_code)
 
-        shutil.copytree(local_workdir, out_workdir_root/item.key, dirs_exist_ok=True)
+        stored_workdir = out_workdir_root/item.key
+        shutil.rmtree(stored_workdir, ignore_errors=True)
+        shutil.copytree(local_workdir, stored_workdir, dirs_exist_ok=True)
 
+    script_name = '/workdir/' + ('test_harness.py' if use_test_harness else 'snippet.py')
     run_items_in_workdir_containers(
         executor_image_name='python',
         inputs=items,
         prepare_workdir=prepare_workdir,
         execution_args=ExecutionArgs(
-            executor_args=['python', '/workdir/test_harness.py'],
+            executor_args=['python', script_name],
             max_workers=max_workers,
             report_path=out_f,
         ),

@@ -68,11 +68,13 @@ simulation_start_rx = reg.compile(
     flags=reg.IGNORECASE | reg.MULTILINE,
 )
 
+# TODO lengthen the distance at which a case is connected to a simulation?
 _case_markers = [
     r'((?P<num>first|second|third|fourth|fifth|sixth|seventh|eighth|ninth) (test )?(sample|example|case).*?)',
-    r'((?P<num>1st|2nd|3rd|4th|5th|6th|7th|8th|9th) (test )?(sample|example|case).*?)',
+    r"((?P<num>1st|2nd|3rd|4th|5th|6th|7th|8th|9th) (test )?(sample|example|case)(?!\w|').*?)",
     # NOTE the negative lookbehinds just reduce the number of false positives a bit,
     # but they're not strictly necessary.
+    # TODO look into "case N" matches, they seem to mostly occur for sub-cases of examples
     r'((?<!for )(sample|example|case) ?(test )?(input ?)?(?P<num>1|2|3|4|5|6|7|8|9|10).*?)',
     r'((?<!for )(sample|example|case) ?(test )?input ?(?P<num>1|2|3|4|5|6|7|8|9|10)?.*?)',
     r'(input (sample|example|case) ?(?P<num>1|2|3|4|5|6|7|8|9|10)?.*?)',
@@ -80,6 +82,8 @@ _case_markers = [
     r'(another ((test | edge )?case|example|sample))'
 ]
 
+# TODO go through these prefixes, they may be more harmful than helpful
+# NOTE prefixes with words like "wait" or "but" are suspicious
 simulation_case_rx = reg.compile(
     fr'^(?P<prefix>.*?)(?P<marker>{"|".join(_case_markers)}):.*$',
     flags=reg.IGNORECASE | reg.MULTILINE,
@@ -99,8 +103,11 @@ thinks_end_rx = reg.compile(
 )
 
 # TODO this may cut off too much.
+# TODO look for a leading "is" or "are"?
+# TODO add "correctly"?
+# TODO why the lookahead?
 reflection_par_rx = reg.compile(
-    r'\n.*?\W(?P<kw>(in)?correct|fails?|wrong)\W.*\n\n+(?=\w)',
+    r'\n.*?\W(?P<kw>(in)?correct|fails?|wrong)\W.*\n\n+(?=\s*\w)',
     flags=reg.IGNORECASE,
 )
 

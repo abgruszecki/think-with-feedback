@@ -2,6 +2,7 @@ Basic chain:
 
 1. fetch_checker_classification_py
 1. fetch_process_solutions_py.py
+1. extract_checkable_responses.py
 1. find_sig_points.py && find_interest_items.py && extend_sig_points_with_interests.py
 1. extract_simulation_snippets.py
 1. extract_simulation_cases.py
