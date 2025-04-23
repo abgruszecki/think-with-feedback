@@ -7,7 +7,7 @@ import typer
 from loguru import logger
 
 from py_shared import ser, io_abstractinator
-from py_shared.misc import step_dirs
+from py_shared.misc import step_dirs, cwd_rel
 
 app = typer.Typer()
 
@@ -74,7 +74,7 @@ def main(
 
             r['code'] = final_code_buf.getvalue()
             print(json.dumps(r), file=out_fh)
-    logger.success('Wrote: {}', outf.relative_to(Path.cwd(), walk_up=True))
+    logger.success('Wrote: {}', cwd_rel(outf))
 
 if __name__ == '__main__':
     app()

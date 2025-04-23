@@ -17,7 +17,7 @@ Basic chain:
 
 1. Copy the current `out` since these steps will overwrite it with incompatible data
    - (They should probably be writing to a different output dir instead...)
-1. fetch_process_solutions_py.py --link
+1. fetch_process_solutions_py.py --link --full
    - (Or copy, the full dataset is ~0.5GB)
 1. fetch_exec_checkable_answers.py
 1. select_checkable_wrong_responses.py

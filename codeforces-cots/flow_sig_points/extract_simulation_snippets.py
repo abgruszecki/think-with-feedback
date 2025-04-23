@@ -11,6 +11,19 @@ from loguru import logger
 from py_shared import ser
 
 
+py_indent_re = re.compile(r'^ *')
+
+
+def remove_indent(code: str) -> str:
+    out_buf = StringIO()
+    first_indent: str | None = None
+    for line in code.splitlines():
+        if first_indent is None:
+            first_indent = py_indent_re.match(line).group(0)
+        print(line.removeprefix(first_indent), file=out_buf)
+    return out_buf.getvalue()
+
+
 _number_rx = re.compile(r'\d+')
 _numerator_list = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth']
 def numerator_to_int(s: str) -> int | None:
@@ -41,23 +54,23 @@ def gen_processed_extended_sigpts(
         numerators = []
         for num_str in raw_numerators or []:
             if num := numerator_to_int(num_str):
+                if num in numerators:
+                    continue
                 numerators.append(num)
             else:
                 logger.warning('Bad numerator: {}/{}, num={}', in_r['idx'], in_r['offset'], num_str)
 
-        # TODO update the downstream scripts to use `nums` and remove this
-        old_num = numerators[0] if numerators else None
-        if basic_raw_numerator := in_r['extra'].get('num'):
-            old_num = numerator_to_int(basic_raw_numerator)
+        idx = in_r['idx']
+        offset = in_r['offset']
+        cleaned_code = remove_indent(code)
 
         r = {
-            'idx': in_r['idx'],
-            'offset': in_r['offset'],
+            'idx': idx,
+            'offset': offset,
             'merge_count': in_r.get('merge_count'),
-            'new_nums': numerators,
-            'num': old_num,
+            'nums': numerators,
             'candidate_offset': candidate_offset,
-            'code': code,
+            'code': cleaned_code,
         }
         in_r_inputs = ds_by_idx[in_r['idx']]['inputs']
         # TODO this fits better in extract_simulation_cases.py I guess??
@@ -113,16 +126,18 @@ def gen_processed_extended_sigpts(
         def merged_buffered_rows() -> dict:
             assert buffered_rows
             str_buf = StringIO()
-            num_buf = []
+            nums = []
             for in_r in buffered_rows:
-                print(in_r['text'], file=str_buf)
                 if num := in_r['extra'].get('num'):
-                    if not next((True for n in num_buf if n == num), False):
-                        num_buf.append(num)
+                    nums.append(num)
+                # NOTE It's important not to add any new characters here,
+                # some scripts need the snippet's length to exactly match the original text.
+                print(in_r['text'], end='', file=str_buf)
+
             buffered_r0 = buffered_rows[0].copy()
             buffered_r0['text'] = str_buf.getvalue()
             buffered_r0['merge_count'] = len(buffered_rows)
-            buffered_r0['nums'] = num_buf
+            buffered_r0['nums'] = nums
             return buffered_r0
 
         def gen_emitted_buffer():
@@ -149,13 +164,12 @@ def gen_processed_extended_sigpts(
 
             # Merge short sims with the following case
             # TODO move this logic to find_sig_points.py
-            # TODO don't merge sigpts with different enumerators
             if buffered_rows and tp == 'sim':
                 yield from gen_emitted_buffer()
 
             in_text_len = len(in_r['text'])
             in_is_bufferable = (
-                tp == 'sim' and in_text_len < 100 and not in_r['extra'].get('is_also_case')
+                tp == 'sim' and in_text_len < 100 # and not in_r['extra'].get('is_also_case')
                 or tp == 'case' and in_text_len < 80
             )
 
