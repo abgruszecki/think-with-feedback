@@ -18,6 +18,7 @@ dep_outf = flowd.parent/'flow_main/out/process_solutions_py/report.jsonl'
 outf = flowd/'out/fetch_process_solutions_py/report.jsonl'
 outf.parent.mkdir(parents=True, exist_ok=True)
 
+
 @app.command()
 def main(
     link: bool = False,
@@ -32,3 +33,7 @@ def main(
         # NOTE this may blow up if the file exists, which may be what we want.
         outf.symlink_to(dep_outf)
         logger.success('Symlinked {} to {}', path2rel(dep_outf), path2rel(outf))
+
+
+if __name__ == '__main__':
+    app()
