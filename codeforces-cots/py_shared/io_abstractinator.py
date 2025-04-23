@@ -110,7 +110,7 @@ def virtualize(
                     continue
 
                 if not first_input_assignment:
-                    logger.warning('Found assignment to `input` (ctx={})', ctx)
+                    logger.debug('Found assignment to `input` (ctx={})', ctx)
                     first_input_assignment = parent
                     continue
             else:
@@ -241,7 +241,6 @@ split_toplevels_t = tuple[
 def split_toplevels(node) -> split_toplevels_t:
     global ctx
     if node.type != 'module':
-        # TODO this isn't actually always true (why??)
         logger.warning('Unexpected node type `{}` (ctx={})', node.type, ctx)
 
     import_node_types = [
@@ -336,21 +335,14 @@ def preprocess_program(
             found_main_boilerplate = True
             main_name = extraction
 
-    if main_name and instruction_count > 1:
-        logger.warning('Found a main with top-level instructions (ctx={})', ctx)
+    # This is below debug level at this point.
+    # if main_name and instruction_count > 1:
+    #     logger.debug('Found a main with top-level instructions (ctx={})', ctx)
 
     if main_name:
         return ((imports, new_stmts_with_kinds), 'defs', main_name)
     else:
         return ((imports, new_stmts_with_kinds), 'exprs')
-
-# TODO idea: first identify the "script type", either:
-# - only top-evel exprs
-# - only top-level defs with a main definition
-# - top-level defs with a main call and a main definition
-
-# for top-level defs, replace the text, add/adjust the main call
-# for top-level exprs, replace the text, then turn it into a function body
 
 
 def process_toplevels1(
@@ -378,8 +370,6 @@ def process_toplevels2(
     main_name: bytes,
 ) -> str:
     imports, stmts_with_kinds = tops
-    # just a sanity check, the real checks (should) happen before
-    # assert len(instructs) <= 1, f'{ctx=}'
 
     out_buf = StringIO()
     for n in imports:
@@ -429,8 +419,9 @@ py_indent_re = re.compile(rb'^ *')
 # Used for logging; if needed can be done via contextvars or loguru binds
 ctx = None
 
-# TODO should this be earlier in the pipeline? when extracting code snippets?
 def remove_indent(code: bytes) -> bytes:
+    # NOTE This should now be done when extracting code snippets.
+    # TODO should we instead just warn on leading indents?
     out_buf = BytesIO()
     first_indent: bytes | None = None
     for line in code.splitlines():
@@ -481,6 +472,7 @@ def go(file: str):
     contents = remove_indent(Path(file).read_bytes())
     tree = py_parser.parse(contents)
     if tree.root_node.has_error:
+        # TODO only bail if the top node is ERROR?
         logger.error('Syntax error in file: {}', file)
         return None
     tops = split_toplevels(tree.root_node)
@@ -494,12 +486,14 @@ def go2(in_: str, ctx_ = None):
     contents = remove_indent(in_.encode())
     tree = py_parser.parse(contents)
     if tree.root_node.has_error:
+        # TODO only bail if the top node is ERROR?
         logger.error('Syntax error in row: {}', ctx)
         return None
     tops = split_toplevels(tree.root_node)
 
     return really_go(tops, contents)
 
+# TODO put the tests (incl. this code) in a separate top-level dir
 def test():
     test_dir = Path(__file__).parent / 'test_resources' / Path(__file__).stem
     for file in test_dir.glob('*/sample.py'):

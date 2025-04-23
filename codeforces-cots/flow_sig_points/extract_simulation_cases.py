@@ -227,7 +227,7 @@ async def async_main(
     api = (model, client)
     used_prompt_toks = 0
     used_compl_toks = 0
-    used_total_toks = 0 # we can use this to make sure things add up
+    used_total_toks = 0 # used to make sure the costs add up
 
     run_outd.mkdir(parents=True, exist_ok=True)
 

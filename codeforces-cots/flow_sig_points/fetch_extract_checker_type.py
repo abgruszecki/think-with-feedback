@@ -18,9 +18,9 @@ def _dep_outf(full: bool):
     tag_suffix = ''
     if full:
         tag_suffix = '+full'
-    return flowd.parent/f'flow_main/out/process_solutions_py{tag_suffix}/report.jsonl'
+    return flowd.parent/f'flow_main/out/extract_checker_type{tag_suffix}/checker-types.jsonl'
 
-outf = flowd/'out/fetch_process_solutions_py/report.jsonl'
+outf = flowd/'out/fetch_extract_checker_type/checker-types.jsonl'
 outf.parent.mkdir(parents=True, exist_ok=True)
 
 

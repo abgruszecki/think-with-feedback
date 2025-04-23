@@ -30,9 +30,9 @@ def make_outf(tag: str = '') -> Path:
     step_outd.mkdir(parents=True, exist_ok=True)
     return step_outd / 'result.jsonl'
 
-# TODO allow alternative dependencies
 opt_dep_checkables_f = flow_outd/'extract_checkable_responses'/'clean-result.jsonl'
 opt_dep_checkables_wrong_f = flow_outd/'select_checkable_wrong_responses'/'report.jsonl'
+opt_dep_process_solutions_py_f = flow_outd/'fetch_process_solutions_py/report.jsonl'
 
 
 # Observations
@@ -257,7 +257,7 @@ def processed_response_gen(
         part_start = cur_item.offset
         part_end = next_item.offset if next_item else len(response)
         cur_item.text = response[part_start:part_end]
-        cur_item.text_len = len(cur_item.text)
+        cur_item.text_len = part_end - part_start
         yield cur_item
         cur_item = next_item # type: ignore
 
@@ -266,7 +266,7 @@ if __name__ == '__main__':
     data_src = 'checkables'
     if len(argv) > 1:
         arg = argv[1]
-        assert arg in ('checkables', 'unfiltered-ds', 'checkables-wrong')
+        assert arg in ('checkables', 'unfiltered-ds', 'checkables-wrong', 'checkables-stream-full')
         data_src = arg
 
     if data_src == 'checkables':
@@ -289,6 +289,20 @@ if __name__ == '__main__':
         get_response = lambda r: r['inputs']['response']
         # NOTE right now we're not tagging the step output dir here, these tags propagate way too much.
         # I think I'd rather tag the output dir.
+        tag = ''
+    elif data_src == 'checkables-stream-full':
+        # TODO this is yet another kludge on top of all the other kludges...
+        dep_ds_checker_types_f = flow_outd/'fetch_extract_checker_type/checker-types.jsonl'
+        wanted_indices = set()
+        for r in ser.jsonl_streamf(dep_ds_checker_types_f):
+            if r.get('type') == 'diff':
+                wanted_indices.add(r['idx'])
+        data_f = opt_dep_process_solutions_py_f
+        def _gen_data_rows():
+            return (r for r in ser.jsonl_streamf(data_f) if r['idx'] in wanted_indices)
+        data_len = sum(1 for _ in _gen_data_rows())
+        data_gen = ((r['idx'], r) for r in _gen_data_rows())
+        get_response = lambda r: r['inputs']['response']
         tag = ''
 
     outf = make_outf(tag)

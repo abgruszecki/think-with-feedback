@@ -4,33 +4,32 @@ import sys
 
 
 TESTS_PREFIX = '''\
-import io
+def test():
+    import io
 
-TEST_CASES = [\
+    TEST_CASES = [\
 '''
 
 TEST_CASE_PREFIX = '''\
-{
-    "input": """\\
+        {
+            "input": \\
+"""\\
 '''
-
 TEST_CASE_INFIX = '''\
 
 """,
-    "output": """\\
+            "output": \\
+"""\\
 '''
-
 TEST_CASE_SUFFIX = '''\
 
 """,
-}, \
+        }, \
 '''
 
 TESTS_SUFFIX = '''\
-]
+    ]
 
-
-def test():
     for i, test_case in enumerate(TEST_CASES):
         in_stream = io.StringIO(test_case["input"])
         expected_output = test_case["output"].rstrip()
@@ -48,17 +47,6 @@ def test():
 if __name__ == '__main__':
     test()
 '''
-
-
-def gen_test_code_parts(examples: list[dict]):
-    yield TESTS_PREFIX
-    for ex in examples:
-        yield TEST_CASE_PREFIX
-        yield ex['input']
-        yield TEST_CASE_INFIX
-        yield ex['output']
-        yield TEST_CASE_SUFFIX
-    yield TESTS_SUFFIX
 
 
 def make_test_code(

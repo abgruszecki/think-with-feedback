@@ -7,46 +7,18 @@ from loguru import logger
 import typer
 
 from py_shared import ser
+from py_shared.misc import step_dirs, cwd_rel
 from py_shared.json_finder import find_json
 
 
 app = typer.Typer()
 
-def _dirs(file_attr, tag: str = ''):
-    p = Path(file_attr)
-    flowd = p.parent
-    flow_outd = flowd/'out'
-    step_outd = flow_outd/(p.stem+tag)
-    step_outd.mkdir(parents=True, exist_ok=True)
-    return flowd, flow_outd, step_outd
 
-
-tag = ''
-if _tag_arg := environ.get('STEP_TAG'):
-    tag = '+'+_tag_arg
-flowd, flow_outd, step_outd = _dirs(__file__, tag)
-dep_ds_f = flow_outd/'fetch_process_solutions_py/report.jsonl'
-# dep_sims_f = flow_outd/'extract_simulation_snippets/result.jsonl'
-dep_cases_stepd = flow_outd/f'extract_simulation_cases{tag}'
-
-def _dep_ds_kvgen():
-    for r in ser.jsonl_streamf(dep_ds_f):
-        yield r['idx'], r
-dep_ds_by_idx = dict(_dep_ds_kvgen())
-
-# def _dep_sims_kvgen():
-#     for r in ser.jsonl_streamf(dep_sims_f):
-#         yield (r['idx'], r['offset']), r
-# dep_sims_by_idx_offset = dict(_dep_sims_kvgen())
-
-
-def _dep_cases_dirs_gen():
+def _dep_cases_dirs_gen(dep_cases_stepd: Path):
     for p in dep_cases_stepd.iterdir():
         if not p.is_dir():
             continue
         yield p
-dep_cases_dirs = list(_dep_cases_dirs_gen())
-dep_cases_dirs.sort(key=lambda x: x.stem, reverse=True)
 
 
 def _def_prompts_kvgen(dir: Path):
@@ -55,8 +27,10 @@ def _def_prompts_kvgen(dir: Path):
         yield (r['idx'], r['offset']), r
 
 
-@app.command()
-def main(
+def postprocess_simulation_cases(
+    dep_cases_dirs: list[Path],
+    dep_ds_by_idx: dict,
+    step_outd: Path,
     only_explode: bool = False,
     add_code: bool = False,
 ):
@@ -147,7 +121,7 @@ def main(
                         expl_r[k] = r[k]
                     expl_r.update({
                         'case_idx': case_idx,
-                        'num': prompt_r.get('num'),
+                        'nums': prompt_r.get('nums'),
                         'examples': ds_r['inputs']['examples'],
                         'len_reasoning': len(reasoning),
                         'input': c.get('input', None),
@@ -168,18 +142,36 @@ def main(
                         if is_trustworthy:
                             print(json.dumps(expl_r), file=trustworthy_fh)
 
-        logger.success('Wrote: {}', main_f.relative_to(flowd, walk_up=True))
-        logger.success('Wrote: {}', exploded_f.relative_to(flowd, walk_up=True))
+        logger.success('Wrote: {}', cwd_rel(main_f))
+        logger.success('Wrote: {}', cwd_rel(exploded_f))
         if not only_explode:
-            logger.success('Wrote: {}', trustworthy_f.relative_to(flowd, walk_up=True))
+            logger.success('Wrote: {}', cwd_rel(trustworthy_f))
         else:
             if len(trustworthy_f.read_text()) > 0:
-                logger.error(
-                    'Dev error - this file should be empty: {}',
-                    trustworthy_f.relative_to(flowd, walk_up=True)
-                )
+                logger.error('Dev error - this file should be empty: {}', cwd_rel(trustworthy_f))
             else:
                 trustworthy_f.unlink()
+
+
+@app.command()
+def main():
+    flowd, flow_outd, step_outd = step_dirs(__file__)
+    dep_ds_f = flow_outd/'fetch_process_solutions_py/report.jsonl'
+    dep_cases_stepd = flow_outd/'extract_simulation_cases'
+
+    def _dep_ds_kvgen():
+        for r in ser.jsonl_streamf(dep_ds_f):
+            yield r['idx'], r
+    dep_ds_by_idx = dict(_dep_ds_kvgen())
+
+    dep_cases_dirs = list(_dep_cases_dirs_gen(dep_cases_stepd))
+    dep_cases_dirs.sort(key=lambda x: x.stem, reverse=True)
+
+    postprocess_simulation_cases(
+        dep_cases_dirs=dep_cases_dirs,
+        dep_ds_by_idx=dep_ds_by_idx,
+        step_outd=step_outd,
+    )
 
 
 if __name__ == '__main__':
