@@ -807,37 +807,107 @@ So, the code steps are:
 
 Thus, this approach has a time complexity of O(m + n), which is acceptable.
 
-Now, let's test this approach against the samples.
+Testing against sample input 1.
 
-Sample 1:
+```python
+import sys
+from collections import deque
 
-n=4, m=5.
 
-Edges:
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    edges = []
+    adj = [[] for _ in range(n + 1)]
+    in_degree = [0] * (n + 1)
+    for idx in range(m):
+        u, v = map(int, input_stream.readline().split())
+        edges.append((u, v))
+        adj[u].append(v)
+        in_degree[v] += 1
 
-2 1
+    # Compute the final topological order using Kahn's algorithm
+    q = deque()
+    for i in range(1, n + 1):
+        if in_degree[i] == 0:
+            q.append(i)
+    T = []
+    temp_in_degree = in_degree.copy()
+    while q:
+        u = q.popleft()
+        T.append(u)
+        for v in adj[u]:
+            temp_in_degree[v] -= 1
+            if temp_in_degree[v] == 0:
+                q.append(v)
 
-1 3
+    pos = [0] * (n + 1)
+    for i in range(n):
+        pos[T[i]] = i
 
-2 3
+    # Check consecutive pairs and track earliest occurrence
+    earliest = {}
+    for idx, (u, v) in enumerate(edges):
+        if pos[u] + 1 == pos[v]:
+            pair = (u, v)
+            if pair not in earliest:
+                earliest[pair] = idx + 1  # 1-based k
 
-4 2
+    max_k = 0
+    for i in range(n - 1):
+        u = T[i]
+        v = T[i + 1]
+        if (u, v) not in earliest:
+            print(-1, file=output_stream)
+            return
+        max_k = max(max_k, earliest[(u, v)])
 
-4 3
+    print(max_k, file=output_stream)
 
-The final topological order T is [4, 2, 1, 3].
 
-Consecutive pairs are (4,2), (2,1), (1,3).
 
-The edges that match consecutive pairs:
+def test():
+    import io
 
-Edge 4->2 is the fourth edge.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2
+1 2
+3 2
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-Edge 2->1 is the first edge.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Edge 1->3 is the second edge.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Thus, the earliest positions are 4, 1, 2. The maximum is 4. Hence, output 4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

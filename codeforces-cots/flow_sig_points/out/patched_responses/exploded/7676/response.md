@@ -1109,37 +1109,101 @@ For each test case:
 
 This code should handle all test cases correctly.
 
-Testing this code with the given examples.
+Testing against sample input 1.
 
-Example 1:
+```python
+import sys
+from collections import defaultdict
 
+
+def main(input_stream, output_stream):
+    q = int(input_stream.readline())
+    for _ in range(q):
+        n = int(input_stream.readline())
+        s = input_stream.readline().strip()
+        t = input_stream.readline().strip()
+        
+        if sorted(s) != sorted(t):
+            print(-1, file=output_stream)
+            continue
+        
+        max_len = 0
+        for i in range(n):
+            ptr = 0
+            current = 0
+            for j in range(i, n):
+                found = False
+                while ptr < n:
+                    if s[ptr] == t[j]:
+                        ptr += 1
+                        current += 1
+                        found = True
+                        break
+                    ptr += 1
+                if not found:
+                    break
+            max_len = max(max_len, current)
+        print(n - max_len, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1
+a
+z
+5
+adhas
+dasha
+5
+aashd
+dasha
+5
+aahsd
+dasha
+""",
+            "output": \
+"""\
+-1
+2
+2
 3
+""",
+        }, 
+    ]
 
-9
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-iredppipe
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-piedpiper
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For the first test case, the code would check each i in 0-8 of t.
+    print('Tests passed 😎')
 
-For i=0, the code tries to find 'p' in s.
 
-s is 'iredppipe' → indices:
+if __name__ == '__main__':
+    test()
 
-0: i, 1:r, 2:e, 3:d, 4:p, 5:p, 6:i, 7:p, 8:e.
 
-Looking for t starting at i=0: 'p' is at 4. current_len becomes 1. Next character in t is 'i' (position 1). search s from 5: 'i' is at 6. current_len=2. Next character 'e' (position 2 of t): search from 7. 'e' is at 8. current_len=3. Then 'd' (position 3 of t): search from 9 (not found). So current_len=3.
+```
 
-But maybe for i=1, the code can find a longer sequence.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-But according to the example, the maximum length is 7, leading to 9-7=2 moves.
+```
 
-Thus, the code should correctly output 2.
-
-Other examples should also be handled correctly.
-
-Thus, this code should work.
 </think>
 
 ```python

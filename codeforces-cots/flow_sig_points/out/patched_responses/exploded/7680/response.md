@@ -319,121 +319,123 @@ So that's efficient.
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n = int(input())
 
-a = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-count_ones = a.count(1)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-if count_ones >0:
+    count_ones = a.count(1)
 
-    print(n - count_ones)
+    if count_ones >0:
 
-else:
-
-    # compute overall GCD
-
-    overall_gcd = a[0]
-
-    for num in a[1:]:
-
-        overall_gcd = math.gcd(overall_gcd, num)
-
-        if overall_gcd ==1:
-
-            break
-
-    if overall_gcd !=1:
-
-        print(-1)
+        print(n - count_ones, file=output_stream)
 
     else:
 
-        # find minimal L
+        # compute overall GCD
 
-        min_len = float('inf')
+        overall_gcd = a[0]
 
-        for i in range(n):
+        for num in a[1:]:
 
-            current_gcd = a[i]
+            overall_gcd = math.gcd(overall_gcd, num)
 
-            if current_gcd ==1:
-
-                min_len =1
+            if overall_gcd ==1:
 
                 break
 
-            for j in range(i+1, n):
+        if overall_gcd !=1:
 
-                current_gcd = math.gcd(current_gcd, a[j])
+            print(-1, file=output_stream)
+
+        else:
+
+            # find minimal L
+
+            min_len = float('inf')
+
+            for i in range(n):
+
+                current_gcd = a[i]
 
                 if current_gcd ==1:
 
-                    current_length = j -i +1
+                    min_len =1
 
-                    if current_length < min_len:
+                    break
 
-                        min_len = current_length
+                for j in range(i+1, n):
 
-                    break  # since adding more elements won't help
+                    current_gcd = math.gcd(current_gcd, a[j])
 
-            if min_len ==1:
+                    if current_gcd ==1:
 
-                break
+                        current_length = j -i +1
 
-        res = (min_len -1) + (n-1)
+                        if current_length < min_len:
 
-        print(res)
+                            min_len = current_length
 
-Testing this code.
+                        break  # since adding more elements won't help
 
-Sample 1:
+                if min_len ==1:
 
-Input:
+                    break
 
-5
+            res = (min_len -1) + (n-1)
 
-2 2 3 4 6
+            print(res, file=output_stream)
 
-The code proceeds:
 
-No ones. Compute overall GCD.
 
-a[0] =2. Then 2 and 2: GCD 2. Then 3: GCD 2 and3 is 1. So overall GCD is 1.
+def test():
+    import io
 
-Now, find minimal L.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+2 4 6 8
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-i=0:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-current_gcd =2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-j=1: current_gcd =gcd(2,2)=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-j=2: current_gcd =gcd(2,3)=1. So current_length is 3 (0 to2). min_len is 3.
+    print('Tests passed 😎')
 
-But then, check i=1.
 
-current_gcd =2.
+if __name__ == '__main__':
+    test()
 
-j=2: gcd(2,3)=1. current_length is 2. So min_len becomes 2.
 
-Then i=2:
+```
 
-current_gcd=3. j=3: gcd(3,4)=1. So current_length is 2 (i=2, j=3: 3 and4. GCD is 1. So length is 2. min_len becomes 2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=3:
-
-current_gcd=4. j=4: gcd(4,6)=2. Not 1.
-
-i=4:
-
-current_gcd=6. No j beyond.
-
-So minimal L is 2.
-
-So res is (2-1)+(5-1) =1+4=5. Correct.
+```
 
 Sample 3:
 

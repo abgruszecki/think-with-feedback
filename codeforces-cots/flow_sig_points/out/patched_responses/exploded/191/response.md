@@ -845,625 +845,175 @@ Read m shops' xj and yj.
 
 For each shop:
 
-   xj, yj = map(int, input().split())
-
-   d = gcd(xj, yj)
-
-   if n %d !=0:
-
-       print(-1)
-
-       continue
-
-   g, x0, y0 = extended_gcd(xj, yj)
-
-   # since xj and yj's gcd is d, so g ==d.
-
-   a0 = x0 * (n//d)
-
-   b0 = y0 * (n//d)
-
-   y_step = yj //d
-
-   x_step = xj //d
-
-   t_min = math.ceil( (-a0) / y_step )
-
-   t_max = math.floor( b0 / x_step )
-
-   # Check if t_min > t_max: no solution.
-
-   if t_min > t_max:
-
-       print(-1)
-
-       continue
-
-   # Iterate t from t_min to t_max.
-
-   max_sum = -inf
-
-   for t in range(t_min, t_max +1):
-
-       a = a0 + y_step * t
-
-       b = b0 - x_step *t
-
-       if a <0 or b <0:
-
-           continue
-
-       k = a *xj
-
-       if k <0 or k >n:
-
-           continue
-
-       # Check if (n -k) is equal to yj*b → which it should be.
-
-       # but code can skip this.
-
-       # Compute the sum.
-
-       if k >n:
-
-           continue
-
-       # Now, k is the number of red dishes.
-
-       # So sum is sum_b + prefix_sum[k]
-
-       if k >n:
-
-           current_sum = -inf
-
-       else:
-
-           current_sum = sum_b + (prefix_sum[k] if k <=n else 0)
-
-       if current_sum > max_sum:
-
-           max_sum = current_sum
-
-   if max_sum == -inf:
-
-       print(-1)
-
-   else:
-
-       print(max_sum)
-
-But this code will have issues with floating points in the t_min and t_max calculations. For example, when a0 is very large and negative, but y_step is large, t_min may be a large negative number, leading to a very large range for t.
-
-But given that xj and yj can be up to 3e5, and m up to 3e5, this approach could be O(m * t_count), where t_count is the number of possible t's per shop. If t_count is large, say 1e5, then it's O(3e5 *1e5)=3e10 operations, which is way too slow.
-
-But wait, what's the maximum possible number of t's per shop?
-
-The possible t's are between t_min and t_max.
-
-But the steps between the possible t's is 1. The possible k's are a*xj = (a0 + y_step *t) *xj.
-
-But a0 is x0 * (n/d). x0 could be up to (xj), but how?
-
-Alternatively, the possible k's are a*xj = xj*(x0*(n/d) + (yj/d)*t) = xj *x0*(n/d) + xj * yj/d *t.
-
-Since xj and yj are up to 3e5, and t can vary, this could generate k's of up to 3e5 * (3e5) * ... which may exceed n.
-
-But the code checks if k is <=n.
-
-So even if t is in the range, the code will skip k's that are larger than n.
-
-But in cases where a0 is very large and positive, and y_step is large, then adding t's could generate k's way beyond n, which the code will check and skip.
-
-But this could be time-consuming.
-
-So the code's approach of iterating over all possible t's in the range t_min to t_max may not be feasible for large ranges.
-
-Thus, this approach will not work for the time constraints.
-
-We need a better way to find the optimal k for each shop j.
-
-But how?
-
-Alternative approach:
-
-The maximum sum for a given k is sum_b + prefix_sum[k], which is a non-decreasing function up to a point and then non-increasing. Wait, no.
-
-Because the differences are sorted in descending order. So prefix_sum[k] is the sum of the top k differences, which is maximum when k is as large as possible. But if some differences are negative, then adding them may decrease the sum. So the sum_b + prefix_sum[k] is maximized at some k where the differences are positive.
-
-But in general, the sum is maximized when k is as large as possible where the cumulative differences are positive.
-
-But for the problem, the sum is the sum_b plus the sum of the top k differences. So the maximum sum is achieved either when k is as large as possible (if all differences are positive) or when we stop adding once the differences become negative.
-
-But this is not necessarily true. For example, if the first few differences are large positive, then a few small positives, then negatives. Adding more could increase sum even after negatives.
-
-But in any case, for each possible k, the sum is sum_b + prefix_sum[k], where prefix_sum is the sum of the first k differences (sorted in descending order).
-
-Thus, the sum is a non-decreasing function up to the point where the differences are positive, then starts decreasing once differences become negative.
-
-So the maximum sum is either the maximum possible k (if all differences are positive) or the sum up to some k where adding more terms makes the sum smaller.
-
-But given that for each shop j, the possible k's are multiples of xj and (n -k) is a multiple of yj, the optimal k may not be the global maximum. So the code needs to find all possible k's for the shop and evaluate the sum for each.
-
-But the problem is to compute this efficiently.
-
-But given that the number of possible k's per shop is small (like O(1)), the code can proceed.
-
-But how to find the possible k's without iterating over all t's.
-
-Wait, the general solution for k is:
-
-k = xj * a = xj * (a0 + (yj/d)*t) = xj*a0 + xj*(yj/d)*t 
-
-But since a0 =x0*(n/d), and xj =d * xj', yj= d * yj', where xj' and yj' are coprime.
-
-So substituting:
-
-k = xj *x0*(n/d) + xj * (d*yj')/d *t 
-
-= xj *x0*(n/d) + xj*yj' *t 
-
-But xj' and yj' are coprime.
-
-But this may not help.
-
-Alternative approach: For each shop j, the possible k's are those that are congruent to (xj*x0*(n/d)) mod (xj*yj/d), and in the allowed range.
-
-But since the step between possible k's is xj*yj/d, which can be very large, the number of possible k's is O(1).
-
-Thus, for each shop j, there are O(1) possible k's, so the code can proceed.
-
-Thus, the code can generate all possible k's and evaluate them.
-
-But how to compute the possible k's without iterating over all possible t's.
-
-For example, the possible k's can be written as k = xj*a0 + (xj*yj/d)*t.
-
-But t must be in the range [t_min, t_max].
-
-Thus, the possible k's are in an arithmetic sequence with step xj*yj/d.
-
-So, the minimal possible k is when t =t_min, and maximum when t =t_max.
-
-But since the step can be large, there are only O(1) possible k's.
-
-Thus, in code, for each shop j:
-
-Compute the minimal and maximal possible k, then compute all k's in that sequence within [0, n], and evaluate each.
-
-But how to compute this.
-
-For example, for shop j:
-
-The possible k's are:
-
-k =xj*a0 + (xj*yj/d) *t, where t is in [t_min, t_max].
-
-But how to generate these k's.
-
-But this requires knowing the initial value and the step.
-
-So, initial_k =xj*a0 + (xj*yj/d)*t_min.
-
-step =xj*yj/d.
-
-Then, k increases by step each time t increases by 1.
-
-Thus, the code can compute the initial_k, then generate k's by adding step until it exceeds the maximum possible k (xj*a0 + step*t_max).
-
-But this is only if step is positive.
-
-But step is xj*yj/d, which is positive since xj, yj, d are positive.
-
-Thus, the code can compute the initial_k and the final_k, and generate all possible k's in the sequence.
-
-But how to ensure that k is within 0 <=k <=n.
-
-So the code can:
-
-compute initial_k = a *xj, where a =a0 + y_step *t_min.
-
-But a is >=0, so initial_k is >=0.
-
-Similarly, final_k = a0 + y_step *t_max *xj.
-
-But need to ensure k <=n.
-
-But a =a0 + y_step *t_max = a0 + yj/d *t_max.
-
-But the code already checks that a is >=0, but not sure if k =a*xj is <=n.
-
-But according to the equation xj*a + yj*b =n, and since b =b0 - x_step *t.
-
-When a >=0 and b >=0, then k =xj*a =n - yj*b.
-
-Since yj*b >=0, k =n - yj*b <=n.
-
-Thus, k is automatically <=n.
-
-So the code can skip checking if k <=n.
-
-Thus, the code can generate all possible k's in the arithmetic sequence starting at initial_k, with step step, up to final_k.
-
-The number of possible k's is (t_max - t_min +1), which is the number of t's in the range.
-
-But since step could be very large (up to 3e5 *3e5 /1 =9e10), the number of possible k's is O(1).
-
-Thus, the code can compute the possible k's by:
-
-initial_k = xj * (a0 + y_step * t_min)
-
-step = xj * y_step → since y_step = yj/d, and xj is xj. So step is xj*(yj/d) = (xj*yj)/d.
-
-Then, the possible k's are initial_k, initial_k + step, initial_k + 2*step, ..., initial_k + (t_max - t_min) * step.
-
-But each step is step.
-
-But how many terms are there?
-
-It's (t_max - t_min +1) terms.
-
-But step can be large, so even if t_max - t_min is large, the k's may quickly exceed n.
-
-But according to the earlier logic, k is <=n.
-
-So, even if step is large, the number of k's is O(1).
-
-Thus, the code can proceed as follows:
-
-For each shop j:
-
-   if no solution, continue.
-
-   else:
-
-       compute t_min and t_max.
-
-       if t_min >t_max → no solution.
-
-       else:
-
-           initial_t = t_min
-
-           max_t = t_max
-
-           possible_k = []
-
-           for t in t_min, t_max:
-
-               a = a0 + y_step *t
-
-               b = b0 - x_step *t
-
-               k = a *xj
-
-               possible_k.append(k)
-
-           # But this is not correct, as t can be anything between t_min and t_max, inclusive.
-
-           # So the code should loop t from t_min to t_max.
-
-           # But for m=3e5 shops, each with 1e5 possible t's, it's impossible.
-
-           # So the previous approach is not feasible.
-
-Thus, the initial approach of iterating t from t_min to t_max is not feasible for large ranges.
-
-Alternative idea: Find the best possible k for the shop j.
-
-The maximum sum is sum_b + prefix_sum[k].
-
-The prefix_sum array is sorted in non-increasing order after the first k elements where the differences are positive.
-
-Thus, for a given shop j, among all possible k's, the best is the largest possible k (since prefix_sum is maximum for larger k up to a certain point).
-
-Wait, but if the differences are all positive, then prefix_sum is increasing, so larger k is better.
-
-If some differences are negative, then after a certain k, adding more reduces the sum.
-
-So for each possible k in the shop's possible k's, the code needs to compute the sum and select the maximum.
-
-But how to find the maximum sum quickly.
-
-But for a given shop j, the possible k's are a few in number (like 1 or 2), so the code can compute each and select the maximum.
-
-But how to confirm that for each shop j, the number of possible k's is small.
-
-The number of possible k's per shop j is (t_max -t_min +1). But t_max and t_min are derived from the equations:
-
-t_min = ceil( (-a0) / y_step )
-
-t_max = floor( (b0)/x_step )
-
-Thus, if the step between t's is 1, then the number of possible k's is (t_max - t_min +1), which could be large.
-
-But the step between k's is xj*yj/d.
-
-For example:
-
-xj=2, yj=3, d=1.
-
-step=2*3/1=6.
-
-So for each t increase, k increases by 6.
-
-Thus, the possible k's are spaced by 6.
-
-Thus, even if t_max -t_min is large, the number of possible k's would be small.
-
-For example, if t_max -t_min is 10, but step is 6, then the possible k's are 10/6 ≈1.666, so 2 possible k's.
-
-Thus, for each shop j, the number of possible k's is O(1).
-
-Thus, the code can proceed as before.
-
-But how to verify this.
-
-Another example:
-
-xj=1, yj=1, n=1e5.
-
-d=1.
-
-The equation is a + b =1e5.
-
-Possible solutions are a from 0 to 1e5, b=1e5 -a.
-
-For each a, k =a*1 =a.
-
-Thus, possible k's are 0, 1, 2, ..., 1e5.
-
-But this would generate 1e5+1 possible k's for a single shop, which is O(1e5) per shop.
-
-But if m=3e5 shops, this would be O(3e5 *1e5)=3e10 operations, which is impossible.
-
-But in this case, the code would iterate through all possible t's (from t_min=0 to t_max=1e5), which is 1e5+1 iterations per shop.
-
-This would be too slow.
-
-Thus, this approach is not feasible.
-
-But why is this possible?
-
-Because in this case, xj=1 and yj=1, the equation a +b =n. So all possible a and b are valid, as long as a and b are non-negative.
-
-Thus, k can be any value from 0 to n.
-
-For such a shop j, the code must compute the maximum sum which is sum_b + prefix_sum[k], where k can be any value from 0 to n.
-
-Thus, the maximum sum is the maximum of sum_b + prefix_sum[k] for k from 0 to n.
-
-But this is the maximum of the prefix_sum array, which can be precomputed.
-
-But for this shop, the code would generate all possible k's (0 to n), which is O(n) per shop, which is impossible for m=3e5.
-
-Thus, the previous approach is not feasible.
-
-So, we need a different approach for shops where xj and yj are 1 and 1, and d=1, but n is large.
-
-But how?
-
-The problem is to find the optimal k for the given constraints. For a shop j where xj=1 and yj=1, any k from 0 to n is allowed.
-
-Thus, the maximum sum for this shop is the maximum sum_b + prefix_sum[k], which is sum_b + max_prefix_sum, where max_prefix_sum is the maximum of the prefix_sum array.
-
-But this can be precomputed once for all shops.
-
-But how to handle this case.
-
-Thus, the code can precompute the maximum possible prefix_sum, which is the maximum value in the prefix_sum array, and the corresponding k.
-
-But for each shop j, if the possible k's are all possible k's (like when xj=1, yj=1, d=1, and n is divisible by d), then the code can directly compute the maximum prefix_sum up to k and output sum_b + max_prefix.
-
-But how to detect such cases.
-
-For example, if xj=1 and yj=1, then for any a and b, xj*a +yj*b =a +b =n.
-
-Thus, any a and b >=0 such that a +b =n. Then, k =a*1 =a can be from 0 to n.
-
-Thus, the code would have to compute sum_b + prefix_sum[k] for k in 0 to n.
-
-But for this shop, the code can directly compute the maximum prefix_sum.
-
-Thus, the code can precompute the maximum prefix_sum and its position.
-
-But this is a special case. How to handle it.
-
-Thus, the code needs to handle two cases:
-
-1. When the possible k's are all possible values (like xj=1, yj=1, etc.). For such shops, the maximum sum is sum_b + max_prefix_sum.
-
-But how to detect this case.
-
-In this case, the equation is xj*a + yj*b =n. If xj=1 and yj=1, then a and b can be any non-negative integers such that a +b =n.
-
-Thus, possible k =a*1 =a, which can be 0,1,...,n.
-
-Thus, the code can find the maximum sum for these k's.
-
-But for large n, this would be O(1) per shop.
-
-But how to detect such cases.
-
-For a shop j, if xj*yj/d ==n, then possible k's are limited. But this seems not helpful.
-
-Alternative idea: For shops where the step in k's is 1, then all possible k's are allowed, but this would only happen if xj*yj/d =1. But this is possible only if xj and yj are coprime, and their product equals d.
-
-But d is the gcd(xj,yj), so this can only happen if xj and yj are coprime and their product equals d, which is only possible if xj and yj are 1 and 1.
-
-But this is not helpful.
-
-Alternatively, for general shops, the code can check if the step is 1. If so, then all k's are allowed, and the maximum is sum_b + max_prefix_sum.
-
-But how to compute the step.
-
-The step is xj*yj/d.
-
-If xj*yj/d ==1, then step is 1.
-
-Thus, the code can check if xj*yj ==d.
-
-But d is the gcd(xj, yj). So xj*yj =d → gcd(xj, yj) =xj*yj → which implies xj and yj are 1 and 1.
-
-Thus, this approach only covers the case where xj and yj are 1 and 1.
-
-But for other cases where step is 1, like xj=2, yj=3, d=1. step=6 → not 1.
-
-Thus, this approach is not helpful.
-
-Thus, the code must find a way to compute for shops where possible k's are all possible values, but without iterating all possible k's.
-
-But how?
-
-Precomputing the maximum prefix_sum and its position can help. Then, for shops where all k's are allowed, the maximum sum is sum_b + max_prefix_sum.
-
-But how to detect if all k's are allowed.
-
-A shop allows all possible k's if for any k in 0..n, there exist x and y >=0 such that x*xj +y*yj =n.
-
-But this is only possible if xj divides k and yj divides (n -k).
-
-But this is only possible if xj=1 and yj=1. Because then, for any k, x=k, y= n-k.
-
-Thus, only for xj=1 and yj=1, all k's are allowed.
-
-Thus, for other shops, the code must compute the possible k's.
-
-But for xj=1 and yj=1, the code can directly use the precomputed max_prefix_sum.
-
-Thus, the code can handle this case separately.
-
-But this requires checking if xj ==1 and yj ==1.
-
-In code:
-
-for each shop j:
-
-   if xj ==1 and yj ==1:
-
-       if n %1 !=0 → impossible (but 1 divides all n).
-
-       possible k's are 0 to n.
-
-       sum is sum_b + max_prefix_sum.
-
-       output this.
-
-       continue.
-
-Thus, for this case, it's O(1) per shop.
-
-Thus, the code can handle this case separately.
-
-For other shops, the code proceeds as before.
-
-But for other shops with large steps, how to compute the possible k's.
-
-But even for other shops, the code must process each possible k.
-
-But for m=3e5 shops, each generating O(1) k's, the code is manageable.
-
-Thus, the code can proceed as follows:
-
-Precompute the prefix_sum array.
-
-Precompute the max_prefix_sum and its k, which is the maximum value in prefix_sum.
-
-For each shop j:
-
-   if xj ==1 and yj ==1:
-
-       if n is not divisible by 1 → impossible (but it's always divisible).
-
-       else:
-
-           output sum_b + max_prefix_sum.
-
-           continue.
-
-   else:
-
-       proceed with the earlier steps.
-
-But how to compute max_prefix_sum.
-
-max_prefix_sum = max(prefix_sum[0..n]).
-
-This can be precomputed once.
-
-Thus, the code can precompute it.
-
-This will handle the shops where xj and yj are 1 and 1.
-
-Other shops are handled with the previous approach.
-
-Thus, the code can be optimized.
-
-This way, for shops where xj=1 and yj=1, the code can answer in O(1) time.
-
-For other shops, the code loops through possible t's, which is O(1) per shop.
-
-Thus, the code should be efficient enough.
-
-Now, let's test this approach against the sample input.
-
-Sample Input 1:
-
-3
-
-5 10 → diff 5-10= -5
-
-100 50 → diff 50
-
-2 2 → diff 0
-
-sorted differences: 50, 0, -5 → prefix_sum [0,50,50,45]
-
-sum_b = 10 +50 +2 =62.
-
-For the shop xj=2, yj=3:
-
-d= gcd(2,3) =1. n=3 is divisible by 1.
-
-extended_gcd(2,3) returns (1, -1, 1).
-
-a0 = -1 *3 =-3.
-
-b0 =1 *3 =3.
-
-y_step =3//1=3.
-
-x_step=2//1=2.
-
-t_min = ceil(3/3) =1.
-
-t_max = floor(3/2) =1.
-
-t can be 1.
-
-a =-3 +3*1=0.
-
-b=3 -2*1=1.
-
-k =0*2=0.
-
-sum is sum_b + prefix_sum[0] →62+0=62.
-
-Thus, output 62.
-
-Which matches the sample.
-
-Another shop in the sample:
-
-shop j=2, xj=1, yj=1.
-
-Here, xj=1 and yj=1.
-
-max_prefix_sum is 50.
-
-sum_b +50 =62+50=112.
-
-Which is correct.
+Testing against sample input 1.
+
+```python
+import sys
+import math
+from math import gcd
+
+
+def extended_gcd(a, b):
+    if b == 0:
+        return (a, 1, 0)
+    else:
+        g, x, y = extended_gcd(b, a % b)
+        return (g, y, x - (a // b) * y)
+
+def main(input_stream, output_stream):
+    input = input_stream.read
+    data = input().split()
+    ptr = 0
+    
+    n = int(data[ptr])
+    ptr +=1
+    
+    sum_b = 0
+    diffs = []
+    for _ in range(n):
+        a = int(data[ptr])
+        b = int(data[ptr+1])
+        ptr +=2
+        sum_b += b
+        diffs.append(a - b)
+    
+    diffs.sort(reverse=True)
+    prefix_sum = [0] * (n + 1)
+    for i in range(n):
+        prefix_sum[i+1] = prefix_sum[i] + diffs[i]
+    
+    max_prefix = max(prefix_sum)
+    
+    m = int(data[ptr])
+    ptr +=1
+    
+    results = []
+    for _ in range(m):
+        xj = int(data[ptr])
+        yj = int(data[ptr+1])
+        ptr +=2
+        
+        if xj == 1 and yj == 1:
+            results.append(sum_b + max_prefix)
+            continue
+        
+        d = gcd(xj, yj)
+        if n % d != 0:
+            results.append(-1)
+            continue
+        
+        g, x0, y0 = extended_gcd(xj, yj)
+        a0 = x0 * (n // d)
+        b0 = y0 * (n // d)
+        
+        y_step = yj // d
+        x_step = xj // d
+        
+        numerator_t_min = -a0
+        t_min = math.ceil(numerator_t_min / y_step) if y_step != 0 else 0
+        numerator_t_max = b0
+        t_max = math.floor(numerator_t_max / x_step) if x_step !=0 else 0
+        
+        if t_min > t_max:
+            results.append(-1)
+            continue
+        
+        max_sum = -float('inf')
+        step_k = xj * yj // d
+        
+        for t in range(t_min, t_max + 1):
+            a = a0 + y_step * t
+            b_val = b0 - x_step * t
+            if a < 0 or b_val < 0:
+                continue
+            k = a * xj
+            if k < 0 or k > n:
+                continue
+            if k <= n:
+                current_sum = sum_b + prefix_sum[k]
+                if current_sum > max_sum:
+                    max_sum = current_sum
+        
+        if max_sum == -float('inf'):
+            results.append(-1)
+        else:
+            results.append(max_sum)
+    
+    output_stream.write('\n'.join(map(str, results)) + '\n')
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10
+3 1
+2 3
+1 1
+2 1
+6 3
+1 4
+4 3
+1 3
+5 3
+5 4
+10
+8 10
+9 3
+1 4
+2 5
+8 3
+3 5
+1 6
+7 2
+6 7
+3 1
+""",
+            "output": \
+"""\
+26
+-1
+36
+30
+-1
+26
+34
+26
+-1
+36
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, the code handles this case.
 

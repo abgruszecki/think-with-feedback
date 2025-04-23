@@ -505,43 +505,76 @@ For each count query, use bisect.bisect_right to find the count.
 
 So, the code would look like:
 
+Testing against sample input 1.
+
+```python
 import bisect
 from collections import defaultdict
 
-n = int(input())
-data = defaultdict(lambda: {'adds': [], 'removes': []})
 
-for _ in range(n):
-    a, t, x = map(int, input().split())
-    if a == 1:
-        bisect.insort(data[x]['adds'], t)
-    elif a == 2:
-        bisect.insort(data[x]['removes'], t)
-    else:
-        adds = data[x]['adds']
-        removes = data[x]['removes']
-        add_count = bisect.bisect_right(adds, t)
-        remove_count = bisect.bisect_right(removes, t)
-        print(add_count - remove_count)
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    data = defaultdict(lambda: {'adds': [], 'removes': []})
 
-But this code is not optimized for large cases where many events are for the same xi and inserted in reverse order. However, given the problem's constraints and the time limit, this may be the best possible solution in Python.
+    for _ in range(n):
+        a, t, x = map(int, input_stream.readline().rstrip("\n").split())
+        if a == 1:
+            bisect.insort(data[x]['adds'], t)
+        elif a == 2:
+            bisect.insort(data[x]['removes'], t)
+        else:
+            adds = data[x]['adds']
+            removes = data[x]['removes']
+            add_count = bisect.bisect_right(adds, t)
+            remove_count = bisect.bisect_right(removes, t)
+            print(add_count - remove_count, file=output_stream)
 
-Testing the sample inputs:
 
-Sample 1:
 
-Input:
-6
-1 1 5
-3 5 5
-1 2 5
-3 6 5
-2 3 5
-3 7 5
+def test():
+    import io
 
-The adds for 5 are [1, 2], removes [3]. The count queries are:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 1 1
+2 2 1
+3 3 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-At t=5: add_count is bisect_right([1,2],5) → 2, remove_count is bisect_right([3],5) →1 → 2-1=1. But sample output says 1 for the first query. Wait sample output for first input is:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 The sample input's first three queries:
 

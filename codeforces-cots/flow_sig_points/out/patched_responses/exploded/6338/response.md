@@ -664,23 +664,128 @@ else:
 
 This code should work.
 
-Testing the first sample:
+Testing against sample input 1.
 
-employees have languages.
+```python
+import sys
+from collections import defaultdict
 
-lang_to_emps will have entries for 2,3,4,5.
 
-For example, lang 2 is known by employee 0 and 1.
+class DSU:
+    def __init__(self, size):
+        self.parent = list(range(size))
+        self.rank = [1] * size
 
-When processing lang 2, first is 0, then emps[1] is 1, so union 0 and 1.
+    def find(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
 
-Then, lang3 is known by employees 1 and 2. So first is 1 (employee index 1?), union 1 and 2.
+    def union(self, x, y):
+        x_root = self.find(x)
+        y_root = self.find(y)
+        if x_root == y_root:
+            return
+        if self.rank[x_root] < self.rank[y_root]:
+            self.parent[x_root] = y_root
+        else:
+            self.parent[y_root] = x_root
+            if self.rank[x_root] == self.rank[y_root]:
+                self.rank[x_root] += 1
 
-So after processing all languages, all employees (0-4) with languages are in the same component.
+def main(input_stream, output_stream):
+    input = input_stream.read().split()
+    ptr = 0
+    n, m = int(input[ptr]), int(input[ptr+1])
+    ptr +=2
+    employees = []
+    zero_employees = 0
+    for _ in range(n):
+        ki = int(input[ptr])
+        ptr +=1
+        if ki ==0:
+            employees.append([])
+            zero_employees +=1
+            ptr += ki
+            continue
+        langs = list(map(int, input[ptr:ptr+ki]))
+        ptr += ki
+        employees.append(langs)
+    
+    lang_to_emps = defaultdict(list)
+    for i in range(n):
+        for lang in employees[i]:
+            lang_to_emps[lang].append(i)
+    
+    dsu = DSU(n)
+    for lang in lang_to_emps:
+        emps = lang_to_emps[lang]
+        first = emps[0]
+        for emp in emps[1:]:
+            dsu.union(first, emp)
+    
+    roots = set()
+    for i in range(n):
+        if len(employees[i]) > 0:
+            roots.add(dsu.find(i))
+    non_zero_components = len(roots)
+    
+    if non_zero_components ==0:
+        print(n, file=output_stream)
+    else:
+        print((non_zero_components -1) + zero_employees, file=output_stream)
 
-Thus, roots will have size 1. non_zero_components is 1. zero_employees is 0. So cost 0.
 
-Yes.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 7
+0
+3 1 2 3
+1 1
+2 5 4
+2 6 7
+1 3
+2 7 4
+1 1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case: third example.
 

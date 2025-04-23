@@ -278,33 +278,76 @@ So the code needs to cast steps to an integer.
 
 So the corrected code is:
 
+Testing against sample input 2.
+
+```python
 import math
 
-r, x, y, x1, y1 = map(int, input().split())
 
-dx = x1 - x
+def main(input_stream, output_stream):
+    r, x, y, x1, y1 = map(int, input_stream.readline().rstrip("\n").split())
 
-dy = y1 - y
+    dx = x1 - x
 
-distance_sq = dx*dx + dy*dy
+    dy = y1 - y
 
-if distance_sq == 0:
+    distance_sq = dx*dx + dy*dy
 
-    print(0)
+    if distance_sq == 0:
 
-else:
+        print(0, file=output_stream)
 
-    distance = math.sqrt(distance_sq)
+    else:
 
-    steps = math.ceil( distance / (2 * r) )
+        distance = math.sqrt(distance_sq)
 
-    print(int(steps))
+        steps = math.ceil( distance / (2 * r) )
 
-This should handle all cases.
+        print(int(steps), file=output_stream)
 
-Testing sample 2:
 
-Input 1 1 1 4 4 → dx=3, dy=3. distance_sq=18. distance=4.2426... . 4.2426/(2*1) =2.1213 → ceil is 3. So printed 3. Correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 5 6 5 6
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 1: 2 0 0 0 4. distance is 4. 4/(2*2)=1 → steps 1. Correct.
 

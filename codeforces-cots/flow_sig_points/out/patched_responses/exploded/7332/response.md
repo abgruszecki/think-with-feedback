@@ -91,19 +91,74 @@ Then divide that sum by 2 (integer division) and that's the answer.
 
 So the code would look something like:
 
+Testing against sample inputs 1, 2.
+
+```python
 from collections import Counter
 
-n = int(input())
-a = list(map(int, input().split()))
-counts = Counter(a)
-total_pairs = sum(v // 2 for v in counts.values())
-print(total_pairs // 2)
 
-Wait, that's all? Let's test this against the examples.
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    counts = Counter(a)
+    total_pairs = sum(v // 2 for v in counts.values())
+    print(total_pairs // 2, file=output_stream)
 
-First example: the sum is 1 + 1 = 2 → 2//2=1 → correct.
 
-Second example: 1 (from 2) + 2 (from 4) + 1 (6) +1 (7) +1 (9) = 6 → 3 → correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+13
+2 2 4 4 4 4 6 6 6 7 7 9 9
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+        {
+            "input": \
+"""\
+4
+3 3 3 5
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: 3//2=1 (from 3) → sum is 1 → 0 → correct.
 

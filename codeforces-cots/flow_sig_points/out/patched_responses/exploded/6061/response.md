@@ -664,127 +664,225 @@ But since we already computed is_pal, this is manageable.
 
 So the code:
 
-s = input().strip()
+Testing against sample input 2.
 
-n = len(s)
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-# Compute is_pal[i][j]: True if s[i..j] is palindrome.
+    n = len(s)
 
-is_pal = [[False] * n for _ in range(n)]
+    # Compute is_pal[i][j]: True if s[i..j] is palindrome.
 
-for i in range(n-1, -1, -1):
+    is_pal = [[False] * n for _ in range(n)]
 
-    for j in range(i, n):
+    for i in range(n-1, -1, -1):
 
-        if i == j:
+        for j in range(i, n):
 
-            is_pal[i][j] = True
+            if i == j:
 
-        elif j == i +1:
+                is_pal[i][j] = True
 
-            is_pal[i][j] = (s[i] == s[j])
+            elif j == i +1:
 
-        else:
+                is_pal[i][j] = (s[i] == s[j])
 
-            is_pal[i][j] = (s[i] == s[j] and is_pal[i+1][j-1])
+            else:
 
-# Compute start_pal[i]
+                is_pal[i][j] = (s[i] == s[j] and is_pal[i+1][j-1])
 
-start_pal = [0]*n
+    # Compute start_pal[i]
 
-for i in range(n):
+    start_pal = [0]*n
 
-    cnt =0
+    for i in range(n):
 
-    for j in range(i, n):
+        cnt =0
 
-        if is_pal[i][j]:
+        for j in range(i, n):
 
-            cnt +=1
+            if is_pal[i][j]:
 
-    start_pal[i] = cnt
+                cnt +=1
 
-# Compute right_count
+        start_pal[i] = cnt
 
-right_count = [0]*(n+1)
+    # Compute right_count
 
-for i in range(n-1, -1, -1):
+    right_count = [0]*(n+1)
 
-    right_count[i] = right_count[i+1] + start_pal[i]
+    for i in range(n-1, -1, -1):
 
-# Compute the total
+        right_count[i] = right_count[i+1] + start_pal[i]
 
-total =0
+    # Compute the total
 
-for i in range(n):
+    total =0
 
-    for j in range(i, n):
+    for i in range(n):
 
-        if is_pal[i][j]:
+        for j in range(i, n):
 
-            total += right_count[j+1]
+            if is_pal[i][j]:
 
-print(total)
+                total += right_count[j+1]
 
-This should work.
+    print(total, file=output_stream)
 
-Testing with sample input 2:
 
-For 'aaa', the code would generate:
 
-start_pal = [3,2,1].
+def test():
+    import io
 
-right_count[0] =3+2+1=6.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+abacaba
+""",
+            "output": \
+"""\
+36
+""",
+        }, 
+    ]
 
-right_count[1] =2+1=3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-right_count[2] =1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-right_count[3] =0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Then, for each palindrome:
+    print('Tests passed 😎')
 
-(0,0): j=0 → add right_count[1] →3.
 
-(0,1): j=1 → add right_count[2] →1.
+if __name__ == '__main__':
+    test()
 
-(0,2): j=2 → add right_count[3] →0.
 
-(1,1): j=1 → add right_count[2] →1.
+```
 
-(1,2): j=2 → add right_count[3] →0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-(2,2): j=2 → add right_count[3] →0.
+```
 
-Sum is 3+1+0+1+0+0=5.
+Testing against sample input 1.
 
-Which is correct.
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-Sample input 1:
+    n = len(s)
 
-'aa' → code:
+    # Compute is_pal[i][j]: True if s[i..j] is palindrome.
 
-start_pal[0] =2 (substrings 0-0 and 0-1).
+    is_pal = [[False] * n for _ in range(n)]
 
-start_pal[1] =1.
+    for i in range(n-1, -1, -1):
 
-right_count[0] =2+1=3.
+        for j in range(i, n):
 
-right_count[1] =1.
+            if i == j:
 
-right_count[2] =0.
+                is_pal[i][j] = True
 
-The palindromes:
+            elif j == i +1:
 
-(0,0): j=0 → add right_count[1] =1.
+                is_pal[i][j] = (s[i] == s[j])
 
-(0,1): j=1 → add right_count[2] =0.
+            else:
 
-(1,1): j=1 → add right_count[2] =0.
+                is_pal[i][j] = (s[i] == s[j] and is_pal[i+1][j-1])
 
-Sum 1+0+0=1.
+    # Compute start_pal[i]
 
-Which is correct.
+    start_pal = [0]*n
+
+    for i in range(n):
+
+        cnt =0
+
+        for j in range(i, n):
+
+            if is_pal[i][j]:
+
+                cnt +=1
+
+        start_pal[i] = cnt
+
+    # Compute right_count
+
+    right_count = [0]*(n+1)
+
+    for i in range(n-1, -1, -1):
+
+        right_count[i] = right_count[i+1] + start_pal[i]
+
+    # Compute the total
+
+    total =0
+
+    for i in range(n):
+
+        for j in range(i, n):
+
+            if is_pal[i][j]:
+
+                total += right_count[j+1]
+
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+aaa
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, this approach is correct.
 

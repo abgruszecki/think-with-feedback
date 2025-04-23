@@ -1167,134 +1167,137 @@ process accordingly.
 
 So code:
 
-n = int(input())
-digits = list(map(int, input().split()))
+Testing against sample input 2.
 
-if 0 not in digits:
-    print(-1)
-    exit()
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    digits = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-digits.sort(reverse=True)
-sum_total = sum(digits)
+    if 0 not in digits:
+        print(-1, file=output_stream)
+        return
 
-if sum_total ==0:
-    print(0)
-    exit()
+    digits.sort(reverse=True)
+    sum_total = sum(digits)
 
-remainder = sum_total %3
+    if sum_total ==0:
+        print(0, file=output_stream)
+        return
 
-if remainder ==0:
-    # Check if all are zero, but sum_total is non-zero. Impossible, since sum_total is sum of digits which includes 0 and others.
-    # So output the digits joined.
-    print(''.join(map(str, digits)))
-else:
-    # Handle remainder 1 or 2.
-    # Make a copy of digits, as we need to modify it.
-    digits_list = digits.copy()
-    if remainder ==1:
-        # Try to remove one mod1 digit.
-        removed = False
-        for i in reversed(range(len(digits_list))):
-            if digits_list[i] %3 ==1:
-                del digits_list[i]
-                removed = True
-                break
-        if not removed:
-            # Remove two mod2 digits.
-            indices = []
-            for i in reversed(range(len(digits_list))):
-                if digits_list[i] %3 ==2:
-                    indices.append(i)
-                    if len(indices) ==2:
-                        break
-            if len(indices) <2:
-                print(-1)
-                exit()
-            else:
-                # Delete in reverse order.
-                for idx in sorted(indices, reverse=True):
-                    del digits_list[idx]
-    else: # remainder ==2
-        removed = False
-        for i in reversed(range(len(digits_list))):
-            if digits_list[i] %3 ==2:
-                del digits_list[i]
-                removed = True
-                break
-        if not removed:
-            # Remove two mod1 digits.
-            indices = []
+    remainder = sum_total %3
+
+    if remainder ==0:
+        # Check if all are zero, but sum_total is non-zero. Impossible, since sum_total is sum of digits which includes 0 and others.
+        # So output the digits joined.
+        print(''.join(map(str, digits)), file=output_stream)
+    else:
+        # Handle remainder 1 or 2.
+        # Make a copy of digits, as we need to modify it.
+        digits_list = digits.copy()
+        if remainder ==1:
+            # Try to remove one mod1 digit.
+            removed = False
             for i in reversed(range(len(digits_list))):
                 if digits_list[i] %3 ==1:
-                    indices.append(i)
-                    if len(indices) ==2:
-                        break
-            if len(indices) <2:
-                print(-1)
-                exit()
-            else:
-                for idx in sorted(indices, reverse=True):
-                    del digits_list[idx]
-    # Check if digits_list is empty.
-    # But since original list has 0, and we didn't remove it.
-    # Now, check if there's at least one zero.
-    # Also, sum_new is sum(digits_list).
-    sum_new = sum(digits_list)
-    if sum_new ==0:
-        print(0)
-    else:
-        # Check if digits_list is not empty.
-        # The digits_list is sorted in descending order.
-        # Check if there's a zero.
-        # But since original digits had at least one zero and we didn't remove any zeros (since mod3 is 0), there must be at least one zero.
-        # So output the joined string.
-        print(''.join(map(str, digits_list)))
+                    del digits_list[i]
+                    removed = True
+                    break
+            if not removed:
+                # Remove two mod2 digits.
+                indices = []
+                for i in reversed(range(len(digits_list))):
+                    if digits_list[i] %3 ==2:
+                        indices.append(i)
+                        if len(indices) ==2:
+                            break
+                if len(indices) <2:
+                    print(-1, file=output_stream)
+                    return
+                else:
+                    # Delete in reverse order.
+                    for idx in sorted(indices, reverse=True):
+                        del digits_list[idx]
+        else: # remainder ==2
+            removed = False
+            for i in reversed(range(len(digits_list))):
+                if digits_list[i] %3 ==2:
+                    del digits_list[i]
+                    removed = True
+                    break
+            if not removed:
+                # Remove two mod1 digits.
+                indices = []
+                for i in reversed(range(len(digits_list))):
+                    if digits_list[i] %3 ==1:
+                        indices.append(i)
+                        if len(indices) ==2:
+                            break
+                if len(indices) <2:
+                    print(-1, file=output_stream)
+                    return
+                else:
+                    for idx in sorted(indices, reverse=True):
+                        del digits_list[idx]
+        # Check if digits_list is empty.
+        # But since original list has 0, and we didn't remove it.
+        # Now, check if there's at least one zero.
+        # Also, sum_new is sum(digits_list).
+        sum_new = sum(digits_list)
+        if sum_new ==0:
+            print(0, file=output_stream)
+        else:
+            # Check if digits_list is not empty.
+            # The digits_list is sorted in descending order.
+            # Check if there's a zero.
+            # But since original digits had at least one zero and we didn't remove any zeros (since mod3 is 0), there must be at least one zero.
+            # So output the joined string.
+            print(''.join(map(str, digits_list)), file=output_stream)
 
-But wait, after processing, the digits_list is modified. But in the code, digits_list is a copy of the sorted digits.
 
-Wait, no. In the code:
 
-digits_list = digits.copy()
+def test():
+    import io
 
-digits is sorted in reverse order. So digits_list is a copy of that sorted list.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+3 2 5 1 5 2 2 3
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-Yes.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But in Python, the list.copy() method creates a shallow copy.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Thus, the code for remainder 1 and 2 modifies the digits_list, which is a copy of the original sorted digits.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Thus, after processing, digits_list is the remaining digits, sorted in descending order.
+    print('Tests passed 😎')
 
-Thus, the code should work.
 
-But let's test the second example:
+if __name__ == '__main__':
+    test()
 
-Input:
 
-11
+```
 
-3 4 5 4 5 3 5 3 4 4 0
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-After sorting: [5,5,5,4,4,4,4,3,3,3,0]
-
-sum_total is 40 → remainder 1.
-
-Processing remainder 1:
-
-Loop through digits_list in reversed order to find mod1 digit.
-
-digits_list[6] is 4 → mod1. So delete index 6.
-
-digits_list becomes [5,5,5,4,4,4,3,3,3,0].
-
-sum_new is 40-4=36 → divisible by3.
-
-sum_new !=0 → output digits_list joined as '5554443330'.
-
-Which matches the example.
-
-Thus, the code works.
+```
 
 Another test case:
 

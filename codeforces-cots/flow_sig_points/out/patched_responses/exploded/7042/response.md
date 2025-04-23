@@ -530,39 +530,80 @@ print(ans)
 
 Yes, this should work.
 
-Testing the first example:
+Testing against sample input 1.
 
-Sample input:
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-4 4
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    a = input_stream.readline().rstrip("\n").strip()
+    b = input_stream.readline().rstrip("\n").strip()
 
-1010
+    # Compute suffix sum for b
+    suffix_b = [0] * (m + 1)  # suffix_b[j] is sum from j to m-1
+    for j in range(m-1, -1, -1):
+        suffix_b[j] = (1 if b[j] == '1' else 0) + suffix_b[j+1]
 
-1101
+    max_pow = max(n-1, m-1)
+    pow2 = [1] * (max_pow + 1)
+    for i in range(1, max_pow + 1):
+        pow2[i] = (pow2[i-1] * 2) % MOD
 
-suffix_b for b:
+    result = 0
+    for i in range(n):
+        if a[i] == '1':
+            s_a = (n-1) - i
+            if s_a < m:
+                result = (result + pow2[s_a] * suffix_b[s_a]) % MOD
 
-j=3: 1, suffix_b[3] =1.
+    print(result, file=output_stream)
 
-j=2: 0 +1=1.
 
-j=1:1 +1=2.
 
-j=0:1+2=3.
+def test():
+    import io
 
-pow2: max_pow is 3. pow2[0]=1, pow2[1]=2, pow2[2]=4, pow2[3]=8.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 5
+1001
+10101
+""",
+            "output": \
+"""\
+11
+""",
+        }, 
+    ]
 
-For a's bits:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=0: '1', s_a=3. 3 <4 → 8 *1=8.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=1: '0' → no.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=2: '1', s_a=4-1-2=1. 1 <4 → 2*2=4.
+    print('Tests passed 😎')
 
-i=3: '0' → no.
 
-Sum 8+4=12 → correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

@@ -740,53 +740,121 @@ But wait, after processing all elements (i from n-1 downto 0), the dp_prev0 and 
 
 Yes.
 
-Let's test this code against the examples.
+Testing against sample input 1.
 
-First example:
+```python
+class FenwickTree:
+    def __init__(self, size):
+        self.size = size
+        self.tree = [0] * (self.size + 2)  # Use +2 to avoid index issues
 
-Input:
+    def update(self, idx, delta):
+        while idx <= self.size:
+            self.tree[idx] += delta
+            idx += idx & -idx
 
-2
+    def query(self, idx):
+        res = 0
+        while idx > 0:
+            res += self.tree[idx]
+            idx -= idx & -idx
+        return res
 
-2 1
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    n = int(input[0])
+    p = list(map(int, input[1:n+1]))
+    
+    all_x = []
+    for num in p:
+        all_x.append(num)
+        all_x.append(-num)
+    sorted_unique_x = sorted(list(set(all_x)))
+    rank_dict = {x: i+1 for i, x in enumerate(sorted_unique_x)}  # 1-based indexing
+    size = len(sorted_unique_x)
+    
+    fenwick = FenwickTree(size)
+    dp_prev0 = 0
+    dp_prev1 = 0
+    
+    for i in reversed(range(n)):
+        current_num = p[i]
+        x0 = current_num
+        x1 = -current_num
+        
+        rank_x0 = rank_dict[x0]
+        rank_x1 = rank_dict[x1]
+        
+        count0 = fenwick.query(rank_x0 - 1)
+        count1 = fenwick.query(rank_x1 - 1)
+        
+        inv0 = count0 + min(dp_prev0, dp_prev1)
+        inv1 = count1 + min(dp_prev0, dp_prev1)
+        
+        if inv0 <= inv1:
+            chosen_rank = rank_x0
+        else:
+            chosen_rank = rank_x1
+        
+        fenwick.update(chosen_rank, 1)
+        dp_prev0, dp_prev1 = inv0, inv1
+    
+    print(min(dp_prev0, dp_prev1), file=output_stream)
 
-Processing in reverse order.
 
-Elements are [2, 1]. Processing i=1 (second element), then i=0.
 
-For i=1:
+def test():
+    import io
 
-x0 = 1, x1 = -1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+9
+-2 0 -1 0 -1 2 1 0 -1
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-Fenwick Tree is initially empty.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-count0 = query(rank_x0-1). What is rank_x0?
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-all_x is [2, -2, 1, -1]. sorted_unique_x is [-2, -1, 1, 2]. rank for 1 is 3. rank_x0-1 = 2. query returns 0. count0=0. count1 is for x1=-1. rank_x1 is 2. query(1) returns 0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-inv0 = 0 + min(0, 0) = 0.
+    print('Tests passed 😎')
 
-inv1 = 0 + 0 = 0.
 
-Both options give 0. So choose either. Let's say we choose x0=1. Add rank 3 to Fenwick Tree. Now, the Fenwick Tree has 1 at rank 3.
+if __name__ == '__main__':
+    test()
 
-dp_prev0 = 0, dp_prev1=0. After processing i=1, dp_prev0 and dp_prev1 are 0 and 0.
 
-Processing i=0 (element 2):
+```
 
-x0=2, x1=-2.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 94, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 87, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '6'
+Got: '12'
 
-rank_x0 is 4. query(3) gives 1 (since rank_x0-1=3, and Fenwick Tree has 1 at rank 3). count0=1.
-
-x1=-2. rank_x1=1. query(0) is 0. count1=0.
-
-inv0 = 1 + min(0, 0) = 1.
-
-inv1 = 0 + 0 = 0.
-
-So choose inv1, which is 0. Add x1=-2 to Fenwick Tree (rank 1).
-
-After processing, dp_prev0=1, dp_prev1=0. So minimal is 0. Which matches the first example.
+```
 
 Second example:
 

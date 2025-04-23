@@ -484,7 +484,11 @@ But how to manage the Fenwick Trees for each character? We can store them in a d
 
 But in Python, the FenwickTree is initialized with the size of the list for the character. So:
 
+Testing against sample input 1.
+
+```python
 from collections import defaultdict
+
 
 class FenwickTree:
     def __init__(self, size):
@@ -506,9 +510,9 @@ class FenwickTree:
             idx -= idx & -idx
         return res
 
-def main():
+def main(input_stream, output_stream):
     import sys
-    input = sys.stdin.read().split()
+    input = input_stream.read().split()
     ptr =0
     k = int(input[ptr])
     ptr +=1
@@ -557,28 +561,57 @@ def main():
             if sum_j_plus1 - sum_j ==1:
                 active.append( list_c[j] )
     active.sort()
-    print( ''.join( t[i] for i in active ) )
+    print( ''.join( t[i] for i in active ) , file=output_stream)
 
-if __name__ == "__main__":
-    main()
 
-Testing this code against the first sample:
 
-Sample Input 1:
+def test():
+    import io
 
-2
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+abacaba
+4
+1 a
+1 a
+1 c
+2 b
+""",
+            "output": \
+"""\
+baa
+""",
+        }, 
+    ]
 
-bac
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-3
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-2 a
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-1 b
+    print('Tests passed 😎')
 
-2 c
 
-The code should output 'acb' which matches the sample.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case: sample 2.
 

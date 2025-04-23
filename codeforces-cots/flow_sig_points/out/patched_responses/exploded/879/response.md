@@ -249,23 +249,147 @@ Yes. For example, after deleting i=1, the next scan starts from i=1 again (since
 
 So this code correctly finds the first occurrence each time.
 
-Testing the code with the examples.
+Testing against sample input 1.
 
-First example:
+```python
+def main(input_stream, output_stream):
+    vowels = {'a', 'e', 'i', 'o', 'u', 'y'}
+    s = input_stream.readline().rstrip("\n").strip()
+    current = list(s)
+    modified = True
+    while modified:
+        modified = False
+        for i in range(1, len(current)):
+            if current[i] in vowels and current[i-1] in vowels:
+                del current[i]
+                modified = True
+                break
+    print(''.join(current), file=output_stream)
 
-Input:
 
-5
 
-weird
+def test():
+    import io
 
-After processing, the code deletes the 'i' (index 2 in the original list). So output 'werd'.
-
-Second example:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
+word
+""",
+            "output": \
+"""\
+word
+""",
+        }, 
+    ]
 
-word → no consecutive vowels. The code doesn't modify anything. Output is 'word'.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 49, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 42, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: 'word'
+Got: '4'
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    vowels = {'a', 'e', 'i', 'o', 'u', 'y'}
+    s = input_stream.readline().rstrip("\n").strip()
+    current = list(s)
+    modified = True
+    while modified:
+        modified = False
+        for i in range(1, len(current)):
+            if current[i] in vowels and current[i-1] in vowels:
+                del current[i]
+                modified = True
+                break
+    print(''.join(current), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+aaeaa
+""",
+            "output": \
+"""\
+a
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 49, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 42, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: 'a'
+Got: '5'
+
+```
 
 Third example: 'aaeaa' → output is 'a'.
 

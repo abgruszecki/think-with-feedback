@@ -1361,33 +1361,71 @@ print(bags)
 
 So this approach handles the cases correctly.
 
-Testing the second example:
+Testing against sample input 2.
 
-n=5, k=1. a_i=1e9 each.
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    bags = 0
+    carry_in = 0
 
-For each day i from 0 to 3 (n-1=4, 0-based):
+    for i in range(n - 1):
+        ai = a[i]
+        carry_over = min(ai, k - 1)
+        s = ai - carry_over
+        sum_disposed = carry_in + s
+        bags += (sum_disposed + k - 1) // k
+        carry_in = carry_over
 
-carry_over = min(1e9, 0) →0.
+    sum_last = carry_in + a[-1]
+    bags += (sum_last + k - 1) // k
+    print(bags, file=output_stream)
 
-s=1e9 -0=1e9.
 
-sum_disposed=carry_in +1e9.
 
-carry_in starts at 0.
+def test():
+    import io
 
-Day0: sum_disposed=0 +1e9=1e9. bags +=1e9. carry_in=0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2
+1 0 1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-Day1: sum_disposed=0+1e9=1e9. bags +=1e9. carry_in=0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Day2: same. bags +=1e9.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Day3: same. bags +=1e9.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Last day (day4):
+    print('Tests passed 😎')
 
-sum_disposed=0+1e9=1e9. bags +=1e9.
 
-Total 5e9. Correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, this algorithm seems to work.
 

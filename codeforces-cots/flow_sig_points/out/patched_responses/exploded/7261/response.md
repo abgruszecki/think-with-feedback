@@ -707,26 +707,63 @@ Read all lines at once.
 
 But the code should work with:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import deque
 
-n, b = map(int, sys.stdin.readline().split())
 
-queries = [tuple(map(int, sys.stdin.readline().split())) for _ in range(n)]
+def main(input_stream, output_stream):
+    n, b = map(int, input_stream.readline().split())
 
-current_end = 0
+    queries = [tuple(map(int, input_stream.readline().split())) for _ in range(n)]
 
-queue = deque()
+    current_end = 0
 
-results = [-1] * n
+    queue = deque()
 
-for i in range(n):
+    results = [-1] * n
 
-    ti, di = queries[i]
+    for i in range(n):
 
-    # process queue until current_end > ti or queue is empty
+        ti, di = queries[i]
 
-    while queue and current_end <= ti:
+        # process queue until current_end > ti or queue is empty
+
+        while queue and current_end <= ti:
+
+            q_di, q_idx = queue.popleft()
+
+            current_end += q_di
+
+            results[q_idx] = current_end
+
+        # handle new query
+
+        if current_end <= ti and not queue:
+
+            # process immediately
+
+            current_end = ti + di
+
+            results[i] = current_end
+
+        else:
+
+            # check if queue is not full
+
+            if len(queue) < b:
+
+                queue.append( (di, i) )
+
+            else:
+
+                results[i] = -1
+
+    # process remaining queries in the queue
+
+    while queue:
 
         q_di, q_idx = queue.popleft()
 
@@ -734,49 +771,56 @@ for i in range(n):
 
         results[q_idx] = current_end
 
-    # handle new query
+    print(' '.join(map(str, results)), file=output_stream)
 
-    if current_end <= ti and not queue:
 
-        # process immediately
 
-        current_end = ti + di
+def test():
+    import io
 
-        results[i] = current_end
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 1
+2 8
+4 8
+10 9
+15 2
+""",
+            "output": \
+"""\
+10 18 27 -1
+""",
+        }, 
+    ]
 
-    else:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-        # check if queue is not full
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-        if len(queue) < b:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-            queue.append( (di, i) )
+    print('Tests passed 😎')
 
-        else:
 
-            results[i] = -1
+if __name__ == '__main__':
+    test()
 
-# process remaining queries in the queue
 
-while queue:
+```
 
-    q_di, q_idx = queue.popleft()
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-    current_end += q_di
+```
 
-    results[q_idx] = current_end
-
-print(' '.join(map(str, results)))
-
-Yes, this should work.
-
-Testing the first sample:
-
-After processing query4 (ti=19), the queue has (1,4). The for loop ends, then the while loop processes it: current_end becomes 21+1=22. So results[4] =22.
-
-Which matches the sample.
-
-Thus, the code should be correct.
 </think>
 
 ```python

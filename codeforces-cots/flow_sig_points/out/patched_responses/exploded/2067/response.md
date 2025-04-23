@@ -230,50 +230,66 @@ Another case: when the sequence enters a cycle immediately. Like r0=0, a=0, b=0.
 
 Now, code in Python:
 
-a, b, m, r0 = map(int, input().split())
+Testing against sample input 2.
 
-seen = {}
-current = r0
-seen[current] = 0
+```python
+def main(input_stream, output_stream):
+    a, b, m, r0 = map(int, input_stream.readline().rstrip("\n").split())
 
-for step in range(1, m + 1):
-    current = (a * current + b) % m
-    if current in seen:
-        print(step - seen[current])
-        exit()
-    seen[current] = step
+    seen = {}
+    current = r0
+    seen[current] = 0
 
-This should work.
+    for step in range(1, m + 1):
+        current = (a * current + b) % m
+        if current in seen:
+            print(step - seen[current], file=output_stream)
+            return
+        seen[current] = step
 
-Testing the third example:
 
-a=3, b=6, m=81, r0=9.
 
-seen starts with 9:0.
+def test():
+    import io
 
-step1: 3*9+6=33 mod81=33 → add 33:1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 6 81 9
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-step2: 3*33 +6=105 mod81=105 - 81=24 → add 24:2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-step3: 3*24 +6=78 → mod81 is 78 → add 78:3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-step4: 3*78 +6=240 → 240 mod81. 81*2=162, 240-162=78. Now, current is 78, which is in seen at step3. step4 (current step is4) → 4-3=1. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So the code works.
+    print('Tests passed 😎')
 
-Another test case from the second example:
 
-a=2, b=3, m=5, r0=1.
+if __name__ == '__main__':
+    test()
 
-r0=1 → step0.
 
-step1: 2*1+3=5 mod5=0 → add 0:1.
+```
 
-step2: 2*0+3=3 mod5=3 → add3:2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-step3: 2*3+3=9 mod5=4 → add4:3.
-
-step4: 2*4+3=11 mod5=1 → current is1. Now, 1 is in seen at step0. So 4-0=4. Correct.
+```
 
 Yes.
 

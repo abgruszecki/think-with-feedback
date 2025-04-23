@@ -778,109 +778,97 @@ But in Python, tuples are hashable. So, for each state, we convert the list of t
 
 So, the code would look something like this:
 
+Testing against sample input 1.
+
+```python
 from collections import deque
 
-n = int(input())
-cards = input().split()
 
-queue = deque()
-queue.append( tuple(cards) )
-visited = set()
-visited.add( tuple(cards) )
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    cards = input_stream.readline().rstrip("\n").split()
 
-while queue:
-    current = queue.popleft()
-    x = len(current)
-    if x == 1:
-        print("YES")
-        exit()
-    # Check possible moves
-    # Move 1: merge x-1 (1-based) -> 0-based x-2
-    if x >= 2:
-        # Check if current[-1] matches current[-2]
-        if current[-1][0] == current[-2][0] or current[-1][1] == current[-2][1]:
-            # new state is current[0 ... x-2-1] + [current[x-1]]
-            new_list = list(current[:-2]) + [current[-1]]
-            new_state = tuple(new_list)
-            if new_state not in visited:
-                visited.add(new_state)
-                queue.append(new_state)
-    # Move 2: merge x-3 (1-based) -> 0-based x-4 (since x-3-1= x-4-1? No, 1-based x-3 is 0-based x-4)
-    if x >=4:
-        # Check if current[-1] matches current[-4]
-        if current[-1][0] == current[-4][0] or current[-1][1] == current[-4][1]:
-            # new_list = current[0 : x-4] + [current[x-1]] + current[x-3 : x-1]
-            # in 0-based terms, current[x-4+0 ...x-4] (current[0 : x-4]) is current[:x-4]
-            # current[x-3 : x-1] is current[x-4 :x-1-1] (since x-3 is x-4 in 0-based)
-            new_list = list(current[:x-4]) + [current[-1]] + list(current[x-3 : x-1])
-            new_state = tuple(new_list)
-            if new_state not in visited:
-                visited.add(new_state)
-                queue.append(new_state)
+    queue = deque()
+    queue.append( tuple(cards) )
+    visited = set()
+    visited.add( tuple(cards) )
 
-print("NO")
+    while queue:
+        current = queue.popleft()
+        x = len(current)
+        if x == 1:
+            print("YES", file=output_stream)
+            return
+        # Check possible moves
+        # Move 1: merge x-1 (1-based) -> 0-based x-2
+        if x >= 2:
+            # Check if current[-1] matches current[-2]
+            if current[-1][0] == current[-2][0] or current[-1][1] == current[-2][1]:
+                # new state is current[0 ... x-2-1] + [current[x-1]]
+                new_list = list(current[:-2]) + [current[-1]]
+                new_state = tuple(new_list)
+                if new_state not in visited:
+                    visited.add(new_state)
+                    queue.append(new_state)
+        # Move 2: merge x-3 (1-based) -> 0-based x-4 (since x-3-1= x-4-1? No, 1-based x-3 is 0-based x-4)
+        if x >=4:
+            # Check if current[-1] matches current[-4]
+            if current[-1][0] == current[-4][0] or current[-1][1] == current[-4][1]:
+                # new_list = current[0 : x-4] + [current[x-1]] + current[x-3 : x-1]
+                # in 0-based terms, current[x-4+0 ...x-4] (current[0 : x-4]) is current[:x-4]
+                # current[x-3 : x-1] is current[x-4 :x-1-1] (since x-3 is x-4 in 0-based)
+                new_list = list(current[:x-4]) + [current[-1]] + list(current[x-3 : x-1])
+                new_state = tuple(new_list)
+                if new_state not in visited:
+                    visited.add(new_state)
+                    queue.append(new_state)
 
-But wait, when merging into x-1 (1-based), which is the previous pile, the new list is current[:-2] + [current[-1]].
+    print("NO", file=output_stream)
 
-Wait, no. For example, if current is a list of 4 elements, merging into x-1 (3rd element) would result in a list that is current[0..x-2-1] (x=4, x-2-1=1) → elements 0 and 1, then current[x-1] (element 3). So the new list is elements 0,1,3. But the original list is [0, 1, 2, 3].
 
-So current[:-2] is elements 0 and 1 (since -2 is 2, so elements before 2). Then add current[-1] (element 3).
 
-Yes, this is correct.
+def test():
+    import io
 
-For merging into x-3 (1-based), which is x-4 in 0-based:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+3S 2C
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-For example, x=4 (current has 4 elements). x-4=0. So new_list is current[:0] (empty) + [current[3]] + current[1:3] (since x-3 is 1 in 0-based, and x-1 is 3, so current[x-3:x-1] is current[1:3] → elements 1 and 2. So new_list is [3] + [1,2], which is [3,1,2] → length 3. Which is correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So, in code:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-new_list = current[:x-4] + [current[-1]] + current[x-3 : x-1]
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But in Python, current[x-3 : x-1] is a slice from index x-3 to x-2 (since x-1 is exclusive). For x=4, x-3=1, x-1=3. So the slice is 1:3 → elements 1 and 2.
+    print('Tests passed 😎')
 
-Yes, this is correct.
 
-So, the code should correctly generate the new states.
+if __name__ == '__main__':
+    test()
 
-Now, let's test this code with the first sample input:
 
-Sample Input 1:
+```
 
-4
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-2S 2S 2C 2C
-
-Initial state: ('2S', '2S', '2C', '2C').
-
-Possible moves:
-
-Merge into x-1 (4-1=3, 1-based). Check if current[-1] (2C) and current[-2] (2C) match. Yes. So new_list is current[:-2] + [current[-1]] → ['2S', '2S'] + ['2C'] → ('2S', '2S', '2C').
-
-Alternatively, merging into x-3 (4-3=1, 1-based). current[-4] is '2S'. current[-1] is '2C'. Do they match in value or suit? 2C and 2S: value 2 is same. So yes. new_list is current[:0] (empty) + ['2C'] + current[1:3] → '2C', '2S', '2C' → ('2C', '2S', '2C').
-
-So the queue after the initial state will have these two new states.
-
-Then, processing the first state ('2S', '2S', '2C'):
-
-x=3. Possible moves:
-
-Merge into x-1 (3-1=2, 1-based). Check current[-2] (2S) and current[-1] (2C). They have value 2. So merge. new_list is ['2S'] + ['2C'] → ('2S', '2C').
-
-Another move is x-3=0, which is invalid (x=3 <4). So only one move possible.
-
-Adding ('2S', '2C') to the queue.
-
-Processing ('2C', '2S', '2C'):
-
-x=3. Merge into x-1 (3-1=2). current[-2] is '2S', current[-1] is '2C'. Value is 2. So merged. new_list is ['2C'] + ['2C'] → ('2C', '2C').
-
-Then, when processing ('2S', '2C'):
-
-x=2. Merge into x-1 (2-1=1). current[-2] '2S' and current[-1] '2C'. Value 2. So merge. new_list is ['2C'] → which is length 1. So output is YES.
-
-Thus, the code should handle the first sample correctly.
-
-Now, the code seems to be correct. But will it handle the constraints for n=52?
+```
 
 The time and memory constraints are tight. For n=52, the BFS could have a lot of states. However, the problem's time limit is 2 seconds, which is 2,000 milliseconds. Python is relatively slow, but perhaps for the given constraints, the code can pass.
 

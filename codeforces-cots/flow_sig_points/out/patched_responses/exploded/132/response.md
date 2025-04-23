@@ -467,93 +467,185 @@ So perhaps, instead of tracking the total, we can just return len(candles) at th
 
 So, the code can be modified as:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-m, t, r = map(int, input().split())
-ghosts = list(map(int, input().split()))
 
-if r > t:
-    print(-1)
-    exit()
+def main(input_stream, output_stream):
+    m, t, r = map(int, input_stream.readline().rstrip("\n").split())
+    ghosts = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-candles = []
+    if r > t:
+        print(-1, file=output_stream)
+        return
 
-for wi in ghosts:
-    start = wi - t
-    end = wi -1
+    candles = []
 
-    left = bisect.bisect_left(candles, start)
-    right = bisect.bisect_right(candles, end)
-    count = right - left
+    for wi in ghosts:
+        start = wi - t
+        end = wi -1
 
-    needed = r - count
-    if needed <=0:
-        continue
+        left = bisect.bisect_left(candles, start)
+        right = bisect.bisect_right(candles, end)
+        count = right - left
 
-    added = 0
-    current_pos = end
-    while added < needed and current_pos >= start:
-        idx = bisect.bisect_left(candles, current_pos)
-        if idx < len(candles) and candles[idx] == current_pos:
-            current_pos -=1
+        needed = r - count
+        if needed <=0:
             continue
-        bisect.insort(candles, current_pos)
-        added +=1
-        current_pos -=1
 
-    if added < needed:
-        print(-1)
-        exit()
+        added = 0
+        current_pos = end
+        while added < needed and current_pos >= start:
+            idx = bisect.bisect_left(candles, current_pos)
+            if idx < len(candles) and candles[idx] == current_pos:
+                current_pos -=1
+                continue
+            bisect.insort(candles, current_pos)
+            added +=1
+            current_pos -=1
 
-print(len(candles))
+        if added < needed:
+            print(-1, file=output_stream)
+            return
 
-This should work.
+    print(len(candles), file=output_stream)
 
-Testing the sample inputs:
 
-Sample 1:
 
-Input:
-1 8 3
-10
+def test():
+    import io
 
-Processing wi=10:
-
-start=10-8=2, end=9.
-
-candles is empty. count=0. needed=3.
-
-Add 9: inserted. candles becomes [9]. added=1.
-
-current_pos=8. Check: not in candles. inserted. candles becomes [8,9]. added=2.
-
-current_pos=7: inserted. candles becomes [7,8,9]. added=3. done.
-
-Total candles is 3. Correct.
-
-Sample 2:
-
-Input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2 10 1
 5 8
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-Check t >=r (10 >=1 → yes).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing first wi=5:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-start=5-10= -5, end=4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-candles is empty. needed=1.
+    print('Tests passed 😎')
 
-Add 4. candles = [4].
 
-Next ghost wi=8:
+if __name__ == '__main__':
+    test()
 
-start=8-10= -2, end=7.
 
-Check candles in [-2,7]. The candles list has 4. So count=1. needed=0. proceed.
+```
 
-Total candles is 1. Correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import bisect
+
+
+def main(input_stream, output_stream):
+    m, t, r = map(int, input_stream.readline().rstrip("\n").split())
+    ghosts = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    if r > t:
+        print(-1, file=output_stream)
+        return
+
+    candles = []
+
+    for wi in ghosts:
+        start = wi - t
+        end = wi -1
+
+        left = bisect.bisect_left(candles, start)
+        right = bisect.bisect_right(candles, end)
+        count = right - left
+
+        needed = r - count
+        if needed <=0:
+            continue
+
+        added = 0
+        current_pos = end
+        while added < needed and current_pos >= start:
+            idx = bisect.bisect_left(candles, current_pos)
+            if idx < len(candles) and candles[idx] == current_pos:
+                current_pos -=1
+                continue
+            bisect.insort(candles, current_pos)
+            added +=1
+            current_pos -=1
+
+        if added < needed:
+            print(-1, file=output_stream)
+            return
+
+    print(len(candles), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 1 3
+10
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

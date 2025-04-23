@@ -591,120 +591,102 @@ Yes.
 
 So code:
 
-count = [0] * 30001
+Testing against sample input 1.
 
-n, d = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    count = [0] * 30001
 
-for _ in range(n):
-    p = int(input())
-    count[p] += 1
+    n, d = map(int, input_stream.readline().rstrip("\n").split())
 
-dp = [dict() for _ in range(30001)]
+    for _ in range(n):
+        p = int(input_stream.readline().rstrip("\n"))
+        count[p] += 1
 
-initial_gem = count[0] + count[d]
+    dp = [dict() for _ in range(30001)]
 
-dp[d][d] = initial_gem
+    initial_gem = count[0] + count[d]
 
-max_gem = initial_gem
+    dp[d][d] = initial_gem
 
-for x in range(d, 30001):
-    if not dp[x]:
-        continue
-    for l in list(dp[x].keys()):  # Iterate over a copy to avoid modifying during iteration
-        current_gem = dp[x][l]
-        # Generate next_l's
-        for delta in (-1, 0, 1):
-            next_l = l + delta
-            if next_l <= 0:
-                continue
-            next_pos = x + next_l
-            if next_pos > 30000:
-                continue
-            new_gem = current_gem + count[next_pos]
-            if new_gem > max_gem:
-                max_gem = new_gem
-            # Update dp[next_pos] if new_gem is better
-            if next_l in dp[next_pos]:
-                if dp[next_pos][next_l] < new_gem:
+    max_gem = initial_gem
+
+    for x in range(d, 30001):
+        if not dp[x]:
+            continue
+        for l in list(dp[x].keys()):  # Iterate over a copy to avoid modifying during iteration
+            current_gem = dp[x][l]
+            # Generate next_l's
+            for delta in (-1, 0, 1):
+                next_l = l + delta
+                if next_l <= 0:
+                    continue
+                next_pos = x + next_l
+                if next_pos > 30000:
+                    continue
+                new_gem = current_gem + count[next_pos]
+                if new_gem > max_gem:
+                    max_gem = new_gem
+                # Update dp[next_pos] if new_gem is better
+                if next_l in dp[next_pos]:
+                    if dp[next_pos][next_l] < new_gem:
+                        dp[next_pos][next_l] = new_gem
+                else:
                     dp[next_pos][next_l] = new_gem
-            else:
-                dp[next_pos][next_l] = new_gem
 
-print(max_gem)
+    print(max_gem, file=output_stream)
 
-But wait, this code initializes dp as a list of 30001 dictionaries. For each x from d to 30000, it processes the l's in dp[x]. For each l, it generates next_l's and updates the next_pos's dictionary.
 
-But there's a problem: when processing x, the next_pos could be larger than x, but when x reaches next_pos, the code will process it. So this should be correct.
 
-But in the code above, when we process x in a loop from d to 30000, we process each x once. For each x, we process all l's in its dictionary, generate the next_pos and update their dictionaries.
+def test():
+    import io
 
-The code also tracks the max_gem as it processes each state.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 8
+9
+19
+28
+36
+45
+55
+66
+78
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-This should work.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But what about the order of processing x? Since the loop processes x in order from d to 30000, and next_pos is x + next_l (which is larger than x), the next_pos will be processed in future iterations.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But the code is designed to process x in increasing order. So when x is processed, all possible transitions from x are handled, and the next_pos's dictionaries are updated.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Now, let's test the first sample input:
+    print('Tests passed 😎')
 
-Sample Input 1:
 
-4 10
+if __name__ == '__main__':
+    test()
 
-10
 
-21
+```
 
-27
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-27
-
-count[10] is 1, count[21] is 1, count[27] is 2.
-
-initial_gem = 0 +1 =1.
-
-dp[10][10] =1.
-
-max_gem is 1.
-
-Processing x=10:
-
-l=10.
-
-Generate next_l 9, 10, 11.
-
-next_pos is 19,20,21.
-
-new_gem is 1+count[19] =1+0=1; 1+0=1; 1+1=2.
-
-So dp[19][9] =1, dp[20][10]=1, dp[21][11]=2. max_gem is now 2.
-
-Processing x=19:
-
-l=9.
-
-next_l 8,9,10. next_pos=27, 28,29.
-
-new_gem for 27 is 1+2=3. So max_gem becomes 3.
-
-dp[27][8] =3.
-
-Other next_pos's have new_gem=1+0=1.
-
-Processing x=20: no entries (since dp[20] may have entries, but in this sample, it's not used.
-
-Processing x=21:
-
-l=11. next_l 10,11,12. next_pos=31, 32,33. These are all beyond 3e4, but next_pos=21+10=31 >3e4, so skipped.
-
-So no updates.
-
-Processing x=27:
-
-l=8. next_l 7,8,9. next_pos=27+7=34, 27+8=35, 27+9=36. count[34] is 0, so new_gem=3+0=3. So no updates. max_gem remains 3.
-
-So the code outputs 3, which is correct.
+```
 
 The code seems to handle this correctly.
 

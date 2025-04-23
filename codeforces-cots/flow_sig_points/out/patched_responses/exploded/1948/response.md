@@ -522,30 +522,6 @@ total_S=3+5=8.
 
 result=(3*4 -8) mod 1e9+7 → (12-8)=4 →4.
 
-Sample 2: n=4, m=4.
-
-k=2.
-
-sum_part1: i=1,2. 1*4=4, 2*2=4. sum_part1=8.
-
-q_max=4//3=1.
-
-q=1:
-
-L=4//2 +1=2+1=3.
-
-R=4//1=4.
-
-L_adj=3, R_adj=4.
-
-sum_i=(3+4)*2//2=7*2//2=7.
-
-sum_part2=7*1=7.
-
-total_S=8+7=15.
-
-result=16-15=1.
-
 Sample 3: n=1, m=1.
 
 m_prime=1.
@@ -1006,175 +982,97 @@ But sum_part1's code is now optimized.
 
 Thus, the code can be rewritten as:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n, m = map(int, input().split())
 
-MOD = 10**9 +7
-
-m_prime = min(m, n)
-
-if m_prime ==0:
-
-   print(0)
-
-   exit()
-
-k = math.isqrt(n)
-
-sum_part1 =0
-
-i =1
-
-upper_i = min(k, m_prime)
-
-while i <= upper_i:
-
-   q = n //i
-
-   max_j = n // q
-
-   max_j = min(max_j, upper_i)
-
-   sum_i = q * (i + max_j) * (max_j -i +1) //2
-
-   sum_part1 += sum_i
-
-   i = max_j +1
-
-sum_part1 %= MOD  # Not needed, but to prevent overflow.
-
-sum_part2 =0
-
-q_max = n // (k +1)
-
-# For part2, iterate q from 1 to q_max.
-
-q =1
-
-while q <= q_max:
-
-   L = (n // (q+1)) +1
-
-   R = n // q
-
-   L_adj = max(L, k+1)
-
-   R_adj = min(R, m_prime)
-
-   if L_adj > R_adj:
-
-       q +=1
-
-       continue
-
-   # sum_i is (L_adj + R_adj) * (R_adj - L_adj +1) //2
-
-   sum_i = (L_adj + R_adj) * (R_adj - L_adj +1) //2
-
-   sum_part2 += q * sum_i
-
-   q +=1
-
-sum_part2 %= MOD
-
-total_S = (sum_part1 + sum_part2) % MOD
-
-result = ( (n * m - total_S) % MOD + MOD ) % MOD
-
-print(result)
-
-But in part2's code, the loop is still O(q_max) steps, which can be 3e6 steps. Which is too slow for Python.
-
-Wait, but in part2's code, q is from 1 to q_max. But q_max is n//(k+1) = 1e13 // (3e6 +1) ≈ 3e6. So the loop is 3e6 steps, which is too slow in Python.
-
-Thus, part2 also needs to be optimized using a group-based approach.
-
-The group-based approach for part2:
-
-For part2, the code is summing q * sum_i for i in [L_adj, R_adj], where L and R are functions of q.
-
-But the code currently loops over each q from 1 to q_max. But this is O(q_max) steps.
-
-But perhaps we can find ranges of q where L and R are the same or change in a predictable way.
-
-Alternatively, we can group q's where the corresponding R_adj and L_adj form a contiguous range.
-
-But I'm not sure.
-
-Alternative idea: for part2, the code can compute the sum in a way similar to part1, by iterating over possible q's in groups where certain parameters are fixed.
-
-But it's not clear how to do this.
-
-Alternatively, notice that for part2, the i's are in [k+1, m_prime], and floor(n/i) = q. The q for these i's ranges from 1 to q_max = floor(n/(k+1)).
-
-For each q, the i's are in [L, R] where L = floor(n/(q+1)) +1 and R = floor(n/q).
-
-But when q decreases, L and R may increase.
-
-But how to find all possible q's and their ranges.
-
-Another approach: for part2, iterate over possible i's in [k+1, m_prime], but in groups where floor(n/i) is the same.
-
-But how to find these groups.
-
-For example, for i in [k+1, m_prime], the value of q = floor(n/i). For each possible q, find the range of i's that give this q.
-
-But since i is >=k+1, q is <= floor(n/(k+1)) = q_max.
-
-Thus, for part2, the code can iterate over possible q's from 1 to q_max, and for each q, compute the valid i's and their sum.
-
-But this is what the code currently does.
-
-So the code for part2 is already grouped by q. The number of q's is q_max, which is O(sqrt(n)).
-
-But for n=1e13, q_max is 3e6. So 3e6 iterations in part2.
-
-Which is manageable.
-
-But in Python, a loop of 3e6 steps may take too long.
-
-Alternative idea: precompute all possible q's and their ranges, and vectorize the operations.
-
-But in Python, it's not possible to vectorize this loop.
-
-Thus, perhaps the only way to proceed is to accept that the code will be accepted for the given time constraints, given that part1 is optimized using group-based approach.
-
-Let's check the code with part1 optimized.
-
-For n=1e13, part1's loop will have O(sqrt(n)) groups. For example, each group can have a range of i's where q is the same. The number of groups is O(2*sqrt(n)), which for n=1e13 is 2e6 groups. Each group is handled in O(1) steps. So part1's loop would have 2e6 steps.
-
-Similarly, part2's loop would have 3e6 steps. But in Python, 5e6 steps with simple operations would take around 1 second.
-
-But let's test the code.
-
-Sample 1: n=3, m=4.
-
-sum_part1:
-
-i=1, q=3. max_j = min(3//3=1, 1) →1. sum_i=3*(1+1)*1//2=3. i=2.
-
-Loop ends. sum_part1=3.
-
-sum_part2: q_max=3//2=1.
-
-q=1:
-
-L=(3//2)+1=1+1=2.
-
-R=3//1=3.
-
-L_adj=2, R_adj=3.
-
-sum_i= (2+3)*2//2=5.
-
-sum_part2=5.
-
-Thus, same as before.
-
-Thus, the code works.
-
-Thus, the code with part1 optimized using group-based approach and part2 using loop over q is correct.
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    MOD = 10**9 + 7
+
+    m_prime = min(m, n)
+    if m_prime == 0:
+        print(0, file=output_stream)
+        return
+
+    k = math.isqrt(n)
+    sum_part1 = 0
+    upper_i = min(k, m_prime)
+    i = 1
+
+    while i <= upper_i:
+        q = n // i
+        max_j = n // q
+        max_j = min(max_j, upper_i)
+        count = max_j - i + 1
+        sum_i = q * (i + max_j) * count // 2
+        sum_part1 += sum_i
+        i = max_j + 1
+
+    sum_part2 = 0
+    q_max = n // (k + 1) if k + 1 != 0 else 0
+    q = 1
+
+    while q <= q_max:
+        L = (n // (q + 1)) + 1
+        R = n // q
+        L_adj = max(L, k + 1)
+        R_adj = min(R, m_prime)
+        if L_adj <= R_adj:
+            count = R_adj - L_adj + 1
+            sum_i = (L_adj + R_adj) * count // 2
+            sum_part2 += q * sum_i
+        q += 1
+
+    total_S = (sum_part1 + sum_part2) % MOD
+    result = (n * m - total_S) % MOD
+    print(result if result >= 0 else result + MOD, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, the final code is as follows.
 </think>

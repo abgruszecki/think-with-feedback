@@ -517,74 +517,92 @@ Yes.
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import itertools
 
-n = int(input())
-cubes = []
-for _ in range(n):
-    faces = list(map(int, input().split()))
-    cubes.append(set(faces))
 
-max_possible = 10**n -1
-ans = 0
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    cubes = []
+    for _ in range(n):
+        faces = list(map(int, input_stream.readline().rstrip("\n").split()))
+        cubes.append(set(faces))
 
-for x in range(1, max_possible +1):
-    s = str(x)
-    k = len(s)
-    if k > n:
-        break  # can't form x, since need more cubes than available
-    digits = list(map(int, s))
-    # check all permutations of k cubes from n
-    found = False
-    for perm in itertools.permutations(range(n), k):
-        valid = True
-        for i in range(k):
-            cube_idx = perm[i]
-            if digits[i] not in cubes[cube_idx]:
-                valid = False
+    max_possible = 10**n -1
+    ans = 0
+
+    for x in range(1, max_possible +1):
+        s = str(x)
+        k = len(s)
+        if k > n:
+            break  # can't form x, since need more cubes than available
+        digits = list(map(int, s))
+        # check all permutations of k cubes from n
+        found = False
+        for perm in itertools.permutations(range(n), k):
+            valid = True
+            for i in range(k):
+                cube_idx = perm[i]
+                if digits[i] not in cubes[cube_idx]:
+                    valid = False
+                    break
+            if valid:
+                found = True
                 break
-        if valid:
-            found = True
+        if not found:
             break
-    if not found:
-        break
-    ans = x
+        ans = x
 
-print(ans)
+    print(ans, file=output_stream)
 
-This code should work.
 
-Testing the first sample:
 
-Cubes are:
+def test():
+    import io
 
-Cube0: {0,1,2,3,4,5}
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+0 1 3 5 6 8
+1 2 4 5 7 8
+2 3 4 6 7 9
+""",
+            "output": \
+"""\
+98
+""",
+        }, 
+    ]
 
-Cube1: {0,1,6,7,8,9}
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Cube2: {2,3,4,5,6,7}
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-When x=88, digits are [8,8]. k=2. Need two cubes.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Check all permutations of 2 cubes:
+    print('Tests passed 😎')
 
-Possible permutations are all 2-length permutations of 0,1,2.
 
-For each:
+if __name__ == '__main__':
+    test()
 
-(0,1): cube0 and cube1. digits[0]=8 → cube0 doesn't have 8. invalid.
 
-(0,2): cube0 (no 8). invalid.
+```
 
-(1,0): cube1 (has 8), cube0 (digits[1]=8? cube0 has no 8. invalid.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-(1,2): cube1 (8) first, cube2 (digits[1] is 8? cube2 has 6,7, etc. No. invalid.
-
-(2,0): cube2 (digits[0] is 8? cube2 has 2,3,4,5,6,7. No. invalid.
-
-(2,1): cube2 (no 8). invalid.
-
-So no permutation is valid. Thus, code breaks and returns 87.
+```
 
 Second sample:
 

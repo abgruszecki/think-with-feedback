@@ -684,145 +684,91 @@ In Python, for n=2e5, creating a list of size n+1 is acceptable.
 
 Now, code outline:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-dp = [0] * (n+2)
-prefix = [0] * (n+2)
-dp[1] = 1
-prefix[1] = 1
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-for x in range(2, n+1):
-    subtraction = prefix[x-1]
-    
-    division = 0
-    sqrt_x = int(x**0.5)
-    # Part a: q <= sqrt_x
-    for q in range(1, sqrt_x +1):
-        q_plus_1 = q +1
-        lower = (x // q_plus_1) +1
-        lower = max(lower, 2)
-        upper = x // q
-        if upper >= lower:
-            division += (upper - lower +1) * dp[q]
-            division %= m
-    
-    # Part b: z <= sqrt_x (since z_max = x // (sqrt_x +1) which is <= sqrt_x)
-    z_max = x // (sqrt_x +1)
-    if z_max >=2:
-        for z in range(2, z_max +1):
-            q = x // z
-            if q > sqrt_x:  # since z <= sqrt_x, x/z >= x/sqrt_x = sqrt_x
-                division += dp[q]
+    dp = [0] * (n+2)
+    prefix = [0] * (n+2)
+    dp[1] = 1
+    prefix[1] = 1
+
+    for x in range(2, n+1):
+        subtraction = prefix[x-1]
+        
+        division = 0
+        sqrt_x = int(x**0.5)
+        # Part a: q <= sqrt_x
+        for q in range(1, sqrt_x +1):
+            q_plus_1 = q +1
+            lower = (x // q_plus_1) +1
+            lower = max(lower, 2)
+            upper = x // q
+            if upper >= lower:
+                division += (upper - lower +1) * dp[q]
                 division %= m
-    
-    division %= m
-    total = (subtraction + division) % m
-    dp[x] = total
-    prefix[x] = (prefix[x-1] + total) % m
+        
+        # Part b: z <= sqrt_x (since z_max = x // (sqrt_x +1) which is <= sqrt_x)
+        z_max = x // (sqrt_x +1)
+        if z_max >=2:
+            for z in range(2, z_max +1):
+                q = x // z
+                if q > sqrt_x:  # since z <= sqrt_x, x/z >= x/sqrt_x = sqrt_x
+                    division += dp[q]
+                    division %= m
+        
+        division %= m
+        total = (subtraction + division) % m
+        dp[x] = total
+        prefix[x] = (prefix[x-1] + total) % m
 
-print(dp[n] % m)
+    print(dp[n] % m, file=output_stream)
 
-Wait, but in part b, the condition q > sqrt_x may not be necessary. Because for part b, we are processing z in 2 to z_max, which is x//(sqrt_x +1). For example, if x=100, sqrt_x=10. x//(10+1) =9. So z ranges from 2 to9.
 
-x/z for z=2 is50, which is >10.
 
-Yes. So for part b, all the q's are > sqrt_x. So the condition can be removed.
+def test():
+    import io
 
-But why? Because z is in 2 to z_max, which is x//(sqrt_x+1). Let's see:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 998244353
+""",
+            "output": \
+"""\
+25
+""",
+        }, 
+    ]
 
-x//(sqrt_x+1) is floor(x/(sqrt_x +1)). For z in [2, ..., z_max], we have z <= x/(sqrt_x+1).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Thus, x/z >= (x) / (x/(sqrt_x+1)) ) → sqrt_x +1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So q= floor(x/z) >= floor(sqrt_x +1) → since sqrt_x is the integer part of sqrt(x), sqrt_x +1 could be larger than sqrt(x), but q is at least sqrt_x+1. But since sqrt_x is the floor of sqrt(x), sqrt_x+1 is greater than sqrt(x).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Wait, for example, x=10, sqrt_x=3, sqrt_x+1=4. So x/(sqrt_x+1) =10/4=2.5 → z_max=2. For z=2, x/z=5 → q=5, which is larger than sqrt_x=3.
+    print('Tests passed 😎')
 
-Yes. So in part b, all q's are larger than sqrt_x. So the condition is redundant. So in code, we can remove the if q>sqrt_x check.
 
-So the code for part b is:
+if __name__ == '__main__':
+    test()
 
-z_max = x // (sqrt_x +1)
 
-if z_max >=2:
+```
 
-    for z in range(2, z_max +1):
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-        q = x // z
-
-        division += dp[q]
-
-        division %=m
-
-Thus, the code is correct.
-
-Testing this code against the examples.
-
-First example:
-
-Input:
-
-3 998244353
-
-Output:5.
-
-Let's compute step by step:
-
-x=2:
-
-subtraction = prefix[1] =1.
-
-sqrt_x=1.
-
-part a:
-
-q=1:
-
-q_plus_1=2.
-
-lower = (2//2)+1=1+1=2.
-
-upper=2//1=2.
-
-count=2-2+1=1. So 1*dp[1] =1.
-
-division part a: 1.
-
-part b: z_max =2// (1+1) =2//2=1. So loop doesn't run.
-
-division sum is1.
-
-total=1+1=2. dp[2]=2.
-
-prefix[2] =1+2=3.
-
-x=3:
-
-subtraction=prefix[2]=3.
-
-sqrt_x=1 (sqrt(3)=1.732).
-
-part a:
-
-q=1:
-
-q_plus_1=2.
-
-lower=3//2 +1=1+1=2. max 2.
-
-upper=3//1=3.
-
-count=3-2+1=2. 2*dp[1] =2*1=2.
-
-division part a:2.
-
-part b: z_max=3//(1+1)=3//2=1. no loop.
-
-division sum is2.
-
-total=3+2=5 → dp[3]=5. Which matches the first example.
-
-So the code seems to handle it correctly.
+```
 
 Another example: input 5, output 25.
 

@@ -37,17 +37,64 @@ for each of the n lines:
 
 print(sum)
 
-Yes, that's it. Let's test with the sample inputs.
+Testing against sample input 1.
 
-First sample:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    total = 0
+    for _ in range(n):
+        x1, y1, x2, y2 = map(int, input_stream.readline().rstrip("\n").split())
+        w = x2 - x1 + 1
+        h = y2 - y1 + 1
+        total += w * h
+    print(total, file=output_stream)
 
-n=2
 
-Rectangles:
 
-1 1 2 3: x1=1, x2=2. width=2-1+1=2. y1=1, y2=3. height=3-1+1=3. area=6.
+def test():
+    import io
 
-Second rectangle: 2 2 3 3. x2- x1+1=3-2+1=2. y2 -y1+1=3-2+1=2. area 4. sum 6+4=10. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+1 1 3 3
+1 1 3 3
+""",
+            "output": \
+"""\
+18
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample: two rectangles each 3-1+1=3, 3-1+1=3. area 9 each. sum 18. Correct.
 

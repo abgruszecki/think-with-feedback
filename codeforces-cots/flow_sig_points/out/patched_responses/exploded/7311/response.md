@@ -186,29 +186,75 @@ Then, check if all characters are the same. For example, check if all characters
 
 So code steps:
 
-s = input().strip()
+Testing against sample inputs 1, 2.
 
-n = len(s)
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-if s != s[::-1]:
-    print(n)
-else:
-    if all(c == s[0] for c in s):
-        print(0)
+    n = len(s)
+
+    if s != s[::-1]:
+        print(n, file=output_stream)
     else:
-        print(n-1)
+        if all(c == s[0] for c in s):
+            print(0, file=output_stream)
+        else:
+            print(n-1, file=output_stream)
 
-Wait, but wait. What if the string is a palindrome, but all characters are the same except one in the middle. For example, "aaabaaa". Then, the entire string is a palindrome. Are all characters the same? No. So return n-1. Which is 6.
 
-Yes. And the substrings of length 6 would be "aaabaa" (positions 0-5) and "aabaaa" (positions 1-6). The first one: "aaabaa" — reverse is "aabaaa" — not same. So it's not a palindrome. So the answer is 6, which is correct.
 
-So this code should handle all cases.
+def test():
+    import io
 
-Now, let's test the sample inputs.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+wuffuw
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+        {
+            "input": \
+"""\
+qqqqqqqq
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Sample 1: "mew" — not a palindrome. Output 3. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample 2: "wuffuw" — is a palindrome. Check if all same? No. Output 5 (6-1=5). Correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3: "qqqqqqqq" — palindrome. All same. Output 0. Correct.
 

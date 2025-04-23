@@ -213,75 +213,145 @@ Find the maximum count.
 
 So, code:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
-b = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-pos_in_b = [0] * (n + 1)
-for j in range(n):
-    val = b[j]
-    pos_in_b[val] = j
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-delta_counts = [0] * n
-for i in range(n):
-    val_a = a[i]
-    j = pos_in_b[val_a]
-    delta = (j - i) % n
-    delta_counts[delta] += 1
+    pos_in_b = [0] * (n + 1)
+    for j in range(n):
+        val = b[j]
+        pos_in_b[val] = j
 
-max_count = max(delta_counts)
-print(max_count)
+    delta_counts = [0] * n
+    for i in range(n):
+        val_a = a[i]
+        j = pos_in_b[val_a]
+        delta = (j - i) % n
+        delta_counts[delta] += 1
 
-Yes, this should work.
+    max_count = max(delta_counts)
+    print(max_count, file=output_stream)
 
-Testing the first example:
 
-n=5.
 
-a = [1,2,3,4,5], which in code is read as [1,2,3,4,5].
+def test():
+    import io
 
-b = [2,3,4,5,1], so pos_in_b is:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+5 4 3 2 1
+1 2 3 4 5
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-pos_in_b[2] = 0
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-pos_in_b[3] =1
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-pos_in_b[4]=2
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-pos_in_b[5]=3
+    print('Tests passed 😎')
 
-pos_in_b[1]=4.
 
-Then for each i:
+if __name__ == '__main__':
+    test()
 
-i=0: a[i]=1, j=4. delta=(4-0) mod5=4. counts[4] +=1.
 
-i=1: a[i]=2, j=0. delta (0-1) mod5=4. counts[4] +=1.
+```
 
-Same for others. So all deltas are 4. counts[4] becomes 5. So max is 5.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Which is correct.
+```
 
-Second example:
+Testing against sample input 2.
 
-a is [5,4,3,2,1], which are the values. pos_in_b for b (1,2,3,4,5) is:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-pos_in_b[1] =0, 2=1, 3=2,4=3,5=4.
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-For each i:
+    pos_in_b = [0] * (n + 1)
+    for j in range(n):
+        val = b[j]
+        pos_in_b[val] = j
 
-i=0, a[i]=5. j=4. delta (4-0) mod5=4.
+    delta_counts = [0] * n
+    for i in range(n):
+        val_a = a[i]
+        j = pos_in_b[val_a]
+        delta = (j - i) % n
+        delta_counts[delta] += 1
 
-i=1, a[i]=4. j=3. delta 3-1=2.
+    max_count = max(delta_counts)
+    print(max_count, file=output_stream)
 
-i=2, a[i]=3. j=2. delta 0.
 
-i=3, a[i]=2. j=1. delta (1-3) mod5= -2 mod5=3.
 
-i=4, a[i]=1. j=0. delta (0-4) mod5=1.
+def test():
+    import io
 
-So counts for 4,2,0,3,1. All counts 1. Max is 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 3 2 4
+4 2 3 1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

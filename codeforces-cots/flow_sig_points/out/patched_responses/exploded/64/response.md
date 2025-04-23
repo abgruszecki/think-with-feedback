@@ -539,293 +539,230 @@ So the code needs to import sys and call sys.exit().
 
 So code should be modified:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-h, w = map(int, input().split())
 
-r = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    h, w = map(int, input_stream.readline().rstrip("\n").split())
 
-c = list(map(int, input().split()))
+    r = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-MOD = 10**9 +7
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-free = 0
+    MOD = 10**9 +7
 
-for i in range(1, h+1):
+    free = 0
 
-    for j in range(1, w+1):
+    for i in range(1, h+1):
 
-        ri = r[i-1]
+        for j in range(1, w+1):
 
-        if j <= ri:
+            ri = r[i-1]
 
-            r_val = 1
+            if j <= ri:
 
-        else:
-
-            if ri < w and j == ri +1:
-
-                r_val = 0
+                r_val = 1
 
             else:
 
-                r_val = None
+                if ri < w and j == ri +1:
 
-        cj = c[j-1]
+                    r_val = 0
 
-        if i <= cj:
+                else:
 
-            c_val = 1
+                    r_val = None
 
-        else:
+            cj = c[j-1]
 
-            if cj < h and i == cj +1:
+            if i <= cj:
 
-                c_val = 0
+                c_val = 1
 
             else:
 
-                c_val = None
+                if cj < h and i == cj +1:
 
-        if r_val is not None and c_val is not None:
+                    c_val = 0
 
-            if r_val != c_val:
+                else:
 
-                print(0)
+                    c_val = None
 
-                sys.exit()
+            if r_val is not None and c_val is not None:
 
-        if r_val is None and c_val is None:
+                if r_val != c_val:
 
-            free +=1
+                    print(0, file=output_stream)
 
-print(pow(2, free, MOD))
+                    sys.exit()
 
-But wait, in the code above, the loops are in 1-based indices. For example, i ranges from 1 to h inclusive. j ranges from 1 to w inclusive. For each i and j, the code accesses r[i-1] and c[j-1], which is correct because the lists are 0-based.
+            if r_val is None and c_val is None:
 
-Testing the first sample input:
+                free +=1
 
-Sample input 1:
+    print(pow(2, free, MOD), file=output_stream)
 
-3 4
 
-0 3 1
 
-0 2 3 0
+def test():
+    import io
 
-So h=3, w=4.
-
-r = [0, 3, 1]
-
-c = [0,2,3,0]
-
-Let's process each cell.
-
-For cell (1,1):
-
-i=1, j=1.
-
-ri = 0.
-
-j=1 <= ri (0): No. So else. ri is 0 <4? yes. j=0+1=1? yes. So r_val is 0.
-
-cj is c[0] =0.
-
-i=1 <=0? No. So else. cj=0 <3? yes. i=0+1=1. So c_val=0.
-
-So r_val and c_val are 0 and 0. No conflict. Not free. So no.
-
-Other cells:
-
-Let me think about row i=2, j=1.
-
-ri=3.
-
-j=1 <=3: yes. r_val=1.
-
-cj is c[0] (j=1 is first column, cj is 0).
-
-i=2 <=0? No. cj=0 <3 (h=3). i=0+1=1? 2 is not 1. So c_val is None.
-
-So row_val is 1, col_val is None. So cell must be 1. No problem.
-
-No conflict. Not free.
-
-Another example: cell (2,2).
-
-i=2, j=2.
-
-ri=3. j=2 <=3 → r_val=1.
-
-cj = c[1] (j=2-1=1? Wait, j runs from 1 to 4. So for j=2, c[j-1] is c[1]. In the sample input, c is [0,2,3,0].
-
-So for j=2, cj is 2.
-
-i=2 <=2 → yes. So column_val is 1.
-
-So r_val=1, c_val=1. No conflict.
-
-Another cell (2,4).
-
-i=2, j=4.
-
-ri=3. j=4 <=3 → no. ri is 3 <4? yes. j=3+1=4? yes. So r_val=0.
-
-cj is c[3] (j=4 → index 3) which is 0.
-
-i=2 <=0? No. cj=0 <3 → yes. i=0+1=1 → 2 !=1. So column_val is None.
-
-So row_val is 0, column_val is None. So cell is 0. No problem.
-
-Another cell (3,3):
-
-i=3, j=3.
-
-ri=1. j=3 >1. ri <4 (w=4) → j=1+1=2. Not equal to j=3. So r_val is None.
-
-cj is c[2] (j=3 → index 2). c[2] is 3.
-
-i=3 <=3 → yes. So column_val is 1.
-
-So row_val is None, column_val is 1. So cell must be 1. No conflict.
-
-So the code would process all cells. For the sample input, how many free cells?
-
-Let's see.
-
-In the first sample, the output is 2, so free must be 1. Wait, but according to the sample, the other possible case contributes 1, but maybe in the sample there's one free cell. Wait, 2^1=2, which matches the sample's answer.
-
-So let's see:
-
-In the first sample, what cells are free?
-
-The grid after the constraints is:
-
-Row 1 (r_i=0):
-
-j=1 must be 0 (since r_i=0 <4 → j=1=0+1 → 0. So cell (1,1) is 0.
-
-Row 2 (r_i=3): cells 1-3 are 1, cell 4 must be 0.
-
-Row 3 (r_i=1): cells 1 is 1, cell 2 must be 0.
-
-Columns:
-
-Column 1 (c_j=0): cell 1 must be 0 (since c_j=0 <3 → cell 1 is 0+1=1 → cell (1,1) is 0.
-
-Column 2 (c_j=2): cells 1-2 must be 1, cell 3 must be 0.
-
-Column 3 (c_j=3): cells 1-3 must be 1 (since h=3, which is equal to c_j=3. So no cell after that.
-
-Column4 (c_j=0): cell 1 must be 0.
-
-So after applying all constraints, the cells determined are:
-
-For row 1:
-
-cell (1,1)=0.
-
-For row 2:
-
-cells 1-3=1, cell4=0.
-
-Row3:
-
-cell1=1, cell2=0.
-
-For columns:
-
-Column2:
-
-cells1-2=1, cell3=0.
-
-Column3: cells1-3=1.
-
-So overlapping constraints:
-
-Looking for cells not determined by row or column.
-
-For example, cell (3,3):
-
-Row3's r_i=1. j=3>1. r_i+1=2 <4? yes. j=2 is 2, but j=3 is not. So row has no constraint here.
-
-Column3's c_j=3. i=3 <=3 → yes. So column requires 1. So cell (3,3) is 1.
-
-So that's determined by column.
-
-Another example: cell (3,4).
-
-Row3: j=4. r_i=1. 4>1. r_i+1=2. j=4 !=2. So no row constraint.
-
-Column4: c_j=0. i=3. i <=0? no. c_j=0 <3. i=0+1=1? i=3 !=1. So column has no constraint. So this cell is free.
-
-So cell (3,4) is free.
-
-So in the first sample, how many free cells?
-
-Looking for cells where both row and column have no constraints.
-
-For example:
-
-Row1: only cell (1,1) is 0. The rest (j=2-4) are not in row's constraints. But let's check column constraints.
-
-For cell (1,2):
-
-row1's r_i=0 <4 → j=1 is 0+1=1. cell (1,2) is j=2. So row has no constraint here.
-
-Column2: c_j=2. i=1 <=2 → yes. So cell (1,2) must be 1. So column imposes 1. So this cell is not free.
-
-Another example: cell (3,4):
-
-row has no constraint, column has no constraint → free.
-
-Another cell (3,3): column requires 1. So not free.
-
-Other cells:
-
-Let's see:
-
-Cell (2,3):
-
-Row2: j=3 <=3 → 1. So row requires 1. Column3: i=2 <=3 → 1. So both require 1. No conflict. Not free.
-
-Cell (3,2):
-
-Row3: j=2. r_i=1. j=2 is 1+1=2, and r_i <4. So row_val is 0. Column j=2: c_j=2. i=3. i <=2? No. c_j=2 <3 → yes. i=2+1=3 → cell (3,2) must be 0. So row and column agree. So no conflict. Not free.
-
-So the only free cell in the first sample is cell (3,4), and perhaps cell (3,4) and (3,3) ?
-
-Wait, cell (3,3) is determined by column3 (i=3 <=3 → 1). So not free.
-
-Cell (3,4):
-
-row3's r_i=1. j=4 is >1. r_i+1=2 <4. j=4 is not 2. So row has no constraint. column4: i=3, c_j=0. i=3>0. c_j <3 → yes. i=0+1=1. 3 !=1. So column has no constraint. So cell is free.
-
-So free is 1. 2^1=2. Which matches the sample.
-
-So code works for sample 1.
-
-Sample 2:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 1 1
-
 0
-
 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-h=1, w=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-r is [0], c is [1].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Process cell (1,1):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-row_val: j=1 <=0? No. r_i=0 <1? Yes. j=0+1=1. So row_val=0.
+    print('Tests passed 😎')
 
-column_val: i=1 <=1 → yes. c_j=1. So column_val=1.
 
-row_val and column_val are 0 and 1. Conflict → answer 0.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+
+```
+
+Testing against sample input 2.
+
+```python
+import sys
+
+
+def main(input_stream, output_stream):
+    h, w = map(int, input_stream.readline().rstrip("\n").split())
+
+    r = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    MOD = 10**9 +7
+
+    free = 0
+
+    for i in range(1, h+1):
+
+        for j in range(1, w+1):
+
+            ri = r[i-1]
+
+            if j <= ri:
+
+                r_val = 1
+
+            else:
+
+                if ri < w and j == ri +1:
+
+                    r_val = 0
+
+                else:
+
+                    r_val = None
+
+            cj = c[j-1]
+
+            if i <= cj:
+
+                c_val = 1
+
+            else:
+
+                if cj < h and i == cj +1:
+
+                    c_val = 0
+
+                else:
+
+                    c_val = None
+
+            if r_val is not None and c_val is not None:
+
+                if r_val != c_val:
+
+                    print(0, file=output_stream)
+
+                    sys.exit()
+
+            if r_val is None and c_val is None:
+
+                free +=1
+
+    print(pow(2, free, MOD), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+19 16
+16 16 16 16 15 15 0 5 0 4 9 9 1 4 4 0 8 16 12
+6 12 19 15 8 6 19 19 14 6 9 16 10 11 15 4
+""",
+            "output": \
+"""\
+797922655
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

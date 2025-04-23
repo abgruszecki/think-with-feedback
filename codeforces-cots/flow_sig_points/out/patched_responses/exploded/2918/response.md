@@ -207,13 +207,64 @@ for i in range(n-1):
 
 print(total)
 
-Wait, but let's test the first sample again:
+Testing against sample input 1.
 
-d=4, n=2, a=[2,2].
+```python
+def main(input_stream, output_stream):
+    d = int(input_stream.readline().rstrip("\n"))
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    total = 0
+    for i in range(n-1):
+        x = (a[i] % d) + 1
+        total += (1 - x) % d
+    print(total, file=output_stream)
 
-n-1 is 1 iteration (i=0).
 
-x= (2%4)+1=3. presses=(1-3) mod4= (-2 mod4)=2. So total 2. Correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+3
+3 4 3
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample: input 3 (the third example). Let's see.
 

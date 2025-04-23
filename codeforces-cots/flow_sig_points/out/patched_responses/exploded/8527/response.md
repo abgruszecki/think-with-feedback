@@ -662,103 +662,115 @@ Yes.
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import heapq
 import bisect
 import math
 
-n, k = map(int, input().split())
-a = list(map(int, input().split()))
 
-# Compute start times s_i
-heap = []
-for _ in range(k):
-    heapq.heappush(heap, 0)
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-s = []
-for ai in a:
-    t = heapq.heappop(heap)
-    s.append(t)
-    heapq.heappush(heap, t + ai)
+    # Compute start times s_i
+    heap = []
+    for _ in range(k):
+        heapq.heappush(heap, 0)
 
-f = [s[i] + a[i] for i in range(n)]
-f.sort()
+    s = []
+    for ai in a:
+        t = heapq.heappop(heap)
+        s.append(t)
+        heapq.heappush(heap, t + ai)
 
-result = 0
+    f = [s[i] + a[i] for i in range(n)]
+    f.sort()
 
-for i in range(n):
-    ai = a[i]
-    s_i = s[i]
-    found = False
-    for q in range(1, ai +1):
-        test_start = s_i + q -1
-        test_end = s_i + q
+    result = 0
 
-        m_start = bisect.bisect_right(f, test_start)
+    for i in range(n):
+        ai = a[i]
+        s_i = s[i]
+        found = False
+        for q in range(1, ai +1):
+            test_start = s_i + q -1
+            test_end = s_i + q
 
-        a_pos = bisect.bisect_left(f, test_start)
-        b_pos = bisect.bisect_left(f, test_end)
-        k_count = b_pos - a_pos
+            m_start = bisect.bisect_right(f, test_start)
 
-        possible_max_m = m_start + k_count
-        possible_min_m = m_start
+            a_pos = bisect.bisect_left(f, test_start)
+            b_pos = bisect.bisect_left(f, test_end)
+            k_count = b_pos - a_pos
 
-        # compute required m range
-        lower = (q -0.5) * n
-        upper = (q +0.5) * n
+            possible_max_m = m_start + k_count
+            possible_min_m = m_start
 
-        required_min_m = math.ceil( lower / 100 )
-        required_max_m = math.floor( (upper - 1e-9) / 100 )
+            # compute required m range
+            lower = (q -0.5) * n
+            upper = (q +0.5) * n
 
-        # check overlap
-        if possible_min_m > required_max_m:
-            continue
-        if possible_max_m < required_min_m:
-            continue
+            required_min_m = math.ceil( lower / 100 )
+            required_max_m = math.floor( (upper - 1e-9) / 100 )
 
-        found = True
-        break
-    if found:
-        result +=1
+            # check overlap
+            if possible_min_m > required_max_m:
+                continue
+            if possible_max_m < required_min_m:
+                continue
 
-print(result)
+            found = True
+            break
+        if found:
+            result +=1
 
-Let's test this code against the first example:
+    print(result, file=output_stream)
 
-n=2, k=2, a=[49,100]
 
-s for i=0 is 0 (heap is 0 and 0, popped 0, pushed 49)
 
-s for i=1 is 0 (heap now has 49 and 0, pop 0, pushed 100+0=100?)
+def test():
+    import io
 
-Wait, after popping the heap for first submission (i=0), heap is [0, 49]? Because after pushing 0 +49 =49, but the heap is a min-heap. So the heap after first submission is [49, 0], but when popped, the smallest is 0. Wait, no.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 2
+32 100 33 1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-Wait, the initial heap is filled with 0's. So, for k=2, heap has [0,0]. The first submission is popped from the heap. The heap is a min-heap, so heapq.heappop returns 0, then we push back 0+49=49. So the heap is [0,49], but after popping the 0, the remaining elements are [49], and then when we push 49, the heap becomes [49, ... ].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Wait, the first submission:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-heap is [0,0]. heappop returns 0. s[0] is 0. Then push 0+49=49. The heap now is [0,49] (since heapq keeps the heap invariant, but after pushing 49, the heap is adjusted. Wait, no.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Wait, after popping the 0, the heap is [0]. Then we push 49. So the heap becomes [0,49], but heapq maintains the heap structure. So after that, when processing the second submission (i=1), we heappop the smallest, which is 0 again. So s[1] is 0. Then push 0 +100=100. The heap now has 49 and 100.
+    print('Tests passed 😎')
 
-So s = [0,0], f = [0+49=49, 0+100=100]. f sorted is [49, 100].
 
-Now, for submission 1 (i=1), which has a_i=100. For q=50:
+if __name__ == '__main__':
+    test()
 
-test_start =0 +50-1=49, test_end=50.
 
-m_start is bisect_right(f,49) =1 (since 49 is in the list, and bisect_right returns the position after it. So f is [49,100], so bisect_right(49) is 1. So m_start=1.
+```
 
-a_pos is bisect_left(f,49) =0. bisect_left(f,50) is 1. So k_count=1-0=1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-possible_min_m=1, possible_max_m=1+1=2.
-
-required_min_m = ceil( (50-0.5)*2 /100 ) = ceil(99/100)=1.
-
-required_max_m= floor( (50.5*2 -1e-9)/100 ) = floor(101 -1e-9)/100 = 1.
-
-So possible_m is 1 to 2. required is 1 to 1. Overlap. So yes.
-
-Thus, submission 1 is interesting. The code returns 1, correct.
+```
 
 Another example: the second sample input:
 

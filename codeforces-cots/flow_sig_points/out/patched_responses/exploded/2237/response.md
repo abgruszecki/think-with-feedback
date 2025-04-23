@@ -579,51 +579,89 @@ Handle MOD correctly.
 
 Now, code:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-n, k = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-# Precompute binomial coefficients C(n, a) mod MOD for a in 0..n
-comb = [0]*(n+1)
-comb[0] = 1
-for a in range(1, n+1):
-    numerator = comb[a-1] * (n - a + 1) % MOD
-    denominator = a
-    inv_denominator = pow(denominator, MOD-2, MOD)
-    comb[a] = numerator * inv_denominator % MOD
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-base_k_minus_1 = (k-1) % MOD
-base_k = k % MOD
+    # Precompute binomial coefficients C(n, a) mod MOD for a in 0..n
+    comb = [0]*(n+1)
+    comb[0] = 1
+    for a in range(1, n+1):
+        numerator = comb[a-1] * (n - a + 1) % MOD
+        denominator = a
+        inv_denominator = pow(denominator, MOD-2, MOD)
+        comb[a] = numerator * inv_denominator % MOD
 
-ans = 0
-for a in range(n+1):
-    for b in range(n+1):
-        sign = 1 if (a + b) %2 ==0 else MOD-1
-        c = comb[a] * comb[b] % MOD
-        c = c * sign % MOD
-        
-        exponent1 = (a + b)*n - a*b
-        pow1 = pow(base_k_minus_1, exponent1, MOD)
-        
-        exponent2 = (n -a) * (n -b)
-        pow2 = pow(base_k, exponent2, MOD)
-        
-        term = c * pow1 % MOD
-        term = term * pow2 % MOD
-        
-        ans = (ans + term) % MOD
+    base_k_minus_1 = (k-1) % MOD
+    base_k = k % MOD
 
-print(ans)
+    ans = 0
+    for a in range(n+1):
+        for b in range(n+1):
+            sign = 1 if (a + b) %2 ==0 else MOD-1
+            c = comb[a] * comb[b] % MOD
+            c = c * sign % MOD
+            
+            exponent1 = (a + b)*n - a*b
+            pow1 = pow(base_k_minus_1, exponent1, MOD)
+            
+            exponent2 = (n -a) * (n -b)
+            pow2 = pow(base_k, exponent2, MOD)
+            
+            term = c * pow1 % MOD
+            term = term * pow2 % MOD
+            
+            ans = (ans + term) % MOD
 
-This should handle all cases.
+    print(ans, file=output_stream)
 
-Testing with the first sample:
 
-n=2, k=2.
 
-The binomial coefficients are comb[0]=1, comb[1]=2, comb[2]=1.
+def test():
+    import io
 
-The code computes the sum correctly as 7.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+123 456789
+""",
+            "output": \
+"""\
+689974806
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case: n=1, k=1. The answer is 1.
 

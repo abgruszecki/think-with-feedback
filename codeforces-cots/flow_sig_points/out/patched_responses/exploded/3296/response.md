@@ -959,6 +959,9 @@ But since Python's list comprehensions can't directly assign values, we need to 
 
 Here's the code:
 
+Testing against sample input 1.
+
+```python
 def build_transitions(pattern):
     n = len(pattern)
     if n == 0:
@@ -996,10 +999,10 @@ def build_transitions(pattern):
         transitions.append(trans)
     return transitions
 
-def main():
-    c = input().strip()
-    s = input().strip()
-    t = input().strip()
+def main(input_stream, output_stream):
+    c = input_stream.readline().rstrip("\n").strip()
+    s = input_stream.readline().rstrip("\n").strip()
+    t = input_stream.readline().rstrip("\n").strip()
 
     len_s = len(s)
     len_t = len(t)
@@ -1044,54 +1047,326 @@ def main():
         current_dp = next_dp
 
     max_val = max(max(row) for row in current_dp)
-    print(max_val)
+    print(max_val, file=output_stream)
 
-if __name__ == "__main__":
-    main()
 
-Let's test this code against the sample inputs.
 
-Sample Input 1:
+def test():
+    import io
 
-*****
-katie
-shiro
-
-Expected output: 1.
-
-The code should build transitions for s='katie' and t='shiro'. Each '*' is replaced with the characters of 'katie', leading to one full match of s and none of t. The difference is 1.
-
-Sample Input 4:
-
-***
-cc
-z
-
-Expected output: 2.
-
-The code replaces all stars with 'c's, forming 'ccc'. The s 'cc' occurs twice (positions 0-1 and 1-2). So the difference is 2-0=2.
-
-Sample Input 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 caat
 caat
 a
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-The input is 'caat', fixed. The s is 'caat' (one occurrence), and t is 'a' (two occurrences). The difference is 1-2 = -1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample Input 3:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def build_transitions(pattern):
+    n = len(pattern)
+    if n == 0:
+        return []
+    # Compute failure function
+    fail = [0] * n
+    for i in range(1, n):
+        j = fail[i-1]
+        while j > 0 and pattern[i] != pattern[j]:
+            j = fail[j-1]
+        if pattern[i] == pattern[j]:
+            j += 1
+        fail[i] = j
+
+    # Build transitions for each state (0 to n)
+    transitions = []
+    for state in range(n + 1):
+        trans = []
+        for c in range(26):
+            char = chr(ord('a') + c)
+            current = state
+            next_state = 0
+            while True:
+                if current < n and pattern[current] == char:
+                    next_state = current + 1
+                    break
+                if current == 0:
+                    if pattern[0] == char:
+                        next_state = 1
+                    else:
+                        next_state = 0
+                    break
+                current = fail[current-1]
+            trans.append(next_state)
+        transitions.append(trans)
+    return transitions
+
+def main(input_stream, output_stream):
+    c = input_stream.readline().rstrip("\n").strip()
+    s = input_stream.readline().rstrip("\n").strip()
+    t = input_stream.readline().rstrip("\n").strip()
+
+    len_s = len(s)
+    len_t = len(t)
+    transitions_s = build_transitions(s)
+    transitions_t = build_transitions(t)
+
+    # Initialize DP
+    current_dp = [[float('-inf')] * (len_t + 1) for _ in range(len_s + 1)]
+    current_dp[0][0] = 0
+
+    for char in c:
+        next_dp = [[float('-inf')] * (len_t + 1) for _ in range(len_s + 1)]
+        for u in range(len_s + 1):
+            for v in range(len_t + 1):
+                if current_dp[u][v] == float('-inf'):
+                    continue
+                if char == '*':
+                    # Try all 26 letters
+                    for c_code in range(26):
+                        next_u = transitions_s[u][c_code]
+                        next_v = transitions_t[v][c_code]
+                        delta = 0
+                        if next_u == len_s:
+                            delta += 1
+                        if next_v == len_t:
+                            delta -= 1
+                        new_val = current_dp[u][v] + delta
+                        if new_val > next_dp[next_u][next_v]:
+                            next_dp[next_u][next_v] = new_val
+                else:
+                    c_code = ord(char) - ord('a')
+                    next_u = transitions_s[u][c_code]
+                    next_v = transitions_t[v][c_code]
+                    delta = 0
+                    if next_u == len_s:
+                        delta += 1
+                    if next_v == len_t:
+                        delta -= 1
+                    new_val = current_dp[u][v] + delta
+                    if new_val > next_dp[next_u][next_v]:
+                        next_dp[next_u][next_v] = new_val
+        current_dp = next_dp
+
+    max_val = max(max(row) for row in current_dp)
+    print(max_val, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 *a*
 bba
 b
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-The code needs to choose characters for the stars to avoid creating 'bba' and minimize 'b's. For example, replacing with 'a's would give 'aaa', which has no 'bba' and no 'b's, so difference 0-0=0. So the output is 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The code should handle all these cases.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Now, the code seems to handle overlapping matches correctly. For example, in the fourth sample, 'ccc' has two overlapping 'cc' matches, which the transitions would capture.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Therefore, the code should work correctly.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def build_transitions(pattern):
+    n = len(pattern)
+    if n == 0:
+        return []
+    # Compute failure function
+    fail = [0] * n
+    for i in range(1, n):
+        j = fail[i-1]
+        while j > 0 and pattern[i] != pattern[j]:
+            j = fail[j-1]
+        if pattern[i] == pattern[j]:
+            j += 1
+        fail[i] = j
+
+    # Build transitions for each state (0 to n)
+    transitions = []
+    for state in range(n + 1):
+        trans = []
+        for c in range(26):
+            char = chr(ord('a') + c)
+            current = state
+            next_state = 0
+            while True:
+                if current < n and pattern[current] == char:
+                    next_state = current + 1
+                    break
+                if current == 0:
+                    if pattern[0] == char:
+                        next_state = 1
+                    else:
+                        next_state = 0
+                    break
+                current = fail[current-1]
+            trans.append(next_state)
+        transitions.append(trans)
+    return transitions
+
+def main(input_stream, output_stream):
+    c = input_stream.readline().rstrip("\n").strip()
+    s = input_stream.readline().rstrip("\n").strip()
+    t = input_stream.readline().rstrip("\n").strip()
+
+    len_s = len(s)
+    len_t = len(t)
+    transitions_s = build_transitions(s)
+    transitions_t = build_transitions(t)
+
+    # Initialize DP
+    current_dp = [[float('-inf')] * (len_t + 1) for _ in range(len_s + 1)]
+    current_dp[0][0] = 0
+
+    for char in c:
+        next_dp = [[float('-inf')] * (len_t + 1) for _ in range(len_s + 1)]
+        for u in range(len_s + 1):
+            for v in range(len_t + 1):
+                if current_dp[u][v] == float('-inf'):
+                    continue
+                if char == '*':
+                    # Try all 26 letters
+                    for c_code in range(26):
+                        next_u = transitions_s[u][c_code]
+                        next_v = transitions_t[v][c_code]
+                        delta = 0
+                        if next_u == len_s:
+                            delta += 1
+                        if next_v == len_t:
+                            delta -= 1
+                        new_val = current_dp[u][v] + delta
+                        if new_val > next_dp[next_u][next_v]:
+                            next_dp[next_u][next_v] = new_val
+                else:
+                    c_code = ord(char) - ord('a')
+                    next_u = transitions_s[u][c_code]
+                    next_v = transitions_t[v][c_code]
+                    delta = 0
+                    if next_u == len_s:
+                        delta += 1
+                    if next_v == len_t:
+                        delta -= 1
+                    new_val = current_dp[u][v] + delta
+                    if new_val > next_dp[next_u][next_v]:
+                        next_dp[next_u][next_v] = new_val
+        current_dp = next_dp
+
+    max_val = max(max(row) for row in current_dp)
+    print(max_val, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+***
+cc
+z
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

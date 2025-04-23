@@ -1007,255 +1007,374 @@ So, the approach could be:
 
                The code:
 
-               k, n = map(int, input().split())
+Testing against sample input 1.
 
-               from collections import defaultdict
+```python
+def main(input_stream, output_stream):
+    k, n = map(int, input_stream.readline().rstrip("\n").split())
 
-               d = defaultdict(list)
+    from collections import defaultdict
 
-               is_palindrome = {}
+    d = defaultdict(list)
 
-               for _ in range(k):
+    is_palindrome = {}
 
-                   s, a = input().split()
+    for _ in range(k):
 
-                   a = int(a)
+        s, a = input_stream.readline().rstrip("\n").split()
 
-                   d[s].append(a)
+        a = int(a)
 
-                   if s not in is_palindrome:
+        d[s].append(a)
 
-                       is_palindrome[s] = (s == s[::-1])
+        if s not in is_palindrome:
 
-               total = 0
+            is_palindrome[s] = (s == s[::-1])
 
-               # Process non-palindromic pairs.
+    total = 0
 
-               processed = set()
+    # Process non-palindromic pairs.
 
-               for s in list(d.keys()):
+    processed = set()
 
-                   if not is_palindrome[s]:
+    for s in list(d.keys()):
 
-                       s_rev = s[::-1]
+        if not is_palindrome[s]:
 
-                       if s_rev in d:
+            s_rev = s[::-1]
 
-                           if s < s_rev and s_rev not in processed:
+            if s_rev in d:
 
-                               list_s = sorted(d[s], reverse=True)
+                if s < s_rev and s_rev not in processed:
 
-                               list_rev = sorted(d[s_rev], reverse=True)
+                    list_s = sorted(d[s], reverse=True)
 
-                               i = j = 0
+                    list_rev = sorted(d[s_rev], reverse=True)
 
-                               while i < len(list_s) and j < len(list_rev):
+                    i = j = 0
 
-                                   sum_p = list_s[i] + list_rev[j]
+                    while i < len(list_s) and j < len(list_rev):
 
-                                   if sum_p > 0:
+                        sum_p = list_s[i] + list_rev[j]
 
-                                       total += sum_p
+                        if sum_p > 0:
 
-                                       i +=1
+                            total += sum_p
 
-                                       j +=1
+                            i +=1
 
-                                   else:
+                            j +=1
 
-                                       break
+                        else:
 
-                               processed.add(s)
+                            break
 
-                               processed.add(s_rev)
+                    processed.add(s)
 
-                   # else: it's a palindrome, processed later.
+                    processed.add(s_rev)
 
-               # Process palindromic groups.
+        # else: it's a palindrome, processed later.
 
-               global_max_center = -float('inf')
+    # Process palindromic groups.
 
-               for s in d:
+    global_max_center = -float('inf')
 
-                   if is_palindrome[s]:
+    for s in d:
 
-                       list_a = sorted(d[s], reverse=True)
+        if is_palindrome[s]:
 
-                       current_sum =0
+            list_a = sorted(d[s], reverse=True)
 
-                       group_max_center = -float('inf')
+            current_sum =0
 
-                       i =0
+            group_max_center = -float('inf')
 
-                       while i < len(list_a):
+            i =0
 
-                           if i+1 < len(list_a):
+            while i < len(list_a):
 
-                               pair_sum = list_a[i] + list_a[i+1]
+                if i+1 < len(list_a):
 
-                               if pair_sum >0:
+                    pair_sum = list_a[i] + list_a[i+1]
 
-                                   current_sum += pair_sum
+                    if pair_sum >0:
 
-                                   i +=2
+                        current_sum += pair_sum
 
-                               else:
+                        i +=2
 
-                                   # check current i and i+1 for possible group_max_center.
+                    else:
 
-                                   group_max_center = max(group_max_center, list_a[i], list_a[i+1])
+                        # check current i and i+1 for possible group_max_center.
 
-                                   # since the rest are smaller, no need to proceed.
+                        group_max_center = max(group_max_center, list_a[i], list_a[i+1])
 
-                                   break
+                        # since the rest are smaller, no need to proceed.
 
-                           else:
+                        break
 
-                               group_max_center = max(group_max_center, list_a[i])
+                else:
 
-                               i +=1
+                    group_max_center = max(group_max_center, list_a[i])
 
-                       # after the loop, check for remaining elements.
+                    i +=1
 
-                       # since list is sorted, the remaining elements are from i onwards.
+            # after the loop, check for remaining elements.
 
-                       if i < len(list_a):
+            # since list is sorted, the remaining elements are from i onwards.
 
-                           group_max_center = max(group_max_center, list_a[i])
+            if i < len(list_a):
 
-                       # update the global_max_center.
+                group_max_center = max(group_max_center, list_a[i])
 
-                       if group_max_center > global_max_center:
+            # update the global_max_center.
 
-                           global_max_center = group_max_center
+            if group_max_center > global_max_center:
 
-                       total += current_sum
+                global_max_center = group_max_center
 
-               # Check if we can add the global_max_center.
+            total += current_sum
 
-               if global_max_center >0:
+    # Check if we can add the global_max_center.
 
-                   total += global_max_center
+    if global_max_center >0:
 
-               # The answer is the maximum between total and 0.
+        total += global_max_center
 
-               print(max(total, 0))
+    # The answer is the maximum between total and 0.
 
-               But wait, there's a problem here with the 'processed' set for non-palindromic pairs.
+    print(max(total, 0), file=output_stream)
 
-               In the code, when processing a pair s and s_rev, we add both to 'processed' to avoid processing them again. But this is wrong.
 
-               Because for example, if there's another pair t and t_rev, which happen to be the same as s_rev and s, but since s < s_rev, they are processed once. So using 'processed' set is not needed. Because we already check if s < s_rev, which ensures that each pair is processed once.
 
-               For example, when s is 'abb' and s_rev is 'bba', since 'abb' < 'bba' lex order, we process them. When s is 'bba', since s_rev is 'abb', and 'bba' > 'abb' lex order, we do not process them.
+def test():
+    import io
 
-               So the 'processed' set is redundant. So the code should remove the 'processed' set.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 1
+a 1
+a 2
+a 3
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-               The corrected code for non-palindromic pairs:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-               for s in list(d.keys()):
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-                   if not is_palindrome[s]:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-                       s_rev = s[::-1]
+    print('Tests passed 😎')
 
-                       if s_rev in d:
 
-                           if s < s_rev:
+if __name__ == '__main__':
+    test()
 
-                               list_s = sorted(d[s], reverse=True)
 
-                               list_rev = sorted(d[s_rev], reverse=True)
+```
 
-                               i = j =0
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-                               while i < len(list_s) and j < len(list_rev):
+```
 
-                                   sum_p = list_s[i] + list_rev[j]
+Testing against sample input 2.
 
-                                   if sum_p >0:
+```python
+def main(input_stream, output_stream):
+    k, n = map(int, input_stream.readline().rstrip("\n").split())
 
-                                       total += sum_p
+    from collections import defaultdict
 
-                                       i +=1
+    d = defaultdict(list)
 
-                                       j +=1
+    is_palindrome = {}
 
-                                   else:
+    for _ in range(k):
 
-                                       break
+        s, a = input_stream.readline().rstrip("\n").split()
 
-               So the 'processed' set is not needed. Because for each s, we process only if s < s_rev. Thus, each pair is processed once.
+        a = int(a)
 
-               So the code for non-palindromic pairs is fixed.
+        d[s].append(a)
 
-               Let's test this code against the first example.
+        if s not in is_palindrome:
 
-               First example:
+            is_palindrome[s] = (s == s[::-1])
 
-               non-palindromic pairs:
+    total = 0
 
-               s is 'abb' (not palindrome). s_rev is 'bba' (not in the processed set?).
+    # Process non-palindromic pairs.
 
-               'abb' < 'bba' lex order → yes.
+    processed = set()
 
-               list_s is [5,2], sorted descending → [5,2].
+    for s in list(d.keys()):
 
-               list_rev is [-1], sorted → [-1].
+        if not is_palindrome[s]:
 
-               i=0, j=0: sum 5 + (-1)=4>0 → total becomes 4. i=1, j=1.
+            s_rev = s[::-1]
 
-               j is now >= len(list_rev) (1 >=1). So loop ends. Total from non-palindromic is 4.
+            if s_rev in d:
 
-               Then, for palindromic groups:
+                if s < s_rev and s_rev not in processed:
 
-               'aaa' is a palindrome. a_i's are [-3,7], sorted → [7,-3].
+                    list_s = sorted(d[s], reverse=True)
 
-               current_sum starts at 0. i=0.
+                    list_rev = sorted(d[s_rev], reverse=True)
 
-               i+1 is 1 < 2.
+                    i = j = 0
 
-               pair_sum =7 + (-3) =4>0 → current_sum +=4. i becomes 2.
+                    while i < len(list_s) and j < len(list_rev):
 
-               loop ends. group_max_center is -inf (since no remaining elements). group_max_center is updated to list_a[i] if i < len(list_a). i=2 >= len(list_a) (len is 2), so no. So group_max_center is -inf.
+                        sum_p = list_s[i] + list_rev[j]
 
-               current_sum is 4 added to total. total becomes 4+4=8.
+                        if sum_p > 0:
 
-               'zyz' is a palindrome. a_i is [-4]. sorted → [-4].
+                            total += sum_p
 
-               i=0:
+                            i +=1
 
-               i+1 >= len(list_a) (0+1 >=1). So else clause. group_max_center = max(-inf, -4) →-4.
+                            j +=1
 
-               i becomes 1. loop ends.
+                        else:
 
-               group_max_center is -4.
+                            break
 
-               current_sum is 0. added to total (total remains 8). global_max_center is max(-inf, -4) →-4.
+                    processed.add(s)
 
-               'xyx' is a palindrome. a_i is [4]. sorted → [4].
+                    processed.add(s_rev)
 
-               i=0:
+        # else: it's a palindrome, processed later.
 
-               i+1 >=1 → else clause. group_max_center is 4. i becomes 1.
+    # Process palindromic groups.
 
-               current_sum is 0. added to total (8 remains). global_max_center becomes 4.
+    global_max_center = -float('inf')
 
-               So after processing all palindromic groups, global_max_center is4.
+    for s in d:
 
-               Then, add 4 to total (8+4=12). So total becomes 12. max(12, 0) is 12.
+        if is_palindrome[s]:
 
-               Which matches the first example.
+            list_a = sorted(d[s], reverse=True)
 
-               The second example: all 'a's, which are palindromes.
+            current_sum =0
 
-               sorted list_a is [3,2,1].
+            group_max_center = -float('inf')
 
-               current_sum is 3+2=5. i becomes 2. then, i+1 is 3 >=3 → else clause. group_max_center is 1.
+            i =0
 
-               current_sum is5 added to total. global_max_center is1.
+            while i < len(list_a):
 
-               After processing, total is5. Then add 1 →6. max(6,0) →6.
+                if i+1 < len(list_a):
+
+                    pair_sum = list_a[i] + list_a[i+1]
+
+                    if pair_sum >0:
+
+                        current_sum += pair_sum
+
+                        i +=2
+
+                    else:
+
+                        # check current i and i+1 for possible group_max_center.
+
+                        group_max_center = max(group_max_center, list_a[i], list_a[i+1])
+
+                        # since the rest are smaller, no need to proceed.
+
+                        break
+
+                else:
+
+                    group_max_center = max(group_max_center, list_a[i])
+
+                    i +=1
+
+            # after the loop, check for remaining elements.
+
+            # since list is sorted, the remaining elements are from i onwards.
+
+            if i < len(list_a):
+
+                group_max_center = max(group_max_center, list_a[i])
+
+            # update the global_max_center.
+
+            if group_max_center > global_max_center:
+
+                global_max_center = group_max_center
+
+            total += current_sum
+
+    # Check if we can add the global_max_center.
+
+    if global_max_center >0:
+
+        total += global_max_center
+
+    # The answer is the maximum between total and 0.
+
+    print(max(total, 0), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 5
+abcde 10000
+abcde 10000
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
                Third example: two 'abcde's. Not palindromes. Their reverse is 'edcba', which is not present. So no pairs processed. Total is 0. global_max_center is -inf. So output is 0.
 

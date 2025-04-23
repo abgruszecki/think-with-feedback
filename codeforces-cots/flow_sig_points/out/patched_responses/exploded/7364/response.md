@@ -695,127 +695,123 @@ Once sorted, for each s, perform a binary search.
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n = int(input())
 
-a = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-b = list(map(int, input().split()))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-pos_b = {val: i for i, val in enumerate(b)}
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-s_x_set = set()
+    pos_b = {val: i for i, val in enumerate(b)}
 
-points = []
+    s_x_set = set()
 
-for i in range(n):
+    points = []
 
-    x = a[i]
+    for i in range(n):
 
-    p = pos_b[x]
+        x = a[i]
 
-    s_x = (p - i) % n
+        p = pos_b[x]
 
-    s_x_set.add(s_x)
+        s_x = (p - i) % n
 
-    a_x = i - p
+        s_x_set.add(s_x)
 
-    point1 = -a_x
+        a_x = i - p
 
-    point2 = a_x + n
+        point1 = -a_x
 
-    points.append(point1)
+        point2 = a_x + n
 
-    points.append(point2)
+        points.append(point1)
 
-sorted_points = sorted(points)
+        points.append(point2)
 
-for s in range(n):
+    sorted_points = sorted(points)
 
-    if s in s_x_set:
+    for s in range(n):
 
-        print(0)
+        if s in s_x_set:
 
-    else:
+            print(0, file=output_stream)
 
-        idx = bisect.bisect_left(sorted_points, s)
+        else:
 
-        min_dist = float('inf')
+            idx = bisect.bisect_left(sorted_points, s)
 
-        # Check idx and idx-1
+            min_dist = float('inf')
 
-        if idx >0:
+            # Check idx and idx-1
 
-            min_dist = min(min_dist, abs(s - sorted_points[idx-1]))
+            if idx >0:
 
-        if idx < len(sorted_points):
+                min_dist = min(min_dist, abs(s - sorted_points[idx-1]))
 
-            min_dist = min(min_dist, abs(s - sorted_points[idx]))
+            if idx < len(sorted_points):
 
-        # Also check wrap-around for cases where the list is cyclic, but not sure
+                min_dist = min(min_dist, abs(s - sorted_points[idx]))
 
-        # But according to the previous sample, this approach works.
+            # Also check wrap-around for cases where the list is cyclic, but not sure
 
-        print(min_dist)
+            # But according to the previous sample, this approach works.
 
-Wait, but this code will not handle the wrap-around correctly. For example, if the list contains points that are larger than n, but the minimal distance is achieved via modulo n. However, according to the problem statement, the distance is the absolute difference between positions in the permutation, which are 0-based and not cyclic. So the code is correct.
+            print(min_dist, file=output_stream)
 
-But wait, in the problem statement, the distance is the absolute difference between i and j (positions in the permutations). So the code correctly calculates the distance as |s - p|, even if p is outside the 0..n-1 range.
 
-But the shifted position is (p_x - s) mod n, which is in 0..n-1. But the a's positions are also 0..n-1. So the code's approach is correct.
 
-So this code should work.
+def test():
+    import io
 
-But let's test with the first sample.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+2 1 3 4
+3 4 2 1
+""",
+            "output": \
+"""\
+2
+1
+0
+1
+""",
+        }, 
+    ]
 
-Sample Input 1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-n=2
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-a=[1,2]
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-b=[2,1]
+    print('Tests passed 😎')
 
-pos_b: 2:0, 1:1.
 
-For i=0 (x=1):
+if __name__ == '__main__':
+    test()
 
-p=1.
 
-s_x = (1-0) mod 2=1.
+```
 
-a_x=0-1=-1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-point1=1, point2= -1 +2=1.
-
-For i=1 (x=2):
-
-p=0.
-
-s_x = (0-1) mod 2 = (-1) mod 2=1.
-
-a_x=1-0=1.
-
-point1=-1, point2=1+2=3.
-
-So points are [1,1, -1,3]. sorted_points is [-1,1,1,3].
-
-For s=0:
-
-Check if 0 is in s_x_set (which contains 1). No.
-
-bisect_left on sorted_points for 0: returns 1 (since -1 <0 <1? No. Wait, sorted_points is [-1,1,1,3]. The bisect_left for 0 would be 1, since elements before index 1 are <=0?
-
-Wait, -1 is less than 0, and the next elements are 1. So bisect_left returns 1.
-
-Check idx=1.
-
-Check idx-1 (0): sorted_points[0] is -1. distance is 0 - (-1) =1.
-
-Check idx (1): sorted_points[1] is 1. distance is 0-1=1.
-
-min_dist is 1. Which is correct.
+```
 
 For s=1:
 

@@ -77,23 +77,65 @@ Then compute the result as described.
 
 So code in Python:
 
-n, *rest = map(int, input().split())
+Testing against sample input 1.
 
-arr = rest[:n]
+```python
+def main(input_stream, output_stream):
+    n, *rest = map(int, input_stream.readline().rstrip("\n").split())
 
-res = [arr[0] + arr[-1]]
+    arr = rest[:n]
 
-for i in range(1, n):
+    res = [arr[0] + arr[-1]]
 
-    res.append(arr[i] + arr[i-1])
+    for i in range(1, n):
 
-print(' '.join(map(str, res)))
+        res.append(arr[i] + arr[i-1])
 
-Wait, that's even better. For the first element, compute it, then loop from 1 to n-1. So the code is a bit more optimized, but same O(n) time.
+    print(' '.join(map(str, res)), file=output_stream)
 
-Yes. So this should work.
 
-Testing the first sample: arr is [1,2,3,4]. res starts as 1+4=5. Then for i=1: 2+1=3 added. i=2:3+2=5. i=3:4+3=7. So [5,3,5,7], joined as '5 3 5 7'.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5 46 372 81 9
+""",
+            "output": \
+"""\
+14 51 418 453 90
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample: [5,46,372,81,9]. res starts with 5+9=14. Then i=1:46+5=51. i=2:372+46=418. i=3:81+372=453. i=4:9+81=90. So [14,51,418,453,90], which is correct.
 

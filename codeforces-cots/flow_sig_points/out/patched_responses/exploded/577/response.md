@@ -257,44 +257,6 @@ The count for node 4 is 0 (if it's not a university) plus 1 (5's count) +1 (6's 
 
 Wait, let's re-calculate:
 
-In the first sample, the edges and their contributions:
-
-Let me list all edges and their a_e:
-
-Edge between 1-3: the subtree of 3 has 1 (node 1's child is 3). The subtree under 3 includes 3, 2, 4,5,6,7. The universities in this subtree are 2,5,6. So a_e is 3. So contribution is min(3, 4-3=1) →1.
-
-Edge between 3-2: subtree of 2 has 1 university (2). Contribution min(1,3) →1.
-
-Edge between 3-7: subtree of 7 has 0. Contribution 0.
-
-Edge between 3-4: subtree of 4 has 2 universities (5 and 6). Contribution min(2,2) →2.
-
-Edge between 4-5: subtree of 5 has 1. Contribution 1.
-
-Edge between 4-6: subtree of 6 has 1. Contribution 1.
-
-Edge between 4-3's parent is 3, which is part of the subtree of 3. So that's the same as the edge between 3-4. Wait, the edges are undirected, but in the code, each edge is processed once (as a parent-child relationship). So the edge between 3 and 4 is considered as a child of 3 (so when 3 is processed, 4 is a child), or as a child of 4 (if 4 is processed first). But in the code, the root is 1. So the path is 1-3-4-5, 4-6, etc. So the edge between 3 and 4 is processed as part of 3's children, leading to 4. So when processing 3's child 4, the child_count is the count of 4's subtree, which is 2 (5 and 6). So the contribution is min(2,4-2=2) →2. So that edge contributes 2.
-
-Other edges:
-
-Edge between 4-5: contribution 1.
-
-Edge between 4-6: contribution 1.
-
-Edge between 3-2: 1.
-
-Edge between 1-3: contribution 1 (since a_e is 3, min(3,1) →1).
-
-Edge between 3-7: contribution 0.
-
-Edge between 3-4: contribution 2.
-
-Edge between 4-5: 1.
-
-Edge between 4-6:1.
-
-Total contributions sum:1 (1-3) +1 (3-2) +2 (3-4) +1 (4-5) +1 (4-6) = 1+1+2+1+1 =6. Which matches the sample output. So the code seems correct.
-
 So the code's approach is correct.
 
 Now, the code uses recursion. But for n up to 2e5, recursion in Python will hit the recursion limit (default is 1000). So this approach would cause a stack overflow for large trees (like a linear tree of 2e5 nodes). So, the code needs to be rewritten to use an iterative DFS (or BFS with post-order processing) to avoid stack overflows.
@@ -437,54 +399,103 @@ Yes.
 
 Now, code:
 
-n, k = map(int, input().split())
+Testing against sample input 1.
 
-universities = list(map(int, input().split()))
-is_uni = [False] * (n + 1)
-for u in universities:
-    is_uni[u] = True
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-adj = [[] for _ in range(n + 1)]
-for _ in range(n - 1):
-    x, y = map(int, input().split())
-    adj[x].append(y)
-    adj[y].append(x)
+    universities = list(map(int, input_stream.readline().rstrip("\n").split()))
+    is_uni = [False] * (n + 1)
+    for u in universities:
+        is_uni[u] = True
 
-total = 0
-child_counts = [0] * (n + 1)
-stack = [(1, -1, False)]
+    adj = [[] for _ in range(n + 1)]
+    for _ in range(n - 1):
+        x, y = map(int, input_stream.readline().rstrip("\n").split())
+        adj[x].append(y)
+        adj[y].append(x)
 
-while stack:
-    node, parent, visited = stack.pop()
-    if not visited:
-        stack.append((node, parent, True))
-        # Push children in reverse order so that they are processed in original order
-        # Because we use a stack (LIFO), pushing reversed ensures that the first child is processed first.
-        # For example, if children are [A, B, C], reversed is [C, B, A], which when popped becomes A, B, C.
-        # So, when processing the children, the first child in the original list is processed first.
-        for neighbor in reversed(adj[node]):
-            if neighbor != parent:
-                stack.append((neighbor, node, False))
-    else:
-        cnt = 0
-        if is_uni[node]:
-            cnt = 1
-        for neighbor in adj[node]:
-            if neighbor != parent:
-                cnt += child_counts[neighbor]
-                contribution = min(child_counts[neighbor], 2 * k - child_counts[neighbor])
-                total += contribution
-        child_counts[node] = cnt
+    total = 0
+    child_counts = [0] * (n + 1)
+    stack = [(1, -1, False)]
 
-print(total)
+    while stack:
+        node, parent, visited = stack.pop()
+        if not visited:
+            stack.append((node, parent, True))
+            # Push children in reverse order so that they are processed in original order
+            # Because we use a stack (LIFO), pushing reversed ensures that the first child is processed first.
+            # For example, if children are [A, B, C], reversed is [C, B, A], which when popped becomes A, B, C.
+            # So, when processing the children, the first child in the original list is processed first.
+            for neighbor in reversed(adj[node]):
+                if neighbor != parent:
+                    stack.append((neighbor, node, False))
+        else:
+            cnt = 0
+            if is_uni[node]:
+                cnt = 1
+            for neighbor in adj[node]:
+                if neighbor != parent:
+                    cnt += child_counts[neighbor]
+                    contribution = min(child_counts[neighbor], 2 * k - child_counts[neighbor])
+                    total += contribution
+            child_counts[node] = cnt
 
-This should handle large trees.
+    print(total, file=output_stream)
 
-Testing with the first sample:
 
-The answer is 6. The code should output that.
 
-Another test case: the second sample input.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+9 3
+3 2 1 6 5 9
+8 9
+3 2
+2 7
+3 4
+7 6
+4 5
+2 1
+2 8
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2:
 

@@ -866,51 +866,221 @@ result = min(sum1, sum2, sum3, sum4)
 
 print(result)
 
-Let's test this code with the previous examples.
+Testing against sample input 1.
 
-Example 1: input 5 2 6 3 → sorted x=2, y=5, z=6. d=3.
+```python
+def main(input_stream, output_stream):
+    a, b, c, d = map(int, input_stream.readline().rstrip("\n").split())
+    x, y, z = sorted([a, b, c])
 
-Candidate1:
+    # Candidate 1: Line arrangement spaced exactly d apart
+    median_val = sorted([x, y - d, z - 2 * d])[1]
+    sum1 = abs(x - median_val) + abs(y - (median_val + d)) + abs(z - (median_val + 2 * d))
 
-median_val is median of 2, 5-3=2, 6-6=0 → sorted [0, 2, 2] → median 2.
+    # Candidate 2: Fix x, adjust y and z
+    y2 = max(y, x + d)
+    z2 = max(z, y2 + d)
+    sum2 = (y2 - y) + (z2 - z)
 
-sum1= 0 + 0 + 2 →2.
+    # Candidate 3: Fix z, adjust y and x
+    y3 = min(y, z - d)
+    x3 = min(x, y3 - d)
+    sum3 = abs(x3 - x) + (y - y3)
 
-Candidate2: y2 = max(5, 2+3=5) →5. z2= max(6, 5+3=8) →8. sum2=0 +2=2.
+    # Candidate 4: Fix y, adjust x and z
+    x4 = min(x, y - d)
+    z4 = max(z, y + d)
+    sum4 = abs(x4 - x) + (z4 - z)
 
-Candidate3: y3= min(5,6-3=3). x3= min(2,3-3=0). sum3=2 + (5-3=2) →4.
+    print(min(sum1, sum2, sum3, sum4), file=output_stream)
 
-Candidate4: x4= min(2,5-3=2) →2. z4= max(6,5+3=8) →8. sum4=0 +2=2.
 
-Result is min(2,2,4,2) →2.
 
-Example2: input3 1 5 6 → sorted x=1, y=3, z=5. d=6.
+def test():
+    import io
 
-Candidate1: median of 1, 3-6=-3, 5-12=-7 → sorted [-7,-3,1] → median -3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 1 5 6
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
 
-sum1= |1+3|=4 + |3 - (-3 +6)=0 →4+0+4=8.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Candidate2: x=1, y2 = max(3,1+6=7) →7. z2= max(5,7+6=13). sum2=7-3=4 + 13-5=8 → sum 12.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Candidate3: y3=min(3,5-6=-1) →-1. x3=min(1,-1-6=-7) →-7. sum3=8 +4=12.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Candidate4: x4=min(1,3-6=-3) →-3. z4= max(5,3+6=9) →9. sum4=4 +4=8.
+    print('Tests passed 😎')
 
-Result is min(8,12,12,8) →8.
 
-Example3: input8 3 3 2 → sorted3,3,8. d=2.
+if __name__ == '__main__':
+    test()
 
-Candidate1: median of 3,3-2=1, 8-4=4 → sorted [1,3,4] → median 3.
 
-sum1=0 + |3-5|=2 + |8-5|=3 →5.
+```
 
-Candidate2: x=3. y2 = max(3,3+2=5) →5. z2= max(8,5+2=7) →8. sum2=5-3=2 +0=2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Candidate3: y3=min(3,8-2=6) →3. x3= min(3,3-2=1) →1. sum3=2 +0 →2.
+```
 
-Candidate4: x4=min(3,3-2=1) →1. z4= max(8,3+2=5) →8. sum4=2 +0 →2.
+Testing against sample input 2.
 
-Result is min(5,2,2,2) →2.
+```python
+def main(input_stream, output_stream):
+    a, b, c, d = map(int, input_stream.readline().rstrip("\n").split())
+    x, y, z = sorted([a, b, c])
+
+    # Candidate 1: Line arrangement spaced exactly d apart
+    median_val = sorted([x, y - d, z - 2 * d])[1]
+    sum1 = abs(x - median_val) + abs(y - (median_val + d)) + abs(z - (median_val + 2 * d))
+
+    # Candidate 2: Fix x, adjust y and z
+    y2 = max(y, x + d)
+    z2 = max(z, y2 + d)
+    sum2 = (y2 - y) + (z2 - z)
+
+    # Candidate 3: Fix z, adjust y and x
+    y3 = min(y, z - d)
+    x3 = min(x, y3 - d)
+    sum3 = abs(x3 - x) + (y - y3)
+
+    # Candidate 4: Fix y, adjust x and z
+    x4 = min(x, y - d)
+    z4 = max(z, y + d)
+    sum4 = abs(x4 - x) + (z4 - z)
+
+    print(min(sum1, sum2, sum3, sum4), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 3 3 2
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    a, b, c, d = map(int, input_stream.readline().rstrip("\n").split())
+    x, y, z = sorted([a, b, c])
+
+    # Candidate 1: Line arrangement spaced exactly d apart
+    median_val = sorted([x, y - d, z - 2 * d])[1]
+    sum1 = abs(x - median_val) + abs(y - (median_val + d)) + abs(z - (median_val + 2 * d))
+
+    # Candidate 2: Fix x, adjust y and z
+    y2 = max(y, x + d)
+    z2 = max(z, y2 + d)
+    sum2 = (y2 - y) + (z2 - z)
+
+    # Candidate 3: Fix z, adjust y and x
+    y3 = min(y, z - d)
+    x3 = min(x, y3 - d)
+    sum3 = abs(x3 - x) + (y - y3)
+
+    # Candidate 4: Fix y, adjust x and z
+    x4 = min(x, y - d)
+    z4 = max(z, y + d)
+    sum4 = abs(x4 - x) + (z4 - z)
+
+    print(min(sum1, sum2, sum3, sum4), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 3 10 4
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Example4: input2 3 10 4 → sorted2,3,10. d=4.
 

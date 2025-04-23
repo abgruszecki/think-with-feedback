@@ -95,9 +95,62 @@ So the steps are:
 
 This approach is O(n) time and O(1) space, which is optimal.
 
-So let's test this with the examples.
+Testing against sample input 1.
 
-First sample input: '1100' → the first '0' is at index 2 (third character). So 2+1=3. Correct.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+    for i in range(n):
+        if s[i] == '0':
+            print(i + 1, file=output_stream)
+            return
+    print(n, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1111
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample input: '1111' → no zeros. Answer is 4. Correct.
 

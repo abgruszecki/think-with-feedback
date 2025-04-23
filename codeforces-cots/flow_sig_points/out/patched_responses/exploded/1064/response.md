@@ -1020,153 +1020,151 @@ So the key steps are:
 
          Now, the code in Python:
 
-         import sys
-         import math
+Testing against sample input 1.
 
-         def divide_large(p_minus_1, last_digit, divisor):
-             quotient = []
-             carry = 0
-             # Process (p_minus_1 -1) 9's
-             for _ in range(p_minus_1 - 1):
-                 current = carry * 10 + 9
-                 q = current // divisor
-                 carry = current % divisor
-                 quotient.append(str(q))
-             # Process last digit
-             current = carry * 10 + last_digit
-             q = current // divisor
-             carry = current % divisor
-             quotient.append(str(q))
-             quotient_str = ''.join(quotient).lstrip('0')
-             if not quotient_str:
-                 quotient_str = '0'
-             return quotient_str, carry
+```python
+import sys
+import math
 
-         def multiply_large(number_str, d):
-             res = []
-             carry = 0
-             for ch in reversed(number_str):
-                 num = int(ch) * d + carry
-                 res.append(num % 10)
-                 carry = num // 10
-             if carry:
-                 res.append(carry)
-             res_str = ''.join(map(str, reversed(res))) if res else '0'
-             return res_str
 
-         def divide_string(number_str, divisor):
-             quotient = []
-             carry = 0
-             for ch in number_str:
-                 current = carry * 10 + int(ch)
-                 q = current // divisor
-                 carry = current % divisor
-                 quotient.append(str(q))
-             quotient_str = ''.join(quotient).lstrip('0')
-             if not quotient_str:
-                 quotient_str = '0'
-             return quotient_str, carry
+def main(input_stream, output_stream):
+    def divide_large(p_minus_1, last_digit, divisor):
+        quotient = []
+        carry = 0
+        # Process (p_minus_1 -1) 9's
+        for _ in range(p_minus_1 - 1):
+            current = carry * 10 + 9
+            q = current // divisor
+            carry = current % divisor
+            quotient.append(str(q))
+        # Process last digit
+        current = carry * 10 + last_digit
+        q = current // divisor
+        carry = current % divisor
+        quotient.append(str(q))
+        quotient_str = ''.join(quotient).lstrip('0')
+        if not quotient_str:
+            quotient_str = '0'
+        return quotient_str, carry
 
-         p, x = map(int, sys.stdin.readline().split())
+    def multiply_large(number_str, d):
+        res = []
+        carry = 0
+        for ch in reversed(number_str):
+            num = int(ch) * d + carry
+            res.append(num % 10)
+            carry = num // 10
+        if carry:
+            res.append(carry)
+        res_str = ''.join(map(str, reversed(res))) if res else '0'
+        return res_str
 
-         if p == 1:
-             if x == 1:
-                 print(1)
-             else:
-                 print("Impossible")
-             sys.exit()
+    def divide_string(number_str, divisor):
+        quotient = []
+        carry = 0
+        for ch in number_str:
+            current = carry * 10 + int(ch)
+            q = current // divisor
+            carry = current % divisor
+            quotient.append(str(q))
+        quotient_str = ''.join(quotient).lstrip('0')
+        if not quotient_str:
+            quotient_str = '0'
+        return quotient_str, carry
 
-         found = False
-         min_n = None
+    p, x = map(int, input_stream.readline().split())
 
-         for d in range(1, 10):
-             k = 10 * x - 1
-             if k == 0:
-                 continue  # x=0, but x >=1 per problem constraints
-             g = math.gcd(k, d)
-             m = k // g
-             # Compute 10^(p-1) mod m
-             if m == 0:
-                 continue
-             rem = pow(10, p-1, m)
-             # Check if (rem -x) % m ==0
-             if (rem - x) % m != 0:
-                 continue
-             last_digit = 10 - x
-             if last_digit < 0 or last_digit > 9:
-                 continue
-             # Divide S by m
-             quotient_part_str, rem = divide_large(p-1, last_digit, m)
-             if rem !=0:
-                 continue  # shouldn't happen
-             # Multiply by d
-             temp_str = multiply_large(quotient_part_str, d)
-             # Divide by g
-             a_str, rem = divide_string(temp_str, g)
-             if rem !=0:
-                 continue
-             if len(a_str) != p-1 or a_str[0] == '0':
-                 continue
-             # Found a candidate
-             N_str = a_str + str(d)
-             if not found or N_str < min_n:
-                 min_n = N_str
-                 found = True
+    if p == 1:
+        if x == 1:
+            print(1, file=output_stream)
+        else:
+            print("Impossible", file=output_stream)
+        sys.exit()
 
-         if found:
-             print(min_n)
-         else:
-             print("Impossible")
+    found = False
+    min_n = None
 
-         Now, let's test this code with the samples.
+    for d in range(1, 10):
+        k = 10 * x - 1
+        if k == 0:
+            continue  # x=0, but x >=1 per problem constraints
+        g = math.gcd(k, d)
+        m = k // g
+        # Compute 10^(p-1) mod m
+        if m == 0:
+            continue
+        rem = pow(10, p-1, m)
+        # Check if (rem -x) % m ==0
+        if (rem - x) % m != 0:
+            continue
+        last_digit = 10 - x
+        if last_digit < 0 or last_digit > 9:
+            continue
+        # Divide S by m
+        quotient_part_str, rem = divide_large(p-1, last_digit, m)
+        if rem !=0:
+            continue  # shouldn't happen
+        # Multiply by d
+        temp_str = multiply_large(quotient_part_str, d)
+        # Divide by g
+        a_str, rem = divide_string(temp_str, g)
+        if rem !=0:
+            continue
+        if len(a_str) != p-1 or a_str[0] == '0':
+            continue
+        # Found a candidate
+        N_str = a_str + str(d)
+        if not found or N_str < min_n:
+            min_n = N_str
+            found = True
 
-         Sample 1:
+    if found:
+        print(min_n, file=output_stream)
+    else:
+        print("Impossible", file=output_stream)
 
-         Input 6 5.
 
-         d=7:
 
-             k=49.
+def test():
+    import io
 
-             g=7, m=7.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 2
+""",
+            "output": \
+"""\
+Impossible
+""",
+        }, 
+    ]
 
-             rem=pow(10,5,7) =5.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-             (5-5) mod7=0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-             last_digit=5.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-             divide_large(5,5,7):
+    print('Tests passed 😎')
 
-                 p-1=5, so 4 9's and last 5.
 
-                 Process 4 9's:
+if __name__ == '__main__':
+    test()
 
-                     carry starts at 0.
 
-                     first digit 9: current=9 →9//7=1, rem 2.
+```
 
-                     append '1'.
+<RUN_SNIPPET>
+```output
 
-                     carry=2.
-
-                     next 9: current=2*10 +9=29 →29//7=4, rem 1 → append '4', carry=1.
-
-                     next 9: current=1*10 +9=19 →19//7=2, rem 5 → append '2', carry=5.
-
-                     next 9: current=5*10+9=59 →59//7=8, rem 3 → append '8', carry=3.
-
-                     last digit 5: current=3*10+5=35 →35//7=5, rem 0 → append '5'.
-
-                 quotient_part_str is '14285'.
-
-             multiply by d=7 →14285 *7 = 99995 → temp_str = '99995'.
-
-             divide by g=7 →99995/7=14285 → a_str is '14285', len 5, starts with 1.
-
-             N_str is '142857'.
-
-             So this is the first candidate. Since we iterate d from 1 to 9, and for d=7 it's valid, and no smaller d is valid, this is the answer.
+```
 
          Sample 3:
 

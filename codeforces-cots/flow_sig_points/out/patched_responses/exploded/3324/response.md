@@ -107,52 +107,151 @@ But in Python, the math.gcd function returns the greatest common divisor of the 
 
 So code:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n = int(input())
 
-x = list(map(int, input().split()))
-x.sort()
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-if n == 1:
-    # but n is >=3 according to constraints, so no need.
-    pass
+    x = list(map(int, input_stream.readline().rstrip("\n").split()))
+    x.sort()
 
-diffs = [x[i] - x[i-1] for i in range(1, n)]
+    if n == 1:
+        # but n is >=3 according to constraints, so no need.
+        pass
 
-current_gcd = diffs[0]
-for d in diffs[1:]:
-    current_gcd = math.gcd(current_gcd, d)
+    diffs = [x[i] - x[i-1] for i in range(1, n)]
 
-sum_m = 0
-for d in diffs:
-    sum_m += (d // current_gcd) -1
+    current_gcd = diffs[0]
+    for d in diffs[1:]:
+        current_gcd = math.gcd(current_gcd, d)
 
-print(sum_m)
+    sum_m = 0
+    for d in diffs:
+        sum_m += (d // current_gcd) -1
 
-That's the code.
+    print(sum_m, file=output_stream)
 
-Testing sample input 1:
 
-3
 
--5 10 5 → sorted [-5,5,10]
+def test():
+    import io
 
-diffs are 10,5.
-
-current_gcd starts as 10. Then next d is 5. gcd(10,5)=5.
-
-sum is (10//5 -1) + (5//5 -1) → (2-1) + (1-1) =1 +0=1. Correct.
-
-Sample input 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 6
+100 200 400 300 600 500
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-100 200 400 300 600 500 → sorted [100,200,300,400,500,600]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-diffs are 100, 100, 100, 100, 100. current_gcd is 100.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sum each (100//100 -1)=0 for each. Sum is 0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import math
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    x = list(map(int, input_stream.readline().rstrip("\n").split()))
+    x.sort()
+
+    if n == 1:
+        # but n is >=3 according to constraints, so no need.
+        pass
+
+    diffs = [x[i] - x[i-1] for i in range(1, n)]
+
+    current_gcd = diffs[0]
+    for d in diffs[1:]:
+        current_gcd = math.gcd(current_gcd, d)
+
+    sum_m = 0
+    for d in diffs:
+        sum_m += (d // current_gcd) -1
+
+    print(sum_m, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+10 9 0 -1
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input3:
 

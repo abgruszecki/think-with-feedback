@@ -510,77 +510,179 @@ So code:
 
 Read input, then:
 
-n, w = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, w = map(int, input_stream.readline().rstrip("\n").split())
 
-current_sum = 0
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-max_lower = 0
+    current_sum = 0
 
-min_upper = w
+    max_lower = 0
 
-for num in a:
+    min_upper = w
 
-    current_sum += num
+    for num in a:
 
-    # update max_lower
+        current_sum += num
 
-    lower = -current_sum
+        # update max_lower
 
-    if lower > max_lower:
+        lower = -current_sum
 
-        max_lower = lower
+        if lower > max_lower:
 
-    # update min_upper
+            max_lower = lower
 
-    upper = w - current_sum
+        # update min_upper
 
-    if upper < min_upper:
+        upper = w - current_sum
 
-        min_upper = upper
+        if upper < min_upper:
 
-if max_lower > min_upper:
+            min_upper = upper
 
-    print(0)
+    if max_lower > min_upper:
 
-else:
+        print(0, file=output_stream)
 
-    print(max(0, min_upper - max_lower + 1))
+    else:
 
-Yes.
+        print(max(0, min_upper - max_lower + 1), file=output_stream)
 
-That should work.
 
-Testing the code with the samples.
 
-Sample 1:
+def test():
+    import io
 
-3 5
-
-2 1 -3 → code's variables:
-
-current_sum:
-
-2: lower -2. max_lower remains 0. upper 5-2=3. min_upper 3.
-
-1: sum 3. lower -3. no change. upper 5-3=2. min_upper 2.
-
--3: sum 0. lower 0. max_lower is 0. upper 5. min_upper remains 2.
-
-max_lower=0, min_upper=2. 2-0+1=3. Correct.
-
-Sample 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2 4
+-1 1
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
--1 1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum after first -1: -1 → lower=1. max_lower becomes 1. upper 4-(-1) =5. min_upper is 4.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sum after 1: 0 → lower=0. no change. upper 4-0=4. min_upper remains4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-max_lower=1, min_upper=4. 4-1+1=4.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, w = map(int, input_stream.readline().rstrip("\n").split())
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    current_sum = 0
+
+    max_lower = 0
+
+    min_upper = w
+
+    for num in a:
+
+        current_sum += num
+
+        # update max_lower
+
+        lower = -current_sum
+
+        if lower > max_lower:
+
+            max_lower = lower
+
+        # update min_upper
+
+        upper = w - current_sum
+
+        if upper < min_upper:
+
+            min_upper = upper
+
+    if max_lower > min_upper:
+
+        print(0, file=output_stream)
+
+    else:
+
+        print(max(0, min_upper - max_lower + 1), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 10
+2 4 1 2
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

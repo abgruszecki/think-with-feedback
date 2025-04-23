@@ -311,47 +311,78 @@ Yes.
 
 So code:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n = int(input())
 
-max_m = (math.isqrt(24 * n + 1) - 1) // 6
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-count = 0
+    max_m = (math.isqrt(24 * n + 1) - 1) // 6
 
-for m in range(1, max_m + 1):
+    count = 0
 
-    if (n + m) % 3 != 0:
+    for m in range(1, max_m + 1):
 
-        continue
+        if (n + m) % 3 != 0:
 
-    s = (n + m) // 3
+            continue
 
-    required = m * (m + 1) // 2
+        s = (n + m) // 3
 
-    if s >= required:
+        required = m * (m + 1) // 2
 
-        count +=1
+        if s >= required:
 
-print(count)
+            count +=1
 
-Wait, but what if (n +m) is not divisible by 3? Then m is skipped.
+    print(count, file=output_stream)
 
-Yes.
 
-Testing sample input 13:
 
-n=13.
+def test():
+    import io
 
-max_m=2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-m=1: 13+1=14 →14%3=2 → skip.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-m=2:13+2=15 →15%3=0 → s=5.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-required =2*3//2=3. 5>=3 → yes. count becomes 1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So output is 1. Correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 6:
 

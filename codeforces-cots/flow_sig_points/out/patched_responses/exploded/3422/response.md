@@ -355,15 +355,64 @@ Yes.
 
 So this code should handle all cases.
 
-Testing the first sample:
+Testing against sample input 1.
 
-Input 4.
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-mod4:4 mod4 is0.
+    if s == '0':
+        mod4 = 0
+    else:
+        mod4 = int(s[-2:]) % 4 if len(s) >= 2 else int(s) % 4
+    mod2 = int(s[-1]) % 2 if s != '0' else 0
 
-mod2:4 mod2 is0.
+    sum_val = (1 + pow(2, mod4, 5) + pow(3, mod4, 5) + pow(4, mod2, 5)) % 5
+    print(sum_val, file=output_stream)
 
-sum_val =1 +1 (2^0) +1 (3^0) +1 (4^0) =4. mod5=4. Correct.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+124356983594583453458888889
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

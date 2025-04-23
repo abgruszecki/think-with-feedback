@@ -518,19 +518,22 @@ But in Python, each string is stored as a separate key in the dictionary. For 1e
 
 Thus, the code would be:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-def main():
 
+def main(input_stream, output_stream):
     import sys
 
     counts = {}
 
-    n = int(sys.stdin.readline())
+    n = int(input_stream.readline())
 
     for _ in range(n):
 
-        name = sys.stdin.readline().strip()
+        name = input_stream.readline().strip()
 
         if name in counts:
 
@@ -538,7 +541,7 @@ def main():
 
             new_name = f"{name}{counts[name]}"
 
-            print(new_name)
+            print(new_name, file=output_stream)
 
             # Add the new_name to counts with 1 (since it's now in the database)
 
@@ -550,37 +553,64 @@ def main():
 
         else:
 
-            print("OK")
+            print("OK", file=output_stream)
 
             counts[name] = 1
 
-This should handle all cases correctly.
 
-Testing the first sample input:
 
-4
+def test():
+    import io
 
-abacaba
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+first
+first
+second
+second
+third
+third
+""",
+            "output": \
+"""\
+OK
+first1
+OK
+second1
+OK
+third1
+""",
+        }, 
+    ]
 
-acaba
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-abacaba
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-acab
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Processing:
+    print('Tests passed 😎')
 
-First line: abacaba is not in counts. Output OK. counts['abacaba'] =1.
 
-Second line: acaba not in counts. Output OK. counts['acaba'] =1.
+if __name__ == '__main__':
+    test()
 
-Third line: abacaba is present. Generate abacaba1. Output it. Add counts['abacaba1']=1. Increment counts['abacaba'] to 2.
 
-Fourth line: acab not in counts. Output OK.
+```
 
-Which matches the sample output.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Another test case where a generated name is reused:
+```
 
 Sample input:
 

@@ -501,107 +501,106 @@ Then, iterate from s down to 0 (inclusive), for each floor fi.
 
 So code:
 
-n, s = map(int, input().split())
+Testing against sample input 1.
 
-max_ti = {}
+```python
+def main(input_stream, output_stream):
+    n, s = map(int, input_stream.readline().rstrip("\n").split())
 
-for _ in range(n):
+    max_ti = {}
 
-    fi, ti = map(int, input().split())
+    for _ in range(n):
 
-    if fi in max_ti:
+        fi, ti = map(int, input_stream.readline().rstrip("\n").split())
 
-        if ti > max_ti[fi]:
+        if fi in max_ti:
+
+            if ti > max_ti[fi]:
+
+                max_ti[fi] = ti
+
+        else:
 
             max_ti[fi] = ti
 
-    else:
+    current_time = 0
 
-        max_ti[fi] = ti
+    current_floor = s
 
-current_time = 0
+    max_time = 0
 
-current_floor = s
+    for fi in range(s, -1, -1):
 
-max_time = 0
+        time_to_reach = current_time + (current_floor - fi)
 
-for fi in range(s, -1, -1):
+        if fi in max_ti:
 
-    time_to_reach = current_time + (current_floor - fi)
+            arrival_time = max(time_to_reach, max_ti[fi])
 
-    if fi in max_ti:
+        else:
 
-        arrival_time = max(time_to_reach, max_ti[fi])
+            arrival_time = time_to_reach
 
-    else:
+        time_to_zero = arrival_time + fi
 
-        arrival_time = time_to_reach
+        if time_to_zero > max_time:
 
-    time_to_zero = arrival_time + fi
+            max_time = time_to_zero
 
-    if time_to_zero > max_time:
+        current_time = arrival_time
 
-        max_time = time_to_zero
+        current_floor = fi
 
-    current_time = arrival_time
+    print(max_time, file=output_stream)
 
-    current_floor = fi
 
-print(max_time)
 
-Testing this code with the samples:
+def test():
+    import io
 
-Sample 1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 10
+2 77
+3 33
+8 21
+9 12
+10 64
+""",
+            "output": \
+"""\
+79
+""",
+        }, 
+    ]
 
-Input:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-3 7
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-2 1
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-3 8
+    print('Tests passed 😎')
 
-5 2
 
-max_ti would be {2:1, 3:8,5:2}
+if __name__ == '__main__':
+    test()
 
-Processing floors 7 down to 0.
 
-For fi=7:
+```
 
-time_to_reach =0 + (7-7) =0. fi not in max_ti. arrival_time=0. time_to_zero=0+7=7. max_time=7.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-current_time=0, current_floor=7.
-
-fi=6:
-
-time_to_reach=0 +7-6=1. not in max_ti. arrival_time=1. time_to_zero=7. current_time=1, current_floor=6.
-
-fi=5:
-
-time_to_reach=1 +6-5=2. fi is in max_ti (ti=2). arrival_time=2. time_to_zero=7. current_time=2, current_floor=5.
-
-fi=4:
-
-time_to_reach=2 +5-4=3. no. arrival_time=3. time_to_zero=3+4=7. current_time=3, current_floor=4.
-
-fi=3:
-
-time_to_reach=3 +4-3=4. max_ti is 8. arrival_time=8. time_to_zero=11. current_time=8, current_floor=3.
-
-fi=2:
-
-time_to_reach=8 +3-2=9. max_ti=1. arrival_time=9. time_to_zero=11. current_time=9, current_floor=2.
-
-fi=1:
-
-time_to_reach=9 +2-1=10. arrival_time=10. time_to_zero 11. current_time=10, current_floor=1.
-
-fi=0:
-
-time_to_reach=10 +1-0=11. arrival_time=11. time_to_zero=11. current_time=11, current_floor=0.
-
-max_time is 11. Correct.
+```
 
 Sample 2:
 

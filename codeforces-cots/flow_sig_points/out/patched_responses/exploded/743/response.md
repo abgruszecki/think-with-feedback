@@ -97,109 +97,62 @@ return h-1.
 
 But how to implement this? In Python:
 
-n = int(input())
+Testing against sample input 1.
 
-h = 0
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    h = 0
+    while True:
+        h += 1
+        current = h * (h + 1) * (h + 2) // 6
+        if current > n:
+            break
+    print(h - 1, file=output_stream)
 
-while True:
 
-    h +=1
 
-    current = h*(h+1)*(h+2) //6
+def test():
+    import io
 
-    if current >n:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+25
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-        break
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-print(h-1)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But wait, let's test for n=1:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Loop starts with h=0.
+    print('Tests passed 😎')
 
-h becomes 1. current is 6//6=1. Which is equal to 1. So not >n. So loop continues.
 
-h increments to 2. current is 2*3*4=24//6=4>1. Break. print(2-1)=1. Correct.
+if __name__ == '__main__':
+    test()
 
-Another test case: n=25.
 
-h increments to 4, current=4*5*6=120//6=20 <=25. Loop continues.
+```
 
-h=5: 5*6*7=210//6=35>25. Break. print(5-1=4). Correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Another test case: n=10. The sum is 20 for h=4. Wait, no. Wait when h=3, sum is 3*4*5//6=60//6=10. So current_sum is 10. So h=3: sum=10. So if n=10, the code will:
-
-h increments to 1: sum 1. <=10.
-
-h=2: sum 4 <=10.
-
-h=3: sum 10 <=10.
-
-h=4: sum 20>10. Break. So print 3. Which is correct.
-
-So the code works.
-
-But what about when n is exactly the sum for h=5, like n=35. Then code would break when h=5 is sum 35, which is equal to n. So code would not break. Then h increments to 6, sum 6*7*8/6= 56*6=336/6=56. 56>35. So return 6-1=5. Correct.
-
-Thus, the code works.
-
-But wait, let's compute h*(h+1)*(h+2) //6 for h=5: 5*6*7=210, 210//6=35.
-
-So for n=35, the code would have:
-
-h increments to 5, current=35. 35 <=35. So loop continues.
-
-h becomes 6, current=6*7*8//6= 336//6=56. 56>35. Break. return 5. So correct.
-
-Thus, the code works.
-
-So the code is straightforward. The time complexity is O(h_max). For n up to 1e4, h_max is about 40, which is trivial.
-
-So this approach is optimal and efficient. No need for binary search here.
-
-But let's consider possible maximum h for n up to 1e4. Let's compute h*(h+1)*(h+2) <=6n.
-
-For n=1e4, 6n=6e4.
-
-We can compute h:
-
-h=39: 39*40*41=39*1640= 63960. 63960/6=10660. Which is 10660. That's for h=39. The sum is 10660. So if n is 1e4 (10000), then 10660>10000. So h=39 is sum 10660>10000. So maximum h is 38. Let's compute for h=38: 38*39*40= 38*1560= 59280. 59280/6= 9880. 9880<=10000. So h=38 would be allowed, and h=39 would exceed. So the maximum h is 38.
-
-So for n=1e4, the code would loop h from 1 to 39, which is 39 iterations. No problem.
-
-Thus, the code is efficient enough.
-
-So the code is correct and efficient.
-
-Now, let's code it in Python.
-
-Read n as input.
-
-Initialize h=0.
-
-Loop:
-
-h +=1
-
-compute current = h*(h+1)*(h+2)//6
-
-if current >n: break.
-
-print h-1.
-
-Yes.
-
-Testing the sample inputs:
-
-Sample 1:
-
-Input:1.
-
-Loop:
-
-h=1, current=1*2*3//6=6//6=1. Not >1. Continue.
-
-h=2: current=2*3*4//6=24//6=4>1. Break. Output 1.
+```
 
 Sample 2:
 

@@ -1158,39 +1158,89 @@ Print(answer)
 
 Yes, this should work.
 
-Now, let's test this on the samples.
+Testing against sample input 1.
 
-Sample1:
+```python
+import bisect
 
-a = [1,2,3], sorted.
 
-b = [2,2,2], sorted.
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-sum_c is sum of |a_i -b_j| for all i,j.
+    a_sorted = sorted(a)
+    b_sorted = sorted(b)
 
-For each b_j=2:
+    # Compute sum_c
+    prefix_a = [0] * (n + 1)
+    for i in range(n):
+        prefix_a[i+1] = prefix_a[i] + a_sorted[i]
+    total_sum_a = prefix_a[-1]
 
-count_leq=3 (all a_i <=2).
+    sum_c = 0
+    for bj in b_sorted:
+        pos = bisect.bisect_right(a_sorted, bj)
+        sum_leq = prefix_a[pos]
+        count_leq = pos
+        sum_gt = total_sum_a - sum_leq
+        count_gt = n - pos
+        contribution = bj * count_leq - sum_leq + sum_gt - bj * count_gt
+        sum_c += contribution
 
-sum_leq=1+2+3=6.
+    # Compute sum_abs
+    sum_abs = 0
+    for ai, bj in zip(a_sorted, b_sorted):
+        sum_abs += abs(ai - bj)
 
-count_gt=0.
+    answer = sum_c - (n - 1) * sum_abs
+    print(answer, file=output_stream)
 
-contribution=2*3 -6 +0 -0=6-6=0. For three b_j's. So sum_c=0*3=0? No. Wait, no.
 
-Wait, no. For each b_j in sorted b, which are [2,2,2].
 
-For each of the three b_j:
+def test():
+    import io
 
-pos = bisect_right(a_sorted, 2) → returns3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+3 1 3
+1 1 2
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-sum_leq = 6, count_leq=3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum_gt =0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-contribution =2*3 -6 +0-0=0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So each contributes0. sum_c=0+0+0=0. Which is incorrect.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 But the actual sum_c is:
 

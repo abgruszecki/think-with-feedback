@@ -497,97 +497,110 @@ Thus, the code can be simplified.
 
 So:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-max_a = max(a)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-cnt = [0] * (max_a + 2)  # indexes 0 to max_a+1 (to avoid index error)
+    max_a = max(a)
 
-for num in a:
+    cnt = [0] * (max_a + 2)  # indexes 0 to max_a+1 (to avoid index error)
 
-    cnt[num] += 1
+    for num in a:
 
-# Compute prefix sums s where s[i] is sum of cnt[0..i] inclusive
+        cnt[num] += 1
 
-s = [0] * (max_a + 2)
+    # Compute prefix sums s where s[i] is sum of cnt[0..i] inclusive
 
-s[0] = cnt[0]
+    s = [0] * (max_a + 2)
 
-for i in range(1, max_a + 2):
+    s[0] = cnt[0]
 
-    s[i] = s[i-1] + cnt[i]
+    for i in range(1, max_a + 2):
 
-unique_x = set(a)
+        s[i] = s[i-1] + cnt[i]
 
-max_total = 0
+    unique_x = set(a)
 
-for x in unique_x:
+    max_total = 0
 
-    total = 0
+    for x in unique_x:
 
-    q = 1
+        total = 0
 
-    while True:
+        q = 1
 
-        start = x * q
+        while True:
 
-        if start > max_a:
+            start = x * q
 
-            break
+            if start > max_a:
 
-        end = x * (q + 1) - 1
+                break
 
-        end = min(end, max_a)
+            end = x * (q + 1) - 1
 
-        sum_cnt = s[end] - s[start - 1]
+            end = min(end, max_a)
 
-        total += q * x * sum_cnt
+            sum_cnt = s[end] - s[start - 1]
 
-        q += 1
+            total += q * x * sum_cnt
 
-    if total > max_total:
+            q += 1
 
-        max_total = total
+        if total > max_total:
 
-print(max_total)
+            max_total = total
 
-This should handle all cases.
+    print(max_total, file=output_stream)
 
-Testing the first sample:
 
-Sample 1:
 
-Input:
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
+8 2 2 7
+""",
+            "output": \
+"""\
+18
+""",
+        }, 
+    ]
 
-3 2 15 9
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-max_a is 15.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-cnt[2] =1, cnt[3]=1, cnt[9]=1, cnt[15]=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-s is built.
+    print('Tests passed 😎')
 
-For x=3:
 
-q=1 → start=3, end=5. sum_cnt = s[5] - s[2] = (sum up to 5) - sum up to 2. s[5] includes cnt[0..5]. cnt[3] is 1, cnt[4] 0, cnt[5] 0. So sum_cnt is 1.
+if __name__ == '__main__':
+    test()
 
-so total += 3*1*1 =3.
 
-q=2 → start=6, end=8. sum_cnt = s[8]-s[5] → cnt[6,7,8] are 0. sum_cnt 0 → nothing added.
+```
 
-q=3 → start=9, end=11. sum_cnt s[11]-s[8]. cnt[9] is 1, others 0. sum 1 → 3*3*1=9 → total 12.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-q=4 → start=12, end=14. sum_cnt 0 → nothing.
-
-q=5 → start=15, end=17 (min to 15). sum_cnt s[15]-s[14]. cnt[15] is 1. → 5*3*1=15 → total 27.
-
-q=6 → start=18>15 → break.
-
-sum_x=27 → max_total becomes 27.
+```
 
 Sample 2:
 

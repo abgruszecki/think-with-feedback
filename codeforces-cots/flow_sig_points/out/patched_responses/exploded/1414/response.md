@@ -54,19 +54,121 @@ Loop a in range((n-1)//2, 0, -1):
 
 This should work.
 
-Testing the examples:
+Testing against sample input 1.
 
-Example 1: n=3
+```python
+import math
 
-(n-1)//2 = 1. So a starts at 1.
 
-b = 3-1=2.
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    for a in range((n - 1) // 2, 0, -1):
+        b = n - a
+        if math.gcd(a, b) == 1:
+            print(a, b, file=output_stream)
+            break
 
-gcd(1,2)=1. So output is 1 2.
 
-Example 2: n=4.
 
-(n-1)//2 = 1 (since (4-1)=3, 3//2=1). So a=1, b=3. gcd(1,3)=1. Output 1 3.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+""",
+            "output": \
+"""\
+1 3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import math
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    for a in range((n - 1) // 2, 0, -1):
+        b = n - a
+        if math.gcd(a, b) == 1:
+            print(a, b, file=output_stream)
+            break
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+12
+""",
+            "output": \
+"""\
+5 7
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: n=12. (12-1)//2=5. a=5, b=7. gcd(5,7)=1. So output 5 7.
 

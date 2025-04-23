@@ -305,143 +305,193 @@ Yes, that's correct.
 
 So, in code:
 
-n = int(input())
-revealed = input().strip()
-m = int(input())
-words = [input().strip() for _ in range(m)]
+Testing against sample input 1.
 
-S = {c for c in revealed if c != '*'}
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    revealed = input_stream.readline().rstrip("\n").strip()
+    m = int(input_stream.readline().rstrip("\n"))
+    words = [input_stream.readline().rstrip("\n").strip() for _ in range(m)]
 
-star_positions = [i for i, c in enumerate(revealed) if c == '*']
-valid_candidates = []
-for word in words:
-    valid = True
-    for i in range(n):
-        c_revealed = revealed[i]
-        c_word = word[i]
-        if c_revealed != '*':
-            if c_word != c_revealed:
-                valid = False
-                break
-        else:
-            if c_word in S:
-                valid = False
-                break
-    if valid:
-        valid_candidates.append(word)
+    S = {c for c in revealed if c != '*'}
 
-# Now collect the sets for each valid candidate's star positions
-sets = []
-for candidate in valid_candidates:
-    letters = set()
-    for i in star_positions:
-        letters.add(candidate[i])
-    sets.append(letters)
+    star_positions = [i for i, c in enumerate(revealed) if c == '*']
+    valid_candidates = []
+    for word in words:
+        valid = True
+        for i in range(n):
+            c_revealed = revealed[i]
+            c_word = word[i]
+            if c_revealed != '*':
+                if c_word != c_revealed:
+                    valid = False
+                    break
+            else:
+                if c_word in S:
+                    valid = False
+                    break
+        if valid:
+            valid_candidates.append(word)
 
-if not sets:
-    # Impossible, but per problem statement, at least one exists
-    print(0)
-else:
-    common = sets[0]
-    for s in sets[1:]:
-        common.intersection_update(s)
-    print(len(common))
+    # Now collect the sets for each valid candidate's star positions
+    sets = []
+    for candidate in valid_candidates:
+        letters = set()
+        for i in star_positions:
+            letters.add(candidate[i])
+        sets.append(letters)
 
-Wait, but let's test this code against the examples.
+    if not sets:
+        # Impossible, but per problem statement, at least one exists
+        print(0, file=output_stream)
+    else:
+        common = sets[0]
+        for s in sets[1:]:
+            common.intersection_update(s)
+        print(len(common), file=output_stream)
 
-First example:
 
-Input:
-4
-a**d
-2
-abcd
-acbd
 
-S is {'a', 'd'}.
+def test():
+    import io
 
-valid_candidates:
-
-Check each word.
-
-First word: 'abcd'.
-
-Check each position.
-
-At index 0, revealed is 'a'. The word's index 0 is 'a' → okay.
-
-At index 1, revealed is '*'. The word's character is 'b', which is not in S → okay.
-
-Same for index 2 (c) → not in S.
-
-Index 3: 'd' → matches.
-
-So valid.
-
-Second word: 'acbd'.
-
-Index 0: 'a' → matches.
-
-Index 1: 'c' → not in S.
-
-Index 2: 'b' → not in S.
-
-Index 3: 'd' → matches.
-
-So both words are valid.
-
-Then, star_positions are indices 1 and 2.
-
-For 'abcd', star positions are 'b' and 'c' → set {'b','c'}.
-
-For 'acbd', star positions are 'c' and 'b' → set {'c','b'}.
-
-The intersection is {'b','c'}, so size 2. So output is 2. Correct.
-
-Second example:
-
-Input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
 lo*er
 2
 lover
 loser
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-revealed is 'l', 'o', '*', 'e', 'r'.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-S is {'l','o','e','r'}.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-star_positions is index 2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Check each candidate.
+    print('Tests passed 😎')
 
-First candidate: 'lover'.
 
-Check each position.
+if __name__ == '__main__':
+    test()
 
-Positions 0: 'l' → matches.
 
-1: 'o' → matches.
+```
 
-2: 'v' → check if in S? S is {'l','o','e','r'}. 'v' is not in S → okay.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-3: 'e' → matches.
+```
 
-4: 'r' → matches. So valid.
+Testing against sample input 2.
 
-Second candidate: 'loser'.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    revealed = input_stream.readline().rstrip("\n").strip()
+    m = int(input_stream.readline().rstrip("\n"))
+    words = [input_stream.readline().rstrip("\n").strip() for _ in range(m)]
 
-At position 2: 's' → not in S. So valid.
+    S = {c for c in revealed if c != '*'}
 
-So both are valid.
+    star_positions = [i for i, c in enumerate(revealed) if c == '*']
+    valid_candidates = []
+    for word in words:
+        valid = True
+        for i in range(n):
+            c_revealed = revealed[i]
+            c_word = word[i]
+            if c_revealed != '*':
+                if c_word != c_revealed:
+                    valid = False
+                    break
+            else:
+                if c_word in S:
+                    valid = False
+                    break
+        if valid:
+            valid_candidates.append(word)
 
-Now, their star positions (index 2):
+    # Now collect the sets for each valid candidate's star positions
+    sets = []
+    for candidate in valid_candidates:
+        letters = set()
+        for i in star_positions:
+            letters.add(candidate[i])
+        sets.append(letters)
 
-'lover' has 'v' → set {'v'}.
+    if not sets:
+        # Impossible, but per problem statement, at least one exists
+        print(0, file=output_stream)
+    else:
+        common = sets[0]
+        for s in sets[1:]:
+            common.intersection_update(s)
+        print(len(common), file=output_stream)
 
-'loser' has 's' → set {'s'}.
 
-The intersection is empty. So answer is 0. Correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+a*a
+2
+aaa
+aba
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

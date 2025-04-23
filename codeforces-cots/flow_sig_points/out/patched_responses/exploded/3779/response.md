@@ -705,49 +705,80 @@ This is the optimal approach.
 
 So the code is:
 
-n = int(input())
+Testing against sample input 1.
 
-s = input().strip()
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-prefix = [0]*(n+1)
+    s = input_stream.readline().rstrip("\n").strip()
 
-for i in range(n):
+    prefix = [0]*(n+1)
 
-    prefix[i+1] = prefix[i] + (1 if s[i] == '8' else 0)
+    for i in range(n):
 
-k = (n - 11) // 2
+        prefix[i+1] = prefix[i] + (1 if s[i] == '8' else 0)
 
-for i in range(n -10):
+    k = (n - 11) // 2
 
-    if s[i] == '8':
+    for i in range(n -10):
 
-        cnt = prefix[i+11] - prefix[i]
+        if s[i] == '8':
 
-        if cnt > k:
+            cnt = prefix[i+11] - prefix[i]
 
-            print("YES")
+            if cnt > k:
 
-            exit()
+                print("YES", file=output_stream)
 
-print("NO")
+                return
 
-Yes, this should work.
+    print("NO", file=output_stream)
 
-Let's test it against the examples.
 
-First example:
 
-n=13, s=8380011223344.
+def test():
+    import io
 
-prefix is computed as follows:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+15
+807345619350641
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-indices 0: 1 (8), 1: 0 (3), 2:1 (8), etc. The sum up to i+11=11 is for i=0:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-prefix[11] - prefix[0] = number of 8s in 0-10.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Which is 2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-k=1. 2>1 → output YES.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

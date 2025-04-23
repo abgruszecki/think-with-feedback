@@ -958,27 +958,120 @@ But wait, in the code above, when we process x and y, we first delete them from 
 
 Yes. So, the code correctly captures the previous state.
 
-Testing this code with sample input 1:
+Testing against sample input 1.
 
-After the first swap (3,4), current is {1:0} → x=3, y=4 not present. So after deletion, current is still {1:0}.
+```python
+import sys
 
-But prev_x and prev_y are None, so no new_x or new_y. So current remains {1:0}.
 
-In the second swap (2,1), we delete x=2 (not present) and y=1 (prev_y=0). So new_x_val for 2 is prev_y=0. new_y_val for 1 is prev_y +1 →1. So current becomes {2:0, 1:1}.
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().split())
+    swaps = [tuple(map(int, input_stream.readline().split())) for _ in range(m)]
+    
+    current = {k: 0}
+    
+    for x, y in swaps:
+        # Extract previous values and remove x, y from current
+        prev_x = current.get(x)
+        prev_y = current.get(y)
+        if x in current:
+            del current[x]
+        if y in current:
+            del current[y]
+        
+        # Compute new_x and new_y
+        new_x = None
+        new_y = None
+        
+        # For x
+        candidates = []
+        if prev_y is not None:
+            candidates.append(prev_y)
+        if prev_x is not None:
+            candidates.append(prev_x + 1)
+        if candidates:
+            new_x = min(candidates)
+        
+        # For y
+        candidates = []
+        if prev_x is not None:
+            candidates.append(prev_x)
+        if prev_y is not None:
+            candidates.append(prev_y + 1)
+        if candidates:
+            new_y = min(candidates)
+        
+        # Update current with new_x and new_y if they are better
+        if new_x is not None:
+            if x in current:
+                if new_x < current[x]:
+                    current[x] = new_x
+            else:
+                current[x] = new_x
+        if new_y is not None:
+            if y in current:
+                if new_y < current[y]:
+                    current[y] = new_y
+            else:
+                current[y] = new_y
+    
+    # Prepare the output
+    output = []
+    for i in range(1, n+1):
+        output.append(str(current.get(i, -1)))
+    print(' '.join(output), file=output_stream)
 
-And so on.
 
-Yes.
 
-Now, in terms of data structures, using a Python dictionary is efficient enough.
+def test():
+    import io
 
-But given that n and m are up to 2e5, and in each swap, we process two entries, the total operations are O(m) time, which is acceptable.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 7 4
+3 2
+3 2
+4 2
+3 4
+4 1
+3 2
+5 2
+""",
+            "output": \
+"""\
+2 2 0 3 1
+""",
+        }, 
+    ]
 
-But in Python, dictionaries have a high constant factor. So, to optimize, we can use a defaultdict or a regular dictionary.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But according to the problem's constraints, this approach should work within the time limits.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Thus, the code should be as follows.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

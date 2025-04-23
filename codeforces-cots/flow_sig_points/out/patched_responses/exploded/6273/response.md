@@ -101,37 +101,79 @@ Yes.
 
 So the code would be something like:
 
-n = int(input())
+Testing against sample input 1.
 
-degrees = [0] * (n + 1)
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-for _ in range(n-1):
+    degrees = [0] * (n + 1)
 
-    a, b = map(int, input().split())
+    for _ in range(n-1):
 
-    degrees[a] += 1
+        a, b = map(int, input_stream.readline().rstrip("\n").split())
 
-    degrees[b] += 1
+        degrees[a] += 1
 
-total = 0
+        degrees[b] += 1
 
-for i in range(1, n+1):
+    total = 0
 
-    d = degrees[i]
+    for i in range(1, n+1):
 
-    total += d * (d-1) // 2
+        d = degrees[i]
 
-print(total)
+        total += d * (d-1) // 2
 
-Testing the first sample:
+    print(total, file=output_stream)
 
-Input 4:
 
-edges 1-2, 1-3, 1-4.
 
-degrees[1] is 3, others 1.
+def test():
+    import io
 
-3*2//2 =3. Sum is 3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 2
+2 3
+3 4
+3 5
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

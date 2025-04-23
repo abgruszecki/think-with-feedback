@@ -414,15 +414,80 @@ Implement the is_leap function.
 
 Then, the loop as discussed.
 
-Testing:
+Testing against sample inputs 1, 2.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    def is_leap(year):
+        return year % 400 == 0 or (year % 4 == 0 and year % 100 != 0)
 
-Input:2016 → output 2044.
+    y = int(input_stream.readline().rstrip("\n"))
+    original_leap = is_leap(y)
+    sum_mod = 0
+    next_year = y + 1
 
-Sample 2:
+    while True:
+        prev_year = next_year - 1
+        days_prev = 366 if is_leap(prev_year) else 365
+        sum_mod = (sum_mod + days_prev) % 7
+        if is_leap(next_year) == original_leap and sum_mod == 0:
+            print(next_year, file=output_stream)
+            break
+        next_year += 1
 
-Input:2000 → output 2028.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2000
+""",
+            "output": \
+"""\
+2028
+""",
+        }, 
+        {
+            "input": \
+"""\
+50501
+""",
+            "output": \
+"""\
+50507
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

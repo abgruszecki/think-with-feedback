@@ -304,49 +304,137 @@ else:
 
    print(''.join(s))
 
-Wait, let's test this code against the sample inputs.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    s = list(input_stream.readline().rstrip("\n").strip())
 
-Input:
+    if n == 1:
+        print('0' if k >= 1 else ''.join(s), file=output_stream)
+    else:
+        if s[0] != '1' and k > 0:
+            s[0] = '1'
+            k -= 1
+        for i in range(1, n):
+            if k <= 0:
+                break
+            if s[i] != '0':
+                s[i] = '0'
+                k -= 1
+        print(''.join(s), file=output_stream)
 
-5 3
 
-51528
 
-After processing:
+def test():
+    import io
 
-First character is '5'. Change to '1', k becomes 2.
-
-Then process the next 4 digits:
-
-index 1: '1' → change to '0' (k becomes 1).
-
-index 2: '5' → change to '0' (k becomes 0).
-
-index 3: '2' → can't change.
-
-index4: '8' → can't change.
-
-Result is ['1','0','0','2','8'] → 10028. Correct.
-
-Sample 2:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3 2
-
 102
+""",
+            "output": \
+"""\
+100
+""",
+        }, 
+    ]
 
-n=3>1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-First character is '1', no change. k remains 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Process remaining characters (indexes 1 and 2):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-index1: '0' → no change.
+    print('Tests passed 😎')
 
-index2: '2' → change to '0', k becomes 1. Then loop continues. Now i=2 (the last index), loop ends. So the result is 100. Correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    s = list(input_stream.readline().rstrip("\n").strip())
+
+    if n == 1:
+        print('0' if k >= 1 else ''.join(s), file=output_stream)
+    else:
+        if s[0] != '1' and k > 0:
+            s[0] = '1'
+            k -= 1
+        for i in range(1, n):
+            if k <= 0:
+                break
+            if s[i] != '0':
+                s[i] = '0'
+                k -= 1
+        print(''.join(s), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 1
+1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

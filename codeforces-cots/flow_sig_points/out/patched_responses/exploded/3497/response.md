@@ -843,115 +843,165 @@ But in Python, for each u, we need to perform a BFS, track parents, and build ch
 
 Implementing this:
 
+Testing against sample input 1.
+
+```python
 from collections import deque
 
-MOD = 10**9+7
 
-d, n = map(int, input().split())
+def main(input_stream, output_stream):
+    MOD = 10**9+7
 
-a = list(map(int, input().split()))  # a is 0-based. node 1 is a[0], node 2 is a[1], etc.
+    d, n = map(int, input_stream.readline().rstrip("\n").split())
 
-adj = [[] for _ in range(n+1)]  # 1-based.
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))  # a is 0-based. node 1 is a[0], node 2 is a[1], etc.
 
-for _ in range(n-1):
+    adj = [[] for _ in range(n+1)]  # 1-based.
 
-    u, v = map(int, input().split())
+    for _ in range(n-1):
 
-    adj[u].append(v)
+        u, v = map(int, input_stream.readline().rstrip("\n").split())
 
-    adj[v].append(u)
+        adj[u].append(v)
 
-# Sort nodes by a_i, then by index (1-based)
+        adj[v].append(u)
 
-sorted_nodes = sorted(range(1, n+1), key=lambda x: (a[x-1], x))
+    # Sort nodes by a_i, then by index (1-based)
 
-answer = 0
+    sorted_nodes = sorted(range(1, n+1), key=lambda x: (a[x-1], x))
 
-for u in sorted_nodes:
+    answer = 0
 
-    a_u = a[u-1]
+    for u in sorted_nodes:
 
-    max_allowed = a_u + d
+        a_u = a[u-1]
 
-    # BFS to find allowed subtree
+        max_allowed = a_u + d
 
-    visited = [False] * (n+1)
+        # BFS to find allowed subtree
 
-    parent = [0]*(n+1)
+        visited = [False] * (n+1)
 
-    children = [[] for _ in range(n+1)]
+        parent = [0]*(n+1)
 
-    q = deque([u])
+        children = [[] for _ in range(n+1)]
 
-    visited[u] = True
+        q = deque([u])
 
-    while q:
+        visited[u] = True
 
-        v = q.popleft()
+        while q:
 
-        for w in adj[v]:
+            v = q.popleft()
 
-            if not visited[w]:
+            for w in adj[v]:
 
-                # Check if w is allowed
+                if not visited[w]:
 
-                aw = a[w-1]
+                    # Check if w is allowed
 
-                if aw < a_u or aw > max_allowed:
+                    aw = a[w-1]
 
-                    continue
+                    if aw < a_u or aw > max_allowed:
 
-                if aw == a_u and w < u:
+                        continue
 
-                    continue
+                    if aw == a_u and w < u:
 
-                # allowed
+                        continue
 
-                visited[w] = True
+                    # allowed
 
-                parent[w] = v
+                    visited[w] = True
 
-                children[v].append(w)
+                    parent[w] = v
 
-                q.append(w)
+                    children[v].append(w)
 
-    # Compute DP using post-order traversal
+                    q.append(w)
 
-    # Initialize dp dictionary
+        # Compute DP using post-order traversal
 
-    dp = {}
+        # Initialize dp dictionary
 
-    stack = [(u, False)]
+        dp = {}
 
-    while stack:
+        stack = [(u, False)]
 
-        node, done = stack.pop()
+        while stack:
 
-        if not done:
+            node, done = stack.pop()
 
-            stack.append( (node, True) )
+            if not done:
 
-            # Push children in reverse order to process left to right
+                stack.append( (node, True) )
 
-            for child in reversed(children[node]):
+                # Push children in reverse order to process left to right
 
-                stack.append( (child, False) )
+                for child in reversed(children[node]):
 
-        else:
+                    stack.append( (child, False) )
 
-            res = 1
+            else:
 
-            for child in children[node]:
+                res = 1
 
-                res = (res * (1 + dp[child])) % MOD
+                for child in children[node]:
 
-            dp[node] = res
+                    res = (res * (1 + dp[child])) % MOD
 
-    answer = (answer + dp[u]) % MOD
+                dp[node] = res
 
-print(answer)
+        answer = (answer + dp[u]) % MOD
 
-Testing this code against the first sample:
+    print(answer, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0 3
+1 2 3
+1 2
+2 3
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input:
 

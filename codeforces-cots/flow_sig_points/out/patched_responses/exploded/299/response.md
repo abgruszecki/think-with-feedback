@@ -172,11 +172,14 @@ Print sum.
 
 So the code structure in Python:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-def main():
 
-    data = sys.stdin.read().split()
+def main(input_stream, output_stream):
+    data = input_stream.read().split()
 
     ptr = 0
 
@@ -216,73 +219,166 @@ def main():
 
         res = prefix[r] - prefix[l-1]
 
-        print(res)
+        print(res, file=output_stream)
 
-if __name__ == "__main__":
 
-    main()
 
-This should handle all cases efficiently.
+def test():
+    import io
 
-Testing with the first example:
-
-Input:
-
-7 3
-
-abacaba
-
-1 3
-
-2 5
-
-1 7
-
-The data list is:
-
-['7', '3', 'abacaba', '1', '3', '2', '5', '1', '7']
-
-prefix array computed as [0, 1,3,4,7,8,10,11]
-
-Queries:
-
-1-3: 4-0=4
-
-2-5: l=2, r=5 → prefix[5] - prefix[1] →8-1=7
-
-1-7: 11-0=11.
-
-Output matches.
-
-Second example:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 7 4
-
 abbabaa
-
 1 3
-
 5 7
-
 6 6
-
 2 4
+""",
+            "output": \
+"""\
+5
+4
+1
+5
+""",
+        }, 
+    ]
 
-The data list after splitting includes 'abbabaa', then the queries. The prefix sum is 0,1,3,5,6,8,9,10.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Queries:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-1-3:5-0=5.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-5-7:10-6=4.
+    print('Tests passed 😎')
 
-6-6:9-8=1.
 
-2-4:6-1=5.
+if __name__ == '__main__':
+    test()
 
-Which matches the output.
 
-Third example's output is correct as well.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import sys
+
+
+def main(input_stream, output_stream):
+    data = input_stream.read().split()
+
+    ptr = 0
+
+    n = int(data[ptr])
+
+    ptr +=1
+
+    q = int(data[ptr])
+
+    ptr +=1
+
+    s = data[ptr]
+
+    ptr +=1
+
+    # Compute prefix sums
+
+    prefix = [0]*(n+1)
+
+    for i in range(1, n+1):
+
+        c = s[i-1]
+
+        prefix[i] = prefix[i-1] + (ord(c) - ord('a') +1)
+
+    # Process queries
+
+    for _ in range(q):
+
+        l = int(data[ptr])
+
+        ptr +=1
+
+        r = int(data[ptr])
+
+        ptr +=1
+
+        res = prefix[r] - prefix[l-1]
+
+        print(res, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+13 7
+sonoshikumiwo
+1 5
+2 10
+7 7
+1 13
+4 8
+2 5
+3 9
+""",
+            "output": \
+"""\
+82
+125
+9
+191
+62
+63
+97
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Now, handling the input correctly is crucial. But in the code, the s variable is data[2], which is the entire string. So even if the string has multiple spaces, but according to the problem statement, the string is one line, so data[2] is correct.
 

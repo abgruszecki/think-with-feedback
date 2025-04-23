@@ -1475,17 +1475,80 @@ else:
 
     print("YES")
 
-Testing this code:
+Testing against sample input 2.
 
-Second example:
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-ai=7, remaining=3 → sum_3=1.
+    sum_3 = 0
+    sum_other = 0
 
-ai=1, remaining=1 → other=1.
+    for ai in a:
+        max_pairs = min(ai // 2, 2 * n)
+        remaining = ai - max_pairs * 2
+        if remaining < 0:
+            print("NO", file=output_stream)
+            return
+        if remaining == 0:
+            continue
+        if remaining % 4 == 3:
+            sum_3 += 1
+        else:
+            sum_other += (remaining + 3) // 4
 
-sum_3=1 <=1 → yes.
+    if sum_3 > n:
+        print("NO", file=output_stream)
+    elif sum_other > 2 * (n - sum_3):
+        print("NO", file=output_stream)
+    else:
+        print("YES", file=output_stream)
 
-sum_other=1 <=2*(1-1)=0 → no. Thus, output NO. Correct.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 2
+4 4
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Test case with n=1, a=[3,3]:
 

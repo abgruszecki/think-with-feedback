@@ -721,67 +721,106 @@ In Python, dictionaries are efficient enough.
 
 So, code:
 
-n, q = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, q = map(int, input_stream.readline().rstrip("\n").split())
 
-from collections import defaultdict
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-first = dict()
-last = dict()
-count = defaultdict(int)
+    from collections import defaultdict
 
-for i in range(n):
-    x = a[i]
-    if x not in first:
-        first[x] = i
-    last[x] = i
-    count[x] += 1
+    first = dict()
+    last = dict()
+    count = defaultdict(int)
 
-# Create intervals: list of tuples (start, end, sum_count, max_count)
-intervals = []
-for x in first:
-    start = first[x]
-    end = last[x]
-    sum_c = count[x]
-    max_c = count[x]
-    intervals.append( (start, end, sum_c, max_c) )
+    for i in range(n):
+        x = a[i]
+        if x not in first:
+            first[x] = i
+        last[x] = i
+        count[x] += 1
 
-# Sort intervals by start
-intervals.sort()
+    # Create intervals: list of tuples (start, end, sum_count, max_count)
+    intervals = []
+    for x in first:
+        start = first[x]
+        end = last[x]
+        sum_c = count[x]
+        max_c = count[x]
+        intervals.append( (start, end, sum_c, max_c) )
 
-merged = []
-for interval in intervals:
-    if not merged:
-        merged.append(interval)
-    else:
-        last_start, last_end, last_sum, last_max = merged[-1]
-        current_start, current_end, current_sum, current_max = interval
-        if current_start <= last_end:
-            # Merge
-            new_start = min(last_start, current_start)
-            new_end = max(last_end, current_end)
-            new_sum = last_sum + current_sum
-            new_max = max(last_max, current_max)
-            merged[-1] = (new_start, new_end, new_sum, new_max)
-        else:
+    # Sort intervals by start
+    intervals.sort()
+
+    merged = []
+    for interval in intervals:
+        if not merged:
             merged.append(interval)
+        else:
+            last_start, last_end, last_sum, last_max = merged[-1]
+            current_start, current_end, current_sum, current_max = interval
+            if current_start <= last_end:
+                # Merge
+                new_start = min(last_start, current_start)
+                new_end = max(last_end, current_end)
+                new_sum = last_sum + current_sum
+                new_max = max(last_max, current_max)
+                merged[-1] = (new_start, new_end, new_sum, new_max)
+            else:
+                merged.append(interval)
 
-total = 0
-for interval in merged:
-    total += interval[2] - interval[3]
+    total = 0
+    for interval in merged:
+        total += interval[2] - interval[3]
 
-print(total)
+    print(total, file=output_stream)
 
-This code should handle all cases.
 
-Testing the first sample:
 
-After intervals are (0,4,3,3) and (1,3,2,2). sorted by start.
+def test():
+    import io
 
-Merging leads to one interval (0,4,5,3). sum 5-3=2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 0
+1 2 1 2 3 1 1 1 50 1
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-Which is correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample where all values are the same:
 

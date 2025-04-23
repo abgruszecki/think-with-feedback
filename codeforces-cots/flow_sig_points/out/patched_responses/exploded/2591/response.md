@@ -244,11 +244,73 @@ print(answer)
 
 Wait, but even if there are no x >=1, the code will set max_freq to 0. So answer is n-0 =n. Which is correct.
 
-Testing the examples.
+Testing against sample input 1.
 
-First example:
+```python
+import sys
+from collections import defaultdict
 
-x_list is [2,1,2]. So Counter has 2:2, 1:1. max_freq is 2. answer 3-2=1.
+
+def main(input_stream, output_stream):
+    n, *rest = map(int, input_stream.read().split())
+    a = rest[:n]
+    
+    layers = [min(i, (n-1) - i) for i in range(n)]
+    x_counter = defaultdict(int)
+    
+    for i in range(n):
+        layer = layers[i]
+        x = a[i] - layer
+        if x >= 1:
+            x_counter[x] += 1
+    
+    max_freq = max(x_counter.values()) if x_counter else 0
+    print(n - max_freq, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 2 2 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: x_list is [1,1,1,1]. max_freq 4. answer 0.
 

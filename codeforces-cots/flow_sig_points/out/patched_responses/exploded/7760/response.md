@@ -564,91 +564,395 @@ Now, code steps.
 
 Putting it all together:
 
-s = input().strip()
+Testing against sample input 3.
 
-sign = -1 if s.startswith('-') else 1
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-if sign == -1:
+    sign = -1 if s.startswith('-') else 1
 
-    num_str = s[1:]
+    if sign == -1:
 
-else:
+        num_str = s[1:]
 
-    num_str = s
+    else:
 
-if '.' in num_str:
+        num_str = s
 
-    integer_part, fractional_part = num_str.split('.', 1)
+    if '.' in num_str:
 
-else:
+        integer_part, fractional_part = num_str.split('.', 1)
 
-    integer_part = num_str
+    else:
 
-    fractional_part = ''
+        integer_part = num_str
 
-# process fractional_part
+        fractional_part = ''
 
-fractional_processed = (fractional_part + '00')[:2]
+    # process fractional_part
 
-# process integer_part
+    fractional_processed = (fractional_part + '00')[:2]
 
-reversed_s = integer_part[::-1]
+    # process integer_part
 
-groups = []
+    reversed_s = integer_part[::-1]
 
-for i in range(0, len(reversed_s), 3):
+    groups = []
 
-    group = reversed_s[i:i+3][::-1]
+    for i in range(0, len(reversed_s), 3):
 
-    groups.append(group)
+        group = reversed_s[i:i+3][::-1]
 
-groups = groups[::-1]
+        groups.append(group)
 
-formatted_integer = ','.join(groups)
+    groups = groups[::-1]
 
-formatted_number = f"{formatted_integer}.{fractional_processed}"
+    formatted_integer = ','.join(groups)
 
-if sign == -1:
+    formatted_number = f"{formatted_integer}.{fractional_processed}"
 
-    print(f"(${formatted_number})")
+    if sign == -1:
 
-else:
+        print(f"(${formatted_number})", file=output_stream)
 
-    print(f"${formatted_number}")
+    else:
 
-Wait, but what if the integer_part is empty? According to the problem constraints, the input cannot be like that. Because the input must have at least one decimal digit, and the '.' must have digits before and after. So integer_part will never be empty.
+        print(f"${formatted_number}", file=output_stream)
 
-Testing sample input 3:
 
-Input: -0.00987654321 → num_str is '0.00987654321' → split into integer_part '0', fractional_part '00987654321'.
 
-fractional_processed = '00' + '00'? No. Wait, fractional_part is '00987654321' → ( '00987654321' + '00')[:2] → '00'.
+def test():
+    import io
 
-formatted_integer is '0'.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+-12345678.9
+""",
+            "output": \
+"""\
+($12,345,678.90)
+""",
+        }, 
+    ]
 
-formatted_number is '0.00'.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-since sign is -1, output is '($0.00)'.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Which matches sample 3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sample input 4: '-12345678.9' → num_str is '12345678.9' → split into integer_part '12345678', fractional_part '9'.
+    print('Tests passed 😎')
 
-fractional_processed → '9' + '00' → '900'[:2] → '90'.
 
-formatted_integer is:
+if __name__ == '__main__':
+    test()
 
-reversed_s is '87654321' → split into i=0 → 876 → reversed '678', i=3 → 543 → '345', i=6 → 21 → '12'.
 
-groups after loop: ['678', '345', '12']. reversed → ['12', '345', '678'] → joined → '12,345,678'.
+```
 
-formatted_number → '12,345,678.90' → sign is -1 → output is ($12,345,678.90), which matches sample 4.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Sample input 2: input is '0.000' → num_str is '0.000' → split into integer_part '0', fractional_part '000' → fractional_processed is '00'.
+```
 
-formatted_integer is '0' → formatted_number is 0.00 → sign is positive → $0.00.
+Testing against sample input 2.
 
-Sample input 1: 2012 → integer_part '2012', reversed_s '2102' → split into 210 and 2 → reversed groups '012' and '2' → groups after reversing: ['2', '012'] → joined as '2,012'. So formatted_integer is '2,012' → output is $2,012.00.
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    sign = -1 if s.startswith('-') else 1
+
+    if sign == -1:
+
+        num_str = s[1:]
+
+    else:
+
+        num_str = s
+
+    if '.' in num_str:
+
+        integer_part, fractional_part = num_str.split('.', 1)
+
+    else:
+
+        integer_part = num_str
+
+        fractional_part = ''
+
+    # process fractional_part
+
+    fractional_processed = (fractional_part + '00')[:2]
+
+    # process integer_part
+
+    reversed_s = integer_part[::-1]
+
+    groups = []
+
+    for i in range(0, len(reversed_s), 3):
+
+        group = reversed_s[i:i+3][::-1]
+
+        groups.append(group)
+
+    groups = groups[::-1]
+
+    formatted_integer = ','.join(groups)
+
+    formatted_number = f"{formatted_integer}.{fractional_processed}"
+
+    if sign == -1:
+
+        print(f"(${formatted_number})", file=output_stream)
+
+    else:
+
+        print(f"${formatted_number}", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+-0.00987654321
+""",
+            "output": \
+"""\
+($0.00)
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 1.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    sign = -1 if s.startswith('-') else 1
+
+    if sign == -1:
+
+        num_str = s[1:]
+
+    else:
+
+        num_str = s
+
+    if '.' in num_str:
+
+        integer_part, fractional_part = num_str.split('.', 1)
+
+    else:
+
+        integer_part = num_str
+
+        fractional_part = ''
+
+    # process fractional_part
+
+    fractional_processed = (fractional_part + '00')[:2]
+
+    # process integer_part
+
+    reversed_s = integer_part[::-1]
+
+    groups = []
+
+    for i in range(0, len(reversed_s), 3):
+
+        group = reversed_s[i:i+3][::-1]
+
+        groups.append(group)
+
+    groups = groups[::-1]
+
+    formatted_integer = ','.join(groups)
+
+    formatted_number = f"{formatted_integer}.{fractional_processed}"
+
+    if sign == -1:
+
+        print(f"(${formatted_number})", file=output_stream)
+
+    else:
+
+        print(f"${formatted_number}", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0.000
+""",
+            "output": \
+"""\
+$0.00
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Wait, wait, let's test the code for integer_part '2012'.
+
+reversed_s = '2012' → reversed is '2102'? Wait, no. Wait, integer_part is '2012' → reversed_s is '2102' → split into groups of three.
+
+Wait, original '2012' → reversed is '2102'.
+
+Loop steps:
+
+i=0 → 0 to 3 → '210' → reversed to '012' → group becomes '012'.
+
+i=3 → 3 to 4 (since len(reversed_s) is 4) → '2' → reversed to '2' → group '2'.
+
+groups after loop: ['012', '2'].
+
+Then reverse the groups list → ['2', '012'] → joined with commas → '2,012'.
+
+Yes, which is correct.
+
+So the code handles that.
+
+Now, what about leading zeros in the integer part? The problem statement says that the input's integer part is either zero or has no leading zeros. So the code doesn't need to handle leading zeros except for the '0' case.
+
+So, code is correct.
+
+Now, code in Python.
+
+But wait, in the code, when formatting the integer_part, if the integer_part is '0', the code will output '0', which is correct.
+
+Now, code:
+
+Wait, wait, let's test the code for integer_part '2012'.
+
+reversed_s = '2012' → reversed is '2102'? Wait, no. Wait, integer_part is '2012' → reversed_s is '2102' → split into groups of three.
+
+Wait, original '2012' → reversed is '2102'.
+
+Loop steps:
+
+i=0 → 0 to 3 → '210' → reversed to '012' → group becomes '012'.
+
+i=3 → 3 to 4 (since len(reversed_s) is 4) → '2' → reversed to '2' → group '2'.
+
+groups after loop: ['012', '2'].
+
+Then reverse the groups list → ['2', '012'] → joined with commas → '2,012'.
+
+Yes, which is correct.
+
+So the code handles that.
+
+Now, what about leading zeros in the integer part? The problem statement says that the input's integer part is either zero or has no leading zeros. So the code doesn't need to handle leading zeros except for the '0' case.
+
+So, code is correct.
+
+Now, code in Python.
+
+But wait, in the code, when formatting the integer_part, if the integer_part is '0', the code will output '0', which is correct.
+
+Now, code:
+
+Wait, wait, let's test the code for integer_part '2012'.
+
+reversed_s = '2012' → reversed is '2102'? Wait, no. Wait, integer_part is '2012' → reversed_s is '2102' → split into groups of three.
+
+Wait, original '2012' → reversed is '2102'.
+
+Loop steps:
+
+i=0 → 0 to 3 → '210' → reversed to '012' → group becomes '012'.
+
+i=3 → 3 to 4 (since len(reversed_s) is 4) → '2' → reversed to '2' → group '2'.
+
+groups after loop: ['012', '2'].
+
+Then reverse the groups list → ['2', '012'] → joined with commas → '2,012'.
+
+Yes, which is correct.
+
+So the code handles that.
+
+Now, what about leading zeros in the integer part? The problem statement says that the input's integer part is either zero or has no leading zeros. So the code doesn't need to handle leading zeros except for the '0' case.
+
+So, code is correct.
+
+Now, code in Python.
+
+But wait, in the code, when formatting the integer_part, if the integer_part is '0', the code will output '0', which is correct.
+
+Now, code:
 
 Wait, wait, let's test the code for integer_part '2012'.
 

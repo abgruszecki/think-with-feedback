@@ -785,132 +785,109 @@ Now, the code:
 
 Implement the steps:
 
+Testing against sample input 1.
+
+```python
 import math
 from math import gcd
 from functools import lru_cache
 
-n, m = map(int, input().split())
-a = list(map(int, input().split()))
-bad_primes = set(map(int, input().split()))
-memo = {}
 
-def compute_f(s):
-    if s == 1:
-        return 0
-    if s in memo:
-        return memo[s]
-    # Find minimal prime divisor
-    if s % 2 == 0:
-        mp = 2
-    else:
-        mp = s
-        for i in range(3, int(math.isqrt(s)) +1, 2):
-            if s % i == 0:
-                mp = i
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    bad_primes = set(map(int, input_stream.readline().rstrip("\n").split()))
+    memo = {}
+
+    def compute_f(s):
+        if s == 1:
+            return 0
+        if s in memo:
+            return memo[s]
+        # Find minimal prime divisor
+        if s % 2 == 0:
+            mp = 2
+        else:
+            mp = s
+            for i in range(3, int(math.isqrt(s)) +1, 2):
+                if s % i == 0:
+                    mp = i
+                    break
+        if mp in bad_primes:
+            res = compute_f(s // mp) - 1
+        else:
+            res = compute_f(s // mp) + 1
+        memo[s] = res
+        return res
+
+    # Compute initial sum
+    total = sum(compute_f(x) for x in a)
+
+    for r in range(n, 0, -1):
+        # Compute GCD of first r elements
+        current_gcd = a[0]
+        for i in range(1, r):
+            current_gcd = math.gcd(current_gcd, a[i])
+            if current_gcd == 1:
                 break
-    if mp in bad_primes:
-        res = compute_f(s // mp) - 1
-    else:
-        res = compute_f(s // mp) + 1
-    memo[s] = res
-    return res
-
-# Compute initial sum
-total = sum(compute_f(x) for x in a)
-
-for r in range(n, 0, -1):
-    # Compute GCD of first r elements
-    current_gcd = a[0]
-    for i in range(1, r):
-        current_gcd = math.gcd(current_gcd, a[i])
-        if current_gcd == 1:
-            break
-    # Compute delta
-    delta = 0
-    for i in range(r):
-        s = a[i]
-        s_div = s // current_gcd
-        delta += compute_f(s_div) - compute_f(s)
-    if delta > 0:
-        total += delta
+        # Compute delta
+        delta = 0
         for i in range(r):
-            a[i] = a[i] // current_gcd
+            s = a[i]
+            s_div = s // current_gcd
+            delta += compute_f(s_div) - compute_f(s)
+        if delta > 0:
+            total += delta
+            for i in range(r):
+                a[i] = a[i] // current_gcd
 
-print(total)
+    print(total, file=output_stream)
 
-Wait, but the code has an issue: when current_gcd is 1, dividing by it does nothing. So for delta in this case, the delta is zero. But the code would still compute it. However, in practice, if current_gcd is 1, the code will proceed to compute delta, but since dividing by 1 leaves the elements unchanged, the delta will be zero, so no change is made.
 
-But in the code, for r in range(n, 0, -1):
 
-In Python, the loop is written as for r in range(n, 0, -1), which for n=5, r takes values 5,4,3,2,1. But for a list a of length n (0-based), the first r elements are a[0..r-1]. So the code is correct.
+def test():
+    import io
 
-But in Python, when you have a list of n elements, and r is in 1..n, the first r elements are a[0..r-1]. So for r=5 (n=5), it's the entire array.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 5
+2 4 8 16
+3 5 7 11 17
+""",
+            "output": \
+"""\
+10
+""",
+        }, 
+    ]
 
-But in the code, when r is 5, the loop processes the first 5 elements.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But the code has a problem when current_gcd is 0. But this can't happen since all elements are positive.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Another possible optimization: precompute the f values for all elements and their possible divisors.
+    print('Tests passed 😎')
 
-But given the time constraints, the code as written should work.
 
-Testing the sample inputs:
+if __name__ == '__main__':
+    test()
 
-Sample 1:
 
-After initial sum is computed as:
+```
 
-f(4) = -2
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-f(20) = -3
-
-f(34) = 0
-
-f(10) =-2
-
-f(10)=-2 → sum is -9.
-
-Processing r=5:
-
-Compute current_gcd of first 5 elements: 4,20,34,10,10.
-
-The GCD is 2.
-
-delta is sum of f(2) - f(4) + f(10) -f(20) + f(17) -f(34) + f(5) -f(10) + f(5) -f(10).
-
-f(2) is compute_f(2):
-
-mp=2 is in bad primes. compute_f(2//2=1) is 0. So f(2)=0-1=-1.
-
-f(4) is -2. delta for first element: -1 - (-2) = 1.
-
-f(10) is compute_f(10) is:
-
-10's mp is 2 (bad). f(10//2=5) → compute_f(5).
-
-5's mp is 5 (bad). f(5//5=1)=0. So f(5)=0-1=-1. f(10) = -1-1=-2.
-
-But wait, for element 20 divided by 2 → 10: f(10) is -2. Original f(20) is -3. delta is -2 - (-3) =1.
-
-For 34/2=17: compute_f(17). 17 is not in bad primes. compute_f(17//17=1) is 0. So f(17)=0+1=1. delta 1-0=1.
-
-For 10/2=5: f(5) is-1. Original f(10) is-2. delta is-1 - (-2) =1.
-
-For 10/2=5: same as above. delta is1.
-
-Total delta for r=5 is 1+1+1+1+1=5. So add 5 to total sum (-9+5= -4). Then divide each element by 2 → [2,10,17,5,5].
-
-Next r=4:
-
-current_gcd of first 4 elements: 2,10,17,5.
-
-The GCD of 2,10 is 2. Then GCD(2,17) is 1. So current_gcd is 1. Delta is 0. No change.
-
-And so on.
-
-The code should process this correctly.
+```
 
 Sample 2:
 

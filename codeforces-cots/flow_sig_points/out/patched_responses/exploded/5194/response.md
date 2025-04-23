@@ -392,105 +392,107 @@ But in code, the code must read from stdin, compute, and write to stdout.
 
 So in Python, after flipping the cell, check if is_okay. If yes, print YES and exit. So code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-grid = [list(input().strip()) for _ in range(4)]
 
-def is_okay(g):
+def main(input_stream, output_stream):
+    grid = [list(input_stream.readline().rstrip("\n").strip()) for _ in range(4)]
 
-    for x in range(3):
+    def is_okay(g):
 
-        for y in range(3):
+        for x in range(3):
 
-            a = g[x][y]
+            for y in range(3):
 
-            b = g[x][y+1]
+                a = g[x][y]
 
-            c = g[x+1][y]
+                b = g[x][y+1]
 
-            d = g[x+1][y+1]
+                c = g[x+1][y]
 
-            if a == b == c == d:
+                d = g[x+1][y+1]
 
-                return True
+                if a == b == c == d:
 
-    return False
+                    return True
 
-if is_okay(grid):
+        return False
 
-    print("YES")
+    if is_okay(grid):
 
-    sys.exit()
+        print("YES", file=output_stream)
 
-for i in range(4):
+        sys.exit()
 
-    for j in range(4):
+    for i in range(4):
 
-        # flip cell (i,j)
+        for j in range(4):
 
-        original = grid[i][j]
+            # flip cell (i,j)
 
-        grid[i][j] = '#' if original == '.' else '.' 
+            original = grid[i][j]
 
-        if is_okay(grid):
+            grid[i][j] = '#' if original == '.' else '.' 
 
-            print("YES")
+            if is_okay(grid):
 
-            sys.exit()
+                print("YES", file=output_stream)
 
-        grid[i][j] = original
+                sys.exit()
 
-print("NO")
+            grid[i][j] = original
 
-But wait, in Python, when you modify the grid, after flipping and checking, you revert it back. So each iteration of i,j flips the cell, checks, then flips back. So the grid is restored to its original state after each check.
+    print("NO", file=output_stream)
 
-This code should handle all cases.
 
-Testing the first sample input:
 
-Input:
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 ####
-
-.#..
-
-####
-
 ....
+####
+....
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-Original grid:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Row 0: ['#','#','#','#']
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Row 1: ['.','#','.', '.']
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Row 2: ['#','#','#','#']
+    print('Tests passed 😎')
 
-Row 3: ['.','.', '.', '.']
 
-Check if any original square is uniform. For example, the square starting at (0,0) has all #s (cells (0,0), (0,1), (1,0), (1,1)). Wait:
+if __name__ == '__main__':
+    test()
 
-Row 0, columns 0-1: '#', '#'
 
-Row 1, columns 0-1: '.', '#'
+```
 
-So cells are '#', '#', '.', '#'. These are not all the same. So original check returns false.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Then, the code loops through each cell.
-
-For example, when i=1 (second row), j=0 (first column):
-
-Original cell is '.'. Flip to '#'. The grid becomes:
-
-Row 1, column 0 is now '#'. So the square starting at (0,0) is now:
-
-Row 0, columns 0-1: '#', '#'
-
-Row 1, columns 0-1: '#', '#'
-
-So all four cells are '#', so the square is uniform. Thus, is_okay returns True, so code prints YES.
-
-So the code works for the first sample.
+```
 
 Second sample:
 

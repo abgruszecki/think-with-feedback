@@ -975,107 +975,115 @@ But in Python, for efficiency, we need to handle the list efficiently.
 
 Sample code:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-s, f = map(int, input().split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-A = s-1
+    s, f = map(int, input_stream.readline().rstrip("\n").split())
 
-B = f-1
+    A = s-1
 
-diff = [0]*n
+    B = f-1
 
-for i in range(1, n+1):
+    diff = [0]*n
 
-    L = (A - (i-1)) % n
+    for i in range(1, n+1):
 
-    R = (B - (i-1)) % n
+        L = (A - (i-1)) % n
 
-    ai = a[i-1]
+        R = (B - (i-1)) % n
 
-    if L < R:
+        ai = a[i-1]
 
-        diff[L] += ai
+        if L < R:
 
-        if R < n:
+            diff[L] += ai
 
-            diff[R] -= ai
+            if R < n:
 
-    else:
+                diff[R] -= ai
 
-        diff[L] += ai
+        else:
 
-        diff[0] += ai
+            diff[L] += ai
 
-        if R < n:
+            diff[0] += ai
 
-            diff[R] -= ai
+            if R < n:
 
-# Compute prefix sum
+                diff[R] -= ai
 
-max_sum = -1
+    # Compute prefix sum
 
-current_sum =0
+    max_sum = -1
 
-best_x =0
+    current_sum =0
 
-for x in range(n):
+    best_x =0
 
-    current_sum += diff[x]
+    for x in range(n):
 
-    if current_sum > max_sum or (current_sum == max_sum and x < best_x):
+        current_sum += diff[x]
 
-        max_sum = current_sum
+        if current_sum > max_sum or (current_sum == max_sum and x < best_x):
 
-        best_x = x
+            max_sum = current_sum
 
-h = best_x +1
+            best_x = x
 
-print(h)
+    h = best_x +1
 
-Wait, but when R is n, then diff[R] would be out of bounds. But since in Python, lists are 0-based, and R is mod n, R is always in 0..n-1. Because (B - (i-1)) mod n ensures R is within [0, n-1].
+    print(h, file=output_stream)
 
-So no need for if R <n.
 
-So code can be:
 
-...
+def test():
+    import io
 
-for i in range(1, n+1):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 2 3 4 1
+1 3
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-    L = (A - (i-1)) % n
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-    R = (B - (i-1)) % n
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-    ai = a[i-1]
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-    if L < R:
+    print('Tests passed 😎')
 
-        diff[L] += ai
 
-        diff[R] -= ai
+if __name__ == '__main__':
+    test()
 
-    else:
 
-        diff[L] += ai
+```
 
-        diff[0] += ai
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-        diff[R] -= ai
-
-Yes.
-
-Testing this with the first sample:
-
-Yes.
-
-Another thing to note: when R is 0, then in the else case, diff[0] +=ai and diff[0] -=ai, so net effect is diff[L] +=ai and diff[0] is unchanged.
-
-But the code handles it correctly.
-
-Now, the code should work.
+```
 
 Testing sample 2:
 

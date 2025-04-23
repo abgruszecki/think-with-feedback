@@ -213,136 +213,192 @@ Then, check if (b_x, b_y) is (c_x, c_y). But according to the problem statement,
 
 So the code is:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import deque
 
-n = int(sys.stdin.readline())
-a_x, a_y = map(int, sys.stdin.readline().split())
-b_x, b_y = map(int, sys.stdin.readline().split())
-c_x, c_y = map(int, sys.stdin.readline().split())
 
-visited = [[False]*(n+1) for _ in range(n+1)]
-queue = deque()
-queue.append( (b_x, b_y) )
-visited[b_x][b_y] = True
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    a_x, a_y = map(int, input_stream.readline().split())
+    b_x, b_y = map(int, input_stream.readline().split())
+    c_x, c_y = map(int, input_stream.readline().split())
 
-directions = [ (-1, -1), (-1, 0), (-1, 1),
-               (0, -1),          (0, 1),
-               (1, -1),  (1, 0), (1, 1) ]
+    visited = [[False]*(n+1) for _ in range(n+1)]
+    queue = deque()
+    queue.append( (b_x, b_y) )
+    visited[b_x][b_y] = True
 
-found = False
+    directions = [ (-1, -1), (-1, 0), (-1, 1),
+                   (0, -1),          (0, 1),
+                   (1, -1),  (1, 0), (1, 1) ]
 
-while queue:
-    x, y = queue.popleft()
-    if x == c_x and y == c_y:
-        found = True
-        break
-    for dx, dy in directions:
-        nx = x + dx
-        ny = y + dy
-        if 1 <= nx <= n and 1 <= ny <= n:
-            # Check if (nx, ny) is under attack
-            if nx == a_x or ny == a_y:
-                continue
-            if (nx - a_x) == (ny - a_y):
-                continue
-            if (nx + ny) == (a_x + a_y):
-                continue
-            if not visited[nx][ny]:
-                visited[nx][ny] = True
-                queue.append( (nx, ny) )
+    found = False
 
-print("YES" if found else "NO")
+    while queue:
+        x, y = queue.popleft()
+        if x == c_x and y == c_y:
+            found = True
+            break
+        for dx, dy in directions:
+            nx = x + dx
+            ny = y + dy
+            if 1 <= nx <= n and 1 <= ny <= n:
+                # Check if (nx, ny) is under attack
+                if nx == a_x or ny == a_y:
+                    continue
+                if (nx - a_x) == (ny - a_y):
+                    continue
+                if (nx + ny) == (a_x + a_y):
+                    continue
+                if not visited[nx][ny]:
+                    visited[nx][ny] = True
+                    queue.append( (nx, ny) )
 
-Wait, but in the code above, the check for the attack is using the four conditions. But the code here is using four separate if statements. Wait, no: the code checks each condition. Let's see:
+    print("YES" if found else "NO", file=output_stream)
 
-The code first checks if nx == a_x (same row) or ny == a_y (same column). If either is true, then continue (skip this neighbor).
 
-Then, check if (nx -a_x) == (ny - a_y) (same diagonal). If so, continue.
 
-Then check if (nx + ny) == (a_x + a_y) (same anti-diagonal). If so, continue.
+def test():
+    import io
 
-Only if none of these conditions are true, then proceed.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+4 4
+2 3
+1 6
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-Yes. So this correctly skips cells in check.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But wait, in the code, after checking the first two conditions (same row or column), it then checks the diagonals. So if any of the four conditions are met, the cell is blocked. So the code is correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So, the code will process the BFS, and for each neighbor cell, check if it's in the attack line. If not, and not visited, add to queue.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Now, for the sample input 1, the code should return YES.
+    print('Tests passed 😎')
 
-But let's test sample input 1:
 
-Sample 1:
+if __name__ == '__main__':
+    test()
 
-n=8
 
-Queen at (4,4)
+```
 
-King starts at (1,3), target at (3,1).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Check the attack lines. The queen's row is 4, column 4. Diagonals: x-y=0 (for example, 4-4=0). So cells like (5,5) are on the diagonal. The anti-diagonal is x + y = 8.
+```
 
-The king's path can go via (2,3) and (3,2). Let's see:
+Testing against sample input 2.
 
-From (1,3), possible moves are to (0,2) [invalid], (0,3) [invalid], (0,4) [invalid], (1,2), (1,4), (2,2), (2,3), (2,4).
+```python
+import sys
+from collections import deque
 
-Wait, the king can move to (2,3) first. Check if (2,3) is under attack.
 
-Check:
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    a_x, a_y = map(int, input_stream.readline().split())
+    b_x, b_y = map(int, input_stream.readline().split())
+    c_x, c_y = map(int, input_stream.readline().split())
 
-2 ==4? No. 3 ==4? No. 2-4 = -2, 3-4 = -1. Not equal. 2+3=5, 4+4=8. Not equal. So (2,3) is safe.
+    visited = [[False]*(n+1) for _ in range(n+1)]
+    queue = deque()
+    queue.append( (b_x, b_y) )
+    visited[b_x][b_y] = True
 
-Add to queue.
+    directions = [ (-1, -1), (-1, 0), (-1, 1),
+                   (0, -1),          (0, 1),
+                   (1, -1),  (1, 0), (1, 1) ]
 
-Then from (2,3), explore all directions. One possible direction is (3,2).
+    found = False
 
-Check (3,2):
+    while queue:
+        x, y = queue.popleft()
+        if x == c_x and y == c_y:
+            found = True
+            break
+        for dx, dy in directions:
+            nx = x + dx
+            ny = y + dy
+            if 1 <= nx <= n and 1 <= ny <= n:
+                # Check if (nx, ny) is under attack
+                if nx == a_x or ny == a_y:
+                    continue
+                if (nx - a_x) == (ny - a_y):
+                    continue
+                if (nx + ny) == (a_x + a_y):
+                    continue
+                if not visited[nx][ny]:
+                    visited[nx][ny] = True
+                    queue.append( (nx, ny) )
 
-3 !=4, 2 !=4. 3-4 = -1, 2-4=-2. Not same. 3+2=5 !=8. So safe.
+    print("YES" if found else "NO", file=output_stream)
 
-Then from (3,2), next step to (3,1). (3,1) is the target. So the code would find this path and return YES.
 
-Yes.
 
-So the code works for sample 1.
+def test():
+    import io
 
-Sample 2:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+3 5
+1 2
+6 1
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-Queen is at (4,4). King starts at (2,3), target at (1,6).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The queen's row is 4, column4. The path requires moving from (2,3) to (1,6). Let's see if the code can find a path.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But the king is at (2,3). To get to (1,6), he would need to move up (from (2,3) to (1,3)), then right. But row1 is not under attack. Wait, (1,3) is in row1, which is not the queen's row (4). So (1,3) is safe. Then, from (1,3), he can move to (1,4), but (1,4) is in the queen's column (a_y=4). So that's blocked. Alternatively, maybe other paths.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But in sample 2, the output is NO. The code would detect that the path is blocked by the queen's row 4. Because to reach (1,6) from (2,3), the king would have to cross row4. For example, moving east from (2,3) to (3,4), but (3,4) is in the queen's row? No, a_x=4. So (3,4) is row3, which is safe. Wait, perhaps the problem is that the queen's row is in the middle, and the king is in a region that's separated from the target by the queen's row.
+    print('Tests passed 😎')
 
-In sample 2, the queen's row is 4. The king starts at (2,3), which is in row2. The target is (1,6) in row1. So perhaps the path can go around the row4. But wait, the queen's row is 4. So any cell in row4 is blocked. So to go from (2,3) to (1,6), the king can move through rows 1-3, columns ... So perhaps the code would find a path.
 
-But according to the sample, the output is NO. So perhaps the code correctly finds that there's no path.
+if __name__ == '__main__':
+    test()
 
-Wait, in the sample explanation, the queen watches the fourth rank (row4). So the king can't cross row4. But in this case, the start is in row2 and the target is in row1, so maybe there's another blocking.
 
-Wait, perhaps the queen's column is 4. So any cell in column4 is blocked. The king's start is (2,3) (column3), target (1,6) (column6). To get from 3 to 6, the king might need to pass through columns 4 or 5. But if column4 is blocked, then the king can't cross it.
+```
 
-So (1,6) is in column6. The king is in column3. To reach column6, he has to move through columns 4 or 5. But column4 is blocked. So moving east from (2,3) to (2,4) is blocked. So he can't get to column4. So how can he reach column6?
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Alternative path: move north to (1,3), then east to (1,4) (blocked). So can't. So maybe the king can go south to (3,3), then east to (3,4) (blocked). So stuck. So the path is blocked. Hence, output NO.
+```
 
-So the code would correctly return NO for sample 2.
-
-So the code works.
-
-Thus, the code should handle all the sample cases correctly.
-
-Now, considering memory constraints. The visited array is a 2D list of size (n+1)x(n+1). For n=1000, that's 1001x1001 booleans. Each boolean in Python takes about 28 bytes (if stored as a list of lists of booleans, but in practice, a list of lists uses a lot more memory). Wait, no: in Python, each element in a list is a reference, and for a list of booleans, each element is a separate Python bool object, which takes up more space. However, for n=1000, 1001*1001= 1,002,001 elements. Each boolean in Python takes 28 bytes (as per some references), but that's way more than the memory limit. Wait, this would be 1e6 * 28 bytes = 28MB. But the memory limit is 256MB. So this is acceptable.
-
-Alternatively, perhaps using a more memory-efficient structure, like a bitmask. But for Python, it's easier to use a list of lists. However, in practice, for Python, using a list of lists of booleans for 1000x1000 is manageable. So the code should pass.
-
-Another optimization is to precompute the attack conditions for each cell during BFS, but the current approach checks each cell on the fly, which is O(1) per check and thus efficient.
-
-So the code should be correct and efficient.
 </think>
 
 ```python

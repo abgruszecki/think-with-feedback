@@ -426,73 +426,107 @@ Testing in Python: a loop of 1e6 iterations, each doing a division and adding to
 
 Thus, code:
 
-n = int(input())
+Testing against sample input 1.
 
-# compute cnt for digital roots 1-9.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-base = n //9
+    # compute cnt for digital roots 1-9.
 
-remainder = n %9
+    base = n //9
 
-cnt = [0]*10  # 0 unused.
+    remainder = n %9
 
-for x in range(1, 10):
+    cnt = [0]*10  # 0 unused.
 
-    if remainder ==0:
+    for x in range(1, 10):
 
-        cnt[x] = base
-
-    else:
-
-        if x <= remainder:
-
-            cnt[x] = base +1
-
-        else:
+        if remainder ==0:
 
             cnt[x] = base
 
-# compute first_total
+        else:
 
-first_total =0
+            if x <= remainder:
 
-for x in range(1,10):
+                cnt[x] = base +1
 
-    for y in range(1,10):
+            else:
 
-        product = x * y
+                cnt[x] = base
 
-        dr = (product -1) %9 +1
+    # compute first_total
 
-        z = dr
+    first_total =0
 
-        first_total += cnt[x] * cnt[y] * cnt[z]
+    for x in range(1,10):
 
-# compute sum_ab
+        for y in range(1,10):
 
-sum_ab =0
+            product = x * y
 
-for a in range(1, n+1):
+            dr = (product -1) %9 +1
 
-    sum_ab += n//a
+            z = dr
 
-answer = first_total - sum_ab
+            first_total += cnt[x] * cnt[y] * cnt[z]
 
-print(answer)
+    # compute sum_ab
 
-Testing sample input 1:
+    sum_ab =0
 
-n=4.
+    for a in range(1, n+1):
 
-cnt for 1-4 is 1, others 0.
+        sum_ab += n//a
 
-sum over x=1-4 and y=1-4.
+    answer = first_total - sum_ab
 
-Each x and y contribute 1 *1 * cnt[dr(xy)].
+    print(answer, file=output_stream)
 
-As before, the sum for first_total is 10.
 
-sum_ab is 4+2+1+1=8. 10-8=2. Correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2: n=5.
 

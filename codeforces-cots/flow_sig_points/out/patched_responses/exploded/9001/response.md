@@ -407,119 +407,120 @@ In Python:
 
 Read the inputs:
 
-n, b, a = map(int, input().split())
+Testing against sample input 1.
 
-s = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, b, a = map(int, input_stream.readline().rstrip("\n").split())
 
-current_b = b
+    s = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-current_a = a
+    current_b = b
 
-max_steps =0
+    current_a = a
 
-for si in s:
+    max_steps =0
 
-    # Check if both are empty
+    for si in s:
 
-    if current_b ==0 and current_a ==0:
+        # Check if both are empty
 
-        break
+        if current_b ==0 and current_a ==0:
 
-    if si ==1:
+            break
 
-        # sunny
+        if si ==1:
 
-        if current_b >0 and current_a < a:
+            # sunny
 
-            current_b -=1
+            if current_b >0 and current_a < a:
 
-            current_a = min(current_a +1, a)
+                current_b -=1
+
+                current_a = min(current_a +1, a)
+
+            else:
+
+                # choose either a or b, whichever is available
+
+                # prefer a first
+
+                if current_a >0:
+
+                    current_a -=1
+
+                elif current_b >0:
+
+                    current_b -=1
+
+                else:
+
+                    break
 
         else:
 
-            # choose either a or b, whichever is available
-
-            # prefer a first
+            # not sunny, use a first
 
             if current_a >0:
 
                 current_a -=1
 
-            elif current_b >0:
+            else:
+
+                if current_b ==0:
+
+                    break
 
                 current_b -=1
 
-            else:
+        max_steps +=1
 
-                break
+    print(max_steps, file=output_stream)
 
-    else:
 
-        # not sunny, use a first
 
-        if current_a >0:
+def test():
+    import io
 
-            current_a -=1
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 2 1
+1 0 0 1 0 1
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-        else:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-            if current_b ==0:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-                break
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-            current_b -=1
+    print('Tests passed 😎')
 
-    max_steps +=1
 
-print(max_steps)
+if __name__ == '__main__':
+    test()
 
-Wait, but in the else part (non-sunny), after using a or b, if neither is available, then we break. So code:
 
-In the non-sunny case:
+```
 
-if current_a >0:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-    use a.
-
-else:
-
-    if current_b >0:
-
-        use b.
-
-    else:
-
-        break.
-
-Wait, the code handles that.
-
-Testing the first example:
-
-s = [0,1,0,1,0]
-
-current_b=2, current_a=1.
-
-Step 1 (s_i=0):
-
-use a. current_a=0. steps=1.
-
-Step 2 (s_i=1):
-
-current_b=2>0, current_a=0 <1. So use battery. current_b=1. current_a=1. steps=2.
-
-Step3 (s_i=0):
-
-use a. current_a=0. steps=3.
-
-Step4 (s_i=1):
-
-current_b=1>0, current_a=0 <1. use battery. current_b=0. current_a=1. steps=4.
-
-Step5 (s_i=0):
-
-use a. current_a=0. steps=5. All steps done.
-
-So code returns 5.
+```
 
 Second example:
 

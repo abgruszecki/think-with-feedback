@@ -1936,23 +1936,110 @@ else:
 
 This code should handle all cases.
 
-Now, let's test the first example:
+Testing against sample input 1.
 
-sum_b=22, sum_c=58. sum_bc=80. 2n=8. 80/8=10=K.
+```python
+import sys
 
-Each a_i is computed correctly.
 
-sum_a=10=K.
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    b = list(map(int, input_stream.readline().split()))
+    c = list(map(int, input_stream.readline().split()))
+    
+    sum_b = sum(b)
+    sum_c = sum(c)
+    sum_bc = sum_b + sum_c
+    
+    if sum_bc % (2 * n) != 0:
+        print(-1, file=output_stream)
+        return
+    
+    K = sum_bc // (2 * n)
+    a = []
+    valid = True
+    
+    for i in range(n):
+        numerator = b[i] + c[i] - K
+        if numerator % n != 0:
+            valid = False
+        ai = numerator // n
+        if ai < 0:
+            valid = False
+        a.append(ai)
+    
+    if not valid:
+        print(-1, file=output_stream)
+        return
+    
+    sum_a = sum(a)
+    if sum_a != K:
+        print(-1, file=output_stream)
+        return
+    
+    bits = [0] * 31
+    for num in a:
+        for k in range(31):
+            if num & (1 << k):
+                bits[k] += 1
+    
+    sum_ands = 0
+    sum_ors = 0
+    for k in range(31):
+        x = bits[k]
+        sum_ands += x * x * (1 << k)
+        sum_ors += x * (2 * n - x) * (1 << k)
+    
+    if sum_ands == sum_b and sum_ors == sum_c:
+        print(' '.join(map(str, a)), file=output_stream)
+    else:
+        print(-1, file=output_stream)
 
-bits:
 
-bit 0:4, bit 1:1, bit 2:1.
 
-sum_ands = 4^2*1 +1^2*2 +1^2*4= 16 +2+4=22.
+def test():
+    import io
 
-sum_ors=4*(8-4)*1 +1*(8-1)*2 +1*(8-1)*4= 4*4*1 +7*2 +7*4 →16+14+28=58.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+8 25 14 7 16
+19 6 9 4 25
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-Thus, output is correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case:
 

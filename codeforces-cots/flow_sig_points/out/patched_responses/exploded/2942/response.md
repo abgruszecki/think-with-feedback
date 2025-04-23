@@ -176,58 +176,77 @@ Yes.
 
 So code outline:
 
-n, m = map(int, input().split())
-grid = [input().strip() for _ in range(n)]
+Testing against sample input 1.
 
-row_counts = [row.count('*') for row in grid]
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    grid = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
 
-col_counts = []
-for j in range(m):
-    cnt = 0
-    for i in range(n):
-        if grid[i][j] == '*':
-            cnt +=1
-    col_counts.append(cnt)
+    row_counts = [row.count('*') for row in grid]
 
-total = 0
-for i in range(n):
+    col_counts = []
     for j in range(m):
-        if grid[i][j] == '*':
-            total += (row_counts[i]-1) * (col_counts[j]-1)
+        cnt = 0
+        for i in range(n):
+            if grid[i][j] == '*':
+                cnt +=1
+        col_counts.append(cnt)
 
-print(total)
+    total = 0
+    for i in range(n):
+        for j in range(m):
+            if grid[i][j] == '*':
+                total += (row_counts[i]-1) * (col_counts[j]-1)
 
-Wait, but in Python, for the col_counts, using a loop for each j and each i. For m=1000, n=1000, that's 1e6 operations. Which is acceptable.
+    print(total, file=output_stream)
 
-Testing the first example:
 
-Input:
 
-2 2
+def test():
+    import io
 
-**
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 4
+*..*
+.**.
+*.**
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
 
-*.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Then grid is:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-['**', '*.']
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-row_counts = [2,1]
+    print('Tests passed 😎')
 
-col_counts for j=0: 2 (row 0 and 1 have j=0 as '*'), j=1: 1 (only row 0, j=1 is '*').
 
-Then for each cell:
+if __name__ == '__main__':
+    test()
 
-(0,0): (2-1)*(2-1) = 1*1=1.
 
-(0,1): (2-1)*(1-1)=0.
+```
 
-(1,0): (1-1)* (2-1) = 0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Total is 1.
-
-Which is correct.
+```
 
 Second example:
 

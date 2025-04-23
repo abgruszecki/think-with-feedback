@@ -256,45 +256,73 @@ Implement the loop.
 
 So the code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n, c = map(int, sys.stdin.readline().split())
 
-t = list(map(int, sys.stdin.readline().split()))
+def main(input_stream, output_stream):
+    n, c = map(int, input_stream.readline().split())
 
-ans = 1
+    t = list(map(int, input_stream.readline().split()))
 
-for i in range(n-2, -1, -1):
+    ans = 1
 
-    if t[i+1] - t[i] > c:
+    for i in range(n-2, -1, -1):
 
-        break
+        if t[i+1] - t[i] > c:
 
-    ans +=1
+            break
 
-print(ans)
+        ans +=1
 
-Yes. This should work.
+    print(ans, file=output_stream)
 
-Testing the code against the samples.
 
-Sample 1:
 
-Input:
+def test():
+    import io
 
-6 5
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 1
+1 3 5 7 9 10
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-1 3 8 14 19 20
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The code reads the t as [1,3,8,14,19,20]. ans starts at 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Loop:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=4: t[5]-t[4] =1 <=5 → ans=2.
+    print('Tests passed 😎')
 
-i=3: t[4]-t[3] =5 → ans=3.
 
-i=2: t[3]-t[2]=6>5 → break. So ans is 3. Correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

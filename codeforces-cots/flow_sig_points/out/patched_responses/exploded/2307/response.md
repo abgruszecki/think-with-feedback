@@ -1361,247 +1361,153 @@ For each residue r:
 
               Now, the code:
 
-              import sys
-              from collections import defaultdict, Counter
-
-              n, m, p = map(int, sys.stdin.readline().split())
-              a = list(map(int, sys.stdin.readline().split()))
-              b = list(map(int, sys.stdin.readline().split()))
-
-              target_freq = Counter(b)
-              unique_b_count = len(target_freq)
-
-              result = []
-
-              max_q = n - (m-1)*p
-              if max_q < 1:
-                  print(0)
-                  print()
-                  sys.exit()
-
-              for r in range(p):
-                  elements_r = a[r::p]
-                  l = len(elements_r)
-                  if l < m:
-                      continue
-                  current_freq = defaultdict(int)
-                  mismatches = len(target_freq)  # initially, each element in target has count 0.
-
-                  valid_qs = []
+Testing against sample input 1.
+
+```python
+import sys
+from collections import defaultdict, Counter
+
+
+def main(input_stream, output_stream):
+    n, m, p = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
+    b = list(map(int, input_stream.readline().split()))
+
+    target_freq = Counter(b)
+    unique_b_count = len(target_freq)
+
+    result = []
+
+    max_q = n - (m-1)*p
+    if max_q < 1:
+        print(0, file=output_stream)
+        print(file=output_stream)
+        sys.exit()
+
+    for r in range(p):
+        elements_r = a[r::p]
+        l = len(elements_r)
+        if l < m:
+            continue
+        current_freq = defaultdict(int)
+        mismatches = len(target_freq)  # initially, each element in target has count 0.
+
+        valid_qs = []
+
+        # Process first window
+        for i in range(m):
+            e = elements_r[i]
+            if e not in target_freq:
+                # element not in target; increment mismatches
+                mismatches +=1
+            else:
+                current_freq[e] +=1
+                if current_freq[e] == target_freq[e]:
+                    mismatches -=1
+                elif current_freq[e] == target_freq[e] +1:
+                    mismatches +=1
+
+        if mismatches ==0 and not any(e not in target_freq for e in current_freq):
+            # Wait, no. Because mismatches includes elements not in target_freq. So if mismatches is zero, then current_freq has no elements not in target_freq.
+
+            # So if mismatches is zero, then valid.
+
+            q = r + 0 * p +1
+            valid_qs.append(q)
+
+        # Slide window
+        for i in range(m, l):
+            removed_e = elements_r[i - m]
+
+            # Remove from current_freq
+            if removed_e not in target_freq:
+                current_freq[removed_e] -=1
+                if current_freq[removed_e] ==0:
+                    del current_freq[removed_e]
+                if current_freq.get(removed_e, 0) ==0:
+                    mismatches -=1
+            else:
+                current_freq[removed_e] -=1
+                if current_freq[removed_e] == target_freq[removed_e] -1:
+                    mismatches +=1
+                elif current_freq[removed_e] == target_freq[removed_e]:
+                    mismatches -=1
+
+            # Add new element
+            added_e = elements_r[i]
+            if added_e not in target_freq:
+                current_freq[added_e] +=1
+                if current_freq[added_e] ==1:
+                    mismatches +=1
+            else:
+                current_freq[added_e] +=1
+                if current_freq[added_e] == target_freq[added_e]:
+                    mismatches -=1
+                elif current_freq[added_e] == target_freq[added_e] +1:
+                    mismatches +=1
+
+            # Check for validity
+            if mismatches ==0:
+                window_start_index_in_elements_r = i -m +1
+                q = r + window_start_index_in_elements_r * p +1
+                valid_qs.append(q)
+
+        result.extend(valid_qs)
+
+    # Sort the result and output
+    result.sort()
+    print(len(result), file=output_stream)
+    if result:
+        print(' '.join(map(str, result)), file=output_stream)
+    else:
+        print(file=output_stream)
+
 
-                  # Process first window
-                  for i in range(m):
-                      e = elements_r[i]
-                      if e not in target_freq:
-                          # element not in target; increment mismatches
-                          mismatches +=1
-                      else:
-                          current_freq[e] +=1
-                          if current_freq[e] == target_freq[e]:
-                              mismatches -=1
-                          elif current_freq[e] == target_freq[e] +1:
-                              mismatches +=1
 
-                  if mismatches ==0 and not any(e not in target_freq for e in current_freq):
-                      # Wait, no. Because mismatches includes elements not in target_freq. So if mismatches is zero, then current_freq has no elements not in target_freq.
+def test():
+    import io
 
-                      # So if mismatches is zero, then valid.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 3 2
+1 3 2 2 3 1
+1 2 3
+""",
+            "output": \
+"""\
+2
+1 2
+""",
+        }, 
+    ]
 
-                      q = r + 0 * p +1
-                      valid_qs.append(q)
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-                  # Slide window
-                  for i in range(m, l):
-                      removed_e = elements_r[i - m]
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-                      # Remove from current_freq
-                      if removed_e not in target_freq:
-                          current_freq[removed_e] -=1
-                          if current_freq[removed_e] ==0:
-                              del current_freq[removed_e]
-                          if current_freq.get(removed_e, 0) ==0:
-                              mismatches -=1
-                      else:
-                          current_freq[removed_e] -=1
-                          if current_freq[removed_e] == target_freq[removed_e] -1:
-                              mismatches +=1
-                          elif current_freq[removed_e] == target_freq[removed_e]:
-                              mismatches -=1
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-                      # Add new element
-                      added_e = elements_r[i]
-                      if added_e not in target_freq:
-                          current_freq[added_e] +=1
-                          if current_freq[added_e] ==1:
-                              mismatches +=1
-                      else:
-                          current_freq[added_e] +=1
-                          if current_freq[added_e] == target_freq[added_e]:
-                              mismatches -=1
-                          elif current_freq[added_e] == target_freq[added_e] +1:
-                              mismatches +=1
+    print('Tests passed 😎')
 
-                      # Check for validity
-                      if mismatches ==0:
-                          window_start_index_in_elements_r = i -m +1
-                          q = r + window_start_index_in_elements_r * p +1
-                          valid_qs.append(q)
 
-                  result.extend(valid_qs)
+if __name__ == '__main__':
+    test()
 
-              # Sort the result and output
-              result.sort()
-              print(len(result))
-              if result:
-                  print(' '.join(map(str, result)))
-              else:
-                  print()
 
-              But wait, there's a mistake in the calculation of q. Because the elements_r is a[r], a[r+p], a[r+2p], etc. The index in elements_r is 0-based. The first element is a[r], which is at position r in a. So for elements_r[i], the position in a is r + i*p. So for a window starting at index s in elements_r (0-based), the first element is a[r + s*p], which is 1-based q = (r + s*p) + 1.
+```
 
-              So in code, for a window starting at elements_r[s], the q is (r + s*p) +1 = r + s*p +1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-              So in the first window, s is 0 → q is r+1.
-
-              For the window starting at s = i -m +1 (when sliding), i is the current index in elements_r. For example, when i=m, the window starts at s=1 (since i -m +1= m -m +1=1).
-
-              So the q for the window starting at s is r + s*p +1.
-
-              So the code should compute q as r + s*p +1.
-
-              But in the code, during sliding:
-
-              for i in range(m, l):
-
-                  window_start_index_in_elements_r = i - m +1
-
-                  q = r + window_start_index_in_elements_r * p +1
-
-              Yes. This is correct.
-
-              Now, let's test this code with the second sample:
-
-              Sample 2:
-
-              n=6, m=3, p=2.
-
-              a = [1,3,2,2,3,1]
-
-              b = [1,2,3].
-
-              For residue 0:
-
-                  elements_r = a[0::2] → [1,2,3] (indices 0,2,4).
-
-                  len=3, which is equal to m=3.
-
-                  Process first window:
-
-                      elements 1,2,3.
-
-                      target_freq is {1:1,2:1,3:1}.
-
-                      mismatches starts at 3.
-
-                      Adding 1: in target. current_freq[1]=1 → matches. mismatches becomes 2.
-
-                      Adding 2: current_freq[2]=1 → matches. mismatches 1.
-
-                      Adding3: current_freq[3]=1 → matches. mismatches 0.
-
-                      q =0 +0*2 +1=1.
-
-                      valid_qs = [1]
-
-                  No more elements to slide.
-
-              For residue 1:
-
-                  elements_r = a[1::2] → [3,2,1] (indices 1,3,5).
-
-                  len=3.
-
-                  Process first window:
-
-                      elements 3,2,1.
-
-                      target_freq is same.
-
-                      mismatches starts at 3.
-
-                      Adding3: current_freq[3]=1 → matches. mismatches 2.
-
-                      Adding2: current_freq[2]=1 → mismatches 1.
-
-                      Adding1: current_freq[1]=1 → mismatches 0.
-
-                      q =1 +0*2 +1=2.
-
-                      valid_qs = [2]
-
-              So the result is [1,2], which matches the sample.
-
-              So the code works.
-
-              Now, let's check for the case where elements in current_freq have elements not in target_freq. For example, if a window has an element not in b.
-
-              Let's say a window has elements [1,1,3], and b is [1,2,3].
-
-              target_freq is {1:1, 2:1, 3:1}.
-
-              current_freq is {1:2,3:1}.
-
-              mismatches is computed as follows:
-
-              For each element in current_freq:
-
-                  1: 2 !=1 → contributes 1.
-
-                  3: 1 ==1 → no contribution.
-
-                  Also, the element 1 is in target_freq, but count is wrong. The element 3 is okay.
-
-              So mismatches is 1 (for element 1) + 0 (for element 3) → but also, elements not in target_freq?
-
-              No. In this case, all elements are in target_freq, but the counts are wrong.
-
-              But in the code, when adding an element not in target_freq, mismatches is increased by 1. So in this example, there are no elements not in target_freq. So the mismatches would be for the elements in target_freq where counts are wrong.
-
-              So in this example, the code would have mismatches = (1 (from 1) + 0 (from 3) ) + (0 for elements not in target).
-
-              But how is this tracked in the code.
-
-              The code's initial mismatches is len(target_freq) =3.
-
-              When adding 1 (first element):
-
-                  current_freq[1] becomes 1 → matches target. mismatches decreases by 1 → 2.
-
-              Adding another 1:
-
-                  current_freq[1] becomes 2 → target is 1 → mismatches increases by 1 → 2+1=3.
-
-              Adding 3:
-
-                  current_freq[3] becomes 1 → matches target. mismatches decreases by 1 →3-1=2.
-
-              So mismatches is 2. But the window has 1 appearing twice, which is not allowed. So the code would not consider this window valid.
-
-              Thus, the code correctly handles this case.
-
-              So the code should work.
-
-              Now, let's think about possible edge cases.
-
-              Edge Case 1: m=1.
-
-              Then, each q can be 1-based up to n.
-
-              For each q, the element a[q-1] must be in b, but since m=1, the multiset is just the single element. So the code should count all q's where a[q-1] is in b.
-
-              But the code checks if the frequency matches. For m=1, target_freq would have each element's count as 1. So for each q, the code checks if the element's count in the window (1) matches the target_freq.
-
-              So it's correct.
+```
 
               Edge Case 2: p is larger than n.
 

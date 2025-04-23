@@ -1957,35 +1957,246 @@ else:
 
    print("Daenerys")
 
-Let's test this code on the samples.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-m=2 even.
+    count_odds = sum(1 for x in a if x % 2 != 0)
+    count_evens = n - count_odds
+    moves = n - k
 
-forced_flips =2-1=1.
+    if moves == 0:
+        if count_odds % 2 == 0:
+            print("Daenerys", file=output_stream)
+        else:
+            print("Stannis", file=output_stream)
+        return
 
-1 is odd.
+    # Calculate the minimal number of odds that must be removed (forced_flips)
+    forced_flips = max(0, moves - count_evens)
 
-sum_parity = (0) ^1 →1.
+    # Check if the minimal required flips exceed the available odds
+    if forced_flips > count_odds:
+        # Not possible, but problem constraints ensure this won't happen
+        print("Stannis" if (count_odds % 2 == 1) else "Daenerys", file=output_stream)
+        return
 
-m is even → no change.
+    # Determine the parity after forced_flips
+    remaining_odds = count_odds - forced_flips
+    sum_parity = remaining_odds % 2
 
-sum_parity 1 → Stannis. Correct.
+    # Check if there are additional possible flips (beyond forced_flips)
+    max_flips = min(count_odds, moves)
+    can_adjust = (max_flips - forced_flips) >= 1
 
-Sample 2:
+    if moves % 2 == 1:
+        # Stannis has the last move; he can adjust if there are both evens and odds left
+        # Check if after (moves-1) removals, there's at least one even and one odd left
+        remaining_after = n - (moves - 1)
+        if remaining_after < 1:
+            can_choose = False
+        else:
+            # Compute the minimal evens removed in (moves-1) steps
+            min_evens_removed = max(0, (moves - 1) - count_odds)
+            remaining_evens = count_evens - min_evens_removed
+            remaining_odds_after = count_odds - (moves - 1 - min_evens_removed)
+            can_choose = remaining_evens > 0 and remaining_odds_after > 0
 
-m=2 even.
+        if can_choose:
+            sum_parity = 1 - sum_parity
+        else:
+            # Check if there's an odd remaining to flip
+            if (count_odds - forced_flips) > 0:
+                sum_parity = 1 - sum_parity
+            else:
+                # Forced to flip even, no change
+                pass
+    else:
+        # Even moves; parity depends on forced_flips and possible adjustments
+        if can_adjust and (forced_flips % 2 != (max_flips % 2)):
+            # Both parities are possible, outcome depends on initial parity and moves
+            sum_parity = (sum_parity + (moves // 2) % 2) % 2
+        else:
+            # Parity is determined by forced_flips
+            sum_parity = (count_odds - forced_flips) % 2
 
-E=2 >=m=2 → forced_flips=0.
+    if sum_parity % 2 == 1:
+        print("Stannis", file=output_stream)
+    else:
+        print("Daenerys", file=output_stream)
 
-sum_parity=1 ^0 →1.
 
-m is even → no change.
 
-sum_parity is 1 → Stannis. But sample output is Daenerys.
+def test():
+    import io
 
-Thus, the code is incorrect.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 1
+2 2 1
+""",
+            "output": \
+"""\
+Daenerys
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    count_odds = sum(1 for x in a if x % 2 != 0)
+    count_evens = n - count_odds
+    moves = n - k
+
+    if moves == 0:
+        if count_odds % 2 == 0:
+            print("Daenerys", file=output_stream)
+        else:
+            print("Stannis", file=output_stream)
+        return
+
+    # Calculate the minimal number of odds that must be removed (forced_flips)
+    forced_flips = max(0, moves - count_evens)
+
+    # Check if the minimal required flips exceed the available odds
+    if forced_flips > count_odds:
+        # Not possible, but problem constraints ensure this won't happen
+        print("Stannis" if (count_odds % 2 == 1) else "Daenerys", file=output_stream)
+        return
+
+    # Determine the parity after forced_flips
+    remaining_odds = count_odds - forced_flips
+    sum_parity = remaining_odds % 2
+
+    # Check if there are additional possible flips (beyond forced_flips)
+    max_flips = min(count_odds, moves)
+    can_adjust = (max_flips - forced_flips) >= 1
+
+    if moves % 2 == 1:
+        # Stannis has the last move; he can adjust if there are both evens and odds left
+        # Check if after (moves-1) removals, there's at least one even and one odd left
+        remaining_after = n - (moves - 1)
+        if remaining_after < 1:
+            can_choose = False
+        else:
+            # Compute the minimal evens removed in (moves-1) steps
+            min_evens_removed = max(0, (moves - 1) - count_odds)
+            remaining_evens = count_evens - min_evens_removed
+            remaining_odds_after = count_odds - (moves - 1 - min_evens_removed)
+            can_choose = remaining_evens > 0 and remaining_odds_after > 0
+
+        if can_choose:
+            sum_parity = 1 - sum_parity
+        else:
+            # Check if there's an odd remaining to flip
+            if (count_odds - forced_flips) > 0:
+                sum_parity = 1 - sum_parity
+            else:
+                # Forced to flip even, no change
+                pass
+    else:
+        # Even moves; parity depends on forced_flips and possible adjustments
+        if can_adjust and (forced_flips % 2 != (max_flips % 2)):
+            # Both parities are possible, outcome depends on initial parity and moves
+            sum_parity = (sum_parity + (moves // 2) % 2) % 2
+        else:
+            # Parity is determined by forced_flips
+            sum_parity = (count_odds - forced_flips) % 2
+
+    if sum_parity % 2 == 1:
+        print("Stannis", file=output_stream)
+    else:
+        print("Daenerys", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 3
+5 20 12 7 14 101
+""",
+            "output": \
+"""\
+Stannis
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 103, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 96, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: 'Stannis'
+Got: 'Daenerys'
+
+```
 
 Thus, the model is incorrect.
 

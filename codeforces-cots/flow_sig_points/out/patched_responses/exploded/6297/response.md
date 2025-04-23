@@ -1395,97 +1395,662 @@ But this would take O(n) time, which is acceptable.
 
 Thus, the corrected code is:
 
+Testing against sample input 1.
+
+```python
 import functools
 
-n, L = map(int, input().split())
 
-c = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n, L = map(int, input_stream.readline().rstrip("\n").split())
 
-types = list(range(n))
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-def compare(i, j):
+    types = list(range(n))
 
-    vol_i = 1 << i
+    def compare(i, j):
 
-    vol_j = 1 << j
+        vol_i = 1 << i
 
-    if c[i] * vol_j < c[j] * vol_i:
+        vol_j = 1 << j
 
-        return -1
+        if c[i] * vol_j < c[j] * vol_i:
 
-    elif c[i] * vol_j > c[j] * vol_i:
+            return -1
 
-        return 1
+        elif c[i] * vol_j > c[j] * vol_i:
 
-    else:
+            return 1
 
-        return 0
+        else:
 
-types.sort(key=functools.cmp_to_key(compare))
+            return 0
 
-total_cost = 0
+    types.sort(key=functools.cmp_to_key(compare))
 
-remaining = L
+    total_cost = 0
 
-for i in types:
+    remaining = L
 
-    volume = 1 << i
+    for i in types:
 
-    count = remaining // volume
+        volume = 1 << i
 
-    if count >0:
+        count = remaining // volume
 
-        total_cost += count * c[i]
+        if count >0:
 
-        remaining -= count * volume
+            total_cost += count * c[i]
 
-    if remaining <=0:
+            remaining -= count * volume
 
-        break
+        if remaining <=0:
 
-if remaining >0:
+            break
 
-    min_extra = min(c[i] for i in types)
+    if remaining >0:
 
-    total_cost += min_extra
+        min_extra = min(c[i] for i in types)
 
-print(total_cost)
+        total_cost += min_extra
 
-Wait, but this may not be correct. For example, if there's a type i with volume larger than the remaining, but its cost is cheaper than any other type.
+    print(total_cost, file=output_stream)
 
-For example, if remaining is3, and there's a type with volume8 and cost10, which is cheaper than type0 (cost20). Then adding the type8 for10 is better.
 
-Thus, the code should find the minimal cost among all types for adding one bottle, regardless of their volume.
 
-Thus, the code correctly adds the minimal c[i], which in this case is10.
+def test():
+    import io
 
-Thus, the code works.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 3
+10000 1000 100 10
+""",
+            "output": \
+"""\
+10
+""",
+        }, 
+    ]
 
-Testing sample1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-After processing all types:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-types are sorted as [3,1,2,0].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Processing type3: count=12//8=1. remaining=4. total_cost=90.
+    print('Tests passed 😎')
 
-Processing type1: remaining=4. volume=2. count=4//2=2. total_cost=90+2*30=150. remaining=0. break.
 
-Thus, remaining is0. So no need to add anything. total_cost is150. correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 93, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 86, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '10'
+Got: '11000'
+
+```
+
+Testing against sample input 2.
+
+```python
+import functools
+
+
+def main(input_stream, output_stream):
+    n, L = map(int, input_stream.readline().rstrip("\n").split())
+
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    types = list(range(n))
+
+    def compare(i, j):
+
+        vol_i = 1 << i
+
+        vol_j = 1 << j
+
+        if c[i] * vol_j < c[j] * vol_i:
+
+            return -1
+
+        elif c[i] * vol_j > c[j] * vol_i:
+
+            return 1
+
+        else:
+
+            return 0
+
+    types.sort(key=functools.cmp_to_key(compare))
+
+    total_cost = 0
+
+    remaining = L
+
+    for i in types:
+
+        volume = 1 << i
+
+        count = remaining // volume
+
+        if count >0:
+
+            total_cost += count * c[i]
+
+            remaining -= count * volume
+
+        if remaining <=0:
+
+            break
+
+    if remaining >0:
+
+        min_extra = min(c[i] for i in types)
+
+        total_cost += min_extra
+
+    print(total_cost, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 3
+10 100 1000 10000
+""",
+            "output": \
+"""\
+30
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Thus, there's a problem.
+
+What's wrong here?
+
+Ah, the code is not processing the sorted types correctly. Let's re-examine sample2:
 
 Sample2:
 
-remaining is3.
+n=4, L=3.
 
-Processing type3: count=3//8=0. total_cost remains0. remaining=3.
+c = [10000, 1000, 100, 10]. 0-based indices.
 
-Processing type2 (volume4, cost100): count=3//4=0. remaining=3.
+types are 0,1,2,3.
 
-Processing type1 (volume2, cost1000): count=3//2=1. total_cost +=1000. remaining=3-2=1.
+volumes are 1,2,4,8.
 
-Processing type0 (volume1, cost10000): count=1. total_cost +=10000. remaining=0. total_cost=10000+1000=11000. But remaining is0.
+ per-liter cost for each type:
 
-But according to the code, after processing all types, remaining is0. So no extra cost is added. But according to sample2, the correct answer is10.
+type0:10000/1=10000.
+
+type1:1000/2=500.
+
+type2:100/4=25.
+
+type3:10/8=1.25.
+
+So sorted order is type3, type2, type1, type0.
+
+Processing types in this order:
+
+type3: volume8.
+
+remaining=3. count=3//8=0. no change.
+
+type2: volume4. remaining=3. count=0.
+
+type1: volume2. remaining=3. count=3//2=1. total_cost +=1000. remaining=1.
+
+type0: volume1. remaining=1. count=1. total_cost +=10000. remaining=0.
+
+Thus, total_cost=1000+10000=11000. But sample2's correct answer is10.
+
+So what's wrong?
+
+The code processes the sorted types in the order type3, type2, type1, type0. But when processing type3, count is0. So no cost added. Then type2, count0. Then type1, count1 (volume2). remaining becomes1. Then type0, count1 (volume1). remaining becomes0. Thus, total cost 1000+10000=11000. But the correct answer is10, which is achieved by buying type3's 8L for10.
+
+But according to the code, after processing all types, remaining is0, so no extra cost is added. But why wasn't type3 considered in the extra cost?
+
+Because after processing type3, count is0. So remaining is3. Then type2, count0. remaining3. type1, count1. remaining1. type0, count1. remaining0.
+
+But the code does not consider that adding one bottle of type3 (cost10) would cover the remaining3. But during the processing, type3 was already processed with count0, but the code didn't buy any. Then, after processing all types, remaining is0, so no extra cost is added.
+
+But wait, in this case, after processing all types, remaining is0. So the code would not add any extra cost.
+
+But sample2's correct answer is10, which is achieved by buying one type3's bottle (8L), which covers the required 3L.
+
+But according to the code, during processing type3, count=0. remaining=3. Then type3 is not processed again. The code proceeds to type2, type1, type0. Eventually, the remaining becomes0, but the total cost is11000.
+
+Thus, the code is incorrect.
+
+What's the issue?
+
+The code's algorithm is not considering that buying a higher type (even if its count is zero) can cover the required liters in a single bottle and be cheaper.
+
+Thus, the problem with the code is that it doesn't consider the option of buying one bottle of a type even if count is zero.
+
+Thus, during processing each type, the code should also consider buying one more bottle even if count is zero.
+
+Thus, the correct approach is, for each type in the sorted list, buy as many as possible (count), but also consider buying one more.
+
+Thus, during processing each type, we should compute two options:
+
+1. Buy count bottles.
+
+2. Buy count +1 bottles.
+
+Take the minimal cost between these options.
+
+But how to implement this without increasing the time complexity.
+
+An alternative approach is to track the minimal cost so far at each step.
+
+Thus, during processing each type, compute the cost for using count and count+1, and keep track of the minimal cost.
+
+Thus, the code can be modified as follows:
+
+Initialize the answer to infinity.
+
+current_cost =0
+
+remaining =L
+
+answer = infinity
+
+for i in sorted_types:
+
+    volume = 2^i
+
+    max_count = remaining // volume
+
+    cost_with_max = current_cost + max_count * c[i]
+
+    new_remaining = remaining - max_count * volume
+
+    if new_remaining <=0:
+
+        answer = min(answer, cost_with_max)
+
+    else:
+
+        answer = min(answer, cost_with_max + c[i])
+
+    # Now, proceed with using max_count.
+
+    current_cost += max_count * c[i]
+
+    remaining = new_remaining
+
+    if remaining <=0:
+
+        answer = min(answer, current_cost)
+
+        break
+
+# After processing all types, if remaining >0:
+
+if remaining >0:
+
+    # Need to buy one more of any type.
+
+    answer = min(answer, current_cost + min(c))
+
+print(answer)
+
+This way, at each step, the code considers both the option of using max_count and using max_count +1, and updates the answer accordingly.
+
+But how does this work for sample2.
+
+Sample2:
+
+sorted_types:3,2,1,0.
+
+current_cost=0.
+
+remaining=3.
+
+Processing type3:
+
+volume=8.
+
+max_count=0.
+
+cost_with_max=0.
+
+new_remaining=3.
+
+answer = min(inf, 0+10=10).
+
+current_cost=0.
+
+remaining=3.
+
+Processing type2:
+
+volume=4.
+
+max_count=0.
+
+cost_with_max=0.
+
+new_remaining=3.
+
+answer = min(10, 0+100=100).
+
+current_cost=0.
+
+remaining=3.
+
+Processing type1:
+
+volume=2.
+
+max_count=1.
+
+cost_with_max=0+1*1000=1000.
+
+new_remaining=3-2=1.
+
+answer = min(10, 1000+1000=2000 →10 remains).
+
+current_cost=1000.
+
+remaining=1.
+
+answer is10.
+
+Processing type0:
+
+volume=1.
+
+max_count=1.
+
+cost_with_max=1000+1*10000=11000.
+
+new_remaining=0.
+
+answer = min(10, 11000 →10 remains).
+
+current_cost=11000.
+
+answer is10.
+
+Thus, the code correctly computes the answer as10.
+
+Thus, the correct approach is to track the minimal cost at each step, considering both using the maximum count and using one more bottle.
+
+Thus, the code should be:
+
+Thus, there's a problem.
+
+What's wrong here?
+
+Ah, the code is not processing the sorted types correctly. Let's re-examine sample2:
+
+Sample2:
+
+n=4, L=3.
+
+c = [10000, 1000, 100, 10]. 0-based indices.
+
+types are 0,1,2,3.
+
+volumes are 1,2,4,8.
+
+ per-liter cost for each type:
+
+type0:10000/1=10000.
+
+type1:1000/2=500.
+
+type2:100/4=25.
+
+type3:10/8=1.25.
+
+So sorted order is type3, type2, type1, type0.
+
+Processing types in this order:
+
+type3: volume8.
+
+remaining=3. count=3//8=0. no change.
+
+type2: volume4. remaining=3. count=0.
+
+type1: volume2. remaining=3. count=3//2=1. total_cost +=1000. remaining=1.
+
+type0: volume1. remaining=1. count=1. total_cost +=10000. remaining=0.
+
+Thus, total_cost=1000+10000=11000. But sample2's correct answer is10.
+
+So what's wrong?
+
+The code processes the sorted types in the order type3, type2, type1, type0. But when processing type3, count is0. So no cost added. Then type2, count0. Then type1, count1 (volume2). remaining becomes1. Then type0, count1 (volume1). remaining becomes0. Thus, total cost 1000+10000=11000. But the correct answer is10, which is achieved by buying type3's 8L for10.
+
+But according to the code, after processing all types, remaining is0, so no extra cost is added. But why wasn't type3 considered in the extra cost?
+
+Because after processing type3, count is0. So remaining is3. Then type2, count0. remaining3. type1, count1. remaining1. type0, count1. remaining0.
+
+But the code does not consider that adding one bottle of type3 (cost10) would cover the remaining3. But during the processing, type3 was already processed with count0, but the code didn't buy any. Then, after processing all types, remaining is0, so no extra cost is added.
+
+But wait, in this case, after processing all types, remaining is0. So the code would not add any extra cost.
+
+But sample2's correct answer is10, which is achieved by buying one type3's bottle (8L), which covers the required 3L.
+
+But according to the code, during processing type3, count=0. remaining=3. Then type3 is not processed again. The code proceeds to type2, type1, type0. Eventually, the remaining becomes0, but the total cost is11000.
+
+Thus, the code is incorrect.
+
+What's the issue?
+
+The code's algorithm is not considering that buying a higher type (even if its count is zero) can cover the required liters in a single bottle and be cheaper.
+
+Thus, the problem with the code is that it doesn't consider the option of buying one bottle of a type even if count is zero.
+
+Thus, during processing each type, the code should also consider buying one more bottle even if count is zero.
+
+Thus, the correct approach is, for each type in the sorted list, buy as many as possible (count), but also consider buying one more.
+
+Thus, during processing each type, we should compute two options:
+
+1. Buy count bottles.
+
+2. Buy count +1 bottles.
+
+Take the minimal cost between these options.
+
+But how to implement this without increasing the time complexity.
+
+An alternative approach is to track the minimal cost so far at each step.
+
+Thus, during processing each type, compute the cost for using count and count+1, and keep track of the minimal cost.
+
+Thus, the code can be modified as follows:
+
+Initialize the answer to infinity.
+
+current_cost =0
+
+remaining =L
+
+answer = infinity
+
+for i in sorted_types:
+
+    volume = 2^i
+
+    max_count = remaining // volume
+
+    cost_with_max = current_cost + max_count * c[i]
+
+    new_remaining = remaining - max_count * volume
+
+    if new_remaining <=0:
+
+        answer = min(answer, cost_with_max)
+
+    else:
+
+        answer = min(answer, cost_with_max + c[i])
+
+    # Now, proceed with using max_count.
+
+    current_cost += max_count * c[i]
+
+    remaining = new_remaining
+
+    if remaining <=0:
+
+        answer = min(answer, current_cost)
+
+        break
+
+# After processing all types, if remaining >0:
+
+if remaining >0:
+
+    # Need to buy one more of any type.
+
+    answer = min(answer, current_cost + min(c))
+
+print(answer)
+
+This way, at each step, the code considers both the option of using max_count and using max_count +1, and updates the answer accordingly.
+
+But how does this work for sample2.
+
+Sample2:
+
+sorted_types:3,2,1,0.
+
+current_cost=0.
+
+remaining=3.
+
+Processing type3:
+
+volume=8.
+
+max_count=0.
+
+cost_with_max=0.
+
+new_remaining=3.
+
+answer = min(inf, 0+10=10).
+
+current_cost=0.
+
+remaining=3.
+
+Processing type2:
+
+volume=4.
+
+max_count=0.
+
+cost_with_max=0.
+
+new_remaining=3.
+
+answer = min(10, 0+100=100).
+
+current_cost=0.
+
+remaining=3.
+
+Processing type1:
+
+volume=2.
+
+max_count=1.
+
+cost_with_max=0+1*1000=1000.
+
+new_remaining=3-2=1.
+
+answer = min(10, 1000+1000=2000 →10 remains).
+
+current_cost=1000.
+
+remaining=1.
+
+answer is10.
+
+Processing type0:
+
+volume=1.
+
+max_count=1.
+
+cost_with_max=1000+1*10000=11000.
+
+new_remaining=0.
+
+answer = min(10, 11000 →10 remains).
+
+current_cost=11000.
+
+answer is10.
+
+Thus, the code correctly computes the answer as10.
+
+Thus, the correct approach is to track the minimal cost at each step, considering both using the maximum count and using one more bottle.
+
+Thus, the code should be:
 
 Thus, there's a problem.
 

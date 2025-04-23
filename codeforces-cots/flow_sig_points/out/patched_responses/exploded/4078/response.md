@@ -1371,7 +1371,11 @@ But in Python, we need to read input efficiently. Since n and q can be up to 3e5
 
 But for the problem constraints, even using input() should work, but to be safe, we can read from sys.stdin.
 
+Testing against sample input 1.
+
+```python
 import sys
+
 
 class FenwickTree:
 
@@ -1413,11 +1417,10 @@ class FenwickTree:
 
         return self.query(r) - self.query(l-1)
 
-def main():
-
+def main(input_stream, output_stream):
     import sys
 
-    input = sys.stdin.read().split()
+    input = input_stream.read().split()
 
     ptr = 0
 
@@ -1525,65 +1528,63 @@ def main():
 
         unread = current_notification_count - (max_t3 + B)
 
-        print(unread)
+        print(unread, file=output_stream)
 
-if __name__ == "__main__":
 
-    main()
 
-Wait, but when initializing the Fenwick trees, for x in 1..n, but in the code, the loop is for x in range(n), which is 0..n-1. So for n apps, the code initializes x from 0 to n-1, but the apps are 1-based. But this is okay because the initial s[x] is 0 for all apps, and the code initializes sum and count trees for 0, n times.
+def test():
+    import io
 
-Yes.
-
-Testing this code against the sample input:
-
-Sample 1:
-
-3 4
-
-1 3
-
-1 1
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 6
 1 2
+1 4
+1 2
+3 3
+1 3
+1 3
+""",
+            "output": \
+"""\
+1
+2
+3
+0
+1
+2
+""",
+        }, 
+    ]
 
-2 3
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-After processing:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The sum_tree will have:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-After initializing: sum of 0*3=0.
+    print('Tests passed 😎')
 
-Event1: type1 x=3: count[3] becomes1. new_s = min(1, 0) =0. No change.
 
-sum_tree remains 0.
+if __name__ == '__main__':
+    test()
 
-Event2: type1 x=1: count[1] becomes1. new_s=0. No change.
 
-Event3: type1 x=2: count[2] becomes1. new_s=0. No change.
+```
 
-Event4: type2 x=3: last_read[3] =3 (current_notification_count is3). count[3] is1. new_s= min(1,3) =1. So sum_tree is updated by removing 0 (s[x]=0) and adding 1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-sum_ge_0 is sum_tree.range_query(0, 3e5) =1 (from x=3) +0 (others). count_ge_0 is 3 (all apps have s >=0).
+```
 
-But wait, after event4:
-
-s[3] =1, others are 0.
-
-sum_ge_0 =1 +0 +0 =1.
-
-count_ge_0 =3.
-
-B=1 -0*3=1.
-
-unread =3 - (0 +1) =2.
-
-Yes.
-
-The code should output correctly.
-
-Thus, this code should work.
 </think>
 
 ```python

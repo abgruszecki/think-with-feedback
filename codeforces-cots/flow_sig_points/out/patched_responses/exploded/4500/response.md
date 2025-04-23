@@ -929,7 +929,11 @@ But in Python, for the binary search, we can use the bisect module.
 
 Here's the code:
 
+Testing against sample input 1.
+
+```python
 import bisect
+
 
 class SegmentTree:
 
@@ -991,11 +995,10 @@ class SegmentTree:
 
         return res
 
-def main():
-
+def main(input_stream, output_stream):
     import sys
 
-    input = sys.stdin.read().split()
+    input = input_stream.read().split()
 
     ptr = 0
 
@@ -1085,47 +1088,55 @@ def main():
 
         output[original_indices[i]] = counts_sorted[i]
 
-    print(' '.join(map(str, output)))
+    print(' '.join(map(str, output)), file=output_stream)
 
-if __name__ == "__main__":
 
-    main()
 
-This should handle the problem correctly.
+def test():
+    import io
 
-Testing for the examples:
-
-First example:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
+0 10
+1 5
+9 10
+15 10
+""",
+            "output": \
+"""\
+4 1 2 1
+""",
+        }, 
+    ]
 
-16 5
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-20 5
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-10 10
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-18 2
+    print('Tests passed 😎')
 
-Sorted dominoes by x:
 
-(10,10,2), (16,5,0), (18,2,3), (20,5,1)
+if __name__ == '__main__':
+    test()
 
-Original indices: [2,0,3,1]
 
-counts_sorted after processing:
+```
 
-i=3: 1
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=2:1
-
-i=1:3
-
-i=0:4
-
-output array: [3,1,4,1], which matches.
+```
 
 Second example:
 

@@ -1163,12 +1163,16 @@ But wait, the sum of all components is n. So step 5 is to check if n is a lucky 
 
 Thus, the code is:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import deque, defaultdict
 
-def main():
+
+def main(input_stream, output_stream):
     sys.setrecursionlimit(1 << 25)
-    n, m = map(int, sys.stdin.readline().split())
+    n, m = map(int, input_stream.readline().split())
 
     # Read edges and compute connected components using DSU
     parent = list(range(n + 1))
@@ -1184,7 +1188,7 @@ def main():
             parent[v_root] = u_root
 
     for _ in range(m):
-        u, v = map(int, sys.stdin.readline().split())
+        u, v = map(int, input_stream.readline().split())
         union(u, v)
 
     # Compute component sizes
@@ -1212,7 +1216,7 @@ def main():
     # Check if any component is lucky
     for s in sizes:
         if s in lucky_set:
-            print(0)
+            print(0, file=output_stream)
             return
 
     # Check for pairs
@@ -1227,56 +1231,67 @@ def main():
             if t in freq:
                 if s == t:
                     if freq[s] >= 2:
-                        print(1)
+                        print(1, file=output_stream)
                         return
                 else:
                     if freq[t] >=1:
-                        print(1)
+                        print(1, file=output_stream)
                         return
 
     # Check if sum of all components is lucky (sum is n)
     if n in lucky_set:
-        print(len(sizes) - 1)
+        print(len(sizes) - 1, file=output_stream)
         return
     else:
-        print(-1)
+        print(-1, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 4
+1 2
+3 4
+4 5
+3 5
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
 
 if __name__ == '__main__':
-    main()
+    test()
 
-But wait, the code checks all lucky numbers for pairs, but may find a pair for one lucky number but not the minimal possible roads. However, since the code returns as soon as any pair is found, but the minimal roads is 1, this is correct.
 
-For example, if there are multiple lucky numbers, the code will output 1 as soon as it finds a pair for any lucky number, which is correct since 1 is the minimal possible roads.
+```
 
-The code then checks if the sum of all components is lucky. If yes, outputs (k-1), else -1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-This code should handle all cases correctly.
-
-Testing the first sample input:
-
-Input:
-4 3
-1 2
-2 3
-1 3
-
-Components: 3 (1,2,3), 1 (4). Sizes [3,1].
-
-Lucky numbers up to 4: 4,7,44, etc. But 4 is the only one <=4.
-
-Check if any component is 4: no.
-
-Check for pairs:
-
-For L=4:
-
-Iterate s in [3,1]:
-
-First s=3:
-
-t=4-3=1. Check if 1 is in freq. Yes. freq[1] >=1. So output 1.
-
-Thus, the code correctly outputs 1.
+```
 
 Another sample input:
 

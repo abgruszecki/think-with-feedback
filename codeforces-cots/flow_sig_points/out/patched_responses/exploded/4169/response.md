@@ -190,74 +190,73 @@ Thus, the code should:
 
 So the code would be:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-sorted_original = sorted(a)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-sorted_perm = sorted(a)
+    sorted_original = sorted(a)
 
-i = 0  # pointer for sorted_original
-j = 0  # pointer for sorted_perm
-count = 0
+    sorted_perm = sorted(a)
 
-for num in sorted_perm:
-    if num > sorted_original[i]:
-        count +=1
-        i +=1
+    i = 0  # pointer for sorted_original
+    j = 0  # pointer for sorted_perm
+    count = 0
 
-print(count)
+    for num in sorted_perm:
+        if num > sorted_original[i]:
+            count +=1
+            i +=1
 
-Wait, but wait, in the code above, the loop is over sorted_perm, but for each num in sorted_perm, we check if it's > sorted_original[i]. If yes, increment count and i. Else, move to next. So this is a linear scan.
+    print(count, file=output_stream)
 
-Testing this code against the first sample:
 
-Original a: [10,1,1,1,5,5,3]
 
-sorted_original becomes [1,1,1,3,5,5,10]
+def test():
+    import io
 
-sorted_perm is the same as sorted_original.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 1 1 1 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Loop over each num in sorted_perm:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-num=1: compare with sorted_original[0] =1. Not greater. So no count.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-num=1: same as above.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-num=1: same. No count.
+    print('Tests passed 😎')
 
-num=3: compare with sorted_original[0]=1. 3>1. So count=1, i=1.
 
-Next num=5: compare with sorted_original[1]=1. 5>1: count=2, i=2.
+if __name__ == '__main__':
+    test()
 
-Next num=5: compare with sorted_original[2]=1: 5>1: count=3, i=3.
 
-Next num=10: compare with sorted_original[3]=3: 10>3: count=4, i=4.
+```
 
-Next, num=10 (no, sorted_perm is [1,1,1,3,5,5,10]? Wait no. Wait, the original array is [10,1,1,1,5,5,3]. sorted_perm is sorted of this array, which is [1,1,1,3,5,5,10]. So the loop is:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-num in sorted_perm: 1,1,1,3,5,5,10.
-
-So after the first three 1s, the fourth element is 3. Then 5,5,10.
-
-So in the loop:
-
-First three 1s: none are > sorted_original[i=0] (1). So i remains 0.
-
-Fourth element is 3: >1 → count 1, i=1.
-
-Fifth element is 5: >1 → count 2, i=2.
-
-Sixth element is 5: >1 → count3, i=3.
-
-Seventh element is 10: compare with sorted_original[3] (3). Yes → count4, i=4.
-
-Now, i=4. sorted_original[i] is 5.
-
-But there are no more elements in sorted_perm. So total count is 4, which matches the sample.
-
-Yes, this works.
+```
 
 Another test case: all 1's. The code counts 0, which is correct.
 

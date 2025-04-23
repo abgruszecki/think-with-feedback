@@ -55,35 +55,91 @@ But if s=3: 3-0=3, which is odd → no.
 
 So the code can be written as:
 
-a, b, s = map(int, input().split())
+Testing against sample inputs 1, 2, 3.
 
-d = abs(a) + abs(b)
+```python
+def main(input_stream, output_stream):
+    a, b, s = map(int, input_stream.readline().rstrip("\n").split())
 
-if d > s:
+    d = abs(a) + abs(b)
 
-    print("No")
+    if d > s:
 
-else:
-
-    if (s - d) % 2 == 0:
-
-        print("Yes")
+        print("No", file=output_stream)
 
     else:
 
-        print("No")
+        if (s - d) % 2 == 0:
 
-Testing this against the examples.
+            print("Yes", file=output_stream)
 
-First example:
+        else:
 
-5 5 11 → d=10. s=11. s >=d. 11-10=1 → odd → No. Correct.
+            print("No", file=output_stream)
 
-Second example:
 
-10 15 → d=25. s=25. 25-25=0 even → yes.
 
-Third example: 0 5 → d=5. s=1. 5>1 → No.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 15 25
+""",
+            "output": \
+"""\
+Yes
+""",
+        }, 
+        {
+            "input": \
+"""\
+0 5 1
+""",
+            "output": \
+"""\
+No
+""",
+        }, 
+        {
+            "input": \
+"""\
+0 0 2
+""",
+            "output": \
+"""\
+Yes
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Fourth example: 0 0 2 → d=0. 2-0=2 even → yes.
 

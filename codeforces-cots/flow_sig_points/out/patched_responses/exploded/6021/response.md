@@ -292,27 +292,139 @@ print(res)
 
 This approach is more efficient and handles all cases correctly.
 
-Testing the examples again:
+Testing against sample input 1.
 
-First example:
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 + 7
+    s = input_stream.readline().rstrip("\n").strip()
 
-Processing 'a' → current_a=1.
+    res = 1
+    current_a = 0
 
-Then 'b' → multiply res by 2 (1+1). res=2. current_a=0.
+    for c in s:
+        if c == 'b':
+            if current_a > 0:
+                res = res * (current_a + 1) % MOD
+                current_a = 0
+        elif c == 'a':
+            current_a += 1
 
-Then 'b' → no current_a, no change.
+    if current_a > 0:
+        res = res * (current_a + 1) % MOD
 
-Then 'a' → current_a=1. Then 'a' → current_a=2.
+    print((res - 1) % MOD, file=output_stream)
 
-End of loop. current_a=2 → multiply res by 3 → 2*3=6.
 
-res=6-1=5. Correct.
 
-Second example:
+def test():
+    import io
 
-Input 'baaaa' → processing 'b' → current_a=0, no action.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+baaaa
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-Then 'a's → current_a=4. At the end of loop, current_a=4 → multiply res by 5. res=5. 5-1=4. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 + 7
+    s = input_stream.readline().rstrip("\n").strip()
+
+    res = 1
+    current_a = 0
+
+    for c in s:
+        if c == 'b':
+            if current_a > 0:
+                res = res * (current_a + 1) % MOD
+                current_a = 0
+        elif c == 'a':
+            current_a += 1
+
+    if current_a > 0:
+        res = res * (current_a + 1) % MOD
+
+    print((res - 1) % MOD, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+agaa
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: 'agaa' → no 'b's. So current_a increases for each 'a' → count is 3. Multiply res by 4 (3+1). res=4. 4-1=3. Correct.
 

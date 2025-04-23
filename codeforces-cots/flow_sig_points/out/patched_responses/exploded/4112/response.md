@@ -1031,109 +1031,120 @@ Yes, this is a crucial optimization.
 
 Thus, the code becomes:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-r, g = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-# Compute h via binary search
+    r, g = map(int, input_stream.readline().rstrip("\n").split())
 
-total = r + g
+    # Compute h via binary search
 
-low = 0
+    total = r + g
 
-high = 200000
+    low = 0
 
-h = 0
+    high = 200000
 
-while low <= high:
+    h = 0
 
-    mid = (low + high) //2
+    while low <= high:
 
-    s_mid = mid * (mid +1) //2
+        mid = (low + high) //2
 
-    if s_mid <= total:
+        s_mid = mid * (mid +1) //2
 
-        h = mid
+        if s_mid <= total:
 
-        low = mid +1
+            h = mid
+
+            low = mid +1
+
+        else:
+
+            high = mid -1
+
+    s = h * (h+1) //2
+
+    a = max(s - r, 0)
+
+    b = min(g, s)
+
+    if a > b:
+
+        print(0, file=output_stream)
 
     else:
 
-        high = mid -1
+        # Compute the bitset
 
-s = h * (h+1) //2
+        bits = 1
 
-a = max(s - r, 0)
+        for i in range(1, h+1):
 
-b = min(g, s)
+            bits |= bits << i
 
-if a > b:
+        # Create mask for a to b
 
-    print(0)
+        mask = ( (1 << (b+1)) -1 ) ^ ( (1 << a) -1 )
 
-else:
+        count = (bits & mask).bit_count()
 
-    # Compute the bitset
+        print(count % MOD, file=output_stream)
 
-    bits = 1
 
-    for i in range(1, h+1):
 
-        bits |= bits << i
+def test():
+    import io
 
-    # Create mask for a to b
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+9 7
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-    mask = ( (1 << (b+1)) -1 ) ^ ( (1 << a) -1 )
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-    count = (bits & mask).bit_count()
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-    print(count % MOD)
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-This code should be much faster, especially for large h.
+    print('Tests passed 😎')
 
-Now, the only remaining issue is whether the bitset can be computed quickly for h=894.
 
-But with the mask approach, the counting step is optimized, and the bitset step is handled via bitwise operations in C code.
+if __name__ == '__main__':
+    test()
 
-Thus, this code should pass the time constraints.
 
-Let's test it against the samples.
+```
 
-Sample 1:
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 93, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 86, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '6'
+Got: '2'
 
-Input: 4 6 → r=4, g=6.
-
-Binary search for h:
-
-r+g=10.
-
-h*(h+1)/2 <=10.
-
-h=4: 4*5/2=10 → yes.
-
-s=10.
-
-a=10 -4=6. b=min(6,10) =6.
-
-So a=6, b=6.
-
-mask is from 6 to6.
-
-bitset is 1 <<1, then <<2, etc.
-
-After processing 1, bits=0b11.
-
-After processing 2: bits=0b1111.
-
-After processing 3: bits=0b11111111.
-
-After processing 4: bits=0b1111111111111111.
-
-So for sum=6, the bit is set. So count is1.
-
-But the sample output is 2.
-
-Wait, why? Oh no, the code is incorrect.
+```
 
 Wait, sample input 1:
 

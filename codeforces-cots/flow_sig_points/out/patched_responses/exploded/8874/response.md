@@ -139,15 +139,67 @@ Another example: when s is 0 (t=0), m=0. Then, first part (i<0) is none, then i=
 
 So this code should handle all cases.
 
-Testing the first example:
+Testing against sample input 1.
 
-Input: 10 10 54.
+```python
+def main(input_stream, output_stream):
+    n, k, t = map(int, input_stream.readline().rstrip("\n").split())
+    s = (t * n * k) // 100
+    m = s // k
+    r = s % k
+    result = []
+    for i in range(n):
+        if i < m:
+            result.append(str(k))
+        elif i == m:
+            result.append(str(r))
+        else:
+            result.append('0')
+    print(' '.join(result), file=output_stream)
 
-s= (54 *10*10)//100=5400//100=54.
 
-m=54//10=5. r=54%10=4.
 
-So for i=0-4 (0-based, 5 elements) → k=10. i=5 (6th element) → r=4. The rest 0. So output is [10,10,10,10,10,4,0,0,0,0], which matches.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+11 13 37
+""",
+            "output": \
+"""\
+13 13 13 13 0 0 0 0 0 0 0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: input 11 13 37.
 

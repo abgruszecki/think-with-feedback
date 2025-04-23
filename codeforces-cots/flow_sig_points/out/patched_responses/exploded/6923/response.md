@@ -730,123 +730,254 @@ For each state, iterate through all possible transitions.
 
 Thus, the code will look something like this:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n = int(input())
-s = input().strip()
 
-vs = [i for i, c in enumerate(s) if c == 'V']
-ks = [i for i, c in enumerate(s) if c == 'K']
-xs = [i for i, c in enumerate(s) if c not in 'VK']
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-len_v = len(vs)
-len_k = len(ks)
-len_x = len(xs)
+    vs = [i for i, c in enumerate(s) if c == 'V']
+    ks = [i for i, c in enumerate(s) if c == 'K']
+    xs = [i for i, c in enumerate(s) if c not in 'VK']
 
-INF = float('inf')
+    len_v = len(vs)
+    len_k = len(ks)
+    len_x = len(xs)
 
-# DP table: a, b, c, last_v (0/1)
-dp = [[[[INF] * 2 for _ in range(len_x + 1)] for __ in range(len_k + 1)] for ___ in range(len_v + 1)]
+    INF = float('inf')
 
-dp[0][0][0][0] = 0  # last_v is False
+    # DP table: a, b, c, last_v (0/1)
+    dp = [[[[INF] * 2 for _ in range(len_x + 1)] for __ in range(len_k + 1)] for ___ in range(len_v + 1)]
 
-for a in range(len_v + 1):
-    for b in range(len_k + 1):
-        for c in range(len_x + 1):
-            for last_v in 0, 1:
-                current_cost = dp[a][b][c][last_v]
-                if current_cost == INF:
-                    continue
+    dp[0][0][0][0] = 0  # last_v is False
 
-                # Try adding a V
-                if a < len_v:
-                    pos_v = vs[a]
-                    # K's in ks[b:] < pos_v
-                    k_count = bisect.bisect_left(ks, pos_v, lo=b) - b
-                    # X's in xs[c:] < pos_v
-                    x_count = bisect.bisect_left(xs, pos_v, lo=c) - c
-                    cost = k_count + x_count
-                    new_a = a + 1
-                    new_last_v = 1
-                    new_cost = current_cost + cost
-                    if new_cost < dp[new_a][b][c][new_last_v]:
-                        dp[new_a][b][c][new_last_v] = new_cost
+    for a in range(len_v + 1):
+        for b in range(len_k + 1):
+            for c in range(len_x + 1):
+                for last_v in 0, 1:
+                    current_cost = dp[a][b][c][last_v]
+                    if current_cost == INF:
+                        continue
 
-                # Try adding a K
-                if b < len_k and not last_v:
-                    pos_k = ks[b]
-                    # V's in vs[a:] < pos_k
-                    v_count = bisect.bisect_left(vs, pos_k, lo=a) - a
-                    # X's in xs[c:] < pos_k
-                    x_count = bisect.bisect_left(xs, pos_k, lo=c) - c
-                    cost = v_count + x_count
-                    new_b = b + 1
-                    new_last_v = 0
-                    new_cost = current_cost + cost
-                    if new_cost < dp[a][new_b][c][new_last_v]:
-                        dp[a][new_b][c][new_last_v] = new_cost
+                    # Try adding a V
+                    if a < len_v:
+                        pos_v = vs[a]
+                        # K's in ks[b:] < pos_v
+                        k_count = bisect.bisect_left(ks, pos_v, lo=b) - b
+                        # X's in xs[c:] < pos_v
+                        x_count = bisect.bisect_left(xs, pos_v, lo=c) - c
+                        cost = k_count + x_count
+                        new_a = a + 1
+                        new_last_v = 1
+                        new_cost = current_cost + cost
+                        if new_cost < dp[new_a][b][c][new_last_v]:
+                            dp[new_a][b][c][new_last_v] = new_cost
 
-                # Try adding an X
-                if c < len_x:
-                    pos_x = xs[c]
-                    # V's in vs[a:] < pos_x
-                    v_count = bisect.bisect_left(vs, pos_x, lo=a) - a
-                    # K's in ks[b:] < pos_x
-                    k_count = bisect.bisect_left(ks, pos_x, lo=b) - b
-                    cost = v_count + k_count
-                    new_c = c + 1
-                    new_last_v = 0
-                    new_cost = current_cost + cost
-                    if new_cost < dp[a][b][new_c][new_last_v]:
-                        dp[a][b][new_c][new_last_v] = new_cost
+                    # Try adding a K
+                    if b < len_k and not last_v:
+                        pos_k = ks[b]
+                        # V's in vs[a:] < pos_k
+                        v_count = bisect.bisect_left(vs, pos_k, lo=a) - a
+                        # X's in xs[c:] < pos_k
+                        x_count = bisect.bisect_left(xs, pos_k, lo=c) - c
+                        cost = v_count + x_count
+                        new_b = b + 1
+                        new_last_v = 0
+                        new_cost = current_cost + cost
+                        if new_cost < dp[a][new_b][c][new_last_v]:
+                            dp[a][new_b][c][new_last_v] = new_cost
 
-# The answer is the minimal cost when all characters are used, in any last_v state.
-min_total = min(dp[len_v][len_k][len_x][0], dp[len_v][len_k][len_x][1])
-print(min_total)
+                    # Try adding an X
+                    if c < len_x:
+                        pos_x = xs[c]
+                        # V's in vs[a:] < pos_x
+                        v_count = bisect.bisect_left(vs, pos_x, lo=a) - a
+                        # K's in ks[b:] < pos_x
+                        k_count = bisect.bisect_left(ks, pos_x, lo=b) - b
+                        cost = v_count + k_count
+                        new_c = c + 1
+                        new_last_v = 0
+                        new_cost = current_cost + cost
+                        if new_cost < dp[a][b][new_c][new_last_v]:
+                            dp[a][b][new_c][new_last_v] = new_cost
 
-Let's test this code against the sample inputs.
+    # The answer is the minimal cost when all characters are used, in any last_v state.
+    min_total = min(dp[len_v][len_k][len_x][0], dp[len_v][len_k][len_x][1])
+    print(min_total, file=output_stream)
 
-Sample Input 1:
 
-4
-VKVK
 
-vs = [0, 2]
-ks = [1, 3]
-xs = []
+def test():
+    import io
 
-The code should compute the minimal inversion count.
-
-For example, the optimal solution is to arrange the V's and K's in the order K, K, V, V. Which requires 3 swaps.
-
-The code's DP should compute this.
-
-But how?
-
-Let's see: the final state is a=2, b=2, c=0. The code checks the minimum of dp[2][2][0][0] and dp[2][2][0][1].
-
-The code should correctly compute the inversion count for this arrangement.
-
-Another sample:
-
-Sample 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
 BVVKV
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-The vs are at positions 1, 2, 4. The ks are at position 3. The xs are positions 0 (B) and 4 is the K? Wait, no, the input is BVVKV.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Indices are 0: B, 1: V, 2: V, 3: K, 4: V.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So vs = [1, 2,4], ks = [3], xs = [0].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The code should compute the minimal inversion count of 2.
+    print('Tests passed 😎')
 
-The code's transitions would compute the cost for placing each character, considering the order.
 
-Thus, the code should handle these cases.
+if __name__ == '__main__':
+    test()
 
-The code seems correct, and the approach is to model the DP state with a, b, c, last_v, and compute the cost based on the original positions of the characters. This approach should handle all possible cases and find the minimal inversion count.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import bisect
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+
+    vs = [i for i, c in enumerate(s) if c == 'V']
+    ks = [i for i, c in enumerate(s) if c == 'K']
+    xs = [i for i, c in enumerate(s) if c not in 'VK']
+
+    len_v = len(vs)
+    len_k = len(ks)
+    len_x = len(xs)
+
+    INF = float('inf')
+
+    # DP table: a, b, c, last_v (0/1)
+    dp = [[[[INF] * 2 for _ in range(len_x + 1)] for __ in range(len_k + 1)] for ___ in range(len_v + 1)]
+
+    dp[0][0][0][0] = 0  # last_v is False
+
+    for a in range(len_v + 1):
+        for b in range(len_k + 1):
+            for c in range(len_x + 1):
+                for last_v in 0, 1:
+                    current_cost = dp[a][b][c][last_v]
+                    if current_cost == INF:
+                        continue
+
+                    # Try adding a V
+                    if a < len_v:
+                        pos_v = vs[a]
+                        # K's in ks[b:] < pos_v
+                        k_count = bisect.bisect_left(ks, pos_v, lo=b) - b
+                        # X's in xs[c:] < pos_v
+                        x_count = bisect.bisect_left(xs, pos_v, lo=c) - c
+                        cost = k_count + x_count
+                        new_a = a + 1
+                        new_last_v = 1
+                        new_cost = current_cost + cost
+                        if new_cost < dp[new_a][b][c][new_last_v]:
+                            dp[new_a][b][c][new_last_v] = new_cost
+
+                    # Try adding a K
+                    if b < len_k and not last_v:
+                        pos_k = ks[b]
+                        # V's in vs[a:] < pos_k
+                        v_count = bisect.bisect_left(vs, pos_k, lo=a) - a
+                        # X's in xs[c:] < pos_k
+                        x_count = bisect.bisect_left(xs, pos_k, lo=c) - c
+                        cost = v_count + x_count
+                        new_b = b + 1
+                        new_last_v = 0
+                        new_cost = current_cost + cost
+                        if new_cost < dp[a][new_b][c][new_last_v]:
+                            dp[a][new_b][c][new_last_v] = new_cost
+
+                    # Try adding an X
+                    if c < len_x:
+                        pos_x = xs[c]
+                        # V's in vs[a:] < pos_x
+                        v_count = bisect.bisect_left(vs, pos_x, lo=a) - a
+                        # K's in ks[b:] < pos_x
+                        k_count = bisect.bisect_left(ks, pos_x, lo=b) - b
+                        cost = v_count + k_count
+                        new_c = c + 1
+                        new_last_v = 0
+                        new_cost = current_cost + cost
+                        if new_cost < dp[a][b][new_c][new_last_v]:
+                            dp[a][b][new_c][new_last_v] = new_cost
+
+    # The answer is the minimal cost when all characters are used, in any last_v state.
+    min_total = min(dp[len_v][len_k][len_x][0], dp[len_v][len_k][len_x][1])
+    print(min_total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+VVKEVKK
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 To solve this problem, we need to minimize the number of adjacent swaps required to transform a given string such that it does not contain the substring "VK". The approach involves dynamic programming (DP) to efficiently compute the minimal number of swaps by considering the positions of 'V', 'K', and other characters (denoted as 'X') in the original string.

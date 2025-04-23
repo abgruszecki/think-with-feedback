@@ -194,55 +194,76 @@ But what about the case when the sum is zero? Because when sum is zero, the code
 
 Now, code:
 
-n = int(input())
-radix = int(input())
-total = 0
-for _ in range(n):
-    s = input().strip().upper()
-    total += int(s, radix)
+Testing against sample input 1.
 
-if total == 0:
-    print('0')
-else:
-    res = []
-    while total > 0:
-        rem = total % radix
-        if rem <10:
-            res.append(str(rem))
-        else:
-            res.append(chr(ord('A') + rem - 10))
-        total = total // radix
-    print(''.join(reversed(res)))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    radix = int(input_stream.readline().rstrip("\n"))
+    total = 0
+    for _ in range(n):
+        s = input_stream.readline().rstrip("\n").strip().upper()
+        total += int(s, radix)
 
-Wait, but in the code above, when total is zero, we handle it first. Otherwise, in the loop, total starts as positive and becomes zero. So the code should work.
+    if total == 0:
+        print('0', file=output_stream)
+    else:
+        res = []
+        while total > 0:
+            rem = total % radix
+            if rem <10:
+                res.append(str(rem))
+            else:
+                res.append(chr(ord('A') + rem - 10))
+            total = total // radix
+        print(''.join(reversed(res)), file=output_stream)
 
-But let's test with sum zero. For example, input:
 
-1
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
 10
-0
+12
+34
+""",
+            "output": \
+"""\
+46
+""",
+        }, 
+    ]
 
-Output should be 0. The code checks if total is zero and outputs '0' directly.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Another test case: sum is zero, but after some divisions. But that can't happen. So the code is correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Wait, but what if the sum is zero, the code outputs '0' immediately, otherwise loops. So that's correct.
+    print('Tests passed 😎')
 
-So this code should handle all cases.
 
-But let's see. For example, in the first sample, the code would compute total=767, which is >0. Then, in the loop:
+if __name__ == '__main__':
+    test()
 
-767 % 16 = 15 → 'F', 767//16=47.
 
-47%16=15 → 'F', 47//16=2.
+```
 
-2%16=2 → '2', 2//16=0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-res is [F, F, 2], reversed → '2FF'.
-
-Which is correct.
+```
 
 Another example: sum is 46 in base 10. The code's loop:
 

@@ -790,345 +790,119 @@ Then proceed.
 
 Now, the code:
 
+Testing against sample input 3.
+
+```python
 import bisect
 
-def main():
 
+def main(input_stream, output_stream):
     import sys
-
-    n, A, R, M = map(int, sys.stdin.readline().split())
-
-    h = list(map(int, sys.stdin.readline().split()))
-
+    input = input_stream.read
+    data = input().split()
+    n = int(data[0])
+    A = int(data[1])
+    R = int(data[2])
+    M = int(data[3])
+    h = list(map(int, data[4:4+n]))
+    
     if n == 1:
-
-        print(0)
-
+        print(0, file=output_stream)
         return
-
+    
     h.sort()
-
     prefix = [0] * (n + 1)
-
     for i in range(n):
-
         prefix[i+1] = prefix[i] + h[i]
-
-    # Compute cost function.
-
+    
     case1 = M < (A + R)
-
+    
     def compute_cost(H):
-
         idx_left = bisect.bisect_left(h, H)
-
         sum_less = prefix[idx_left]
-
         count_less = idx_left
-
         idx_right = bisect.bisect_right(h, H)
-
         sum_greater = prefix[n] - prefix[idx_right]
-
         count_greater = n - idx_right
-
+        
         D = H * count_less - sum_less
-
         S = sum_greater - H * count_greater
-
+        
         if case1:
-
             common = min(D, S)
-
-            cost = common * M + max(S - common, 0) * R + max(D - common, 0) * A
-
+            return common * M + max(S - common, 0) * R + max(D - common, 0) * A
         else:
-
-            cost = R * S + A * D
-
-        return cost
-
-    # Perform ternary search.
-
+            return R * S + A * D
+    
     low = 0
-
     high = 10**18
-
-    # We'll run a few iterations to find the minimal.
-
     for _ in range(100):
-
         mid = (low + high) // 2
-
         if mid >= high:
-
-            mid = high -1
-
+            mid = high - 1
         c1 = compute_cost(mid)
-
         c2 = compute_cost(mid + 1)
-
         if c1 < c2:
-
             high = mid
-
         else:
-
             low = mid + 1
-
-    # Check around low.
-
-    candidates = [low-2, low-1, low, low+1, low+2, 0]
-
-    # Also check the median and mean.
-
-    # Also include some other points.
-
-    # Or just compute the minimal.
-
+    
+    h_min = h[0]
+    h_max = h[-1]
+    candidates = {low-2, low-1, low, low+1, low+2, 0, h_min, h_max}
     min_cost = float('inf')
-
     for H in candidates:
+        if H >= 0:
+            current_cost = compute_cost(H)
+            if current_cost < min_cost:
+                min_cost = current_cost
+    
+    print(min_cost, file=output_stream)
 
-        if H <0:
 
-            continue
 
-        current_cost = compute_cost(H)
+def test():
+    import io
 
-        if current_cost < min_cost:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 1 2 4
+5 5 3 6 5
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-            min_cost = current_cost
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-    # Also check the minimum and maximum of the original array.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-    for H in h:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-        current_cost = compute_cost(H)
+    print('Tests passed 😎')
 
-        if current_cost < min_cost:
 
-            min_cost = current_cost
+if __name__ == '__main__':
+    test()
 
-    print(min_cost)
 
-if __name__ == "__main__":
+```
 
-    main()
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-But wait, why do we need to check the original array's elements?
-
-Because the minimal H could be between two elements of the array, but in some cases, the minimal cost could be at one of the elements. For example, the third example's optimal H is 4, which is not in the array, but when H is 4, it's better than any of the array elements. But the code's ternary search should have already found that. However, due to the possibility of the ternary search not precisely finding the optimal H because of the discrete nature, checking the nearby values (like low-2, etc.) and the array elements could help.
-
-But the code as written may not check the correct H. For example, in the third example, the ternary search may find low=4, and then the candidates would include 4, which is the correct H. So the code would compute the correct cost.
-
-But in the case where the optimal H is not in the array, the code would find it via the ternary search.
-
-But why check the array elements? Because the code's ternary search may have missed the optimal H. For example, if the code's ternary search steps over H=4, but for some reason, the ternary search steps are not sufficient, then checking the array elements may not help. But the code runs 100 iterations, which should be sufficient for 1e18 range.
-
-But the code also includes the array elements in the candidates. But why?
-
-Ah, in the code as written, after the ternary search, the code checks the candidates and then also checks all elements in h. For n=1e5, this would add 1e5 elements to check, which is not feasible. So that part is wrong.
-
-Wait, in the code, after the ternary search, the code adds:
-
-for H in h:
-
-    current_cost = compute_cost(H)
-
-    if current_cost < min_cost:
-
-        min_cost = current_cost
-
-But for n=1e5, this loop would take O(n) time, which is 1e5 iterations, each with O(log n) time. So O(n log n) time, which is acceptable for 1e5.
-
-But wait, when n is 1e5, and each compute_cost is O(log n), the loop would take 1e5 * log n steps, which is about 1e5 * 20 = 2e6 operations. Which should be acceptable.
-
-But why check all elements in h?
-
-Because in some cases, the minimal H could be one of the original elements, but the ternary search may not find it. For example, when the cost function is flat for a range of H values, and the minimal H is one of the array elements.
-
-But given that the code performs 100 iterations of ternary search, which is sufficient to find the minimal H even in a large range, and then checks the nearby H and the array elements, this should cover all possibilities.
-
-But in the code as written, after the ternary search, the code checks the candidates (H in [low-2, low-1, low, low+1, low+2, 0]) and then all elements in the array. For large n, this can be time-consuming.
-
-Wait, but for n=1e5, this is 1e5 iterations, each with a binary search (log n steps). This would take O(n log n) time, which is acceptable given the time constraints (1 second).
-
-But let's test with the third example.
-
-The code's ternary search would find low=4. Then, the candidates are 2,3,4,5,6. The code checks these and the array elements (1,3,8). So for H=3, the cost is 302. For H=4, cost is 4. So the code would find the minimal.
-
-But without checking the array elements, the code would still find H=4.
-
-So why check the array elements?
-
-Because in some cases, the minimal H is not in the vicinity of the ternary search's result. For example, when the minimal H is exactly one of the array elements, but the ternary search didn't find it due to the step size.
-
-But given the code's ternary search runs 100 steps, which can cover a range of 1e18 with precision (since each step halves the range), this is unlikely.
-
-So, the code's current approach may be correct, but checking all array elements is unnecessary and may cause TLE for n=1e5.
-
-So to optimize, we can remove the loop over h. Instead, we can check a few candidates around the ternary search's result, including possible H's in the array.
-
-Alternatively, the code can check the original array's elements, but this may be too slow.
-
-So in the code, the loop over h after the ternary search is a problem. For example, when n=1e5, this loop would take 1e5 iterations, which could take up to 0.1 seconds. But given that the code is allowed 1 second per test case, this may be acceptable, but perhaps not.
-
-So, to optimize, we can remove the loop over h and rely on the ternary search and checking the nearby candidates.
-
-In that case, the code would be:
-
-After the ternary search, check H in [low-2, low-1, low, low+1, low+2, 0, max_h], where max_h is the maximum in h.
-
-But in the code above, the candidates are [low-2, low-1, low, low+1, low+2, 0].
-
-But maybe adding the minimum and maximum of h to the candidates would help.
-
-So modifying the code:
-
-candidates = [low-2, low-1, low, low+1, low+2, 0, min_h, max_h]
-
-where min_h is h[0], max_h is h[-1]
-
-So:
-
-h_min = h[0]
-
-h_max = h[-1]
-
-candidates = [low-2, low-1, low, low+1, low+2, 0, h_min, h_max]
-
-But even better, include h_min and h_max in the candidates.
-
-But for the code to be efficient, the number of candidates should be small.
-
-So the code can be modified to:
-
-h_min = h[0]
-
-h_max = h[-1]
-
-candidates = [low-2, low-1, low, low+1, low+2, h_min, h_max, 0]
-
-But 0 may not be necessary if h_min is 0.
-
-But it's better to include all relevant candidates.
-
-Alternatively, use the original code but remove the loop over h.
-
-So the code becomes:
-
-...
-
-candidates = [low-2, low-1, low, low+1, low+2, h[0], h[-1], 0]
-
-...
-
-But why include h[0] and h[-1]?
-
-Because the optimal H could be at the minimal or maximal element.
-
-For example, in the first sample input, the optimal H is 3, which is the middle element of the sorted array. But in some cases, the minimal or maximal could be the optimal.
-
-So including these in the candidates.
-
-Thus, the code can be adjusted to:
-
-h_min = h[0]
-
-h_max = h[-1]
-
-candidates = [low-2, low-1, low, low+1, low+2, h_min, h_max, 0]
-
-But also check 0 in case adding bricks is cheaper.
-
-But for large H, the code's ternary search should find it.
-
-So, in the code, the candidates list is:
-
-candidates = [low-2, low-1, low, low+1, low+2, h_min, h_max, 0]
-
-But how to handle possible duplicates. For example, h_min and h_max may be already in the candidates.
-
-But no problem.
-
-So the code can be adjusted to:
-
-candidates = list(set([low-2, low-1, low, low+1, low+2, 0, h[0], h[-1]]))
-
-This ensures unique candidates.
-
-But then, the code would have to process each candidate.
-
-But the number of candidates is small (like 8 elements), so it's manageable.
-
-Thus, the code's loop becomes:
-
-h_min = h[0]
-
-h_max = h[-1]
-
-candidates = {low-2, low-1, low, low+1, low+2, 0, h_min, h_max}
-
-min_cost = float('inf')
-
-for H in candidates:
-
-    if H <0:
-
-        continue
-
-    current_cost = compute_cost(H)
-
-    if current_cost < min_cost:
-
-        min_cost = current_cost
-
-print(min_cost)
-
-This would cover all important candidates, including the possible minimal H.
-
-Thus, the code becomes more efficient, avoiding the loop over all h elements.
-
-So, the updated code would be:
-
-...
-
-h_min = h[0]
-
-h_max = h[-1]
-
-candidates = {low-2, low-1, low, low+1, low+2, 0, h_min, h_max}
-
-min_cost = float('inf')
-
-for H in candidates:
-
-    if H <0:
-
-        continue
-
-    current_cost = compute_cost(H)
-
-    if current_cost < min_cost:
-
-        min_cost = current_cost
-
-print(min_cost)
-
-This should handle the cases.
-
-But let's test the third example:
-
-h_min is 1, h_max is 8.
-
-candidates are {4-2=2, 3,4,5,6,0,1,8}.
-
-H=4 is in the candidates.
-
-So the code would compute cost for H=4.
-
-Thus, the code is correct.
+```
 
 Another example: the first sample input:
 

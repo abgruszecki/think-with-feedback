@@ -205,95 +205,84 @@ Otherwise, add nothing.
 
 So the code can be structured as:
 
-n, a = map(int, input().split())
+Testing against sample input 1.
 
-t = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, a = map(int, input_stream.readline().rstrip("\n").split())
 
-from collections import defaultdict
+    t = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-groups = defaultdict(list)
+    from collections import defaultdict
 
-for i in range(n):
+    groups = defaultdict(list)
 
-    city = i + 1  # since input is 1-based
+    for i in range(n):
 
-    d = abs(city - a)
+        city = i + 1  # since input is 1-based
 
-    groups[d].append(t[i])
+        d = abs(city - a)
 
-total = 0
+        groups[d].append(t[i])
 
-for d in groups:
+    total = 0
 
-    members = groups[d]
+    for d in groups:
 
-    s = sum(members)
+        members = groups[d]
 
-    if s == len(members):
+        s = sum(members)
 
-        total += s
+        if s == len(members):
 
-print(total)
+            total += s
 
-Wait, that seems correct.
+    print(total, file=output_stream)
 
-Let's test with the examples.
 
-First example:
 
-Input:
+def test():
+    import io
 
-6 3
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 2
+0 0 0 1 0
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-1 1 1 0 1 0
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Cities are 1,2,3,4,5,6. a is 3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Distances:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-1: |1-3|=2
+    print('Tests passed 😎')
 
-2: |2-3|=1
 
-3: 0
+if __name__ == '__main__':
+    test()
 
-4:1
 
-5:2
+```
 
-6:3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Wait, no:
-
-Wait city 1: distance 2 (3-1=2)
-
-city 2: 1 (3-2=1)
-
-city 3: 0
-
-city4:1 (4-3=1)
-
-city5:2 (5-3=2)
-
-city6:3 (6-3=3)
-
-So groups:
-
-d=0: [1 (city3's t is 1? No, the input is 1 1 1 0 1 0. Wait the t array is [t1, t2, t3, t4, t5, t6]. So city 1: t=1, city 2: t=1, city3: t=1, city4: t=0, city5: t=1, city6: t=0.
-
-So group for d=0: city3: t=1. sum is 1, len is 1. So sum == len. So contributes 1.
-
-d=1: cities 2 and 4. t2=1, t4=0. sum is 1. len is 2. sum != len. So contributes nothing.
-
-d=2: cities1 and5. t1=1, t5=1. sum is 2. len is 2. sum == len. contributes 2.
-
-d=3: city6. t6=0. sum 0. contributes 0.
-
-So total is 1 + 2 + 0 + ... any other groups? Wait, what about d=3? Yes. So for each possible d in groups.
-
-But in the code, groups are all the d's present.
-
-So the total would be 1 (d=0) + 2 (d=2) = 3. Which matches the first example.
+```
 
 Second example:
 

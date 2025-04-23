@@ -154,39 +154,68 @@ Then, for each pair in the sorted list, print the ci and di separated by space.
 
 So the code should be straightforward.
 
-Testing the first sample:
+Testing against sample input 1.
 
-Input: 3 2 1 1.
+```python
+def main(input_stream, output_stream):
+    x, y, a, b = map(int, input_stream.readline().rstrip("\n").split())
+    pairs = []
+    for ci in range(a, x + 1):
+        min_di = b
+        max_di = min(ci - 1, y)
+        if min_di > max_di:
+            continue
+        for di in range(min_di, max_di + 1):
+            pairs.append((ci, di))
+    pairs.sort()
+    print(len(pairs), file=output_stream)
+    for pair in pairs:
+        print(pair[0], pair[1], file=output_stream)
 
-ci ranges from 1 to 3.
 
-ci=1:
 
-lower_di = 1, upper_di = min(0, 2) = 0. So 1>0: skip.
+def test():
+    import io
 
-ci=2:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 4 2 2
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-lower=1, upper = min(1,2)=1. So di=1. Add (2,1).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-ci=3:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-lower=1, upper = min(2, 2) =2. So di=1 and 2. Add (3,1) and (3,2).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-sorted list is [(2,1), (3,1), (3,2)].
+    print('Tests passed 😎')
 
-Which matches the sample.
 
-Another test case.
+if __name__ == '__main__':
+    test()
 
-Input 2 4 2 2.
 
-ci can only be 2 (since a=2, x=2).
+```
 
-lower_di=2, upper_di=min(1,4) =1. So 2>1: no di. So pairs is empty. Output 0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So the code works.
+```
 
-So the code is correct.
 </think>
 
 ```python

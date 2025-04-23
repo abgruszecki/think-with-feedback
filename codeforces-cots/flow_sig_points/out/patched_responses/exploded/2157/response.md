@@ -108,29 +108,67 @@ s[-4:] is "abcd", s[:-4] is empty → rotated is "abcd". So for k=4, which is le
 
 Yes, so the code can be written as:
 
-s = input().strip()
+Testing against sample input 1.
 
-n = len(s)
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-unique = set()
+    n = len(s)
 
-for k in range(n):
+    unique = set()
 
-    rotated = s[-k:] + s[:-k]
+    for k in range(n):
 
-    unique.add(rotated)
+        rotated = s[-k:] + s[:-k]
 
-print(len(unique))
+        unique.add(rotated)
 
-Wait, but when k=0, s[-0:] is the entire string (since -0 is 0). So s[-0:] is the same as s[0:], which is the entire string. Then s[:-k] is s[:-0], which is s[:0], which is the empty string. So rotated is entire string + empty, which is the original string. Correct.
+    print(len(unique), file=output_stream)
 
-So this code would correctly generate all possible rotations, including the original. Then add them to the set. The size of the set is the answer.
 
-Testing the examples:
 
-First example:
+def test():
+    import io
 
-Input "abcd". For k=0: abcd. k=1: d + abc → dabc. k=2: cd + ab → cdab. k=3: bcd + a → bcda. So four unique entries. Set size 4. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+bbb
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: "bbb". For all k, rotated will be "bbb". So set size 1.
 

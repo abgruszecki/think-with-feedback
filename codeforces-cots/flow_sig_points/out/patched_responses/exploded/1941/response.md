@@ -1145,194 +1145,199 @@ When processing a node, mark it as burned, then check its neighbors.
 
 Implementing this in Python:
 
+Testing against sample input 1.
+
+```python
 import heapq
 
-n, q = map(int, input().split())
 
-adj = [[] for _ in range(n+1)]
-degrees = [0]*(n+1)
+def main(input_stream, output_stream):
+    n, q = map(int, input_stream.readline().rstrip("\n").split())
 
-for _ in range(n-1):
+    adj = [[] for _ in range(n+1)]
+    degrees = [0]*(n+1)
 
-   u, v = map(int, input().split())
+    for _ in range(n-1):
 
-   adj[u].append(v)
+       u, v = map(int, input_stream.readline().rstrip("\n").split())
 
-   adj[v].append(u)
+       adj[u].append(v)
 
-   degrees[u] +=1
+       adj[v].append(u)
 
-   degrees[v] +=1
+       degrees[u] +=1
 
-# Initial burn time simulation
+       degrees[v] +=1
 
-burn_time = [0]*(n+1)
+    # Initial burn time simulation
 
-current_time = 1
+    burn_time = [0]*(n+1)
 
-heap = []
+    current_time = 1
 
-# Find initial leaves
+    heap = []
 
-for v in range(1, n+1):
+    # Find initial leaves
 
-   if degrees[v] ==1:
+    for v in range(1, n+1):
 
-       heapq.heappush(heap, (v, v))
+       if degrees[v] ==1:
 
-processed = [False]*(n+1)
+           heapq.heappush(heap, (v, v))
 
-while heap:
+    processed = [False]*(n+1)
 
-   priority, v = heapq.heappop(heap)
+    while heap:
 
-   if processed[v]:
+       priority, v = heapq.heappop(heap)
 
-       continue
+       if processed[v]:
 
-   processed[v] = True
+           continue
 
-   burn_time[v] = current_time
+       processed[v] = True
 
-   current_time +=1
+       burn_time[v] = current_time
 
-   # Find neighbor
+       current_time +=1
 
-   for u in adj[v]:
+       # Find neighbor
 
-       if not processed[u]:
+       for u in adj[v]:
 
-           degrees[u] -=1
+           if not processed[u]:
 
-           if degrees[u] ==1:
+               degrees[u] -=1
 
-               heapq.heappush(heap, (u, u))
+               if degrees[u] ==1:
 
-           break
+                   heapq.heappush(heap, (u, u))
 
-# Process queries
+               break
 
-upped_order = []
+    # Process queries
 
-upped_index = dict()
+    upped_order = []
 
-for _ in range(q):
+    upped_index = dict()
 
-   parts = input().split()
+    for _ in range(q):
 
-   if parts[0] == 'up':
+       parts = input_stream.readline().rstrip("\n").split()
 
-       v = int(parts[1])
+       if parts[0] == 'up':
 
-       if v not in upped_index:
+           v = int(parts[1])
 
-           upped_order.append(v)
+           if v not in upped_index:
 
-           upped_index[v] = len(upped_order)-1
+               upped_order.append(v)
 
-   elif parts[0] == 'when':
+               upped_index[v] = len(upped_order)-1
 
-       v = int(parts[1])
+       elif parts[0] == 'when':
 
-       if v in upped_index:
+           v = int(parts[1])
 
-           non_up_count = n - len(upped_order)
+           if v in upped_index:
 
-           index = upped_index[v]
+               non_up_count = n - len(upped_order)
 
-           print(non_up_count + index +1)
+               index = upped_index[v]
 
-       else:
-
-           print(burn_time[v])
-
-   else: # compare
-
-       v = int(parts[1])
-
-       u = int(parts[2])
-
-       # get burn times for both
-
-       def get_time(x):
-
-           if x in upped_index:
-
-               non_up = n - len(upped_order)
-
-               return non_up + upped_index[x] +1
+               print(non_up_count + index +1, file=output_stream)
 
            else:
 
-               return burn_time[x]
+               print(burn_time[v], file=output_stream)
 
-       tv = get_time(v)
+       else: # compare
 
-       tu = get_time(u)
+           v = int(parts[1])
 
-       if tv < tu:
+           u = int(parts[2])
 
-           print(v)
+           # get burn times for both
 
-       else:
+           def get_time(x):
 
-           print(u)
+               if x in upped_index:
 
-But there's a problem with the simulation. In the initial burning process, the priority is the node's value. But the priority queue in the code is pushing (v, v), which uses the node's value as the priority. This is correct.
+                   non_up = n - len(upped_order)
 
-But the code uses heapq.heappush(heap, (u, u)) when adding new leaves. Thus, the priority is the node's value.
+                   return non_up + upped_index[x] +1
 
-But in the initial simulation, the code correctly processes the leaves in order of increasing node value.
+               else:
 
-This matches the problem's initial setup where p_v =v.
+                   return burn_time[x]
 
-Thus, the simulation is correct.
+           tv = get_time(v)
 
-Testing this code against the first sample input:
+           tu = get_time(u)
 
-Sample 1:
+           if tv < tu:
 
-5 7
+               print(v, file=output_stream)
 
-Edges:
+           else:
 
-1-5, 1-2,1-3,4-3.
+               print(u, file=output_stream)
 
-Initial degrees:
 
-1 has degree 3, 2 has 1, 3 has 2, 4 has 1,5 has1.
 
-Initial leaves are 2,4,5.
+def test():
+    import io
 
-Priority queue starts with (2,2), (4,4), (5,5).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5
+1 5
+1 2
+1 3
+4 3
+up 1
+compare 2 4
+compare 4 3
+compare 3 1
+compare 1 5
+""",
+            "output": \
+"""\
+2
+4
+3
+5
+""",
+        }, 
+    ]
 
-The first extracted is 2. Burn time 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Then, 1's degree is decremented to 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Next, the queue has 4 and 5.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Extract 4 (priority 4). Burn time 2.
+    print('Tests passed 😎')
 
-3's degree is decremented to 1. Add 3 to queue (priority 3).
 
-Next, extract 5 (priority 5), but degrees of 1 becomes 2. So no new leaves.
+if __name__ == '__main__':
+    test()
 
-Now, the queue has 3. Extract 3 (priority 3). Burn time 3.
 
-1's degree is decremented to 1. Add 1 to queue (priority 1).
+```
 
-Extract 1. Burn time4.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-5 is processed next, but it's already burned.
-
-So burn_time is:
-
-1:4, 2:1,3:3,4:2,5:5.
-
-Which matches the sample output.
-
-Thus, the code is correct.
+```
 
 Sample 2:
 

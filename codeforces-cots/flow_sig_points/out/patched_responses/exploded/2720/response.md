@@ -181,17 +181,76 @@ else:
 
 This should work.
 
-Testing the first example:
+Testing against sample input 1.
 
-k=3, n='11'
+```python
+def main(input_stream, output_stream):
+    k = int(input_stream.readline().rstrip("\n"))
+    n = input_stream.readline().rstrip("\n").strip()
 
-sum=2 <3.
+    current_sum = sum(int(c) for c in n)
+    if current_sum >= k:
+        print(0, file=output_stream)
+    else:
+        required = k - current_sum
+        gains = [9 - int(c) for c in n]
+        gains.sort(reverse=True)
+        
+        total = 0
+        count = 0
+        for g in gains:
+            if g <= 0:
+                break
+            total += g
+            count += 1
+            if total >= required:
+                break
+        print(count, file=output_stream)
 
-required=1.
 
-gains for 1 and 1: 8 and8. sorted [8,8].
 
-loop: take first 8. total=8 >=1. count is 1. Output is 1.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+99
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: sum 18 >=3. Output 0.
 

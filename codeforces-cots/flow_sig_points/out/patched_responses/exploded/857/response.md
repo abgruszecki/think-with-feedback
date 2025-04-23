@@ -257,87 +257,157 @@ This would be more efficient because for each candidate_str, the sum is computed
 
 So the code becomes:
 
-x_str = input().strip()
+Testing against sample input 1.
 
-candidates = [x_str]
+```python
+def main(input_stream, output_stream):
+    x_str = input_stream.readline().rstrip("\n").strip()
 
-n = len(x_str)
+    candidates = [x_str]
 
-for i in range(n):
-    if x_str[i] == '0':
-        continue
-    # create the new candidate string
-    new_str = x_str[:i] + str(int(x_str[i]) -1) + '9' * (n - i -1)
-    candidates.append(new_str)
+    n = len(x_str)
 
-max_sum = -1
-best_num = -1
+    for i in range(n):
+        if x_str[i] == '0':
+            continue
+        # create the new candidate string
+        new_str = x_str[:i] + str(int(x_str[i]) -1) + '9' * (n - i -1)
+        candidates.append(new_str)
 
-for candidate in candidates:
-    # compute sum and num
-    num = int(candidate)
-    if num <1:
-        continue
-    s = sum(int(c) for c in candidate)
-    if s > max_sum or (s == max_sum and num > best_num):
-        max_sum = s
-        best_num = num
+    max_sum = -1
+    best_num = -1
 
-print(best_num)
+    for candidate in candidates:
+        # compute sum and num
+        num = int(candidate)
+        if num <1:
+            continue
+        s = sum(int(c) for c in candidate)
+        if s > max_sum or (s == max_sum and num > best_num):
+            max_sum = s
+            best_num = num
 
-This code should work.
+    print(best_num, file=output_stream)
 
-Testing the sample inputs:
 
-Sample 1:
 
-Input: 100
+def test():
+    import io
 
-Candidates:
-Original: '100' → sum 1+0+0=1, num 100.
-i=0: x_str[0] is '1'. new_str is '0' + '99' → '099' → num 99. sum is 0+9+9=18.
-i=1: x_str[1] is '0' → skip.
-i=2: x_str[2] is '0' → skip.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+48
+""",
+            "output": \
+"""\
+48
+""",
+        }, 
+    ]
 
-So the candidates are '100', '099', '09', '0' (no, wait for i=0,1,2. Let's see:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Original code adds '099' for i=0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Then for i=1, x_str[1] is '0', skip.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=2: x_str[2] is '0', skip.
+    print('Tests passed 😎')
 
-So the candidates are '100', '099', '0' (Wait, no. Let's see:
 
-Wait, for i=0, new_str is x_str[:0] (empty) + '0' (1-1) + '99' (since n-i-1 is 3-0-1=2). So the new_str is '099'. So candidate is '099', which when converted to num is 99.
+if __name__ == '__main__':
+    test()
 
-For i=0, candidate is '099' → sum is 0+9+9=18, num 99.
 
-So in the code, the candidate '099' is added. Then, during processing, num is 99 (>=1), sum is 18.
+```
 
-So in the first sample, the processed list includes:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-sum 1 (num 100), sum 18 (num 99). So the best is 99.
+```
 
-Sample 2:
+Testing against sample input 2.
 
-Input: 48.
+```python
+def main(input_stream, output_stream):
+    x_str = input_stream.readline().rstrip("\n").strip()
 
-Candidates: original '48' (sum 12), i=0: '38' (sum 3+8=11), i=1: x_str[1] is '8', new_str is '4' + '7' → '47'. sum 4+7=11. So candidates are '48', '3' followed by 9 (no, wait for i=0:
+    candidates = [x_str]
 
-x_str[:0] is empty. x_str[0] is '4', so new_str is '3' + '9' (since len is 2, i=0, so 2-0-1=1, so one 9). So candidate is '39'. sum 3+9=12. num is 39.
+    n = len(x_str)
 
-So the candidates are '48' (sum 12), '39' (sum 12), and '47' (sum 11).
+    for i in range(n):
+        if x_str[i] == '0':
+            continue
+        # create the new candidate string
+        new_str = x_str[:i] + str(int(x_str[i]) -1) + '9' * (n - i -1)
+        candidates.append(new_str)
 
-Processing these:
+    max_sum = -1
+    best_num = -1
 
-sum 12, num 48.
+    for candidate in candidates:
+        # compute sum and num
+        num = int(candidate)
+        if num <1:
+            continue
+        s = sum(int(c) for c in candidate)
+        if s > max_sum or (s == max_sum and num > best_num):
+            max_sum = s
+            best_num = num
 
-sum 12, num 39.
+    print(best_num, file=output_stream)
 
-sum 11.
 
-So the best is 48 (since sum is 12, and it's the largest number with that sum).
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+521
+""",
+            "output": \
+"""\
+499
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

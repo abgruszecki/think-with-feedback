@@ -383,9 +383,12 @@ Implementing in code.
 
 Now, the code:
 
-import sys
+Testing against sample input 1.
 
+```python
+import sys
 from collections import defaultdict
+
 
 def process_superstition(line):
 
@@ -393,9 +396,8 @@ def process_superstition(line):
 
     return ' '.join(word.lower() for word in words)
 
-def main():
-
-    lines = sys.stdin.read().splitlines()
+def main(input_stream, output_stream):
+    lines = input_stream.read().splitlines()
 
     if not lines:
 
@@ -451,7 +453,7 @@ def main():
 
         # so this can't happen
 
-        print('')
+        print('', file=output_stream)
 
         return
 
@@ -465,59 +467,61 @@ def main():
 
     for sup in max_sups:
 
-        print(sup)
+        print(sup, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+Spain
+* Tuesday the 13th
+Italy
+* Friday the 17th
+Russia
+* Friday the 13th
+England
+* rabbit foot
+""",
+            "output": \
+"""\
+friday the 13th
+friday the 17th
+rabbit foot
+tuesday the 13th
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
 
 if __name__ == '__main__':
+    test()
 
-    main()
 
-Testing this code against the examples.
+```
 
-First example input:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Ukraine
-
-* Friday the   13th
-
-* black   cat
-
-* knock the   wood
-
-USA
-
-* wishing well
-
-* friday   the   13th
-
-Holland
-
-France
-
-* Wishing Well
-
-The countries parsed:
-
-- Ukraine has superstitions: "friday the 13th", "black cat", "knock the wood"
-
-USA has "wishing well", "friday the 13th"
-
-Holland has none.
-
-France has "wishing well".
-
-So counts:
-
-friday the 13th appears in Ukraine and USA: count 2.
-
-wishing well appears in USA and France: count 2.
-
-Others have 1.
-
-So the output is these two, sorted.
-
-The sorted order is "friday the 13th" comes before "wishing well".
-
-Yes, which matches the first example's output.
+```
 
 Second example input:
 

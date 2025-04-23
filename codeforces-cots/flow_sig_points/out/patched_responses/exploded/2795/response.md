@@ -677,55 +677,132 @@ Yes.
 
 Thus, the code should look like this.
 
-Testing this code with the samples.
+Testing against sample input 2.
 
-Sample Input 2:
+```python
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    ptr = 0
+    n, q = int(input[ptr]), int(input[ptr+1])
+    ptr += 2
+    e = list(map(int, input[ptr:ptr+n]))
+    ptr +=n
+    edges = []
+    for _ in range(n-1):
+        a = int(input[ptr])-1
+        b = int(input[ptr+1])-1
+        c = int(input[ptr+2])
+        t = int(input[ptr+3])
+        edges.append( (a, b, c, t) )
+        ptr +=4
+    queries = []
+    for idx in range(q):
+        v = int(input[ptr])
+        x = int(input[ptr+1])-1
+        queries.append( (v, x, idx) )
+        ptr +=2
+    
+    edges.sort(key=lambda x: -x[2])
+    queries.sort(key=lambda x: -x[0])
+    
+    parent = list(range(n))
+    size = [1]*n
+    max_e = e.copy()
+    count_max = [1]*n
+    max_toll = [0]*n
+    
+    def find(u):
+        while parent[u] != u:
+            parent[u] = parent[parent[u]]
+            u = parent[u]
+        return u
+    
+    j = 0
+    answers = [ (0,0) ] * q
+    for v, x, idx in queries:
+        while j < len(edges) and edges[j][2] >= v:
+            a, b, c_edge, t_edge = edges[j]
+            j +=1
+            root_a = find(a)
+            root_b = find(b)
+            if root_a == root_b:
+                continue
+            if size[root_a] < size[root_b]:
+                root_a, root_b = root_b, root_a
+            parent[root_b] = root_a
+            size[root_a] += size[root_b]
+            if max_e[root_a] < max_e[root_b]:
+                max_e[root_a] = max_e[root_b]
+                count_max[root_a] = count_max[root_b]
+            elif max_e[root_a] == max_e[root_b]:
+                count_max[root_a] += count_max[root_b]
+            new_toll = max(t_edge, max_toll[root_a], max_toll[root_b])
+            max_toll[root_a] = new_toll
+        root_x = find(x)
+        answers[idx] = (max_e[root_x], max_toll[root_x])
+    
+    for ans in answers:
+        print(ans[0], ans[1], file=output_stream)
 
-Queries after sorting:
 
-v=5,4,3,2,1.
 
-After processing each query:
+def test():
+    import io
 
-For v=5:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5
+1 2 2 2 2
+1 2 5 8
+1 3 6 3
+1 4 4 5
+1 5 7 1
+4 1
+5 1
+6 1
+7 1
+8 1
+""",
+            "output": \
+"""\
+2 8
+2 8
+2 3
+2 1
+1 0
+""",
+        }, 
+    ]
 
-No edges with c >=5. So each node is own set. Query x=0 (city1), max_e=1, max_toll=0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For v=4:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Edge 0-1 (c=4) is processed. Merge 0 and 1. The merged set's max_e is max(1,2)=2. count_max=1. max_toll is max(1,0,0) → 1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For x=0 (city1), the root is 0. answer is (2,1).
+    print('Tests passed 😎')
 
-For v=3:
 
-Process edges with c >=3. Next edge is c=3 (edge 0-2). Merge 0 and 2.
+if __name__ == '__main__':
+    test()
 
-The merged set's max_e is max(2,3) →3. count_max=1. max_toll is max(1,0,1) →1.
 
-For x=0, answer is (3,1).
+```
 
-For v=2:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Process edges with c >=2: the next edge is 0-3 (c=2). Merge 0 and 3. Now, merged set has max_e 3 (from 2 and3?), but the merged set's max_e would be 4 (since e[3] is4). Wait, no. The node 3 (0-based index3 is city4). e[3] is4.
+```
 
-So when merging the set of 0 (nodes 0,1,2) with e=3 (max_e) and set of 3 (e=4) → merged set's max_e is4. count_max=1. max_toll is max(1,0,1) →1.
-
-So the answer for x=0 is (4,1).
-
-For v=1:
-
-Process edge 1-4 (c=1). Merge the merged set (0,1,2,3) with node4 (e=5). The merged set's max_e is5. count_max=1. max_toll is max(1,0,1) →1.
-
-So the answer is (5,1).
-
-Thus, the answers are (1,0), (2,1), (3,1), (4,1), (5,1), which matches sample 2.
-
-So the code works.
-
-Now, edge cases: when a node is isolated. The code handles it.
-
-Now, implement the code.
 </think>
 
 ```python

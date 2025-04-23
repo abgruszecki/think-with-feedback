@@ -509,33 +509,90 @@ In general, the number of stations with candies is up to m, but in practice, for
 
 Yes.
 
-Now, let's test this code against the samples.
+Testing against sample input 1.
 
-First sample:
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    stations = [[] for _ in range(n + 1)]
+    for _ in range(m):
+        a, b = map(int, input_stream.readline().rstrip("\n").split())
+        d = (b - a) % n
+        stations[a].append(d)
 
-After processing, for a=2, d_list is [2,1], max_val is 1 +5=6. j=0:2+0=2; j=1:1+5=6. So M=6.
+    max_m = [0] * (n + 1)
+    candy_stations = []
+    for a in range(1, n + 1):
+        candies = stations[a]
+        if not candies:
+            continue
+        candies_sorted = sorted(candies, reverse=True)
+        current_max = 0
+        for j in range(len(candies_sorted)):
+            current = candies_sorted[j] + j * n
+            if current > current_max:
+                current_max = current
+        max_m[a] = current_max
+        candy_stations.append(a)
 
-For a=3: d_list is [2,1], j=0:2+0=2; j=1:1+5=6 → M=6.
+    result = []
+    for start in range(1, n + 1):
+        max_time = 0
+        for s in candy_stations:
+            t0 = (s - start) % n
+            candidate = max_m[s] + t0
+            if candidate > max_time:
+                max_time = candidate
+        result.append(str(max_time))
 
-a=4: d=2 → M=2.
+    print(' '.join(result), file=output_stream)
 
-a=5: d_list is [3,1], j=0:3+0=3, j=1:1+5=6 → M=6.
 
-candy_stations is [2,3,4,5].
 
-For start=1:
+def test():
+    import io
 
-s=2: t0 = (2-1) mod5=1. 6+1=7.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 3
+1 2
+1 2
+1 2
+""",
+            "output": \
+"""\
+5 6
+""",
+        }, 
+    ]
 
-s=3: (3-1)=2 →6+2=8.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-s=4:3 →2+3=5.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-s=5:4 →6+4=10.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-max is 10.
+    print('Tests passed 😎')
 
-Which matches the first sample's first output.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Now, code for the second sample:
 

@@ -996,127 +996,111 @@ But in Python, to exit early, after printing, we can call sys.exit().
 
 So the code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import defaultdict
 
+
+def main(input_stream, output_stream):
 # Read grid
-grid = [list(input().strip()) for _ in range(4)]
+    grid = [list(input_stream.readline().rstrip("\n").strip()) for _ in range(4)]
 
-# Generate all lines
-lines = []
+    # Generate all lines
+    lines = []
 
-# Horizontal
-for row in range(4):
-    lines.append([(row, 0), (row, 1), (row, 2)])
-    lines.append([(row, 1), (row, 2), (row, 3)])
+    # Horizontal
+    for row in range(4):
+        lines.append([(row, 0), (row, 1), (row, 2)])
+        lines.append([(row, 1), (row, 2), (row, 3)])
 
-# Vertical
-for col in range(4):
-    lines.append([(0, col), (1, col), (2, col)])
-    lines.append([(1, col), (2, col), (3, col)])
+    # Vertical
+    for col in range(4):
+        lines.append([(0, col), (1, col), (2, col)])
+        lines.append([(1, col), (2, col), (3, col)])
 
-# Diagonal slope 1
-for i in [0, 1]:
-    for j in [0, 1]:
-        lines.append([(i, j), (i+1, j+1), (i+2, j+2)])
+    # Diagonal slope 1
+    for i in [0, 1]:
+        for j in [0, 1]:
+            lines.append([(i, j), (i+1, j+1), (i+2, j+2)])
 
-# Diagonal slope -1
-for i in [0, 1]:
-    for j in [2, 3]:
-        lines.append([(i, j), (i+1, j-1), (i+2, j-2)])
+    # Diagonal slope -1
+    for i in [0, 1]:
+        for j in [2, 3]:
+            lines.append([(i, j), (i+1, j-1), (i+2, j-2)])
 
-# Build cell_lines dictionary
-cell_lines = defaultdict(list)
-for line in lines:
-    for (x, y) in line:
-        cell_lines[(x, y)].append(line)
+    # Build cell_lines dictionary
+    cell_lines = defaultdict(list)
+    for line in lines:
+        for (x, y) in line:
+            cell_lines[(x, y)].append(line)
 
-# Check each empty cell
-for i in range(4):
-    for j in range(4):
-        if grid[i][j] == '.':
-            # Check all lines that include (i,j)
-            for line in cell_lines.get((i,j), []):
-                count = 0
-                for (x, y) in line:
-                    if (x, y) == (i, j):
-                        count += 1
-                    else:
-                        if grid[x][y] == 'x':
+    # Check each empty cell
+    for i in range(4):
+        for j in range(4):
+            if grid[i][j] == '.':
+                # Check all lines that include (i,j)
+                for line in cell_lines.get((i,j), []):
+                    count = 0
+                    for (x, y) in line:
+                        if (x, y) == (i, j):
                             count += 1
-                if count == 3:
-                    print("YES")
-                    sys.exit()
+                        else:
+                            if grid[x][y] == 'x':
+                                count += 1
+                    if count == 3:
+                        print("YES", file=output_stream)
+                        sys.exit()
 
-print("NO")
+    print("NO", file=output_stream)
 
-This code should handle all cases correctly.
 
-Testing sample input 1:
 
-When placing X at (0,2), the line [(0,0), (0,1), (0,2)] is in cell_lines[(0,2)]? Let's see:
+def test():
+    import io
 
-For cell (0,2), the lines that include it are:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+x.ox
+ox..
+x.o.
+oo.x
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-Horizontal line (0,0-2): yes.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Horizontal line (0,1-3): yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Other lines?
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Vertical lines: only if (0,2) is part of a vertical line. For column 2, vertical lines are:
+    print('Tests passed 😎')
 
-(0,2), (1,2), (2,2) → line [(0,2), (1,2), (2,2)] is part of vertical lines for col 2.
 
-But in the code, vertical lines for col 2 are added as:
+if __name__ == '__main__':
+    test()
 
-lines.append( [ (0,2), (1,2), (2,2) ] )
 
-lines.append( [ (1,2), (2,2), (3,2) ] )
+```
 
-So cell (0,2) is part of the first vertical line of column 2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Diagonals: slope 1: lines starting at (0,0) → (0,0), (1,1), (2,2). (0,2) is not part of this line.
-
- slope -1: line starting at (0,3) → (0,3), (1,2), (2,1). So (1,2) is part of this line, but (0,2) is not.
-
-Another line that includes (0,2) is the vertical line for column 2, first line.
-
-So the lines for cell (0,2) are:
-
-Horizontal line 0,0-2.
-
-Horizontal line 0,1-3.
-
-Vertical line 0,2; 1,2; 2,2.
-
-Any others?
-
-Another possible line: diagonal slope -1 (i=0, j=2) → line (0,2), (1,1), (2,0). So yes, (0,2) is part of this line.
-
-So cell (0,2) is part of:
-
-- two horizontal lines in row 0.
-
-- vertical line (0,2), (1,2), (2,2).
-
-- diagonal line (0,2), (1,1), (2,0).
-
-So four lines.
-
-Thus, when placing X at (0,2), the code checks these four lines.
-
-The horizontal line (0,0-2) is checked:
-
-original grid has (0,0)=x, (0,1)=x, (0,2) is now x → sum 3 → returns YES.
-
-Thus, code works.
-
-Thus, the code should handle all test cases correctly.
-
-Another possible edge case: all cells are empty. So Ilya's first move. He can't win with one move.
-
-But the code checks for any line of three X's. But placing one X can't form three X's. So code returns NO.
+```
 
 Another case: two X's in a row with a empty cell. Placing X in the empty cell to form three in a row.
 

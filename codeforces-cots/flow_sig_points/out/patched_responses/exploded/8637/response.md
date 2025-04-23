@@ -285,19 +285,69 @@ Wait, but in the code, when we process x in the array p, we check prev in pos. B
 
 Yes.
 
-Testing sample input 1:
+Testing against sample input 1.
 
-Input is 5 4 1 2 5 3.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
+    pos = {x: i for i, x in enumerate(p)}
+    dp = {}
+    max_len = 0
+    for x in p:
+        prev = x - 1
+        if prev in pos and pos[prev] < pos[x]:
+            dp[x] = dp.get(prev, 0) + 1
+        else:
+            dp[x] = 1
+        if dp[x] > max_len:
+            max_len = dp[x]
+    print(n - max_len, file=output_stream)
 
-Processing x=4 (prev 3 is in pos? pos[3] is4 (the index of 3 in the array is4). pos[4] is0. So 4>0, so condition is false. dp[4] =1.
 
-x=1: prev 0 not in pos. dp[1]=1.
 
-x=2: prev 1 is in pos (pos[1] is1). pos[1] < pos[2] (1<2). So dp[2] = dp[1] (1) +1=2. max_len is 2.
+def test():
+    import io
 
-x=5: prev 4 is in pos. pos[4] is0 <3. So dp[5] = dp[4] (1) +1=2. max_len remains 2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+4 1 3 2
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-x=3: prev 2 is in pos. pos[2] is2 <4. So dp[3] = dp[2] (2) +1=3. max_len becomes3. So answer is5-3=2. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Yes.
 

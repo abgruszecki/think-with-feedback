@@ -189,35 +189,182 @@ print(max(0, max_k))
 
 Wait, but what if x_prime is zero? But since x is at least 1, and g divides x, x_prime can't be zero. So no problem.
 
-Testing this code on the samples:
+Testing against sample input 1.
 
-First sample:
+```python
+import math
 
-a=17, b=15, x=5, y=3.
 
-g = gcd(5,3) =1. x_prime=5, y_prime=3.
+def main(input_stream, output_stream):
+    a, b, x, y = map(int, input_stream.readline().rstrip("\n").split())
+    g = math.gcd(x, y)
+    x_div = x // g
+    y_div = y // g
+    max_k1 = a // x_div
+    max_k2 = b // y_div
+    print(max(0, min(max_k1, max_k2)), file=output_stream)
 
-max_k1 =17//5=3, max_k2=15//3=5. min(3,5)=3. So output 3. Correct.
 
-Second sample:
 
-a=14, b=16, x=7, y=22.
+def test():
+    import io
 
-g=1. x_prime=7, y_prime=22.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+14 16 7 22
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-max_k1=14//7=2, max_k2=16//22=0. min is 0. So output 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Third sample:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-a=4, b=2, x=6, y=4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-g=2. x_prime=6/2=3, y_prime=4/2=2.
+    print('Tests passed 😎')
 
-max_k1=4//3=1, max_k2=2//2=1. min(1,1)=1. Output 1.
 
-Fourth sample's output is 1e9+63, but according to the code, that's what the code would compute.
+if __name__ == '__main__':
+    test()
 
-So the code is correct.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import math
+
+
+def main(input_stream, output_stream):
+    a, b, x, y = map(int, input_stream.readline().rstrip("\n").split())
+    g = math.gcd(x, y)
+    x_div = x // g
+    y_div = y // g
+    max_k1 = a // x_div
+    max_k2 = b // y_div
+    print(max(0, min(max_k1, max_k2)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 2 6 4
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+import math
+
+
+def main(input_stream, output_stream):
+    a, b, x, y = map(int, input_stream.readline().rstrip("\n").split())
+    g = math.gcd(x, y)
+    x_div = x // g
+    y_div = y // g
+    max_k1 = a // x_div
+    max_k2 = b // y_div
+    print(max(0, min(max_k1, max_k2)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1000000000000000000 1000000000000000000 999999866000004473 999999822000007597
+""",
+            "output": \
+"""\
+1000000063
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 But wait, there's a possibility of division by zero? Because if x_prime is zero, but since x and y are at least 1, and x_prime is x/gcd(x,y), which is at least 1. Because x is at least 1, and gcd is a divisor of x, so x/gcd is at least 1. So x_prime is >=1. Similarly for y_prime. So division by zero is not possible.
 

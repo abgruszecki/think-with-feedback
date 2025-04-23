@@ -392,7 +392,11 @@ But for the heap, each time a new run is created (due to merging), we push it in
 
 Now, during processing:
 
+Testing against sample input 1.
+
+```python
 import heapq
+
 
 class Run:
     _id = 0  # class variable to track the next id
@@ -407,13 +411,13 @@ class Run:
         self.next = None
         self.deleted = False
 
-def main():
+def main(input_stream, output_stream):
     import sys
-    input = sys.stdin.read().split()
+    input = input_stream.read().split()
     n = int(input[0])
     a = list(map(int, input[1:n+1]))
     if n ==0:
-        print(0)
+        print(0, file=output_stream)
         return
     # Preprocess into runs
     runs = []
@@ -476,85 +480,187 @@ def main():
             # Add new_run to heap and id_to_run
             heapq.heappush(heap, (-new_run.length, new_run.start, new_run.run_id))
             id_to_run[new_run.run_id] = new_run
-    print(count)
+    print(count, file=output_stream)
 
-But wait, in the code above, after merging prev_run and next_run, the new_run's prev and next are set correctly. Also, the prev_run and next_run are marked as deleted, so their entries in the heap are ignored.
 
-This should work.
 
-Testing with the examples.
+def test():
+    import io
 
-First example:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+6 3 4 1 5
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-Input:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+import heapq
+
+
+class Run:
+    _id = 0  # class variable to track the next id
+
+    def __init__(self, start, value, length):
+        self.run_id = Run._id
+        Run._id +=1
+        self.start = start
+        self.value = value
+        self.length = length
+        self.prev = None
+        self.next = None
+        self.deleted = False
+
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    n = int(input[0])
+    a = list(map(int, input[1:n+1]))
+    if n ==0:
+        print(0, file=output_stream)
+        return
+    # Preprocess into runs
+    runs = []
+    current_val = a[0]
+    current_length =1
+    start =0
+    for i in range(1, n):
+        if a[i] == current_val:
+            current_length +=1
+        else:
+            runs.append(Run(start, current_val, current_length))
+            current_val = a[i]
+            current_length =1
+            start =i
+    runs.append(Run(start, current_val, current_length))
+    # Build linked list
+    for i in range(len(runs)):
+        if i >0:
+            runs[i].prev = runs[i-1]
+        if i < len(runs)-1:
+            runs[i].next = runs[i+1]
+    # Create heap and id_to_run map
+    heap = []
+    id_to_run = {}
+    for run in runs:
+        heapq.heappush(heap, (-run.length, run.start, run.run_id))
+        id_to_run[run.run_id] = run
+    count =0
+    while heap:
+        neg_len, start_pos, run_id = heapq.heappop(heap)
+        current_run = id_to_run.get(run_id)
+        if not current_run or current_run.deleted:
+            continue
+        # Process this run
+        count +=1
+        prev_run = current_run.prev
+        next_run = current_run.next
+        # Mark current run as deleted
+        current_run.deleted = True
+        # Update prev and next links
+        if prev_run:
+            prev_run.next = next_run
+        if next_run:
+            next_run.prev = prev_run
+        # Check if prev and next can be merged
+        if prev_run and next_run and prev_run.value == next_run.value:
+            # Create new merged run
+            new_run = Run(prev_run.start, prev_run.value, prev_run.length + next_run.length)
+            # Set new_run's prev and next
+            new_run.prev = prev_run.prev
+            new_run.next = next_run.next
+            # Update new_run's prev's next and next's prev
+            if new_run.prev:
+                new_run.prev.next = new_run
+            if new_run.next:
+                new_run.next.prev = new_run
+            # Mark prev_run and next_run as deleted
+            prev_run.deleted = True
+            next_run.deleted = True
+            # Add new_run to heap and id_to_run
+            heapq.heappush(heap, (-new_run.length, new_run.start, new_run.run_id))
+            id_to_run[new_run.run_id] = new_run
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+10 10 50 10 50 50
+""",
+            "output": \
+"""\
 4
-2 5 5 2
+""",
+        }, 
+    ]
 
-The initial runs are:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Run 0: start 0, value 2, length 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Run 1: start 1, value 5, length 2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Run 2: start 3, value 2, length 1.
+    print('Tests passed 😎')
 
-The heap entries are:
 
-(-1, 0, 0), (-2, 1, 1), (-1, 3, 2).
+if __name__ == '__main__':
+    test()
 
-The first step pops (-2, 1, 1) (run 1). Processed. count becomes 1.
 
-prev_run is run 0, next_run is run 2.
+```
 
-prev_run.value (2) != next_run.value (2? Wait, no. Run 0 is value 2, run 2 is value 2. So yes. So after removing run 1, prev_run is run 0, next_run is run 2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So prev_run.value == next_run.value (2 == 2). So they are merged into a new run with length 1+1=2, start 0.
-
-So the new_run's prev is None (since run 0's prev is None), and next is None (run 2's next is None). Then, this new run is added to the heap.
-
-The next step, the heap has entries:
-
-(-1, 0, 0) (run 0, but it's marked as deleted after merging).
-
-(-1, 3, 2) (run 2, marked as deleted).
-
-The new entry is (-2, 0, 3) (new run with id 3).
-
-The next pop is (-2, 0, 3). Processed, count becomes 2. This run has no prev or next. So after removing it, the heap is empty. So total 2 steps. Correct.
-
-Another example: the fourth example.
-
-Initial runs are:
-
-Run 0: start 0, 10, 2.
-
-Run 1: start 2, 50, 1.
-
-Run 2: start 3, 10, 1.
-
-Run 3: start 4, 50, 2.
-
-Processing steps:
-
-First, heap entries are (-2,0,0), (-1,2,1), (-1,3,2), (-2,4,3).
-
-First step pops run 0 (id 0), length 2. count=1. prev is None, next is run 1. So no merging (run 1's value is 50 vs None). So after removing run 0, the next runs are run 1, 2, 3.
-
-Run 1's next is run 2, which is 10. So no merge. Then, the next step's heap has entries: (-1,2,1), (-1,3,2), (-2,4,3). Next highest is (-2,4,3) (run3). Pop it. count=2. Remove run3. Check its prev (run2) and next (None). So no merge. Then, the remaining runs are run1 (50,1) and run2 (10,1). The heap now has (-1,2,1), (-1,3,2). Next, the next pop is the first one (run1). count=3. Remove run1. prev is None, next is run2. So no merge. Then, the next run is run2. Pop and count=4. So total 4 steps. Correct.
-
-But in the fourth example's note, the steps are 4. So this code should handle that.
-
-Another test case: input 5 6 3 4 1 5. All elements are distinct. So each run has length 1. So each step removes the leftmost run. So 5 steps, correct.
-
-Third example: input 8 4 4 4 2 2 100 100 100. Initial runs:
-
-Run0: 4,3, start 0.
-
-Run1: 2,2, start3.
-
-Run2: 100,3, start5.
-
-Heap entries are (-3,0,0), (-2,3,1), (-3,5,2). First step pops run0. count=1. prev is None, next is run1. No merge. Next step, heap has entries (-2,3,1), (-3,5,2). Next pop run2 (100,3). count=2. prev is run1, next None. No merge. Next pop run1. count=3. So total 3 steps. Correct.
+```
 
 So the code seems to handle these cases.
 

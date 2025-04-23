@@ -1661,155 +1661,164 @@ But the code must be efficient.
 
 Here's the Python code:
 
-n, k = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-xor_sum = 0
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-if k % 2 == 0:
+    xor_sum = 0
 
-    for x in a:
+    if k % 2 == 0:
 
-        if x == 0:
+        for x in a:
 
-            g = 0
-
-        elif x == 1:
-
-            g = 1
-
-        elif x == 2:
-
-            g = 2
-
-        else:
-
-            if x % 2 == 1:
+            if x == 0:
 
                 g = 0
 
-            else:
+            elif x == 1:
 
                 g = 1
 
-        xor_sum ^= g
+            elif x == 2:
 
-else:
-
-    memo = {0: 0}
-
-    for x in a:
-
-        current = x
-
-        stack = []
-
-        while True:
-
-            if current in memo:
-
-                break
-
-            stack.append(current)
-
-            if current % 2 == 1:
-
-                current -= 1
+                g = 2
 
             else:
 
-                stack.append(current // 2)
+                if x % 2 == 1:
 
-                current = current // 2
+                    g = 0
 
-        # Now, compute from the bottom up
+                else:
 
-        while stack:
+                    g = 1
 
-            current = stack.pop()
+            xor_sum ^= g
 
-            if current in memo:
+    else:
 
-                continue
+        memo = {0: 0}
 
-            if current % 2 == 1:
+        for x in a:
 
-                # Compute grundy(current) = mex of [grundy(current-1)]
+            current = x
 
-                g_prev = memo.get(current - 1, 0)
+            stack = []
 
-                mex = 1 if g_prev == 0 else 0
+            while True:
 
-                memo[current] = mex
+                if current in memo:
 
-            else:
+                    break
 
-                # Compute grundy(current) = mex of [grundy(current-1), grundy(current//2)]
+                stack.append(current)
 
-                g_prev = memo.get(current - 1, 0)
+                if current % 2 == 1:
 
-                g_half = memo.get(current // 2, 0)
+                    current -= 1
 
-                s = {g_prev, g_half}
+                else:
 
-                mex = 0
+                    stack.append(current // 2)
 
-                while mex in s:
+                    current = current // 2
 
-                    mex += 1
+            # Now, compute from the bottom up
 
-                memo[current] = mex
+            while stack:
 
-        xor_sum ^= memo[x]
+                current = stack.pop()
 
-if xor_sum != 0:
+                if current in memo:
 
-    print("Kevin")
+                    continue
 
-else:
+                if current % 2 == 1:
 
-    print("Nicky")
+                    # Compute grundy(current) = mex of [grundy(current-1)]
 
-This code uses a while loop to traverse down to the base case (when current is in memo), then computes the grundy numbers on the way back up.
+                    g_prev = memo.get(current - 1, 0)
 
-This should handle all cases efficiently.
+                    mex = 1 if g_prev == 0 else 0
 
-For example, when a_i is even and k is odd, the code will split into current//2 and current-1, and compute each step as needed.
+                    memo[current] = mex
 
-The memo dictionary will remember all computed grundy numbers, so subsequent a_i's that require the same current values will use the memoized values.
+                else:
 
-This approach should handle large a_i's efficiently.
+                    # Compute grundy(current) = mex of [grundy(current-1), grundy(current//2)]
 
-Testing the sample inputs:
+                    g_prev = memo.get(current - 1, 0)
 
-Sample 1:
+                    g_half = memo.get(current // 2, 0)
 
-Input:
+                    s = {g_prev, g_half}
 
-2 1
+                    mex = 0
 
-3 4
+                    while mex in s:
 
-k is odd.
+                        mex += 1
 
-For x=3 (odd):
+                    memo[current] = mex
 
-grundy(3) = mex(grundy(2)).
+            xor_sum ^= memo[x]
 
-grundy(2) is even: mex(grundy(1), grundy(1)).
+    if xor_sum != 0:
 
-grundy(1) is mex(grundy(0)) → 1.
+        print("Kevin", file=output_stream)
 
-So mex(1, 1) is 0. So grundy(2) is 0.
+    else:
 
-So mex(grundy(2)=0) → 1. So grundy(3)=1.
+        print("Nicky", file=output_stream)
 
-For x=4 (even):
 
-grundy(4) = mex(grundy(3), grundy(2)) → mex(1, 0) →2.
 
-So the xor is 1 ^ 2 = 3. Which is non-zero → Kevin wins.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 2
+3
+""",
+            "output": \
+"""\
+Nicky
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

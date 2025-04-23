@@ -1261,67 +1261,102 @@ But for handling large n=3e5, in Python, this is feasible.
 
 The code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from bisect import bisect_left
 
-n, p = map(int, sys.stdin.readline().split())
-count = [0] * (n + 1)
-overlap = dict()  # keys are sorted tuples (a, b), values are counts.
 
-for _ in range(n):
-    x, y = map(int, sys.stdin.readline().split())
-    count[x] += 1
-    count[y] += 1
-    a = min(x, y)
-    b = max(x, y)
-    key = (a, b)
-    if key in overlap:
-        overlap[key] += 1
-    else:
-        overlap[key] = 1
+def main(input_stream, output_stream):
+    n, p = map(int, input_stream.readline().split())
+    count = [0] * (n + 1)
+    overlap = dict()  # keys are sorted tuples (a, b), values are counts.
 
-sorted_counts = sorted(count[1:n+1])
+    for _ in range(n):
+        x, y = map(int, input_stream.readline().split())
+        count[x] += 1
+        count[y] += 1
+        a = min(x, y)
+        b = max(x, y)
+        key = (a, b)
+        if key in overlap:
+            overlap[key] += 1
+        else:
+            overlap[key] = 1
 
-total_pairs = 0
+    sorted_counts = sorted(count[1:n+1])
 
-for i in range(n):
-    a = sorted_counts[i]
-    # Find the smallest j > i such that a + sorted_counts[j] >= p
-    target = p - a
-    j = bisect_left(sorted_counts, target, i + 1, n)
-    total_pairs += (n - j)
+    total_pairs = 0
 
-invalid = 0
-for (a, b), cnt in overlap.items():
-    sum_ab = count[a] + count[b]
-    if sum_ab >= p:
-        required = sum_ab - p
-        if cnt > required:
-            invalid += 1
+    for i in range(n):
+        a = sorted_counts[i]
+        # Find the smallest j > i such that a + sorted_counts[j] >= p
+        target = p - a
+        j = bisect_left(sorted_counts, target, i + 1, n)
+        total_pairs += (n - j)
 
-print(total_pairs - invalid)
+    invalid = 0
+    for (a, b), cnt in overlap.items():
+        sum_ab = count[a] + count[b]
+        if sum_ab >= p:
+            required = sum_ab - p
+            if cnt > required:
+                invalid += 1
 
-Wait, but the bisect_left approach for finding j is different.
+    print(total_pairs - invalid, file=output_stream)
 
-Wait, the bisect_left function finds the first index j >= i+1 where sorted_counts[j] >= target.
 
-Because sum_ab = a + sorted_counts[j] >= p → sorted_counts[j] >= p -a.
 
-So j is the first index where sorted_counts[j] >= (p - a).
+def test():
+    import io
 
-But this is correct because once sorted_counts[j] >= (p -a), then a + sorted_counts[j] >= p.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 6
+5 6
+5 7
+5 8
+6 2
+2 1
+7 3
+1 3
+1 4
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-Yes.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So this code works.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Testing with sample 1:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-sorted_counts = [1,2,2,3]
+    print('Tests passed 😎')
 
-For i=0 (a=1), target =2-1=1. So bisect_left finds the first j>0 where sorted_counts[j] >=1. All elements are >=1. So j=1. n-j =4-1=3 → adds 3.
 
-Similarly for other i's.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

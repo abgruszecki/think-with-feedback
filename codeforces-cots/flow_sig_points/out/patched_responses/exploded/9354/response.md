@@ -430,48 +430,100 @@ The DP can be represented as two arrays, count and sum_ (since sum is a keyword 
 
 Now, the code outline is:
 
-MOD = 998244353
+Testing against sample input 1.
 
-n, m = map(int, input().split())
-edges = [[] for _ in range(n)]
-mask_a = [0]*n
-mask_b = [0]*n
-for _ in range(m):
-    a, b = map(int, input().split())
-    a -= 1
-    b -= 1
-    mask_a[a] |= 1 << b
-    mask_b[b] |= 1 << a
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-size = 1 << n
-count = [0] * size
-sum_ = [0] * size
-count[0] = 1
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    edges = [[] for _ in range(n)]
+    mask_a = [0]*n
+    mask_b = [0]*n
+    for _ in range(m):
+        a, b = map(int, input_stream.readline().rstrip("\n").split())
+        a -= 1
+        b -= 1
+        mask_a[a] |= 1 << b
+        mask_b[b] |= 1 << a
 
-for S in range(size):
-    if count[S] == 0:
-        continue
-    for u in range(n):
-        if not (S & (1 << u)):
-            # compute cost
-            a_part = (mask_a[u] & S).bit_count()
-            b_part = (mask_b[u] & (~S)).bit_count()
-            cost = a_part + b_part
-            new_S = S | (1 << u)
-            new_count = count[S]
-            new_sum = (sum_[S] + new_count * cost) % MOD
-            count[new_S] = (count[new_S] + new_count) % MOD
-            sum_[new_S] = (sum_[new_S] + new_sum) % MOD
+    size = 1 << n
+    count = [0] * size
+    sum_ = [0] * size
+    count[0] = 1
 
-print(sum_[(1<<n)-1] % MOD)
+    for S in range(size):
+        if count[S] == 0:
+            continue
+        for u in range(n):
+            if not (S & (1 << u)):
+                # compute cost
+                a_part = (mask_a[u] & S).bit_count()
+                b_part = (mask_b[u] & (~S)).bit_count()
+                cost = a_part + b_part
+                new_S = S | (1 << u)
+                new_count = count[S]
+                new_sum = (sum_[S] + new_count * cost) % MOD
+                count[new_S] = (count[new_S] + new_count) % MOD
+                sum_[new_S] = (sum_[new_S] + new_sum) % MOD
 
-Wait, but the mask_a and mask_b are computed for each node. For example, mask_a[u] is a bitmask of the nodes that u has edges to. So when we check (mask_a[u] & S), this gives the nodes v in S that are destinations of edges from u. Each such edge must be reversed, adding 1 to the cost.
+    print(sum_[(1<<n)-1] % MOD, file=output_stream)
 
-Similarly, mask_b[u] is a bitmask of the nodes v that have edges to u. For those edges, if the source node v is not in S (since we're adding u now), then the edge must be reversed. So (mask_b[u] & (~S)) gives the number of edges where v is not in S and the edge is v->u. These edges must be reversed, adding 1 to the cost.
 
-Yes, this seems correct.
 
-Testing this code with the first sample input:
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 3
+1 2
+2 3
+1 3
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 73, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 66, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '9'
+Got: '18'
+
+```
 
 Sample input 1:
 

@@ -285,94 +285,145 @@ Then, print the sums separated by spaces.
 
 Putting it all together, the code would be:
 
-n, k = map(int, input().split())
-a = list(map(int, input().split()))
-a = list(set(a))  # Remove duplicates
+Testing against sample input 1.
 
-prev = 1  # represents sum 0 (for 0 items)
-for _ in range(k):
-    curr = 0
-    for num in a:
-        curr |= prev << num
-    prev = curr
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a = list(set(a))  # Remove duplicates
 
-sums = []
-current = prev
-while current:
-    lsb = current & -current
-    pos = (lsb).bit_length() - 1
-    sums.append(pos)
-    current ^= lsb
+    prev = 1  # represents sum 0 (for 0 items)
+    for _ in range(k):
+        curr = 0
+        for num in a:
+            curr |= prev << num
+        prev = curr
 
-print(' '.join(map(str, sums)))
+    sums = []
+    current = prev
+    while current:
+        lsb = current & -current
+        pos = (lsb).bit_length() - 1
+        sums.append(pos)
+        current ^= lsb
 
-Wait, but what if prev is zero? Like in the case where no possible sums exist (but according to the problem statement, the thief takes exactly k items. So if a is empty, but according to the constraints, n is at least 1, so a can't be empty. So prev will be non-zero.
+    print(' '.join(map(str, sums)), file=output_stream)
 
-But in code, if after k steps, prev is zero (but that's impossible because there are a_i's and the thief can take exactly k items).
 
-So this code should work.
 
-Testing the first sample:
+def test():
+    import io
 
-Input:
-3 2
-1 2 3
-
-After deduplication, a is [1,2,3].
-
-prev starts as 1 (sum 0, 0 items).
-
-First iteration (k=1):
-
-curr = 0
-for each a_i:
-    shift prev (1) by a_i:
-    for 1: 1 << 1 = 2 → binary 10.
-    for 2: 1 << 2 =4 → 100.
-    for 3: 1<<3=8 →1000.
-    OR them: 10 | 100 | 1000 = 1110 (14 in decimal). So curr is 14 (sums 1,2,3).
-
-prev becomes 14.
-
-Second iteration (k=2):
-
-curr = 0.
-
-For each a_i (1,2,3):
-
-prev is 14 (binary 1110). Shifting by 1:
-
-1110 <<1 = 11100 (sums 2,3,4). OR into curr.
-
-Shifting by 2: 1110 <<2 → 111000 (sums 3,4,5). OR into curr.
-
-Shifting by 3: 1110 <<3 → 1110000 (sums 4,5,6). OR into curr.
-
-So curr is 11100 | 111000 | 1110000 → 11100 (12) | 111000 (56) → 111100 (60) | 1110000 (112) → 1111100 (124). So binary 1111100 is 124. The bits set are positions 2,3,4,5,6. So sums are 2,3,4,5,6. Which matches the sample.
-
-So code works.
-
-The second sample:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5 5
+1 1 1 1 1
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-1 1 1 1 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-After deduplication, a is [1].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-prev starts as 1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-After 5 iterations:
+    print('Tests passed 😎')
 
-Each time, curr is prev <<1.
 
-First iteration: 1 <<1 = 2 (sum 1).
+if __name__ == '__main__':
+    test()
 
-Second iteration: 2 <<1 =4 (sum 2).
 
-After 5 times: sum is 5, so the bit is 1 <<5 =32.
+```
 
-So sums is [5], which matches the sample.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a = list(set(a))  # Remove duplicates
+
+    prev = 1  # represents sum 0 (for 0 items)
+    for _ in range(k):
+        curr = 0
+        for num in a:
+            curr |= prev << num
+        prev = curr
+
+    sums = []
+    current = prev
+    while current:
+        lsb = current & -current
+        pos = (lsb).bit_length() - 1
+        sums.append(pos)
+        current ^= lsb
+
+    print(' '.join(map(str, sums)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 3
+3 5 11
+""",
+            "output": \
+"""\
+9 11 13 15 17 19 21 25 27 33
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

@@ -327,11 +327,14 @@ But in code submission, sometimes using sys.stdin is faster. Let's code that way
 
 So the code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-def main():
 
-    data = sys.stdin.read().split()
+def main(input_stream, output_stream):
+    data = input_stream.read().split()
 
     n = int(data[0])
 
@@ -355,83 +358,131 @@ def main():
 
         sum_prev = current_sum
 
-    print(' '.join(res))
+    print(' '.join(res), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 20
+10 9 19 2
+""",
+            "output": \
+"""\
+0 0 1 1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
 
 if __name__ == '__main__':
+    test()
 
-    main()
 
-This code reads all data at once, splits into a list, and processes. This is faster for large input.
+```
 
-But according to the problem statement, the code must read via input(), but that's not the case. The problem states: "Your solution must read input from standard input (input()), write output to standard output (print())."
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-But in Python, the code can read via sys.stdin and still be considered as reading from standard input. The input() function is a higher-level way to read from stdin.
+```
 
-But using sys.stdin.read() is allowed. So the code is okay.
+Testing against sample input 2.
 
-This code should handle all cases correctly.
+```python
+import sys
 
-Testing the first sample:
 
-Input:
+def main(input_stream, output_stream):
+    data = input_stream.read().split()
 
-3 5
+    n = int(data[0])
 
-3 7 9
+    m = int(data[1])
 
-The data list will be ['3', '5', '3', '7', '9']
+    a = list(map(int, data[2:2+n]))
 
-n=3, m=5.
+    sum_prev = 0
 
-a = [3,7,9].
+    current_sum = 0
 
-sum_prev starts at 0.
+    res = []
 
-current_sum after each step:
+    for num in a:
 
-3: 3//5=0. t=0-0=0. res is [0].
+        current_sum += num
 
-sum_prev becomes 3.
+        t = (current_sum // m) - (sum_prev // m)
 
-current_sum becomes 3+7=10. 10//5=2. sum_prev//5=3//5=0. t=2-0=2. res [0,2].
+        res.append(str(t))
 
-sum_prev becomes 10.
+        sum_prev = current_sum
 
-current_sum 19. 19//5=3. sum_prev//5=2. t=3-2=1. res [0,2,1].
+    print(' '.join(res), file=output_stream)
 
-Output is 0 2 1.
 
-Which is correct.
 
-Another sample:
+def test():
+    import io
 
-Sample input 2:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 100
+99
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-4 20
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-10 9 19 2
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-data list is ['4', '20', '10', '9', '19', '2'].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-sum_prev=0.
+    print('Tests passed 😎')
 
-current_sum=10: 10//20=0. t=0-0=0. res [0].
 
-sum_prev=10.
+if __name__ == '__main__':
+    test()
 
-current_sum=19: 19//20=0. t=0-0=0. res [0,0].
 
-sum_prev=19.
+```
 
-current_sum=38: 38//20=1. t=1 - 0=1. res [0,0,1].
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-sum_prev=38.
+```
 
-current_sum 40: 40//20=2. 38//20=1. t=2-1=1. res [0,0,1,1].
-
-Which matches.
-
-Thus, the code should work.
 </think>
 
 ```python

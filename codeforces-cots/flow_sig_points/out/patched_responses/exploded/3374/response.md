@@ -261,95 +261,97 @@ But what if m is zero? Then, there are no pairs. So answer is n-1.
 
 So code:
 
-n, m = map(int, input().split())
+Testing against sample input 2.
 
-if m ==0:
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-   print(n-1)
+    if m ==0:
 
-else:
+       print(n-1, file=output_stream)
 
-   max_u = 0
+    else:
 
-   min_v = float('inf')
+       max_u = 0
 
-   for _ in range(m):
+       min_v = float('inf')
 
-       u, v = map(int, input().split())
+       for _ in range(m):
 
-       if u >v:
+           u, v = map(int, input_stream.readline().rstrip("\n").split())
 
-           u, v = v, u
+           if u >v:
 
-       # Now u <v. The allowed interval is [u, v-1]
+               u, v = v, u
 
-       max_u = max(max_u, u)
+           # Now u <v. The allowed interval is [u, v-1]
 
-       current_v_min = v-1
+           max_u = max(max_u, u)
 
-       if current_v_min < min_v:
+           current_v_min = v-1
 
-           min_v = current_v_min
+           if current_v_min < min_v:
 
-   start = max(max_u, 1)
+               min_v = current_v_min
 
-   end = min(min_v, n-1)
+       start = max(max_u, 1)
 
-   if start > end:
+       end = min(min_v, n-1)
 
-       print(0)
+       if start > end:
 
-   else:
+           print(0, file=output_stream)
 
-       print(end - start +1)
+       else:
 
-But wait, in the case where m is 1, like in the third sample. Let's see.
+           print(end - start +1, file=output_stream)
 
-Yes.
 
-Now, let's test the third sample:
 
-n=3, m=2.
+def test():
+    import io
 
-pairs:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2
+3 1
+3 2
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-3 1 → sorted to 1 and3 → interval [1,2]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-3 2 → sorted to 2 and3 → interval [2,2]
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-max_u is max(1,2) =2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-min_v is min(2, 2) =2.
+    print('Tests passed 😎')
 
-start = max(2,1) =2.
 
-end = min(2, 3-1=2) →2.
+if __name__ == '__main__':
+    test()
 
-so end - start +1 =1. Correct.
 
-Another test case:
+```
 
-Sample 2:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-n=3, m=3.
-
-Pairs:
-
-1 2 → [1,1]
-
-2 3 → [2,2]
-
-1 3 → [1,2]
-
-max_u is max(1,2,1) →2.
-
-min_v is min(1,2,2) →1.
-
-start is max(2,1) →2.
-
-end is min(1,2) →1.
-
-start >end →0. Correct.
+```
 
 So the code seems to handle these cases.
 

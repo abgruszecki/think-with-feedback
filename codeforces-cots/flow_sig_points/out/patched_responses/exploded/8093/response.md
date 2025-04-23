@@ -70,23 +70,62 @@ Yes, that's the code.
 
 So the code in Python would be:
 
-n = int(input())
-a = list(map(int, input().split()))
-a.sort()
-res = 0
-for i in range(0, n, 2):
-    res += a[i+1] - a[i]
-print(res)
+Testing against sample input 1.
 
-That's all. It's O(n log n) due to the sorting step, which is acceptable for n up to 100.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a.sort()
+    res = 0
+    for i in range(0, n, 2):
+        res += a[i+1] - a[i]
+    print(res, file=output_stream)
 
-Testing the first sample:
 
-Input 6
 
-5 10 2 3 14 5 → sorted becomes [2,3,5,5,10,14]
+def test():
+    import io
 
-The pairs are 2-3 (1), 5-5 (0), 10-14 (4). Sum is 5. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+1 100
+""",
+            "output": \
+"""\
+99
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample: sum is 99. Correct.
 

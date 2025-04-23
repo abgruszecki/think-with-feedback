@@ -383,38 +383,75 @@ for i in range(n):
 
 So in code:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-s = input().strip()
-n = len(s)
-starts = []
-for k in range(n -3):
-    if s[k] == 'b' and s[k+1] == 'e' and s[k+2] == 'a' and s[k+3] == 'r':
-        starts.append(k)
 
-total =0
-for i in range(n):
-    idx = bisect.bisect_left(starts, i)
-    if idx < len(starts):
-        k = starts[idx]
-        j_min = k +3
-        if j_min >=n:
-            continue
-        count = n - j_min
-        total += count
-print(total)
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    n = len(s)
+    starts = []
+    for k in range(n -3):
+        if s[k] == 'b' and s[k+1] == 'e' and s[k+2] == 'a' and s[k+3] == 'r':
+            starts.append(k)
 
-Testing this code with sample 1:
+    total =0
+    for i in range(n):
+        idx = bisect.bisect_left(starts, i)
+        if idx < len(starts):
+            k = starts[idx]
+            j_min = k +3
+            if j_min >=n:
+                continue
+            count = n - j_min
+            total += count
+    print(total, file=output_stream)
 
-Sample1 input: "bearbtear" (n=9)
 
-starts is [0]. For i in 0..8:
 
-i=0: idx=0. k=0. j_min=3. count=9-3=6.
+def test():
+    import io
 
-i=1: idx=0 (since starts[0] is 0 <1). starts is length 1, so idx=1 >=len(starts) (1 >=1 is no). So no contribution.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+bearaabearc
+""",
+            "output": \
+"""\
+20
+""",
+        }, 
+    ]
 
-So sum is 6. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample2 input: "bearaabearc" (n=11)
 

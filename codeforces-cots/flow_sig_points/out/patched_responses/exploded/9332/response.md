@@ -1345,39 +1345,145 @@ else:
 
 This code should handle all conditions.
 
-Testing the first sample:
+Testing against sample input 1.
 
-Test case 1:
+```python
+import sys
+from collections import deque
 
-s = [0, 4, 0, 2, 1, 0, 1, 0]
 
-g = [0,4,0,1,0,0,0,0]
+def main(input_stream, output_stream):
+    input = input_stream.read().split()
+    ptr = 0
+    t = int(input[ptr])
+    ptr += 1
+    for _ in range(t):
+        n, m = int(input[ptr]), int(input[ptr+1])
+        ptr +=2
+        p = list(map(int, input[ptr:ptr+n]))
+        ptr +=n
+        h = list(map(int, input[ptr:ptr+n]))
+        ptr +=n
+        edges = [[] for _ in range(n+1)]
+        for _ in range(n-1):
+            u = int(input[ptr])
+            v = int(input[ptr+1])
+            ptr +=2
+            edges[u].append(v)
+            edges[v].append(u)
+        
+        parent = [0]*(n+1)
+        children = [[] for _ in range(n+1)]
+        visited = [False]*(n+1)
+        q = deque([1])
+        visited[1] = True
+        while q:
+            u = q.popleft()
+            for v in edges[u]:
+                if not visited[v]:
+                    visited[v] = True
+                    parent[v] = u
+                    children[u].append(v)
+                    q.append(v)
+        
+        s = [0]*(n+1)
+        def post_order(u):
+            s[u] = p[u-1]
+            for v in children[u]:
+                post_order(v)
+                s[u] += s[v]
+        post_order(1)
+        
+        valid = True
+        g = [0]*(n+1)
+        for u in range(1, n+1):
+            su = s[u]
+            hu = h[u-1]
+            if (hu + su) % 2 != 0:
+                valid = False
+                break
+            gu = (hu + su) // 2
+            if gu < 0 or gu > su:
+                valid = False
+                break
+            g[u] = gu
+        
+        if not valid:
+            print("NO", file=output_stream)
+            continue
+        
+        for u in range(2, n+1):
+            if g[u] > g[parent[u]]:
+                valid = False
+                break
+        if not valid:
+            print("NO", file=output_stream)
+            continue
+        
+        for u in range(1, n+1):
+            total = 0
+            for v in children[u]:
+                total += g[v]
+            if total > g[u]:
+                valid = False
+                break
+        print("YES" if valid else "NO", file=output_stream)
 
-Check condition 2:
 
-For u=2: g=0 <= parent's g=4: yes.
 
-u=3:1 <=4: yes.
+def test():
+    import io
 
-u=4:0 <=4: yes.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+4 4
+1 1 1 1
+4 1 -3 -1
+1 2
+1 3
+1 4
+3 13
+3 3 7
+13 1 4
+1 2
+1 3
+""",
+            "output": \
+"""\
+NO
+NO
+""",
+        }, 
+    ]
 
-u=5:0 <=1: yes.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-u=6:0 <=1: yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-u=7:0 <=0: yes.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Condition3:
+    print('Tests passed 😎')
 
-For u=1: sum of children's g (0+1+0) =1 <=4: yes.
 
-u=3: sum of children's g (0+0+0) =0 <=1: yes.
+if __name__ == '__main__':
+    test()
 
-Others: sum is <= g[u].
 
-Thus, valid.
+```
 
-Thus, sample output is YES.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

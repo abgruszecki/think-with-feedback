@@ -406,27 +406,65 @@ for i in range(1, n):
 
 print(res)
 
-Wait, but let's test this code on the sample 2.
+Testing against sample input 2.
 
-Sample2:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    prev_d = 0
+    result = 0
+    for i in range(1, n):
+        required_prev = a[i-1] + prev_d
+        current_d = max(required_prev - a[i], 0)
+        result += max(current_d - prev_d, 0)
+        prev_d = current_d
+    print(result, file=output_stream)
 
-n=3.
 
-a = [3,2,1].
 
-i=1 (0-based):
+def test():
+    import io
 
-required_prev =3 +0=3. current_d=3-2=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+7 4 1 47
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-res +=1-0=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=2:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-required_prev =2 +1=3. current_d=3-1=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-res +=2-1=1. res is 2.
+    print('Tests passed 😎')
 
-Which is correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

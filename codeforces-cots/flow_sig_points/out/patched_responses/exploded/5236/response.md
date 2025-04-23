@@ -152,15 +152,119 @@ else:
 
         print(reversed_digits)
 
-Wait, let's test this code with the examples.
+Testing against sample input 1.
 
-First example:
+```python
+def main(input_stream, output_stream):
+    n = input_stream.readline().rstrip("\n").strip()
+    sign = '-' if n.startswith('-') else ''
+    digits = n[len(sign):].lstrip('0') or '0'
+    reversed_digits = digits[::-1].lstrip('0') or '0'
+    if reversed_digits == '0':
+        print('0', file=output_stream)
+    else:
+        print(f"{sign}{reversed_digits}" if sign else reversed_digits, file=output_stream)
 
-Input '23' → digits is '23', leading zeros stripped to '23', reversed '32', stripped '32', not zero → output '32'.
 
-Second example:
 
-Input '-032' → sign is '-', digits is '032' → lstrip → '32' → reversed '23' → lstrip → '23' → not zero. So output '-23'.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+-032
+""",
+            "output": \
+"""\
+-23
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = input_stream.readline().rstrip("\n").strip()
+    sign = '-' if n.startswith('-') else ''
+    digits = n[len(sign):].lstrip('0') or '0'
+    reversed_digits = digits[::-1].lstrip('0') or '0'
+    if reversed_digits == '0':
+        print('0', file=output_stream)
+    else:
+        print(f"{sign}{reversed_digits}" if sign else reversed_digits, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+01234560
+""",
+            "output": \
+"""\
+654321
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: input '01234560' → sign is positive. digits after lstrip is '1234560' → reversed is '0654321' → lstrip → '654321' → not zero → output '654321'.
 

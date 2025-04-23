@@ -583,115 +583,110 @@ But n can be up to 1e5, 2n up to 2e5. So sorting is O(n log n), acceptable.
 
 Now code:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-a.sort()
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-min_product = float('inf')
+    a.sort()
 
-total = 2 * n
+    min_product = float('inf')
 
-for i in range(n + 1):
+    total = 2 * n
 
-    # window starts at i, ends at i + n -1
+    for i in range(n + 1):
 
-    window_end = i + n -1
+        # window starts at i, ends at i + n -1
 
-    if window_end >= total:
+        window_end = i + n -1
 
-        break
+        if window_end >= total:
 
-    window_range = a[window_end] - a[i]
+            break
 
-    # compute remaining_range
+        window_range = a[window_end] - a[i]
 
-    if i ==0:
+        # compute remaining_range
 
-        # remaining is from n to 2n-1
+        if i ==0:
 
-        rem_min = a[n]
+            # remaining is from n to 2n-1
 
-        rem_max = a[-1]
+            rem_min = a[n]
 
-    elif i +n == total:
+            rem_max = a[-1]
 
-        # remaining is from 0 to i-1
+        elif i +n == total:
 
-        rem_min = a[0]
+            # remaining is from 0 to i-1
 
-        rem_max = a[i-1]
+            rem_min = a[0]
 
-    else:
+            rem_max = a[i-1]
 
-        rem_min = a[0]
+        else:
 
-        rem_max = a[-1]
+            rem_min = a[0]
 
-    rem_range = rem_max - rem_min
+            rem_max = a[-1]
 
-    product = window_range * rem_range
+        rem_range = rem_max - rem_min
 
-    if product < min_product:
+        product = window_range * rem_range
 
-        min_product = product
+        if product < min_product:
 
-print(min_product)
+            min_product = product
 
-Wait, let's test this code against the samples.
+    print(min_product, file=output_stream)
 
-First sample:
 
-Input:
 
-4
+def test():
+    import io
 
-4 1 3 2 3 2 1 3
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+5 8 5 5 7 5
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-After sorting: [1,1,2,2,3,3,3,4]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-total =8.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-n=4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Loop i from 0 to 4 inclusive.
+    print('Tests passed 😎')
 
-i=0:
 
-window_end=3 (0+4-1=3). a[3] -a[0] =2-1=1.
+if __name__ == '__main__':
+    test()
 
-rem_min =a[4] =3, rem_max =a[7]=4. rem_range 1. product=1.
 
-i=1:
+```
 
-window_end=1+4-1=4. a[4]-a[1] =3-1=2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-rem is a[0], a[5-7]. i+4=5 !=8. So rem_min is a[0]=1, rem_max a[-1]=4. rem_range=3. product 2*3=6.
-
-i=2:
-
-window_end=2+4-1=5. a[5]-a[2] =3-2=1.
-
-rem_min=1, rem_max=4. product 1*3=3.
-
-i=3:
-
-window_end=3+4-1=6. a[6] is 3, a[3] is 2. 3-2=1.
-
-rem_min=1, rem_max=4. product 1*3=3.
-
-i=4:
-
-window_end=4+4-1=7. a[7] -a[4] =4-3=1.
-
-i+4=4+4=8 ==total.
-
-so rem is a[0..3]. rem_min=1, rem_max=2. rem_range=1.
-
-product=1*1=1.
-
-So the minimal is 1. Which is correct.
+```
 
 Second sample:
 

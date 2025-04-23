@@ -808,76 +808,108 @@ We need to read n, k, s. Compute for each character in s the counts for less, eq
 
 The code will look like this:
 
-MOD = 10**9 +7
+Testing against sample inputs 1, 2.
 
-n, k = map(int, input().split())
-s = input()
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-current_dp = {(0, 0): 1}
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    s = input_stream.readline().rstrip("\n")
 
-for m in range(1, n+1):
-    char = s[m-1]
-    ord_char = ord(char) - ord('a')
-    less = ord_char
-    equal = 1
-    greater = 25 - ord_char
+    current_dp = {(0, 0): 1}
 
-    next_dp = dict()
+    for m in range(1, n+1):
+        char = s[m-1]
+        ord_char = ord(char) - ord('a')
+        less = ord_char
+        equal = 1
+        greater = 25 - ord_char
 
-    for (l_prev, b), cnt in current_dp.items():
-        # Greater option
-        contrib = (l_prev +1) * (n - m +1)
-        new_b = b + contrib
-        if new_b <= k:
-            key = (0, new_b)
-            next_dp[key] = (next_dp.get(key, 0) + cnt * greater) % MOD
+        next_dp = dict()
 
-        # Equal option
-        new_l = l_prev +1
-        key = (new_l, b)
-        next_dp[key] = (next_dp.get(key, 0) + cnt * equal) % MOD
+        for (l_prev, b), cnt in current_dp.items():
+            # Greater option
+            contrib = (l_prev +1) * (n - m +1)
+            new_b = b + contrib
+            if new_b <= k:
+                key = (0, new_b)
+                next_dp[key] = (next_dp.get(key, 0) + cnt * greater) % MOD
 
-        # Less option
-        key = (0, b)
-        next_dp[key] = (next_dp.get(key, 0) + cnt * less) % MOD
+            # Equal option
+            new_l = l_prev +1
+            key = (new_l, b)
+            next_dp[key] = (next_dp.get(key, 0) + cnt * equal) % MOD
 
-    current_dp = next_dp
+            # Less option
+            key = (0, b)
+            next_dp[key] = (next_dp.get(key, 0) + cnt * less) % MOD
 
-# Sum all counts where b ==k
-result = 0
-for (l, b), cnt in current_dp.items():
-    if b ==k:
-        result = (result + cnt) % MOD
+        current_dp = next_dp
 
-print(result)
+    # Sum all counts where b ==k
+    result = 0
+    for (l, b), cnt in current_dp.items():
+        if b ==k:
+            result = (result + cnt) % MOD
 
-This code uses dictionaries to track the current DP states. For each m, it iterates through all possible (l_prev, b) states, and processes each of the three choices, updating the next_dp accordingly.
+    print(result, file=output_stream)
 
-This should work for the constraints. However, for Python, dictionaries may be slow for large n and k. But given the problem's constraints and the pruning due to the contributions, this should be manageable.
 
-Testing this code with the first sample input:
 
-Sample 1:
+def test():
+    import io
 
-Input:
-
-2 2
-
-yz
-
-Output: 26.
-
-The code should produce this.
-
-Sample 2:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2 3
-
 yx
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+        {
+            "input": \
+"""\
+4 7
+abcd
+""",
+            "output": \
+"""\
+21962
+""",
+        }, 
+    ]
 
-Output: 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

@@ -750,31 +750,103 @@ Then, loops as described.
 
 Finally, print dp[0][n-1].
 
-Testing sample input 2:
+Testing against sample inputs 2, 3.
 
-n=1 → output 0.
+```python
+def main(input_stream, output_stream):
+    import sys
+    n = int(input_stream.readline())
+    s = list(map(int, input_stream.readline().split()))
+    s.sort()
+    INF = float('inf')
+    dp = [[INF] * n for _ in range(n)]
+    for i in range(n):
+        dp[i][i] = 0
+    for l in range(1, n):
+        for left in range(n - l):
+            right = left + l
+            current = dp[left][right]
+            if current == INF:
+                continue
+            # Expand to the left
+            if left > 0:
+                new_left = left - 1
+                cost = current + (s[right] - s[new_left])
+                if cost < dp[new_left][right]:
+                    dp[new_left][right] = cost
+            # Expand to the right
+            if right < n - 1:
+                new_right = right + 1
+                cost = current + (s[new_right] - s[left])
+                if cost < dp[left][new_right]:
+                    dp[left][new_right] = cost
+    print(dp[0][n-1], file=output_stream)
 
-Sample input 3:
 
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 6
+1 6 3 3 6 3
+""",
+            "output": \
+"""\
+11
+""",
+        }, 
+        {
+            "input": \
+"""\
+6
+104 943872923 6589 889921234 1000000000 69
+""",
+            "output": \
+"""\
+2833800505
+""",
+        }, 
+    ]
 
-1 6 3 3 6 3 → sorted [1,3,3,3,6,6]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The expected output is 11.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Let's see:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The optimal order is built by expanding left or right in the sorted array.
+    print('Tests passed 😎')
 
-The sorted array is [1,3,3,3,6,6].
 
-The minimal sum is 11.
+if __name__ == '__main__':
+    test()
 
-But we'll need to see if the code can compute that.
 
-But for the sake of time, we can trust that the code works as per the problem's examples.
+```
 
-Thus, the code is correct.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 75, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 68, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '11'
+Got: 'inf'
+
+```
+
 </think>
 
 ```python

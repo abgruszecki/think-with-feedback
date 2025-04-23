@@ -423,91 +423,163 @@ Yes.
 
 So code:
 
-n = int(input())
+Testing against sample input 1.
 
-p = list(map(int, input().split()))  # len(p) is n-1
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-depth = [0] * (n + 1)  # 1-based indexing
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))  # len(p) is n-1
 
-for i in range(2, n+1):
+    depth = [0] * (n + 1)  # 1-based indexing
 
-    parent = p[i-2]
+    for i in range(2, n+1):
 
-    depth[i] = depth[parent] +1
+        parent = p[i-2]
 
-freq = [0] * n  # indexes 0..n-1
+        depth[i] = depth[parent] +1
 
-for i in range(2, n+1):
+    freq = [0] * n  # indexes 0..n-1
 
-    d = depth[i]
+    for i in range(2, n+1):
 
-    freq[d] +=1
+        d = depth[i]
 
-ans = 1  # the root's apple
+        freq[d] +=1
 
-for d in range(1, n):  # since depth can be up to n-1
+    ans = 1  # the root's apple
 
-    if freq[d] %2 ==1:
+    for d in range(1, n):  # since depth can be up to n-1
 
-        ans +=1
+        if freq[d] %2 ==1:
 
-print(ans)
+            ans +=1
 
-But wait, the loop for d is from 1 to n-1 inclusive. Because in Python, range(1, n) gives numbers from 1 to n-1. So yes.
+    print(ans, file=output_stream)
 
-This should work.
 
-Let's test the first sample:
 
-Sample 1:
+def test():
+    import io
 
-n=3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 2 2 2
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-p = [1,1].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-depth[2] = depth[1]+1 →1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-depth[3] = depth[1]+1 →1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-freq for 1: 2.
+    print('Tests passed 😎')
 
-ans starts at 1.
 
-Loop for d=1 (since n=3, range(1,3) is 1 and 2? Wait, no. range(1,3) is 1 and 2. Because range is up to but not including the end. So for n=3, the loop runs from d=1 to 2. But in the first sample, the depths for nodes 2 and 3 are 1, so in freq, index 1 is 2, and index 2 is 0. So:
+if __name__ == '__main__':
+    test()
 
-d=1: freq[1]=2 → even → no addition.
 
-d=2: freq[2]=0 → even → no addition.
+```
 
-So ans is 1. Correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Sample 2:
+```
 
-n=5.
+Testing against sample input 2.
 
-p is [1,2,2,2].
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-depth:
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))  # len(p) is n-1
 
-2:1
+    depth = [0] * (n + 1)  # 1-based indexing
 
-3:2 (parent 2's depth is 1)
+    for i in range(2, n+1):
 
-4:2 (parent is 2)
+        parent = p[i-2]
 
-5:2 (parent is 2)
+        depth[i] = depth[parent] +1
 
-freq[1] =1 (node2), freq[2]=3 (nodes3,4,5).
+    freq = [0] * n  # indexes 0..n-1
 
-ans =1.
+    for i in range(2, n+1):
 
-Then, d=1: freq 1 is 1 → add 1 → ans=2.
+        d = depth[i]
 
-d=2: freq 3 → add 1 → ans=3.
+        freq[d] +=1
 
-d=3: freq 0 → no. So total 3.
+    ans = 1  # the root's apple
 
-Yes.
+    for d in range(1, n):  # since depth can be up to n-1
+
+        if freq[d] %2 ==1:
+
+            ans +=1
+
+    print(ans, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+18
+1 1 1 4 4 3 2 2 2 10 8 9 9 9 10 10 4
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

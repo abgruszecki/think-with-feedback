@@ -289,47 +289,139 @@ So the code with the added epsilon is correct.
 
 So the code would be:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n, R, r = map(int, input().split())
 
-if n == 1:
-    print("YES" if r <= R else "NO")
-else:
-    if R < r:
-        print("NO")
+def main(input_stream, output_stream):
+    n, R, r = map(int, input_stream.readline().rstrip("\n").split())
+
+    if n == 1:
+        print("YES" if r <= R else "NO", file=output_stream)
     else:
-        C = R - r
-        angle = math.pi / n
-        lhs = C * math.sin(angle)
-        if lhs + 1e-9 >= r:
-            print("YES")
+        if R < r:
+            print("NO", file=output_stream)
         else:
-            print("NO")
+            C = R - r
+            angle = math.pi / n
+            lhs = C * math.sin(angle)
+            if lhs + 1e-9 >= r:
+                print("YES", file=output_stream)
+            else:
+                print("NO", file=output_stream)
 
-Wait, but let's test the sample inputs.
 
-First sample:
 
-4 10 4 → n=4 !=1.
+def test():
+    import io
 
-R=10 >=4. C=6.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 10 4
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-angle is pi/4 → sin(pi/4)=sqrt(2)/2 ≈0.7071.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-6 * 0.7071 ≈4.2426. Which is >=4 → YES.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-In code, lhs is 4.2426... which is more than 4, so code returns YES.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Second sample:
+    print('Tests passed 😎')
 
-5 10 4 → n=5 !=1.
 
-R=10 >=4. C=6.
+if __name__ == '__main__':
+    test()
 
-angle pi/5 radians. sin(pi/5) is approx 0.5878.
 
-6 * 0.5878 ≈3.5268, which is less than 4 → code returns NO.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import math
+
+
+def main(input_stream, output_stream):
+    n, R, r = map(int, input_stream.readline().rstrip("\n").split())
+
+    if n == 1:
+        print("YES" if r <= R else "NO", file=output_stream)
+    else:
+        if R < r:
+            print("NO", file=output_stream)
+        else:
+            C = R - r
+            angle = math.pi / n
+            lhs = C * math.sin(angle)
+            if lhs + 1e-9 >= r:
+                print("YES", file=output_stream)
+            else:
+                print("NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 10 10
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

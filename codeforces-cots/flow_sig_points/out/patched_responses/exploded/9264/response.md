@@ -1006,78 +1006,194 @@ But this code may not pass the time constraints for large n and m, especially wh
 
 But according to the problem's examples and the time constraints, this is the best possible approach.
 
-Now, let's test with the first example:
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+import sys
+from collections import deque, defaultdict
 
-5 8
-kurou
-takuo
-takeshi
-naomi
-shingo
-2 nakiraomi
-2 abanaomicaba
-1 3 943
-2 takuotakeshishingo
-1 5 135832
-2 shingotakeshi
-1 5 0
-2 shingotakeshi
 
-The names are:
+def main(input_stream, output_stream):
+    input = input_stream.read().split()
+    ptr = 0
+    n = int(input[ptr])
+    ptr += 1
+    m = int(input[ptr])
+    ptr +=1
+    
+    names = []
+    for _ in range(n):
+        names.append(input[ptr])
+        ptr +=1
+    
+    class TrieNode:
+        __slots__ = ['children', 'failure', 'name']
+        def __init__(self):
+            self.children = {}
+            self.failure = None
+            self.name = None
+    
+    root = TrieNode()
+    name_to_victims = defaultdict(list)
+    
+    # Build the trie
+    for idx, s in enumerate(names):
+        node = root
+        for c in s:
+            if c not in node.children:
+                node.children[c] = TrieNode()
+            node = node.children[c]
+        if node.name is None:
+            node.name = s
+        name_to_victims[s].append(idx)
+    
+    # Build failure links using BFS
+    queue = deque([root])
+    root.failure = None
+    while queue:
+        current_node = queue.popleft()
+        for char, child in current_node.children.items():
+            if current_node == root:
+                child.failure = root
+            else:
+                p = current_node.failure
+                while p is not None:
+                    if char in p.children:
+                        child.failure = p.children[char]
+                        break
+                    p = p.failure
+                if p is None:
+                    child.failure = root
+            queue.append(child)
+    
+    # Initialize values and name_to_max
+    values = [0] * n
+    name_to_max = defaultdict(int)
+    for s in name_to_victims:
+        name_to_max[s] = 0  # Initially all 0
+    
+    output = []
+    for _ in range(m):
+        query = input[ptr]
+        ptr +=1
+        if query == '1':
+            i = int(input[ptr]) - 1  # convert to 0-based
+            ptr +=1
+            x = int(input[ptr])
+            ptr +=1
+            s = names[i]
+            old_val = values[i]
+            values[i] = x
+            current_max = name_to_max[s]
+            if x > current_max:
+                name_to_max[s] = x
+            elif old_val == current_max:
+                max_val = max(values[v] for v in name_to_victims[s])
+                name_to_max[s] = max_val
+        else:
+            q = input[ptr]
+            ptr +=1
+            current_node = root
+            max_val = -1
+            for c in q:
+                while current_node is not None and c not in current_node.children:
+                    current_node = current_node.failure
+                if current_node is None:
+                    current_node = root
+                else:
+                    current_node = current_node.children.get(c, root)
+                # Traverse failure links
+                temp_node = current_node
+                while temp_node != root:
+                    if temp_node.name is not None:
+                        current_max = name_to_max.get(temp_node.name, -1)
+                        if current_max > max_val:
+                            max_val = current_max
+                    temp_node = temp_node.failure
+                # Check root node
+                if temp_node.name is not None:
+                    current_max = name_to_max.get(temp_node.name, -1)
+                    if current_max > max_val:
+                        max_val = current_max
+            if max_val == -1:
+                output.append("-1")
+            else:
+                output.append(str(max_val))
+    
+    print('\n'.join(output), file=output_stream)
 
-Victim 1: kurou
 
-Victim 2: takuo
 
-Victim 3: takeshi
+def test():
+    import io
 
-Victim 4: naomi
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 15
+a
+ab
+ba
+b
+a
+ba
+2 aa
+1 4 4
+2 bbb
+1 2 1
+1 2 18
+2 b
+2 c
+1 6 10
+2 aba
+2 abbbba
+1 2 12
+2 bbaaab
+1 1 11
+1 5 5
+2 baa
+""",
+            "output": \
+"""\
+0
+4
+4
+-1
+18
+18
+12
+11
+""",
+        }, 
+    ]
 
-Victim 5: shingo
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Initially, all values are 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The first query of type 2 is 'nakiraomi'. The substrings of this that are names are 'naomi' (at positions 5-9?), so the max is 0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But according to the sample output, the first query returns -1. Wait, why?
+    print('Tests passed 😎')
 
-Wait, the first query is 'nakiraomi' — let's see:
 
-The name 'naomi' is a substring of 'nakiraomi'? Let's see:
+if __name__ == '__main__':
+    test()
 
-'n a k i r a o m i' — the substring 'a o m i' would be 'aomi' (no). The substring 'naomi' would need to start at index 4 (0-based): 'nakiraomi' is 10 characters long.
 
-Wait, 'nakiraomi' — letters are n a k i r a o m i. No 'naomi' substring. The 'nao' is not present. So no names are present as substrings. So the first query returns -1.
+```
 
-Wait, how?
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Ah, perhaps 'naomi' is present as a substring. Let's see:
+```
 
-The 'nakiraomi' string is length 9. Let's see:
-
-The substring from index 4 to 8: 'a o m i' — which is 'aomi', not 'naomi'.
-
-So no names are present. Hence, the output is -1.
-
-The second query is 'abanaomicaba' — the substring 'naomi' is present. So the max is 0.
-
-Thus, the code would find 'naomi' and output 0.
-
-Then, after the update to victim 3 (takeshi) to 943, the query 'takuotakeshishingo' would have substrings 'takuo', 'takeshi', 'shingo'. The max is 943.
-
-Then, victim 5 is updated to 135832. The query 'shingotakeshi' includes 'shingo' (now 135832) and 'takeshi' (943). So the max is 135832.
-
-But then, victim 5 is updated back to 0. The max for 'shingo' becomes 0, but 'takeshi' is still 943. So the next query returns 943.
-
-Thus, the code should handle this.
-
-Thus, the code should correctly track the max values for each name.
-
-Thus, the code should work.
-
-Now, let's proceed to write the code.
 </think>
 
 ```python

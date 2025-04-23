@@ -2085,15 +2085,87 @@ multiplier = multiplier *3
 
 With this correction, the first example now returns24.
 
-Let's test this corrected model on the first example:
+Testing against sample input 1.
 
-After sixth character, abc=24.
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 + 7
 
-This matches the sample.
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-So the error in the initial code was in the new_ab calculation for '?': multiplying a_prev by multiplier instead of just a_prev.
+    a = 0
+    ab = 0
+    abc = 0
+    multiplier = 1
 
-So the correct code is:
+    for char in s:
+        if char == 'a':
+            new_a = (a + multiplier) % MOD
+            new_ab = ab % MOD
+            new_abc = abc % MOD
+        elif char == 'b':
+            new_a = a % MOD
+            new_ab = (ab + a) % MOD
+            new_abc = abc % MOD
+        elif char == 'c':
+            new_a = a % MOD
+            new_ab = ab % MOD
+            new_abc = (abc + ab) % MOD
+        else:  # char is '?'
+            new_a = (a * 3 + multiplier) % MOD
+            new_ab = (ab * 3 + a) % MOD
+            new_abc = (abc * 3 + ab) % MOD
+            multiplier = (multiplier * 3) % MOD
+        
+        a, ab, abc = new_a, new_ab, new_abc
+
+    print(abc % MOD, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+???????
+""",
+            "output": \
+"""\
+2835
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 We need to adjust the way new_ab is calculated for '?' characters.
 

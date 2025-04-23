@@ -259,15 +259,66 @@ for code_row in range(n):
 
 Then, print each row in the grid. 
 
-Wait, let's test with the sample input.
+Testing against sample input 1.
 
-Sample 1: n=3, m=3.
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    for code_row in range(n):
+        if code_row % 2 == 0:
+            print('#' * m, file=output_stream)
+        else:
+            filled_index = (code_row - 1) // 2
+            if filled_index % 2 == 0:
+                print('.' * (m-1) + '#', file=output_stream)
+            else:
+                print('#' + '.' * (m-1), file=output_stream)
 
-code_row runs from 0 to 2.
 
-code_row 0: even → '###'
 
-code_row 1: odd. filled_row_index = (1-1)/2=0. 0%2=0 → direction right. s = '..#' → which is correct. 
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 4
+""",
+            "output": \
+"""\
+####
+...#
+####
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 code_row2: even → '###'
 
@@ -281,49 +332,135 @@ So output is:
 
 Which matches the first sample. 
 
-Second sample: n=3, m=4.
+Testing against sample input 2.
 
-code_row0: '####'
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    for code_row in range(n):
+        if code_row % 2 == 0:
+            print('#' * m, file=output_stream)
+        else:
+            filled_index = (code_row - 1) // 2
+            if filled_index % 2 == 0:
+                print('.' * (m-1) + '#', file=output_stream)
+            else:
+                print('#' + '.' * (m-1), file=output_stream)
 
-code_row1: filled_row_index (0) → direction right → '...#'.
 
-code_row2: '####'.
 
-Output:
+def test():
+    import io
 
-####
-
-...#
-
-####
-
-Which matches the second sample. 
-
-Third sample: n=5, m=3. 
-
-code_row0: '###'
-
-code_row1: filled_row_index (0) → right → '..#'
-
-code_row2: '###'
-
-code_row3: filled_row_index (3-1)/2=1. 1%2=1 → left → '#..'
-
-code_row4: '###'
-
-So output is:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 3
+""",
+            "output": \
+"""\
 ###
-
 ..#
-
 ###
-
 #..
-
 ###
+""",
+        }, 
+    ]
 
-Which matches the third sample. 
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    for code_row in range(n):
+        if code_row % 2 == 0:
+            print('#' * m, file=output_stream)
+        else:
+            filled_index = (code_row - 1) // 2
+            if filled_index % 2 == 0:
+                print('.' * (m-1) + '#', file=output_stream)
+            else:
+                print('#' + '.' * (m-1), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+9 9
+""",
+            "output": \
+"""\
+#########
+........#
+#########
+#........
+#########
+........#
+#########
+#........
+#########
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Fourth sample: n=9, m=9. 
 

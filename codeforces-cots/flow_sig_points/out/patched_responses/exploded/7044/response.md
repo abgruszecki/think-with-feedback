@@ -450,101 +450,110 @@ So for each element in all_elements, check if it's present in both dictionaries.
 
 Thus, the code becomes:
 
-n = int(input())
+Testing against sample input 1.
 
-cf = {}
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-for _ in range(n):
+    cf = {}
 
-    a_i, x_i = map(int, input().split())
+    for _ in range(n):
 
-    cf[a_i] = x_i
+        a_i, x_i = map(int, input_stream.readline().rstrip("\n").split())
 
-m = int(input())
+        cf[a_i] = x_i
 
-tc = {}
+    m = int(input_stream.readline().rstrip("\n"))
 
-for _ in range(m):
+    tc = {}
 
-    b_j, y_j = map(int, input().split())
+    for _ in range(m):
 
-    tc[b_j] = y_j
+        b_j, y_j = map(int, input_stream.readline().rstrip("\n").split())
 
-all_elements = set(cf.keys()).union(tc.keys())
+        tc[b_j] = y_j
 
-total = 0
+    all_elements = set(cf.keys()).union(tc.keys())
 
-for elem in all_elements:
+    total = 0
 
-    in_cf = elem in cf
+    for elem in all_elements:
 
-    in_tc = elem in tc
+        in_cf = elem in cf
 
-    cf_val = cf.get(elem, 0)
+        in_tc = elem in tc
 
-    tc_val = tc.get(elem, 0)
+        cf_val = cf.get(elem, 0)
 
-    if in_cf and in_tc:
+        tc_val = tc.get(elem, 0)
 
-        current_max = max(cf_val, tc_val)
+        if in_cf and in_tc:
 
-        if current_max >0:
+            current_max = max(cf_val, tc_val)
 
-            total += current_max
+            if current_max >0:
 
-    else:
+                total += current_max
 
-        contribution = cf_val + tc_val
+        else:
 
-        if contribution >0:
+            contribution = cf_val + tc_val
 
-            total += contribution
+            if contribution >0:
 
-print(total)
+                total += contribution
 
-Testing this code against the first example:
+    print(total, file=output_stream)
 
-Sample Input 1:
 
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+1000000000 239
 3
+14 15
+92 65
+35 89
+""",
+            "output": \
+"""\
+408
+""",
+        }, 
+    ]
 
-1 2
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-7 2
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-3 10
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-4
+    print('Tests passed 😎')
 
-1 4
 
-2 4
+if __name__ == '__main__':
+    test()
 
-3 4
 
-4 4
+```
 
-Processing:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-cf has {1:2, 7:2,3:10}
-
-tc has {1:4,2:4,3:4,4:4}
-
-all_elements = {1,7,3,2,4}
-
-For each element:
-
-1: in both. max(2,4)=4. Add 4.
-
-7: only in cf. contribution is 2. Add 2.
-
-3: in both. max(10,4)=10. Add 10.
-
-2: only in tc. contribution is 4. Add4.
-
-4: only in tc. contribution is4. Add4.
-
-Total 4+2+10+4+4=24. Correct.
+```
 
 Sample Input 2:
 

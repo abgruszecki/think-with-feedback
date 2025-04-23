@@ -337,32 +337,72 @@ Mod the sum by 1073741824.
 
 So code:
 
-a, b, c = map(int, input().split())
+Testing against sample input 1.
 
-max_product = a * b * c
-MOD = 1073741824
+```python
+def main(input_stream, output_stream):
+    a, b, c = map(int, input_stream.readline().rstrip("\n").split())
 
-# Precompute divisor counts
-div_count = [0] * (max_product + 1)
-for d in range(1, max_product + 1):
-    for multiple in range(d, max_product + 1, d):
-        div_count[multiple] += 1
+    max_product = a * b * c
+    MOD = 1073741824
 
-sum_ = 0
-for i in range(1, a + 1):
-    for j in range(1, b + 1):
-        for k in range(1, c + 1):
-            sum_ += div_count[i * j * k]
+    # Precompute divisor counts
+    div_count = [0] * (max_product + 1)
+    for d in range(1, max_product + 1):
+        for multiple in range(d, max_product + 1, d):
+            div_count[multiple] += 1
 
-print(sum_ % MOD)
+    sum_ = 0
+    for i in range(1, a + 1):
+        for j in range(1, b + 1):
+            for k in range(1, c + 1):
+                sum_ += div_count[i * j * k]
 
-But this code uses triple loops. Let's test it with the sample input.
+    print(sum_ % MOD, file=output_stream)
 
-Sample Input 1:
 
-2 2 2
 
-max_product = 8. div_count for 1 is 1, 2 is 2, 3 is 2, etc. The code computes all triplets and sums the div counts. For the sample, the sum is 20, which matches.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 6 7
+""",
+            "output": \
+"""\
+1520
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample Input 2:
 

@@ -559,107 +559,141 @@ If not → output No.
 
 So, code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-def factorize(k):
 
-    factors = {}
+def main(input_stream, output_stream):
+    def factorize(k):
 
-    while k % 2 ==0:
+        factors = {}
 
-        factors[2] = factors.get(2,0) +1
+        while k % 2 ==0:
 
-        k =k //2
+            factors[2] = factors.get(2,0) +1
 
-    i=3
+            k =k //2
 
-    while i*i <=k:
+        i=3
 
-        while k %i ==0:
+        while i*i <=k:
 
-            factors[i] = factors.get(i,0)+1
+            while k %i ==0:
 
-            k =k//i
+                factors[i] = factors.get(i,0)+1
 
-        i +=2
+                k =k//i
 
-    if k>1:
+            i +=2
 
-        factors[k] =1
+        if k>1:
 
-    return factors
+            factors[k] =1
 
-n, k = map(int, sys.stdin.readline().split())
+        return factors
 
-c = list(map(int, sys.stdin.readline().split()))
+    n, k = map(int, input_stream.readline().split())
 
-if k ==1:
+    c = list(map(int, input_stream.readline().split()))
 
-    print("Yes")
+    if k ==1:
 
-    exit()
+        print("Yes", file=output_stream)
 
-factors = factorize(k)
+        return
 
-for p, e in factors.items():
+    factors = factorize(k)
 
-    # Compute p^e, check if it exceeds 1e6
+    for p, e in factors.items():
 
-    val = 1
+        # Compute p^e, check if it exceeds 1e6
 
-    over = False
+        val = 1
 
-    for _ in range(e):
+        over = False
 
-        val *=p
+        for _ in range(e):
 
-        if val > 10**6:
+            val *=p
 
-            over = True
+            if val > 10**6:
 
-            break
+                over = True
 
-    if over:
+                break
 
-        print("No")
+        if over:
 
-        exit()
+            print("No", file=output_stream)
 
-    # Check if any c_i is divisible by val
+            return
 
-    found = False
+        # Check if any c_i is divisible by val
 
-    for num in c:
+        found = False
 
-        if num % val ==0:
+        for num in c:
 
-            found = True
+            if num % val ==0:
 
-            break
+                found = True
 
-    if not found:
+                break
 
-        print("No")
+        if not found:
 
-        exit()
+            print("No", file=output_stream)
 
-print("Yes")
+            return
 
-This code should handle all cases.
+    print("Yes", file=output_stream)
 
-But let's test with the first sample:
 
-Sample 1:
 
-4 5
+def test():
+    import io
 
-2 3 5 12
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 7
+2 3
+""",
+            "output": \
+"""\
+No
+""",
+        }, 
+    ]
 
-factors of 5: {5:1}
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-val=5.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Check c_i's: 5 is in the list. So found is true. Proceed. Output yes.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

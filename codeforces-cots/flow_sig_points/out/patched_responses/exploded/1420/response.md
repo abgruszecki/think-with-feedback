@@ -171,45 +171,69 @@ If k <=n, then output k. Else, output -1.
 
 So in Python code:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-minimal_steps = (n + 1) // 2
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-ceil_division = (minimal_steps + m -1) // m
+    minimal_steps = (n + 1) // 2
 
-k = ceil_division * m
+    ceil_division = (minimal_steps + m -1) // m
 
-if k <=n:
+    k = ceil_division * m
 
-    print(k)
+    if k <=n:
 
-else:
+        print(k, file=output_stream)
 
-    print(-1)
+    else:
 
-Wait, but let's check some edge cases.
+        print(-1, file=output_stream)
 
-Case when n=1, m=2. Then minimal_steps is (1+1)//2=1. ceil_division is (1+2-1)//2=2//2=1. So k=2. 2>1. So output -1. Which is correct. Because to climb 1 step, the only option is 1 step. 1 is not a multiple of 2. So output -1.
 
-Another case: n=4, m=3. minimal_steps is (4+1)//2=2.5 →2. ceil_division (2+3-1)/3 →4//3=1. k=3. 3<=4. So x=4-3=1. 1 2-step, 2 1-steps. Sum 2+2=4. Correct. Output 3.
 
-Another edge case: n=0? But according to constraints, n is 0 < n <=10000, so no. So code is safe.
+def test():
+    import io
 
-Another test case: n=2, m=2. minimal_steps is (2+1)//2=1.5→1. So ceil_division (1+2-1)/2=2//2=1. k=2. 2<=2. So output 2. Which is correct. Because two steps of 1, but that's 2 steps (1+1=2). Alternatively, one step of 2. Which is 1 step. But 1 is not a multiple of 2, so the minimal k is 2. Which requires 2 steps of 1 each.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 5
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-Wait, but why can't it be one step of 2? Because m is 2, so the number of steps must be a multiple of 2. So 1 is invalid, so the next possible is 2 steps. So yes.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But wait, in this case, the 2 steps can be two 1-steps. So yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So code works.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Another case: n=5, m=4. minimal_steps is 3. ceil_division (3+4-1)/4 →6//4=1. k=4. Check if 4<=5. Yes. x=5-4=1. So 1 2-step and 3 1-steps. Sum 2 +3 =5. So yes. Output 4.
+    print('Tests passed 😎')
 
-So code seems correct.
 
-So this code should handle all cases correctly. Let's test the sample inputs.
+if __name__ == '__main__':
+    test()
 
-Sample 1: input 10 2. Code computes minimal_steps=5. ceil_division (5+2-1)/2=6//2=3. k=6. 6<=10 → yes. Output 6. Correct.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2: input 3 5. minimal_steps=2. ceil_division (2+5-1)/5=6//5=1. k=5. 5>3 → output -1. Correct.
 

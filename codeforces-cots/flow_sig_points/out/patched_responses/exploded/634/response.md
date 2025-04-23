@@ -230,61 +230,96 @@ Now, some optimizations. For example, pre-sort the array. But in the code, it's 
 
 So code:
 
-n, l, r, x = map(int, input().split())
+Testing against sample input 1.
 
-c = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, l, r, x = map(int, input_stream.readline().rstrip("\n").split())
 
-count =0
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for mask in range(1, 1<<n):
+    count =0
 
-    bits = bin(mask).count('1')
+    for mask in range(1, 1<<n):
 
-    if bits <2:
+        bits = bin(mask).count('1')
 
-        continue
+        if bits <2:
 
-    s =0
+            continue
 
-    min_c = float('inf')
+        s =0
 
-    max_c = -float('inf')
+        min_c = float('inf')
 
-    for i in range(n):
+        max_c = -float('inf')
 
-        if mask & (1 <<i):
+        for i in range(n):
 
-            val = c[i]
+            if mask & (1 <<i):
 
-            s += val
+                val = c[i]
 
-            if val < min_c:
+                s += val
 
-                min_c = val
+                if val < min_c:
 
-            if val > max_c:
+                    min_c = val
 
-                max_c = val
+                if val > max_c:
 
-    if l <= s <= r and (max_c - min_c) >=x:
+                    max_c = val
 
-        count +=1
+        if l <= s <= r and (max_c - min_c) >=x:
 
-print(count)
+            count +=1
 
-Yes. Let's test this against the examples.
+    print(count, file=output_stream)
 
-First example:
 
-3 5 6 1
 
-c is [1,2,3]
+def test():
+    import io
 
-The mask 111 (all 3 bits set) is 7. sum is 6, which is within 5-6. min 1, max 3: 2 >=1. So counts.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 40 50 10
+10 20 30 25
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-mask 011 (3) is 3. sum 2+3=5. min 2, max3. 1 >=1. So counts. So total 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: the code would generate all pairs of 10 and 20. For each pair, the sum is 30, which is between 25 and 35, and max-min is 10. So each of the 3*2=6 pairs is counted. So the code returns 6.
 

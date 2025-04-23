@@ -695,129 +695,145 @@ Else, process the sentences with greedy approach.
 
 Now, code:
 
-n = int(input())
+Testing against sample inputs 2, 1.
 
-text = input().strip()
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-sentences = []
+    text = input_stream.readline().rstrip("\n").strip()
 
-start = 0
+    sentences = []
 
-i = 0
+    start = 0
 
-length = len(text)
+    i = 0
 
-while i < length:
+    length = len(text)
 
-    if text[i] in '.!?':
+    while i < length:
 
-        if i +1 < length and text[i+1] == ' ':
+        if text[i] in '.!?':
 
-            # split here
+            if i +1 < length and text[i+1] == ' ':
 
-            sentences.append(text[start:i+1])
+                # split here
 
-            start = i +2
+                sentences.append(text[start:i+1])
 
-            i +=2
+                start = i +2
 
-            continue
+                i +=2
 
-    i +=1
+                continue
 
-# add the last sentence
+        i +=1
 
-sentences.append(text[start:])
+    # add the last sentence
 
-# Check if any sentence exceeds n
+    sentences.append(text[start:])
 
-for s in sentences:
+    # Check if any sentence exceeds n
 
-    if len(s) > n:
+    for s in sentences:
 
-        print("Impossible")
+        if len(s) > n:
 
-        exit()
+            print("Impossible", file=output_stream)
 
-# Now process the sentences with greedy approach
+            return
 
-count =0
+    # Now process the sentences with greedy approach
 
-current =0
+    count =0
 
-total = len(sentences)
+    current =0
 
-while current < total:
+    total = len(sentences)
 
-    # take current sentence
+    while current < total:
 
-    current_sum = len(sentences[current])
+        # take current sentence
 
-    # try to add as many as possible
+        current_sum = len(sentences[current])
 
-    next_pos = current +1
+        # try to add as many as possible
 
-    while next_pos < total:
+        next_pos = current +1
 
-        added = len(sentences[next_pos]) +1  # space before
+        while next_pos < total:
 
-        if current_sum + added >n:
+            added = len(sentences[next_pos]) +1  # space before
 
-            break
+            if current_sum + added >n:
 
-        current_sum += added
+                break
 
-        next_pos +=1
+            current_sum += added
 
-    count +=1
+            next_pos +=1
 
-    current = next_pos
+        count +=1
 
-print(count)
+        current = next_pos
 
-Wait, but what if the text is empty? The problem states that the input is guaranteed to be correct, which implies that the text is not empty. So no need to handle that.
+    print(count, file=output_stream)
 
-Testing sample 3:
 
-sentences after splitting are ["Hello!", "Do you like fish?", "Why?"]
 
-their lengths are 6, 17,4.
+def test():
+    import io
 
-Processing:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+19
+Hello! Do you like fish? Why?
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+        {
+            "input": \
+"""\
+2
+How are you?
+""",
+            "output": \
+"""\
+Impossible
+""",
+        }, 
+    ]
 
-current=0:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-current_sum=6.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Check next_pos=1: len("Do you like fish?") is 17. added is 17+1=18. current_sum=6+18=24>19? No. Because 17+1=18. 6+18=24>19. So cannot add. So group is current 0, next_pos is 1. count increases by 1. current becomes 1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-current=1:
+    print('Tests passed 😎')
 
-current_sum=17. next_pos=2: added=4+1=5. 17+5=22>19? Yes, 22>19. So can't add. So group is 1, count becomes 2. current becomes 2.
 
-current=2:
+if __name__ == '__main__':
+    test()
 
-current_sum=4. next_pos=3, which is beyond. count 3.
 
-So output 3. Correct.
+```
 
-Sample 2:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-n=2.
-
-sentence is "How are you?", len is 11>2 → output Impossible.
-
-Sample 1:
-
-sentences are "Hello.", "I am a little walrus." → lengths 6 and 19.
-
-Processing:
-
-current=0:
-
-current_sum=6. next_pos=1: len("I am ...") is 19. added=19+1=20. 6+20=26>25. So cannot add. So group 0, count 1. current=1.
-
-current=1: sum 19 <=25. next_pos=2. group count 2. output 2.
+```
 
 Another test case:
 

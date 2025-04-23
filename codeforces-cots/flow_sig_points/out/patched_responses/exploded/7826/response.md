@@ -1035,57 +1035,98 @@ Thus, the previous approaches are not sufficient. The correct solution must allo
 
 After extensive research, I found the correct solution which handles both positive and negative carries. Here's the code:
 
-n = input().strip()
+Testing against sample input 1.
 
-digits = list(map(int, reversed(n)))
+```python
+def main(input_stream, output_stream):
+    n = input_stream.readline().rstrip("\n").strip()
 
-ans = 0
+    digits = list(map(int, reversed(n)))
 
-carry = 0
+    ans = 0
 
-for d in digits:
+    carry = 0
 
-    d += carry
+    for d in digits:
 
-    if d < 0:
+        d += carry
 
-        ans += -d
+        if d < 0:
 
-        carry = (d - 9) // 10
+            ans += -d
 
-    else:
-
-        if d > 4:
-
-            ans += 10 - d
-
-            carry = 1
+            carry = (d - 9) // 10
 
         else:
 
-            ans += d
+            if d > 4:
 
-            carry = 0
+                ans += 10 - d
 
-ans += abs(carry)
+                carry = 1
 
-print(ans)
+            else:
 
-Let's test this code.
+                ans += d
 
-Example 1: n=24.
+                carry = 0
 
-Reversed digits:4,2.
+    ans += abs(carry)
 
-Processing d=4:
+    print(ans, file=output_stream)
 
-d+carry=4+0=4 <=4. ans +=4. carry=0.
 
-Processing d=2:
 
-d+carry=2+0=2 <=4. ans +=2. carry=0.
+def test():
+    import io
 
-ans +=0. Total 6. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+102
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 71, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 64, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '7'
+Got: '3'
+
+```
 
 Example 2: n=9:
 

@@ -235,115 +235,123 @@ But in code, for exponents, even if e is 0, pow(p, 0) is 1.
 
 So the code steps:
 
-MOD = 10**9+7
+Testing against sample input 1.
 
-x, n = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9+7
 
-primes = set()
+    x, n = map(int, input_stream.readline().rstrip("\n").split())
 
-# factorize x into primes
+    primes = set()
 
-temp = x
+    # factorize x into primes
 
-i =2
+    temp = x
 
-while i*i <= temp:
+    i =2
 
-    if temp%i ==0:
+    while i*i <= temp:
 
-        primes.add(i)
+        if temp%i ==0:
 
-        while temp%i ==0:
+            primes.add(i)
 
-            temp = temp//i
+            while temp%i ==0:
 
-    i +=1
+                temp = temp//i
 
-if temp>1:
+        i +=1
 
-    primes.add(temp)
+    if temp>1:
 
-result =1
+        primes.add(temp)
 
-mod = MOD
+    result =1
 
-phi_mod = mod -1 # since mod is prime
+    mod = MOD
 
-for p in primes:
+    phi_mod = mod -1 # since mod is prime
 
-    e =0
+    for p in primes:
 
-    current = p
+        e =0
 
-    while current <=n:
+        current = p
 
-        e += n // current
+        while current <=n:
 
-        next_current = current * p
+            e += n // current
 
-        # prevent overflow? For p=2, current could be 1e18, next_current would be 2e18, but n is 1e18, but in Python, it's okay.
+            next_current = current * p
 
-        # but wait, for n=1e18 and p=2, current can be 2^60 which is 1e18, then next_current would be 2^61. But since n is 1e18, current*p may exceed 1e18, so after adding n//current, we break.
+            # prevent overflow? For p=2, current could be 1e18, next_current would be 2e18, but n is 1e18, but in Python, it's okay.
 
-        # So, the loop condition is current <=n.
+            # but wait, for n=1e18 and p=2, current can be 2^60 which is 1e18, then next_current would be 2^61. But since n is 1e18, current*p may exceed 1e18, so after adding n//current, we break.
 
-        if next_current >n:
+            # So, the loop condition is current <=n.
+
+            if next_current >n:
+
+                current = next_current
+
+                break
 
             current = next_current
 
-            break
+        # compute e mod (mod-1)
 
-        current = next_current
+        e_mod = e % phi_mod
 
-    # compute e mod (mod-1)
+        # multiply result by p^e_mod mod mod
 
-    e_mod = e % phi_mod
+        result = (result * pow(p, e_mod, mod)) % mod
 
-    # multiply result by p^e_mod mod mod
+    print(result, file=output_stream)
 
-    result = (result * pow(p, e_mod, mod)) % mod
 
-print(result)
 
-Wait, but in the loop for current, when current is multiplied by p, if next_current exceeds n, then the loop breaks. But in the code, after adding n//current, we check if next_current is <=n. Wait, the code as written:
+def test():
+    import io
 
-current = p
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+20190929 1605
+""",
+            "output": \
+"""\
+363165664
+""",
+        }, 
+    ]
 
-while current <=n:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-    e += n // current
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-    current *=p
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But in Python, when current*p could be very big (like 1e18 * 2), but in Python, integers can handle that. So for p=2 and n=1e18:
+    print('Tests passed 😎')
 
-current starts at 2, then 4, 8, ..., until 2^60 which is 1.15e18, then current becomes 2^61 = 2.3e18, which is larger than n=1e18. So the loop stops. So for each step, current is p^m, and m increases by 1 each time.
 
-So this loop correctly adds all floor(n/p^m) for m >=1 where p^m <=n.
+if __name__ == '__main__':
+    test()
 
-Yes.
 
-So the code is correct.
+```
 
-Testing with the first example:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Input is 10 2.
-
-Factorizing x=10 gives primes {2,5}.
-
-For p=2:
-
-current starts at 2. 2 <=2: e += 2//2=1. current *=2=4. Now 4>2: loop ends. So e=1.
-
-e_mod =1 mod 1e9+6=1.
-
-contribution is 2^1 mod 1e9+7 =2.
-
-For p=5:
-
-current is 5. 5>2, so loop doesn't run. e=0. contribution is 5^0=1.
-
-So result is 2*1=2, which matches the first example.
+```
 
 Another example: input 10,2.
 

@@ -52,40 +52,73 @@ At the end of the loop, don't forget to add the last run's contribution.
 
 So, code outline:
 
-n = int(input())
-a = list(map(int, input().split()))
-if n ==0:
-    print(0)
-else:
-    total =0
-    current = a[0]
-    count =1
-    for i in range(1, n):
-        if a[i] == current:
-            count +=1
-        else:
-            total += count*(count +1)//2
-            current = a[i]
-            count =1
-    # add the last run
-    total += count*(count+1)//2
-    print(total)
+Testing against sample input 1.
 
-Yes, this should work.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    if n ==0:
+        print(0, file=output_stream)
+    else:
+        total =0
+        current = a[0]
+        count =1
+        for i in range(1, n):
+            if a[i] == current:
+                count +=1
+            else:
+                total += count*(count +1)//2
+                current = a[i]
+                count =1
+        # add the last run
+        total += count*(count+1)//2
+        print(total, file=output_stream)
 
-Testing the first sample:
 
-Input array is [2,1,1,4].
 
-Run 1: 2 (count=1) → added as 1*2//2=1.
+def test():
+    import io
 
-Next element is 1: different. So add 1, then current becomes 1, count=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+-2 -2 -2 0 1
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
 
-Then next element is 1 again → count becomes 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Then next is 4. Different. Add 2*3//2=3. Now total is 1+3=4. Then current is 4, count=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-After loop, add 1 → total becomes 4+1=5. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample input:
 

@@ -271,63 +271,83 @@ That's better.
 
 So the code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from itertools import product
 
-n, m = map(int, sys.stdin.readline().split())
-edges = []
-for _ in range(m):
-    a, b = map(int, sys.stdin.readline().split())
-    edges.append( (a-1, b-1) )
 
-if m == 0:
-    print(0)
-    exit()
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    edges = []
+    for _ in range(m):
+        a, b = map(int, input_stream.readline().split())
+        edges.append( (a-1, b-1) )
 
-max_domino = 0
+    if m == 0:
+        print(0, file=output_stream)
+        return
 
-for assignment in product(range(1,7), repeat=n):
-    dominoes = set()
-    for u, v in edges:
-        a = assignment[u]
-        b = assignment[v]
-        domino = (min(a, b), max(a, b))
-        dominoes.add(domino)
-    current = len(dominoes)
-    if current > max_domino:
-        max_domino = current
+    max_domino = 0
 
-print(max_domino)
+    for assignment in product(range(1,7), repeat=n):
+        dominoes = set()
+        for u, v in edges:
+            a = assignment[u]
+            b = assignment[v]
+            domino = (min(a, b), max(a, b))
+            dominoes.add(domino)
+        current = len(dominoes)
+        if current > max_domino:
+            max_domino = current
 
-This code should handle all cases.
+    print(max_domino, file=output_stream)
 
-Testing the first sample:
 
-Input 4 4, edges 1-2, 2-3, 3-4,4-1.
 
-After conversion, edges are (0,1), (1,2), (2,3), (3,0).
+def test():
+    import io
 
-The code will generate all possible assignments. For the assignment (3,4,1,2) for the four vertices:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 0
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Wait, no. Because the assignment is for all four vertices. For example, assignment could be (3,4,1,2) (vertex 0:3, vertex1:4, vertex2:1, vertex3:2).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Then:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Edge 0-1: min(3,4) =3 → (3,4)
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Edge1-2: min(4,1) =1 → (1,4)
+    print('Tests passed 😎')
 
-Edge2-3: min(1,2) →1,2 → (1,2)
 
-Edge3-0: min(2,3) →2,3 → (2,3)
+if __name__ == '__main__':
+    test()
 
-The set has four elements. So the code returns 4, as expected.
 
-Thus, the code works.
+```
 
-Now, for the fourth sample with 21 edges (complete graph 7 nodes). The code will generate all possible assignments, and for each, count the number of unique domino pairs. The maximum possible is 16, which should be found by some assignment.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Thus, the code is correct.
+```
+
 </think>
 
 ```python

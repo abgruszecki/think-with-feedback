@@ -601,19 +601,76 @@ The code steps are:
 
 6. Output cp + cb.
 
-Let's test this against the sample inputs.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-n=4.
+    visited = [False] * (n + 1)
+    cycles = 0
 
-p is [4,3,2,1]. cycles = 2.
+    for i in range(1, n + 1):
+        if not visited[i]:
+            cycles += 1
+            j = i
+            while not visited[j]:
+                visited[j] = True
+                j = p[j - 1]
 
-cp= 2*(2-1)=2.
+    changes_p = 2 * (cycles - 1)
+    sum_b = sum(b)
+    changes_b = 0 if sum_b % 2 == 1 else 1
 
-sum_b=3 (odd). cb=0.
+    print(changes_p + changes_b, file=output_stream)
 
-Total 2+0=2. Correct.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+2 3 1
+0 0 0
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

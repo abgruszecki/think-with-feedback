@@ -196,65 +196,75 @@ Else, break.
 
 So code:
 
-n = int(input())
-numbers = [input().strip() for _ in range(n)]
+Testing against sample input 1.
 
-if n == 0:
-    print(0)
-    exit()
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    numbers = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
 
-m = len(numbers[0])
-ans = 0
+    if n == 0:
+        print(0, file=output_stream)
+        return
 
-for i in range(m):
-    current_char = numbers[0][i]
-    for s in numbers[1:]:
-        if s[i] != current_char:
-            print(ans)
-            exit()
-    ans +=1
+    m = len(numbers[0])
+    ans = 0
 
-print(ans)
+    for i in range(m):
+        current_char = numbers[0][i]
+        for s in numbers[1:]:
+            if s[i] != current_char:
+                print(ans, file=output_stream)
+                return
+        ans +=1
 
-Wait, but this approach uses a loop over all other numbers for each i. Wait, the code as written uses a nested loop: for each i, iterate through all numbers[1:] and check s[i] == current_char. As soon as any is not equal, break and return ans. Otherwise, increment ans.
+    print(ans, file=output_stream)
 
-But in Python, for numbers[1:], this creates a new list each time. For n=3e4, numbers[1:] is 29999 elements. So for each i, looping through 29999 elements. That's 20 * 29999 = ~6e5 steps. Which is manageable.
 
-But perhaps it's more efficient to use a generator expression with all()?
 
-Like:
+def test():
+    import io
 
-if all(s[i] == current_char for s in numbers):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+1
+2
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-But in that case, for all s in numbers, including the first. Because the first s will always have s[i] == current_char (since current_char is numbers[0][i]). So checking all numbers is redundant for the first element. So in the original code, numbers[1:] is better.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Because for the code in the original code, the current_char is from numbers[0], and then we check numbers[1:] to see if they all have the same. So in code:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-for i in range(m):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-    current_char = numbers[0][i]
+    print('Tests passed 😎')
 
-    for s in numbers[1:]:
 
-        if s[i] != current_char:
+if __name__ == '__main__':
+    test()
 
-            print(ans)
 
-            exit()
+```
 
-    ans +=1
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Yes. That's more efficient, because we skip checking the first element again.
-
-So the code will loop through each i, check all other elements. As soon as any element in numbers[1:] has a different character at i, break and return ans. Otherwise, ans increments.
-
-This is correct and efficient.
-
-Testing this code on sample input 1:
-
-n=4, numbers are the four given. For i=0: check all numbers[1] to numbers[3]. All have '0' at position 0. So ans becomes 1.
-
-i=1: check numbers[1][1] (which is '0'), numbers[2][1] (9?), wait wait the third number is 00999. So position 1 is '0'. So numbers[2][1] is '0'?
+```
 
 Wait sample input 1:
 

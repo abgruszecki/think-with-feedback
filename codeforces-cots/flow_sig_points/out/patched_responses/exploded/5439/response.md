@@ -566,45 +566,155 @@ print(count)
 
 This should work.
 
-Testing this code against the samples:
+Testing against sample input 1.
 
-Sample 1:
+```python
+import sys
 
-After filtering and sorting, the ducks are:
 
-(0,0), (0,2), (1,3)
+def main(input_stream, output_stream):
+    n, r = map(int, input_stream.readline().split())
+    ducks = []
+    for _ in range(n):
+        hi, ti = map(int, input_stream.readline().split())
+        a = max(hi, 0)
+        if a <= ti:
+            ducks.append((a, ti))
+    ducks.sort(key=lambda x: x[1])
+    count = 0
+    last_shot = -float('inf')
+    for a, b in ducks:
+        if last_shot >= a and last_shot <= b:
+            count += 1
+        else:
+            possible_s = max(a, last_shot + r)
+            if possible_s <= b:
+                count += 1
+                last_shot = possible_s
+    print(count, file=output_stream)
 
-Wait no, wait:
 
-Original ducks in sample1:
 
-Duck1: hi=-3, ti=0 → a_i=0, b_i=0.
+def test():
+    import io
 
-Duck2: hi=1, ti=3 → a_i=1, b_i=3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 5
+-1 1
+2 4
+5 9
+6 8
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-Duck3: hi=-1, ti=2 → a_i=0, b_i=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So after filtering, all three ducks are valid.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sorted by b_i: 0, 2, 3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So the list is [(0,0), (0,2), (1,3)].
+    print('Tests passed 😎')
 
-Processing:
 
-First duck: a=0, b=0.
+if __name__ == '__main__':
+    test()
 
-possible_s = max(0, -inf +3) →0. possible_s <=0 → yes. count=1. last_shot=0.
 
-Second duck: a=0, b=2.
+```
 
-last_shot is 0. Check if 0 >=0 and <=2 → yes. count=2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Third duck: a=1, b=3.
+```
 
-Check if 0 >=1 → no. possible_s = max(1, 0+3=3). 3 <=3. count=3. last_shot=3.
+Testing against sample input 1.
 
-So code returns 3. Correct.
+```python
+import sys
+
+
+def main(input_stream, output_stream):
+    n, r = map(int, input_stream.readline().split())
+    ducks = []
+    for _ in range(n):
+        hi, ti = map(int, input_stream.readline().split())
+        a = max(hi, 0)
+        if a <= ti:
+            ducks.append((a, ti))
+    ducks.sort(key=lambda x: x[1])
+    count = 0
+    last_shot = -float('inf')
+    for a, b in ducks:
+        if last_shot >= a and last_shot <= b:
+            count += 1
+        else:
+            possible_s = max(a, last_shot + r)
+            if possible_s <= b:
+                count += 1
+                last_shot = possible_s
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 5
+-1 1
+2 4
+5 9
+6 8
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

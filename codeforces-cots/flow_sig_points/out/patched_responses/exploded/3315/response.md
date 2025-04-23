@@ -572,95 +572,140 @@ So, replacing the recursive count_leq with this iterative version.
 
 Now, the code should be:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-class Node:
-    def __init__(self, start, end, sorted_list, left=None, right=None):
-        self.start = start
-        self.end = end
-        self.sorted_list = sorted_list
-        self.left = left
-        self.right = right
 
-def merge(a, b):
-    merged = []
-    i = j = 0
-    len_a, len_b = len(a), len(b)
-    while i < len_a and j < len_b:
-        if a[i] < b[j]:
-            merged.append(a[i])
-            i += 1
-        else:
-            merged.append(b[j])
-            j += 1
-    merged.extend(a[i:])
-    merged.extend(b[j:])
-    return merged
+def main(input_stream, output_stream):
+    class Node:
+        def __init__(self, start, end, sorted_list, left=None, right=None):
+            self.start = start
+            self.end = end
+            self.sorted_list = sorted_list
+            self.left = left
+            self.right = right
 
-def build(start, end, arr):
-    if start == end:
-        return Node(start, end, [arr[start]])
-    mid = (start + end) // 2
-    left = build(start, mid, arr)
-    right = build(mid +1, end, arr)
-    merged = merge(left.sorted_list, right.sorted_list)
-    return Node(start, end, merged, left, right)
+    def merge(a, b):
+        merged = []
+        i = j = 0
+        len_a, len_b = len(a), len(b)
+        while i < len_a and j < len_b:
+            if a[i] < b[j]:
+                merged.append(a[i])
+                i += 1
+            else:
+                merged.append(b[j])
+                j += 1
+        merged.extend(a[i:])
+        merged.extend(b[j:])
+        return merged
 
-def count_leq(root, l, r, val):
-    stack = [root]
-    count = 0
-    while stack:
-        node = stack.pop()
-        if node.end < l or node.start > r:
-            continue
-        if l <= node.start and node.end <= r:
-            cnt = bisect.bisect_right(node.sorted_list, val)
-            count += cnt
-        else:
-            stack.append(node.right)
-            stack.append(node.left)
-    return count
+    def build(start, end, arr):
+        if start == end:
+            return Node(start, end, [arr[start]])
+        mid = (start + end) // 2
+        left = build(start, mid, arr)
+        right = build(mid +1, end, arr)
+        merged = merge(left.sorted_list, right.sorted_list)
+        return Node(start, end, merged, left, right)
 
-def find_kth_smallest(root, l, r, k):
-    low = 1  # min possible value in permutation
-    high = root.sorted_list[-1]  # max value in permutation
-    while low < high:
-        mid = (low + high) // 2
-        cnt = count_leq(root, l, r, mid)
-        if cnt >= k:
-            high = mid
-        else:
-            low = mid + 1
-    return low
+    def count_leq(root, l, r, val):
+        stack = [root]
+        count = 0
+        while stack:
+            node = stack.pop()
+            if node.end < l or node.start > r:
+                continue
+            if l <= node.start and node.end <= r:
+                cnt = bisect.bisect_right(node.sorted_list, val)
+                count += cnt
+            else:
+                stack.append(node.right)
+                stack.append(node.left)
+        return count
 
-n, m = map(int, input().split())
-P = list(map(int, input().split()))
-# build the segment tree
-root = build(0, n-1, P)
+    def find_kth_smallest(root, l, r, k):
+        low = 1  # min possible value in permutation
+        high = root.sorted_list[-1]  # max value in permutation
+        while low < high:
+            mid = (low + high) // 2
+            cnt = count_leq(root, l, r, mid)
+            if cnt >= k:
+                high = mid
+            else:
+                low = mid + 1
+        return low
 
-for _ in range(m):
-    l, r, x = map(int, input().split())
-    l0 = l-1
-    r0 = r-1
-    x0 = x-1
-    original_val = P[x0]
-    k = x0 - l0 + 1
-    kth = find_kth_smallest(root, l0, r0, k)
-    print("Yes" if kth == original_val else "No")
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    P = list(map(int, input_stream.readline().rstrip("\n").split()))
+    # build the segment tree
+    root = build(0, n-1, P)
 
-This code should work. Let's test it against the sample input.
+    for _ in range(m):
+        l, r, x = map(int, input_stream.readline().rstrip("\n").split())
+        l0 = l-1
+        r0 = r-1
+        x0 = x-1
+        original_val = P[x0]
+        k = x0 - l0 + 1
+        kth = find_kth_smallest(root, l0, r0, k)
+        print("Yes" if kth == original_val else "No", file=output_stream)
 
-Sample Input 1:
 
-5 5
 
-5 4 3 2 1
+def test():
+    import io
 
-Queries:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 5
+1 4 3 2 5 6
+2 4 3
+1 6 2
+4 5 4
+1 3 3
+2 6 3
+""",
+            "output": \
+"""\
+Yes
+No
+Yes
+No
+Yes
+""",
+        }, 
+    ]
 
-1 5 3 → converted to l=0, r=4, x=2. k=3. The 3rd smallest element in [0-4] is 3. P[x0] is 3 → Yes.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample Output 1's first line is Yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample Input 1's second query:
 

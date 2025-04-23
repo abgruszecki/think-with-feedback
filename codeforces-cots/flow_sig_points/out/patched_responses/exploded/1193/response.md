@@ -147,61 +147,86 @@ Summing all these gives the answer.
 
 So the code would look like:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n = int(input())
-total = 0
 
-max_m = int(math.isqrt(n -1)) if n >=2 else 0
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    total = 0
 
-for m in range(2, max_m +1):
-    for n_val in range(1, m):
-        # Check if coprime
-        if math.gcd(m, n_val) != 1:
-            continue
-        # Check if not both odd
-        if (m % 2 ==1) and (n_val %2 ==1):
-            continue
-        # Compute c
-        c = m*m + n_val*n_val
-        if c > n:
-            continue
-        # Compute a and b
-        a = m*m - n_val*n_val
-        b = 2 * m *n_val
-        if a > b:
-            a, b = b, a
-        # Now a <=b <=c
-        # For this primitive triple, the count is floor(n /c)
-        # But wait, the primitive triple's c is m^2 +n_val^2. So for the k multiples, each k must be such that k*c <=n.
-        count = n // c
-        total += count
+    max_m = int(math.isqrt(n -1)) if n >=2 else 0
 
-print(total)
+    for m in range(2, max_m +1):
+        for n_val in range(1, m):
+            # Check if coprime
+            if math.gcd(m, n_val) != 1:
+                continue
+            # Check if not both odd
+            if (m % 2 ==1) and (n_val %2 ==1):
+                continue
+            # Compute c
+            c = m*m + n_val*n_val
+            if c > n:
+                continue
+            # Compute a and b
+            a = m*m - n_val*n_val
+            b = 2 * m *n_val
+            if a > b:
+                a, b = b, a
+            # Now a <=b <=c
+            # For this primitive triple, the count is floor(n /c)
+            # But wait, the primitive triple's c is m^2 +n_val^2. So for the k multiples, each k must be such that k*c <=n.
+            count = n // c
+            total += count
 
-Wait, but this code may generate multiple primitive triples that are the same. For example, different (m, n) pairs could generate the same triple. But according to Euclid's formula, each primitive triple is generated exactly once for some m and n. So perhaps the code is correct.
+    print(total, file=output_stream)
 
-Testing with the sample input:
 
-Sample input 1: 5
 
-Sample output:1.
+def test():
+    import io
 
-Let's see for n=5.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+74
+""",
+            "output": \
+"""\
+35
+""",
+        }, 
+    ]
 
-Possible m and n pairs:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-m can be up to sqrt(5-1) = 2. So m=2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-n can be 1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Check gcd(2,1) =1. Not both odd. So proceed.
+    print('Tests passed 😎')
 
-c= 2^2 +1^2 =5 <=5.
 
-a=4-1=3, b=2*2*1=4. Swap a and b? No, 3<4. So a=3, b=4, c=5.
+if __name__ == '__main__':
+    test()
 
-count is 5//5=1. So total is 1. Which matches the sample.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2:74, output 35.
 

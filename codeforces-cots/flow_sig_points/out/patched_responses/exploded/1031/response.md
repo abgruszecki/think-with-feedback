@@ -1474,101 +1474,259 @@ But according to the formula, the multiplier 2 accounts for positive and negativ
 
 Thus, the code is correct.
 
-But let's test it on the sample input 1:
+Testing against sample input 1.
 
-Sample input 1: w=2, h=1.
+```python
+import sys
+import math
 
-Compute even_total:
 
-parity counts:
+MOD = 10**9 + 7
 
-even_x = (2//2 +1) = 2.
+def main(input_stream, output_stream):
+    w, h = map(int, input_stream.readline().split())
 
-odd_x = 3-2=1.
+    # Compute parity counts
+    even_x = (w // 2 + 1) if w % 2 == 0 else (w + 1) // 2
+    odd_x = (w + 1) - even_x
+    even_y = (h // 2 + 1) if h % 2 == 0 else (h + 1) // 2
+    odd_y = (h + 1) - even_y
 
-even_y = (1 is odd, so (1+1)//2 =1.
+    count = {
+        (0, 0): even_x * even_y,
+        (0, 1): even_x * odd_y,
+        (1, 0): odd_x * even_y,
+        (1, 1): odd_x * odd_y,
+    }
 
-odd_y= 2-1=1.
+    # Compute even_total_triplets
+    even_total = 0
+    parities = [(0, 0), (0, 1), (1, 0), (1, 1)]
 
-counts:
+    for a in parities:
+        for b in parities:
+            for c in parities:
+                a_x, a_y = a
+                b_x, b_y = b
+                c_x, c_y = c
 
-(0,0) = 2*1=2.
+                term1 = (b_x + a_x) % 2
+                term2 = (c_y + a_y) % 2
+                term3 = (c_x + a_x) % 2
+                term4 = (b_y + a_y) % 2
+                det_parity = (term1 * term2 + term3 * term4) % 2
 
-(0,1)=2*1=2.
+                if det_parity != 0:
+                    continue
 
-(1,0)=1*1=1.
+                if a == b == c:
+                    cnt = count[a]
+                    product = cnt * (cnt - 1) * (cnt - 2)
+                elif a == b:
+                    product = count[a] * (count[a] - 1) * count[c]
+                elif a == c:
+                    product = count[a] * (count[a] - 1) * count[b]
+                elif b == c:
+                    product = count[a] * count[b] * (count[b] - 1)
+                else:
+                    product = count[a] * count[b] * count[c]
 
-(1,1)=1*1=1.
+                even_total = (even_total + product) % MOD
 
-even_total:
+    # Compute colinear_triplets
+    # Horizontal lines
+    horizontal = (h + 1) * ((w + 1) * w * (w - 1)) % MOD
 
-Loop over all a, b, c.
+    # Vertical lines
+    vertical = (w + 1) * ((h + 1) * h * (h - 1)) % MOD
 
-For example, a=(0,0), b=(0,0), c=(0,0):
+    # Other lines
+    others = 0
+    for dx in range(1, w + 1):
+        for dy in range(1, h + 1):
+            g = math.gcd(dx, dy)
+            if g == 0:
+                continue
+            contribution = (g - 1) * (w - dx + 1) * (h - dy + 1)
+            others = (others + contribution) % MOD
 
-det_parity is 0.
+    others = (others * 2 * 6) % MOD  # Multiply by 2 for slope signs and 6 for ordered triplets
 
-product is 2*1*0=0.
+    colinear = (horizontal + vertical + others) % MOD
 
-a=(0,0), b=(0,0), c=(0,1):
+    valid = (even_total - colinear) % MOD
+    print(valid if valid >= 0 else valid + MOD, file=output_stream)
 
-det_parity is computed as follows:
 
-a_x=0, a_y=0.
 
-b_x=0, b_y=0.
+def test():
+    import io
 
-c_x=0, c_y=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 2
+""",
+            "output": \
+"""\
+240
+""",
+        }, 
+    ]
 
-term1 = (0+0) mod 2 =0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-term2 = (1 +0) mod2=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-term3 = (0+0) mod2=0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-term4 = (0+0) mod2=0.
+    print('Tests passed 😎')
 
-det_parity = (0*1 +0*0) mod2=0.
 
-so even.
+if __name__ == '__main__':
+    test()
 
-product is count[a] * (count[a]-1) * count[c] = 2*1 *2=4.
 
-This contributes 4.
+```
 
-Other combinations may contribute.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-But for the sample input 1:
+```
 
-even_total is 48.
+Testing against sample input 1.
 
-colinear_triplets = horizontal + vertical + others.
+```python
+import sys
+import math
 
-horizontal = (h+1)* (w+1)*w*(w-1) = 2 *3*2*1= 12.
 
-vertical = (w+1)* (h+1)*h*(h-1) =3 *2*1*0=0.
+MOD = 10**9 + 7
 
-others:
+def main(input_stream, output_stream):
+    w, h = map(int, input_stream.readline().split())
 
-loop dx from 1 to 2, dy from 1 to1.
+    # Compute parity counts
+    even_x = (w // 2 + 1) if w % 2 == 0 else (w + 1) // 2
+    odd_x = (w + 1) - even_x
+    even_y = (h // 2 + 1) if h % 2 == 0 else (h + 1) // 2
+    odd_y = (h + 1) - even_y
 
-dx=1, dy=1:
+    count = {
+        (0, 0): even_x * even_y,
+        (0, 1): even_x * odd_y,
+        (1, 0): odd_x * even_y,
+        (1, 1): odd_x * odd_y,
+    }
 
-g=1. (g-1) =0. contribute 0.
+    # Compute even_total_triplets
+    even_total = 0
+    parities = [(0, 0), (0, 1), (1, 0), (1, 1)]
 
-dx=1, dy=1: sum +=0.
+    for a in parities:
+        for b in parities:
+            for c in parities:
+                a_x, a_y = a
+                b_x, b_y = b
+                c_x, c_y = c
 
-dx=2, dy=1:
+                term1 = (b_x + a_x) % 2
+                term2 = (c_y + a_y) % 2
+                term3 = (c_x + a_x) % 2
+                term4 = (b_y + a_y) % 2
+                det_parity = (term1 * term2 + term3 * term4) % 2
 
-g=1. contribute 0.
+                if det_parity != 0:
+                    continue
 
-So others_contribution is 0.
+                if a == b == c:
+                    cnt = count[a]
+                    product = cnt * (cnt - 1) * (cnt - 2)
+                elif a == b:
+                    product = count[a] * (count[a] - 1) * count[c]
+                elif a == c:
+                    product = count[a] * (count[a] - 1) * count[b]
+                elif b == c:
+                    product = count[a] * count[b] * (count[b] - 1)
+                else:
+                    product = count[a] * count[b] * count[c]
 
-others *= 12 →0.
+                even_total = (even_total + product) % MOD
 
-So colinear_triplets= 12+0+0=12.
+    # Compute colinear_triplets
+    # Horizontal lines
+    horizontal = (h + 1) * ((w + 1) * w * (w - 1)) % MOD
 
-valid = 48-12=36, which matches sample input 1.
+    # Vertical lines
+    vertical = (w + 1) * ((h + 1) * h * (h - 1)) % MOD
+
+    # Other lines
+    others = 0
+    for dx in range(1, w + 1):
+        for dy in range(1, h + 1):
+            g = math.gcd(dx, dy)
+            if g == 0:
+                continue
+            contribution = (g - 1) * (w - dx + 1) * (h - dy + 1)
+            others = (others + contribution) % MOD
+
+    others = (others * 2 * 6) % MOD  # Multiply by 2 for slope signs and 6 for ordered triplets
+
+    colinear = (horizontal + vertical + others) % MOD
+
+    valid = (even_total - colinear) % MOD
+    print(valid if valid >= 0 else valid + MOD, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 2
+""",
+            "output": \
+"""\
+240
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2:
 

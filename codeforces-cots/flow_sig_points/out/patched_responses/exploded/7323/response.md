@@ -693,62 +693,93 @@ But the code for FenwickTree is O(log n) per operation, which is acceptable.
 
 Now, code:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-class FenwickTree:
-    def __init__(self, size):
-        self.n = size
-        self.tree = [0]*(self.n +1)
-    
-    def update(self, idx, delta):
-        while idx <= self.n:
-            self.tree[idx] += delta
-            idx += idx & -idx
-    
-    def query(self, idx):
-        res =0
-        while idx >0:
-            res += self.tree[idx]
-            idx -= idx & -idx
-        return res
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-n = int(input())
-a = list(map(int, input().split()))
-elements = sorted( [(a[i], i+1) for i in range(n)] , key=lambda x: x[0])
+    class FenwickTree:
+        def __init__(self, size):
+            self.n = size
+            self.tree = [0]*(self.n +1)
+        
+        def update(self, idx, delta):
+            while idx <= self.n:
+                self.tree[idx] += delta
+                idx += idx & -idx
+        
+        def query(self, idx):
+            res =0
+            while idx >0:
+                res += self.tree[idx]
+                idx -= idx & -idx
+            return res
 
-ft_j = FenwickTree(n)
-ft_ngt = FenwickTree(n)
-ans =0
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    elements = sorted( [(a[i], i+1) for i in range(n)] , key=lambda x: x[0])
 
-for val, pos in elements:
-    sum_j_le_i = ft_j.query(pos)
-    sum_gt_part = ft_ngt.query(n) - ft_ngt.query(pos)
-    sum_less = sum_j_le_i * (n - pos +1) + pos * sum_gt_part
-    s_x = sum_less + pos * (n - pos +1)
-    contribution = val * s_x
-    ans = (ans + contribution) % MOD
-    ft_j.update(pos, pos)
-    ft_ngt.update(pos, (n +1 - pos))
+    ft_j = FenwickTree(n)
+    ft_ngt = FenwickTree(n)
+    ans =0
 
-print(ans % MOD)
+    for val, pos in elements:
+        sum_j_le_i = ft_j.query(pos)
+        sum_gt_part = ft_ngt.query(n) - ft_ngt.query(pos)
+        sum_less = sum_j_le_i * (n - pos +1) + pos * sum_gt_part
+        s_x = sum_less + pos * (n - pos +1)
+        contribution = val * s_x
+        ans = (ans + contribution) % MOD
+        ft_j.update(pos, pos)
+        ft_ngt.update(pos, (n +1 - pos))
 
-Yes, this should work.
+    print(ans % MOD, file=output_stream)
 
-Testing for the first sample input:
 
-Input:
 
-4
+def test():
+    import io
 
-5 2 4 7
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+123456789 214365879 987654321
+""",
+            "output": \
+"""\
+582491518
+""",
+        }, 
+    ]
 
-elements sorted are [(2,2), (4,3), (5,1), (7,4)]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Each step as before.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The code should output 167.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample input:
 

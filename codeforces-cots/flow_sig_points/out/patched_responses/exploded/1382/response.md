@@ -285,44 +285,75 @@ So this code should handle all cases.
 
 So code:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n = int(input())
 
-if n % 2 == 0:
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-    print(n // 2)
+    if n % 2 == 0:
 
-else:
+        print(n // 2, file=output_stream)
 
-    # check for smallest divisor
-    max_div = int(math.isqrt(n))  # sqrt(n) rounded down
-    found = False
-    for i in range(3, max_div +1, 2):
-        if n % i ==0:
-            print(1 + (n -i) //2)
-            found = True
-            break
-    if not found:
-        print(1)
+    else:
 
-Yes.
+        # check for smallest divisor
+        max_div = int(math.isqrt(n))  # sqrt(n) rounded down
+        found = False
+        for i in range(3, max_div +1, 2):
+            if n % i ==0:
+                print(1 + (n -i) //2, file=output_stream)
+                found = True
+                break
+        if not found:
+            print(1, file=output_stream)
 
-But in Python, math.isqrt is available in Python 3.8 and above. Since the problem states to use Python 3, assuming it's allowed.
 
-Wait, for very large n, even 1e10, math.sqrt(n) would return a float, but using math.isqrt(n) gives the integer square root correctly.
 
-So using math.isqrt is better.
+def test():
+    import io
 
-So the code would work.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-Testing with sample input:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample 1:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Input:5
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Odd. Check for divisors up to sqrt(5)=2. But the loop starts from 3. So loop doesn't run. So found remains False. Output 1. Correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

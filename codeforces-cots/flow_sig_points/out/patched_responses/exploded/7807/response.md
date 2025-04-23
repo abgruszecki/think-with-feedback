@@ -1093,99 +1093,112 @@ Similarly for sorted_a.
 
 So, code:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n = int(input())
-a = list(map(int, input().split()))
-b = list(map(int, input().split()))
 
-initial_sum = sum(abs(ai - bi) for ai, bi in zip(a, b))
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-sorted_b = sorted((val, idx) for idx, val in enumerate(b))
-sorted_a = sorted((val, idx) for idx, val in enumerate(a))
+    initial_sum = sum(abs(ai - bi) for ai, bi in zip(a, b))
 
-max_gain = 0
+    sorted_b = sorted((val, idx) for idx, val in enumerate(b))
+    sorted_a = sorted((val, idx) for idx, val in enumerate(a))
 
-for i in range(n):
-    ai_val = a[i]
-    bi_val = b[i]
-    
-    # Find closest in b to ai_val
-    target = ai_val
-    pos = bisect.bisect_left(sorted_b, (target, 0))
-    candidates = []
-    if pos > 0:
-        candidates.append(pos-1)
-    if pos < len(sorted_b):
-        candidates.append(pos)
-    # Check up to two candidates
-    for c in candidates:
-        b_j, j = sorted_b[c]
-        if j == i:
-            continue
-        original = abs(ai_val - bi_val) + abs(a[j] - b[j])
-        new_sum = abs(ai_val - b_j) + abs(a[j] - bi_val)
-        current_gain = original - new_sum
-        if current_gain > max_gain:
-            max_gain = current_gain
-    
-    # Find closest in a to bi_val
-    target = bi_val
-    pos = bisect.bisect_left(sorted_a, (target, 0))
-    candidates = []
-    if pos > 0:
-        candidates.append(pos-1)
-    if pos < len(sorted_a):
-        candidates.append(pos)
-    for c in candidates:
-        a_j, j = sorted_a[c]
-        if j == i:
-            continue
-        original = abs(ai_val - bi_val) + abs(a[j] - b[j])
-        new_sum = abs(ai_val - b[j]) + abs(a[j] - bi_val)
-        current_gain = original - new_sum
-        if current_gain > max_gain:
-            max_gain = current_gain
+    max_gain = 0
 
-print(initial_sum - max_gain)
+    for i in range(n):
+        ai_val = a[i]
+        bi_val = b[i]
+        
+        # Find closest in b to ai_val
+        target = ai_val
+        pos = bisect.bisect_left(sorted_b, (target, 0))
+        candidates = []
+        if pos > 0:
+            candidates.append(pos-1)
+        if pos < len(sorted_b):
+            candidates.append(pos)
+        # Check up to two candidates
+        for c in candidates:
+            b_j, j = sorted_b[c]
+            if j == i:
+                continue
+            original = abs(ai_val - bi_val) + abs(a[j] - b[j])
+            new_sum = abs(ai_val - b_j) + abs(a[j] - bi_val)
+            current_gain = original - new_sum
+            if current_gain > max_gain:
+                max_gain = current_gain
+        
+        # Find closest in a to bi_val
+        target = bi_val
+        pos = bisect.bisect_left(sorted_a, (target, 0))
+        candidates = []
+        if pos > 0:
+            candidates.append(pos-1)
+        if pos < len(sorted_a):
+            candidates.append(pos)
+        for c in candidates:
+            a_j, j = sorted_a[c]
+            if j == i:
+                continue
+            original = abs(ai_val - bi_val) + abs(a[j] - b[j])
+            new_sum = abs(ai_val - b[j]) + abs(a[j] - bi_val)
+            current_gain = original - new_sum
+            if current_gain > max_gain:
+                max_gain = current_gain
 
-This code should work.
+    print(initial_sum - max_gain, file=output_stream)
 
-But let's test it against the samples.
 
-Sample 1:
 
-Input:
+def test():
+    import io
 
-5
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+1 3
+4 2
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-5 4 3 2 1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-1 2 3 4 5
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-initial_sum is 4 + 2 + 0 + 2 +4 =12.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-In the code:
+    print('Tests passed 😎')
 
-For i=0, ai_val=5, bi_val=1.
 
-Looking in sorted_b for closest to 5:
+if __name__ == '__main__':
+    test()
 
-sorted_b is sorted by b's values. The sorted_b list is [(1,0), (2,1), (3,2), (4,3), (5,4)].
 
-bisect_left for (5,0) is 4. candidates are 3 and 4.
+```
 
-Checking pos=3: b_j=4, j=3. Original is |5-1| + |2-4|=4+2=6. New sum is |5-4| + |2-1|=1+1=2. gain is 4.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-pos=4: b_j=5, j=4. Original is 4 + |1-5|=4 +4=8. new sum is 0 +0=0. gain is 8. So max_gain becomes 8.
-
-Then, for bi_val=1, look in sorted_a for closest to 1. sorted_a is [(1,4), (2,3), (3,2), (4,1), (5,0)]. bisect_left for 1 is 0. candidates are 0 and 0.
-
-j=4 (a_j=1). j=4 is not i=0. Original is |5-1| + |1-5|=4+4=8. new sum is |5-5| + |1-1|=0. gain is 8. same as before.
-
-So the max_gain is 8.
-
-So the answer is 12-8=4.
+```
 
 Sample 2:
 

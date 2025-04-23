@@ -782,119 +782,136 @@ But since reversed_S is a new string, the code should work.
 
 Thus, the complete code would be:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-def kmp_failure_function(pattern):
-    n = len(pattern)
-    fail = [0] * n
-    j = 0
-    for i in range(1, n):
-        while j > 0 and pattern[i] != pattern[j]:
-            j = fail[j-1]
-        if pattern[i] == pattern[j]:
-            j += 1
-            fail[i] = j
-        else:
-            fail[i] = 0
-    return fail
 
-def kmp_search(text, pattern, fail):
-    n = len(text)
-    m = len(pattern)
-    j = 0
-    occurrences = []
-    for i in range(n):
-        while j > 0 and text[i] != pattern[j]:
-            j = fail[j-1]
-        if text[i] == pattern[j]:
-            j += 1
-            if j == m:
-                start = i - m + 1
-                occurrences.append(start)
+def main(input_stream, output_stream):
+    def kmp_failure_function(pattern):
+        n = len(pattern)
+        fail = [0] * n
+        j = 0
+        for i in range(1, n):
+            while j > 0 and pattern[i] != pattern[j]:
                 j = fail[j-1]
-        else:
-            j = 0
-    return occurrences
+            if pattern[i] == pattern[j]:
+                j += 1
+                fail[i] = j
+            else:
+                fail[i] = 0
+        return fail
 
-def check_direction(S, s1, s2):
-    len_s1 = len(s1)
-    len_s2 = len(s2)
-    len_S = len(S)
-    if len_s1 + len_s2 > len_S:
+    def kmp_search(text, pattern, fail):
+        n = len(text)
+        m = len(pattern)
+        j = 0
+        occurrences = []
+        for i in range(n):
+            while j > 0 and text[i] != pattern[j]:
+                j = fail[j-1]
+            if text[i] == pattern[j]:
+                j += 1
+                if j == m:
+                    start = i - m + 1
+                    occurrences.append(start)
+                    j = fail[j-1]
+            else:
+                j = 0
+        return occurrences
+
+    def check_direction(S, s1, s2):
+        len_s1 = len(s1)
+        len_s2 = len(s2)
+        len_S = len(S)
+        if len_s1 + len_s2 > len_S:
+            return False
+        if len_s1 == 0 or len_s2 == 0:
+            return False
+        # Find s1 occurrences.
+        fail_s1 = kmp_failure_function(s1)
+        s1_occurrences = kmp_search(S, s1, fail_s1)
+        if not s1_occurrences:
+            return False
+        # Find s2 occurrences.
+        fail_s2 = kmp_failure_function(s2)
+        s2_occurrences = kmp_search(S, s2, fail_s2)
+        if not s2_occurrences:
+            return False
+        # Sort s2_occurrences.
+        s2_occurrences.sort()
+        # Check each s1 occurrence.
+        for s1_start in s1_occurrences:
+            s1_end = s1_start + len_s1 -1
+            target = s1_end + 1
+            idx = bisect.bisect_left(s2_occurrences, target)
+            if idx < len(s2_occurrences):
+                return True
         return False
-    if len_s1 == 0 or len_s2 == 0:
-        return False
-    # Find s1 occurrences.
-    fail_s1 = kmp_failure_function(s1)
-    s1_occurrences = kmp_search(S, s1, fail_s1)
-    if not s1_occurrences:
-        return False
-    # Find s2 occurrences.
-    fail_s2 = kmp_failure_function(s2)
-    s2_occurrences = kmp_search(S, s2, fail_s2)
-    if not s2_occurrences:
-        return False
-    # Sort s2_occurrences.
-    s2_occurrences.sort()
-    # Check each s1 occurrence.
-    for s1_start in s1_occurrences:
-        s1_end = s1_start + len_s1 -1
-        target = s1_end + 1
-        idx = bisect.bisect_left(s2_occurrences, target)
-        if idx < len(s2_occurrences):
-            return True
-    return False
 
-# Read input.
-S = input().strip()
-s1 = input().strip()
-s2 = input().strip()
+    # Read input.
+    S = input_stream.readline().rstrip("\n").strip()
+    s1 = input_stream.readline().rstrip("\n").strip()
+    s2 = input_stream.readline().rstrip("\n").strip()
 
-forward = check_direction(S, s1, s2)
-backward = check_direction(S[::-1], s1, s2)
+    forward = check_direction(S, s1, s2)
+    backward = check_direction(S[::-1], s1, s2)
 
-if forward and backward:
-    print("both")
-elif forward:
-    print("forward")
-elif backward:
-    print("backward")
-else:
-    print("fantasy")
+    if forward and backward:
+        print("both", file=output_stream)
+    elif forward:
+        print("forward", file=output_stream)
+    elif backward:
+        print("backward", file=output_stream)
+    else:
+        print("fantasy", file=output_stream)
 
-But wait, in the code for check_direction, when len_s1 is zero, the code returns False. But the problem constraints state that s1 and s2 are non-empty, so the code is safe.
 
-Testing this code on the first example:
 
-Sample Input 1:
+def test():
+    import io
 
-atob
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+aaacaaa
+aca
+aa
+""",
+            "output": \
+"""\
+both
+""",
+        }, 
+    ]
 
-a
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-b
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-check_direction(S, 'a', 'b'):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-len_s1=1, len_s2=1. len_S=4. 1+1=2 <=4.
+    print('Tests passed 😎')
 
-s1_occurrences is [0]. s2_occurrences is [3].
 
-sorted s2_occurrences is [3]. For each s1_start=0:
+if __name__ == '__main__':
+    test()
 
-s1_end=0. target=1.
 
-bisect_left([3],1) returns 0. 0 < len([3])=1 → returns True. So forward is True.
+```
 
-check_direction(S[::-1], 'a', 'b'):
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-S reversed is 'bota'. len is 4.
-
-s1 is 'a', occurs at 3. s2 is 'b', occurs at 0.
-
-s1_occurrences is [3]. s1_end=3. target=4. s2_occurrences is [0]. bisect_left([0],4) is 1. 1 <1 is false. So returns False. So backward is False.
-
-Output is 'forward'.
+```
 
 Sample Input 2:
 

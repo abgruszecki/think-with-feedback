@@ -270,41 +270,77 @@ So this code should handle all cases.
 
 So the code is:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-if m > 0 and n == 0:
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-    print("Impossible")
+    if m > 0 and n == 0:
 
-else:
-
-    if m == 0:
-
-        min_f = n
-
-        max_f = n
+        print("Impossible", file=output_stream)
 
     else:
 
-        min_f = max(n, m)
+        if m == 0:
 
-        max_f = n + m -1
+            min_f = n
 
-    print(f"{min_f} {max_f}")
+            max_f = n
 
-Yes, this should work.
+        else:
 
-Testing the examples:
+            min_f = max(n, m)
 
-First example:
+            max_f = n + m -1
 
-input 1 2 → output 2 2 → correct.
+        print(f"{min_f} {max_f}", file=output_stream)
 
-Second input 0 5 → output impossible.
 
-Third input 2 2 → output 2 3 → correct.
 
-Another test case: input 0 0 → output 0 0.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0 5
+""",
+            "output": \
+"""\
+Impossible
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+test case: input 0 0 → output 0 0.
 
 Another test case: input 5 0 → output 5 5.
 

@@ -80,68 +80,68 @@ So even if processing all cells, the code will work correctly.
 
 So in code:
 
-grid = [input().strip() for _ in range(3)]
+Testing against sample input 1.
 
-for i in range(3):
-    for j in range(3):
-        if grid[i][j] == 'X':
-            # find symmetric position
-            ni = 2 - i
-            nj = 2 - j
-            if grid[ni][nj] != 'X':
-                print("NO")
-                exit()
-print("YES")
+```python
+def main(input_stream, output_stream):
+    grid = [input_stream.readline().rstrip("\n").strip() for _ in range(3)]
 
-Wait, but this approach has a problem. Suppose there's an X in (i,j) and the symmetric is not X. Then we immediately return NO. That's correct.
+    for i in range(3):
+        for j in range(3):
+            if grid[i][j] == 'X':
+                # find symmetric position
+                ni = 2 - i
+                nj = 2 - j
+                if grid[ni][nj] != 'X':
+                    print("NO", file=output_stream)
+                    return
+    print("YES", file=output_stream)
 
-But what if the symmetric cell hasn't been checked yet? For example, suppose in the grid, (0,0) is X and (2,2) is not. Then when processing (0,0), it checks (2,2) and returns NO. That's correct. If (2,2) is X but (0,0) is not, then when (2,2) is processed, it checks (0,0) and returns NO.
 
-But what if the code processes all cells, and in the case where (i,j) is X but (2-i,2-j) is not. Then even if (2-i,2-j) is not X, when processing (i,j), the code will catch it.
 
-So this approach works.
+def test():
+    import io
 
-But wait, what about the center cell? For example, if the center cell is X, then the symmetric cell is itself. So when processing (1,1), it checks itself. So if (1,1) is X, then code checks if (1,1) is X, which it is. So that's okay.
-
-Another example: input where all X's are symmetric.
-
-Another case: a single X in the center. Then code processes (1,1), checks (1,1) which is X. So returns YES.
-
-Another case: X at (0,1) and (2,1). Then symmetric is correct. So code returns YES.
-
-So the code seems to handle all cases.
-
-So the code would read the 3 lines of input, process each cell. For each X in the cell, check the symmetric cell. If any X's symmetric is not X, output NO. Else, output YES.
-
-This approach is O(1) time since there are only 9 cells to check. So for any input size, it's acceptable.
-
-Now, let's test the code against the sample inputs.
-
-First sample input:
-
-XX.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+X.X
+X..
 ...
-.XX
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-The grid is:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Row 0: 'XX.' → indexes 0,0; 0,1; 0,2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Row 1: '...'
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Row 2: '.XX' → indexes 2,0 (.), 2,1 (X), 2,2 (X).
+    print('Tests passed 😎')
 
-Processing each cell:
 
-i=0, j=0: X. Check (2,2) which is X. Good.
+if __name__ == '__main__':
+    test()
 
-i=0, j=1: X. Check (2,1) which is X. Good.
 
-i=0, j=2: . → skip.
+```
 
-i=1, j=0: . → skip.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-etc. For all Xs, their symmetric positions are X. So code returns YES.
+```
 
 Second sample input:
 

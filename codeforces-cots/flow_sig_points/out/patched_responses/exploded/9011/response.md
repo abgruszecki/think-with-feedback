@@ -579,35 +579,83 @@ Yes.
 
 So this code should work.
 
-But let's test for sample 1.
+Testing against sample input 1.
 
-Sample 1 code:
+```python
+def main(input_stream, output_stream):
+    k = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+    t = input_stream.readline().rstrip("\n").strip()
 
-k=2.
+    s_digits = [ord(c) - ord('a') for c in s]
+    t_digits = [ord(c) - ord('a') for c in t]
 
-s_digits = [0,25]
+    carry = 0
+    sum_digits = [0] * k
+    for i in reversed(range(k)):
+        total = s_digits[i] + t_digits[i] + carry
+        sum_digits[i] = total % 26
+        carry = total // 26
 
-t_digits = [1,5]
+    sum_with_carry = [carry] + sum_digits
 
-sum_digits:
+    current_carry = 0
+    result_digits = []
+    for digit in sum_with_carry:
+        current_value = current_carry * 26 + digit
+        quotient = current_value // 2
+        remainder = current_value % 2
+        result_digits.append(quotient)
+        current_carry = remainder
 
-i=1: 25+5=30 +0 → sum_digits[1] =30%26=4, carry=30//26=1.
+    median_digits = result_digits[-k:]
+    print(''.join(chr(d + ord('a')) for d in median_digits), file=output_stream)
 
-i=0:0+1 +1=2 → sum_digits[0]=2, carry=0.
 
-sum_with_carry = [0,2,4].
 
-Divide:
+def test():
+    import io
 
-digits are 0,2,4.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+afogk
+asdji
+""",
+            "output": \
+"""\
+alvuw
+""",
+        }, 
+    ]
 
-Processing 0: current_value =0 → q=0, r=0. result [0], carry 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing 2: current_value=0*26+2=2 → q=1, r=0. result [0,1], carry 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing 4: current_value=0*26 +4=4 → q=2. result [0,1,2]. last two digits [1,2] → 'bc'.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Which is correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case where sum_with_carry has a carry.
 

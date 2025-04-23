@@ -508,35 +508,156 @@ But for very large n, converting the entire s and t into lists of integers can t
 
 This code should handle all cases efficiently.
 
-Testing it against the samples:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+    t = input_stream.readline().rstrip("\n").strip()
 
-n=2
+    s_int = list(map(int, s))
+    t_int = list(map(int, t))
 
-s=0111 → s_int is [0,1,1,1]
+    sorted_positions = sorted(range(2 * n), key=lambda i: (-(s_int[i] + t_int[i]), -(s_int[i] - t_int[i])))
 
-t=0001 → t_int is [0,0,0,1]
+    y_count = 0
+    a_count = 0
 
-sorted_positions as before.
+    for idx, pos in enumerate(sorted_positions):
+        if idx % 2 == 0:
+            y_count += s_int[pos]
+        else:
+            a_count += t_int[pos]
 
-Yes.
+    if y_count > a_count:
+        print("First", file=output_stream)
+    elif a_count > y_count:
+        print("Second", file=output_stream)
+    else:
+        print("Draw", file=output_stream)
 
-Another sample: input 4.
 
-Sample 4:
 
-n=4
+def test():
+    import io
 
-s=01010110 → len 8.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+110110
+001001
+""",
+            "output": \
+"""\
+First
+""",
+        }, 
+    ]
 
-t=00101101.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But code will process sorted_positions correctly.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So the code should handle all cases correctly.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So this is the correct approach.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 4.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+    t = input_stream.readline().rstrip("\n").strip()
+
+    s_int = list(map(int, s))
+    t_int = list(map(int, t))
+
+    sorted_positions = sorted(range(2 * n), key=lambda i: (-(s_int[i] + t_int[i]), -(s_int[i] - t_int[i])))
+
+    y_count = 0
+    a_count = 0
+
+    for idx, pos in enumerate(sorted_positions):
+        if idx % 2 == 0:
+            y_count += s_int[pos]
+        else:
+            a_count += t_int[pos]
+
+    if y_count > a_count:
+        print("First", file=output_stream)
+    elif a_count > y_count:
+        print("Second", file=output_stream)
+    else:
+        print("Draw", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+01100000
+10010011
+""",
+            "output": \
+"""\
+Second
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

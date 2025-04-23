@@ -94,67 +94,72 @@ But in Python, for n up to 3000, this is trivial in terms of time and memory.
 
 So code outline:
 
-n = int(input())
+Testing against sample input 1.
 
-if n < 2:
-    print(0)
-else:
-    sieve = [True] * (n+1)
-    sieve[0] = sieve[1] = False
-    for i in range(2, int(n**0.5) +1):
-        if sieve[i]:
-            sieve[i*i : n+1 :i] = [False]*( (n - i*i)//i + 1 )
-    primes = [i for i, is_prime in enumerate(sieve) if is_prime]
-    count = [0]*(n+1)
-    for p in primes:
-        for m in range(p, n+1, p):
-            count[m] +=1
-    total = sum(1 for x in range(2, n+1) if count[x] == 2)
-    print(total)
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-Wait, but wait: primes is a list of primes up to n. Then, for each p in primes, we iterate through all multiples of p. So for example, for p=2, we hit all even numbers, adding 1 to their count. For p=3, add 1 to multiples of 3, etc. So the count array ends up with the number of distinct primes dividing each number.
+    if n < 2:
+        print(0, file=output_stream)
+    else:
+        sieve = [True] * (n+1)
+        sieve[0] = sieve[1] = False
+        for i in range(2, int(n**0.5) +1):
+            if sieve[i]:
+                sieve[i*i : n+1 :i] = [False]*( (n - i*i)//i + 1 )
+        primes = [i for i, is_prime in enumerate(sieve) if is_prime]
+        count = [0]*(n+1)
+        for p in primes:
+            for m in range(p, n+1, p):
+                count[m] +=1
+        total = sum(1 for x in range(2, n+1) if count[x] == 2)
+        print(total, file=output_stream)
 
-Yes.
 
-Testing the first example:
 
-Input 10:
+def test():
+    import io
 
-Numbers that are almost primes are 6 (2,3), 10 (2,5), 12 (2,3), but wait wait. Wait the first example's input is 10, output is 2. So 6 and 10. So in this code, count[6] is 2, count[10] is 2 (since 10=2*5). So the code would sum 2, which matches the first example.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+21
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
 
-Second example input 21, output 8. Let's see.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The numbers between 1 and 21 that are almost primes must have exactly two distinct primes. Let's list them:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-6 (2,3)
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-10 (2,5)
+    print('Tests passed 😎')
 
-12 (2,3) → but 12 has factors 2 and 3, so count is 2.
 
-14 (2,7)
+if __name__ == '__main__':
+    test()
 
-15 (3,5)
 
-18 (2,3) → count is 2? Wait 18's prime factors are 2 and 3. So yes.
+```
 
-20 (2,5)
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-21 (3,7)
+```
 
-So that's 8 numbers. The code should count 8, which matches the sample.
-
-So the code works for the samples.
-
-Now, edge cases: n=4. The numbers up to 4: 4's factors are 2 only (since 4=2^2, so distinct primes is 1. So no. 6 is the first almost prime, but when n=5, the answer is 0. For n=6, answer is 1.
-
-Another edge case: n=6 → output 1.
-
-So the code should handle all these.
-
-In terms of time and memory, for n=3000, the sieve and count arrays are manageable. The sieve array is size 3001. The count array is the same. The sieve processing is O(n log log n), which is very fast. Then, for primes, the number of primes up to 3000 is about 430 (the exact number is not important). For each prime p, iterating through all multiples of p (n/p steps). The total steps would be sum_{p prime} floor(n/p) ) → which is O(n log log n), same as sieve. So the code is efficient.
-
-Therefore, this approach is optimal for the given constraints.
 </think>
 
 ```python

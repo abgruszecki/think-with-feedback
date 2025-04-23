@@ -949,209 +949,172 @@ Thus, in the code, we can process unique_substrings.
 
 Now, the code proceeds as follows:
 
-MOD = 10**9 +9
+Testing against sample input 1.
 
-n, m = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +9
 
-substrings = [input().strip() for _ in range(m)]
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-unique_substrings = list(set(substrings))  # Remove duplicates
+    substrings = [input_stream.readline().rstrip("\n").strip() for _ in range(m)]
 
-L_max = max(len(s) for s in unique_substrings) if unique_substrings else 0
+    unique_substrings = list(set(substrings))  # Remove duplicates
 
-# Precompute all possible substring lengths and their possible candidates.
+    L_max = max(len(s) for s in unique_substrings) if unique_substrings else 0
 
-# Now, initialize DP.
+    # Precompute all possible substring lengths and their possible candidates.
 
-from collections import defaultdict
+    # Now, initialize DP.
 
-# The initial state is (k=1, last_chars=''), count=1.
+    from collections import defaultdict
 
-current_dp = defaultdict(int)
+    # The initial state is (k=1, last_chars=''), count=1.
 
-current_dp[(1, '')] = 1
+    current_dp = defaultdict(int)
 
-for i in range(n):
+    current_dp[(1, '')] = 1
 
-    next_dp = defaultdict(int)
+    for i in range(n):
+
+        next_dp = defaultdict(int)
+
+        for (k, last_chars), count in current_dp.items():
+
+            # Generate all possible next characters.
+
+            for c in ['A', 'C', 'G', 'T']:
+
+                # Compute new_last_chars.
+
+                new_last = (last_chars + c)[-L_max:] if L_max >0 else ''
+
+                # For the new_i =i+1.
+
+                new_i = i+1
+
+                # Check all substrings in unique_substrings.
+
+                found = False
+
+                for s in unique_substrings:
+
+                    L = len(s)
+
+                    # Check if the current last_chars +c can form s.
+
+                    if len(last_chars) +1 < L:
+
+                        continue
+
+                    # Get the last L characters of last_chars +c.
+
+                    candidate = (last_chars + c)[-L:]
+
+                    if candidate != s:
+
+                        continue
+
+                    # Check if s_pos is <=k and >=1.
+
+                    s_pos = new_i - L +1
+
+                    if s_pos <1 or s_pos >k:
+
+                        continue
+
+                    # If any of the substrings satisfies, then new_k is new_i +1.
+
+                    found = True
+
+                    break
+
+                if found:
+
+                    new_k = new_i +1
+
+                    # Check if new_k is within the allowed range for new_i +1.
+
+                    # For new_i +1 = new_i +1 is i+2.
+
+                    # The allowed k for new_i +1 is [i+2 - L_max +1, i+2]
+
+                    # But since new_k is i+2, which is within the allowed range.
+
+                    # So add to next_dp.
+
+                    key = (new_k, new_last)
+
+                    next_dp[key] = (next_dp[key] + count) % MOD
+
+        current_dp = next_dp
+
+    # After processing all steps, the answer is the sum of all states where k ==n+1.
+
+    result = 0
 
     for (k, last_chars), count in current_dp.items():
 
-        # Generate all possible next characters.
+        if k == n+1:
 
-        for c in ['A', 'C', 'G', 'T']:
+            result = (result + count) % MOD
 
-            # Compute new_last_chars.
+    print(result, file=output_stream)
 
-            new_last = (last_chars + c)[-L_max:] if L_max >0 else ''
 
-            # For the new_i =i+1.
 
-            new_i = i+1
+def test():
+    import io
 
-            # Check all substrings in unique_substrings.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 2
+CAT
+TACT
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-            found = False
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-            for s in unique_substrings:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-                L = len(s)
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-                # Check if the current last_chars +c can form s.
+    print('Tests passed 😎')
 
-                if len(last_chars) +1 < L:
 
-                    continue
+if __name__ == '__main__':
+    test()
 
-                # Get the last L characters of last_chars +c.
 
-                candidate = (last_chars + c)[-L:]
+```
 
-                if candidate != s:
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 145, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 138, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '2'
+Got: '0'
 
-                    continue
-
-                # Check if s_pos is <=k and >=1.
-
-                s_pos = new_i - L +1
-
-                if s_pos <1 or s_pos >k:
-
-                    continue
-
-                # If any of the substrings satisfies, then new_k is new_i +1.
-
-                found = True
-
-                break
-
-            if found:
-
-                new_k = new_i +1
-
-                # Check if new_k is within the allowed range for new_i +1.
-
-                # For new_i +1 = new_i +1 is i+2.
-
-                # The allowed k for new_i +1 is [i+2 - L_max +1, i+2]
-
-                # But since new_k is i+2, which is within the allowed range.
-
-                # So add to next_dp.
-
-                key = (new_k, new_last)
-
-                next_dp[key] = (next_dp[key] + count) % MOD
-
-    current_dp = next_dp
-
-# After processing all steps, the answer is the sum of all states where k ==n+1.
-
-result = 0
-
-for (k, last_chars), count in current_dp.items():
-
-    if k == n+1:
-
-        result = (result + count) % MOD
-
-print(result)
-
-But wait, what if L_max is zero (m=0 and no substrings)? But according to the problem constraints, m >=1. Because in the input, m can be 1. So the code can handle m=0, but the constraints say 1<=m<=10.
-
-Wait, the problem statement says "1 ≤ m ≤ 10", so m cannot be zero. So the code can safely assume that unique_substrings is non-empty.
-
-But let's check the constraints: the input's m is 1<=m<=10, so the code can proceed.
-
-Testing the sample inputs:
-
-Sample input 1:
-
-2 1
-
-A
-
-The code:
-
-unique_substrings is {"A"}, L_max=1.
-
-The initial state is (k=1, '') with count=1.
-
-For i=0 (processing the first character):
-
-for each (k=1, ''):
-
-   for c in ACGT:
-
-      new_last = ('' +c)[-1:] = c.
-
-      new_i=1.
-
-      check if any s in unique_substrings.
-
-      s is "A", L=1.
-
-      len(last_chars) +1=0+1=1 >=1.
-
-      candidate = (''+c)[-1:] =c.
-
-      if c == "A":
-
-          then s_pos =1 -1+1=1. which is >=1 and <=k=1.
-
-          found = True.
-
-      So for c="A", new_k=1+1=2.
-
-      new_last is "A" (L_max=1, so new_last is "A").
-
-      So the state (2, "A") gets count=1.
-
-      For other c's, found is false.
-
-Thus, after i=0, current_dp has {(2, 'A'):1}.
-
-For i=1 (processing the second character):
-
-for each (k=2, 'A'):
-
-   for c in ACGT:
-
-      new_last = ('A' +c)[-1:] = c.
-
-      new_i=2.
-
-      check s in ["A"]:
-
-          L=1.
-
-          len('A')+1=2 >=1.
-
-          candidate = ('A' +c)[-1:] =c.
-
-          if c == 'A':
-
-              s_pos =2 -1 +1=2.
-
-              check if s_pos >=1 and <=k=2.
-
-              yes.
-
-              found=True.
-
-              new_k =2+1=3.
-
-              new_last is 'A'.
-
-              So the state (3, 'A') accumulates count=1.
-
-      other c's would not match.
-
-Thus, after i=1, current_dp has {(3, 'A'):1}.
-
-After processing all steps, the answer is sum of states where k ==2+1=3 (n=2, n+1=3).
-
-Thus, the result is 1, which matches the sample.
+```
 
 Sample input 2:
 

@@ -337,63 +337,143 @@ else:
 
 So this code would handle all cases.
 
-Let's test it with the examples.
+Testing against sample input 1.
 
-First example:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    r = list(map(int, input_stream.readline().rstrip("\n").split()))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a = sum(ri == 1 and bi == 0 for ri, bi in zip(r, b))
+    if a == 0:
+        print(-1, file=output_stream)
+    else:
+        b_count = sum(ri == 0 and bi == 1 for ri, bi in zip(r, b))
+        if a > b_count:
+            print(1, file=output_stream)
+        else:
+            print((b_count + 1 + a - 1) // a, file=output_stream)
 
-n=5
 
-r = [1,1,1,0,0]
 
-b = [0,1,1,1,1]
+def test():
+    import io
 
-a is sum( r[i] ==1 and b[i] ==0.
-
-For each i:
-
-i=0: r=1, b=0 → yes → count 1.
-
-i=1: r=1, b=1 → no.
-
-i=2: r=1, b=1 → no.
-
-i=3: r=0 → no.
-
-i=4: r=0 → no.
-
-So a=1.
-
-b_count is sum(r=0 and b=1):
-
-i=0: r=0 → no.
-
-i=1: r=0? No, r is 1.
-
-i=2: r=1 → no.
-
-i=3: r=0, b=1 → yes.
-
-i=4: r=0, b=1 → yes.
-
-So b_count=2.
-
-Since a=1 <=2, required is (2+1 +1-1 )//1 = 3//1=3. So output 3. Which matches.
-
-Second example:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
+0 0 0
+0 0 0
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-r is all 0, b is all 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-a=0 → output -1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Third example:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample inputs 2, 3.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    r = list(map(int, input_stream.readline().rstrip("\n").split()))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a = sum(ri == 1 and bi == 0 for ri, bi in zip(r, b))
+    if a == 0:
+        print(-1, file=output_stream)
+    else:
+        b_count = sum(ri == 0 and bi == 1 for ri, bi in zip(r, b))
+        if a > b_count:
+            print(1, file=output_stream)
+        else:
+            print((b_count + 1 + a - 1) // a, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
+1 1 1 1
+1 1 1 1
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+        {
+            "input": \
+"""\
+9
+1 0 0 0 0 0 0 0 1
+0 1 1 0 1 1 1 1 0
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-r=all 1, b=all 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-a = sum(1 and 0?) → no. So a=0 → output -1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Fourth example:
 

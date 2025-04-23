@@ -412,37 +412,140 @@ So here's the code:
 
 Read the input:
 
-n = int(input())
-states = list(map(int, input().split()))
-unreads = [i for i in range(n) if states[i] == 1]
+Testing against sample input 2.
 
-if not unreads:
-    print(0)
-else:
-    total = 1
-    prev = unreads[0]
-    for idx in unreads[1:]:
-        delta = idx - prev
-        if delta <= 2:
-            total += delta
-        else:
-            total += 2
-        prev = idx
-    print(total)
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    states = list(map(int, input_stream.readline().rstrip("\n").split()))
+    unreads = [i for i in range(n) if states[i] == 1]
 
-Testing sample 2:
+    if not unreads:
+        print(0, file=output_stream)
+    else:
+        total = 1
+        prev = unreads[0]
+        for idx in unreads[1:]:
+            delta = idx - prev
+            if delta <= 2:
+                total += delta
+            else:
+                total += 2
+            prev = idx
+        print(total, file=output_stream)
 
-input is 1 1 0 0 1 → indices are 0,1,4.
 
-delta between 0 and1:1 → total becomes 2.
 
-delta between1 and4:3 → add 2 → total 4. Correct.
+def test():
+    import io
 
-Yes.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+0 0
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Sample1: 0 1 0 1 0 → indices are 1 and3. delta 2 → added 2. Total 3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Thus, the code works.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 1.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    states = list(map(int, input_stream.readline().rstrip("\n").split()))
+    unreads = [i for i in range(n) if states[i] == 1]
+
+    if not unreads:
+        print(0, file=output_stream)
+    else:
+        total = 1
+        prev = unreads[0]
+        for idx in unreads[1:]:
+            delta = idx - prev
+            if delta <= 2:
+                total += delta
+            else:
+                total += 2
+            prev = idx
+        print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 1 0 0 1
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

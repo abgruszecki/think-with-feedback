@@ -482,41 +482,69 @@ Now, implementing this in Python.
 
 In Python, the bisect module's bisect_right function can be used. So:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n = int(input())
-a = list(map(int, input().split()))
-sorted_abs = sorted(abs(x) for x in a)
-count = 0
 
-for i in range(n):
-    target = 2 * sorted_abs[i]
-    j = bisect.bisect_right(sorted_abs, target) -1
-    if j > i:
-        count += (j - i)
-print(count)
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    sorted_abs = sorted(abs(x) for x in a)
+    count = 0
 
-This should work.
+    for i in range(n):
+        target = 2 * sorted_abs[i]
+        j = bisect.bisect_right(sorted_abs, target) -1
+        if j > i:
+            count += (j - i)
+    print(count, file=output_stream)
 
-Testing the first example:
 
-Input:
 
-3
+def test():
+    import io
 
-2 5 -3
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+3 6
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-sorted_abs is [2,3,5]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=0: target 4. bisect_right returns 2. j=1. count +=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=1: target 6. bisect_right returns 3. j=2. count +=1. Total 2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=2: j=2. no.
+    print('Tests passed 😎')
 
-Output 2.
 
-Correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

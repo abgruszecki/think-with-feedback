@@ -261,38 +261,75 @@ Then loop through each i:
 
 So, code:
 
-n, b = map(int, input().split())
-a = list(map(int, input().split()))
+Testing against sample input 1.
 
-max_sell = [0] * n
-max_sell[-1] = a[-1]
-for i in range(n-2, -1, -1):
-    max_sell[i] = max(a[i], max_sell[i+1])
+```python
+def main(input_stream, output_stream):
+    n, b = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-max_total = b
-for i in range(n):
-    current_price = a[i]
-    sell_price = max_sell[i]
-    if sell_price > current_price:
-        k = b // current_price
-        rem = b % current_price
-        total = k * sell_price + rem
-        if total > max_total:
-            max_total = total
+    max_sell = [0] * n
+    max_sell[-1] = a[-1]
+    for i in range(n-2, -1, -1):
+        max_sell[i] = max(a[i], max_sell[i+1])
 
-print(max_total)
+    max_total = b
+    for i in range(n):
+        current_price = a[i]
+        sell_price = max_sell[i]
+        if sell_price > current_price:
+            k = b // current_price
+            rem = b % current_price
+            total = k * sell_price + rem
+            if total > max_total:
+                max_total = total
 
-Testing this against the samples:
+    print(max_total, file=output_stream)
 
-Sample 1:
 
-Input 2 4
 
-3 7 → a = [3,7]
+def test():
+    import io
 
-max_sell is [7,7]. For i=0:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 10
+4 3 2 1
+""",
+            "output": \
+"""\
+10
+""",
+        }, 
+    ]
 
-sell_price 7>3 → k=4//3=1, rem 1. total=1*7+1=8. So max becomes 8. i=1: 7 ==7 → no. So output 8.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

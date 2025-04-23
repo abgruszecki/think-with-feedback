@@ -511,87 +511,116 @@ Then proceed.
 
 So code:
 
+Testing against sample input 3.
+
+```python
 import sys
 
-n = int(sys.stdin.readline())
 
-contests = []
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
-for _ in range(n):
+    contests = []
 
-    ci, di = map(int, sys.stdin.readline().split())
+    for _ in range(n):
 
-    contests.append( (ci, di) )
+        ci, di = map(int, input_stream.readline().split())
 
-prefix = [0]*(n+1)
+        contests.append( (ci, di) )
 
-for i in range(1, n+1):
+    prefix = [0]*(n+1)
 
-    prefix[i] = prefix[i-1] + contests[i-1][0]
+    for i in range(1, n+1):
 
-lower = -float('inf')
+        prefix[i] = prefix[i-1] + contests[i-1][0]
 
-upper = float('inf')
+    lower = -float('inf')
 
-for i in range(1, n+1):
+    upper = float('inf')
 
-    sum_before = prefix[i-1]
+    for i in range(1, n+1):
 
-    di = contests[i-1][1]
+        sum_before = prefix[i-1]
 
-    if di == 1:
+        di = contests[i-1][1]
 
-        lb = 1900 - sum_before
+        if di == 1:
 
-        if lb > lower:
+            lb = 1900 - sum_before
 
-            lower = lb
+            if lb > lower:
+
+                lower = lb
+
+        else:
+
+            ub = 1899 - sum_before
+
+            if ub < upper:
+
+                upper = ub
+
+    sum_c = prefix[n]
+
+    if lower > upper:
+
+        print("Impossible", file=output_stream)
+
+    elif upper == float('inf'):
+
+        print("Infinity", file=output_stream)
 
     else:
 
-        ub = 1899 - sum_before
+        print(upper + sum_c, file=output_stream)
 
-        if ub < upper:
 
-            upper = ub
 
-sum_c = prefix[n]
+def test():
+    import io
 
-if lower > upper:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+27 2
+13 1
+-50 1
+8 2
+""",
+            "output": \
+"""\
+1897
+""",
+        }, 
+    ]
 
-    print("Impossible")
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-elif upper == float('inf'):
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-    print("Infinity")
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-else:
+    print('Tests passed 😎')
 
-    print(upper + sum_c)
 
-But wait, sum_c is prefix[n], which is the sum of all ci's. upper is the min of the upper bounds, which is 1899 - sum_before for the i-th contest.
+if __name__ == '__main__':
+    test()
 
-So when upper is added to sum_c, the sum is 1899 - sum_before + sum_c.
 
-sum_before is the sum before the i-th contest, which is prefix[i-1].
+```
 
-But sum_c is prefix[n], which is sum of all ci's. So upper + sum_c is (1899 - sum_before) + (sum_before + sum_rest). But sum_rest is sum from i-th contest to n-th.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Wait, but sum_before is prefix[i-1], sum_c is prefix[n]. So sum_c = sum_before + (sum from i to n). So upper is 1899 - sum_before. So upper + sum_c = (1899 - sum_before) + (sum_before + ...) = 1899 + (sum from i to n).
-
-Wait, perhaps it's better to think of upper as 1899 - sum_before (for di=2). And sum_c is sum of all ci's, which is sum_before_i-1 (sum_before) plus ci + ... + cn. So upper + sum_c = (1899 - sum_before) + (sum_before + ... + cn) = 1899 + (ci + ... + cn). But the sum from ci to cn is the sum from i-th contest to n-th. But how is that related to the problem?
-
-In any case, the code is correct.
-
-Testing the third example:
-
-sum_c = -5.
-
-upper is infinity.
-
-So code prints Infinity.
-
-Which is correct.
+```
 
 Another test case where sum_c is negative but there are no upper constraints. For example:
 
@@ -741,107 +770,106 @@ This way, we don't need to store the prefix array. So for n=2e5, this saves 2e5+
 
 So the code can be optimized as:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n = int(sys.stdin.readline())
 
-lower = -float('inf')
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
-upper = float('inf')
+    lower = -float('inf')
 
-sum_before =0
+    upper = float('inf')
 
-sum_c =0
+    sum_before =0
 
-for _ in range(n):
+    sum_c =0
 
-    ci, di = map(int, sys.stdin.readline().split())
+    for _ in range(n):
 
-    # process the current contest (sum_before is the sum before this contest)
+        ci, di = map(int, input_stream.readline().split())
 
-    if di ==1:
+        # process the current contest (sum_before is the sum before this contest)
 
-        lb =1900 - sum_before
+        if di ==1:
 
-        if lb > lower:
+            lb =1900 - sum_before
 
-            lower = lb
+            if lb > lower:
+
+                lower = lb
+
+        else:
+
+            ub =1899 - sum_before
+
+            if ub < upper:
+
+                upper = ub
+
+        sum_before += ci
+
+    sum_c = sum_before
+
+    if lower > upper:
+
+        print("Impossible", file=output_stream)
+
+    elif upper == float('inf'):
+
+        print("Infinity", file=output_stream)
 
     else:
 
-        ub =1899 - sum_before
+        print(upper + sum_c, file=output_stream)
 
-        if ub < upper:
 
-            upper = ub
 
-    sum_before += ci
+def test():
+    import io
 
-sum_c = sum_before
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+57 1
+22 2
+""",
+            "output": \
+"""\
+Impossible
+""",
+        }, 
+    ]
 
-if lower > upper:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-    print("Impossible")
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-elif upper == float('inf'):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-    print("Infinity")
+    print('Tests passed 😎')
 
-else:
 
-    print(upper + sum_c)
+if __name__ == '__main__':
+    test()
 
-This code is O(n) time and O(1) space (except for reading input), which is better for memory constraints.
 
-Testing this code:
+```
 
-First example:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-n=3
-
-Contests:
-
--7 1
-
-5 2
-
-8 2
-
-sum_before starts at 0.
-
-Processing first contest (ci=-7, di=1):
-
-sum_before is 0.
-
-di=1 → lb=1900 -0 =1900. lower becomes 1900.
-
-sum_before becomes 0-7 =-7.
-
-Processing second contest (ci=5, di=2):
-
-sum_before is -7.
-
-di=2 → ub=1899 - (-7) =1906. upper is min(inf, 1906) →1906.
-
-sum_before +=5 → -2.
-
-Processing third contest (ci=8, di=2):
-
-sum_before is -2.
-
-di=2 → ub=1899 - (-2) =1901. upper becomes min(1906, 1901) →1901.
-
-sum_before +=8 →6.
-
-sum_c is 6.
-
-lower=1900, upper=1901.
-
-1900 <=1901 → possible.
-
-upper is not inf. So output 1901 +6=1907.
-
-Which is correct.
+```
 
 Yes.
 

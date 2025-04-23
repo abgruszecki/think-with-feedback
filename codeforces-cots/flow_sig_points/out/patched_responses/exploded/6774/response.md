@@ -340,65 +340,157 @@ Then output sorted list.
 
 So the Python code would be:
 
-n = int(input())
-a_list = list(map(int, input().split()))
-a = [0] + a_list  # a[0] = 0, a[1] = a_1, etc.
-d = [a[i] - a[i-1] for i in range(1, n+1)]
+Testing against sample input 1.
 
-valid_ks = []
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a_list = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a = [0] + a_list  # a[0] = 0, a[1] = a_1, etc.
+    d = [a[i] - a[i-1] for i in range(1, n+1)]
 
-for k in range(1, n+1):
-    expected = [None] * k
-    valid = True
-    for idx in range(n):
-        j = idx % k
-        current_d = d[idx]
-        if expected[j] is not None:
-            if current_d != expected[j]:
-                valid = False
-                break
-        else:
-            expected[j] = current_d
-    if valid:
-        valid_ks.append(k)
+    valid_ks = []
 
-valid_ks.sort()
-print(len(valid_ks))
-print(' '.join(map(str, valid_ks)))
+    for k in range(1, n+1):
+        expected = [None] * k
+        valid = True
+        for idx in range(n):
+            j = idx % k
+            current_d = d[idx]
+            if expected[j] is not None:
+                if current_d != expected[j]:
+                    valid = False
+                    break
+            else:
+                expected[j] = current_d
+        if valid:
+            valid_ks.append(k)
 
-Yes, that's the code. Let's test the sample inputs.
+    valid_ks.sort()
+    print(len(valid_ks), file=output_stream)
+    print(' '.join(map(str, valid_ks)), file=output_stream)
 
-First sample input:
 
-5
-1 2 3 4 5
 
-d is [1,1,1,1,1]. For any k, all groups are 1. So all k's from 1 to5 are valid. Output as per example.
+def test():
+    import io
 
-Second sample input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
 1 3 5 6 8
+""",
+            "output": \
+"""\
+2
+3 5
+""",
+        }, 
+    ]
 
-a is [0,1,3,5,6,8]. d is [1,2,2,1,2].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-k=3:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-expected is [1,2,2]. Check each idx:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-idx0 →0 mod3 →0 →d=1 →expected[0] =1.
+    print('Tests passed 😎')
 
-idx1 →1 mod3 →1 →d=2 →expected[1] =2.
 
-idx2 →2 mod3 →2 →d=2 →expected[2]=2.
+if __name__ == '__main__':
+    test()
 
-idx3 →3 mod3 →0 →d=1 →check 1 vs 1 → ok.
 
-idx4 →4 mod3 →1 →d=2 → check 2 vs 2 → ok.
+```
 
-So valid.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-k=5: each group has one element. So valid. So output [3,5].
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a_list = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a = [0] + a_list  # a[0] = 0, a[1] = a_1, etc.
+    d = [a[i] - a[i-1] for i in range(1, n+1)]
+
+    valid_ks = []
+
+    for k in range(1, n+1):
+        expected = [None] * k
+        valid = True
+        for idx in range(n):
+            j = idx % k
+            current_d = d[idx]
+            if expected[j] is not None:
+                if current_d != expected[j]:
+                    valid = False
+                    break
+            else:
+                expected[j] = current_d
+        if valid:
+            valid_ks.append(k)
+
+    valid_ks.sort()
+    print(len(valid_ks), file=output_stream)
+    print(' '.join(map(str, valid_ks)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 5 3
+""",
+            "output": \
+"""\
+1
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

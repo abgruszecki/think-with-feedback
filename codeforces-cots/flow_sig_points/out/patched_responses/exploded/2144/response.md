@@ -87,69 +87,77 @@ But in Python, this approach is straightforward.
 
 Now, code structure:
 
-x = int(input())
+Testing against sample input 1.
 
-digits_x = set(str(x))
+```python
+def main(input_stream, output_stream):
+    x = int(input_stream.readline().rstrip("\n"))
 
-divisors = set()
+    digits_x = set(str(x))
 
-for i in range(1, int(x**0.5)+1):
+    divisors = set()
 
-   if x % i == 0:
+    for i in range(1, int(x**0.5)+1):
 
-       divisors.add(i)
+       if x % i == 0:
 
-       divisors.add(x//i)
+           divisors.add(i)
 
-count = 0
+           divisors.add(x//i)
 
-for d in divisors:
+    count = 0
 
-   if any(c in digits_x for c in str(d)):
+    for d in divisors:
 
-       count +=1
+       if any(c in digits_x for c in str(d)):
 
-print(count)
+           count +=1
 
-Wait, but in Python, creating a set for the divisors is important to avoid duplicates, but in the loop above, when i and x//i are added, if x is a square (like 16), then i and x//i would be the same, so adding both would result in duplicates. Wait, no. For example, x=16, i=4. Then x//i is 4. So the code adds 4 twice. But since divisors is a set, duplicates are automatically handled. So using a set for divisors is better.
+    print(count, file=output_stream)
 
-Alternatively, in the code, for i in the loop, we could check if i == x//i, but in practice, using a set is easier.
 
-But in Python, the code would generate all divisors correctly.
 
-Wait, let's test with x=1:
+def test():
+    import io
 
-i ranges from 1 to 1. 1 %1 ==0, so add 1 and 1. But since it's a set, only one 1 is added. So that's correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-Another example: x=10.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i ranges from 1 to 3 (since sqrt(10) is ~3.16). For i=1: add 1 and 10. For i=2: 10%2 is 0? 10/2 is 5. So add 2 and 5. i=3: 10%3 is 1, so no. So divisors are {1,2,5,10} → correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Yes, the code would generate all divisors.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So that's the plan.
+    print('Tests passed 😎')
 
-But let's check time and memory.
 
-For x=1e9, sqrt(x) is 3e4, so the loop runs 3e4 times. For each iteration, it does a modulo check. That's manageable.
+if __name__ == '__main__':
+    test()
 
-Then, the number of divisors can be up to 100 (as in the example for 1e9 which has 100 divisors). For each divisor, converting to a string and checking each character against the digits_x set. Each such check is O(k), where k is the number of digits. For d up to 1e9, k is 9 digits. So for 100 divisors, that's 9*100 = 900 operations. That's negligible.
 
-So the code should work within the time constraints.
+```
 
-What about memory? The divisors set for x=1e9 would have up to 100 elements. Each stored as integers. So negligible memory usage.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-The code is straightforward and efficient.
-
-Now, let's test the examples.
-
-First example:
-
-Input: 1 → x=1. digits_x is {'1'}.
-
-Divisors are {1}.
-
-Check 1: '1' is in digits_x → count is 1. Output 1. Correct.
+```
 
 Second example: input 10 → digits_x {'1','0'}. Divisors are {1,2,5,10}.
 

@@ -175,33 +175,67 @@ But in Python, building a list and then computing min and max is straightforward
 
 So the second approach's code:
 
-n = int(input())
-xs = []
-ys = []
-for _ in range(n):
-    x, y = map(int, input().split())
-    xs.append(x)
-    ys.append(y)
-delta_x = max(xs) - min(xs)
-delta_y = max(ys) - min(ys)
-side = max(delta_x, delta_y)
-print(side * side)
+Testing against sample input 1.
 
-Yes. That's even shorter and works.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    xs = []
+    ys = []
+    for _ in range(n):
+        x, y = map(int, input_stream.readline().rstrip("\n").split())
+        xs.append(x)
+        ys.append(y)
+    delta_x = max(xs) - min(xs)
+    delta_y = max(ys) - min(ys)
+    side = max(delta_x, delta_y)
+    print(side * side, file=output_stream)
 
-Testing this code against the examples.
 
-First example input:
 
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2
-
 0 0
+0 3
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
 
-2 2
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-xs = [0,2], ys = [0,2]
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-delta_x is 2-0=2, delta_y is 2-0=2. max is 2. area 4. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example input:
 

@@ -441,35 +441,86 @@ else:
 
 Yes. This should work.
 
-Testing the first sample input:
+Testing against sample input 1.
 
-Sample 1:
+```python
+import sys
+from collections import defaultdict
 
-3 3 3
 
-2 2 2 → a_counts: {2:3}
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
+    b = list(map(int, input_stream.readline().split()))
+    
+    a_count = defaultdict(int)
+    for x in a:
+        a_count[x] += 1
+    b_count = defaultdict(int)
+    for x in b:
+        b_count[x] += 1
+    
+    species = set(a_count.keys()).union(b_count.keys())
+    sorted_species = sorted(species)
+    c_list = []
+    for s in sorted_species:
+        c = a_count.get(s, 0) - b_count.get(s, 0)
+        c_list.append(c)
+    
+    current_sum = 0
+    max_suffix = -float('inf')
+    for c in reversed(c_list):
+        current_sum += c
+        if current_sum > max_suffix:
+            max_suffix = current_sum
+    
+    print("YES" if max_suffix > 0 else "NO", file=output_stream)
 
-1 1 3 → b_counts: {1:2, 3:1}
 
-species are 1,2,3.
 
-sorted_species: [1,2,3]
+def test():
+    import io
 
-c_list: 0-2 = -2 (species1), 3-0=3 (species2), 0-1= -1 (species3).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 7 9
+5 2 7 3
+3 5 2 7 3 8 7
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-c_list is [-2,3,-1].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing reversed:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
--1 → current_sum =-1 → max_suffix =-1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Then add 3 → current_sum=2 → max is 2.
+    print('Tests passed 😎')
 
-Then add -2 → current_sum=0 → max remains 2.
 
-max_suffix is 2>0 → YES.
+if __name__ == '__main__':
+    test()
 
-Which matches the sample.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

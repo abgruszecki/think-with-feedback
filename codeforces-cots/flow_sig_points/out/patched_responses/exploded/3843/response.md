@@ -251,50 +251,82 @@ Compute the maximum zebra in s_rot and s_rev_rot, then take the maximum between 
 
 So the code would be:
 
-s = input().strip()
+Testing against sample input 1.
 
-n = len(s)
-if n == 0:
-    print(0)
-else:
-    def compute_max(s):
-        max_zebra = 1
-        current = 1
-        for i in range(1, len(s)):
-            if s[i] != s[i-1]:
-                current +=1
-                if current > max_zebra:
-                    max_zebra = current
-            else:
-                current = 1
-        return max_zebra
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-    s_rot = s + s
-    s_rev_rot = s[::-1] + s[::-1]
+    n = len(s)
+    if n == 0:
+        print(0, file=output_stream)
+    else:
+        def compute_max(s):
+            max_zebra = 1
+            current = 1
+            for i in range(1, len(s)):
+                if s[i] != s[i-1]:
+                    current +=1
+                    if current > max_zebra:
+                        max_zebra = current
+                else:
+                    current = 1
+            return max_zebra
 
-    max_rot = compute_max(s_rot)
-    max_rev_rot = compute_max(s_rev_rot)
+        s_rot = s + s
+        s_rev_rot = s[::-1] + s[::-1]
 
-    result = max(max_rot, max_rev_rot, 1)  # at least 1
-    result = min(result, n)  # can't be longer than the original string length
+        max_rot = compute_max(s_rot)
+        max_rev_rot = compute_max(s_rev_rot)
 
-    print(result)
+        result = max(max_rot, max_rev_rot, 1)  # at least 1
+        result = min(result, n)  # can't be longer than the original string length
 
-Wait, but why do we need to compute the maximum of max_rot and max_rev_rot? Because the allowed operations can generate any rotation of the original and the reversed string. So the maximum zebra could be in either of those.
+        print(result, file=output_stream)
 
-But let's test this code against the examples.
 
-First example:
 
-Input: bwwwbwwbw → output is 5.
+def test():
+    import io
 
-The original string is 'bwwwbwwbw' (length 9).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+bwwbwwb
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-s_rot is the original concatenated with itself. Let's see what the compute_max would find.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But the maximum in s_rot would be 5. Similarly, the reversed string is 'wbwwbwwwb', then reversed_rot is that concatenated with itself. compute_max on that would also find 5.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So the code would return 5.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: input is bwwbwwb → output 3.
 

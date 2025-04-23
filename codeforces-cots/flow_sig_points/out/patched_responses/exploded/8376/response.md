@@ -174,54 +174,210 @@ Then, count the sum of sieve[a to b], inclusive.
 
 So code steps:
 
-a, b = map(int, input().split())
+Testing against sample input 1.
 
-if b < 2:
-    print(0)
-else:
-    sieve = bytearray([1])*(b+1)
-    sieve[0] = sieve[1] = 0
-    for i in range(2, int(b**0.5) +1):
-        if sieve[i]:
-            sieve[i*i::i] = b'\x00' * ( (b - i*i) // i + 1 )
-    count = sum(sieve[a : b+1])
-    print(count)
+```python
+def main(input_stream, output_stream):
+    a, b = map(int, input_stream.readline().rstrip("\n").split())
 
-Wait, but in Python, the slice assignment for a bytearray needs to be done with a bytes-like object. The line sieve[i*i::i] = b'\x00' * ... ?
+    if b < 2:
+        print(0, file=output_stream)
+    else:
+        sieve = bytearray([1])*(b+1)
+        sieve[0] = sieve[1] = 0
+        for i in range(2, int(b**0.5) +1):
+            if sieve[i]:
+                sieve[i*i::i] = b'\x00' * ( (b - i*i) // i + 1 )
+        count = sum(sieve[a : b+1])
+        print(count, file=output_stream)
 
-Yes. Because for each i, sieve is a bytearray, and the slice is of length (b - i*i) // i +1. So multiplying a single zero byte (b'\x00') by that length gives a bytes object of the correct length. Then, assigning that to the slice.
 
-But how to compute the length of the slice?
 
-The length of sieve[i*i::i] is (b - i*i) // i +1.
+def test():
+    import io
 
-For example, if i*i is 4, step is 2, up to 10:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+23 23
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-4,6,8,10. So (10-4)/2 +1 = (6/2) +1 =3+1=4 elements. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So the length is (b - i*i) //i +1. Yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So in code:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-sieve[i*i::i] = b'\x00' * ((b - i*i) // i +1 )
+    print('Tests passed 😎')
 
-But in Python, this requires that the multiplication of the bytes object by the length is done correctly.
 
-But multiplying a single byte by a length gives a bytes object of that length. So this should work.
+if __name__ == '__main__':
+    test()
 
-But what if i*i >b? Then the slice is empty, and the length is 0. So the code would do nothing.
 
-So the code should work.
+```
 
-Now, let's test this code against the sample inputs.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Sample 1: a=10, b=20.
+```
 
-Generate sieve up to 20.
+Testing against sample input 2.
 
-Primes between 10 and 20: 11,13,17,19. So sum is 4. Correct.
+```python
+def main(input_stream, output_stream):
+    a, b = map(int, input_stream.readline().rstrip("\n").split())
 
-Sample 2: a=23, b=23. Sum is 1. Correct.
+    if b < 2:
+        print(0, file=output_stream)
+    else:
+        sieve = bytearray([1])*(b+1)
+        sieve[0] = sieve[1] = 0
+        for i in range(2, int(b**0.5) +1):
+            if sieve[i]:
+                sieve[i*i::i] = b'\x00' * ( (b - i*i) // i + 1 )
+        count = sum(sieve[a : b+1])
+        print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+271 566
+""",
+            "output": \
+"""\
+46
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Sample 3: a=271, b=566. The output is 46. Let's see. The sieve would correctly count all primes in that range.
+
+Now, what about memory? The sieve is a bytearray of size (b+1), which for b=1e6 is 1,000,001 bytes. Which is about 1MB. So the memory usage is well under 64MB.
+
+Time: sieve generation for 1e6. The sieve steps are:
+
+For each i from 2 to sqrt(1e6) (which is 1000). For each i, if it's a prime, mark multiples.
+
+The main cost is marking multiples of primes. But each sieve[i*i::i] assignment is O(k), where k is the number of elements in the slice. The sum of all these k's is O(n log log n), which is acceptable.
+
+In Python, for 1e6, this should be manageable in under 2 seconds.
+
+But perhaps in practice, the code can be optimized further. For example, precomputing the sieve and then counting the sum with a loop instead of using the sum function. Because the sum function in Python for a bytearray (which is an iterable of integers 0 or 1) is O(n), but using a slice and sum is O(n). So in code, sum(sieve[a:b+1]) is O(b -a +1). But for the worst case, a=2, b=1e6, that's 1e6 iterations. So sum is O(1e6), which should be acceptable.
+
+Alternatively, precompute a prefix sum array. But that would take O(n) memory. For example, for sieve up to 1e6, create a prefix array where prefix[i] is the number of primes up to i. Then, the answer is prefix[b] - prefix[a-1]. But generating the prefix array adds O(n) time and space. But for n=1e6, this is acceptable.
+
+Which is better? Let's compare.
+
+Option 1: Generate sieve, then sum the slice.
+
+Time complexity: O(b) for the sieve, O(b -a) for the sum.
+
+Option 2: Generate sieve, generate prefix sum array (O(b) time), then compute answer as prefix[b] - prefix[a-1].
+
+Time complexity: O(b) for sieve, O(b) for prefix sum, then O(1) for the answer.
+
+But for a given test case, which is better?
+
+If a is 1e6 and b is 1e6, then sum is O(1), but the prefix approach is O(1). But generating the prefix sum array takes O(b) time. So for a single test case, option 1 is better if the sum is O(b -a +1), which is worse than O(b) in the worst case. But if the sum is O(b) and the prefix sum is O(b), then the total time is O(b) for both.
+
+But for a=2 and b=1e6, sum is O(1e6). The prefix approach would take O(1e6) time for the sieve and another O(1e6) for the prefix array, which totals O(2e6) steps. Whereas option 1 is sieve O(1e6) and sum O(1e6) steps. So same time.
+
+But for a=1e6 and b=1e6, sum is O(1), but the prefix approach adds O(1e6) steps for the prefix array. So in this case, the sum approach is better.
+
+So for a single test case, generating the sieve and then summing the slice is better.
+
+But the code can be optimized. For example, in Python, sum(sieve[a:b+1]) is O(b-a+1). But for the worst case, when a=2 and b=1e6, this is 999999 steps, which may take some time. But in practice, even 1e6 steps are manageable.
+
+So which approach is better?
+
+Let's see.
+
+In code, using the sum is straightforward. However, perhaps generating a prefix sum array would be more efficient in some cases. Let's consider:
+
+If we generate the sieve, then compute a list of counts where count[i] is the number of primes up to i. Then, the answer is count[b] - count[a-1].
+
+But generating count requires an O(b) pass. So for example:
+
+count = [0]*(b+1)
+current =0
+for i in range(b+1):
+    if sieve[i]:
+        current +=1
+    count[i] = current
+
+Then, answer is count[b] - count[a-1]
+
+But this adds O(b) time and O(b) memory. So for 1e6, this is 1e6 steps, which is acceptable. But the question is whether the sum approach is faster.
+
+In Python, summing a slice of a bytearray (which is a sequence of 0s and 1s) is equivalent to counting the number of 1s in that slice. The sum function would iterate over each byte and add 1 for each 1. For a slice of size 1e6, that's 1e6 iterations. Which in Python could take some time.
+
+Alternatively, using a precomputed prefix sum array allows O(1) answer. But for the code to generate the prefix sum array, it's O(b) time. So for the case where a is small and b is large, the sum approach may be O(b) time, while the prefix sum approach is O(b) time (during sieve and prefix array). But the code would take O(b) time in both cases.
+
+So which is faster in practice? Let's see:
+
+Suppose we have sieve of size 1e6. The sum is 78,498 primes (if b is 1e6). So sum(sieve) is O(1e6). For the prefix sum approach, the code would take O(1e6) steps for the sieve, then O(1e6) steps for the prefix sum. So total of O(2e6) steps. For the sum approach, O(1e6) for sieve and O(1e6) for sum, so same as 2e6 steps. So the time is similar.
+
+But if a is close to b, the sum approach is O(k) steps where k is the range. For example, if a=1e6 and b=1e6, sum is O(1), which is faster. So in that case, sum is better.
+
+But for a=2 and b=1e6, both approaches take O(1e6) steps for the sum.
+
+But in code, the sum is straightforward. So perhaps the code can be written as:
+
+Generate sieve, then sum(sieve[a:b+1]).
+
+But wait, sieve is a bytearray where sieve[i] is 1 if i is prime. So sum(sieve[a:b+1]) gives the count.
+
+But in Python, when you slice a bytearray, you get a bytes-like object. However, the sum of a bytearray slice is the sum of the integer values of each byte. Since sieve[i] is 1 or 0, sum(sieve[a:b+1]) would correctly count the number of primes.
+
+Yes. Because each element is 0 or 1. So sum is correct.
+
+So the code is:
 
 Sample 3: a=271, b=566. The output is 46. Let's see. The sieve would correctly count all primes in that range.
 

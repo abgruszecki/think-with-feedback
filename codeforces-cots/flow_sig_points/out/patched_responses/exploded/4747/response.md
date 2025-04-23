@@ -639,92 +639,113 @@ Now, let's code this.
 
 The code would look like this:
 
+Testing against sample input 4.
+
+```python
 import sys
 from collections import deque
 
-x, y = map(int, sys.stdin.readline().split())
 
-if x == y:
-    print("YES")
-    sys.exit()
+def main(input_stream, output_stream):
+    x, y = map(int, input_stream.readline().split())
 
-def has_ending_one(num):
-    return bin(num)[-1] == '1'
+    if x == y:
+        print("YES", file=output_stream)
+        sys.exit()
 
-if not has_ending_one(y):
-    print("NO")
-    sys.exit()
+    def has_ending_one(num):
+        return bin(num)[-1] == '1'
 
-visited = set()
-q = deque()
-q.append(y)
-visited.add(y)
+    if not has_ending_one(y):
+        print("NO", file=output_stream)
+        sys.exit()
 
-found = False
+    visited = set()
+    q = deque()
+    q.append(y)
+    visited.add(y)
 
-while q:
-    current = q.popleft()
-    if current == x:
-        print("YES")
-        found = True
-        break
-    bin_current = bin(current)[2:]
-    if bin_current[-1] != '1':
-        continue
-    len_bin = len(bin_current)
-    max_k = 61 - len_bin
-    for k in range(max_k + 1):
-        T = '0' * k + bin_current
-        T_rev = T[::-1]
-        if len(T_rev) < 1:
-            continue
-        B_part = T_rev[:-1]
-        if not B_part:
-            continue
-        if B_part[0] != '1':
-            continue
-        w = int(B_part, 2)
-        if w == x:
-            print("YES")
+    found = False
+
+    while q:
+        current = q.popleft()
+        if current == x:
+            print("YES", file=output_stream)
             found = True
-            q.clear()
             break
-        if w <= 10**18 and w not in visited:
-            visited.add(w)
-            q.append(w)
-    if found:
-        break
+        bin_current = bin(current)[2:]
+        if bin_current[-1] != '1':
+            continue
+        len_bin = len(bin_current)
+        max_k = 61 - len_bin
+        for k in range(max_k + 1):
+            T = '0' * k + bin_current
+            T_rev = T[::-1]
+            if len(T_rev) < 1:
+                continue
+            B_part = T_rev[:-1]
+            if not B_part:
+                continue
+            if B_part[0] != '1':
+                continue
+            w = int(B_part, 2)
+            if w == x:
+                print("YES", file=output_stream)
+                found = True
+                q.clear()
+                break
+            if w <= 10**18 and w not in visited:
+                visited.add(w)
+                q.append(w)
+        if found:
+            break
 
-if not found:
-    print("NO")
+    if not found:
+        print("NO", file=output_stream)
 
-But wait, there's a problem here. In the code above, when generating predecessors for current, if any of them is x, we print YES and exit. Otherwise, add them to the queue.
 
-But in the code, for each current, after generating all possible predecessors, we check each predecessor and see if it's x. If any of them is x, we break and return YES.
 
-This should work.
+def test():
+    import io
 
-Testing sample input 4: 34 and 69.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8935891487501725 71487131900013807
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
 
-BFS steps:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Initial queue has 69.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Process 69.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Generate predecessors.
+    print('Tests passed 😎')
 
-For k=0: T = '1000101' (binary of 69). Reversed is '1010001'. B_part is '101000' (40). Add to queue if not visited.
 
-k=1: T = '01000101' → reversed '10100010' → B_part '1010001' (81). Add to queue.
+if __name__ == '__main__':
+    test()
 
-When processing 81:
 
-Generate predecessors for 81.
+```
 
-For k=0: T is '1010001' → reversed '1000101' → B_part '100010' (34). So w=34. Which is x. So print YES.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Thus, the code works.
+```
 
 Another test case: input 3, where x=2 and y=8.
 

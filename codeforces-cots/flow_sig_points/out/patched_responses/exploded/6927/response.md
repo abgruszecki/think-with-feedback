@@ -862,392 +862,104 @@ But for efficiency, since each step only depends on the previous step, we can us
 
 So, the code outline:
 
-MOD = 998244353
+Testing against sample input 1.
 
-n, k = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-max_k = 2 * n
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-# Initialize previous_dp and current_dp as lists of lists of size max_k +1 x 2
+    max_k = 2 * n
 
-prev_dp = [ [0] * 2 for _ in range(max_k + 1) ]
+    # Initialize previous_dp and current_dp as lists of lists of size max_k +1 x 2
 
-if n == 0:
-    # edge case, but n >=1
-    pass
+    prev_dp = [ [0] * 2 for _ in range(max_k + 1) ]
 
-# for i=1
-prev_dp[1][0] = 2  # type 0
-prev_dp[2][1] = 2  # type 1
+    if n == 0:
+        # edge case, but n >=1
+        pass
 
-for i in range(2, n+1):
-    curr_dp = [ [0] * 2 for _ in range(max_k + 1) ]
-    for c_prev in range(0, 2*(i-1)+1):
-        for t_prev in 0, 1:
-            if prev_dp[c_prev][t_prev] == 0:
-                continue
-            if t_prev == 0:
-                # transitions to t_prev=0
-                # to type 0, delta 0 (same color)
-                curr_c = c_prev
-                curr_dp[curr_c][0] = (curr_dp[curr_c][0] + prev_dp[c_prev][t_prev] * 1) % MOD
-                # to type 0, delta +1 (diff color)
-                curr_c = c_prev +1
-                if curr_c <= max_k:
+    # for i=1
+    prev_dp[1][0] = 2  # type 0
+    prev_dp[2][1] = 2  # type 1
+
+    for i in range(2, n+1):
+        curr_dp = [ [0] * 2 for _ in range(max_k + 1) ]
+        for c_prev in range(0, 2*(i-1)+1):
+            for t_prev in 0, 1:
+                if prev_dp[c_prev][t_prev] == 0:
+                    continue
+                if t_prev == 0:
+                    # transitions to t_prev=0
+                    # to type 0, delta 0 (same color)
+                    curr_c = c_prev
                     curr_dp[curr_c][0] = (curr_dp[curr_c][0] + prev_dp[c_prev][t_prev] * 1) % MOD
-                # to type 1, delta +1
-                curr_c = c_prev +1
-                if curr_c <= max_k:
+                    # to type 0, delta +1 (diff color)
+                    curr_c = c_prev +1
+                    if curr_c <= max_k:
+                        curr_dp[curr_c][0] = (curr_dp[curr_c][0] + prev_dp[c_prev][t_prev] * 1) % MOD
+                    # to type 1, delta +1
+                    curr_c = c_prev +1
+                    if curr_c <= max_k:
+                        curr_dp[curr_c][1] = (curr_dp[curr_c][1] + prev_dp[c_prev][t_prev] * 2) % MOD
+                else: # t_prev ==1
+                    # to type 0, delta 0
+                    curr_c = c_prev
+                    curr_dp[curr_c][0] = (curr_dp[curr_c][0] + prev_dp[c_prev][t_prev] * 2) % MOD
+                    # to type 1, delta 0
+                    curr_c = c_prev
                     curr_dp[curr_c][1] = (curr_dp[curr_c][1] + prev_dp[c_prev][t_prev] * 2) % MOD
-            else: # t_prev ==1
-                # to type 0, delta 0
-                curr_c = c_prev
-                curr_dp[curr_c][0] = (curr_dp[curr_c][0] + prev_dp[c_prev][t_prev] * 2) % MOD
-                # to type 1, delta 0
-                curr_c = c_prev
-                curr_dp[curr_c][1] = (curr_dp[curr_c][1] + prev_dp[c_prev][t_prev] * 2) % MOD
-    prev_dp = curr_dp
+        prev_dp = curr_dp
 
-# after processing n columns, sum type 0 and 1 for k components
-answer = (prev_dp[k][0] + prev_dp[k][1]) % MOD
+    # after processing n columns, sum type 0 and 1 for k components
+    answer = (prev_dp[k][0] + prev_dp[k][1]) % MOD
 
-print(answer)
+    print(answer, file=output_stream)
 
-But wait, let's test this code with the examples.
 
-First example:
 
-Input: 3 4 → output 12.
+def test():
+    import io
 
-Let's walk through the steps.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-n=3, k=4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Initialization for i=1:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-prev_dp[1][0] = 2 (type 0, 1 component).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-prev_dp[2][1] = 2 (type 1, 2 components).
+    print('Tests passed 😎')
 
-Now, i=2:
 
-For each c_prev and t_prev:
+if __name__ == '__main__':
+    test()
 
-t_prev=0, c_prev=1:
 
-   transitions to:
+```
 
-   type 0, delta 0 → c=1. Add 2 * 1 = 2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-   type 0, delta +1 → c=2. Add 2 * 1 = 2.
-
-   type 1, delta +1 → c=2. Add 2 * 2 =4.
-
-t_prev=1, c_prev=2:
-
-   transitions to type 0, delta 0 → c=2. Add 2 * 2=4.
-
-   transitions to type 1, delta 0 → c=2. Add 2 * 2=4.
-
-So after i=2:
-
-curr_dp for c=1, type 0: 2.
-
-c=2, type 0: 2 (from type 0 delta 0) + 4 (from type 1 to 0) = 6?
-
-Wait, wait. Let's compute step by step.
-
-i=2:
-
-Loop over c_prev from 0 to 2*(2-1) = 2.
-
-For c_prev in 0,1,2.
-
-But prev_dp is initialized for i=1. prev_dp has non-zero entries at c_prev=1 (type 0) and c_prev=2 (type 1).
-
-So first iteration for c_prev=1, t_prev=0:
-
-prev_dp[1][0] is 2.
-
-t_prev=0:
-
-   transitions:
-
-   to type 0, delta 0: c_curr=1.
-
-   curr_dp[1][0] += 2*1 = 2.
-
-   to type 0, delta+1: c_prev+1=2 → curr_dp[2][0] += 2*1 = 2.
-
-   to type 1, delta+1: c_prev+1=2 → curr_dp[2][1] += 2*2=4.
-
-Next, for c_prev=2, t_prev=1:
-
-prev_dp[2][1] is 2.
-
-t_prev=1:
-
-   transitions to type 0: delta 0, c_curr=2 → curr_dp[2][0] += 2*2=4.
-
-   transitions to type 1: delta 0, c_curr=2 → curr_dp[2][1] += 2*2=4.
-
-So after processing i=2:
-
-curr_dp[1][0] = 2.
-
-curr_dp[2][0] = 2.
-
-curr_dp[2][0] +=4 → 6?
-
-Wait, no. For t_prev=1, c_prev=2, when transitioning to type 0:
-
-curr_dp[2][0] += 2 * 2 =4.
-
-For t_prev=0, c_prev=1, transitioning to type 0 delta+1 (c_prev+1=2) adds 2 to curr_dp[2][0].
-
-So total curr_dp[2][0] is 2 (from delta 0) plus 4 (from t_prev=1) → 6?
-
-Wait, no. The transitions for t_prev=0, c_prev=1, type 0:
-
-- transition to type 0 delta 0: adds 2 to curr_dp[1][0].
-
-- transition to type 0 delta+1: adds 2 to curr_dp[2][0].
-
-- transition to type 1 delta+1: adds 4 to curr_dp[2][1].
-
-For t_prev=1, c_prev=2:
-
-- transition to type 0: adds 4 to curr_dp[2][0].
-
-- transition to type 1: adds 4 to curr_dp[2][1].
-
-So after i=2:
-
-curr_dp[1][0] = 2.
-
-curr_dp[2][0] = 2 (from t_prev=0) + 4 (from t_prev=1) =6.
-
-curr_dp[2][1] =4 (from t_prev=0) +4 (from t_prev=1) =8.
-
-Also, any other entries are zero.
-
-So prev_dp after i=2 is:
-
-c=1, type 0: 2.
-
-c=2, type 0:6.
-
-c=2, type 1:8.
-
-Now, i=3:
-
-Process each c_prev up to 2*(3-1) =4.
-
-So c_prev can be up to 4.
-
-But in prev_dp after i=2, the possible c_prev are 1, 2, and possibly others but they are zero.
-
-Wait, after i=2, prev_dp for i=2 has entries:
-
-c=1, type0:2.
-
-c=2, type0:6.
-
-c=2, type1:8.
-
-So for i=3, loop over c_prev in 0 to 4.
-
-For each c_prev in 0-4 and t_prev in 0,1:
-
-For example:
-
-c_prev=1, t_prev=0:
-
-prev_dp[1][0] =2.
-
-t_prev=0:
-
-transitions to type0 delta0: add 2*1=2 to curr_dp[1][0].
-
-transitions to type0 delta+1: add 2*1=2 to curr_dp[2][0].
-
-transitions to type1 delta+1: add 2*2=4 to curr_dp[2][1].
-
-c_prev=2, t_prev=0: prev_dp[2][0] =6.
-
-transitions to type0 delta0: add6*1=6 to curr_dp[2][0].
-
-transitions to type0 delta+1: add6*1=6 to curr_dp[3][0].
-
-transitions to type1 delta+1: add6*2=12 to curr_dp[3][1].
-
-c_prev=2, t_prev=1: prev_dp[2][1] =8.
-
-transitions to type0 delta0: add8*2=16 to curr_dp[2][0].
-
-transitions to type1 delta0: add8*2=16 to curr_dp[2][1].
-
-c_prev=3, t_prev=0: prev_dp[3][0] is zero. So skip.
-
-Similarly for other c_prev.
-
-So after processing all c_prev and t_prev for i=3:
-
-curr_dp after i=3:
-
-For each transition:
-
-From c_prev=1, t_prev=0:
-
-- type0 delta0: curr_dp[1][0] +=2 → 2.
-
-- type0 delta+1: curr_dp[2][0] +=2 →2.
-
-- type1 delta+1: curr_dp[2][1] +=4 →4.
-
-From c_prev=2, t_prev=0:
-
-- type0 delta0: curr_dp[2][0] +=6 → 6+6=12 (from previous additions? No, no. For i=3, curr_dp is initially all zeros. So each transition adds to the zero-initialized curr_dp.
-
-Wait, no. curr_dp is initialized to all zeros for each i. So in i=3, processing each c_prev and t_prev adds to the curr_dp.
-
-So for c_prev=2, t_prev=0:
-
-- type0 delta0: curr_dp[2][0] +=6*1 →6.
-
-- type0 delta+1: curr_dp[3][0] +=6*1 →6.
-
-- type1 delta+1: curr_dp[3][1] +=6*2 →12.
-
-For c_prev=2, t_prev=1:
-
-- type0 delta0: curr_dp[2][0] +=8*2 →16.
-
-- type1 delta0: curr_dp[2][1] +=8*2 →16.
-
-So after processing all:
-
-curr_dp[1][0] =2.
-
-curr_dp[2][0] =6 (from c_prev=2, t_prev=0) +16 (from c_prev=2, t_prev=1) →22.
-
-Wait, no. Let me recalculate:
-
-For c_prev=2, t_prev=0:
-
-- transitions to type0 delta0: add6 to curr_dp[2][0].
-
-For c_prev=2, t_prev=1:
-
-- transitions to type0 delta0: add8*2=16 to curr_dp[2][0].
-
-So curr_dp[2][0] is 6 +16 =22.
-
-Similarly:
-
-curr_dp[2][1] has contributions from c_prev=1, t_prev=0 (4) and c_prev=2, t_prev=1 (16).
-
-So curr_dp[2][1] =4 +16=20.
-
-curr_dp[3][0] has 6 (from c_prev=2, t_prev=0 delta+1) and possibly others.
-
-curr_dp[3][1] has 12 (from c_prev=2, t_prev=0 delta+1).
-
-curr_dp[3][0] could also have contributions from other transitions.
-
-Wait, let's proceed step by step.
-
-For i=3:
-
-Processing c_prev=1, t_prev=0:
-
-- type0 delta0: curr_dp[1][0] +=2*1=2.
-
-- type0 delta+1: curr_dp[2][0] +=2*1=2.
-
-- type1 delta+1: curr_dp[2][1] +=2*2=4.
-
-Processing c_prev=2, t_prev=0:
-
-- type0 delta0: curr_dp[2][0] +=6*1=6.
-
-- type0 delta+1: curr_dp[3][0] +=6*1=6.
-
-- type1 delta+1: curr_dp[3][1] +=6*2=12.
-
-Processing c_prev=2, t_prev=1:
-
-- type0 delta0: curr_dp[2][0] +=8*2=16.
-
-- type1 delta0: curr_dp[2][1] +=8*2=16.
-
-Other c_prev are zero.
-
-So after this:
-
-curr_dp[1][0] =2.
-
-curr_dp[2][0] =2 (from c_prev=1) +6 (c_prev=2, t_prev=0) +16 (c_prev=2, t_prev=1) →2+6+16=24.
-
-curr_dp[2][1] =4 (from c_prev=1) +16 (c_prev=2, t_prev=1) →20.
-
-curr_dp[3][0] =6.
-
-curr_dp[3][1] =12.
-
-Also, are there other transitions?
-
-For example, when i=3, and c_prev=3, but prev_dp for c_prev=3 is zero. So no.
-
-So after i=3:
-
-prev_dp for i=3 will have:
-
-curr_dp[1][0] =2.
-
-curr_dp[2][0] =24.
-
-curr_dp[2][1] =20.
-
-curr_dp[3][0] =6.
-
-curr_dp[3][1] =12.
-
-Wait, but what about other c_prev like 3,4? They are zero.
-
-Now, the target k=4.
-
-For i=3, the maximum possible c is 3*2=6.
-
-But in the code, the sum is prev_dp[4][0] + prev_dp[4][1].
-
-But according to the example, the answer is 12.
-
-So after i=3, we need to look for c=4.
-
-But in the current_dp after i=3, what's the value for c=4?
-
-Looking at the transitions during i=3:
-
-Any transitions that contribute to c=4?
-
-Let's see:
-
-For c_prev=3, but in prev_dp after i=2, there are no entries for c_prev=3. So during i=3 processing, c_prev=3 is not processed.
-
-Other possibilities:
-
-For example, from c_prev=2, t_prev=0:
-
-- type0 delta+1: c_prev+1=3 → curr_dp[3][0] +=6*1=6.
-
-No, that's curr_dp[3][0] =6.
-
-From c_prev=3, if there was any value, but there isn't.
-
-So for i=3, the maximum c in curr_dp is 3.
-
-So prev_dp after i=3 has no entries for c=4. So the answer would be 0, which is incorrect.
+```
 
 But the example input 3 4 expects output 12. So there must be a mistake in the code.
 

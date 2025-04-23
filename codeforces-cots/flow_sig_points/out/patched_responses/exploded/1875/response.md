@@ -158,35 +158,82 @@ print(result)
 
 Yes. That should work.
 
-Let's test with the examples.
+Testing against sample input 1.
 
-First example:
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
+    max_b = max(b)
+    min_b = min(b)
+    result = float('inf')
 
-n=2, m=2
+    for i in range(n):
+        current_max = -float('inf')
+        current_min = float('inf')
+        for j in range(n):
+            if j != i:
+                num = a[j]
+                if num > current_max:
+                    current_max = num
+                if num < current_min:
+                    current_min = num
+        option1 = current_max * max_b
+        option2 = current_max * min_b
+        option3 = current_min * max_b
+        option4 = current_min * min_b
+        max_option = max(option1, option2, option3, option4)
+        if max_option < result:
+            result = max_option
 
-a = [20, 18]
+    print(result, file=output_stream)
 
-b = [2,14]
 
-max_b is 14, min_b is 2.
 
-For each i in 0 and 1:
+def test():
+    import io
 
-i=0 (hiding 20):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 3
+-1 0 1 2 3
+-1 0 1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-remaining a is [18]. So max_a_excl is 18, min_a_excl is 18.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Four products:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-18*14=252, 18*2=36, 18*14=252, 18*2=36. Max is 252.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=1 (hiding 18):
+    print('Tests passed 😎')
 
-remaining a is [20]. max and min are 20.
 
-products: 20*14=280, 20*2=40, 20*14=280, 20*2=40. Max is 280.
+if __name__ == '__main__':
+    test()
 
-So the min of 252 and 280 is 252. Which matches the example.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

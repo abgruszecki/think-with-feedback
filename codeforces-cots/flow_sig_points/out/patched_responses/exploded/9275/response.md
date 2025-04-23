@@ -316,57 +316,81 @@ Now, in Python, for each a_i, precompute the set of possible c_i's.
 
 In code:
 
-n, m = map(int, input().split())
-a = list(map(int, input().split()))
-b = list(map(int, input().split()))
+Testing against sample input 1.
 
-pre = []
-for ai in a:
-    s = set()
-    for bj in b:
-        s.add(ai & bj)
-    pre.append(s)
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for mask in range(512):
-    ok = True
-    for s in pre:
-        found = False
-        for c in s:
-            if (c | mask) == mask:
-                found = True
+    pre = []
+    for ai in a:
+        s = set()
+        for bj in b:
+            s.add(ai & bj)
+        pre.append(s)
+
+    for mask in range(512):
+        ok = True
+        for s in pre:
+            found = False
+            for c in s:
+                if (c | mask) == mask:
+                    found = True
+                    break
+            if not found:
+                ok = False
                 break
-        if not found:
-            ok = False
-            break
-    if ok:
-        print(mask)
-        exit()
+        if ok:
+            print(mask, file=output_stream)
+            return
 
-Yes. This should handle all cases.
 
-But wait, the precompute step can be optimized. For example, for each ai, we can create a set of possible c_i's, but in Python, the order of checking in the set is arbitrary. However, since the 'any' function in Python checks elements in arbitrary order (as sets are unordered), but as soon as one element is found, it returns True. So the code is correct.
 
-Another optimization: precompute for each a_i the list of possible c_i's, but using a set removes duplicates. So for example, if multiple b_j's result in the same c_i, it's stored once. This reduces the number of checks per a_i.
+def test():
+    import io
 
-Yes, which is better. Because if there are duplicate c_i's, it's redundant to check them all. So using a set is better.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 6
+1 9 1 9 8 1 0
+1 1 4 5 1 4
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Thus the code is correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Testing the first sample:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-pre[0] for a=2 is {0,2}, for a=6 is {2,4}, etc. When mask=2 is checked, the code will find that:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For each a_i:
+    print('Tests passed 😎')
 
-a_0: 0 | 2 is 2 → yes. 2 | 2 is 2 → yes. So any of them works. So found=True.
 
-a_1: check 2 |2=2, which equals mask. So found=True.
+if __name__ == '__main__':
+    test()
 
-a_2: 0 |2=2, yes. So found=True.
 
-a_3: 0 |2=2, yes. So mask=2 is valid, and printed.
+```
 
-Thus correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 The code should work.
 </think>

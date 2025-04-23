@@ -175,35 +175,133 @@ The length of piles is the answer.
 
 Yes, this code should work.
 
-Testing against the examples.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    x = list(map(int, input_stream.readline().rstrip("\n").split()))
+    x.sort()
+    piles = []
+    for s in x:
+        found = False
+        for i in range(len(piles)):
+            if piles[i] <= s:
+                piles[i] += 1
+                found = True
+                break
+        if not found:
+            piles.append(1)
+    print(len(piles), file=output_stream)
 
-3
 
-0 0 10 → sorted [0,0,10]
 
-Processing 0: piles is empty, append 1 → [1]
+def test():
+    import io
 
-Processing 0: check first pile (1) is >0? No, 1>0 is True. So can't add. So append another 1. Piles [1,1].
-
-Processing 10: check first pile (1). 1 <=10 → yes. increment to 2. So piles becomes [2,1]. The answer is 2.
-
-Sample 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
+0 1 2 3 4
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-0 1 2 3 4 → sorted [0,1,2,3,4]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Process 0 → piles [1]
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-1: check first pile (1) → 1 <=1 → yes. Increment to 2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-2: check pile is 2 → 2 <=2 → yes. increment to 3.
+    print('Tests passed 😎')
 
-3: check pile is 3 → yes. increment to 4.
 
-4: check pile is 4 → yes. increment to 5. So piles [5]. Answer is 1.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    x = list(map(int, input_stream.readline().rstrip("\n").split()))
+    x.sort()
+    piles = []
+    for s in x:
+        found = False
+        for i in range(len(piles)):
+            if piles[i] <= s:
+                piles[i] += 1
+                found = True
+                break
+        if not found:
+            piles.append(1)
+    print(len(piles), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+0 0 0 0
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3: 4 zeros. Each step appends a new pile, leading to 4 piles.
 

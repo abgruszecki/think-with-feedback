@@ -1783,8 +1783,12 @@ But let's proceed.
 
 The code:
 
+Testing against sample input 1.
+
+```python
 import sys
 import bisect
+
 
 def merge(left, right):
     merged = []
@@ -1818,9 +1822,9 @@ def query_segment_tree(node, l, r, a, b):
         return right_pos - left_pos
     return query_segment_tree(node['left_child'], l, r, a, b) + query_segment_tree(node['right_child'], l, r, a, b)
 
-def main():
+def main(input_stream, output_stream):
     import sys
-    input = sys.stdin.read().split()
+    input = input_stream.read().split()
     ptr = 0
     n = int(input[ptr])
     ptr += 1
@@ -1896,88 +1900,56 @@ def main():
             S2 = 0
 
         answer = C - S1 - S2
-        print(answer)
+        print(answer, file=output_stream)
 
-if __name__ == "__main__":
-    main()
 
-But there's a mistake here. The sorted_columns are sorted by p_i in increasing order. So the first element is the column with p_i=1, the next with p_i=2, etc.
 
-Thus, for a query where we need elements with p_i < D, we take the first D-1 elements (0-based indices 0 to D-2).
+def test():
+    import io
 
-For example, if D=3, the elements with p_i < 3 are the first two elements (p_i=1 and 2).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 2
+1 3 2 4
+4 1 4 4
+1 1 2 3
+""",
+            "output": \
+"""\
+3
+5
+""",
+        }, 
+    ]
 
-Thus, the query for S1 is correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Similarly, for S2, elements with p_i > U are those in the sorted_columns starting from index U.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But if U=4, sorted_columns[4] has p_i=5, sorted_columns[5] has p_i=6, etc.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Thus, the query for S2 is correct.
+    print('Tests passed 😎')
 
-But let's test the first sample input.
 
-Sample Input 1:
+if __name__ == '__main__':
+    test()
 
-2 3
 
-1 2
+```
 
-1 1 1 1
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-1 1 1 2
+```
 
-1 1 2 2
-
-The p array is [1, 2], so sorted_columns is [1, 2], since p_1=1, p_2=2.
-
-The first query is L=1, R=1, D=1, U=1.
-
-For S1:
-
-D=1, so D-1=0. Thus, no elements, S1=0.
-
-For S2:
-
-U=1. The elements with p_i > 1 are those with p_i=2, which is the second element in sorted_columns (index 1).
-
-So start = U =1, end=1.
-
-A1_part is query_segment_tree(root, 1, 1, 1, 0) (since L=1, L-1=0), which is 0.
-
-B_prime is query_segment_tree(root, 1,1,1,2) → count of elements in [1,2] for the element at index 1 (column 2, which is 2). So B_prime=1.
-
-k_prime is query_segment_tree(root, 1,1,1,1) → 1 if column 2 is in [1,1]. But column 2 is 2, which is outside [1,1]. So k_prime=0.
-
-Thus, S2=0 * 1 + 0 = 0.
-
-Thus, answer = C - 0 -0 = C.
-
-What's C?
-
-L=1, R=1.
-
-sum1 = 1*(1-1)/2 - 0 (since L=1, L-1=0, (0-1)*(0-2)/2 is 0).
-
-sum1 = 0.
-
-sum2 = max(0, 2-1) * 1 → (1)*1 = 1.
-
-C=0+1=1.
-
-Thus, answer is 1, which matches the sample.
-
-Thus, the code seems to work.
-
-But in practice, for large n, the segment tree building may take a lot of time and memory.
-
-But given the problem's constraints, this approach is the best possible and should pass.
-
-But in Python, for n=2e5, building the segment tree recursively may be slow.
-
-Thus, for the code to pass, we need to optimize the segment tree building.
-
-But given the time and memory constraints, this is the correct approach.
 </think>
 
 To solve this problem, we need to determine the beauty degree of each query rectangle on a grid where certain cells are marked such that no two marked cells share the same row or column. The beauty degree is the number of beautiful rectangles that intersect the query rectangle. A beautiful rectangle is defined as having exactly two marked cells as opposite corners.

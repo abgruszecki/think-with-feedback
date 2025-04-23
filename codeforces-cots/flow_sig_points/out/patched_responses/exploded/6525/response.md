@@ -456,76 +456,104 @@ Now, code:
 
 In Python:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-if n < 3:
-    for _ in range(m):
-        x, y = map(int, input().split())
-    print(-1)
-    exit()
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-# Initialize counts as (n-2) x (n-2) grid
-counts = [[0]*(n-2) for _ in range(n-2)]
+    if n < 3:
+        for _ in range(m):
+            x, y = map(int, input_stream.readline().rstrip("\n").split())
+        print(-1, file=output_stream)
+        return
 
-result = -1
+    # Initialize counts as (n-2) x (n-2) grid
+    counts = [[0]*(n-2) for _ in range(n-2)]
 
-for step in range(1, m+1):
-    x, y = map(int, input().split())
-    # Compute possible i range
-    i_min = max(1, x - 2)
-    i_max = min(x, n - 2)
-    if i_min > i_max:
-        continue  # no possible squares for rows
-    # Compute possible j range
-    j_min = max(1, y - 2)
-    j_max = min(y, n - 2)
-    if j_min > j_max:
-        continue  # no possible squares for columns
-    # Iterate over all possible (i,j)
-    for i in range(i_min, i_max + 1):
-        for j in range(j_min, j_max + 1):
-            # Update counts for this square (i,j)
-            # counts is 0-based, so i-1 and j-1
-            row = i - 1
-            col = j - 1
-            counts[row][col] += 1
-            if counts[row][col] == 9:
-                print(step)
-                exit()
+    result = -1
 
-print(-1)
+    for step in range(1, m+1):
+        x, y = map(int, input_stream.readline().rstrip("\n").split())
+        # Compute possible i range
+        i_min = max(1, x - 2)
+        i_max = min(x, n - 2)
+        if i_min > i_max:
+            continue  # no possible squares for rows
+        # Compute possible j range
+        j_min = max(1, y - 2)
+        j_max = min(y, n - 2)
+        if j_min > j_max:
+            continue  # no possible squares for columns
+        # Iterate over all possible (i,j)
+        for i in range(i_min, i_max + 1):
+            for j in range(j_min, j_max + 1):
+                # Update counts for this square (i,j)
+                # counts is 0-based, so i-1 and j-1
+                row = i - 1
+                col = j - 1
+                counts[row][col] += 1
+                if counts[row][col] == 9:
+                    print(step, file=output_stream)
+                    return
 
-Yes. Let's test this code with the first example.
+    print(-1, file=output_stream)
 
-Sample input 1:
 
-4 11
 
-Then 11 lines of cells. Let's see the steps. The 10th step is when the 10th cell is added.
+def test():
+    import io
 
-In code, for each step from 1 to 11:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 12
+1 1
+1 2
+1 3
+2 2
+2 3
+1 4
+2 4
+3 4
+3 2
+4 2
+4 1
+3 1
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-At step 10, when the cell (3,3) is added.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i_min = max(1, 3-2) =1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i_max = min(3, 4-2) →2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-j_min = max(1,3-2)=1.
+    print('Tests passed 😎')
 
-j_max = min(3,4-2)=2.
 
-So loop i from 1 to 2, j from 1 to 2.
+if __name__ == '__main__':
+    test()
 
-So squares (1,1), (1,2), (2,1), (2,2).
 
-For each of these squares, increment the counts. Suppose after incrementing, one of them reaches 9.
+```
 
-So the code will output 10.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-In the second example, after 12 steps, no square reaches 9, so output is -1.
-
-This code should handle all cases correctly.
+```
 
 Another test case: n=3, m=9, and all 9 cells are in the 3x3 square.
 

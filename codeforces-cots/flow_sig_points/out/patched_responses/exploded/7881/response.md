@@ -722,98 +722,228 @@ But when we copy the dp list, we can use list.copy() or prev = list(dp).
 
 In code:
 
-n, k = map(int, input().split())
-s = input().strip()
+Testing against sample inputs 1, 2.
 
-max_len = n
-dp = [0] * (max_len + 1)
-dp[0] = 1  # empty subsequence
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    s = input_stream.readline().rstrip("\n").strip()
 
-last = dict()  # to keep track of the previous state for each character
+    max_len = n
+    dp = [0] * (max_len + 1)
+    dp[0] = 1  # empty subsequence
 
-for c in s:
-    prev = list(dp)
-    # Update dp for adding c to each subsequence
-    for l in range(max_len, -1, -1):
-        if prev[l] == 0:
-            continue
-        new_l = l + 1
-        if new_l > max_len:
-            continue
-        dp[new_l] += prev[l]
-        if dp[new_l] > k:
-            dp[new_l] = k
-    # Subtract the duplicates if c has been seen before
-    if c in last:
-        prev_last = last[c]
+    last = dict()  # to keep track of the previous state for each character
+
+    for c in s:
+        prev = list(dp)
+        # Update dp for adding c to each subsequence
         for l in range(max_len, -1, -1):
-            if prev_last[l] == 0:
+            if prev[l] == 0:
                 continue
             new_l = l + 1
             if new_l > max_len:
                 continue
-            dp[new_l] -= prev_last[l]
-            if dp[new_l] < 0:
-                dp[new_l] = 0
-    # Cap the values at k
-    for l in range(max_len + 1):
-        if dp[l] > k:
-            dp[l] = k
-    # Save the previous state for this character
-    last[c] = prev
+            dp[new_l] += prev[l]
+            if dp[new_l] > k:
+                dp[new_l] = k
+        # Subtract the duplicates if c has been seen before
+        if c in last:
+            prev_last = last[c]
+            for l in range(max_len, -1, -1):
+                if prev_last[l] == 0:
+                    continue
+                new_l = l + 1
+                if new_l > max_len:
+                    continue
+                dp[new_l] -= prev_last[l]
+                if dp[new_l] < 0:
+                    dp[new_l] = 0
+        # Cap the values at k
+        for l in range(max_len + 1):
+            if dp[l] > k:
+                dp[l] = k
+        # Save the previous state for this character
+        last[c] = prev
 
-# Now compute the total cost
-total_cost = 0
-remaining = k
-for l in range(max_len, -1, -1):
-    cnt = dp[l]
-    take = min(cnt, remaining)
-    if take > 0:
-        total_cost += take * (n - l)
-        remaining -= take
-    if remaining == 0:
-        break
+    # Now compute the total cost
+    total_cost = 0
+    remaining = k
+    for l in range(max_len, -1, -1):
+        cnt = dp[l]
+        take = min(cnt, remaining)
+        if take > 0:
+            total_cost += take * (n - l)
+            remaining -= take
+        if remaining == 0:
+            break
 
-if remaining > 0:
-    print(-1)
-else:
-    print(total_cost)
+    if remaining > 0:
+        print(-1, file=output_stream)
+    else:
+        print(total_cost, file=output_stream)
 
-Wait, but the code in the for loop for processing each character has a loop over l in range(max_len, -1, -1). But for example, for the first character, the prev is [1,0,0,...0]. Then, for l in 4, 3, 2, 1, 0 (assuming n=4). So l=4 is checked first, but prev[4] is 0. Then l=3, etc., until l=0. For l=0, new_l is 1, so dp[1] is increased by 1.
 
-Yes.
 
-Testing this code with the samples:
+def test():
+    import io
 
-Sample 1:
-
-Input:
-
-4 5
-
-asdf
-
-Output is 4. Which matches.
-
-Sample 2:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5 6
-
 aaaaa
+""",
+            "output": \
+"""\
+15
+""",
+        }, 
+        {
+            "input": \
+"""\
+5 7
+aaaaa
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-The code's dp after processing each 'a' would have each length 0-5 as 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So when collecting:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Take 1 (length 5, cost 0), then 1 (4, cost 1), then 1 (3, cost 2), 1 (2, cost3), 1 (1, cost4), 1 (0, cost5). Total 0+1+2+3+4+5=15.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sample 3:
+    print('Tests passed 😎')
 
-k=7, the same string. The code collects 6 subsequences (sum 1 per length 0-5), remaining is 1. So output -1.
 
-Yes.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    s = input_stream.readline().rstrip("\n").strip()
+
+    max_len = n
+    dp = [0] * (max_len + 1)
+    dp[0] = 1  # empty subsequence
+
+    last = dict()  # to keep track of the previous state for each character
+
+    for c in s:
+        prev = list(dp)
+        # Update dp for adding c to each subsequence
+        for l in range(max_len, -1, -1):
+            if prev[l] == 0:
+                continue
+            new_l = l + 1
+            if new_l > max_len:
+                continue
+            dp[new_l] += prev[l]
+            if dp[new_l] > k:
+                dp[new_l] = k
+        # Subtract the duplicates if c has been seen before
+        if c in last:
+            prev_last = last[c]
+            for l in range(max_len, -1, -1):
+                if prev_last[l] == 0:
+                    continue
+                new_l = l + 1
+                if new_l > max_len:
+                    continue
+                dp[new_l] -= prev_last[l]
+                if dp[new_l] < 0:
+                    dp[new_l] = 0
+        # Cap the values at k
+        for l in range(max_len + 1):
+            if dp[l] > k:
+                dp[l] = k
+        # Save the previous state for this character
+        last[c] = prev
+
+    # Now compute the total cost
+    total_cost = 0
+    remaining = k
+    for l in range(max_len, -1, -1):
+        cnt = dp[l]
+        take = min(cnt, remaining)
+        if take > 0:
+            total_cost += take * (n - l)
+            remaining -= take
+        if remaining == 0:
+            break
+
+    if remaining > 0:
+        print(-1, file=output_stream)
+    else:
+        print(total_cost, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 100
+ajihiushda
+""",
+            "output": \
+"""\
+233
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case: input 2 with k=5. The code would sum 0+1+2+3+4=10? Wait no. Wait, the code processes l from 5 down to 0. For k=5, take 1 from 5, 1 from4, 1 from3, 1 from2, 1 from1. Sum 0 +1+2+3+4=10. But in that case, remaining would be 0.
 

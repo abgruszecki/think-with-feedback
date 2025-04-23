@@ -73,40 +73,135 @@ result = min(total, c4)
 
 Yes.
 
-Now, let's test with the examples.
+Testing against sample input 1.
 
-First example:
+```python
+def main(input_stream, output_stream):
+    c1, c2, c3, c4 = map(int, input_stream.readline().rstrip("\n").split())
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-Input:
-1 3 7 19
-2 3
-2 5
-4 4 4
+    sum_bus = sum(min(ride * c1, c2) for ride in a if ride > 0)
+    sum_bus = min(sum_bus, c3)
 
-For buses: 2 and 5 rides.
+    sum_trolley = sum(min(ride * c1, c2) for ride in b if ride > 0)
+    sum_trolley = min(sum_trolley, c3)
 
-For each bus:
-First bus: min(2*1=2, 3) → 2
-Second bus: min(5*1=5, 3) → 3
-sum_bus = 2+3=5. Compare with c3=7 → 5. So sum_bus is 5.
+    total = sum_bus + sum_trolley
+    print(min(total, c4), file=output_stream)
 
-For trolleys: 4,4,4. Each is min(4*1=4, 3) → 3 each. Sum is 3*3=9. Compare to c3=7 → 7. So sum_trolley=7.
 
-Total is 5+7=12. Compare with c4=19 → 12. So output is 12. Correct.
 
-Second example:
+def test():
+    import io
 
-Input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4 3 2 1
 1 3
 798
 1 2 3
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-Buses: one bus with 798 rides. So per bus min(798*4=3192 vs 3) → 3. sum_bus is 3, compare to c3=2. So sum_bus is 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Trolleys: three trolleys. Rides are 1,2,3. Each min(4*1=4 vs 3) → 3 each. Sum is 3*3=9. Compare to c3=2. So sum_trolley is 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Total sum is 2+2=4. Compare to c4=1. So min is 1. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    c1, c2, c3, c4 = map(int, input_stream.readline().rstrip("\n").split())
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    sum_bus = sum(min(ride * c1, c2) for ride in a if ride > 0)
+    sum_bus = min(sum_bus, c3)
+
+    sum_trolley = sum(min(ride * c1, c2) for ride in b if ride > 0)
+    sum_trolley = min(sum_trolley, c3)
+
+    total = sum_bus + sum_trolley
+    print(min(total, c4), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+100 100 8 100
+3 5
+7 94 12
+100 1 47 0 42
+""",
+            "output": \
+"""\
+16
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

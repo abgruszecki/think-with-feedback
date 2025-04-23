@@ -81,66 +81,77 @@ Wait, in Python, if the array is 0-based, then the first two elements are index 
 
 So code outline:
 
-n = int(input())
-a = list(map(int, input().split()))
-if n < 3:
-    print(0)
-    exit()
+Testing against sample input 1.
 
-count = 0
-max1, max2 = sorted([a[0], a[1]], reverse=True)
-# Wait, but what if a[0] is less than a[1]? sorted in reverse gives max1 = a[1], max2 = a[0]
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    if n < 3:
+        print(0, file=output_stream)
+        return
 
-for i in range(2, n):
-    current = a[i]
-    if current < max1 and current < max2:
-        count +=1
-    # Now update max1 and max2 with current
-    if current > max1:
-        max2 = max1
-        max1 = current
-    elif current > max2:
-        max2 = current
+    count = 0
+    max1, max2 = sorted([a[0], a[1]], reverse=True)
+    # Wait, but what if a[0] is less than a[1]? sorted in reverse gives max1 = a[1], max2 = a[0]
 
-print(count)
+    for i in range(2, n):
+        current = a[i]
+        if current < max1 and current < max2:
+            count +=1
+        # Now update max1 and max2 with current
+        if current > max1:
+            max2 = max1
+            max1 = current
+        elif current > max2:
+            max2 = current
 
-Wait, but this might not work. Let's test with the first example:
+    print(count, file=output_stream)
 
-Sample input 1:
-8
-3 1 4 1 5 9 2 6
 
-The days are 1-8. The bad days are day 4 (a=1) and day7 (a=2). So the count should be 2.
 
-Let's see how the code processes this.
+def test():
+    import io
 
-Initial a is [3,1,4,1,5,9,2,6]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 1 1 1 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-First, max1 and max2 are sorted([3,1], reverse=True) => 3,1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Now, process i=2 (third element, value 4):
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Check 4 < 3 and 1? No. So count remains 0. Then, 4 is larger than max1 (3). So max1 becomes 4, max2 becomes 3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Next, i=3 (fourth element, value 1):
+    print('Tests passed 😎')
 
-Check 1 < 4 and 3? Yes. So count becomes 1. Then, 1 is not larger than max1 or max2. So no change.
 
-i=4 (fifth element, value 5):
+if __name__ == '__main__':
+    test()
 
-Check 5 <4 and 3? No. Update max1 to 5, max2 to4.
 
-i=5 (sixth element, value 9):
+```
 
-Check 9 <5 and4? No. Update max1 to9, max2 to5.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=6 (seventh element, value2):
-
-Check 2 <9 and5? Yes. count becomes 2. Then, 2 is not larger than any.
-
-i=7 (eighth element, value6): check 6 <9 and5? 6 is not less than 5. So no. Update max2 to6 (since 6>5). So new max1=9, max2=6.
-
-Final count is 2. Which matches the sample. So code works here.
+```
 
 Another sample: input 5 all 1s. Then max1 and max2 are 1 and1. For each i >=2 (third element), check if 1 <1 and1? No. So count remains 0. Correct.
 

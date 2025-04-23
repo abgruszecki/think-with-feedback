@@ -1419,33 +1419,121 @@ Thus, the code correctly sets current_v to0.
 
 Thus, the code for the first element is correct.
 
-Now, let's test the first sample input.
+Testing against sample input 1.
 
-Sample input1:
+```python
+import sys
 
-n=5, m=3, a=[0,0,0,1,2], t=0.
 
-First element's low=0, high=0. So current_v=0.
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
+    
+    if n == 0:
+        print(0, file=output_stream)
+        return
+    
+    def is_possible(t):
+        # Handle the first element
+        first = a[0]
+        low = first
+        high = (first + t) % m
+        
+        if low <= high:
+            current_v = low
+        else:
+            current_v = 0  # minimal possible in [0, high]
+            # Check if 0 is within the possible values
+            if not (current_v <= high):
+                return False
+        
+        prev_v = current_v
+        
+        for num in a[1:]:
+            low = num
+            high_val = (num + t) % m
+            
+            if low <= high_val:
+                if prev_v > high_val:
+                    return False
+                current_v = max(prev_v, low)
+                prev_v = current_v
+            else:
+                # Check upper range first
+                if prev_v >= low:
+                    current_v = prev_v
+                else:
+                    if high_val >= prev_v:
+                        current_v = prev_v
+                    else:
+                        current_v = low
+                        if current_v < prev_v:
+                            return False
+                # Check if current_v is within the allowed intervals
+                if not (current_v >= low or current_v <= high_val):
+                    return False
+                prev_v = current_v
+        
+        return True
+    
+    left = 0
+    right = m - 1
+    answer = m  # Initialize with a value larger than possible
+    
+    while left <= right:
+        mid = (left + right) // 2
+        if is_possible(mid):
+            answer = mid
+            right = mid - 1
+        else:
+            left = mid + 1
+    
+    print(answer, file=output_stream)
 
-prev_v=0.
 
-Rest of the elements are processed as before.
 
-All pass. So returns True.
+def test():
+    import io
 
-Another example where the first element's interval is split.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 7
+0 6 1 3 2
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-m=7, a=[6], t=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-First element's low=6, high=0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-current_v=0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Which is in the interval.
+    print('Tests passed 😎')
 
-The check returns True.
 
-But this is correct, since the element can be incremented once (6+1 mod7=0), which is allowed.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, the code is correct.
 

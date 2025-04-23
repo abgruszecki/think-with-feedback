@@ -639,22 +639,75 @@ if x >x1:
 
 print(sum)
 
-That's the code. Let's test it against the samples.
+Testing against sample input 1.
 
-First sample:
+```python
+def main(input_stream, output_stream):
+    x, y, z = map(int, input_stream.readline().rstrip("\n").split())
+    x1, y1, z1 = map(int, input_stream.readline().rstrip("\n").split())
+    a1, a2, a3, a4, a5, a6 = map(int, input_stream.readline().rstrip("\n").split())
 
-Input:
-2 2 2
-1 1 1
+    total = 0
+    if y < 0:
+        total += a1
+    if y > y1:
+        total += a2
+    if z < 0:
+        total += a3
+    if z > z1:
+        total += a4
+    if x < 0:
+        total += a5
+    if x > x1:
+        total += a6
+
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0 0 10
+3 2 3
 1 2 3 4 5 6
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-y=2>1 → add a2 (2).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-z=2>1 → add a4 (4).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-x=2>1 → add a6 (6).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sum is 2+4+6=12. Correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

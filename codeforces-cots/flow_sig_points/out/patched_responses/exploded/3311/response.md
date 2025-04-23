@@ -424,61 +424,179 @@ So now, the code.
 
 In Python:
 
-s = input().strip()
+Testing against sample input 1.
 
-k = int(input())
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-frequency = {}
+    k = int(input_stream.readline().rstrip("\n"))
 
-for c in s:
+    frequency = {}
 
-    frequency[c] = frequency.get(c,0)+1
+    for c in s:
 
-current_unique = len(frequency)
+        frequency[c] = frequency.get(c,0)+1
 
-n = len(s)
+    current_unique = len(frequency)
 
-if k > 26 or n <k:
+    n = len(s)
 
-    print("impossible")
+    if k > 26 or n <k:
 
-else:
-
-    if current_unique >=k:
-
-        print(0)
+        print("impossible", file=output_stream)
 
     else:
 
-        required_new = k - current_unique
+        if current_unique >=k:
 
-        sum_duplicates = sum( (count-1) for count in frequency.values() )
-
-        if sum_duplicates >= required_new:
-
-            print(required_new)
+            print(0, file=output_stream)
 
         else:
 
-            print("impossible")
+            required_new = k - current_unique
 
-Wait, but the code for sum_duplicates is sum( (count-1) for count in frequency.values() )
+            sum_duplicates = sum( (count-1) for count in frequency.values() )
 
-Which gives the sum of (count-1) for each character.
+            if sum_duplicates >= required_new:
 
-Yes.
+                print(required_new, file=output_stream)
 
-Testing the samples.
+            else:
 
-Sample 1:
+                print("impossible", file=output_stream)
 
-Input: yandex → s has 6 unique characters. k=6. So current_unique >=k → 6 >=6 → output 0.
 
-Sample 2:
 
-Input: yahoo → s is y, a, h, o. current_unique=4. k=5. required_new=1.
+def test():
+    import io
 
-sum_duplicates: o appears 2 times → 2-1=1. others are 1. So sum is 1. required_new=1. sum >= required_new. Output 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+yahoo
+5
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    k = int(input_stream.readline().rstrip("\n"))
+
+    frequency = {}
+
+    for c in s:
+
+        frequency[c] = frequency.get(c,0)+1
+
+    current_unique = len(frequency)
+
+    n = len(s)
+
+    if k > 26 or n <k:
+
+        print("impossible", file=output_stream)
+
+    else:
+
+        if current_unique >=k:
+
+            print(0, file=output_stream)
+
+        else:
+
+            required_new = k - current_unique
+
+            sum_duplicates = sum( (count-1) for count in frequency.values() )
+
+            if sum_duplicates >= required_new:
+
+                print(required_new, file=output_stream)
+
+            else:
+
+                print("impossible", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+google
+7
+""",
+            "output": \
+"""\
+impossible
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3: google → len=6. k=7. len <7 → impossible.
 

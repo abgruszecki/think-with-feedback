@@ -101,11 +101,127 @@ else:
 
 Yes. So that's the code.
 
-Testing the examples:
+Testing against sample input 1.
 
-First example input:40047 → digits are 4,0,0,4,7. So count is 3 (digits 4,4,7). 3 is not made of 4/7. So output NO.
+```python
+def main(input_stream, output_stream):
+    n = input_stream.readline().rstrip("\n").strip()
+    count = sum(1 for c in n if c in {'4', '7'})
+    if count == 0:
+        print("NO", file=output_stream)
+    else:
+        s = str(count)
+        for c in s:
+            if c not in {'4', '7'}:
+                print("NO", file=output_stream)
+                break
+        else:
+            print("YES", file=output_stream)
 
-Second example:7747774 → count is 7 digits (all 7s except the last 4). So count is 7. So output YES.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7747774
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = input_stream.readline().rstrip("\n").strip()
+    count = sum(1 for c in n if c in {'4', '7'})
+    if count == 0:
+        print("NO", file=output_stream)
+    else:
+        s = str(count)
+        for c in s:
+            if c not in {'4', '7'}:
+                print("NO", file=output_stream)
+                break
+        else:
+            print("YES", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1000000000000000000
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:1e18 → digits are 1 followed by 18 zeros. No 4 or7. So count is 0 → output NO.
 
@@ -127,11 +243,76 @@ Read the input as a string. Then count the 4s and 7s. Then check if the count is
 
 Edge cases:
 
-Case 1: n is 4 → count is 1. 1 is not 4/7. So output NO.
+Testing against sample inputs 1, 2.
 
-Case 2: n is 7 → count is 1. Output NO.
+```python
+def main(input_stream, output_stream):
+    n = input_stream.readline().rstrip("\n").strip()
+    count = sum(1 for c in n if c in {'4', '7'})
+    if count == 0:
+        print("NO", file=output_stream)
+    else:
+        s = str(count)
+        for c in s:
+            if c not in {'4', '7'}:
+                print("NO", file=output_stream)
+                break
+        else:
+            print("YES", file=output_stream)
 
-Wait, no. Wait, count is 1. Then the count is 1. So the code converts it to string '1', which has a '1' → not 4 or7. So output NO. So in that case, the answer is NO. But according to the problem statement, the count of lucky digits is 1. But 1 is not a lucky number. So output NO.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7747774
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+        {
+            "input": \
+"""\
+1000000000000000000
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: n is 44 → count is 2. '2' is not 4/7. So output NO.
 

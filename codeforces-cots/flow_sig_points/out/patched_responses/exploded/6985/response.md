@@ -320,41 +320,141 @@ Yes.
 
 So code:
 
-s = input().strip()
+Testing against sample input 1.
 
-n = len(s)
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-prefix_lower = [0]*(n+1)
-for i in range(n):
-    prefix_lower[i+1] = prefix_lower[i] + (1 if s[i].islower() else 0)
+    n = len(s)
 
-suffix_upper = [0]*(n+1)
-for i in range(n-1, -1, -1):
-    suffix_upper[i] = suffix_upper[i+1] + (1 if s[i].isupper() else 0)
+    prefix_lower = [0]*(n+1)
+    for i in range(n):
+        prefix_lower[i+1] = prefix_lower[i] + (1 if s[i].islower() else 0)
 
-min_changes = float('inf')
-for k in range(n+1):
-    current = prefix_lower[k] + suffix_upper[k]
-    if current < min_changes:
-        min_changes = current
+    suffix_upper = [0]*(n+1)
+    for i in range(n-1, -1, -1):
+        suffix_upper[i] = suffix_upper[i+1] + (1 if s[i].isupper() else 0)
 
-print(min_changes)
+    min_changes = float('inf')
+    for k in range(n+1):
+        current = prefix_lower[k] + suffix_upper[k]
+        if current < min_changes:
+            min_changes = current
 
-Yes, this should work.
+    print(min_changes, file=output_stream)
 
-Testing the first example:
 
-Sample Input 1:
 
-PRuvetSTAaYA → output 5.
+def test():
+    import io
 
-As we saw, split at k=2 gives sum 0+5=5.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+OYPROSTIYAOPECHATALSYAPRIVETSTASYA
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Sample Input 2:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-OYPROSTIYAOPECHATALSYAPRIVETSTASYA → output 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-This is because all uppercase letters are already followed by lowercase. Or perhaps the entire string is uppercase followed by lowercase. So the split is at the end of the uppercase part. So no changes needed.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    n = len(s)
+
+    prefix_lower = [0]*(n+1)
+    for i in range(n):
+        prefix_lower[i+1] = prefix_lower[i] + (1 if s[i].islower() else 0)
+
+    suffix_upper = [0]*(n+1)
+    for i in range(n-1, -1, -1):
+        suffix_upper[i] = suffix_upper[i+1] + (1 if s[i].isupper() else 0)
+
+    min_changes = float('inf')
+    for k in range(n+1):
+        current = prefix_lower[k] + suffix_upper[k]
+        if current < min_changes:
+            min_changes = current
+
+    print(min_changes, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+helloworld
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample Input 3:
 

@@ -69,45 +69,69 @@ But in code, writing the entire string is acceptable.
 
 So code:
 
-s = input().strip()
+Testing against sample input 1.
 
-unique = set()
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-n = len(s)
+    unique = set()
 
-for i in range(n + 1):
+    n = len(s)
 
-    for c in 'abcdefghijklmnopqrstuvwxyz':
+    for i in range(n + 1):
 
-        new_s = s[:i] + c + s[i:]
+        for c in 'abcdefghijklmnopqrstuvwxyz':
 
-        unique.add(new_s)
+            new_s = s[:i] + c + s[i:]
 
-print(len(unique))
+            unique.add(new_s)
 
-Yes. This code will handle all cases correctly.
+    print(len(unique), file=output_stream)
 
-Let's test the first example:
 
-Input is 'a'. For i in 0 and 1:
 
-When i=0:
+def test():
+    import io
 
-new_s is '' + c + 'a' → c + 'a'
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+hi
+""",
+            "output": \
+"""\
+76
+""",
+        }, 
+    ]
 
-For c from a to z. So all possible two-letter strings starting with the character c, followed by 'a'. Wait, no: when inserting at position 0, the original string is 'a', so inserting c at 0 gives c followed by a. So for example, c is 'a' → 'aa'.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-When i=1, inserting at the end: 'a' + c. So inserting 'a' here gives 'aa' again.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So for all c, inserting at i=0 and i=1 gives c followed by 'a' and 'a' followed by c. So for c != 'a', these are different. But for c='a', both insertions result in 'aa'. So in the set, there's only one 'aa'.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So the total is 26 letters for each insertion position, but duplicates when c is inserted in multiple positions and creates the same string.
+    print('Tests passed 😎')
 
-In the first example, inserting 'a' in positions 0 and 1 gives same string. So for 'a', the two possibilities are duplicates. All other letters have insertions in two positions that create different strings. For example, inserting 'b' at 0 gives 'ba', inserting at 1 gives 'ab' → two distinct strings.
 
-So the total is (25 letters * 2 insertions) + 1 (for 'a' inserted once in the set). 25*2=50, plus 1 → 51. Which matches the example.
+if __name__ == '__main__':
+    test()
 
-So the code works.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: 'hi' → output 76. Let's see.
 

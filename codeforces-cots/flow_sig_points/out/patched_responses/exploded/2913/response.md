@@ -325,81 +325,101 @@ Now, let's write the code.
 
 First, read the input.
 
-s = input().strip()
+Testing against sample input 1.
 
-n = len(s)
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-if n == 1:
+    n = len(s)
 
-    print(10)
+    if n == 1:
 
-else:
+        print(10, file=output_stream)
 
-    prev_counts = [1] * 10
+    else:
 
-    for i in range(1, n):
+        prev_counts = [1] * 10
 
-        m = int(s[i])
+        for i in range(1, n):
 
-        current_counts = [0] * 10
+            m = int(s[i])
 
-        for prev_digit in range(10):
+            current_counts = [0] * 10
 
-            cnt = prev_counts[prev_digit]
+            for prev_digit in range(10):
 
-            if cnt == 0:
+                cnt = prev_counts[prev_digit]
 
-                continue
+                if cnt == 0:
 
-            sum_val = m + prev_digit
+                    continue
 
-            if sum_val % 2 == 0:
+                sum_val = m + prev_digit
 
-                curr = sum_val // 2
+                if sum_val % 2 == 0:
 
-                current_counts[curr] += cnt
+                    curr = sum_val // 2
 
-            else:
+                    current_counts[curr] += cnt
 
-                curr1 = sum_val // 2
+                else:
 
-                curr2 = curr1 + 1
+                    curr1 = sum_val // 2
 
-                current_counts[curr1] += cnt
+                    curr2 = curr1 + 1
 
-                current_counts[curr2] += cnt
+                    current_counts[curr1] += cnt
 
-        prev_counts = current_counts
+                    current_counts[curr2] += cnt
 
-    print(sum(prev_counts))
+            prev_counts = current_counts
 
-This should handle all cases.
+        print(sum(prev_counts), file=output_stream)
 
-Let's test the first sample input:
 
-Input '12345' (n=5). The code proceeds:
 
-prev_counts starts as [1,1,..1] (10 ones).
+def test():
+    import io
 
-Processing i=1 (digit 2):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+09
+""",
+            "output": \
+"""\
+15
+""",
+        }, 
+    ]
 
-for each prev_digit (0-9):
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum_val = 2 + prev_digit.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-If even, then current digit is sum_val/2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Else, two options.
+    print('Tests passed 😎')
 
-For example, prev_digit=9: sum_val=11 → odd. So current digits 5 and 6. So current_counts[5] +=1 and current_counts[6] +=1.
 
-After processing all digits for i=1 (second digit in the beloved's number), prev_counts is the current_counts.
+if __name__ == '__main__':
+    test()
 
-This repeats for each subsequent digit.
 
-Finally, sum all the elements in prev_counts, which is 48.
+```
 
-Yes, the code should output that.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case: input '09', output 15. The code correctly handles it.
 

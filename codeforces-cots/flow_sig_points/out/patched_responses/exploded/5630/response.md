@@ -1671,51 +1671,140 @@ print(answer)
 
 But this may not work because the binary search may not find the correct t.
 
-But let's test this with the first sample input.
+Testing against sample input 1.
 
-Sample input 1:
+```python
+def main(input_stream, output_stream):
+    a, b, w, x, c = map(int, input_stream.readline().rstrip("\n").split())
 
-4 2 3 1 6
+    if c <= a:
+        print(0, file=output_stream)
+        return
 
-a=4, b=2, w=3, x=1, c=6.
+    steps_initial = (b // x) + 1
+    new_b_initial = (b % x) + (w - x)
 
-Initial steps_initial = (2//1) +1 =2+1=3 steps? Wait, no.
+    seen = {}
+    steps_list = []
+    current_b = new_b_initial
+    seen[current_b] = 0
 
-Wait, initial steps_initial is the steps until the first a decrease.
+    cycle_found = False
+    pre_cycle_steps_list = []
+    cycle_steps_list = []
+    cycle_start_idx = 0
+    pre_cycle_steps = 0
+    pre_cycle_decreases = 0
+    cycle_steps = 0
+    cycle_decreases = 0
 
-initial_b = 2.
+    while True:
+        s = (current_b // x) + 1
+        steps_list.append(s)
+        current_b = (current_b % x) + (w - x)
+        if current_b in seen:
+            cycle_start_idx = seen[current_b]
+            pre_cycle_steps_list = steps_list[:cycle_start_idx]
+            cycle_steps_list = steps_list[cycle_start_idx:]
+            pre_cycle_decreases = len(pre_cycle_steps_list)
+            pre_cycle_steps = sum(pre_cycle_steps_list)
+            cycle_decreases = len(cycle_steps_list)
+            cycle_steps = sum(cycle_steps_list)
+            break
+        else:
+            seen[current_b] = len(steps_list)
 
-In each step:
+    def compute_k(t):
+        if t < steps_initial:
+            return 0
+        k = 1
+        remaining = t - steps_initial
+        sum_pre = 0
+        cnt_pre = 0
+        for s in pre_cycle_steps_list:
+            if sum_pre + s <= remaining:
+                sum_pre += s
+                cnt_pre += 1
+            else:
+                break
+        k += cnt_pre
+        remaining -= sum_pre
+        if remaining <= 0:
+            return k
+        full_cycles = remaining // cycle_steps
+        k += full_cycles * cycle_decreases
+        remaining -= full_cycles * cycle_steps
+        if remaining <= 0:
+            return k
+        sum_cycle = 0
+        cnt_cycle = 0
+        for s in cycle_steps_list:
+            if sum_cycle + s <= remaining:
+                sum_cycle += s
+                cnt_cycle += 1
+            else:
+                break
+        k += cnt_cycle
+        return k
 
-Step 1: subtract x=1 → b=1. Steps_initial is (2//1)+1=2+1=3 steps? Wait, no.
+    low = 0
+    high = 10**18
+    answer = high
 
-Wait, steps_initial is (b //x) +1 → 2//1 =2 → steps_initial=3.
+    while low <= high:
+        mid = (low + high) // 2
+        k = compute_k(mid)
+        if c - mid <= a - k:
+            answer = mid
+            high = mid - 1
+        else:
+            low = mid + 1
 
-But in 3 steps:
+    print(answer, file=output_stream)
 
-Step 1: b=2-1=1.
 
-Step 2: b=1-1=0.
 
-Step 3: b=0 <x=1 → a decreases by 1.
+def test():
+    import io
 
-Yes, steps_initial is 3 steps.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 2 3 1 7
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-But in the first sample input, the output is 2. This suggests that after 2 steps, Alexander's c is 6-2=4, and Arthur's a is 4-0=4. So 4 <=4, hence the answer is 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But according to the code, when t=2, compute_k(2):
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-t=2 < steps_initial=3 → k=0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So condition is 6-2=4 <=4-0=4 → yes.
+    print('Tests passed 😎')
 
-Thus, the answer is 2.
 
-But the code's binary search will find this.
+if __name__ == '__main__':
+    test()
 
-The code's binary search will check mid=0, then mid=5e17, etc., but eventually, when mid=2, compute_k(2) returns 0, and the condition is true.
 
-Thus, the code would correctly return 2.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample input is the fourth example:
 

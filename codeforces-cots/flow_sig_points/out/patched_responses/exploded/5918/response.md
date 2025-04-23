@@ -430,67 +430,113 @@ But since the problem requires to process the input and output each charge immed
 
 So the code outline:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n = int(input())
 
-t = [int(input()) for _ in range(n)]
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-dp = [0] * n
+    t = [int(input_stream.readline().rstrip("\n")) for _ in range(n)]
 
-for i in range(n):
+    dp = [0] * n
 
-    current_time = t[i]
+    for i in range(n):
 
-    option1 = (dp[i-1] if i >0 else 0) + 20
+        current_time = t[i]
 
-    # compute 90 option
+        option1 = (dp[i-1] if i >0 else 0) + 20
 
-    t_start_90 = current_time -89
+        # compute 90 option
 
-    j_90 = bisect.bisect_left(t, t_start_90, 0, i+1)
+        t_start_90 = current_time -89
 
-    cost_90 = (dp[j_90-1] if j_90 >0 else 0) +50
+        j_90 = bisect.bisect_left(t, t_start_90, 0, i+1)
 
-    # compute day option
+        cost_90 = (dp[j_90-1] if j_90 >0 else 0) +50
 
-    t_start_day = current_time -1439
+        # compute day option
 
-    j_day = bisect.bisect_left(t, t_start_day, 0, i+1)
+        t_start_day = current_time -1439
 
-    cost_day = (dp[j_day-1] if j_day>0 else 0) +120
+        j_day = bisect.bisect_left(t, t_start_day, 0, i+1)
 
-    # compute minimal cost
+        cost_day = (dp[j_day-1] if j_day>0 else 0) +120
 
-    dp[i] = min(option1, cost_90, cost_day)
+        # compute minimal cost
 
-    # compute charge
+        dp[i] = min(option1, cost_90, cost_day)
 
-    charge = dp[i] - (dp[i-1] if i>0 else 0)
+        # compute charge
 
-    print(charge)
+        charge = dp[i] - (dp[i-1] if i>0 else 0)
 
-Yes.
+        print(charge, file=output_stream)
 
-Testing this code on the first sample:
 
-Sample Input 1:
 
-3
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 10
-
+13
+45
+46
+60
+103
+115
+126
+150
+256
+516
+""",
+            "output": \
+"""\
 20
+20
+10
+0
+20
+0
+0
+20
+20
+10
+""",
+        }, 
+    ]
 
-30
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The code would generate dp[0] =20, charge 20.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-dp[1] =40, charge 20.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-dp[2] =50, charge 10.
+    print('Tests passed 😎')
 
-Which matches.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case from sample 2:
 

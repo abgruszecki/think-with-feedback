@@ -699,69 +699,548 @@ print(max_answer)
 
 But need to test this code.
 
-Now, let's test the first sample input:
+Testing against sample input 1.
 
-Sample 1:
+```python
+import sys
+from collections import defaultdict
 
-Input:
 
-13
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    u = list(map(int, input_stream.readline().split()))
+    
+    count = defaultdict(int)
+    freq_count = defaultdict(int)
+    max_answer = 0
+    
+    for i in range(n):
+        color = u[i]
+        prev = count[color]
+        
+        if prev in freq_count:
+            freq_count[prev] -= 1
+            if freq_count[prev] == 0:
+                del freq_count[prev]
+        
+        new = prev + 1
+        count[color] = new
+        freq_count[new] += 1
+        
+        x = i + 1
+        valid = False
+        
+        # Case 1: All elements have frequency 1
+        if len(freq_count) == 1:
+            key = next(iter(freq_count))
+            if key == 1 and freq_count[key] == x:
+                valid = True
+        else:
+            # Case 2: Exactly one element with frequency 1, others same
+            if 1 in freq_count and freq_count[1] == 1:
+                if len(freq_count) == 2:
+                    other_freq = next(k for k in freq_count if k != 1)
+                    if 1 + other_freq * (freq_count[other_freq]) == x:
+                        valid = True
+            # Case 3: One element with max frequency, others one less
+            if not valid and len(freq_count) <= 2:
+                max_freq = max(freq_count.keys())
+                if freq_count[max_freq] == 1:
+                    remaining = max_freq - 1
+                    sum_total = max_freq + remaining * freq_count.get(remaining, 0)
+                    if sum_total == x:
+                        valid = True
+        
+        if valid:
+            max_answer = max(max_answer, x)
+    
+    print(max_answer, file=output_stream)
 
-1 1 1 2 2 2 3 3 3 4 4 4 5
 
-After processing the 13th day (index 12), the color is 5.
 
-count for 5 becomes 1.
+def test():
+    import io
 
-counts:
-
-1:3, 2:3, 3:3,4:3,5:1.
-
-freq_count: {3:4, 1:1}
-
-Check case1: no (len is 2).
-
-case2: 1 is present once. len is 2. other_freq is3.
-
-1 +3*4=1+12=13=x. So valid. So case2 applies. So x=13 is valid.
-
-Sample 2:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
-
 10 100 20 200 1
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-After 5 days:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-each count is 1. freq_count {1:5}.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-case1: len is 1, key is 1, and value is5. x=5. So yes.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sample3:
+    print('Tests passed 😎')
 
-Input 1, output 1. case1.
 
-Sample4:
+if __name__ == '__main__':
+    test()
 
-Input:7
 
-3 2 1 1 4 5 1 → output 6.
+```
 
-At x=6, processing up to index5:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-counts are:
+```
 
-3:1, 2:1,1:2,4:1,5:1 → freq_count {1:4, 2:1}.
+Testing against sample inputs 1, 2.
 
-case3:
+```python
+import sys
+from collections import defaultdict
 
-max_freq is2. freq_count[2] is1.
 
-remaining is1.
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    u = list(map(int, input_stream.readline().split()))
+    
+    count = defaultdict(int)
+    freq_count = defaultdict(int)
+    max_answer = 0
+    
+    for i in range(n):
+        color = u[i]
+        prev = count[color]
+        
+        if prev in freq_count:
+            freq_count[prev] -= 1
+            if freq_count[prev] == 0:
+                del freq_count[prev]
+        
+        new = prev + 1
+        count[color] = new
+        freq_count[new] += 1
+        
+        x = i + 1
+        valid = False
+        
+        # Case 1: All elements have frequency 1
+        if len(freq_count) == 1:
+            key = next(iter(freq_count))
+            if key == 1 and freq_count[key] == x:
+                valid = True
+        else:
+            # Case 2: Exactly one element with frequency 1, others same
+            if 1 in freq_count and freq_count[1] == 1:
+                if len(freq_count) == 2:
+                    other_freq = next(k for k in freq_count if k != 1)
+                    if 1 + other_freq * (freq_count[other_freq]) == x:
+                        valid = True
+            # Case 3: One element with max frequency, others one less
+            if not valid and len(freq_count) <= 2:
+                max_freq = max(freq_count.keys())
+                if freq_count[max_freq] == 1:
+                    remaining = max_freq - 1
+                    sum_total = max_freq + remaining * freq_count.get(remaining, 0)
+                    if sum_total == x:
+                        valid = True
+        
+        if valid:
+            max_answer = max(max_answer, x)
+    
+    print(max_answer, file=output_stream)
 
-sum is 2 +1*4=6=x. So valid. So case3.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+10 100 20 200 1
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+        {
+            "input": \
+"""\
+1
+100000
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import sys
+from collections import defaultdict
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    u = list(map(int, input_stream.readline().split()))
+    
+    count = defaultdict(int)
+    freq_count = defaultdict(int)
+    max_answer = 0
+    
+    for i in range(n):
+        color = u[i]
+        prev = count[color]
+        
+        if prev in freq_count:
+            freq_count[prev] -= 1
+            if freq_count[prev] == 0:
+                del freq_count[prev]
+        
+        new = prev + 1
+        count[color] = new
+        freq_count[new] += 1
+        
+        x = i + 1
+        valid = False
+        
+        # Case 1: All elements have frequency 1
+        if len(freq_count) == 1:
+            key = next(iter(freq_count))
+            if key == 1 and freq_count[key] == x:
+                valid = True
+        else:
+            # Case 2: Exactly one element with frequency 1, others same
+            if 1 in freq_count and freq_count[1] == 1:
+                if len(freq_count) == 2:
+                    other_freq = next(k for k in freq_count if k != 1)
+                    if 1 + other_freq * (freq_count[other_freq]) == x:
+                        valid = True
+            # Case 3: One element with max frequency, others one less
+            if not valid and len(freq_count) <= 2:
+                max_freq = max(freq_count.keys())
+                if freq_count[max_freq] == 1:
+                    remaining = max_freq - 1
+                    sum_total = max_freq + remaining * freq_count.get(remaining, 0)
+                    if sum_total == x:
+                        valid = True
+        
+        if valid:
+            max_answer = max(max_answer, x)
+    
+    print(max_answer, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+100000
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample inputs 1, 3, 4.
+
+```python
+import sys
+from collections import defaultdict
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    u = list(map(int, input_stream.readline().split()))
+    
+    count = defaultdict(int)
+    freq_count = defaultdict(int)
+    max_answer = 0
+    
+    for i in range(n):
+        color = u[i]
+        prev = count[color]
+        
+        if prev in freq_count:
+            freq_count[prev] -= 1
+            if freq_count[prev] == 0:
+                del freq_count[prev]
+        
+        new = prev + 1
+        count[color] = new
+        freq_count[new] += 1
+        
+        x = i + 1
+        valid = False
+        
+        # Case 1: All elements have frequency 1
+        if len(freq_count) == 1:
+            key = next(iter(freq_count))
+            if key == 1 and freq_count[key] == x:
+                valid = True
+        else:
+            # Case 2: Exactly one element with frequency 1, others same
+            if 1 in freq_count and freq_count[1] == 1:
+                if len(freq_count) == 2:
+                    other_freq = next(k for k in freq_count if k != 1)
+                    if 1 + other_freq * (freq_count[other_freq]) == x:
+                        valid = True
+            # Case 3: One element with max frequency, others one less
+            if not valid and len(freq_count) <= 2:
+                max_freq = max(freq_count.keys())
+                if freq_count[max_freq] == 1:
+                    remaining = max_freq - 1
+                    sum_total = max_freq + remaining * freq_count.get(remaining, 0)
+                    if sum_total == x:
+                        valid = True
+        
+        if valid:
+            max_answer = max(max_answer, x)
+    
+    print(max_answer, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+10 100 20 200 1
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+        {
+            "input": \
+"""\
+7
+3 2 1 1 4 5 1
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+        {
+            "input": \
+"""\
+6
+1 1 1 2 2 2
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+import sys
+from collections import defaultdict
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    u = list(map(int, input_stream.readline().split()))
+    
+    count = defaultdict(int)
+    freq_count = defaultdict(int)
+    max_answer = 0
+    
+    for i in range(n):
+        color = u[i]
+        prev = count[color]
+        
+        if prev in freq_count:
+            freq_count[prev] -= 1
+            if freq_count[prev] == 0:
+                del freq_count[prev]
+        
+        new = prev + 1
+        count[color] = new
+        freq_count[new] += 1
+        
+        x = i + 1
+        valid = False
+        
+        # Case 1: All elements have frequency 1
+        if len(freq_count) == 1:
+            key = next(iter(freq_count))
+            if key == 1 and freq_count[key] == x:
+                valid = True
+        else:
+            # Case 2: Exactly one element with frequency 1, others same
+            if 1 in freq_count and freq_count[1] == 1:
+                if len(freq_count) == 2:
+                    other_freq = next(k for k in freq_count if k != 1)
+                    if 1 + other_freq * (freq_count[other_freq]) == x:
+                        valid = True
+            # Case 3: One element with max frequency, others one less
+            if not valid and len(freq_count) <= 2:
+                max_freq = max(freq_count.keys())
+                if freq_count[max_freq] == 1:
+                    remaining = max_freq - 1
+                    sum_total = max_freq + remaining * freq_count.get(remaining, 0)
+                    if sum_total == x:
+                        valid = True
+        
+        if valid:
+            max_answer = max(max_answer, x)
+    
+    print(max_answer, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+3 2 1 1 4 5 1
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample5:
 
@@ -771,29 +1250,312 @@ At x=5:
 
 counts are1:3, 2:2. freq_count {3:1, 2:1}.
 
-case3: max_freq is3, count is1. remaining is2.
+Testing against sample input 3.
 
-sum 3 +2*1=5. Valid.
+```python
+import sys
+from collections import defaultdict
 
-So code works.
 
-Another test case: x=2, [1,1]. Output 2.
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    u = list(map(int, input_stream.readline().split()))
+    
+    count = defaultdict(int)
+    freq_count = defaultdict(int)
+    max_answer = 0
+    
+    for i in range(n):
+        color = u[i]
+        prev = count[color]
+        
+        if prev in freq_count:
+            freq_count[prev] -= 1
+            if freq_count[prev] == 0:
+                del freq_count[prev]
+        
+        new = prev + 1
+        count[color] = new
+        freq_count[new] += 1
+        
+        x = i + 1
+        valid = False
+        
+        # Case 1: All elements have frequency 1
+        if len(freq_count) == 1:
+            key = next(iter(freq_count))
+            if key == 1 and freq_count[key] == x:
+                valid = True
+        else:
+            # Case 2: Exactly one element with frequency 1, others same
+            if 1 in freq_count and freq_count[1] == 1:
+                if len(freq_count) == 2:
+                    other_freq = next(k for k in freq_count if k != 1)
+                    if 1 + other_freq * (freq_count[other_freq]) == x:
+                        valid = True
+            # Case 3: One element with max frequency, others one less
+            if not valid and len(freq_count) <= 2:
+                max_freq = max(freq_count.keys())
+                if freq_count[max_freq] == 1:
+                    remaining = max_freq - 1
+                    sum_total = max_freq + remaining * freq_count.get(remaining, 0)
+                    if sum_total == x:
+                        valid = True
+        
+        if valid:
+            max_answer = max(max_answer, x)
+    
+    print(max_answer, file=output_stream)
 
-case3: after x=2, counts {1:2}, freq_count {2:1}.
 
-max_freq is2. count is1. remaining is1.
 
-sum is2 +1*0 → 2= x. So valid.
+def test():
+    import io
 
-Thus, code returns 2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+3 2 1 1 4 5 1
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-Another case: x=3, [1,1,2].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-case2: after x=3, 1 is present once (color 2). other_freq is2. 1+2*1=3. So valid.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Yes.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Thus, the code should be correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+import sys
+from collections import defaultdict
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    u = list(map(int, input_stream.readline().split()))
+    
+    count = defaultdict(int)
+    freq_count = defaultdict(int)
+    max_answer = 0
+    
+    for i in range(n):
+        color = u[i]
+        prev = count[color]
+        
+        if prev in freq_count:
+            freq_count[prev] -= 1
+            if freq_count[prev] == 0:
+                del freq_count[prev]
+        
+        new = prev + 1
+        count[color] = new
+        freq_count[new] += 1
+        
+        x = i + 1
+        valid = False
+        
+        # Case 1: All elements have frequency 1
+        if len(freq_count) == 1:
+            key = next(iter(freq_count))
+            if key == 1 and freq_count[key] == x:
+                valid = True
+        else:
+            # Case 2: Exactly one element with frequency 1, others same
+            if 1 in freq_count and freq_count[1] == 1:
+                if len(freq_count) == 2:
+                    other_freq = next(k for k in freq_count if k != 1)
+                    if 1 + other_freq * (freq_count[other_freq]) == x:
+                        valid = True
+            # Case 3: One element with max frequency, others one less
+            if not valid and len(freq_count) <= 2:
+                max_freq = max(freq_count.keys())
+                if freq_count[max_freq] == 1:
+                    remaining = max_freq - 1
+                    sum_total = max_freq + remaining * freq_count.get(remaining, 0)
+                    if sum_total == x:
+                        valid = True
+        
+        if valid:
+            max_answer = max(max_answer, x)
+    
+    print(max_answer, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+3 2 1 1 4 5 1
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import sys
+from collections import defaultdict
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    u = list(map(int, input_stream.readline().split()))
+    
+    count = defaultdict(int)
+    freq_count = defaultdict(int)
+    max_answer = 0
+    
+    for i in range(n):
+        color = u[i]
+        prev = count[color]
+        
+        if prev in freq_count:
+            freq_count[prev] -= 1
+            if freq_count[prev] == 0:
+                del freq_count[prev]
+        
+        new = prev + 1
+        count[color] = new
+        freq_count[new] += 1
+        
+        x = i + 1
+        valid = False
+        
+        # Case 1: All elements have frequency 1
+        if len(freq_count) == 1:
+            key = next(iter(freq_count))
+            if key == 1 and freq_count[key] == x:
+                valid = True
+        else:
+            # Case 2: Exactly one element with frequency 1, others same
+            if 1 in freq_count and freq_count[1] == 1:
+                if len(freq_count) == 2:
+                    other_freq = next(k for k in freq_count if k != 1)
+                    if 1 + other_freq * (freq_count[other_freq]) == x:
+                        valid = True
+            # Case 3: One element with max frequency, others one less
+            if not valid and len(freq_count) <= 2:
+                max_freq = max(freq_count.keys())
+                if freq_count[max_freq] == 1:
+                    remaining = max_freq - 1
+                    sum_total = max_freq + remaining * freq_count.get(remaining, 0)
+                    if sum_total == x:
+                        valid = True
+        
+        if valid:
+            max_answer = max(max_answer, x)
+    
+    print(max_answer, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+100000
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

@@ -1003,16 +1003,20 @@ But this approach ensures that each group's s_j is non-decreasing.
 
 Thus, the code would look like:
 
+Testing against sample input 1.
+
+```python
 import sys
 from bisect import bisect_right
 
-def main():
+
+def main(input_stream, output_stream):
     import sys
     sys.setrecursionlimit(1 << 25)
-    n = int(sys.stdin.readline())
+    n = int(input_stream.readline())
     adj = [[] for _ in range(n+1)]  # 1-based
     for _ in range(n-1):
-        u, v, l = map(int, sys.stdin.readline().split())
+        u, v, l = map(int, input_stream.readline().split())
         adj[u].append((v, l))
         adj[v].append((u, l))
     # Compute depth from root (1)
@@ -1032,10 +1036,10 @@ def main():
                 depth[v] = depth[u] + l
                 q.append(v)
     # Now, read observations
-    k = int(sys.stdin.readline())
+    k = int(input_stream.readline())
     obs = []
     for _ in range(k):
-        d, f, p = map(int, sys.stdin.readline().split())
+        d, f, p = map(int, input_stream.readline().split())
         s = d - depth[p]
         obs.append((s, f))
     # Sort obs by s
@@ -1054,88 +1058,190 @@ def main():
             groups.append((s, f))
     # Sum the max_f
     total = sum(f for s, f in groups)
-    print(total)
+    print(total, file=output_stream)
 
-if __name__ == "__main__":
-    main()
 
-But this code may not work for the first sample.
 
-Wait, let's test the first sample:
+def test():
+    import io
 
-After computing depth:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 2 1
+1 3 1
+1 4 1
+1 5 1
+4
+1 1 2
+2 1 3
+3 1 4
+4 1 5
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-depth[1] =0
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-depth[2] =1 (river length 1)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-depth[3] =1
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-depth[4] =1
+    print('Tests passed 😎')
 
-Observations:
 
-Sample1's observations:
+if __name__ == '__main__':
+    test()
 
-(1,1,2) → s=1-1=0
 
-(1,1,3) → s=1-1=0
+```
 
-(2,2,1) → s=2-0=2
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 97, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 90, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '2'
+Got: '1'
 
-(3,1,4) → s=3-1=2
+```
 
-(3,1,2) → s=3-1=2
+Testing against sample input 2.
 
-Sorted by s: [(0,1), (0,1), (2,2), (2,1), (2,1)]
+```python
+import sys
+from bisect import bisect_right
 
-Processing:
 
-First observation (0,1): groups is empty. Add new group (0,1).
+def main(input_stream, output_stream):
+    import sys
+    sys.setrecursionlimit(1 << 25)
+    n = int(input_stream.readline())
+    adj = [[] for _ in range(n+1)]  # 1-based
+    for _ in range(n-1):
+        u, v, l = map(int, input_stream.readline().split())
+        adj[u].append((v, l))
+        adj[v].append((u, l))
+    # Compute depth from root (1)
+    from collections import deque
+    depth = [0]*(n+1)
+    parent = [0]*(n+1)
+    visited = [False]*(n+1)
+    q = deque()
+    q.append(1)
+    visited[1] = True
+    while q:
+        u = q.popleft()
+        for v, l in adj[u]:
+            if not visited[v]:
+                visited[v] = True
+                parent[v] = u
+                depth[v] = depth[u] + l
+                q.append(v)
+    # Now, read observations
+    k = int(input_stream.readline())
+    obs = []
+    for _ in range(k):
+        d, f, p = map(int, input_stream.readline().split())
+        s = d - depth[p]
+        obs.append((s, f))
+    # Sort obs by s
+    obs.sort()
+    # Process groups
+    groups = []  # list of (current_s, max_f)
+    for s, f in obs:
+        # Find the rightmost group with current_s <= s
+        idx = bisect_right(groups, (s, float('inf'))) -1
+        if idx >=0 and groups[idx][0] <= s:
+            # merge into this group
+            prev_s, prev_f = groups[idx]
+            new_f = max(prev_f, f)
+            groups[idx] = (s, new_f)
+        else:
+            groups.append((s, f))
+    # Sum the max_f
+    total = sum(f for s, f in groups)
+    print(total, file=output_stream)
 
-Second observation (0,1): bisect_right finds group with s=0 <=0. index=0. Update group to (0, max(1,1)=1).
 
-Third (2,2): bisect_right finds groups up to s=2. groups[0] is (0,1). So idx=0. groups[0][0] <=2 → yes. Update group to (2, max(1, 2)=2).
 
-Fourth (2,1): bisect_right finds groups up to s=2. groups[0] is (2,2). Update to (2, max(2,1)=2).
+def test():
+    import io
 
-Fifth (2,1): same as fourth. groups[0] is (2,2). Update to (2,2).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+2 5 1
+5 1 1
+2 4 1
+5 3 3
+6
+5 2 4
+2 1 1
+2 1 3
+2 2 4
+4 7 5
+4 1 2
+""",
+            "output": \
+"""\
+10
+""",
+        }, 
+    ]
 
-Sum is 2. Which is correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Thus, this code passes the first sample.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Similarly, the second sample:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sample2:
+    print('Tests passed 😎')
 
-5 lakes connected to 1. depth for 2,3,4,5 is 1 each.
 
-Observations:
+if __name__ == '__main__':
+    test()
 
-1 1 2 → s=1-1=0
 
-2 1 3 → s=2-1=1
+```
 
-3 1 4 → s=3-1=2
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 99, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 92, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '10'
+Got: '7'
 
-4 1 5 → s=4-1=3
-
-Sorted s:0,1,2,3.
-
-Groups:
-
-0: (0,1)
-
-1: (1,1)
-
-2: (2,1)
-
-3: (3,1)
-
-Sum is4. But sample's output is 2.
-
-This code's output is 4, which is incorrect.
+```
 
 Thus, this approach is incorrect for some cases.
 

@@ -192,71 +192,87 @@ Implementing this.
 
 Now, code steps:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n, d = map(int, input().split())
 
-friends = []
-for _ in range(n):
-    m, s = map(int, input().split())
-    friends.append( (m, s) )
+def main(input_stream, output_stream):
+    n, d = map(int, input_stream.readline().rstrip("\n").split())
 
-friends.sort()
-m = [x[0] for x in friends]
-s = [x[1] for x in friends]
+    friends = []
+    for _ in range(n):
+        m, s = map(int, input_stream.readline().rstrip("\n").split())
+        friends.append( (m, s) )
 
-prefix = [0]*(n+1)
-for i in range(n):
-    prefix[i+1] = prefix[i] + s[i]
+    friends.sort()
+    m = [x[0] for x in friends]
+    s = [x[1] for x in friends]
 
-max_total = 0
+    prefix = [0]*(n+1)
+    for i in range(n):
+        prefix[i+1] = prefix[i] + s[i]
 
-for i in range(n):
-    target = m[i] + d
-    j = bisect.bisect_left(m, target, i, n)  # since after i, m is sorted, and we can search from i to n-1
-    current_sum = prefix[j] - prefix[i]
-    if current_sum > max_total:
-        max_total = current_sum
+    max_total = 0
 
-print(max_total)
+    for i in range(n):
+        target = m[i] + d
+        j = bisect.bisect_left(m, target, i, n)  # since after i, m is sorted, and we can search from i to n-1
+        current_sum = prefix[j] - prefix[i]
+        if current_sum > max_total:
+            max_total = current_sum
 
-Wait, but bisect_left can take lo and hi parameters. The m list is already sorted. So for each i, the j can't be less than i, because m is sorted. So when we search for target in m, the starting point is i. Because including friends before i would have m less than m[i], but since the group starts at i, any j before i is invalid. So the bisect_left can start from i, to n.
+    print(max_total, file=output_stream)
 
-Yes. So for each i, the search is done in the subarray starting at i. Because in the sorted array, the friends are ordered, so for i-th element, the possible j is >=i.
 
-This way, we can optimize the binary search a bit. Because the bisect_left is given the lo as i.
 
-Yes. So this code should work.
+def test():
+    import io
 
-Testing the first sample input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 100
+0 7
+11 32
+99 10
+46 8
+87 54
+""",
+            "output": \
+"""\
+111
+""",
+        }, 
+    ]
 
-Sample 1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-4 5
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-75 5
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-0 100
+    print('Tests passed 😎')
 
-150 20
 
-75 1
+if __name__ == '__main__':
+    test()
 
-After sorting:
 
-friends are sorted by m: 0,75,75,150.
+```
 
-So m = [0,75,75,150]
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-s = [100,5,1,20]
-
-prefix is [0, 100, 105, 106, 126]
-
-For i=0:
-
-target is 0 +5=5. bisect_left in m, looking for 5. The elements are [0,75,75,150]. The first element >=5 is 75 (index 1). So j=1. sum is prefix[1] - prefix[0] = 100.
-
-i=1: m[i]=75. target=80. The m list from i=1 is [75,75,150]. So bisect_left looks for 80. The first element >=80 is index3 (150). So j=3. sum is prefix[3] - prefix[1] = 1 (since 5+1=6, but prefix[3] is 106, prefix[1] is 100. So 6.)
+```
 
 Wait, the prefix array for the first sample would be:
 

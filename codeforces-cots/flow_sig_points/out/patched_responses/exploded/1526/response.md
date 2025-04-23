@@ -691,115 +691,132 @@ But let's see:
 
 In code:
 
+Testing against sample inputs 1, 4.
+
+```python
 from collections import defaultdict, Counter
 
-MOD = 10**9 +7
 
-max_fact = 10**6  # since m can be up to 1e6
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-fact = [1]*(max_fact+1)
+    max_fact = 10**6  # since m can be up to 1e6
 
-for i in range(2, max_fact+1):
+    fact = [1]*(max_fact+1)
 
-    fact[i] = fact[i-1] *i % MOD
+    for i in range(2, max_fact+1):
 
-n, m = map(int, input().split())
+        fact[i] = fact[i-1] *i % MOD
 
-type_counts = defaultdict(list)
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-present_types = set()
+    type_counts = defaultdict(list)
 
-for gym_idx in range(n):
+    present_types = set()
 
-    parts = list(map(int, input().split()))
+    for gym_idx in range(n):
 
-    gi = parts[0]
+        parts = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-    types = parts[1:]
+        gi = parts[0]
 
-    cntr = Counter(types)
+        types = parts[1:]
 
-    for x, c in cntr.items():
+        cntr = Counter(types)
 
-        type_counts[x].append( (gym_idx, c) )
+        for x, c in cntr.items():
 
-    present_types.update(types)
+            type_counts[x].append( (gym_idx, c) )
 
-# Now, process the type_counts into groups
+        present_types.update(types)
 
-count_vectors = defaultdict(int)
+    # Now, process the type_counts into groups
 
-for x in type_counts:
+    count_vectors = defaultdict(int)
 
-    # sort the list by gym index
+    for x in type_counts:
 
-    vec = tuple(sorted(type_counts[x], key=lambda t: t[0]))
+        # sort the list by gym index
 
-    count_vectors[vec] +=1
+        vec = tuple(sorted(type_counts[x], key=lambda t: t[0]))
 
-# handle the missing types
+        count_vectors[vec] +=1
 
-num_missing = m - len(present_types)
+    # handle the missing types
 
-if num_missing >0:
+    num_missing = m - len(present_types)
 
-    count_vectors[ () ] += num_missing
+    if num_missing >0:
 
-# compute the product
+        count_vectors[ () ] += num_missing
 
-result = 1
+    # compute the product
 
-for s in count_vectors.values():
+    result = 1
 
-    result = result * fact[s] % MOD
+    for s in count_vectors.values():
 
-print(result)
+        result = result * fact[s] % MOD
 
-Wait, but present_types is a set of all types present in any gym. But the code is using present_types = set(), and for each gym's types, present_types.update(types). 
+    print(result, file=output_stream)
 
-But this is incorrect. Because for a type x that appears in multiple gyms, present_types.add(x) is done once. So the size of present_types is the number of distinct types present in any gym. 
 
-Thus, len(present_types) is the number of types that have at least one occurrence in any gym. 
 
-Then, the number of types with all-zero count vectors is m - len(present_types). 
+def test():
+    import io
 
-Yes. 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 3
+3 1 2 3
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+        {
+            "input": \
+"""\
+3 7
+2 1 2
+2 3 4
+3 5 6 7
+""",
+            "output": \
+"""\
+24
+""",
+        }, 
+    ]
 
-But the code is using present_types as a set of all types that appear in any gym. 
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But in the code above, the line present_types.update(types) will add all the types in the current gym's list, even if they appear multiple times. 
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Wait, for example, in a gym with types [1,1,2], present_types.update([1,1,2]) will add 1 and 2. So len(present_types) is correct. 
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So the code is correct. 
+    print('Tests passed 😎')
 
-Testing sample1:
 
-present_types will have {1,2,3}, len is3. m=3. So num_missing=0. 
+if __name__ == '__main__':
+    test()
 
-Sample4:
 
-n=2, m=2. 
+```
 
-Gym1:3 2,2,1 → types 2,2,1 → present_types adds 2 and 1. 
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Gym2:2 1,2 → types 1,2 → present_types already has them. 
-
-len(present_types)=2. m=2. So num_missing=0. 
-
-But in sample4, the count vectors are different. 
-
-Yes. 
-
-Now, what about types that are not present in any gym? 
-
-For example, m=4, but in the input, only types 1-3 are present. Then, type4 has count vector all zeros. So it's added to the count_vectors with key () and count 1. 
-
-But if there are multiple types not present, their group is the count of (m - len(present_types)). 
-
-Thus, the code handles this. 
-
-So this should work. 
+```
 
 But let's test another sample. 
 

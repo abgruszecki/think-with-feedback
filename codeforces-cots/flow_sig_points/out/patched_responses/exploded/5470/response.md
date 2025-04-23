@@ -506,47 +506,93 @@ Second entry: 480. Since 480 <540 → new day. day_count=2. current_counts is {4
 
 Third entry:420 <480 → new day. day_count=3. Output 3.
 
-Sample input1:
+Testing against sample input 1.
 
-times are 300,300,793,790,1420.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    times = []
+    for _ in range(n):
+        line = input_stream.readline().rstrip("\n").strip()
+        time_str = line.split(']: ')[0][1:]
+        hh_part, mm_part = time_str.split(':')
+        hh = int(hh_part.strip())
+        mm_rest = mm_part.strip().split()
+        mm = int(mm_rest[0])
+        period = mm_rest[1].lower().replace('.', '')
+        if period == 'am':
+            hh_24 = 0 if hh == 12 else hh
+        else:
+            hh_24 = hh if hh == 12 else hh + 12
+        total = hh_24 * 60 + mm
+        times.append(total)
 
-Processing:
+    day_count = 1
+    current_counts = {}
+    prev_time = -1
 
-First entry:300. prev_time=-1 → ok. counts {300:1}.
+    for t in times:
+        if prev_time == -1:
+            current_counts = {t: 1}
+            prev_time = t
+        else:
+            if t < prev_time or current_counts.get(t, 0) + 1 > 10:
+                day_count += 1
+                current_counts = {t: 1}
+                prev_time = t
+            else:
+                current_counts[t] = current_counts.get(t, 0) + 1
+                prev_time = t
 
-Second entry:300. 300 >=300. counts becomes 2. allowed. prev_time 300.
+    print(day_count, file=output_stream)
 
-Third entry:793. 793 >=300. counts for 793 is 1. allowed.
 
-prev_time is 793.
 
-Fourth entry:790. 790 <793 → new day. day_count=2. counts {790:1}.
+def test():
+    import io
 
-Fifth entry:1420 >=790. counts for 1420 is 1. allowed. prev_time 1420.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+[09:00 a.m.]: User logged in
+[08:00 a.m.]: User logged in
+[07:00 a.m.]: User logged in
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-Total days:2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Which matches the sample.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So the code should work.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Now, edge cases.
+    print('Tests passed 😎')
 
-Test case where all times are the same and exactly 10 entries. Then 11th entry would start a new day.
 
-n=11 entries, all 05:00 a.m.
+if __name__ == '__main__':
+    test()
 
-Then the first 10 entries are in day1. The 11th is day2. So output 2.
 
-Another edge case: entries in same minute but in increasing order. Like 10 entries at 00:00, then 10 entries at 00:00 again. So the first 10 in day1. The next 10 in day2. But the times are same as previous. But since in day2, the first entry is 00:00, which is allowed. Because the previous day's last time is 00:00 (day1), the next day's first entry is 00:00 (day2) → which is allowed, but in the same day, entries must be non-decreasing. So 10 entries in day1 (all 00:00), next entry would have to be new day. So for 20 entries, 2 days.
+```
 
-Another edge case: entries with times that loop around midnight. For example, 23:59 PM (1439), then 00:00 AM (0). Since 0 <1439, must start new day.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So two days.
+```
 
-So code handles that.
-
-Now, code should be correct.
 </think>
 
 ```python

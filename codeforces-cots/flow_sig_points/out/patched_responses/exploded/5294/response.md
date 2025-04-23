@@ -163,23 +163,64 @@ Finally, compute the sum of squares.
 
 Yes, this is correct.
 
-Now, let's test this approach against the sample inputs.
+Testing against sample input 1.
 
-First sample:
+```python
+def main(input_stream, output_stream):
+    n, h, m = map(int, input_stream.readline().rstrip("\n").split())
+    max_allowed = [h] * n
+    for _ in range(m):
+        l, r, x = map(int, input_stream.readline().rstrip("\n").split())
+        for j in range(l-1, r):
+            if max_allowed[j] > x:
+                max_allowed[j] = x
+    print(sum(a*a for a in max_allowed), file=output_stream)
 
-n=3, h=3, m=3.
 
-max_allowed starts as [3,3,3].
 
-Processing restrictions:
+def test():
+    import io
 
-1. l=1, r=1, x=1. So j=0 (since 1-based to 0-based). For j=0: max_allowed[0] becomes min(3,1)=1. So max_allowed is [1,3,3].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 10 2
+2 3 8
+3 4 7
+""",
+            "output": \
+"""\
+262
+""",
+        }, 
+    ]
 
-2. l=2, r=2, x=3. j=1. max_allowed[1] is min(3,3) remains 3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-3. l=3, r=3, x=2. j=2. max_allowed[2] is min(3,2)=2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sum is 1^2 + 3^2 + 2^2 = 1+9+4=14. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

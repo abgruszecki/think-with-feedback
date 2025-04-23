@@ -938,13 +938,17 @@ But let's proceed.
 
 The code:
 
+Testing against sample input 1.
+
+```python
 import sys
 import math
 
-def main():
-    n = int(sys.stdin.readline())
-    a = list(map(int, sys.stdin.readline().split()))
-    allowed_swaps = sys.stdin.readline().strip()
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    a = list(map(int, input_stream.readline().split()))
+    allowed_swaps = input_stream.readline().strip()
 
     # Generate allowed regions
     regions = []
@@ -1010,13 +1014,13 @@ def main():
         sum_actual = prefix_sum[R] - prefix_sum[L-1]
         sum_expected = R*(R+1)//2 - (L-1)*L//2
         if sum_actual != sum_expected:
-            print("NO")
+            print("NO", file=output_stream)
             return
 
         min_val = get_min(L-1, R-1)
         max_val = get_max(L-1, R-1)
         if min_val != L or max_val != R:
-            print("NO")
+            print("NO", file=output_stream)
             return
 
     # Check positions not in any allowed region
@@ -1028,13 +1032,13 @@ def main():
             sum_actual = prefix_sum[end] - prefix_sum[start-1]
             sum_expected = (end*(end +1)//2) - ((start-1)*start//2)
             if sum_actual != sum_expected:
-                print("NO")
+                print("NO", file=output_stream)
                 return
 
             min_val = get_min(start-1, end-1)
             max_val = get_max(start-1, end-1)
             if min_val != start or max_val != end:
-                print("NO")
+                print("NO", file=output_stream)
                 return
 
         current_pos = max(current_pos, R + 1)
@@ -1046,67 +1050,172 @@ def main():
         sum_actual = prefix_sum[end] - prefix_sum[start-1]
         sum_expected = (end*(end +1)//2) - ((start-1)*start//2)
         if sum_actual != sum_expected:
-            print("NO")
+            print("NO", file=output_stream)
             return
 
         min_val = get_min(start-1, end-1)
         max_val = get_max(start-1, end-1)
         if min_val != start or max_val != end:
-            print("NO")
+            print("NO", file=output_stream)
             return
 
-    print("YES")
+    print("YES", file=output_stream)
 
-if __name__ == "__main__":
-    main()
 
-Wait, but in the sparse table building code, the way it's implemented may not be correct. Because for each j, the st_min and st_max are being built with new lists. For large n, this can be time-consuming.
 
-Alternative approach: precompute the sparse tables using dynamic programming.
+def test():
+    import io
 
-But perhaps the way to build the sparse tables is as follows:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+1 2 5 3 4 6
+01010
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-Compute log_table as before.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Then, for j from 1 to k_max:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-    for i in range(n - (1 << j) + 1):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-        st_min[j][i] = min( st_min[j-1][i], st_min[j-1][i + (1 << (j-1))] )
+    print('Tests passed 😎')
 
-        st_max[j][i] = max( st_max[j-1][i], st_max[j-1][i + (1 << (j-1))] )
 
-But in Python, creating lists for each j is not efficient.
+if __name__ == '__main__':
+    test()
 
-Alternative approach: use a list of lists, where each level j is a list.
 
-But for n=2e5, this will be memory-heavy.
+```
 
-Alternatively, use a preallocated array for each j.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-But for the sake of passing the problem, perhaps this code is acceptable.
+```
 
-Testing with the first sample input:
+min_val is 2, max_val is 5. So correct.
 
-Sample Input 1:
+Then, check the positions not in any allowed region.
+
+current_pos starts at 1.
+
+First allowed region (2,5):
+
+current_pos is 1 < 2 → check positions 1 to 1 (start=1, end=1).
+
+sum_actual is a[0] =1. sum_expected is 1. min and max are 1. So ok.
+
+current_pos becomes max(1,5+1) =6.
+
+After processing all regions, check current_pos=6 <=6.
+
+Check start=6, end=6.
+
+sum_actual is a[5] =6. sum_expected 6. min and max 6. ok.
+
+So output is YES.
+
+Sample Input 2:
 
 6
 
 1 2 5 3 4 6
 
-01110
+01010
 
-allowed_swaps is '01110', which has allowed regions:
+allowed_swaps is '0','1','0','1','0'.
 
-The allowed_swaps has group of '1's from index 1 to 3 (0-based).
+So allowed regions are:
 
-So allowed region is (1+1, 3+2) → (2,5).
+At index 1: allowed_swaps[1] is '1' → group a=1, b=1. L=2, R=3.
 
-So the region is L=2, R=5.
+At index 3: allowed_swaps[3] is '1' → group a=3, b=3. L=4, R=5.
 
-Check sum_actual: a[1 to 4] (0-based) are 2,5,3,4. Sum is 2+5+3+4=14.
+So allowed regions are (2,3) and (4,5).
 
-sum_expected: R=5, L=2. sum from 2 to 5: 2+3+4+5=14. So sum is correct.
+For the first region (2,3):
+
+sum_actual is a[1]+a[2] → 2+5=7. sum_expected (2+3) =5. So 7≠5 → return NO.
+
+So code correctly outputs NO.
+
+Thus, the code should work.
+
+But in Python, building the sparse tables for large n may be too slow. So we need to optimize.
+
+Alternative approach: use the built-in functions for range queries.
+
+Another idea: precompute the min and max for all possible ranges using the built-in functions. But that's not feasible.
+
+Alternatively, for the allowed regions, compute the min and max using the built-in min and max functions. But for large regions, this could be O(n) per region.
+
+But for the problem constraints, if the allowed regions are up to O(n) in total size, then it's O(n) time.
+
+But the allowed regions may be O(n) in total, but each region is of size up to O(n). So in the worst case, O(n) time.
+
+But for n=2e5, this is manageable.
+
+So the alternative code would be:
+
+For each allowed region [L, R], extract the subarray a[L-1 : R], compute the min, max, sum.
+
+But for large regions, this can be O(k) per region, where k is the size of the region.
+
+But for example, if the allowed regions are one large region of size 2e5, this would be O(2e5) time.
+
+Which is acceptable.
+
+So, the code can be optimized by avoiding the sparse tables and instead using slicing and built-in functions.
+
+But for the problem's time constraints, this may not be feasible.
+
+But in Python, list slicing and sum/min/max are optimized in C, so this approach may be faster than building the sparse tables.
+
+So the code can be rewritten as follows:
+
+For each allowed region [L, R]:
+
+    subarray = a[L-1 : R]
+
+    sum_actual = sum(subarray)
+
+    sum_expected = (R*(R+1)//2) - ((L-1)*L//2)
+
+    min_val = min(subarray)
+
+    max_val = max(subarray)
+
+    if sum_actual != sum_expected or min_val != L or max_val != R:
+
+        print("NO")
+
+        exit()
+
+Similarly, for the ranges between regions:
+
+For a range [start, end], extract a[start-1 : end], compute sum, min, max.
+
+But for ranges of size O(n), this is O(n) time.
+
+But for the worst case, this code would be O(n) time, which is acceptable.
+
+So, the code can be simplified by avoiding the sparse tables and prefix sums.
+
+Thus, the code can be written as:
 
 min_val is 2, max_val is 5. So correct.
 

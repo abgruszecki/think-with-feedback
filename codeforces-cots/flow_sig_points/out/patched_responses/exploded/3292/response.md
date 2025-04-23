@@ -121,69 +121,81 @@ In Python, using heapq.
 
 But the initial heap needs to be filled with k zeros. So:
 
+Testing against sample input 1.
+
+```python
 import heapq
 
-n, k = map(int, input().split())
 
-# Initialize the heap with k zeros
-heap = [0]*k
-heapq.heapify(heap)
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-for _ in range(n):
-    s, m = map(int, input().split())
-    available = heapq.heappop(heap)
-    start = max(s, available)
-    end = start + m
-    print(end)
-    heapq.heappush(heap, end)
+    # Initialize the heap with k zeros
+    heap = [0]*k
+    heapq.heapify(heap)
 
-Wait, but this code would read n lines, and for each, do heappop and heappush. For k servers, this works.
+    for _ in range(n):
+        s, m = map(int, input_stream.readline().rstrip("\n").split())
+        available = heapq.heappop(heap)
+        start = max(s, available)
+        end = start + m
+        print(end, file=output_stream)
+        heapq.heappush(heap, end)
 
-But wait, when the number of servers k is larger than the number of videos n, then after processing all videos, the heap will have (k - n) zeros left, but the code doesn't care. Because the problem is to process all n videos, which are in order.
 
-Yes. So this code should work.
 
-But let's test for the first sample input:
+def test():
+    import io
 
-Sample Input 1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 1
+1 1000000000
+2 1000000000
+3 1000000000
+4 1000000000
+5 1000000000
+6 3
+""",
+            "output": \
+"""\
+1000000001
+2000000001
+3000000001
+4000000001
+5000000001
+5000000004
+""",
+        }, 
+    ]
 
-3 2
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-1 5
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-2 5
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-3 5
+    print('Tests passed 😎')
 
-The code initializes a heap with [0,0], heapified as a min-heap.
 
-Processing first video: s=1, m=5.
+if __name__ == '__main__':
+    test()
 
-available = heappop(heap) →0.
 
-start = max(1,0) =1.
+```
 
-end=6.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-print(6).
-
-push 6 into heap. Now heap has [6,0]. After heapify, the heap is [0,6].
-
-Wait, because when you push 6 into the heap, the heap structure is maintained. So after pushing, the next elements would be [0,6].
-
-Second video: s=2, m=5.
-
-available = heappop(heap) →0.
-
-start = max(2,0) →2. end=7. print 7. Push 7 into heap. Now heap has [6,7].
-
-Third video: s=3, m=5.
-
-available = heappop(heap) →6.
-
-start = max(3,6) →6. end=11. print 11. Push 11. Now heap has [7,11].
-
-So the outputs are 6,7,11. Which matches the sample.
+```
 
 Another test case: when k is 1 and n is 6, as in the second sample.
 

@@ -889,83 +889,113 @@ This way, we avoid sorting again.
 
 Thus, the code can be optimized as follows:
 
-n, x = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, x = map(int, input_stream.readline().rstrip("\n").split())
 
-b = list(map(int, input().split()))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-a_sorted = sorted(a)
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-b_sorted_asc = sorted(b)
+    a_sorted = sorted(a)
 
-min_s = float('inf')
+    b_sorted_asc = sorted(b)
 
-for ai in a_sorted:
+    min_s = float('inf')
 
-    target = x - ai
+    for ai in a_sorted:
 
-    left = 0
+        target = x - ai
 
-    right = len(b_sorted_asc) - 1
+        left = 0
 
-    res = None
+        right = len(b_sorted_asc) - 1
 
-    while left <= right:
+        res = None
 
-        mid = (left + right) // 2
+        while left <= right:
 
-        if b_sorted_asc[mid] >= target:
+            mid = (left + right) // 2
 
-            res = mid
+            if b_sorted_asc[mid] >= target:
 
-            right = mid - 1
+                res = mid
 
-        else:
+                right = mid - 1
 
-            left = mid + 1
+            else:
 
-    if res is not None:
+                left = mid + 1
 
-        current_sum = ai + b_sorted_asc[res]
+        if res is not None:
 
-        if current_sum < min_s:
+            current_sum = ai + b_sorted_asc[res]
 
-            min_s = current_sum
+            if current_sum < min_s:
 
-# Now compute the count
+                min_s = current_sum
 
-b_sorted_desc = list(reversed(b_sorted_asc))
+    # Now compute the count
 
-count = 0
+    b_sorted_desc = list(reversed(b_sorted_asc))
 
-for i in range(n):
+    count = 0
 
-    if a_sorted[i] + b_sorted_desc[i] >= min_s:
+    for i in range(n):
 
-        count +=1
+        if a_sorted[i] + b_sorted_desc[i] >= min_s:
 
-print(1, count)
+            count +=1
 
-This should work.
+    print(1, count, file=output_stream)
 
-Let's test the first sample:
 
-Sample 1:
 
-After sorting a and b_asc, both are [1,1,1,1,1].
+def test():
+    import io
 
-For each ai (1):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 7
+4 3 5 6 4 4
+8 6 0 4 3 4
+""",
+            "output": \
+"""\
+1 5
+""",
+        }, 
+    ]
 
-target = 2-1=1. The first element in b_asc >=1 is 1 (index 0). sum 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-min_s is 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-b_sorted_desc is [1,1,1,1,1].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Pairing each a_sorted[i] (1) with b_sorted_desc[i] (1): sum is 2 >=2. count 5.
+    print('Tests passed 😎')
 
-Output 1 5.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

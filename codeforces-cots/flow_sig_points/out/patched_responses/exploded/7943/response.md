@@ -867,35 +867,138 @@ print(result)
 
 This code should work.
 
-Testing it against the first example:
+Testing against sample input 1.
 
-Input:
-116285317
-8
+```python
+import bisect
+from collections import defaultdict
 
-Proper divisors of 8: [1, 2, 4]
 
-Candidates are all substrings summing to 8. These include the single '8' and the '53' (sum 5+3=8).
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    x = int(input_stream.readline().rstrip("\n"))
+    digits = [int(c) for c in s]
+    n = len(digits)
 
-For each candidate, check if any of the proper divisor intervals are contained within them.
+    prefix = [0] * (n + 1)
+    for i in range(n):
+        prefix[i+1] = prefix[i] + digits[i]
 
-The '8' has no proper substrings, so it's x-prime.
+    def get_proper_divisors(x):
+        if x == 1:
+            return []
+        return [i for i in range(1, x) if x % i == 0]
 
-The '53' (positions 5 and 6) sum to 8. Check for d=1, 2,4:
+    proper_divisors = get_proper_divisors(x)
 
-- For d=1: look for any intervals of sum 1 contained within [5,6]. The digits are 5 and 3, sum 8. No sum 1.
+    pos = defaultdict(list)
+    for idx, val in enumerate(prefix):
+        pos[val].append(idx)
 
-- For d=2: check if any intervals sum 2. The digits are 5 and 3. 5 is 5, 3 is 3. No sums of 2.
+    d_intervals = []
+    for d in proper_divisors:
+        intervals = []
+        for a in range(n):
+            target = prefix[a] + d
+            if target not in pos:
+                continue
+            for b_plus_1 in pos[target]:
+                b = b_plus_1 - 1
+                if a <= b < n:
+                    intervals.append((a, b))
+        intervals.sort()
+        m = len(intervals)
+        min_b = [0] * m
+        if m:
+            min_b[-1] = intervals[-1][1]
+            for i in range(m-2, -1, -1):
+                min_b[i] = min(intervals[i][1], min_b[i+1])
+        d_intervals.append((intervals, min_b))
 
-- For d=4: similarly, no.
+    candidates = []
+    for a in range(n):
+        target = prefix[a] + x
+        if target not in pos:
+            continue
+        for b_plus_1 in pos[target]:
+            b = b_plus_1 - 1
+            if a <= b < n:
+                candidates.append((a, b))
 
-Thus, '53' is x-prime.
+    x_prime = []
+    for a, b in candidates:
+        if a == b:
+            x_prime.append((a, b))
+            continue
+        valid = True
+        for i in range(len(proper_divisors)):
+            intervals, min_b_list = d_intervals[i]
+            if not intervals:
+                continue
+            idx = bisect.bisect_left([start for start, _ in intervals], a)
+            if idx < len(intervals):
+                if min_b_list[idx] <= b:
+                    valid = False
+                    break
+        if valid:
+            x_prime.append((a, b))
 
-So the x_prime list contains both intervals. The greedy algorithm picks the end of the first (4) and then the end of the second (6), requiring two deletions.
+    if not x_prime:
+        print(0, file=output_stream)
+    else:
+        x_prime.sort(key=lambda x: x[1])
+        res = 0
+        last_end = -1
+        for start, end in x_prime:
+            if start > last_end:
+                res += 1
+                last_end = end
+        print(res, file=output_stream)
 
-Thus, output is 2.
 
-The code should correctly handle this.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+314159265359
+1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: input '3434343434', x=7. The proper divisors are [1]. The code will check for each candidate (sum 7) if any intervals of sum 1 are contained within them. Since the string has no 1's, all such candidates are x-prime. These candidates are all '34' and '43' pairs, which sum to 7. Each such pair has no substrings summing to 1. So all are x-prime. The code will collect all these intervals and then apply the greedy algorithm. The minimal deletions required would be 5 (since each pair requires a deletion, and overlapping pairs can be handled by deleting the end of each).
 

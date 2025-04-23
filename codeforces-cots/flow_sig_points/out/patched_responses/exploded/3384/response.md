@@ -168,57 +168,78 @@ For example, s_concat is "HTHTHTHHT" + "HTHTHTHHT" → 18 characters.
 
 The code will be:
 
-n = int(input())
-s = input().strip()
-cntH = s.count('H')
-if cntH == 0 or cntH == n:
-    print(0)
-    exit()
+Testing against sample input 1.
 
-s_concat = s + s
-prefix = [0] * (len(s_concat) +1)
-for i in range(len(s_concat)):
-    prefix[i+1] = prefix[i] + (1 if s_concat[i] == 'T' else 0)
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+    cntH = s.count('H')
+    if cntH == 0 or cntH == n:
+        print(0, file=output_stream)
+        return
 
-min_swaps = float('inf')
+    s_concat = s + s
+    prefix = [0] * (len(s_concat) +1)
+    for i in range(len(s_concat)):
+        prefix[i+1] = prefix[i] + (1 if s_concat[i] == 'T' else 0)
 
-for i in range(n):
-    j = i + cntH -1
-    # The window is from i to j (inclusive), which is cntH elements.
-    # The number of T's is prefix[j+1] - prefix[i]
-    total_t = prefix[j+1] - prefix[i]
-    if total_t < min_swaps:
-        min_swaps = total_t
+    min_swaps = float('inf')
 
-print(min_swaps)
+    for i in range(n):
+        j = i + cntH -1
+        # The window is from i to j (inclusive), which is cntH elements.
+        # The number of T's is prefix[j+1] - prefix[i]
+        total_t = prefix[j+1] - prefix[i]
+        if total_t < min_swaps:
+            min_swaps = total_t
 
-Wait, but wait: for j, since s_concat is of length 2n, and i ranges from 0 to n-1, and cntH can be up to n-1 (since cntH is at least 1, and n >=2). So j = i + cntH -1 can be up to (n-1) + (n-1) -1 = 2n-3, which is less than 2n. So j+1 can be up to 2n-2 +1 = 2n-1, which is within the prefix array (size 2n+1, since len(s_concat) is 2n, and prefix has len(s_concat)+1 elements). So the code is correct.
+    print(min_swaps, file=output_stream)
 
-Testing the first example:
 
-n=3, s=HTH → cntH=2. s_concat is HTHHTH.
 
-prefix array:
+def test():
+    import io
 
-prefix[0] =0
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+9
+HTHTHTHHT
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-i=0: 'H' → T? No. prefix[1]=0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=1: 'T' → yes. prefix[2]=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=2: 'H' → no. prefix[3]=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=3: 'H' → no. prefix[4]=1.
+    print('Tests passed 😎')
 
-i=4: 'T' → yes. prefix[5] =2.
 
-i=5: 'H' → no. prefix[6] =2.
+if __name__ == '__main__':
+    test()
 
-So the prefix array is [0,0,1,1,1,2,2, ... ].
 
-For i=2 (original starting index 2):
+```
 
-j= 2+2-1=3. So j+1=4. The T's in window i=2 to j=3 is prefix[4] - prefix[2] =1-1=0. Which is correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, the code would output 0.
 

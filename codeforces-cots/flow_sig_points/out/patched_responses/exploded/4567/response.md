@@ -485,74 +485,88 @@ The code would look like:
 
 Read n.
 
+Testing against sample input 1.
+
+```python
 from collections import defaultdict
 
-n = int(input())
 
-cnt = defaultdict(int)
-pair_counts = defaultdict(int)
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-for _ in range(n):
-    w, h = map(int, input().split())
-    a = min(w, h)
-    b = max(w, h)
-    cnt[a] += 1
-    if a != b:
-        cnt[b] += 1
-    pair_counts[(a, b)] += 1
+    cnt = defaultdict(int)
+    pair_counts = defaultdict(int)
 
-sum1 = 0
-for c in cnt.values():
-    sum1 += c * (c-1) // 2
+    for _ in range(n):
+        w, h = map(int, input_stream.readline().rstrip("\n").split())
+        a = min(w, h)
+        b = max(w, h)
+        cnt[a] += 1
+        if a != b:
+            cnt[b] += 1
+        pair_counts[(a, b)] += 1
 
-sum2 = 0
-for (a, b), count in pair_counts.items():
-    if a < b:
-        sum2 += count * (count -1) // 2
+    sum1 = 0
+    for c in cnt.values():
+        sum1 += c * (c-1) // 2
 
-print(sum1 - sum2)
+    sum2 = 0
+    for (a, b), count in pair_counts.items():
+        if a < b:
+            sum2 += count * (count -1) // 2
 
-Yes.
+    print(sum1 - sum2, file=output_stream)
 
-Testing this code against the first example:
 
-Sample input 1:
 
-5
+def test():
+    import io
 
-3 2 → a=2, b=3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+10 10
+10 20
+20 10
+10 20
+10 20
+10 10
+20 10
+""",
+            "output": \
+"""\
+21
+""",
+        }, 
+    ]
 
-So cnt[2] +=1, cnt[3] +=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-pair_counts[(2,3)] +=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Then next line 2 2: a=2, b=2. So cnt[2] +=1. pair_counts[(2,2)] +=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Third line 5 5 → a=5, b=5. cnt[5] +=1. pair_counts[(5,5)] +=1.
+    print('Tests passed 😎')
 
-Fourth line 3 5 → a=3, b=5. cnt[3] +=1, cnt[5] +=1. pair_counts[(3,5)] +=1.
 
-Fifth line 4 3 → a=3, b=4. cnt[3] +=1, cnt[4] +=1. pair_counts[(3,4)] +=1.
+if __name__ == '__main__':
+    test()
 
-cnt:
 
-2: 2 (from first two monitors)
+```
 
-3: 1 (first) +1 (fourth) +1 (fifth) → 3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-5:1 (third) +1 (fourth) → 2.
-
-4:1 (fifth).
-
-sum1 = C(2,2) + C(3,2) + C(2,2) + C(1,2) → 1 + 3 + 1 +0 =5.
-
-sum2: check all pair_counts entries where a < b.
-
-pair_counts has (2,3), (3,5), (3,4).
-
-Each has count 1. So sum2 = 0 +0 +0 =0.
-
-So sum1 - sum2 =5 → correct.
+```
 
 Sample input 2:
 

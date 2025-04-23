@@ -2001,31 +2001,90 @@ For x in range(1, n+1):
 
 Print ' '.join(map(str, count[1:]))
 
-Let's test this code.
+Testing against sample inputs 1, 2.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-Input:
+    L = [0] * (n + 1)
+    R = [0] * (n + 1)
+    count = [0] * (n + 1)
 
-6 0
+    for x in range(1, n + 1):
+        lx = max(1, x - k)
+        rx = min(n, x + k)
+        if a[x - 1] == 0:
+            L[x] = lx
+            R[x] = rx
+            count[x] = rx - lx + 1
+        else:
+            y = a[x - 1]
+            merged_L = min(lx, L[y])
+            merged_R = max(rx, R[y])
+            overlap = max(0, min(rx, R[y]) - max(lx, L[y]) + 1)
+            count[x] = (rx - lx + 1) + count[y] - overlap
+            L[x] = merged_L
+            R[x] = merged_R
 
-0 1 1 2 3 2
+    print(' '.join(map(str, count[1:])), file=output_stream)
 
-Code output is 1 2 2 3 3 3.
 
-Sample 2:
 
-Input:
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 10 1
-
 0 1 0 3 4 5 2 3 7 0
+""",
+            "output": \
+"""\
+2 3 3 4 5 6 6 6 8 2
+""",
+        }, 
+        {
+            "input": \
+"""\
+2 2
+0 1
+""",
+            "output": \
+"""\
+2 2
+""",
+        }, 
+    ]
 
-Output:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-2 3 3 4 5 6 6 6 8 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Which matches.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

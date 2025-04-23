@@ -1794,7 +1794,11 @@ So, first, precompute for each word its hyphens and split_part_i_lengths.
 
 Thus, the code:
 
+Testing against sample input 1.
+
+```python
 import bisect
+
 
 def compute_max_split_remain(hyphens, len_S):
     if not hyphens:
@@ -1889,9 +1893,9 @@ def is_possible(k, words, W):
             current_line_length = last_part_length
     return lines_used <=k
 
-def main():
+def main(input_stream, output_stream):
     import sys
-    input = sys.stdin.read().split()
+    input = input_stream.read().split()
     k = int(input[0])
     text = input[1:]
     words = []
@@ -1913,114 +1917,52 @@ def main():
             high = mid -1
         else:
             low = mid +1
-    print(answer)
+    print(answer, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+Edu-ca-tion-al Ro-unds are so fun
+""",
+            "output": \
+"""\
+10
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
 
 if __name__ == '__main__':
-    main()
+    test()
 
-But wait, this code has some issues.
 
-First, the words are read from input, but the original text is split into words using input().split(), which splits by whitespace.
+```
 
-Then, for each word, we precompute hyphens, length, and split_part_i_lengths.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-In the is_possible function, for each word, when the split_part_i is chosen (i.e., when idx >=0), we compute start_index as hyphens[idx] +1. But hyphens is the list of hyphen positions in the word. For example, if hyphens are [3,6,10], and idx is 0, then start_index is 3+1=4. The remaining substring is the word from index 4 onwards.
-
-The hyphens_in_S is hyphens[idx+1 ... ] - start_index. For example, hyphens[idx+1 ...] would be [6,10], and subtract start_index (4), giving [2,6]. These are the hyphen positions in the remaining substring.
-
-Then, compute_max_split_remain is called with hyphens_in_S and len_S.
-
-If the max_split_remain exceeds W, return False.
-
-The number of lines used is increased by m_remain, which is the number of hyphens_in_S +1.
-
-But lines_used += m_remain.
-
-But if m_remain is zero (no hyphens_in_S), then it's len_S split into 1 line.
-
-Thus, the code seems correct.
-
-But let's test with the first sample input:
-
-Sample 1:
-
-Input:
-
-4
-
-garage for sa-le
-
-Words:
-
-garage (hyphens = [], split_part_i_lengths = [])
-
-for (hyphens = [], split_part_i_lengths = [])
-
-sa-le (hyphens = [2], split_part_i_lengths = [3])
-
-So, for the third word (sa-le), split_part_i_lengths is [3].
-
-Now, during binary search with W=7.
-
-Processing each word:
-
-First word: garage.
-
-split_part_0_length = 6.
-
-current_line_length is 0. space_before is 0.
-
-available =7-0-0=7.
-
-6 <=7: yes. current_line_length becomes 6. lines_used=1.
-
-Next word: for.
-
-space_before=1. available=7-6-1=0.
-
-available <0, so lines_used +=1 (now 2), current_line_length=0.
-
-available becomes 7-0=7.
-
-split_part_0_length=3 (for the word "for") is 3 <=7: yes. current_line_length=0+0+3=3.
-
-Next word: sa-le.
-
-space_before=1. available=7-3-1=3.
-
-split_part_0_length=5 (sa-le). 5>3. check split_part_i_lengths.
-
-split_part_i_lengths is [3].
-
-3 <=3: yes.
-
-start_index = 2+1=3.
-
-hyphens_in_S = hyphens[1 ... ] = [].
-
-len_S =5-3=2.
-
-max_split_remain = compute_max_split_remain([], 2) → 2.
-
-Which is <=7.
-
-m_remain=0+1=1.
-
-lines_used +=1 → lines_used=3.
-
-current_line_length =3 (sa-).
-
-But after processing this word, current_line_length is set to the last part's length. Since hyphens_in_S is empty, last_part_length is 2.
-
-current_line_length becomes 2.
-
-Thus, lines_used=3, which is <=4.
-
-So the total lines used is 3, which is <=4. So W=7 is possible.
-
-Thus, the code should return 7 as the minimal possible.
-
-But according to the sample, it's correct.
+```
 
 Another test case: sample 2.
 

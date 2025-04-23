@@ -564,101 +564,99 @@ So here's the plan:
 
       Now, the code:
 
-      n = int(input())
-      adj = []
-      for _ in range(n):
-          row = list(map(int, input().split()))
-          adj.append(row)
-      deletion_order = list(map(int, input().split()))
-      add_order = list(reversed(deletion_order))
+Testing against sample input 2.
 
-      INF = float('inf')
-      d = [[INF] * (n + 1) for _ in range(n + 1)]
-      for i in range(n + 1):
-          d[i][i] = 0
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    adj = []
+    for _ in range(n):
+        row = list(map(int, input_stream.readline().rstrip("\n").split()))
+        adj.append(row)
+    deletion_order = list(map(int, input_stream.readline().rstrip("\n").split()))
+    add_order = list(reversed(deletion_order))
 
-      current_nodes = []
-      sum_list = []
+    INF = float('inf')
+    d = [[INF] * (n + 1) for _ in range(n + 1)]
+    for i in range(n + 1):
+        d[i][i] = 0
 
-      for k in add_order:
-          current_nodes.append(k)
-          # Initialize edges between k and existing nodes
-          # existing nodes are current_nodes[:-1]
-          for u in current_nodes[:-1]:
-              # from k to u: adj[k-1][u-1]
-              d[k][u] = adj[k-1][u-1]
-              # from u to k: adj[u-1][k-1]
-              d[u][k] = adj[u-1][k-1]
-          # Run Floyd-Warshall step for intermediate k
-          for i in current_nodes:
-              for j in current_nodes:
-                  if d[i][j] > d[i][k] + d[k][j]:
-                      d[i][j] = d[i][k] + d[k][j]
-          # Compute sum
-          total = 0
-          for i in current_nodes:
-              for j in current_nodes:
-                  if i != j:
-                      total += d[i][j]
-          sum_list.append(total)
+    current_nodes = []
+    sum_list = []
 
-      # Reverse the sum_list to get the correct order
-      print(' '.join(map(str, reversed(sum_list))))
+    for k in add_order:
+        current_nodes.append(k)
+        # Initialize edges between k and existing nodes
+        # existing nodes are current_nodes[:-1]
+        for u in current_nodes[:-1]:
+            # from k to u: adj[k-1][u-1]
+            d[k][u] = adj[k-1][u-1]
+            # from u to k: adj[u-1][k-1]
+            d[u][k] = adj[u-1][k-1]
+        # Run Floyd-Warshall step for intermediate k
+        for i in current_nodes:
+            for j in current_nodes:
+                if d[i][j] > d[i][k] + d[k][j]:
+                    d[i][j] = d[i][k] + d[k][j]
+        # Compute sum
+        total = 0
+        for i in current_nodes:
+            for j in current_nodes:
+                if i != j:
+                    total += d[i][j]
+        sum_list.append(total)
 
-      Let's test the sample input 2:
+    # Reverse the sum_list to get the correct order
+    print(' '.join(map(str, reversed(sum_list))), file=output_stream)
 
-      n=2.
 
-      adj = [
-          [0,5],
-          [4,0]
-      ]
 
-      deletion_order is [1,2], so add_order is [2,1].
+def test():
+    import io
 
-      Processing k=2:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+0 3 1 1
+6 0 400 1
+2 4 0 1
+1 1 1 0
+4 1 2 3
+""",
+            "output": \
+"""\
+17 23 404 0
+""",
+        }, 
+    ]
 
-      current_nodes becomes [2]. Initialize edges between 2 and existing nodes (none). Then run Floyd step. Then sum is 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-      sum_list appends 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-      Next, k=1:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-      current_nodes becomes [2,1]. existing nodes are [2].
+    print('Tests passed 😎')
 
-      For u=2:
 
-          d[1][2] = adj[0][1] =5.
+if __name__ == '__main__':
+    test()
 
-          d[2][1] = adj[1][0] =4.
 
-      Then run Floyd step for intermediate 1:
+```
 
-          for i in [2,1], j in [2,1]:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-              check if d[i][j] > d[i][1] + d[1][j]
-
-              For i=2, j=2: d[2][2] is 0. No change.
-
-              i=2, j=1: d[2][1] is 4. Compare with d[2][1] + d[1][1] (4+0=4) → no change.
-
-              i=1, j=2: d[1][2] is5. Compare with d[1][1] + d[1][2] →0+5=5 → no change.
-
-              i=1, j=1: 0.
-
-              i=1, j=2: no change.
-
-              i=2, j=1: no change.
-
-              i=1, j=2: no change.
-
-              So distances remain 4 and5.
-
-          sum is 4+5=9.
-
-          sum_list is now [0,9].
-
-      reversed sum_list is [9,0], which matches the sample.
+```
 
       Another sample:
 

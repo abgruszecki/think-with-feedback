@@ -1296,166 +1296,179 @@ Else UNKNOWN.
 
 Thus, the code is:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-data = list(map(int, sys.stdin.read().split()))
-ptr = 0
 
-xmax = data[ptr]; ptr +=1
-ymax = data[ptr]; ptr +=1
-zmax = data[ptr]; ptr +=1
-n = data[ptr]; ptr +=1
-m = data[ptr]; ptr +=1
-k = data[ptr]; ptr +=1
+def main(input_stream, output_stream):
+    data = list(map(int, input_stream.read().split()))
+    ptr = 0
 
-open_x = []
-open_y = []
-open_z = []
+    xmax = data[ptr]; ptr +=1
+    ymax = data[ptr]; ptr +=1
+    zmax = data[ptr]; ptr +=1
+    n = data[ptr]; ptr +=1
+    m = data[ptr]; ptr +=1
+    k = data[ptr]; ptr +=1
 
-for _ in range(n):
-    x = data[ptr]; ptr +=1
-    y = data[ptr]; ptr +=1
-    z = data[ptr]; ptr +=1
-    open_x.append(x)
-    open_y.append(y)
-    open_z.append(z)
+    open_x = []
+    open_y = []
+    open_z = []
 
-x_min = min(open_x)
-x_max = max(open_x)
-y_min = min(open_y)
-y_max = max(open_y)
-z_min = min(open_z)
-z_max = max(open_z)
+    for _ in range(n):
+        x = data[ptr]; ptr +=1
+        y = data[ptr]; ptr +=1
+        z = data[ptr]; ptr +=1
+        open_x.append(x)
+        open_y.append(y)
+        open_z.append(z)
 
-closed_x_less_min = []
-closed_x_greater_max = []
-closed_y_less_min = []
-closed_y_greater_max = []
-closed_z_less_min = []
-closed_z_greater_max = []
+    x_min = min(open_x)
+    x_max = max(open_x)
+    y_min = min(open_y)
+    y_max = max(open_y)
+    z_min = min(open_z)
+    z_max = max(open_z)
 
-for _ in range(m):
-    x = data[ptr]; ptr +=1
-    y = data[ptr]; ptr +=1
-    z = data[ptr]; ptr +=1
-    if x < x_min:
-        closed_x_less_min.append(x)
-    elif x > x_max:
-        closed_x_greater_max.append(x)
-    if y < y_min:
-        closed_y_less_min.append(y)
-    elif y > y_max:
-        closed_y_greater_max.append(y)
-    if z < z_min:
-        closed_z_less_min.append(z)
-    elif z > z_max:
-        closed_z_greater_max.append(z)
+    closed_x_less_min = []
+    closed_x_greater_max = []
+    closed_y_less_min = []
+    closed_y_greater_max = []
+    closed_z_less_min = []
+    closed_z_greater_max = []
 
-# Compute xl_min and xr_max
-if closed_x_less_min:
-    xl_min = max(closed_x_less_min) + 1
-else:
-    xl_min = 1
+    for _ in range(m):
+        x = data[ptr]; ptr +=1
+        y = data[ptr]; ptr +=1
+        z = data[ptr]; ptr +=1
+        if x < x_min:
+            closed_x_less_min.append(x)
+        elif x > x_max:
+            closed_x_greater_max.append(x)
+        if y < y_min:
+            closed_y_less_min.append(y)
+        elif y > y_max:
+            closed_y_greater_max.append(y)
+        if z < z_min:
+            closed_z_less_min.append(z)
+        elif z > z_max:
+            closed_z_greater_max.append(z)
 
-if closed_x_greater_max:
-    xr_max = min(closed_x_greater_max) -1
-else:
-    xr_max = xmax
-
-if xl_min > x_min or xr_max < x_max:
-    print("INCORRECT")
-    exit()
-
-# Compute yl_min and yr_max
-if closed_y_less_min:
-    yl_min = max(closed_y_less_min) + 1
-else:
-    yl_min = 1
-
-if closed_y_greater_max:
-    yr_max = min(closed_y_greater_max) -1
-else:
-    yr_max = ymax
-
-if yl_min > y_min or yr_max < y_max:
-    print("INCORRECT")
-    exit()
-
-# Compute zl_min and zr_max
-if closed_z_less_min:
-    zl_min = max(closed_z_less_min) + 1
-else:
-    zl_min = 1
-
-if closed_z_greater_max:
-    zr_max = min(closed_z_greater_max) -1
-else:
-    zr_max = zmax
-
-if zl_min > z_min or zr_max < z_max:
-    print("INCORRECT")
-    exit()
-
-print("CORRECT")
-for _ in range(k):
-    x = data[ptr]; ptr +=1
-    y = data[ptr]; ptr +=1
-    z = data[ptr]; ptr +=1
-    # Check OPEN
-    if (xl_min <= x <= x_max) and (yl_min <= y <= y_max) and (zl_min <= z <= z_max):
-        print("OPEN")
-    elif (x < xl_min) or (x > xr_max) or (y < yl_min) or (y > yr_max) or (z < zl_min) or (z > zr_max):
-        print("CLOSED")
+    # Compute xl_min and xr_max
+    if closed_x_less_min:
+        xl_min = max(closed_x_less_min) + 1
     else:
-        print("UNKNOWN")
+        xl_min = 1
 
-Let's test this code with the first sample input.
+    if closed_x_greater_max:
+        xr_max = min(closed_x_greater_max) -1
+    else:
+        xr_max = xmax
 
-Sample input 1:
+    if xl_min > x_min or xr_max < x_max:
+        print("INCORRECT", file=output_stream)
+        return
 
-10 10 10 3 1 3
+    # Compute yl_min and yr_max
+    if closed_y_less_min:
+        yl_min = max(closed_y_less_min) + 1
+    else:
+        yl_min = 1
 
-Open entries: x=2,4,6 → x_min=2, x_max=6.
+    if closed_y_greater_max:
+        yr_max = min(closed_y_greater_max) -1
+    else:
+        yr_max = ymax
 
-Closed entry:9,9,9.
+    if yl_min > y_min or yr_max < y_max:
+        print("INCORRECT", file=output_stream)
+        return
 
-For x:
+    # Compute zl_min and zr_max
+    if closed_z_less_min:
+        zl_min = max(closed_z_less_min) + 1
+    else:
+        zl_min = 1
 
-closed_x_less_min: empty → xl_min=1.
+    if closed_z_greater_max:
+        zr_max = min(closed_z_greater_max) -1
+    else:
+        zr_max = zmax
 
-closed_x_greater_max: x=9 → min is 9. xr_max=9-1=8.
+    if zl_min > z_min or zr_max < z_max:
+        print("INCORRECT", file=output_stream)
+        return
 
-Check xl_min <=x_min (1<=2) → ok.
+    print("CORRECT", file=output_stream)
+    for _ in range(k):
+        x = data[ptr]; ptr +=1
+        y = data[ptr]; ptr +=1
+        z = data[ptr]; ptr +=1
+        # Check OPEN
+        if (xl_min <= x <= x_max) and (yl_min <= y <= y_max) and (zl_min <= z <= z_max):
+            print("OPEN", file=output_stream)
+        elif (x < xl_min) or (x > xr_max) or (y < yl_min) or (y > yr_max) or (z < zl_min) or (z > zr_max):
+            print("CLOSED", file=output_stream)
+        else:
+            print("UNKNOWN", file=output_stream)
 
-xr_max >=x_max (8 >=6) → ok.
 
-For y:
 
-closed_y_less_min: none → yl_min=1.
+def test():
+    import io
 
-closed_y_greater_max: y=9>6 → min is9 → yr_max=9-1=8.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 10 10 1 1 1
+2 5 7
+2 5 7
+8 9 10
+""",
+            "output": \
+"""\
+INCORRECT
+""",
+        }, 
+    ]
 
-Check yl_min <=y_min (1<=2) → ok.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-yr_max >=y_max (8 >=6) → ok.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-For z:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-closed_z_greater_max: z=9>6 → min is9-1=8.
+    print('Tests passed 😎')
 
-Check zl_min=1, zr_max=8 >=6 → ok.
 
-Thus, all coordinates are valid.
+if __name__ == '__main__':
+    test()
 
-Queries:
 
-1. 3,3,3 → x=3 is between 1 and 6 (xl_min=1, x_max=6). y=3 between 1 and 6 (yl_min=1, y_max=6). z=3 between 1 and 6 → OPEN.
+```
 
-2. 10,10,10 → x=10> xr_max=8 → CLOSED.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 152, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 145, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: 'INCORRECT'
+Got: 'CORRECT\nUNKNOWN'
 
-3. 8,8,8 → x=8 between x_max=6 and xr_max=8. But x_max=6 <8 → x is not in [xl_min=1, x_max=6]. So not OPEN. Also, x=8 is <=xr_max=8. So not CLOSED. Thus, UNKNOWN.
-
-Which matches the sample output.
+```
 
 The second sample input:
 

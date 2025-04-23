@@ -599,129 +599,123 @@ But for this problem, since each type 1 query can ask for different nodes, early
 
 So, in code:
 
+Testing against sample input 1.
+
+```python
 import sys
 import heapq
 
-n, m, q = map(int, sys.stdin.readline().split())
-adj = [[] for _ in range(n+1)]  # nodes are 1-based
-edges = []  # edges[0] unused, edges[1..m] are the edges
-for l in range(1, m+1):
-    a, b, c = map(int, sys.stdin.readline().split())
-    adj[a].append( (b, c, l) )
 
-delta = [0]*(m+1)  # delta[0] unused
+def main(input_stream, output_stream):
+    n, m, q = map(int, input_stream.readline().split())
+    adj = [[] for _ in range(n+1)]  # nodes are 1-based
+    edges = []  # edges[0] unused, edges[1..m] are the edges
+    for l in range(1, m+1):
+        a, b, c = map(int, input_stream.readline().split())
+        adj[a].append( (b, c, l) )
 
-current_time = 0
-dist = [0]*(n+1)
-visited_time = [0]*(n+1)
+    delta = [0]*(m+1)  # delta[0] unused
 
-for _ in range(q):
-    query = sys.stdin.readline().split()
-    if query[0] == '2':
-        # type 2 query
-        c = int(query[1])
-        ls = list(map(int, query[2:2+c]))
-        for l in ls:
-            delta[l] += 1
-    else:
-        # type 1 query
-        v = int(query[1])
-        current_time += 1
-        # Initialize for Dijkstra
-        dist[1] = 0
-        visited_time[1] = current_time
-        heap = []
-        heapq.heappush(heap, (0, 1))
-        found = False
-        while heap:
-            current_dist, u = heapq.heappop(heap)
-            if u == v:
-                print(current_dist)
-                found = True
-                break
-            if visited_time[u] != current_time or current_dist > dist[u]:
-                continue
-            for edge in adj[u]:
-                b, c_l, l = edge
-                new_dist = current_dist + c_l + delta[l]
-                if visited_time[b] < current_time or new_dist < dist[b]:
-                    dist[b] = new_dist
-                    visited_time[b] = current_time
-                    heapq.heappush(heap, (new_dist, b))
-        if not found:
-            print(-1)
+    current_time = 0
+    dist = [0]*(n+1)
+    visited_time = [0]*(n+1)
 
-Wait, but this code has a problem: when a node is popped from the heap, but its visited_time is not current_time or its distance is not the current_dist, we skip processing it. For other nodes, we process their edges.
+    for _ in range(q):
+        query = input_stream.readline().split()
+        if query[0] == '2':
+            # type 2 query
+            c = int(query[1])
+            ls = list(map(int, query[2:2+c]))
+            for l in ls:
+                delta[l] += 1
+        else:
+            # type 1 query
+            v = int(query[1])
+            current_time += 1
+            # Initialize for Dijkstra
+            dist[1] = 0
+            visited_time[1] = current_time
+            heap = []
+            heapq.heappush(heap, (0, 1))
+            found = False
+            while heap:
+                current_dist, u = heapq.heappop(heap)
+                if u == v:
+                    print(current_dist, file=output_stream)
+                    found = True
+                    break
+                if visited_time[u] != current_time or current_dist > dist[u]:
+                    continue
+                for edge in adj[u]:
+                    b, c_l, l = edge
+                    new_dist = current_dist + c_l + delta[l]
+                    if visited_time[b] < current_time or new_dist < dist[b]:
+                        dist[b] = new_dist
+                        visited_time[b] = current_time
+                        heapq.heappush(heap, (new_dist, b))
+            if not found:
+                print(-1, file=output_stream)
 
-But this should work correctly.
 
-Testing the code against the sample input:
 
-Sample Input 1:
+def test():
+    import io
 
-3 2 9
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 4 9
+2 3 1
+2 4 1
+3 4 1
 1 2 0
-2 3 0
+1 5
+1 4
 2 1 2
-1 3
-1 2
-2 1 1
-1 3
-1 2
-2 2 1 2
-1 3
-1 2
-
-The sample output is:
-
+2 1 2
+1 4
+2 2 1 3
+1 4
+2 1 4
+1 4
+""",
+            "output": \
+"""\
+-1
 1
-0
 2
-1
+3
 4
-2
+""",
+        }, 
+    ]
 
-Let's see:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The initial edges are:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Edge 1: 1->2, weight 0
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Edge 2: 2->3, weight 0
+    print('Tests passed 😎')
 
-First query is type 2 with c=1 and edges 2. So delta[2] becomes 1.
 
-Then type 1 queries for 3 and 2.
+if __name__ == '__main__':
+    test()
 
-After the first type 2 query, delta is [0, 0, 1]. So the edge weights are:
 
-Edge 1: 0+0 = 0
+```
 
-Edge 2:0+1=1
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-The path 1->2->3 has weight 0+1=1. So the first type 1 query for 3 outputs 1.
-
-The next query is type 1 for 2. The shortest path is directly edge 1, weight 0.
-
-Then a type 2 query adds 1 to edge 1. Now delta is [0, 1, 1]. The edges' weights are:
-
-Edge 1: 0+1=1
-
-Edge 2:0+1=1.
-
-So for the next type 1 query for 3, the path 1->2->3 has weight 1+1=2. Output 2.
-
-Another type 1 for 2: path 1->2 with weight 1.
-
-Another type 2 query adds 1 to edges 1 and 2. Now delta[1] is 2, delta[2] is 2. Edge weights:
-
-Edge 1: 0+2=2
-
-Edge 2:0+2=2.
-
-For type 1 query for 3, the path weight is 2+2=4.
-
-Finally, after another type 2 query adding 2 edges, the delta for 1 and 2 are 3 and 3. But the last query is type 1 for 2, which uses edge 1 with weight 3, so output 3. But the sample output's last line is 2. Wait, perhaps I'm missing something in the sample input.
+```
 
 Wait the sample input's type 2 queries are:
 

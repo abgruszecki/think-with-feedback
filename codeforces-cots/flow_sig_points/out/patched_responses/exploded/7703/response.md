@@ -954,73 +954,265 @@ sum_total_mod_p = (sum_total_mod_p + p) % p
 
 Print sum_total_mod_p.
 
-Now, let's test this code with the sample input.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    idx = 0
+    n = int(input[idx]); idx +=1
+    x = int(input[idx]); idx +=1
+    y = int(input[idx]); idx +=1
+    p = int(input[idx]); idx +=1
+    a = list(map(int, input[idx:idx+n]))
+    idx +=n
+    
+    sum_initial_mod_p = sum(a) % p
+    if n ==0:
+        print(0, file=output_stream)
+        return
+    
+    a0 = a[0] % p
+    
+    if x ==0 and y ==0:
+        print(sum_initial_mod_p % p, file=output_stream)
+        return
+    
+    def fib(n, mod):
+        if n == 0:
+            return (0, 1)
+        a, b = fib(n >> 1, mod)
+        c = (a * (2 * b - a)) % mod
+        d = (a * a + b * b) % mod
+        if n & 1:
+            return (d, (c + d) % mod)
+        else:
+            return (c, d)
+    
+    # Compute sum_x_mod_p
+    sum_x_mod_p = 0
+    if x >0:
+        if n >=2:
+            a_n_minus_1 = a[-1] % (2*p)
+            a_sum = (a[0] + a_n_minus_1) % (2*p)
+        else:
+            a_sum = (a0 *2) % (2*p)
+        three_pow_x_mod_2p = pow(3, x, 2*p)
+        three_pow_x_minus_1 = (three_pow_x_mod_2p -1) % (2*p)
+        product_x = (a_sum * three_pow_x_minus_1) % (2*p)
+        term_x = (product_x //2) % p
+        sum_x_mod_p = (sum_initial_mod_p * pow(3, x, p)) % p
+        sum_x_mod_p = (sum_x_mod_p - term_x) % p
+        sum_x_mod_p = (sum_x_mod_p + p) % p
+    else:
+        sum_x_mod_p = sum_initial_mod_p % p
+    
+    # Compute max_x
+    max_x = 0
+    m = 2*p
+    a0_mod = a0 % m
+    if n >=2:
+        a_n_minus_1 = a[-1] % m
+        a_n_minus_2 = a[-2] % m if n >=2 else 0
+        if x ==0:
+            max_x = a_n_minus_1 % m
+        else:
+            fib_x, fib_x_plus_1 = fib(x, m)
+            max_x = (fib_x_plus_1 * a_n_minus_1 + fib_x * a_n_minus_2) % m
+    else:
+        max_x = a0_mod
+    
+    a0_plus_max_x = (a0_mod + max_x) % m
+    
+    # Compute sum after y steps
+    if y ==0:
+        total = sum_x_mod_p % p
+    else:
+        three_pow_y_mod_2p = pow(3, y, m)
+        three_pow_y_minus_1 = (three_pow_y_mod_2p -1) % m
+        product_y = (a0_plus_max_x * three_pow_y_minus_1) % m
+        term_y = (product_y //2) % p
+        total = (sum_x_mod_p * pow(3, y, p)) % p
+        total = (total - term_y) % p
+        total = (total + p) % p
+    
+    print(total % p, file=output_stream)
 
-n=2, x=1, y=0, p=657276545
 
-a = [1,2]
 
-sum_initial = 3 mod p is 3.
+def test():
+    import io
 
-a_sum = 1+2=3 mod 2*p is 3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 1 1 888450282
+1 2
+""",
+            "output": \
+"""\
+14
+""",
+        }, 
+    ]
 
-three_pow_x_mod_2p = 3^1 mod 657276545*2 =3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-three_pow_x_minus_1_mod_2p =2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-product_x =3*2=6 mod 1314553090 is 6.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-term_x =6//2=3 mod p is3.
+    print('Tests passed 😎')
 
-sum_x_mod_p =3*3 mod p -3 =9-3=6 mod p.
 
-y=0:
+if __name__ == '__main__':
+    test()
 
-three_pow_y_mod_2p=1.
 
-three_pow_y_minus_1=0.
+```
 
-product_y=0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-term_y=0.
+```
 
-sum_total_mod_p=6*1 -0=6.
+Testing against sample input 2.
 
-Output is 6.
+```python
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    idx = 0
+    n = int(input[idx]); idx +=1
+    x = int(input[idx]); idx +=1
+    y = int(input[idx]); idx +=1
+    p = int(input[idx]); idx +=1
+    a = list(map(int, input[idx:idx+n]))
+    idx +=n
+    
+    sum_initial_mod_p = sum(a) % p
+    if n ==0:
+        print(0, file=output_stream)
+        return
+    
+    a0 = a[0] % p
+    
+    if x ==0 and y ==0:
+        print(sum_initial_mod_p % p, file=output_stream)
+        return
+    
+    def fib(n, mod):
+        if n == 0:
+            return (0, 1)
+        a, b = fib(n >> 1, mod)
+        c = (a * (2 * b - a)) % mod
+        d = (a * a + b * b) % mod
+        if n & 1:
+            return (d, (c + d) % mod)
+        else:
+            return (c, d)
+    
+    # Compute sum_x_mod_p
+    sum_x_mod_p = 0
+    if x >0:
+        if n >=2:
+            a_n_minus_1 = a[-1] % (2*p)
+            a_sum = (a[0] + a_n_minus_1) % (2*p)
+        else:
+            a_sum = (a0 *2) % (2*p)
+        three_pow_x_mod_2p = pow(3, x, 2*p)
+        three_pow_x_minus_1 = (three_pow_x_mod_2p -1) % (2*p)
+        product_x = (a_sum * three_pow_x_minus_1) % (2*p)
+        term_x = (product_x //2) % p
+        sum_x_mod_p = (sum_initial_mod_p * pow(3, x, p)) % p
+        sum_x_mod_p = (sum_x_mod_p - term_x) % p
+        sum_x_mod_p = (sum_x_mod_p + p) % p
+    else:
+        sum_x_mod_p = sum_initial_mod_p % p
+    
+    # Compute max_x
+    max_x = 0
+    m = 2*p
+    a0_mod = a0 % m
+    if n >=2:
+        a_n_minus_1 = a[-1] % m
+        a_n_minus_2 = a[-2] % m if n >=2 else 0
+        if x ==0:
+            max_x = a_n_minus_1 % m
+        else:
+            fib_x, fib_x_plus_1 = fib(x, m)
+            max_x = (fib_x_plus_1 * a_n_minus_1 + fib_x * a_n_minus_2) % m
+    else:
+        max_x = a0_mod
+    
+    a0_plus_max_x = (a0_mod + max_x) % m
+    
+    # Compute sum after y steps
+    if y ==0:
+        total = sum_x_mod_p % p
+    else:
+        three_pow_y_mod_2p = pow(3, y, m)
+        three_pow_y_minus_1 = (three_pow_y_mod_2p -1) % m
+        product_y = (a0_plus_max_x * three_pow_y_minus_1) % m
+        term_y = (product_y //2) % p
+        total = (sum_x_mod_p * pow(3, y, p)) % p
+        total = (total - term_y) % p
+        total = (total + p) % p
+    
+    print(total % p, file=output_stream)
 
-Sample 2:
 
-n=2, x=1, y=1, p=888450282.
 
-sum_x_mod_p is6.
+def test():
+    import io
 
-For max_x:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 5 0 10000
+1 2 3 4
+""",
+            "output": \
+"""\
+1825
+""",
+        }, 
+    ]
 
-m=2*888450282=1776900564.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Compute Fib(1) and Fib(2).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-x=1, so Fib(1) is1, Fib(2) is1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-max_x=1*2 +1*1=3 mod m is3.
+    print('Tests passed 😎')
 
-a0_plus_max_x =1+3=4 mod m.
 
-three_pow_y=3^1=3 mod m is3.
+if __name__ == '__main__':
+    test()
 
-three_pow_y_minus_1=2.
 
-product_y=4*2=8 mod m.
+```
 
-term_y=8//2=4 mod p.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-sum_total_mod_p=6 *3^1 mod p →6*3=18 mod p is18.
-
-18 -4=14 mod p.
-
-Which is correct.
+```
 
 Thus, the code should handle these cases.
 

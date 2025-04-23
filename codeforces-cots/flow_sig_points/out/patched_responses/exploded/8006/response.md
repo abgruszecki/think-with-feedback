@@ -210,53 +210,81 @@ In Python, using a Counter.
 
 So the code would be:
 
+Testing against sample input 1.
+
+```python
 from collections import Counter
 
-n, k = map(int, input().split())
 
-a = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-counts = Counter(a)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-s = len(counts)
+    counts = Counter(a)
 
-sum_remaining = sum(counts.values())
+    s = len(counts)
 
-max_ceil = 0
+    sum_remaining = sum(counts.values())
 
-for v in counts.values():
+    max_ceil = 0
 
-    current = (v + k -1) // k
+    for v in counts.values():
 
-    if current > max_ceil:
+        current = (v + k -1) // k
 
-        max_ceil = current
+        if current > max_ceil:
 
-stolen = s * max_ceil * k - sum_remaining
+            max_ceil = current
 
-print(stolen)
+    stolen = s * max_ceil * k - sum_remaining
 
-Yes.
+    print(stolen, file=output_stream)
 
-Testing with first example:
 
-a is [1,2,2,1,3]
 
-counts is 1:2, 2:2, 3:1.
+def test():
+    import io
 
-s=3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 3
+1 3 3 1 3 5 5 5 5 100
+""",
+            "output": \
+"""\
+14
+""",
+        }, 
+    ]
 
-sum_remaining=5.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-max_ceil for each v:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-2 → (2 +2-1)/2 =3//2=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Same for 2 →1.
+    print('Tests passed 😎')
 
-1 → (1+2-1)/2=2//2=1. So max_ceil is 1.
 
-3*1*2=6. 6-5=1.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

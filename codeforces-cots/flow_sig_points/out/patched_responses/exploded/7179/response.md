@@ -201,59 +201,74 @@ Then select the candidate with min last_occurrence.
 
 In code:
 
-n = int(input())
-a = list(map(int, input().split()))
-photo_info = {}
-for idx, photo in enumerate(a):
-    step = idx + 1
-    if photo in photo_info:
-        count, last = photo_info[photo]
-        count +=1
-        photo_info[photo] = (count, step)
-    else:
-        photo_info[photo] = (1, step)
-max_count = max(v[0] for v in photo_info.values())
-candidates = []
-for pid, (cnt, last) in photo_info.items():
-    if cnt == max_count:
-        candidates.append( (last, pid) )
-# The candidate with the smallest last occurrence (smallest 'last'), so min in the first element.
-candidates.sort()
-print(candidates[0][1])
+Testing against sample input 1.
 
-Wait, but the way we generate candidates is a list of tuples (last, pid). Sorting this list will sort first by last, then by pid. So the first element after sorting will have the smallest last. The pid is not considered unless the last is same. But as discussed, last is unique. So the first element's pid is the answer.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    photo_info = {}
+    for idx, photo in enumerate(a):
+        step = idx + 1
+        if photo in photo_info:
+            count, last = photo_info[photo]
+            count +=1
+            photo_info[photo] = (count, step)
+        else:
+            photo_info[photo] = (1, step)
+    max_count = max(v[0] for v in photo_info.values())
+    candidates = []
+    for pid, (cnt, last) in photo_info.items():
+        if cnt == max_count:
+            candidates.append( (last, pid) )
+    # The candidate with the smallest last occurrence (smallest 'last'), so min in the first element.
+    candidates.sort()
+    print(candidates[0][1], file=output_stream)
 
-Yes.
 
-So this code should work.
 
-Testing the first sample:
+def test():
+    import io
 
-Input 5
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+9
+100 200 300 200 100 300 300 100 200
+""",
+            "output": \
+"""\
+300
+""",
+        }, 
+    ]
 
-1 3 2 2 1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-photo_info:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-1: count 2, last 5 (steps1 and5)
+    print('Tests passed 😎')
 
-3: count1, step2
 
-2: count2, step4
+if __name__ == '__main__':
+    test()
 
-max_count is 2.
 
-candidates are (5,1), (4,2).
+```
 
-Sorting these tuples gives (4,2) first. So output 2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Yes.
-
-So the code works.
-
-Another test case where all are same. For example, input 3: 5 5 5. Then max_count is3, last step3. Only one candidate. Output 5.
+```
 
 Another case: two photos with same counts and same last step? Not possible. Because each step is a like to a photo. So two different photos can't have the same last step.
 

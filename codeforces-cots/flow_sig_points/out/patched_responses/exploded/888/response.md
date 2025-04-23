@@ -613,119 +613,201 @@ Wait, no. The maximum possible x is when all other positions are 1. Then sum is 
 
 So code:
 
-n, m, k = map(int, input().split())
+Testing against sample input 1.
 
-low = 1
+```python
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
 
-high = m  # initial high, but can be higher. But binary search is efficient.
+    low = 1
 
-max_pillows = 0
+    high = m  # initial high, but can be higher. But binary search is efficient.
 
-def compute(x):
+    max_pillows = 0
 
-    # compute sum for left and right.
+    def compute(x):
 
-    left = k-1
+        # compute sum for left and right.
 
-    a = min(x-1, left)
+        left = k-1
 
-    sum_left = a*( (x-1) + (x - a) ) //2
+        a = min(x-1, left)
 
-    sum_left += max(0, left - a) *1
+        sum_left = a*( (x-1) + (x - a) ) //2
 
-    right = n -k
+        sum_left += max(0, left - a) *1
 
-    b = min(x-1, right)
+        right = n -k
 
-    sum_right = b*( (x-1) + (x -b) ) //2
+        b = min(x-1, right)
 
-    sum_right += max(0, right -b)*1
+        sum_right = b*( (x-1) + (x -b) ) //2
 
-    total = sum_left + sum_right + x
+        sum_right += max(0, right -b)*1
 
-    return total
+        total = sum_left + sum_right + x
 
-while low <= high:
+        return total
 
-    mid = (low + high) //2
+    while low <= high:
 
-    required = compute(mid)
+        mid = (low + high) //2
 
-    if required <= m:
+        required = compute(mid)
 
-        max_pillows = mid
+        if required <= m:
 
-        low = mid +1
+            max_pillows = mid
 
-    else:
+            low = mid +1
 
-        high = mid -1
+        else:
 
-print(max_pillows)
+            high = mid -1
 
-So this code should work.
+    print(max_pillows, file=output_stream)
 
-Testing the first sample:
 
-n=4, m=6, k=2.
 
-compute(2):
+def test():
+    import io
 
-left =1, a= min(1,1)=1. sum_left =1*(1 + (2-1)) /2 → (1+1)*1/2=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 10 3
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-sum_left is 1+0=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-right=2. b= min(1,2)=1. sum_right=1*(1 + (2-1))//2= (1+1)*1/2=1. sum_right += (2-1)*1 → sum_right=2. total=1+2+2=5 <=6 → yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So mid=2 is possible. low=3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-mid=3:
+    print('Tests passed 😎')
 
-compute(3):
 
-left=1. a=2. sum_left =1*(2 + (3-1))//2 →1*(2+2)/2=2. sum_left=2+0=2.
+if __name__ == '__main__':
+    test()
 
-right=2. b=2. sum_right=2*(2 + (3-2))//2 → 2*(2+1)/2=3. sum_right=3+0=3. total=2+3+3=8>6 → no. high=2.
 
-Loop ends. max_pillows=2.
+```
 
-Which is correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Second sample:
+```
 
-input: 3 10 3.
+Testing against sample input 2.
 
-n=3, m=10, k=3.
+```python
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
 
-Frodo is in position 3.
+    low = 1
 
-left: 2 positions (1,2), right: 0.
+    high = m  # initial high, but can be higher. But binary search is efficient.
 
-x=4.
+    max_pillows = 0
 
-sum_left:
+    def compute(x):
 
-left=2. x-1=3. a= min(3,2) =2.
+        # compute sum for left and right.
 
-sum_part1=2*(3 + (4-2 )) //2 →2*(3+2)/2 →5. sum_part2=0. sum_left=5.
+        left = k-1
 
-sum_right=0.
+        a = min(x-1, left)
 
-total=5+0+4=9 <=10.
+        sum_left = a*( (x-1) + (x - a) ) //2
 
-So x=4 is possible. Check x=5:
+        sum_left += max(0, left - a) *1
 
-sum_left:
+        right = n -k
 
-x-1=4. a= min(4,2) =2.
+        b = min(x-1, right)
 
-sum_part1=2*(4 + (5-2))//2 → 2*(4+3)/2=7. sum_left=7+0=7.
+        sum_right = b*( (x-1) + (x -b) ) //2
 
-sum_right=0.
+        sum_right += max(0, right -b)*1
 
-total=7+0+5=12>10. Not possible.
+        total = sum_left + sum_right + x
 
-So max_pillows=4. Which matches the sample.
+        return total
+
+    while low <= high:
+
+        mid = (low + high) //2
+
+        required = compute(mid)
+
+        if required <= m:
+
+            max_pillows = mid
+
+            low = mid +1
+
+        else:
+
+            high = mid -1
+
+    print(max_pillows, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 6 1
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

@@ -696,80 +696,88 @@ Process each road.
 
 Now, code:
 
-n = int(input())
-d = []
-for _ in range(n):
-    row = list(map(int, input().split()))
-    d.append(row)
-current_sum = sum(d[i][j] for i in range(n) for j in range(i + 1, n))
-k = int(input())
-output = []
-for _ in range(k):
-    a, b, c = map(int, input().split())
-    a -= 1
-    b -= 1
-    if d[a][b] > c:
-        # Update the direct distance
-        d[a][b] = c
-        d[b][a] = c
-        # Run Floyd-Warshall for k in [a, b]
-        for k_node in [a, b]:
-            for i in range(n):
-                for j in range(n):
-                    new_dist = d[i][k_node] + d[k_node][j]
-                    if new_dist < d[i][j]:
-                        d[i][j] = new_dist
-                        d[j][i] = new_dist  # since undirected
-        # Recompute the sum
-        current_sum = sum(d[i][j] for i in range(n) for j in range(i + 1, n))
-    output.append(str(current_sum))
-print(' '.join(output))
+Testing against sample input 1.
 
-Wait, but in Python, the loop variables can't be named 'k' because there's a variable named k (the number of roads). So in the code above, the loop variable is named k_node.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    d = []
+    for _ in range(n):
+        row = list(map(int, input_stream.readline().rstrip("\n").split()))
+        d.append(row)
+    current_sum = sum(d[i][j] for i in range(n) for j in range(i + 1, n))
+    k = int(input_stream.readline().rstrip("\n"))
+    output = []
+    for _ in range(k):
+        a, b, c = map(int, input_stream.readline().rstrip("\n").split())
+        a -= 1
+        b -= 1
+        if d[a][b] > c:
+            # Update the direct distance
+            d[a][b] = c
+            d[b][a] = c
+            # Run Floyd-Warshall for k in [a, b]
+            for k_node in [a, b]:
+                for i in range(n):
+                    for j in range(n):
+                        new_dist = d[i][k_node] + d[k_node][j]
+                        if new_dist < d[i][j]:
+                            d[i][j] = new_dist
+                            d[j][i] = new_dist  # since undirected
+            # Recompute the sum
+            current_sum = sum(d[i][j] for i in range(n) for j in range(i + 1, n))
+        output.append(str(current_sum))
+    print(' '.join(output), file=output_stream)
 
-Yes, that's correct.
 
-Testing this code with sample input 1:
 
-Sample Input 1:
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+0 4 5
+4 0 9
+5 9 0
 2
+2 3 8
+1 2 1
+""",
+            "output": \
+"""\
+17 12
+""",
+        }, 
+    ]
 
-0 5
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-5 0
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-1
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-1 2 3 → a=0, b=1, c=3.
+    print('Tests passed 😎')
 
-d[a][b] is 5 >3 → update to 3.
 
-Then run for k_node in [0, 1].
+if __name__ == '__main__':
+    test()
 
-For k_node=0:
 
-Loop i from 0 to 1.
+```
 
-i=0:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-j=0: d[0][0] +d[0][0] →0+0=0 → no change.
-
-j=1: d[0][0] (0) + d[0][1] (3) =3 → current d[0][1] is 3 → no change.
-
-i=1:
-
-j=0: d[1][0] (3) + d[0][0] (0) =3 → current d[1][0] is 3 → no change.
-
-j=1: no change.
-
-k_node=1:
-
-Same as k_node=0. No changes.
-
-Sum is 3.
-
-Which is correct.
+```
 
 Sample input 2:
 

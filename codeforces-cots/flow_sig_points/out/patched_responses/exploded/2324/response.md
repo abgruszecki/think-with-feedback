@@ -1411,177 +1411,188 @@ Now, putting it all together.
 
 The code:
 
-class FenwickTree:
+Testing against sample input 1.
 
-    def __init__(self, size):
+```python
+def main(input_stream, output_stream):
+    class FenwickTree:
 
-        self.n = size
+        def __init__(self, size):
 
-        self.tree = [0]*(self.n + 2)  # +2 to avoid issues with 1-based indexing
+            self.n = size
 
-    def update(self, idx, delta=1):
+            self.tree = [0]*(self.n + 2)  # +2 to avoid issues with 1-based indexing
 
-        while idx <= self.n:
+        def update(self, idx, delta=1):
 
-            self.tree[idx] += delta
+            while idx <= self.n:
 
-            idx += idx & -idx
+                self.tree[idx] += delta
 
-    def query(self, idx):
+                idx += idx & -idx
 
-        res = 0
+        def query(self, idx):
 
-        while idx >0:
+            res = 0
 
-            res += self.tree[idx]
+            while idx >0:
 
-            idx -= idx & -idx
+                res += self.tree[idx]
 
-        return res
+                idx -= idx & -idx
 
-n = int(input())
+            return res
 
-a = list(map(int, input().split()))
+    n = int(input_stream.readline().rstrip("\n"))
 
-# Compute original inversion count
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-ft = FenwickTree(n)
+    # Compute original inversion count
 
-inv =0
+    ft = FenwickTree(n)
 
-for num in reversed(a):
+    inv =0
 
-    # query the number of elements inserted so far that are < num
+    for num in reversed(a):
 
-    # which are the elements to the right in the original array
+        # query the number of elements inserted so far that are < num
 
-    inv += ft.query(num)
+        # which are the elements to the right in the original array
 
-    ft.update(num +1)  # since elements are 0-based, stored as 1-based in FenwickTree
+        inv += ft.query(num)
 
-# Precompute prefix array
+        ft.update(num +1)  # since elements are 0-based, stored as 1-based in FenwickTree
 
-prefix = [[0]*(n) for _ in range(n+1)]
+    # Precompute prefix array
 
-for i in range(1, n+1):
+    prefix = [[0]*(n) for _ in range(n+1)]
 
-    current = a[i-1]
+    for i in range(1, n+1):
 
-    for v in range(n):
+        current = a[i-1]
 
-        if current <= v:
+        for v in range(n):
 
-            prefix[i][v] = prefix[i-1][v] +1
+            if current <= v:
 
-        else:
+                prefix[i][v] = prefix[i-1][v] +1
 
-            prefix[i][v] = prefix[i-1][v]
+            else:
 
-min_new_inv = float('inf')
+                prefix[i][v] = prefix[i-1][v]
 
-count_pairs =0
+    min_new_inv = float('inf')
 
-for i in range(n):
+    count_pairs =0
 
-    for j in range(i+1, n):
+    for i in range(n):
 
-        x = a[i]
+        for j in range(i+1, n):
 
-        y = a[j]
+            x = a[i]
 
-        if x < y:
+            y = a[j]
 
-            A = x
+            if x < y:
 
-            B = y
+                A = x
 
-        else:
+                B = y
 
-            A = y
+            else:
 
-            B = x
+                A = y
 
-        L = i +1
+                B = x
 
-        R = j -1
+            L = i +1
 
-        if L > R:
+            R = j -1
 
-            c =0
+            if L > R:
 
-        else:
+                c =0
 
-            # compute elements in [L, R] where A < z < B
+            else:
 
-            # which is elements <= B-1 and > A
+                # compute elements in [L, R] where A < z < B
 
-            # count = (number of elements <= B-1) - (number of elements <= A)
+                # which is elements <= B-1 and > A
 
-            part1 = prefix[R+1][B-1] - prefix[L][B-1]
+                # count = (number of elements <= B-1) - (number of elements <= A)
 
-            part2 = prefix[R+1][A] - prefix[L][A]
+                part1 = prefix[R+1][B-1] - prefix[L][B-1]
 
-            c = part1 - part2
+                part2 = prefix[R+1][A] - prefix[L][A]
 
-        if x < y:
+                c = part1 - part2
 
-            delta = 2 * c +1
+            if x < y:
 
-        else:
+                delta = 2 * c +1
 
-            delta = -2 * c -1
+            else:
 
-        new_inv = inv + delta
+                delta = -2 * c -1
 
-        if new_inv < min_new_inv:
+            new_inv = inv + delta
 
-            min_new_inv = new_inv
+            if new_inv < min_new_inv:
 
-            count_pairs =1
+                min_new_inv = new_inv
 
-        elif new_inv == min_new_inv:
+                count_pairs =1
 
-            count_pairs +=1
+            elif new_inv == min_new_inv:
 
-print(min_new_inv, count_pairs)
+                count_pairs +=1
 
-Testing this code with sample input 1:
+    print(min_new_inv, count_pairs, file=output_stream)
 
-Sample Input 1:
 
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
+1 2 3 4 0
+""",
+            "output": \
+"""\
+3 4
+""",
+        }, 
+    ]
 
-4 0 3 1 2
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Original inversion count is 6.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing pairs:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Pair (0,3):
+    print('Tests passed 😎')
 
-x=4, y=1. x>y. A=1, B=4. L=1, R=2.
 
-c=1.
+if __name__ == '__main__':
+    test()
 
-delta= -2*1-1= -3. new_inv=6-3=3.
 
-Pair (0,4):
+```
 
-x=4, y=2. x>y. A=2, B=4. L=1, R=3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Elements between 0+1=1 and 4-1=3: positions 1,2,3: elements 0,3,1.
-
-A=2, B=4.
-
-Elements between 2 and4: 3.
-
-So c=1.
-
-delta= -2*1 -1= -3. new_inv=3.
-
-Thus, there are 2 pairs, so code outputs 3 2.
-
-Which matches the sample.
+```
 
 Sample Input 2:
 

@@ -639,45 +639,163 @@ The main bottleneck is the sum( x//mid for x in a ). For 1e6 elements, each divi
 
 But even so, for 1e6 elements, each step is O(1e6), which for 24 steps is 24e6 operations—manageable.
 
-But let's test with the sample inputs.
+Testing against sample input 1.
 
-First sample:
+```python
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    n = int(input[0])
+    k = int(input[1])
+    a = list(map(int, input[2:2 + n]))
+    
+    total = sum(a)
+    if total < k:
+        print(-1, file=output_stream)
+        return
+    
+    max_a = max(a)
+    low = 1
+    high = max_a
+    ans = 0
+    
+    while low <= high:
+        mid = (low + high) // 2
+        current = 0
+        for num in a:
+            current += num // mid
+            if current >= k:
+                break
+        if current >= k:
+            ans = mid
+            low = mid + 1
+        else:
+            high = mid - 1
+    print(ans, file=output_stream)
 
-n=3, k=2.
 
-a=5,9,3.
 
-sum_a=17 >=2.
+def test():
+    import io
 
-binary search between 1 and9.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 4
+12 14
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-mid=5: sum=5//5=1, 9//5=1, 3//5=0. sum=2 >=2. So answer is 5.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Which matches.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Second sample:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-n=2, k=4.
+    print('Tests passed 😎')
 
-a=12,14.
 
-sum=26 >=4.
+if __name__ == '__main__':
+    test()
 
-max_a=14.
 
-binary search:
+```
 
-low=1, high=14.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-mid= (1+14)//2=7. sum is 12//7=1, 14//7=2. sum=3 <4. So high=6.
+```
 
-mid=(1+6)/2=3.5 → mid=3. sum 12//3=4, 14//3=4. sum 8 >=4 → answer=3, low=4.
+Testing against sample input 2.
 
-mid= (4+6)/2=5. sum 12//5=2,14//5=2. sum=4 >=4 → answer=5, low=6.
+```python
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    n = int(input[0])
+    k = int(input[1])
+    a = list(map(int, input[2:2 + n]))
+    
+    total = sum(a)
+    if total < k:
+        print(-1, file=output_stream)
+        return
+    
+    max_a = max(a)
+    low = 1
+    high = max_a
+    ans = 0
+    
+    while low <= high:
+        mid = (low + high) // 2
+        current = 0
+        for num in a:
+            current += num // mid
+            if current >= k:
+                break
+        if current >= k:
+            ans = mid
+            low = mid + 1
+        else:
+            high = mid - 1
+    print(ans, file=output_stream)
 
-mid=6. sum 12//6=2, 14//6=2. sum=4 >=4. answer=6. low=7.
 
-mid= (7+6)/2=6. high becomes 5. loop ends. So answer is 6. Correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 3
+1 1
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

@@ -1186,72 +1186,103 @@ The code uses a dictionary to track the availability of pawns in x+1.
 
 Here's the code:
 
+Testing against sample input 1.
+
+```python
 from collections import defaultdict
 
-n = int(input())
-pawns = [tuple(map(int, input().split())) for _ in range(n)]
 
-# Group pawns by x-coordinate
-x_groups = defaultdict(set)
-for x, y in pawns:
-    x_groups[x].add(y)
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    pawns = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n)]
 
-# Sort the x-coordinates in increasing order
-sorted_x = sorted(x_groups.keys())
+    # Group pawns by x-coordinate
+    x_groups = defaultdict(set)
+    for x, y in pawns:
+        x_groups[x].add(y)
 
-count = 0
+    # Sort the x-coordinates in increasing order
+    sorted_x = sorted(x_groups.keys())
 
-# For each x in increasing order, process the pawns
-for x in sorted_x:
-    current_ys = sorted(x_groups[x])
-    next_x = x + 1
-    next_ys = x_groups.get(next_x, set())
-    matched = set()
-    for y in current_ys:
-        # Check if y-1 is available in next_x
-        if (y-1) in next_ys:
-            count +=1
-            next_ys.remove(y-1)
-            matched.add(y-1)
-        elif (y+1) in next_ys:
-            count +=1
-            next_ys.remove(y+1)
-            matched.add(y+1)
-    # Remove the matched pawns from next_x's group
-    if next_x in x_groups:
-        x_groups[next_x] = x_groups[next_x] - matched
+    count = 0
 
-print(n - count)
+    # For each x in increasing order, process the pawns
+    for x in sorted_x:
+        current_ys = sorted(x_groups[x])
+        next_x = x + 1
+        next_ys = x_groups.get(next_x, set())
+        matched = set()
+        for y in current_ys:
+            # Check if y-1 is available in next_x
+            if (y-1) in next_ys:
+                count +=1
+                next_ys.remove(y-1)
+                matched.add(y-1)
+            elif (y+1) in next_ys:
+                count +=1
+                next_ys.remove(y+1)
+                matched.add(y+1)
+        # Remove the matched pawns from next_x's group
+        if next_x in x_groups:
+            x_groups[next_x] = x_groups[next_x] - matched
 
-Let's test this with sample input 1:
+    print(n - count, file=output_stream)
 
-Pawns grouped by x:
 
-x=1: {1}
 
-x=2: {2}
+def test():
+    import io
 
-x=5: {1}
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+3 2
+1 3
+1 1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-Processing x=1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-current_ys = [1]
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-next_x=2, next_ys = {2}.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Check y=1-1=0 not in next_ys. Then check y+1=2. Present. count becomes 1. Remove 2 from next_ys.
+    print('Tests passed 😎')
 
-x_groups[2] is now empty.
 
-Processing x=2:
+if __name__ == '__main__':
+    test()
 
-current_ys is empty. No processing.
 
-Processing x=5:
+```
 
-next_x=6. No next_ys. No matches.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 76, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 69, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '2'
+Got: '3'
 
-Total count=1. n -1=2. Sample output is 1. So this approach is incorrect.
+```
 
 Thus, this code is also incorrect.
 

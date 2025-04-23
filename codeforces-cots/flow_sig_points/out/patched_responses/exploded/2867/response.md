@@ -741,33 +741,165 @@ print(count)
 
 This should handle all cases.
 
-Let's test this code on the samples.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-n=1, s=U.
+    x, y = 0, 0
+    current_side = None  # 'first', 'second', or None initially
+    count = 0
 
-After move, new_x=0, new_y=1. new_kingdom is second. current_side is None → set to 'second'. count remains 0. Output is 0. Correct.
+    for move in s:
+        if move == 'R':
+            new_x = x + 1
+            new_y = y
+        else:
+            new_x = x
+            new_y = y + 1
+        
+        if new_x > new_y:
+            new_kingdom = 'first'
+        elif new_x < new_y:
+            new_kingdom = 'second'
+        else:
+            new_kingdom = 'gate'
+        
+        if new_kingdom != 'gate':
+            if current_side is not None and current_side != new_kingdom:
+                count += 1
+            current_side = new_kingdom
+        
+        x, y = new_x, new_y
 
-Sample 2:
+    print(count, file=output_stream)
 
-n=6, s=RURUUR.
 
-Moves:
 
-R → (1,0) → first. current_side becomes first.
+def test():
+    import io
 
-U → (1,1) → gate. current_side remains first.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+RURUUR
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-R → (2,1) → first. current_side remains first. No change.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-U → (2,2) → gate. current_side remains first.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-U → (2,3) → second. current_side is first → count +=1. current_side becomes second.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-R → (3,3) → gate. current_side remains second.
+    print('Tests passed 😎')
 
-Total count is 1. Correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+
+    x, y = 0, 0
+    current_side = None  # 'first', 'second', or None initially
+    count = 0
+
+    for move in s:
+        if move == 'R':
+            new_x = x + 1
+            new_y = y
+        else:
+            new_x = x
+            new_y = y + 1
+        
+        if new_x > new_y:
+            new_kingdom = 'first'
+        elif new_x < new_y:
+            new_kingdom = 'second'
+        else:
+            new_kingdom = 'gate'
+        
+        if new_kingdom != 'gate':
+            if current_side is not None and current_side != new_kingdom:
+                count += 1
+            current_side = new_kingdom
+        
+        x, y = new_x, new_y
+
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+URRRUUU
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

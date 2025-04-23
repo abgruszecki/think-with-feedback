@@ -137,53 +137,78 @@ Now, in code:
 
 In Python:
 
-x = int(input())
+Testing against sample input 1.
 
-hh, mm = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    x = int(input_stream.readline().rstrip("\n"))
 
-total = hh * 60 + mm
+    hh, mm = map(int, input_stream.readline().rstrip("\n").split())
 
-for y in range(1440):  # since after 1440 steps, it would have cycled
+    total = hh * 60 + mm
 
-    current_time = (total - x * y) % 1440
+    for y in range(1440):  # since after 1440 steps, it would have cycled
 
-    h = current_time // 60
+        current_time = (total - x * y) % 1440
 
-    m = current_time % 60
+        h = current_time // 60
 
-    hh_str = f"{h:02d}"
+        m = current_time % 60
 
-    mm_str = f"{m:02d}"
+        hh_str = f"{h:02d}"
 
-    if '7' in hh_str or '7' in mm_str:
+        mm_str = f"{m:02d}"
 
-        print(y)
+        if '7' in hh_str or '7' in mm_str:
 
-        exit()
+            print(y, file=output_stream)
 
-Wait, but why 1440? Because in the worst case, you might have to check all possible times. For example, if x=1, and the only possible time with a 7 is 1440 steps back, which is the same as the original time. Wait, but maybe not. Let's see: Suppose x=1, and the original time is 00:00. Then, subtracting 1*y minutes. The first time with a 7 would be 00:07 (y=53? Wait, 00:07 is 7 minutes after 00:00, but subtracting 53 steps would be 00:00 -53*1 = -53 minutes, which is 23:07. So y=53 would give 23:07, which has a 7. So in that case, y is 53.
+            return
 
-But in the worst case, when x is 1, the maximum y could be up to 1439 steps, but after 1440 steps, the time cycles. So the loop can be up to 1440 steps. Because in the worst case, the first occurrence of a 7 is after 1439 steps. But since the problem states that there is at least one solution, the loop will find it within 1440 steps.
 
-So in code, looping up to 1440 times is sufficient.
 
-Testing the sample input.
+def test():
+    import io
 
-Sample 1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+01 07
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Input:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-3
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-11 23
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-total = 11*60 +23= 683.
+    print('Tests passed 😎')
 
-For y=0: 683 -0 =683. 683 mod 1440 is 683. 683 minutes is 11 h 23 m. Check: 11:23. No 7. So no.
 
-y=1: 683-3=680. 680 minutes is 11*60=660, 20: 680-660=20. 11:20. No.
+if __name__ == '__main__':
+    test()
 
-y=2: 683-6=677. 677//60 = 11 (11*60=660), 677-660=17. 11:17. The minutes are 17, which has a 7. So yes. So y=2 is the answer. Which matches the sample.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

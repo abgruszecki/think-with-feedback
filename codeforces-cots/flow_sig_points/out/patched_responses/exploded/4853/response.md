@@ -67,59 +67,147 @@ So loop from 1 to int(math.sqrt(n)) + 1? Wait, no. Because the loop is inclusive
 
 So code steps:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n = int(input())
 
-max_a = 1
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-sqrt_n = int(math.sqrt(n))
+    max_a = 1
 
-for i in range(1, sqrt_n + 1):
+    sqrt_n = int(math.sqrt(n))
 
-    if n % i == 0:
+    for i in range(1, sqrt_n + 1):
 
-        if i > max_a:
+        if n % i == 0:
 
-            max_a = i
+            if i > max_a:
 
-b = n // max_a
+                max_a = i
 
-perimeter = 2 * (max_a + b)
+    b = n // max_a
 
-print(perimeter)
+    perimeter = 2 * (max_a + b)
 
-Yes. This should work.
+    print(perimeter, file=output_stream)
 
-Testing the examples:
 
-Sample 1: 36.
 
-Loop i from 1 to 6.
+def test():
+    import io
 
-Check each i. All divisors of 36 up to 6.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+13
+""",
+            "output": \
+"""\
+28
+""",
+        }, 
+    ]
 
-i=1: yes, max_a=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=2: 36%2=0. max_a=2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=3: yes. max_a=3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=4: 36%4=0? 36/4 is 9, which is 9. So 4 is a divisor. So max_a becomes 4.
+    print('Tests passed 😎')
 
-i=5: 36%5=1, no.
 
-i=6: 36%6=0. So max_a becomes 6. Then b is 6. Perimeter 24.
+if __name__ == '__main__':
+    test()
 
-Sample 2:13.
 
-Loop i from 1 to 3.
+```
 
-i=1: yes, max_a=1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=2: no.
+```
 
-i=3: 13%3 is 1. So max_a remains 1. Then b=13. perimeter 28.
+Testing against sample input 2.
+
+```python
+import math
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    max_a = 1
+
+    sqrt_n = int(math.sqrt(n))
+
+    for i in range(1, sqrt_n + 1):
+
+        if n % i == 0:
+
+            if i > max_a:
+
+                max_a = i
+
+    b = n // max_a
+
+    perimeter = 2 * (max_a + b)
+
+    print(perimeter, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:1. Loop i from 1 to 1.
 

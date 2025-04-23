@@ -99,17 +99,58 @@ result = (r-1)*m +c
 
 Print(result)
 
-Testing the first example:
+Testing against sample input 1.
 
-n=3, m=4, k=11.
+```python
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
+    c = (k - 1) // n + 1
+    r = (k - 1) % n + 1
+    print((r - 1) * m + c, file=output_stream)
 
-(k-1) is 10.
 
-10//3=3 → c=4.
 
-10%3=1 → r=2.
+def test():
+    import io
 
-(r-1)*m +c =1*4 +4=8. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+20000 10000 200000000
+""",
+            "output": \
+"""\
+200000000
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: 20000,10000,2e8. As discussed, correct.
 

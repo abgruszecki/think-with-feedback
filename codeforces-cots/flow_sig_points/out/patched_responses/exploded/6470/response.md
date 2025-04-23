@@ -141,25 +141,74 @@ print(max_val)
 
 This should handle all cases.
 
-Testing on the first sample input:
+Testing against sample input 1.
 
-After processing, the dist matrix for the first case becomes:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    dist = [list(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n)]
 
-For k=0:
+    for k in range(n):
+        for i in range(n):
+            for j in range(n):
+                if dist[i][j] > dist[i][k] + dist[k][j]:
+                    dist[i][j] = dist[i][k] + dist[k][j]
 
-i=1, j=2: original value is 4. But dist[1][0] + dist[0][2] = 1+1=2. So it's updated to 2.
+    max_distance = 0
+    for i in range(n):
+        for j in range(n):
+            if i != j and dist[i][j] > max_distance:
+                max_distance = dist[i][j]
 
-Other entries remain the same.
+    print(max_distance, file=output_stream)
 
-So the dist matrix after Floyd-Warshall would have entries:
 
-Row 0: 0,1,1
 
-Row 1:1,0,2
+def test():
+    import io
 
-Row 2:1,2,0
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+0 1 2 3
+1 0 4 5
+2 4 0 6
+3 5 6 0
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-So the maximum is 2, which matches the sample.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample input:
 

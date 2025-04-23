@@ -367,247 +367,181 @@ Let's see.
 
 The code:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-n = int(input())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-max_bell = n +1
+    n = int(input_stream.readline().rstrip("\n"))
 
-# Precompute combinations up to (max_bell-1) choose k, since for Bell(max_bell), the maximum m is max_bell-1.
+    max_bell = n +1
 
-max_m = max_bell -1
+    # Precompute combinations up to (max_bell-1) choose k, since for Bell(max_bell), the maximum m is max_bell-1.
 
-# Compute comb up to max_m.
+    max_m = max_bell -1
 
-comb = [[0]*(max_m +1) for _ in range(max_m +1)]
+    # Compute comb up to max_m.
 
-for m in range(max_m +1):
-    comb[m][0] = 1
-    if m >=1:
-        comb[m][m] =1
-    for k in range(1, m):
-        comb[m][k] = (comb[m-1][k-1] + comb[m-1][k]) % MOD
+    comb = [[0]*(max_m +1) for _ in range(max_m +1)]
 
-# Now compute Bell numbers up to max_bell.
+    for m in range(max_m +1):
+        comb[m][0] = 1
+        if m >=1:
+            comb[m][m] =1
+        for k in range(1, m):
+            comb[m][k] = (comb[m-1][k-1] + comb[m-1][k]) % MOD
 
-Bell = [0]*(max_bell +1)
-Bell[0] =1
+    # Now compute Bell numbers up to max_bell.
 
-for m in range(0, max_bell):
-    # Compute Bell[m+1]
-    s =0
-    for k in range(0, m+1):
-        if k > m:
-            c =0
-        else:
-            c = comb[m][k]
-        s = (s + c * Bell[k]) % MOD
-    Bell[m+1] = s
+    Bell = [0]*(max_bell +1)
+    Bell[0] =1
 
-ans = (Bell[n+1] - Bell[n]) % MOD
-print(ans)
+    for m in range(0, max_bell):
+        # Compute Bell[m+1]
+        s =0
+        for k in range(0, m+1):
+            if k > m:
+                c =0
+            else:
+                c = comb[m][k]
+            s = (s + c * Bell[k]) % MOD
+        Bell[m+1] = s
 
-Wait, but when m is up to max_bell-1. Let's see.
+    ans = (Bell[n+1] - Bell[n]) % MOD
+    print(ans, file=output_stream)
 
-max_bell is n+1.
 
-We need to compute Bell[0] to Bell[n+1].
 
-So, the loop for m in 0 to (n+1-1) =n.
+def test():
+    import io
 
-But in code:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-for m in range(0, max_bell):
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-max_bell is n+1. So the loop runs m from 0 to (n+1-1) =n.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Which is correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But let's test for n=1.
+    print('Tests passed 😎')
 
-max_bell =2.
 
-So m runs from 0 to 1 (since max_bell is 2, range(0, max_bell) is 0,1).
+if __name__ == '__main__':
+    test()
 
-For m=0:
 
-Bell[1] = sum_{k=0}^0 comb[0][0] * Bell[0} =1*1=1.
+```
 
-For m=1:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-sum_{k=0}^1 comb[1][k] * Bell[k}.
+```
 
-comb[1][0] =1, comb[1][1}=1.
+Testing against sample input 2.
 
-So sum is 1*1 (k=0) +1*1 (k=1) =2 → Bell[2] =2.
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-So, correct.
+    n = int(input_stream.readline().rstrip("\n"))
 
-But the code may need to precompute comb up to m=1.
+    max_bell = n +1
 
-Yes, because for m=1, comb is needed up to m=1.
+    # Precompute combinations up to (max_bell-1) choose k, since for Bell(max_bell), the maximum m is max_bell-1.
 
-But the code's max_m is max_bell-1 = (n+1) -1 =n.
+    max_m = max_bell -1
 
-So, when n=4000, max_m is 4000.
+    # Compute comb up to max_m.
 
-So, the comb is precomputed up to 4000, which is correct.
+    comb = [[0]*(max_m +1) for _ in range(max_m +1)]
 
-Yes.
+    for m in range(max_m +1):
+        comb[m][0] = 1
+        if m >=1:
+            comb[m][m] =1
+        for k in range(1, m):
+            comb[m][k] = (comb[m-1][k-1] + comb[m-1][k]) % MOD
 
-But in the code above, when m is up to max_m (which is 4000 for n=4000), then for m=4000, the code computes Bell[4001], which is needed.
+    # Now compute Bell numbers up to max_bell.
 
-So, the code is correct.
+    Bell = [0]*(max_bell +1)
+    Bell[0] =1
 
-Now, let's check the memory. For n=4000, the comb array is (4001 x 4001) integers, which is 16 million integers. Each integer is 4 bytes (in CPython, but in Python, integers can take more memory). However, 16 million integers in Python may take up a lot of memory, but given the 256 MB limit, perhaps it's manageable. Alternatively, perhaps there's a way to optimize.
+    for m in range(0, max_bell):
+        # Compute Bell[m+1]
+        s =0
+        for k in range(0, m+1):
+            if k > m:
+                c =0
+            else:
+                c = comb[m][k]
+            s = (s + c * Bell[k]) % MOD
+        Bell[m+1] = s
 
-But for Python, using a list of lists for comb may be memory-intensive. So, perhaps, using a 1D array and updating it in place.
+    ans = (Bell[n+1] - Bell[n]) % MOD
+    print(ans, file=output_stream)
 
-Alternatively, since in the Bell recurrence, for each m, when calculating Bell[m+1], we need comb[m][k] for k up to m. So, perhaps compute comb on the fly for each m.
 
-Wait, but that would not save time, as we need to compute comb for all m up to 4000.
 
-Alternatively, perhaps we can compute the combination C(m, k) as the binomial coefficient, but for m up to 4000 and k up to m, but this would require a different approach.
+def test():
+    import io
 
-Alternatively, note that the recurrence for Bell numbers can be rewritten using the formula:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+""",
+            "output": \
+"""\
+10
+""",
+        }, 
+    ]
 
-Bell[m+1] = sum_{k=0}^m C(m, k) * Bell[k]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Which can be rewritten as sum_{k=0}^m (m choose k) * Bell[k}.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But perhaps using generating functions or other methods to compute this sum.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But for the time being, the initial approach is correct, but the problem is that for n=4000, the comb array requires 4001 x 4001 entries. Which in Python would be 4001 lists, each of size 4001. Each entry is a 4-byte integer (but in Python, integers are objects and take more memory). However, 4001 *4001 is ~16 million entries. Even if each takes 8 bytes, it's 128MB, which is under the memory limit (256MB). So it's manageable.
+    print('Tests passed 😎')
 
-But let's check the code with the sample inputs.
 
-Sample input 1:
+if __name__ == '__main__':
+    test()
 
-n=1.
 
-max_bell=2.
+```
 
-precompute comb up to m=1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-comb[0][0] =1.
-
-comb[1][0] =1, comb[1][1]=1.
-
-Then, compute Bell[0] =1.
-
-m=0:
-
-compute Bell[1] = sum_{k=0}^0 comb[0][0] * Bell[0} =1 → Bell[1]=1.
-
-m=1:
-
-compute Bell[2} = sum_{k=0}^1 comb[1][k} * Bell[k}.
-
-comb[1][0}=1 → 1*1=1.
-
-comb[1][1}=1 → 1*1=1.
-
-Sum is 2 → Bell[2}=2.
-
-answer is (2-1) mod MOD =1. Correct.
-
-Sample input 2: n=2.
-
-max_bell=3.
-
-precompute comb up to m=2.
-
-comb[2][0} =1, comb[2][1}=2, comb[2][2}=1.
-
-Bell[3} is computed as sum_{k=0}^2 comb[2][k} * Bell[k}.
-
-Bell[0}=1, Bell[1}=1, Bell[2}=2.
-
-sum = comb[2][0} *1 + comb[2][1} *1 + comb[2][2} *2 → 1*1 + 2*1 +1*2 =1+2+2=5.
-
-So Bell[3}=5.
-
-answer is 5-2=3.
-
-Yes.
-
-So code works.
-
-But the problem is that for n=4000, precomputing the comb array may take a lot of time and memory.
-
-Alternative approach: compute the combinations C(m, k) on the fly using a formula.
-
-But for each m and k, C(m, k) can be computed as factorial(m) / ( factorial(k) * factorial(m-k) ) mod MOD.
-
-But factorials up to 4000 are needed.
-
-Precomputing factorials and inverse factorials mod MOD is another approach.
-
-Let me think:
-
-Compute fact = [1]*(max_m +1)
-
-fact[i] = i! mod MOD.
-
-Compute inv_fact = [1]*(max_m +1)
-
-inv_fact[i] = inverse(fact[i]) mod MOD.
-
-Once these are precomputed, then C(m, k) can be computed as fact[m] * inv_fact[k] * inv_fact[m-k] mod MOD.
-
-This would allow us to compute C(m, k) on the fly for any m and k.
-
-But this approach requires precomputing factorials and inverse factorials up to 4000.
-
-This is more memory-efficient as it uses two arrays of size 4001 each, instead of a 4001x4001 matrix.
-
-Let's see:
-
-For precomputing factorials:
-
-fact[0] =1.
-
-for i in 1 to 4000:
-
-fact[i] = fact[i-1] * i % MOD.
-
-Inverse factorials:
-
-inv_fact[4000] = pow(fact[4000], MOD-2, MOD)
-
-for i in 3999 down to 0:
-
-inv_fact[i] = inv_fact[i+1] * (i+1) % MOD.
-
-Once this is done, C(m, k) can be computed as:
-
-if k <0 or k>m: 0
-
-else: (fact[m] * inv_fact[k] % MOD) * inv_fact[m -k] % MOD.
-
-So, this approach uses O(n) memory for factorials and inverse factorials, and O(1) per C(m, k) query.
-
-Thus, for each m in 0..4000, and k in 0..m, we can compute C(m, k) on the fly.
-
-This would save memory, which is important for n=4000.
-
-So, modifying the code to use this approach.
-
-Steps:
-
-1. Precompute fact and inv_fact up to 4000.
-
-2. For each m in 0 to (n+1-1) =n:
-
-   compute Bell[m+1] as sum_{k=0}^m C(m, k)*Bell[k} mod MOD.
-
-But to compute C(m, k), use the formula.
-
-This would eliminate the need for the comb array, saving memory.
-
-This is better for Python, which has memory constraints for large 2D arrays.
-
-So, the code would be:
+```
 
 MOD = 10**9 +7
 

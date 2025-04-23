@@ -900,13 +900,16 @@ But in code submission, sometimes it's better to split the input into lines.
 
 But for the code, perhaps:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-def main():
 
-    n = int(sys.stdin.readline())
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
-    x0, y0 = map(int, sys.stdin.readline().split())
+    x0, y0 = map(int, input_stream.readline().split())
 
     left_rook = None  # (xi, type)
 
@@ -926,7 +929,7 @@ def main():
 
     for _ in range(n):
 
-        parts = sys.stdin.readline().split()
+        parts = input_stream.readline().split()
 
         typ = parts[0]
 
@@ -1018,13 +1021,13 @@ def main():
 
     if left_rook and left_rook[1] in ('R', 'Q'):
 
-        print("YES")
+        print("YES", file=output_stream)
 
         return
 
     if right_rook and right_rook[1] in ('R', 'Q'):
 
-        print("YES")
+        print("YES", file=output_stream)
 
         return
 
@@ -1032,13 +1035,13 @@ def main():
 
     if below_rook and below_rook[1] in ('R', 'Q'):
 
-        print("YES")
+        print("YES", file=output_stream)
 
         return
 
     if above_rook and above_rook[1] in ('R', 'Q'):
 
-        print("YES")
+        print("YES", file=output_stream)
 
         return
 
@@ -1046,83 +1049,78 @@ def main():
 
     if northeast_bishop and northeast_bishop[1] in ('B', 'Q'):
 
-        print("YES")
+        print("YES", file=output_stream)
 
         return
 
     if southwest_bishop and southwest_bishop[1] in ('B', 'Q'):
 
-        print("YES")
+        print("YES", file=output_stream)
 
         return
 
     if northwest_bishop and northwest_bishop[1] in ('B', 'Q'):
 
-        print("YES")
+        print("YES", file=output_stream)
 
         return
 
     if southeast_bishop and southeast_bishop[1] in ('B', 'Q'):
 
-        print("YES")
+        print("YES", file=output_stream)
 
         return
 
     # If none
 
-    print("NO")
+    print("NO", file=output_stream)
 
-if __name__ == "__main__":
 
-    main()
 
-Now, let's test this code against sample 1 and 2.
+def test():
+    import io
 
-Sample 1:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2
-
 4 2
-
-R 1 1
-
+R 3 3
 B 1 5
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-Processing the R piece (1,1):
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-yi is 1 !=2. So not same row.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-xi is 1 !=4. So not same column.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-delta_x = 1-4 =-3, delta_y=1-2 =-1. So delta_x != delta_y. Check diagonal2: delta_x == -delta_y →-3 == -(-1) →-3 ==1 → no. So this piece is not in any direction. So none of the eight variables are updated.
+    print('Tests passed 😎')
 
-Then processing the B (1,5):
 
-yi=5 !=2. Not same row.
+if __name__ == '__main__':
+    test()
 
-xi=1 !=4. Not same column.
 
-delta_x=1-4=-3, delta_y=5-2=3. delta_x =-3 ==-3 → yes.
+```
 
-delta_x ==-delta_y → -3 = -3 → yes. So delta_x == -delta_y → yes.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-delta_x is -3 <0. So check southeast direction.
-
-delta_x =-3. For southeast direction (xi <x0, yi>y0).
-
-Compare with current southeast_bishop (initially None). So set to (-3, 'B').
-
-Now, after processing all pieces:
-
-Check left_rook, right_rook: None.
-
-below and above: None.
-
-Check southeast_bishop: delta_x=-3, type B. B is in allowed types (B or Q).
-
-So code prints YES.
+```
 
 Sample 2:
 

@@ -283,313 +283,309 @@ Then, process.
 
 Now, code:
 
-x, y, l, r = map(int, input().split())
+Testing against sample input 1.
 
-def get_powers(base, max_r):
+```python
+def main(input_stream, output_stream):
+    x, y, l, r = map(int, input_stream.readline().rstrip("\n").split())
 
-    powers = [1] if 1 <= max_r else []
+    def get_powers(base, max_r):
 
-    if base == 1:
+        powers = [1] if 1 <= max_r else []
+
+        if base == 1:
+
+            return powers
+
+        current = base
+
+        while current <= max_r:
+
+            powers.append(current)
+
+            next_val = current * base
+
+            if next_val > max_r:
+
+                break
+
+            current = next_val
 
         return powers
 
-    current = base
+    A = get_powers(x, r)
 
-    while current <= max_r:
+    B = get_powers(y, r)
 
-        powers.append(current)
+    sums = set()
 
-        next_val = current * base
+    for a in A:
 
-        if next_val > max_r:
+        for b in B:
 
-            break
+            s = a + b
 
-        current = next_val
+            if l <= s <= r:
 
-    return powers
+                sums.add(s)
 
-A = get_powers(x, r)
+    bad_years = sorted(sums)
 
-B = get_powers(y, r)
+    if not bad_years:
 
-sums = set()
+        print(r - l + 1, file=output_stream)
 
-for a in A:
+    else:
 
-    for b in B:
+        max_gap = 0
 
-        s = a + b
+        prev = l -1
 
-        if l <= s <= r:
+        for year in bad_years:
 
-            sums.add(s)
+            gap = year - prev -1
 
-bad_years = sorted(sums)
+            if gap > max_gap:
 
-if not bad_years:
+                max_gap = gap
 
-    print(r - l + 1)
+            prev = year
 
-else:
+        # Check the gap after the last bad year
 
-    max_gap = 0
-
-    prev = l -1
-
-    for year in bad_years:
-
-        gap = year - prev -1
+        gap = r - bad_years[-1]
 
         if gap > max_gap:
 
             max_gap = gap
 
-        prev = year
+        # Also consider the gap before the first bad year
 
-    # Check the gap after the last bad year
+        first_gap = bad_years[0] - l
 
-    gap = r - bad_years[-1]
+        if first_gap > max_gap:
 
-    if gap > max_gap:
+            max_gap = first_gap
 
-        max_gap = gap
+        # Wait, perhaps the code with sentinel is better.
 
-    # Also consider the gap before the first bad year
+        # So modified approach:
 
-    first_gap = bad_years[0] - l
+        # Insert sentinel values.
 
-    if first_gap > max_gap:
+        sorted_bad = [l-1] + bad_years + [r+1]
 
-        max_gap = first_gap
+        max_gap = 0
 
-    # Wait, perhaps the code with sentinel is better.
+        for i in range(1, len(sorted_bad)):
 
-    # So modified approach:
+            prev = sorted_bad[i-1]
 
-    # Insert sentinel values.
+            curr = sorted_bad[i]
 
-    sorted_bad = [l-1] + bad_years + [r+1]
+            gap = curr - prev - 1
 
-    max_gap = 0
+            if gap > max_gap:
 
-    for i in range(1, len(sorted_bad)):
+                max_gap = gap
 
-        prev = sorted_bad[i-1]
+        print(max_gap, file=output_stream)
 
-        curr = sorted_bad[i]
 
-        gap = curr - prev - 1
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 5 10 22
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    x, y, l, r = map(int, input_stream.readline().rstrip("\n").split())
+
+    def get_powers(base, max_r):
+
+        powers = [1] if 1 <= max_r else []
+
+        if base == 1:
+
+            return powers
+
+        current = base
+
+        while current <= max_r:
+
+            powers.append(current)
+
+            next_val = current * base
+
+            if next_val > max_r:
+
+                break
+
+            current = next_val
+
+        return powers
+
+    A = get_powers(x, r)
+
+    B = get_powers(y, r)
+
+    sums = set()
+
+    for a in A:
+
+        for b in B:
+
+            s = a + b
+
+            if l <= s <= r:
+
+                sums.add(s)
+
+    bad_years = sorted(sums)
+
+    if not bad_years:
+
+        print(r - l + 1, file=output_stream)
+
+    else:
+
+        max_gap = 0
+
+        prev = l -1
+
+        for year in bad_years:
+
+            gap = year - prev -1
+
+            if gap > max_gap:
+
+                max_gap = gap
+
+            prev = year
+
+        # Check the gap after the last bad year
+
+        gap = r - bad_years[-1]
 
         if gap > max_gap:
 
             max_gap = gap
 
-    print(max_gap)
+        # Also consider the gap before the first bad year
 
-Wait, but in the original code, the sentinel approach should handle all possible gaps. For example, the gap between l-1 and first bad year: which is from l to first_bad_year-1. The gap is (first_bad_year - (l-1) -1) = first_bad_year - l.
+        first_gap = bad_years[0] - l
 
-Similarly, the gap between last bad year and r+1 is (r+1 - last_bad_year -1) = r - last_bad_year.
+        if first_gap > max_gap:
 
-So the sentinel approach correctly captures all possible intervals.
+            max_gap = first_gap
 
-So in code:
+        # Wait, perhaps the code with sentinel is better.
 
-bad_sorted = sorted(bad_years)
+        # So modified approach:
 
-sorted_bad = [l-1] + bad_sorted + [r+1]
+        # Insert sentinel values.
 
-max_gap = 0
+        sorted_bad = [l-1] + bad_years + [r+1]
 
-for i in range(1, len(sorted_bad)):
+        max_gap = 0
 
-    prev = sorted_bad[i-1]
+        for i in range(1, len(sorted_bad)):
 
-    curr = sorted_bad[i]
+            prev = sorted_bad[i-1]
 
-    possible_gap = curr - prev -1
+            curr = sorted_bad[i]
 
-    if possible_gap > max_gap:
+            gap = curr - prev - 1
 
-        max_gap = possible_gap
+            if gap > max_gap:
 
-print(max_gap if max_gap >=0 else 0)
+                max_gap = gap
 
-But wait, if all years are bad, then bad_years would be all the years in [l, r]. Then, after adding sentinels, sorted_bad would be [l-1, ... (all bad years) ..., r+1]. Then, the gaps between l-1 and first bad year (which is l), which is l - (l-1) -1 = 0. Then between the bad years, all gaps are zero. Then between the last bad year (r) and r+1: r+1 - r -1 = 0. So max_gap is 0, which is correct.
+        print(max_gap, file=output_stream)
 
-So this code handles all cases.
 
-Let's test the sample inputs.
 
-Sample 1:
+def test():
+    import io
 
-Input:
-
-2 3 1 10
-
-A is [1, 2,4,8]
-
-B is [1,3,9]
-
-sums are:
-
-1+1=2
-
-1+3=4
-
-1+9=10
-
-2+1=3
-
-2+3=5
-
-2+9=11 (exceeds r)
-
-4+1=5 (already in)
-
-4+3=7
-
-4+9=13 (exceeds)
-
-8+1=9
-
-8+3=11 (exceeds)
-
-8+9=17.
-
-So the valid sums are 2,3,4,5,7,9,10.
-
-sorted_bad = [0, 2,3,4,5,7,9,10, 11]
-
-Now, check the gaps:
-
-0 to 2: gap is 2-0-1=1. So the interval is 1 to 1, length 1.
-
-2 to3: gap 3-2-1=0.
-
-3 to4: same.
-
-4 to5: same.
-
-5 to7: 7-5-1=1 (interval 6-6).
-
-7 to9: 9-7-1=1 (8-8).
-
-9 to10: 0.
-
-10 to11: 11-10-1=0.
-
-So the maximum gap is 1, which matches the sample.
-
-Sample 3:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2 3 3 5
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-sums in [3,5].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-A for x=2: 1,2,4,8 (but 8>5? Wait, r=5.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Wait, x=2, r=5.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-x^a must be <=5.
+    print('Tests passed 😎')
 
-a=0: 1.
 
-a=1:2.
+if __name__ == '__main__':
+    test()
 
-a=2:4.
 
-a=3:8>5. So A is [1,2,4].
+```
 
-y=3, r=5.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-y^b:
-
-b=0:1.
-
-b=1:3.
-
-b=2:9>5. So B is [1,3].
-
-sums:
-
-1+1=2 (less than 3, so not included.
-
-1+3=4 (3<=4 <=5 → yes.
-
-2+1=3.
-
-2+3=5.
-
-4+1=5.
-
-4+3=7>5.
-
-So sums are 3,4,5.
-
-So bad_years = [3,4,5].
-
-sorted_bad is [2,3,4,5,6].
-
-Check gaps:
-
-3-2-1=0.
-
-4-3-1=0.
-
-5-4-1=0.
-
-6-5-1=0.
-
-So the maximum gap is 0. So output is 0, which matches the third sample.
-
-Another sample:
-
-Sample 2:
-
-3 5 10 22.
-
-Sample output is 8.
-
-The code should generate all a and b, compute sums, and find that the maximum gap is 8.
-
-But let's not check that now.
-
-So the code should work.
-
-Potential issues:
-
-- Overflow in generating x^a. But in Python, integers can be arbitrarily large, so no problem.
-
-- Handling cases where a=0 and x=1. But x is >=2, so no.
-
-- Generating all possible a and b combinations. Since for x and y up to 1e18, the number of elements in A and B is O(60) each, so 3600 combinations, which is manageable.
-
-- Collecting the sums correctly, including when a_val is 1 (a=0) and b_val is 1 (b=0), leading to sum 2, which could be in [l, r].
-
-- Handling the case where no sums are in [l, r], leading to the entire interval being a golden age (output r-l+1).
-
-Yes. So the code should work.
-
-Now, the code in Python:
-
-Read x, y, l, r.
-
-Generate A and B.
-
-Compute all possible sums.
-
-Collect in a set.
-
-Sort.
-
-Add sentinels.
-
-Compute maximum gap.
-
-Now, code:
+```
 
 x, y, l, r = map(int, input().split())
 

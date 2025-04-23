@@ -234,67 +234,99 @@ So code:
 
 Read n, m = map(int, input().split())
 
-s = input().strip()
+Testing against sample input 3.
 
-t = input().strip()
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-if '*' not in s:
+    t = input_stream.readline().rstrip("\n").strip()
 
-    print("YES" if s == t else "NO")
+    if '*' not in s:
 
-else:
-
-    star_pos = s.index('*')
-
-    prefix = s[:star_pos]
-
-    suffix = s[star_pos+1:]
-
-    req = len(prefix) + len(suffix)
-
-    if m < req:
-
-        print("NO")
+        print("YES" if s == t else "NO", file=output_stream)
 
     else:
 
-        # Check prefix and suffix
+        star_pos = s.index('*')
 
-        # Check startswith prefix
+        prefix = s[:star_pos]
 
-        ok = True
+        suffix = s[star_pos+1:]
 
-        # Check first len(prefix) chars of t match prefix
+        req = len(prefix) + len(suffix)
 
-        if len(prefix) >0 and t[:len(prefix)] != prefix:
+        if m < req:
 
-            ok = False
+            print("NO", file=output_stream)
 
-        # Check last len(suffix) chars of t match suffix
+        else:
 
-        if len(suffix) >0 and t[-len(suffix):] != suffix:
+            # Check prefix and suffix
 
-            ok = False
+            # Check startswith prefix
 
-        print("YES" if ok else "NO")
+            ok = True
 
-Wait, but when len(prefix) is zero (i.e., the * is at the start of s), then prefix is empty. So t[:0] is empty, which equals the prefix. So no need to check that. But in the code, if len(prefix) >0 and the first part doesn't match, then set ok to False. So if len(prefix) is zero, that condition is skipped. Similarly for suffix.
+            # Check first len(prefix) chars of t match prefix
 
-So the code correctly handles cases where the prefix or suffix is empty.
+            if len(prefix) >0 and t[:len(prefix)] != prefix:
 
-Testing the case where s is "*", then prefix is empty, suffix is empty. req = 0. m can be any >=0. So even m=0, but t is empty. Then:
+                ok = False
 
-t starts with prefix (empty), ends with suffix (empty). So output is YES.
+            # Check last len(suffix) chars of t match suffix
 
-Another example: s is "a*", t is "a". Then prefix is "a", suffix is empty. req is 1+0=1. m=1 >=1. Check first 1 character of t is "a", which it is. Suffix is empty, so no check. So output YES.
+            if len(suffix) >0 and t[-len(suffix):] != suffix:
 
-Another example: s is "*a", t is "ba". prefix is empty, suffix is "a". m=2 >=0+1=1. Check t starts with empty (yes), ends with "a". So yes.
+                ok = False
 
-Yes, code seems correct.
+            print("YES" if ok else "NO", file=output_stream)
 
-Now, let's test the third sample input:
 
-s is "v", which has no *. t is "k". So code compares s and t. Not equal. Output NO.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+9 6
+gfgf*gfgf
+gfgfgf
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Fourth sample: s is "gfgf*gfgf" → split into "gfgf" and "gfgf". req len is 8. t has len 6 <8 → output NO.
 

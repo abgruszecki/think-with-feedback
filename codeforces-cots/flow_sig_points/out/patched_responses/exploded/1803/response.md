@@ -677,59 +677,99 @@ But the code can proceed as follows:
 
 But for the initial code, it would look like:
 
-n = int(input())
-adj = []
-for _ in range(n):
-    s = input().strip()
-    adj.append([int(c) for c in s])
+Testing against sample input 1.
 
-from collections import defaultdict
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    adj = []
+    for _ in range(n):
+        s = input_stream.readline().rstrip("\n").strip()
+        adj.append([int(c) for c in s])
 
-max_mask = 1 << n
+    from collections import defaultdict
 
-# Precompute masks in order of increasing population count.
-masks = []
-for mask in range(max_mask):
-    if mask == 0:
-        continue
-    masks.append(mask)
+    max_mask = 1 << n
 
-masks.sort(key=lambda x: bin(x).count('1'))
+    # Precompute masks in order of increasing population count.
+    masks = []
+    for mask in range(max_mask):
+        if mask == 0:
+            continue
+        masks.append(mask)
 
-dp = [defaultdict(int) for _ in range(max_mask)]
+    masks.sort(key=lambda x: bin(x).count('1'))
 
-for i in range(n):
-    mask = 1 << i
-    dp[mask][ (i, 0) ] = 1
+    dp = [defaultdict(int) for _ in range(max_mask)]
 
-for mask in masks:
-    current_entries = list(dp[mask].items())
-    for (last, s), cnt in current_entries:
-        for j in range(n):
-            if not (mask & (1 << j)):
-                bit = adj[last][j]
-                new_mask = mask | (1 << j)
-                new_s = (s << 1) | bit
-                dp[new_mask][ (j, new_s) ] += cnt
+    for i in range(n):
+        mask = 1 << i
+        dp[mask][ (i, 0) ] = 1
 
-full_mask = (1 << n) - 1
-result = [0] * (2 ** (n-1))
-for (last, s), cnt in dp[full_mask].items():
-    result[s] += cnt
+    for mask in masks:
+        current_entries = list(dp[mask].items())
+        for (last, s), cnt in current_entries:
+            for j in range(n):
+                if not (mask & (1 << j)):
+                    bit = adj[last][j]
+                    new_mask = mask | (1 << j)
+                    new_s = (s << 1) | bit
+                    dp[new_mask][ (j, new_s) ] += cnt
 
-print(' '.join(map(str, result)))
+    full_mask = (1 << n) - 1
+    result = [0] * (2 ** (n-1))
+    for (last, s), cnt in dp[full_mask].items():
+        result[s] += cnt
 
-But this code may not handle the full_mask correctly. For example, the full_mask's s is a (n-1)-bit number. So for n=3, the s is 2 bits. For each x in 0..3, the code outputs result[x], which is the count of permutations that generated s=x.
+    print(' '.join(map(str, result)), file=output_stream)
 
-This should work.
 
-Testing the first sample:
 
-After processing, the full_mask is 7 (binary 111). The DP for this mask will have (last, s) entries where s is 3 (binary 11). Each permutation contributes to s=3. So result[3] = 6. All other entries are 0. So the output is 0 0 0 6.
+def test():
+    import io
 
-The code would generate this.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+0101
+1000
+0001
+1010
+""",
+            "output": \
+"""\
+2 2 6 2 2 6 2 2
+""",
+        }, 
+    ]
 
-For the second sample, the code should compute the correct counts.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 But for Python, the code may be too slow for n=14. Let's see.
 

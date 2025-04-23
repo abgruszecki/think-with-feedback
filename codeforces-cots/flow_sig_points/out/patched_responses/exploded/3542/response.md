@@ -193,15 +193,68 @@ Yes.
 
 So the code is straightforward.
 
-Testing the first sample:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-4 100 2
+    if k >= n:
+        print(n, file=output_stream)
+    else:
+        initial = b[-1] - b[0] + 1
+        gaps = []
+        for i in range(n-1):
+            gaps.append(b[i+1] - b[i] - 1)
+        gaps.sort(reverse=True)
+        sum_gaps = sum(gaps[:k-1])
+        print(initial - sum_gaps, file=output_stream)
 
-20 30 75 80
 
-gaps = 30-20-1=9, 75-30-1=44, 80-75-1=4. sorted as [44,9,4]. sum first 1:44. 61-44=17.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 100 3
+1 2 4 60 87
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

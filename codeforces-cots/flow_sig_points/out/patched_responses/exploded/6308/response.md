@@ -993,66 +993,94 @@ Thus, for each group:
 
 Thus, the code should be:
 
+Testing against sample input 1.
+
+```python
 import sys
 import math
 from collections import defaultdict, Counter
 
-n = int(sys.stdin.readline())
-a = list(map(int, sys.stdin.readline().split()))
-b = list(map(int, sys.stdin.readline().split()))
-m = int(sys.stdin.readline())
 
-elements = []
-for i in range(n):
-    elements.append( (a[i], i+1) )
-for i in range(n):
-    elements.append( (b[i], i+1) )
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    a = list(map(int, input_stream.readline().split()))
+    b = list(map(int, input_stream.readline().split()))
+    m = int(input_stream.readline())
 
-elements.sort()
-result = 1
+    elements = []
+    for i in range(n):
+        elements.append( (a[i], i+1) )
+    for i in range(n):
+        elements.append( (b[i], i+1) )
 
-i = 0
-while i < 2*n:
-    current_x = elements[i][0]
-    j = i
-    while j < 2*n and elements[j][0] == current_x:
-        j += 1
-    group = elements[i:j]
-    counts = Counter(y for (x, y) in group)
-    group_size = len(group)
-    denominator = 1
-    for c in counts.values():
-        denominator *= math.factorial(c)
-    numerator = math.factorial(group_size)
-    contribution = numerator // denominator
-    result = (result * contribution) % m
-    i = j
+    elements.sort()
+    result = 1
 
-print(result % m)
+    i = 0
+    while i < 2*n:
+        current_x = elements[i][0]
+        j = i
+        while j < 2*n and elements[j][0] == current_x:
+            j += 1
+        group = elements[i:j]
+        counts = Counter(y for (x, y) in group)
+        group_size = len(group)
+        denominator = 1
+        for c in counts.values():
+            denominator *= math.factorial(c)
+        numerator = math.factorial(group_size)
+        contribution = numerator // denominator
+        result = (result * contribution) % m
+        i = j
 
-This should handle all cases.
+    print(result % m, file=output_stream)
 
-But let's test it with the sample inputs.
 
-Sample 1:
 
-Input:
+def test():
+    import io
 
-1
-
-1
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2
+1 2
+2 3
+11
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-7
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-elements after sorting: [(1,1), (2,1)].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Groups:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-x=1: len 1 → counts {1:1} → denominator 1! → 1. numerator 1! → 1. contribution 1.
+    print('Tests passed 😎')
 
-x=2: len 1 → counts {1:1} → contribution 1. So result is 1*1 mod7=1.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

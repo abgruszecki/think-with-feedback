@@ -344,63 +344,104 @@ But since n is up to 2e5, recursion-based DFS is not suitable. So BFS is better.
 
 So code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import deque
 
-n, x = map(int, sys.stdin.readline().split())
-adj = [[] for _ in range(n+1)]
-for _ in range(n-1):
-    a, b = map(int, sys.stdin.readline().split())
-    adj[a].append(b)
-    adj[b].append(a)
 
-# Compute depth and parent for each node.
-depth = [0]*(n+1)
-parent = [0]*(n+1)
-visited = [False]*(n+1)
-q = deque()
-q.append(1)
-visited[1] = True
-parent[1] = -1 # root has no parent
-while q:
-    u = q.popleft()
-    for v in adj[u]:
-        if not visited[v] and v != parent[u]:
-            visited[v] = True
-            parent[v] = u
-            depth[v] = depth[u] + 1
-            q.append(v)
+def main(input_stream, output_stream):
+    n, x = map(int, input_stream.readline().split())
+    adj = [[] for _ in range(n+1)]
+    for _ in range(n-1):
+        a, b = map(int, input_stream.readline().split())
+        adj[a].append(b)
+        adj[b].append(a)
 
-# Now compute maximum distance in x's subtree
-# BFS from x, not going to parent[x]
-max_d = 0
-q = deque()
-q.append( (x, 0) )
-visited_sub = [False]*(n+1)
-visited_sub[x] = True
-parent_x = parent[x]
+    # Compute depth and parent for each node.
+    depth = [0]*(n+1)
+    parent = [0]*(n+1)
+    visited = [False]*(n+1)
+    q = deque()
+    q.append(1)
+    visited[1] = True
+    parent[1] = -1 # root has no parent
+    while q:
+        u = q.popleft()
+        for v in adj[u]:
+            if not visited[v] and v != parent[u]:
+                visited[v] = True
+                parent[v] = u
+                depth[v] = depth[u] + 1
+                q.append(v)
 
-while q:
-    u, d = q.popleft()
-    max_d = max(max_d, d)
-    for v in adj[u]:
-        if v != parent_x and not visited_sub[v]:
-            visited_sub[v] = True
-            q.append( (v, d+1) )
+    # Now compute maximum distance in x's subtree
+    # BFS from x, not going to parent[x]
+    max_d = 0
+    q = deque()
+    q.append( (x, 0) )
+    visited_sub = [False]*(n+1)
+    visited_sub[x] = True
+    parent_x = parent[x]
 
-print(2 * (max_d + depth[x]))
+    while q:
+        u, d = q.popleft()
+        max_d = max(max_d, d)
+        for v in adj[u]:
+            if v != parent_x and not visited_sub[v]:
+                visited_sub[v] = True
+                q.append( (v, d+1) )
 
-This code should handle the problem correctly.
+    print(2 * (max_d + depth[x]), file=output_stream)
 
-Let's test this code against the examples.
 
-First example:
 
-n=4, x=3.
+def test():
+    import io
 
-After BFS from 1, depth is [0, 0, 1, 2, 1].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 2
+1 2
+2 3
+3 4
+2 5
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-Then, BFS from x=3, parent[x] is 2. So in adjacency list, 3's edges are 2 and others. We skip 2 (parent_x). So no other nodes are reachable. So the BFS for x's subtree only has x. So max_d=0. So 2*(0 + 2) =4 → correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

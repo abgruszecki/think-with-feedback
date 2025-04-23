@@ -689,211 +689,141 @@ So, the steps would be:
 
    So in code:
 
-   # Precompute best_w and best_d.
+Testing against sample input 2.
+
+```python
+import heapq
+
+
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    idx = 0
+    n = int(input[idx]); idx +=1
+    m = int(input[idx]); idx +=1
+    k = int(input[idx]); idx +=1
+
+    envelopes = []
+    for _ in range(k):
+        s = int(input[idx]); idx +=1
+        t = int(input[idx]); idx +=1
+        d = int(input[idx]); idx +=1
+        w = int(input[idx]); idx +=1
+        envelopes.append( (s, t, d, w) )
+    
+    # Sort envelopes by s
+    envelopes.sort()
+    best_w = [0] * (n + 2)
+    best_d = [0] * (n + 2)
+    ptr = 0
+    heap = []
+    
+    for x in range(1, n + 1):
+        # Add all envelopes with s == x
+        while ptr < k and envelopes[ptr][0] == x:
+            s, t, d, w = envelopes[ptr]
+            # Push (-w, -d, t, d, w) to maintain max-heap based on w and d
+            heapq.heappush(heap, (-w, -d, t, d, w))
+            ptr += 1
+        
+        # Remove envelopes with t < x
+        while heap and heap[0][2] < x:
+            heapq.heappop(heap)
+        
+        if heap:
+            best_w[x] = heap[0][4]
+            best_d[x] = heap[0][3]
+        else:
+            best_w[x] = 0
+            best_d[x] = 0
+    
+    # Initialize DP
+    INF = float('inf')
+    dp = [ [INF] * (m + 1) for _ in range(n + 2) ]
+    # Base case: i > n
+    for j in range(m + 1):
+        dp[n + 1][j] = 0
+    
+    # Iterate from n downto 1
+    for i in range(n, 0, -1):
+        for j in range(m, -1, -1):
+            # Option 1: disturb (if j < m)
+            option1 = INF
+            if j < m:
+                next_j = j + 1
+                next_time = i + 1
+                if next_time > n:
+                    option1 = 0
+                else:
+                    option1 = dp[next_time][next_j]
+            
+            # Option 2: not disturb
+            if best_w[i] > 0:
+                next_time = best_d[i] + 1
+                if next_time > n:
+                    option2 = best_w[i]
+                else:
+                    option2 = best_w[i] + dp[next_time][j]
+            else:
+                next_time = i + 1
+                if next_time > n:
+                    option2 = 0
+                else:
+                    option2 = dp[next_time][j]
+            
+            dp[i][j] = min(option1, option2)
+    
+    print(dp[1][0], file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+12 2 6
+1 5 5 4
+4 6 6 2
+3 8 8 3
+2 9 9 5
+6 10 10 7
+8 12 12 9
+""",
+            "output": \
+"""\
+11
+""",
+        }, 
+    ]
 
-   import heapq
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-   n, m, k = map(int, input().split())
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-   envelopes = []
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-   for _ in range(k):
+    print('Tests passed 😎')
 
-       s, t, d, w = map(int, input().split())
 
-       envelopes.append( (s, t, d, w) )
+if __name__ == '__main__':
+    test()
 
-   # Sort envelopes by s_i.
 
-   envelopes.sort()
+```
 
-   best_w = [0]*(n+2)
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-   best_d = [0]*(n+2)
-
-   ptr =0
-
-   heap = []
-
-   for x in range(1, n+1):
-
-       # Add all envelopes where s_i ==x.
-
-       while ptr <k and envelopes[ptr][0] ==x:
-
-           s, t, d, w = envelopes[ptr]
-
-           # push (-w, -d, t, d, w) into the heap.
-
-           heapq.heappush(heap, (-w, -d, t, d, w))
-
-           ptr +=1
-
-       # Remove envelopes where t <x.
-
-       while heap and heap[0][2] <x:
-
-           heapq.heappop(heap)
-
-       # Now, the top is the best envelope.
-
-       if heap:
-
-           w_val = heap[0][4]
-
-           d_val = heap[0][3]
-
-           best_w[x] = w_val
-
-           best_d[x] = d_val
-
-       else:
-
-           best_w[x] =0
-
-           best_d[x] =0
-
-   # Now, compute DP.
-
-   # Initialize DP. For i >n, dp[i][j] =0.
-
-   # We can use a 2D list where dp[i][j] represents the minimal coins from time i with j disturbances left.
-
-   INF = float('inf')
-
-   dp = [ [0]*(m+2) for _ in range(n+2) ]
-
-   # Or, to save space, for i in 1..n, compute them, and i >n is 0.
-
-   # Iterate i from n downto 1.
-
-   for i in range(n, 0, -1):
-
-       for j in range(m, -1, -1):
-
-           # Option 1: disturb.
-
-           option1 = INF
-
-           if j <m:
-
-               next_j = j +1
-
-               next_time = i +1
-
-               if next_time >n:
-
-                   option1 = 0
-
-               else:
-
-                   option1 = dp[next_time][next_j]
-
-           # Option 2: not disturb.
-
-           option2 = 0
-
-           if best_w[i] >0:
-
-               next_time = best_d[i] +1
-
-               if next_time >n:
-
-                   option2 = best_w[i]
-
-               else:
-
-                   option2 = best_w[i] + dp[next_time][j]
-
-           else:
-
-               next_time = i+1
-
-               if next_time >n:
-
-                   option2 =0
-
-               else:
-
-                   option2 = dp[next_time][j]
-
-           # Take the minimum.
-
-           min_val = min( option1, option2 )
-
-           dp[i][j] = min_val
-
-   print( dp[1][0] )
-
-   But wait, initially, the dp array is filled with zeros. So during the iteration, for i from n downto 1, we set dp[i][j] to the computed min_val.
-
-   However, for i=5 (n=5), and j=0, in the first sample, the code would compute option2 as 8 (best_w[5] is 8, next_time=5+1=6>5, so option2=8 +0=8. So dp[5][0] becomes 8. Then, when i=4, j=0, the option2 is 8 (best_w[4]=8, next_time=5+1=6>5, so 8+0=8. So dp[4][0] is min(inf, 8) →8. And so on.
-
-   So this seems correct.
-
-   Now, for the second sample, after disturbing at x=1, the code should compute the minimal coins.
-
-   However, the code may have an error in the way options are computed. For example, when j is the number of disturbances used, but in the code, j represents the number of disturbances remaining. Or is it the other way around?
-
-   Wait, in the code, the initial call is dp[1][0], which implies that j is the number of disturbances used. Because for j=0, no disturbances have been used. But in the code, for option1, if j <m, then we can disturb, which would use a disturbance. So next_j =j+1, which represents that we have used one more disturbance.
-
-   So the code's j represents the number of disturbances used so far. So m is the maximum number of disturbances allowed.
-
-   Wait, no. For example, in the code, the initial state is j=0. If we disturb, j increments to 1, which counts the number of disturbances used. So the code's j is the number of disturbances used, and the maximum allowed is m. So for j >m, it's invalid.
-
-   But in the code, for j in range(m, -1, -1):
-
-       if j <m:
-
-           ... can disturb.
-
-   Wait, no. Because j starts from m downto 0. So when j is m, it's not allowed to disturb, because j+1 would be m+1, which is more than m.
-
-   So the code's j represents the number of disturbances used. The maximum allowed is m. So for j <=m, the code is allowed to use up to m disturbances.
-
-   For example, if j is the number of disturbances used so far, then the remaining disturbances allowed are m - j.
-
-   So the code's logic is:
-
-   If the current j (disturbances used) is less than m, then disturbing is allowed (because remaining disturbances is m -j >0).
-
-   So this seems correct.
-
-   Now, let's test the code against the second sample.
-
-   Sample 2:
-
-   n=10, m=1, k=6.
-
-   Envelopes are as described.
-
-   best_w for x=1 is 4. best_d=2. So when not disturbing, Bob collects 4 coins and jumps to 3. Then, at x=3, best_w is 3, collects and jumps to 4. And so on. But if Alice disturbs at x=1, then Bob skips x=1, moves to x=2. best_w is 2, which is collected. Then jumps to 6+1=7, which is beyond 10. So total 2 coins.
-
-   So the code's DP should compute this.
-
-   For i=1, j=0:
-
-       option1: disturb (j <1). next_j=1, next_time=2. dp[2][1] is the value for time 2 with 1 disturbance used.
-
-       option2: collect 4 coins and jump to 3. So dp[3][0] is computed.
-
-   What's dp[2][1]? It's the minimal coins when at time 2 with 1 disturbance used.
-
-   For i=2, j=1:
-
-       disturb is allowed (j=1 <1? No. Because m=1. So j=1 is equal to m, so disturb is not allowed. So option1 is infinity.
-
-       option2: collect 2 coins (best_w[2]=2), next_time=6+1=7. dp[7][1] is the value. Since 7<=10, and dp[7][1] is 0 (since for 7, there are no envelopes). So option2 is 2 +0=2.
-
-       So dp[2][1] =2.
-
-   For i=1, j=0: option1 is dp[2][1] =2. option2 is 4 + dp[3][0]. So we need to compute dp[3][0].
-
-   For dp[3][0], best_w is 3, next_time=4. So option2 is 3 + dp[4][0]. And so on.
-
-   So option1 (disturb) gives 2 coins, option2 (not disturb) gives 4 + ... which would be more than 2. So the minimal is 2.
-
-   So the code's answer would be 2, which is correct.
+```
 
    So the code works for the samples.
 

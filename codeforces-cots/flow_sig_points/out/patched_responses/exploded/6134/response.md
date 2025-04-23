@@ -1229,15 +1229,123 @@ For each shot:
 
 Thus, the code now correctly handles all cases.
 
-Now, let's test the sample input again.
+Testing against sample input 1.
 
-Sample input 1:
+```python
+import bisect
 
-After processing third shot, first_hit[0] and [1] are 3.
 
-The fourth and fifth shots (4,0) will hit target 1. But their first_hit remains 3.
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    ptr = 0
+    n = int(input[ptr])
+    ptr +=1
+    targets = []
+    for i in range(n):
+        x = int(input[ptr])
+        r = int(input[ptr+1])
+        ptr +=2
+        left = x - r
+        right = x + r
+        targets.append( (left, right, x, r, i) )
+    # Sort targets by left
+    targets.sort(key=lambda t: t[0])
+    lefts = [t[0] for t in targets]
+    m = int(input[ptr])
+    ptr +=1
+    first_hit = [-1] * n
+    for shot_num in range(m):
+        a = int(input[ptr])
+        b = int(input[ptr+1])
+        ptr +=2
+        s = b * b
+        a_point = a
+        ip = bisect.bisect_right(lefts, a_point)
+        i = ip -1
+        candidates = []
+        # Check current i
+        if i >=0:
+            t_i = targets[i]
+            if t_i[1] >= a_point:
+                candidates.append(i)
+        # Check previous target if it ends at a_point
+        if i >=1:
+            t_prev = targets[i-1]
+            if t_prev[1] == a_point and t_prev[0] <= a_point:
+                candidates.append(i-1)
+        # Check next target if it starts at a_point
+        if ip < len(targets):
+            t_next = targets[ip]
+            if t_next[0] == a_point and t_next[1] >= a_point:
+                candidates.append(ip)
+        for ci in candidates:
+            t = targets[ci]
+            left_t, right_t, x_t, r_t, original_index = t
+            if r_t * r_t < s:
+                continue
+            dx = a_point - x_t
+            dx_sq = dx * dx
+            if dx_sq + s <= r_t * r_t:
+                if first_hit[original_index] == -1:
+                    first_hit[original_index] = shot_num +1
+    # Count hit targets and prepare output
+    count = sum(1 for hit in first_hit if hit != -1)
+    print(count, file=output_stream)
+    print(' '.join(map(str, first_hit)), file=output_stream)
 
-Thus, the first_hit array is [3,3,-1], leading to the sample output of 2 targets hit, and the array 3 3 -1.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+3 2
+7 1
+11 2
+4
+2 1
+6 0
+6 4
+11 2
+""",
+            "output": \
+"""\
+3
+1 2 4
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2:
 

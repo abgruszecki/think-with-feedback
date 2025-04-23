@@ -891,195 +891,485 @@ Thus, the code must check this.
 
 So in code:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n, x = map(int, input().split())
 
-a = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n, x = map(int, input_stream.readline().rstrip("\n").split())
 
-from collections import defaultdict
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-freq = defaultdict(int)
+    from collections import defaultdict
 
-for num in a:
+    freq = defaultdict(int)
 
-    if num < x:
+    for num in a:
 
-        freq[num] +=1
+        if num < x:
 
-if not freq:
+            freq[num] +=1
 
-    print("Yes" if 0 % x ==0 else "No")
+    if not freq:
 
-    exit()
+        print("Yes" if 0 % x ==0 else "No", file=output_stream)
 
-if x ==1:
+        return
 
-    # All a_i are 1 (>=x=1), so sum is 0. 0 mod1 is 0 → Yes.
+    if x ==1:
 
-    print("Yes")
+        # All a_i are 1 (>=x=1), so sum is 0. 0 mod1 is 0 → Yes.
 
-    exit()
+        print("Yes", file=output_stream)
 
-# Precompute prod array.
+        return
 
-prod = [1]*(x)
+    # Precompute prod array.
 
-for a_i in range(x-2, -1, -1):
+    prod = [1]*(x)
 
-    prod[a_i] = ( (a_i +1) * prod[a_i +1] ) %x
+    for a_i in range(x-2, -1, -1):
 
-sum_total =0
+        prod[a_i] = ( (a_i +1) * prod[a_i +1] ) %x
 
-for num, cnt in freq.items():
+    sum_total =0
 
-    current_a = num
+    for num, cnt in freq.items():
 
-    if current_a >=x:
+        current_a = num
 
-        continue
+        if current_a >=x:
 
-    p = prod[current_a]
+            continue
 
-    if p %x ==0:
+        p = prod[current_a]
 
-        print("No")
+        if p %x ==0:
 
-        exit()
+            print("No", file=output_stream)
 
-    g = math.gcd(p, x)
+            return
 
-    if g !=1:
+        g = math.gcd(p, x)
 
-        print("No")
+        if g !=1:
 
-        exit()
+            print("No", file=output_stream)
 
-    inv = pow(p, -1, x)
+            return
 
-    sum_total = (sum_total + cnt * inv) %x
+        inv = pow(p, -1, x)
 
-print("Yes" if sum_total %x ==0 else "No")
+        sum_total = (sum_total + cnt * inv) %x
 
-But let's test this code against the samples.
+    print("Yes" if sum_total %x ==0 else "No", file=output_stream)
 
-First sample:
 
-Input:
 
-6 4
+def test():
+    import io
 
-3 2 2 2 3 3
-
-x=4.
-
-prod array:
-
-prod[3] =1.
-
-prod[2] =3*1 =3 mod4=3.
-
-prod[1] =2*3=6 mod4=2.
-
-prod[0] =1*2=2 mod4=2.
-
-For a=3:
-
-p=prod[3]=1. gcd(1,4)=1 → inv=1. sum +=3*1=3 mod4=3.
-
-For a=2:
-
-p=prod[2]=3. gcd(3,4)=1 → inv=3. sum +=3*3=9 mod4=1 → sum_total=3+1=4 mod4=0.
-
-So sum is 0 → yes.
-
-Second sample:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 8 3
-
 3 2 2 2 2 2 1 1
+""",
+            "output": \
+"""\
+Yes
+""",
+        }, 
+    ]
 
-x=3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-prod array:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-prod[2] =1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-prod[1] =2*1=2 mod3=2.
+    print('Tests passed 😎')
 
-prod[0] =1*2=2 mod3=2.
 
-For a=2: p=1, gcd(1,3)=1 → inv=1. sum +=5*1=5 mod3=2.
+if __name__ == '__main__':
+    test()
 
-For a=1: p=prod[1]=2. gcd(2,3)=1 → inv=2. sum +=2*2=4 mod3=1 → sum_total=2+1=3 mod3=0 → yes.
 
-Third sample:
+```
 
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import math
+
+
+def main(input_stream, output_stream):
+    n, x = map(int, input_stream.readline().rstrip("\n").split())
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    from collections import defaultdict
+
+    freq = defaultdict(int)
+
+    for num in a:
+
+        if num < x:
+
+            freq[num] +=1
+
+    if not freq:
+
+        print("Yes" if 0 % x ==0 else "No", file=output_stream)
+
+        return
+
+    if x ==1:
+
+        # All a_i are 1 (>=x=1), so sum is 0. 0 mod1 is 0 → Yes.
+
+        print("Yes", file=output_stream)
+
+        return
+
+    # Precompute prod array.
+
+    prod = [1]*(x)
+
+    for a_i in range(x-2, -1, -1):
+
+        prod[a_i] = ( (a_i +1) * prod[a_i +1] ) %x
+
+    sum_total =0
+
+    for num, cnt in freq.items():
+
+        current_a = num
+
+        if current_a >=x:
+
+            continue
+
+        p = prod[current_a]
+
+        if p %x ==0:
+
+            print("No", file=output_stream)
+
+            return
+
+        g = math.gcd(p, x)
+
+        if g !=1:
+
+            print("No", file=output_stream)
+
+            return
+
+        inv = pow(p, -1, x)
+
+        sum_total = (sum_total + cnt * inv) %x
+
+    print("Yes" if sum_total %x ==0 else "No", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 7 8
+7 7 7 7 7 7 7
+""",
+            "output": \
+"""\
+No
+""",
+        }, 
+    ]
 
-7 7 7 7 7 7 7 → all a_i=7 <8.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-x=8.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-prod[7] =1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-prod[6] =7*1=7 mod8=7.
+    print('Tests passed 😎')
 
-prod[5] =6*7=42 mod8=2.
 
-prod[4] =5*2=10 mod8=2.
+if __name__ == '__main__':
+    test()
 
-prod[3] =4*2=8 mod8=0.
 
-prod[2] =3*0=0.
+```
 
-prod[1] =2*0=0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-prod[0] =1*0=0.
+```
 
-a=7: current_a=7. p=prod[7] =1. gcd(1,8)=1 → inv=1. sum=7*1=7 mod8=7. Not zero → answer is No.
+Testing against sample input 3.
 
-Which matches the sample.
+```python
+import math
 
-Fourth sample:
 
+def main(input_stream, output_stream):
+    n, x = map(int, input_stream.readline().rstrip("\n").split())
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    from collections import defaultdict
+
+    freq = defaultdict(int)
+
+    for num in a:
+
+        if num < x:
+
+            freq[num] +=1
+
+    if not freq:
+
+        print("Yes" if 0 % x ==0 else "No", file=output_stream)
+
+        return
+
+    if x ==1:
+
+        # All a_i are 1 (>=x=1), so sum is 0. 0 mod1 is 0 → Yes.
+
+        print("Yes", file=output_stream)
+
+        return
+
+    # Precompute prod array.
+
+    prod = [1]*(x)
+
+    for a_i in range(x-2, -1, -1):
+
+        prod[a_i] = ( (a_i +1) * prod[a_i +1] ) %x
+
+    sum_total =0
+
+    for num, cnt in freq.items():
+
+        current_a = num
+
+        if current_a >=x:
+
+            continue
+
+        p = prod[current_a]
+
+        if p %x ==0:
+
+            print("No", file=output_stream)
+
+            return
+
+        g = math.gcd(p, x)
+
+        if g !=1:
+
+            print("No", file=output_stream)
+
+            return
+
+        inv = pow(p, -1, x)
+
+        sum_total = (sum_total + cnt * inv) %x
+
+    print("Yes" if sum_total %x ==0 else "No", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 10 5
+4 3 2 1 4 3 2 4 3 4
+""",
+            "output": \
+"""\
+No
+""",
+        }, 
+    ]
 
-4 3 2 1 4 3 2 4 3 4 → a_i <5 are 4,3,2,1,4,3,2,4,3,4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-x=5.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-prod array:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-prod[4] =1.
+    print('Tests passed 😎')
 
-prod[3] =4*1=4 mod5=4.
 
-prod[2] =3*4=12 mod5=2.
+if __name__ == '__main__':
+    test()
 
-prod[1] =2*2=4 mod5=4.
 
-prod[0] =1*4=4 mod5=4.
+```
 
-For a=4:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-p=prod[4]=1 → inv=1. sum +=4*1=4 mod5=4.
+```
 
-For a=3:
+Testing against sample input 4.
 
-p=prod[3]=4. gcd(4,5)=1 → inv=4 (4*4=16 mod5=1). sum +=3*4=12 mod5=2 → 4+2=6 mod5=1.
+```python
+import math
 
-For a=2:
 
-p=prod[2]=2. gcd(2,5)=1 → inv=3 (2*3=6 mod5=1). sum +=2*3=6 mod5=1 → 1+6=7 mod5=2.
+def main(input_stream, output_stream):
+    n, x = map(int, input_stream.readline().rstrip("\n").split())
 
-For a=1:
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-p=prod[1]=4. gcd(4,5)=1 → inv=4. sum +=1*4=4 mod5=2+4=6 mod5=1.
+    from collections import defaultdict
 
-Total sum mod5=1 → not zero → answer is No.
+    freq = defaultdict(int)
 
-Which matches the sample.
+    for num in a:
+
+        if num < x:
+
+            freq[num] +=1
+
+    if not freq:
+
+        print("Yes" if 0 % x ==0 else "No", file=output_stream)
+
+        return
+
+    if x ==1:
+
+        # All a_i are 1 (>=x=1), so sum is 0. 0 mod1 is 0 → Yes.
+
+        print("Yes", file=output_stream)
+
+        return
+
+    # Precompute prod array.
+
+    prod = [1]*(x)
+
+    for a_i in range(x-2, -1, -1):
+
+        prod[a_i] = ( (a_i +1) * prod[a_i +1] ) %x
+
+    sum_total =0
+
+    for num, cnt in freq.items():
+
+        current_a = num
+
+        if current_a >=x:
+
+            continue
+
+        p = prod[current_a]
+
+        if p %x ==0:
+
+            print("No", file=output_stream)
+
+            return
+
+        g = math.gcd(p, x)
+
+        if g !=1:
+
+            print("No", file=output_stream)
+
+            return
+
+        inv = pow(p, -1, x)
+
+        sum_total = (sum_total + cnt * inv) %x
+
+    print("Yes" if sum_total %x ==0 else "No", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 500000
+499999 499999
+""",
+            "output": \
+"""\
+No
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Fifth sample:
 

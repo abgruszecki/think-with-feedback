@@ -219,55 +219,88 @@ So this approach covers all possibilities.
 
 So code:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-if n ==0:
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-    print(0)
+    if n ==0:
 
-    exit()
+        print(0, file=output_stream)
 
-min_time = float('inf')
+        return
 
-max_a = a[-1]
+    min_time = float('inf')
 
-for k in range(n+1):
+    max_a = a[-1]
 
-    my_time = a[k-1] -1 if k >0 else 0
+    for k in range(n+1):
 
-    if k <n:
+        my_time = a[k-1] -1 if k >0 else 0
 
-        friend_time = (10**6 + max_a - 2 * a[k])
+        if k <n:
 
-    else:
+            friend_time = (10**6 + max_a - 2 * a[k])
 
-        friend_time =0
+        else:
 
-    current_max = max(my_time, friend_time)
+            friend_time =0
 
-    if current_max < min_time:
+        current_max = max(my_time, friend_time)
 
-        min_time = current_max
+        if current_max < min_time:
 
-print(min_time)
+            min_time = current_max
 
-Wait, but in the code above, when k is 0, a[k-1] is a[-1], which is invalid. But the code checks if k>0. So for k=0, my_time is 0. So that's correct.
+    print(min_time, file=output_stream)
 
-But when k is in 0...n, the code for k=0: my_time is 0.
 
-Friend_time: if k <n (which it is), then 1e6 + a[-1] - 2*a[0].
 
-Yes.
+def test():
+    import io
 
-Testing the first example:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+2 999995
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-a = [2,3,9], max_a=9.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-k=3: my_time is a[2] -1 =9-1=8. friend_time is0. current_max is8.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Which is correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

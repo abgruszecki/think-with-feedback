@@ -119,37 +119,131 @@ Return the sum.
 
 So the code in Python would be:
 
-n, k = map(int, input().split())
+Testing against sample input 1.
 
-floors = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-floors.sort(reverse=True)
+    floors = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-total = 0
+    floors.sort(reverse=True)
 
-for i in range(0, n, k):
-    current_max = floors[i]
-    total += 2 * (current_max -1)
+    total = 0
 
-print(total)
+    for i in range(0, n, k):
+        current_max = floors[i]
+        total += 2 * (current_max -1)
 
-Wait, but when splitting into groups of k elements, the first group is 0 to k-1, then k to 2k-1, etc. So for the first group, the first element is floors[i], which is the maximum of the group. Since the list is sorted in reverse order, each group's first element is the maximum.
+    print(total, file=output_stream)
 
-Yes. Because in the group, the first element is the largest, followed by the next, etc. So the maximum is the first element of the group.
 
-So the code is correct.
 
-This should handle all cases.
+def test():
+    import io
 
-Testing sample input 1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 2
+50 100 50 100
+""",
+            "output": \
+"""\
+296
+""",
+        }, 
+    ]
 
-3 2
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-2 3 4 → sorted as [4,3,2]. Groups are [4,3], [2]. The first group's max is 4, contribution 6. Second group's max is 2 → 2. Sum is 8.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sample input 2:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-4 2 → [100,100,50,50]. Groups [100,100], [50,50]. Contributions 198 and 98 → sum 296.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+
+    floors = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    floors.sort(reverse=True)
+
+    total = 0
+
+    for i in range(0, n, k):
+        current_max = floors[i]
+        total += 2 * (current_max -1)
+
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 3
+2 2 2 2 2 2 2 2 2 2
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 3:
 

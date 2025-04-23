@@ -155,47 +155,162 @@ Then process as described.
 
 So code:
 
-n, b, d = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, b, d = map(int, input_stream.readline().rstrip("\n").split())
 
-count =0
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-current =0
+    count =0
 
-for num in a:
+    current =0
 
-    if num >b:
+    for num in a:
 
-        continue
+        if num >b:
 
-    current += num
+            continue
 
-    if current >d:
+        current += num
 
-        count +=1
+        if current >d:
 
-        current =0
+            count +=1
 
-print(count)
+            current =0
 
-Yes. That's the code.
+    print(count, file=output_stream)
 
-Testing the samples:
 
-First sample:
 
-2 7 10
+def test():
+    import io
 
-5 6 → process 5: current=5 (<=10). Then 6: current=11>10 → count=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 5 10
+7
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Second sample:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-1 5 10 → 7 is >5 → not added. count remains 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Third sample:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-3 10 10 → sum 5+7=12>10 → count 1. Then reset to 0. Add 7: sum 7 <=10. So count is 1.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample inputs 2, 3.
+
+```python
+def main(input_stream, output_stream):
+    n, b, d = map(int, input_stream.readline().rstrip("\n").split())
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    count =0
+
+    current =0
+
+    for num in a:
+
+        if num >b:
+
+            continue
+
+        current += num
+
+        if current >d:
+
+            count +=1
+
+            current =0
+
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 10 10
+5 7 7
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+        {
+            "input": \
+"""\
+1 1 1
+1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Fourth sample: sum 1. Not >1. So 0.
 

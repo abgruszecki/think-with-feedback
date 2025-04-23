@@ -698,51 +698,92 @@ But in the code above, after the initial step, when processing the first file, s
 
 So code:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-total = sum(a)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-result = {0}
+    total = sum(a)
 
-sum_prev = 0
+    result = {0}
 
-for size in a:
+    sum_prev = 0
 
-    for x in range(1, size + 1):
+    for size in a:
 
-        current = (100 * x) // size
+        for x in range(1, size + 1):
 
-        sum_so_far = sum_prev + x
+            current = (100 * x) // size
 
-        overall = (100 * sum_so_far) // total
+            sum_so_far = sum_prev + x
 
-        if current == overall:
+            overall = (100 * sum_so_far) // total
 
-            result.add(current)
+            if current == overall:
 
-    sum_prev += size
+                result.add(current)
 
-# Also, check if 100 is in the result. Because when x=size, sum_so_far is sum_prev + size. sum_prev is sum of previous files. So sum_prev +size = sum_prev_new. And sum_prev_new is sum_prev + size. sum_prev_new is the sum up to this file. But x is processed in the loop. For example, the last file's x=size is processed, sum_so_far is sum_prev + size. Which is sum_prev_new. So when x=size, sum_so_far is sum_prev_new. sum_prev_new is sum of all files processed so far. So when it's the last file, sum_prev_new is total. So 100 is added.
+        sum_prev += size
 
-sorted_result = sorted(result)
+    # Also, check if 100 is in the result. Because when x=size, sum_so_far is sum_prev + size. sum_prev is sum of previous files. So sum_prev +size = sum_prev_new. And sum_prev_new is sum_prev + size. sum_prev_new is the sum up to this file. But x is processed in the loop. For example, the last file's x=size is processed, sum_so_far is sum_prev + size. Which is sum_prev_new. So when x=size, sum_so_far is sum_prev_new. sum_prev_new is sum of all files processed so far. So when it's the last file, sum_prev_new is total. So 100 is added.
 
-print('\n'.join(map(str, sorted_result)))
+    sorted_result = sorted(result)
 
-But why? Because in the code, when processing the last file, x=size will be the last step. sum_so_far = sum_prev (sum of all previous files) + x (size). sum_prev += size after processing.
+    print('\n'.join(map(str, sorted_result)), file=output_stream)
 
-So for the last x=size, sum_so_far is sum_prev + size → sum_prev_initial + size → sum_prev_initial is sum of previous files. So sum_so_far is total.
 
-Thus, (100 * total) // total →100. current is (100 * size) // size →100. So 100 is added.
 
-So the code will capture 100.
+def test():
+    import io
 
-Thus, the code is correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+100 500
+""",
+            "output": \
+"""\
+0
+95
+96
+97
+98
+99
+100
+""",
+        }, 
+    ]
 
-Testing the first sample: 0,16,33,50,66,83,100.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Now, let's test sample3's case where 99 is added.
 

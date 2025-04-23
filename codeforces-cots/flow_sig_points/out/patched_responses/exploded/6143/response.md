@@ -257,119 +257,211 @@ So, the steps are:
 
 So the code would look something like this:
 
-n, r = map(int, input().split())
-a = list(map(int, input().split()))
+Testing against sample input 1.
 
-heaters = []
-for i in range(n):
-    if a[i] == 1:
-        pos = i + 1  # convert to 1-based
-        s = pos - r + 1
-        e = pos + r - 1
-        # clamp to 1 and n
-        s = max(1, s)
-        e = min(n, e)
-        if s > e:
-            continue  # heater's coverage is invalid
-        heaters.append( (s, e) )
+```python
+def main(input_stream, output_stream):
+    n, r = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-# Check if no heaters
-if not heaters:
-    print(-1)
-    exit()
+    heaters = []
+    for i in range(n):
+        if a[i] == 1:
+            pos = i + 1  # convert to 1-based
+            s = pos - r + 1
+            e = pos + r - 1
+            # clamp to 1 and n
+            s = max(1, s)
+            e = min(n, e)
+            if s > e:
+                continue  # heater's coverage is invalid
+            heaters.append( (s, e) )
 
-# Sort heaters by s
-heaters.sort()
+    # Check if no heaters
+    if not heaters:
+        print(-1, file=output_stream)
+        return
 
-current = 1
-count = 0
-index = 0
+    # Sort heaters by s
+    heaters.sort()
 
-while current <= n:
-    # Find the farthest e where s <= current
-    max_e = -1
-    best_i = -1
-    for i in range(len(heaters)):
-        s, e = heaters[i]
-        if s > current:
-            break  # since sorted, no more heaters can be considered
-        if e > max_e:
-            max_e = e
-            best_i = i
+    current = 1
+    count = 0
+    index = 0
 
-    if max_e == -1:
-        # No heater covers current
-        print(-1)
-        exit()
+    while current <= n:
+        # Find the farthest e where s <= current
+        max_e = -1
+        best_i = -1
+        for i in range(len(heaters)):
+            s, e = heaters[i]
+            if s > current:
+                break  # since sorted, no more heaters can be considered
+            if e > max_e:
+                max_e = e
+                best_i = i
 
-    count += 1
-    current = max_e + 1
+        if max_e == -1:
+            # No heater covers current
+            print(-1, file=output_stream)
+            return
 
-    # Remove heaters that are before best_i? No, because in next iteration, we might need to check again.
+        count += 1
+        current = max_e + 1
 
-    # However, since we've processed all heaters with s <= current (before the best_i), but in the next iteration, current is updated to max_e +1. So the next s must be <= max_e +1. But the heaters are sorted by s, so in the next iteration, the loop will start from the first heater.
+        # Remove heaters that are before best_i? No, because in next iteration, we might need to check again.
 
-print(count)
+        # However, since we've processed all heaters with s <= current (before the best_i), but in the next iteration, current is updated to max_e +1. So the next s must be <= max_e +1. But the heaters are sorted by s, so in the next iteration, the loop will start from the first heater.
 
-Wait, but in this code, for each iteration, the for loop checks all heaters from 0 to the first s > current. But in the worst case, this is O(m) per iteration. For example, if all heaters have s <= current, and the maximum e is the last one.
+    print(count, file=output_stream)
 
-But given that m is up to 1e3, this is acceptable.
 
-Testing this code with the sample inputs.
 
-First sample input:
+def test():
+    import io
 
-6 2
-
-0 1 1 0 0 1
-
-Heater positions are 2,3,6 (1-based). For each:
-
-Heater at 2:
-
-s = 2 -2 +1 =1, e=2+2-1=3. So [1,3].
-
-Heater at 3: s=3-2+1=2, e=3+2-1=4. So [2,4].
-
-Heater at 6: s=6-2+1=5, e=6+2-1=7. Clamped to 5-6. So [5,6].
-
-So heaters list is [(1,3), (2,4), (5,6)]. Sorted by s.
-
-current starts at 1.
-
-Iteration 1:
-
-Check all heaters with s <=1. Only the first heater (1,3). Max_e is 3. current becomes 4. count=1.
-
-Next, current=4. Now, check heaters:
-
-s must be <=4. So first heater (1,3) is s=1 <=4. Then (2,4) s=2 <=4. (5,6) s=5>4. So in the loop, check first two heaters. Max e is 4. current becomes 5. count=2.
-
-current=5. Check heaters with s <=5. All three heaters. The third heater (5,6) is s=5. So for all three:
-
-s=1,2,5 <=5. Their e's are 3,4,6. Max is 6. current becomes 7. Which is >6. So loop ends. count=3. Correct.
-
-Second sample:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5 3
-
 1 0 0 0 1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-Heater positions 1 and 5.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For heater 1: s=1-3+1 =-1, clamped to 1. e=1+3-1=3. So [1,3].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Heater 5: s=5-3+1=3. e=5+3-1=7. Clamped to 3-5. So [3,5].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So heaters list is [(1,3), (3,5)].
+    print('Tests passed 😎')
 
-current starts at 1.
 
-First iteration: s <=1. Only first heater (1,3). max_e is 3. current becomes 4. count=1.
+if __name__ == '__main__':
+    test()
 
-current=4. Check heaters with s<=4. Both heaters:
 
-s=1,3 <=4. Their e's are 3 and 5. Max is 5. current becomes 6>5. count=2. Correct.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, r = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    heaters = []
+    for i in range(n):
+        if a[i] == 1:
+            pos = i + 1  # convert to 1-based
+            s = pos - r + 1
+            e = pos + r - 1
+            # clamp to 1 and n
+            s = max(1, s)
+            e = min(n, e)
+            if s > e:
+                continue  # heater's coverage is invalid
+            heaters.append( (s, e) )
+
+    # Check if no heaters
+    if not heaters:
+        print(-1, file=output_stream)
+        return
+
+    # Sort heaters by s
+    heaters.sort()
+
+    current = 1
+    count = 0
+    index = 0
+
+    while current <= n:
+        # Find the farthest e where s <= current
+        max_e = -1
+        best_i = -1
+        for i in range(len(heaters)):
+            s, e = heaters[i]
+            if s > current:
+                break  # since sorted, no more heaters can be considered
+            if e > max_e:
+                max_e = e
+                best_i = i
+
+        if max_e == -1:
+            # No heater covers current
+            print(-1, file=output_stream)
+            return
+
+        count += 1
+        current = max_e + 1
+
+        # Remove heaters that are before best_i? No, because in next iteration, we might need to check again.
+
+        # However, since we've processed all heaters with s <= current (before the best_i), but in the next iteration, current is updated to max_e +1. So the next s must be <= max_e +1. But the heaters are sorted by s, so in the next iteration, the loop will start from the first heater.
+
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 10
+0 0 0 0 0
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

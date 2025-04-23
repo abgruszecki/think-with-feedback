@@ -265,83 +265,96 @@ Compute the total.
 
 So the code would look like:
 
+Testing against sample input 1.
+
+```python
 import itertools
 
-g = [list(map(int, input().split())) for _ in range(5)]
 
-max_total = 0
+def main(input_stream, output_stream):
+    g = [list(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(5)]
 
-for perm in itertools.permutations([1,2,3,4,5]):
+    max_total = 0
 
-    current_line = list(perm)
+    for perm in itertools.permutations([1,2,3,4,5]):
 
-    total = 0
+        current_line = list(perm)
 
-    for _ in range(5):
+        total = 0
 
-        n = len(current_line)
+        for _ in range(5):
 
-        i = 0
+            n = len(current_line)
 
-        while i < n:
+            i = 0
 
-            if i+1 < n:
+            while i < n:
 
-                a = current_line[i]
+                if i+1 < n:
 
-                b = current_line[i+1]
+                    a = current_line[i]
 
-                total += g[a-1][b-1] + g[b-1][a-1]
+                    b = current_line[i+1]
 
-            i += 2
+                    total += g[a-1][b-1] + g[b-1][a-1]
 
-        current_line = current_line[1:]
+                i += 2
 
-    if total > max_total:
+            current_line = current_line[1:]
 
-        max_total = total
+        if total > max_total:
 
-print(max_total)
+            max_total = total
 
-Yes. Let's test this code against the sample inputs.
+    print(max_total, file=output_stream)
 
-First sample input:
 
-0 0 0 0 9
 
-0 0 0 0 0
+def test():
+    import io
 
-0 0 0 0 0
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0 43 21 18 2
+3 0 21 11 65
+5 2 0 1 4
+54 62 12 0 99
+87 64 81 33 0
+""",
+            "output": \
+"""\
+620
+""",
+        }, 
+    ]
 
-0 0 0 0 0
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-7 0 0 0 0
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So the grid is:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-g[0][4] = 9 (person 1 and 5: when they are a pair, 1's happiness increases by 9, 5's by 7).
+    print('Tests passed 😎')
 
-The sample output is 32, which is achieved by the permutation 2,3,1,5,4.
 
-Let's see how the code would compute this.
+if __name__ == '__main__':
+    test()
 
-Let's take perm = (2,3,1,5,4).
 
-Processing step by step:
+```
 
-Step 1 (current_line is [2,3,1,5,4], n=5):
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=0: a=2, b=3. Add g[1][2] + g[2][1]. g[1][2] is 0 (since all second row is 0). So 0+0=0.
-
-i=2: a=1, b=5. Add g[0][4] (9) + g[4][0] (7) → 16.
-
-i=4: no i+1 (5 is beyond 4). So total now 16.
-
-Then current_line becomes [3,1,5,4].
-
-Step 2 (n=4):
-
-i=0: 3 and 1 → add g[2][0] (0) and g[0][2] (0) → 0.
+```
 
 i=2: 5 and 4 → add g[4][3] (33? Wait the sample input is first line: 0 0 0 0 9. The fifth line is 7 0 0 0 0. So g[4][0] is 7, but other entries for g[4][j] are 0 except j=0. So 5 and 4 are 4 and 5 in the grid. Wait, a=5, b=4. So g[4][3] (since a is 5-1=4, b is 4-1=3). But according to the first sample, the fifth line is 7 0 0 0 0. So g[4][0] is 7, others are 0. So for a=5 and b=4, which is (5-1=4,4-1=3). So g[4][3] is 0. So contribution is 0+0=0. So this adds 0.
 

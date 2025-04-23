@@ -328,113 +328,94 @@ Then, for the first string, collect all possible targets (keys in rot_dict), and
 
 Now, in code:
 
-n = int(input())
-strings = [input().strip() for _ in range(n)]
+Testing against sample input 2.
 
-if n == 1:
-    print(0)
-    exit()
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    strings = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
 
-# Precompute rotation dictionaries for each string
-rot_dicts = []
-for s in strings:
-    d = {}
-    l = len(s)
-    for i in range(l):
-        rotated = s[i:] + s[:i]
-        if rotated not in d:
-            d[rotated] = i
-    rot_dicts.append(d)
+    if n == 1:
+        print(0, file=output_stream)
+        return
 
-# Check all possible targets from the first string's rotations
-min_total = None
-for target, first_moves in rot_dicts[0].items():
-    total = first_moves
-    valid = True
-    for i in range(1, n):
-        s_dict = rot_dicts[i]
-        if target not in s_dict:
-            valid = False
-            break
-        total += s_dict[target]
-    if valid:
-        if min_total is None or total < min_total:
-            min_total = total
+    # Precompute rotation dictionaries for each string
+    rot_dicts = []
+    for s in strings:
+        d = {}
+        l = len(s)
+        for i in range(l):
+            rotated = s[i:] + s[:i]
+            if rotated not in d:
+                d[rotated] = i
+        rot_dicts.append(d)
 
-if min_total is not None:
-    print(min_total)
-else:
-    print(-1)
+    # Check all possible targets from the first string's rotations
+    min_total = None
+    for target, first_moves in rot_dicts[0].items():
+        total = first_moves
+        valid = True
+        for i in range(1, n):
+            s_dict = rot_dicts[i]
+            if target not in s_dict:
+                valid = False
+                break
+            total += s_dict[target]
+        if valid:
+            if min_total is None or total < min_total:
+                min_total = total
 
-This should work.
+    if min_total is not None:
+        print(min_total, file=output_stream)
+    else:
+        print(-1, file=output_stream)
 
-Testing the second sample:
 
-Sample 2:
 
-2
+def test():
+    import io
 
-molzv
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+kc
+kc
+kc
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-lzvmo
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-First string is 'molzv' (length 5).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Rotations:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=0: molzv → 0.
+    print('Tests passed 😎')
 
-i=1: olzvm → 'olzvm' (i=1).
 
-i=2: lzvmo → i=2.
+if __name__ == '__main__':
+    test()
 
-i=3: zvm ol → 'zvm ol'? Wait, the string is 'molzv'.
 
-Wait, let's see:
+```
 
-s = 'molzv' (m o l z v)
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=0 → molzv → 0.
-
-i=1 → o l z v m → 'olzv' + 'm' → 'olzvm' (i=1).
-
-i=2 → l z v m o → 'lzvmo' (i=2).
-
-i=3 → z v m o l → 'zvm ol' → 'zvmol' (i=3).
-
-i=4 → v m o l z → 'vmolz' (i=4).
-
-So the possible targets are 'molzv' (0), 'olzvm' (1), 'lzvmo' (2), 'zvmol' (3), 'vmolz' (4).
-
-Now, the second string is 'lzvmo' (l z v m o). Let's generate its rotations:
-
-i=0: 'lzvmo' → 0.
-
-i=1: 'zvmo' + 'l' → 'zvm ol' → 'zvm ol'? Or perhaps 'zvmo l' → 'zvm ol' → 'zvmol' (i=1).
-
-i=2: 'vmo' + 'lz' → 'vmolz' → i=2.
-
-i=3: 'mo' + 'lzv' → 'molzv' → i=3.
-
-i=4: 'o' + 'lzvm' → 'olzvm' → i=4.
-
-So the second string's rotation dictionary would map:
-
-'lzvmo' →0, 'zvmol' →1, 'vmolz' →2, 'molzv' →3, 'olzvm' →4.
-
-So, the possible targets from the first string's rotations are the ones I listed.
-
-Now, in the code, for each target in the first string's rotations:
-
-Check if the second string's dictionary contains it.
-
-Let's look for targets that are present in both.
-
-For example, the target 'molzv' (from first string's rotation with i=0). The second string's dict has 'molzv' with move count 3. So for this target, sum would be 0 (first) +3 (second) =3.
-
-But the sample output is 2.
-
-Hmm, what's the correct target here?
+```
 
 Sample input 2:
 

@@ -859,206 +859,204 @@ But in the code, the variables are stored as a list. For each variable in the li
 
 Thus, in code:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-variables = []
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-for _ in range(n):
+    variables = []
 
-    parts = input().split(' := ')
+    for _ in range(n):
 
-    name = parts[0]
+        parts = input_stream.readline().rstrip("\n").split(' := ')
 
-    expr = parts[1]
+        name = parts[0]
 
-    if expr[0] in '01':
+        expr = parts[1]
 
-        # constant
+        if expr[0] in '01':
 
-        binary_str = expr
+            # constant
 
-        variables.append( (name, 'constant', binary_str) )
+            binary_str = expr
 
-    else:
-
-        # operation
-
-        op1, op, op2 = expr.split()
-
-        variables.append( (name, 'operation', op1, op, op2) )
-
-min_bits = []
-max_bits = []
-
-for k in range(m):
-
-    var_dict = {}  # key: variable name, value: (val0, val1)
-
-    sum0 = 0
-
-    sum1 = 0
-
-    for var in variables:
-
-        name = var[0]
-
-        if var[1] == 'constant':
-
-            binary_str = var[2]
-
-            bit = binary_str[k]
-
-            val0 = 1 if (bit == '1') else 0
-
-            val1 = val0
+            variables.append( (name, 'constant', binary_str) )
 
         else:
 
             # operation
 
-            _, _, op1, op, op2 = var
+            op1, op, op2 = expr.split()
 
-            # scenario 0
+            variables.append( (name, 'operation', op1, op, op2) )
 
-            a0 = 0 if op1 == '?' else var_dict[op1][0]
+    min_bits = []
+    max_bits = []
 
-            b0 = 0 if op2 == '?' else var_dict[op2][0]
+    for k in range(m):
 
-            if op == 'AND':
+        var_dict = {}  # key: variable name, value: (val0, val1)
 
-                res0 = a0 & b0
+        sum0 = 0
 
-            elif op == 'OR':
+        sum1 = 0
 
-                res0 = a0 | b0
+        for var in variables:
 
-            else:  # XOR
+            name = var[0]
 
-                res0 = a0 ^ b0
+            if var[1] == 'constant':
 
-            # scenario 1
+                binary_str = var[2]
 
-            a1 = 1 if op1 == '?' else var_dict[op1][1]
+                bit = binary_str[k]
 
-            b1 = 1 if op2 == '?' else var_dict[op2][1]
+                val0 = 1 if (bit == '1') else 0
 
-            if op == 'AND':
+                val1 = val0
 
-                res1 = a1 & b1
+            else:
 
-            elif op == 'OR':
+                # operation
 
-                res1 = a1 | b1
+                _, _, op1, op, op2 = var
 
-            else:  # XOR
+                # scenario 0
 
-                res1 = a1 ^ b1
+                a0 = 0 if op1 == '?' else var_dict[op1][0]
 
-            val0 = res0
+                b0 = 0 if op2 == '?' else var_dict[op2][0]
 
-            val1 = res1
+                if op == 'AND':
 
-        sum0 += val0
+                    res0 = a0 & b0
 
-        sum1 += val1
+                elif op == 'OR':
 
-        var_dict[name] = (val0, val1)
+                    res0 = a0 | b0
 
-    # decide min and max bits for this position.
+                else:  # XOR
 
-    # for min:
+                    res0 = a0 ^ b0
 
-    if sum0 < sum1:
+                # scenario 1
 
-        min_bit = '0'
+                a1 = 1 if op1 == '?' else var_dict[op1][1]
 
-    elif sum0 > sum1:
+                b1 = 1 if op2 == '?' else var_dict[op2][1]
 
-        min_bit = '1'
+                if op == 'AND':
 
-    else:
+                    res1 = a1 & b1
 
-        min_bit = '0'
+                elif op == 'OR':
 
-    min_bits.append(min_bit)
+                    res1 = a1 | b1
 
-    # for max:
+                else:  # XOR
 
-    if sum1 > sum0:
+                    res1 = a1 ^ b1
 
-        max_bit = '1'
+                val0 = res0
 
-    elif sum1 < sum0:
+                val1 = res1
 
-        max_bit = '0'
+            sum0 += val0
 
-    else:
+            sum1 += val1
 
-        max_bit = '0'
+            var_dict[name] = (val0, val1)
 
-    max_bits.append(max_bit)
+        # decide min and max bits for this position.
 
-min_number = ''.join(min_bits)
-max_number = ''.join(max_bits)
+        # for min:
 
-print(min_number)
-print(max_number)
+        if sum0 < sum1:
 
-This should handle all cases.
+            min_bit = '0'
 
-Testing the first sample:
+        elif sum0 > sum1:
 
-Sample input:
+            min_bit = '1'
 
-3 3
+        else:
 
-a := 101
+            min_bit = '0'
 
-b := 011
+        min_bits.append(min_bit)
 
-c := ? XOR b
+        # for max:
 
-For each bit:
+        if sum1 > sum0:
 
-k=0:
+            max_bit = '1'
 
-a is 1, b is 0.
+        elif sum1 < sum0:
 
-c's scenario 0: 0 XOR 0 =0 → sum0=1+0+0=1.
+            max_bit = '0'
 
-scenario 1: 1 XOR 0=1 → sum1=1+0+1=2.
+        else:
 
-min_bit is 0 (sum0 is 1 < sum1 2).
+            max_bit = '0'
 
-max_bit is 1 (sum1 is 2> sum0 1).
+        max_bits.append(max_bit)
 
-k=1:
+    min_number = ''.join(min_bits)
+    max_number = ''.join(max_bits)
 
-a's bit is 0, b's bit is 1.
+    print(min_number, file=output_stream)
+    print(max_number, file=output_stream)
 
-c's scenario 0: 0 XOR 1 →1. sum0=0+1+1=2.
 
-scenario 1: 1 XOR 1 →0. sum1=0+1+0=1.
 
-sum0> sum1, so min_bit is 1 (sum1 is better), max_bit is 0.
+def test():
+    import io
 
-k=2:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 1
+a := 1
+bb := 0
+cx := ? OR a
+d := ? XOR ?
+e := d AND bb
+""",
+            "output": \
+"""\
+0
+0
+""",
+        }, 
+    ]
 
-a's bit is 1, b's bit is 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-c's scenario 0: 0 XOR 1 →1. sum0=1+1+1=3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-scenario 1: 1 XOR 1 →0. sum1=1+1+0=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-sum0> sum1 → min_bit is 1 (sum1 is 2 < 3).
+    print('Tests passed 😎')
 
-max_bit is 0.
 
-Thus, min bits are [0,1,1] → '011'.
+if __name__ == '__main__':
+    test()
 
-max bits are [1,0,0] → '100'.
 
-Which matches the sample output.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case:
 

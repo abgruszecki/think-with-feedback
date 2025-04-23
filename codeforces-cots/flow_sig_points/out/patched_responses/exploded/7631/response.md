@@ -314,63 +314,159 @@ But for large arrays (n=1e5), a.copy() would take O(n) time, which is acceptable
 
 So the code would be:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-if all(num == 1 for num in a):
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-    # replace one with 2
+    if all(num == 1 for num in a):
 
-    res = [1]*(n-1) + [2]
+        # replace one with 2
 
-else:
+        res = [1]*(n-1) + [2]
 
-    max_val = max(a)
+    else:
 
-    # find first occurrence of max_val
+        max_val = max(a)
 
-    idx = a.index(max_val)
+        # find first occurrence of max_val
 
-    a = a.copy()
+        idx = a.index(max_val)
 
-    a[idx] = 1
+        a = a.copy()
 
-    a.sort()
+        a[idx] = 1
 
-    res = a
+        a.sort()
 
-print(' '.join(map(str, res)))
+        res = a
 
-Wait, but in the else case, after replacing the max with 1, we sort the array, which is correct.
+    print(' '.join(map(str, res)), file=output_stream)
 
-But what if there are multiple max elements? For example, array [5,5,3]. The code replaces the first 5 with 1, resulting in [5,1,3]. Then sorted becomes [1,3,5]. Which is correct. The other 5 is still present, but after replacement, the array has one 1, and the rest are 5 and 3. Sorting gives the minimal possible array.
 
-Yes.
 
-Another example: array [5,5,5]. Replacing first 5 with 1 gives [5,5,1], sorted as [1,5,5], which is correct.
+def test():
+    import io
 
-So the code handles that.
-
-Testing the sample inputs:
-
-Sample 1:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
-
-1 2 3 4 5
-
-all_ones? No. max is 5. Replace first occurrence (index 4) with 1. New array is [1,2,3,4,1]. Sort: [1,1,2,3,4]. Output matches sample.
-
-Sample 2:
-
-5
-
 2 3 4 5 6
+""",
+            "output": \
+"""\
+1 2 3 4 5
+""",
+        }, 
+    ]
 
-all_ones? No. Max is 6. Replace index 4 with 1. New array [2,3,4,5,1]. Sorted [1,2,3,4,5]. Output matches.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    if all(num == 1 for num in a):
+
+        # replace one with 2
+
+        res = [1]*(n-1) + [2]
+
+    else:
+
+        max_val = max(a)
+
+        # find first occurrence of max_val
+
+        idx = a.index(max_val)
+
+        a = a.copy()
+
+        a[idx] = 1
+
+        a.sort()
+
+        res = a
+
+    print(' '.join(map(str, res)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+2 2 2
+""",
+            "output": \
+"""\
+1 2 2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

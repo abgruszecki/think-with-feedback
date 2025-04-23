@@ -553,121 +553,457 @@ else:
 
 So code:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-sum_all = sum(a)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-if sum_all < m:
+    sum_all = sum(a)
 
-    print(-1)
+    if sum_all < m:
 
-else:
+        print(-1, file=output_stream)
 
-    a.sort(reverse=True)
+    else:
 
-    prefix_sum = [0] * (n +1)
+        a.sort(reverse=True)
 
-    for i in range(n):
+        prefix_sum = [0] * (n +1)
 
-        prefix_sum[i+1] = prefix_sum[i] + a[i]
+        for i in range(n):
 
-    def is_possible(k):
+            prefix_sum[i+1] = prefix_sum[i] + a[i]
 
-        for s in range(k, n+1):
+        def is_possible(k):
 
-            if s > n:
+            for s in range(k, n+1):
 
-                continue
+                if s > n:
 
-            sum_a = prefix_sum[s]
+                    continue
 
-            t = s // k
+                sum_a = prefix_sum[s]
 
-            r = s % k
+                t = s // k
 
-            sum_x = r * (t +1)*t //2 + (k - r)* t*(t-1) //2
+                r = s % k
 
-            if sum_a - sum_x >= m:
+                sum_x = r * (t +1)*t //2 + (k - r)* t*(t-1) //2
 
-                return True
+                if sum_a - sum_x >= m:
 
-        return False
+                    return True
 
-    low =1
+            return False
 
-    high =n
+        low =1
 
-    ans =-1
+        high =n
 
-    while low <= high:
+        ans =-1
 
-        mid = (low + high) //2
+        while low <= high:
 
-        if is_possible(mid):
+            mid = (low + high) //2
 
-            ans =mid
+            if is_possible(mid):
 
-            high = mid -1
+                ans =mid
 
-        else:
+                high = mid -1
 
-            low = mid +1
+            else:
 
-    print(ans if ans !=-1 else -1)
+                low = mid +1
 
-Wait, but in the case sum_all >=m, there must be a solution. Because when k =n, s can be n. sum_x is 0. sum_a is sum_all. So sum_all >=m. So for k =n, is_possible returns True. So the binary search will find a solution. So ans will not be -1. So the code can safely print ans.
+        print(ans if ans !=-1 else -1, file=output_stream)
 
-So in code:
 
-print(ans)
 
-Because after the binary search, if sum_all >=m, then there must be a solution (at least k =n). So ans is not -1.
+def test():
+    import io
 
-Thus, the code should work.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 10
+1 3 4 2 1 4 2
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-Testing the samples:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample 1:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-n=5, m=8.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-sum_all= 3+2+2+1+1=9 >=8.
+    print('Tests passed 😎')
 
-sorted a:3,2,2,1,1.
 
-prefix_sum: [0,3,5,7,8,9].
+if __name__ == '__main__':
+    test()
 
-binary search for k=4.
 
-Check s=4:
+```
 
-sum_a=8. sum_x for s=4, k=4: t=1, r=0. sum_x=0*(2*1/2) +4*(1*0/2) → 0. So 8-0=8 >=8. So possible. So k=4 is feasible.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Sample 2:
+```
 
-sum_all=4+4+3+2+2+1+1=17 >=10.
+Testing against sample input 2.
 
-binary search for k=2.
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-Check s=3:
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-sum_a=4+4+3=11. sum_x for s=3, k=2: t=1, r=1. sum_x=1*(2*1/2) + (2-1)*1*0/2 → 1*1 +1*0=1. 11-1=10 >=10. So k=2 is feasible.
+    sum_all = sum(a)
 
-Sample 3:
+    if sum_all < m:
 
-sum_all=25 >=15. For k=1.
+        print(-1, file=output_stream)
 
-Check s=5. sum_a=25. sum_x=5*4//2=10. 25-10=15 >=15. So possible.
+    else:
 
-Sample 4:
+        a.sort(reverse=True)
 
-sum_all=25 >=16. k=2. s=5.
+        prefix_sum = [0] * (n +1)
 
-sum_x for s=5, k=2:
+        for i in range(n):
 
-t=5//2=2, r=1. sum_x=1*(3*2//2) + (2-1)*2*1//2 → 3 +1=4. 25-4=21 >=16. So possible.
+            prefix_sum[i+1] = prefix_sum[i] + a[i]
+
+        def is_possible(k):
+
+            for s in range(k, n+1):
+
+                if s > n:
+
+                    continue
+
+                sum_a = prefix_sum[s]
+
+                t = s // k
+
+                r = s % k
+
+                sum_x = r * (t +1)*t //2 + (k - r)* t*(t-1) //2
+
+                if sum_a - sum_x >= m:
+
+                    return True
+
+            return False
+
+        low =1
+
+        high =n
+
+        ans =-1
+
+        while low <= high:
+
+            mid = (low + high) //2
+
+            if is_possible(mid):
+
+                ans =mid
+
+                high = mid -1
+
+            else:
+
+                low = mid +1
+
+        print(ans if ans !=-1 else -1, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 15
+5 5 5 5 5
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    sum_all = sum(a)
+
+    if sum_all < m:
+
+        print(-1, file=output_stream)
+
+    else:
+
+        a.sort(reverse=True)
+
+        prefix_sum = [0] * (n +1)
+
+        for i in range(n):
+
+            prefix_sum[i+1] = prefix_sum[i] + a[i]
+
+        def is_possible(k):
+
+            for s in range(k, n+1):
+
+                if s > n:
+
+                    continue
+
+                sum_a = prefix_sum[s]
+
+                t = s // k
+
+                r = s % k
+
+                sum_x = r * (t +1)*t //2 + (k - r)* t*(t-1) //2
+
+                if sum_a - sum_x >= m:
+
+                    return True
+
+            return False
+
+        low =1
+
+        high =n
+
+        ans =-1
+
+        while low <= high:
+
+            mid = (low + high) //2
+
+            if is_possible(mid):
+
+                ans =mid
+
+                high = mid -1
+
+            else:
+
+                low = mid +1
+
+        print(ans if ans !=-1 else -1, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 16
+5 5 5 5 5
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 4.
+
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    sum_all = sum(a)
+
+    if sum_all < m:
+
+        print(-1, file=output_stream)
+
+    else:
+
+        a.sort(reverse=True)
+
+        prefix_sum = [0] * (n +1)
+
+        for i in range(n):
+
+            prefix_sum[i+1] = prefix_sum[i] + a[i]
+
+        def is_possible(k):
+
+            for s in range(k, n+1):
+
+                if s > n:
+
+                    continue
+
+                sum_a = prefix_sum[s]
+
+                t = s // k
+
+                r = s % k
+
+                sum_x = r * (t +1)*t //2 + (k - r)* t*(t-1) //2
+
+                if sum_a - sum_x >= m:
+
+                    return True
+
+            return False
+
+        low =1
+
+        high =n
+
+        ans =-1
+
+        while low <= high:
+
+            mid = (low + high) //2
+
+            if is_possible(mid):
+
+                ans =mid
+
+                high = mid -1
+
+            else:
+
+                low = mid +1
+
+        print(ans if ans !=-1 else -1, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 26
+5 5 5 5 5
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample5: sum_all=25 <26 → output -1.
 

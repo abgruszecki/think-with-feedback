@@ -577,25 +577,77 @@ For example, the first sample's s is R B R. The reversed string is R B R reverse
 
 So the code would be:
 
-s = input().strip()
+Testing against sample input 2.
 
-reversed_s = s[::-1]
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-total = 0
+    reversed_s = s[::-1]
 
-for i in range(len(reversed_s)):
+    total = 0
 
-    if reversed_s[i] == 'B':
+    for i in range(len(reversed_s)):
 
-        total += 2**i
+        if reversed_s[i] == 'B':
 
-print(total)
+            total += 2**i
 
-This is very simple and efficient, and handles all the samples correctly.
+    print(total, file=output_stream)
 
-Let's test this with the second sample input:
 
-Input is RBBR → the string is 'RBBR'. Reversed is 'RBBR' → reversed string is 'RBBR'[::-1] → 'RBBR' → reversed is 'RBBR' → 'RB'BR becomes 'R B B R' reversed is 'R B B R' → wait, the original string is 'RBBR' → indices 0: R, 1: B, 2: B, 3: R. Reversed would be indices 3,2,1,0 → R B B R → reversed string is 'RBBR' → wait, no. Wait, the original string is 'RBBR' which is R B B R. Reversing it gives R B B R → no, wait, no. 'RBBR' is 'R', 'B', 'B', 'R'. Reversed is 'R', 'B', 'B', 'R' → no, no. Wait, no. Reversing the string 'RBBR' gives 'RBBR'[::-1] → 'RBBR' → reversed is 'R B B R'? No. Let's see: original string is 'R', 'B', 'B', 'R'. Reversed is 'R', 'B', 'B', 'R' → no. Wait, no. Wait, the original string is 'RBBR' → 'R', 'B', 'B', 'R'. Reversed would be 'R', 'B', 'B', 'R' → 'R B B R' → same as original? No, no. Wait, the reversed string would have the first character as the original last. So for 'RBBR' (R, B, B, R), reversed is R, B, B, R → no. Wait, no, the first character of the reversed string is the last character of the original. So original is [0]R, [1]B, [2]B, [3]R. Reversed is [3]R, [2]B, [1]B, [0]R → so the reversed string is 'RBBR' → no. Wait, reversed string is 'R' 'B' 'B' 'R' reversed is 'R' 'B' 'B' 'R' → no. Wait, no, reversing 'RBBR' gives 'RBBR'[::-1] → 'RB'BR' → 'R B B R' → no, the reversed string is 'R B B R' → wait, no. Wait, 'RBBR' is R B B R. Reversed is R B B R → same as original. No, that's not possible. Wait, no, 'RBBR' reversed is 'RBBR'[::-1] → which is 'R', 'B', 'B', 'R' → reversed to 'R', 'B', 'B', 'R' → same as original? No. Wait, original is 'R', 'B', 'B', 'R'. Reversed is 'R', 'B', 'B', 'R' → yes, because the first and last characters are R, and the middle two are B's. So reversed string is 'RBBR' → same as original. So the reversed string is 'RBBR'.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+RBBRR
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 50, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 43, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '6'
+Got: '0'
+
+```
 
 So for the second sample input, reversed_s is 'RBBR'. Then, we check each character:
 

@@ -554,112 +554,128 @@ But in Python, integers can be up to any size, and lru_cache can handle that.
 
 So the code would look something like this:
 
+Testing against sample input 1.
+
+```python
 import sys
 from functools import lru_cache
 
-n = int(sys.stdin.readline())
-p = list(map(int, sys.stdin.readline().split()))
 
-existing = set()
-missing = []
-for num in p:
-    if num != 0:
-        existing.add(num)
-for num in range(1, n+1):
-    if num not in existing:
-        missing.append(num)
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    p = list(map(int, input_stream.readline().split()))
 
-e = sum(1 for num in missing if num % 2 == 0)
-o = len(missing) - e
+    existing = set()
+    missing = []
+    for num in p:
+        if num != 0:
+            existing.add(num)
+    for num in range(1, n+1):
+        if num not in existing:
+            missing.append(num)
 
-# Precompute whether each position is fixed or zero, and their parity if fixed
-is_fixed = []
-parities = []
-for num in p:
-    if num == 0:
-        is_fixed.append(False)
-        parities.append(None)
+    e = sum(1 for num in missing if num % 2 == 0)
+    o = len(missing) - e
+
+    # Precompute whether each position is fixed or zero, and their parity if fixed
+    is_fixed = []
+    parities = []
+    for num in p:
+        if num == 0:
+            is_fixed.append(False)
+            parities.append(None)
+        else:
+            is_fixed.append(True)
+            parities.append(num % 2)
+
+    @lru_cache(maxsize=None)
+    def dp(i, curr_p, e_left, o_left):
+        if i == n - 1:
+            return 0  # no next element
+        next_i = i + 1
+        if is_fixed[next_i]:
+            next_p = parities[next_i]
+            cost = 1 if (curr_p != next_p) else 0
+            return cost + dp(next_i, next_p, e_left, o_left)
+        else:
+            # next_i is a zero; need to choose between even and odd
+            min_cost = float('inf')
+            # Try even
+            if e_left > 0:
+                new_e = e_left - 1
+                new_p = 0
+                cost = 1 if (curr_p != new_p) else 0
+                res = cost + dp(next_i, new_p, new_e, o_left)
+                if res < min_cost:
+                    min_cost = res
+            # Try odd
+            if o_left > 0:
+                new_o = o_left - 1
+                new_p = 1
+                cost = 1 if (curr_p != new_p) else 0
+                res = cost + dp(next_i, new_p, e_left, new_o)
+                if res < min_cost:
+                    min_cost = res
+            return min_cost
+
+    # Now handle the initial call
+    if not is_fixed[0]:
+        # First element is 0, need to choose even or odd
+        possible = []
+        if e > 0:
+            possible.append(dp(0, 0, e-1, o))
+        if o > 0:
+            possible.append(dp(0, 1, e, o-1))
+        print(min(possible), file=output_stream)
     else:
-        is_fixed.append(True)
-        parities.append(num % 2)
+        # First element is fixed
+        initial_p = parities[0]
+        print(dp(0, initial_p, e, o), file=output_stream)
 
-@lru_cache(maxsize=None)
-def dp(i, curr_p, e_left, o_left):
-    if i == n - 1:
-        return 0  # no next element
-    next_i = i + 1
-    if is_fixed[next_i]:
-        next_p = parities[next_i]
-        cost = 1 if (curr_p != next_p) else 0
-        return cost + dp(next_i, next_p, e_left, o_left)
-    else:
-        # next_i is a zero; need to choose between even and odd
-        min_cost = float('inf')
-        # Try even
-        if e_left > 0:
-            new_e = e_left - 1
-            new_p = 0
-            cost = 1 if (curr_p != new_p) else 0
-            res = cost + dp(next_i, new_p, new_e, o_left)
-            if res < min_cost:
-                min_cost = res
-        # Try odd
-        if o_left > 0:
-            new_o = o_left - 1
-            new_p = 1
-            cost = 1 if (curr_p != new_p) else 0
-            res = cost + dp(next_i, new_p, e_left, new_o)
-            if res < min_cost:
-                min_cost = res
-        return min_cost
 
-# Now handle the initial call
-if not is_fixed[0]:
-    # First element is 0, need to choose even or odd
-    possible = []
-    if e > 0:
-        possible.append(dp(0, 0, e-1, o))
-    if o > 0:
-        possible.append(dp(0, 1, e, o-1))
-    print(min(possible))
-else:
-    # First element is fixed
-    initial_p = parities[0]
-    print(dp(0, initial_p, e, o))
 
-Wait, but this code has a problem. For example, the is_fixed and parities arrays are built for the entire array. For the next_i (i+1) position, when we are processing the next_i-th element, which is a zero, the code checks if is_fixed[next_i] is True. If it is, uses its parity. Otherwise, it's a zero and needs to choose even or odd.
+def test():
+    import io
 
-But in the code above, the is_fixed array is built based on the original p array. So the code correctly identifies which positions are fixed (non-zero) and which are zeros.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+1 0 0 5 0 0 2
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-But the code's DP function is designed to process the array positions in order. Let's test this logic with the first example.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-First example input:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-5
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-0 5 0 2 3
+    print('Tests passed 😎')
 
-The array is [0,5,0,2,3]. The existing numbers are 5,2,3. Missing numbers are 1,4.
 
-So e = 1 (4 is even), o=1 (1 is odd).
+if __name__ == '__main__':
+    test()
 
-The code's is_fixed array for each position:
 
-0: False (0), so handled by choosing even or odd.
+```
 
-But wait, in the original array, the first element is 0. So the code checks if the first element is fixed. If not, it starts by choosing even or odd.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Wait, according to the code:
-
-For the first element (position 0), it's 0 (not fixed). So the code enters the else branch and tries choosing even (e=1) and odd (o=1). For each choice, it calls dp(0, chosen_p, e-1 or o-1, ...).
-
-For example, if even is chosen (4), then curr_p is 0, and the next element is i=1 (which is fixed as 5, which is 1).
-
-The code will call dp(0, 0, 0, 1). Then, processing next_i=1, which is fixed (5, parity 1). The transition cost between 0 and 1 is 1. Then, the next step is to call dp(1, 1, 0, 1). But next_i is 2 (third element, which is 0).
-
-In that case, the code will need to process position 2 (next_i=2), which is a zero. So the code will try even or odd. But e_left is 0 (since we used the only even in the first step), so only odd (1) is left.
-
-So for next_i=2 (position 2), the code chooses odd (parity 1). Transition cost between previous parity (1) and new_p (1) is 0. Then, proceed to next_i=3 (position 3), which is fixed (2, parity 0). Transition cost 1. Then next_i=4 (position 4, fixed 3, parity 1). Transition cost 1. Then i=4 is the last position, so return 0. The total cost is 1 (from 0 to 1) + 0 (1 to 1) + 1 (1 to 0) + 1 (0 to 1) = 3. But the sample output is 2. So this indicates a problem.
+```
 
 Wait, perhaps the code isn't considering all possible permutations. For example, in the first sample, the optimal arrangement is 1 5 4 2 3. Let's see the transitions:
 

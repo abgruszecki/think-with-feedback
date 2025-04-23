@@ -294,75 +294,104 @@ But the code can be written either way. For speed, the single loop is better.
 
 So code:
 
-n = int(input())
+Testing against sample input 1.
 
-s = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-count1 = 0
+    s = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-count2 = 0
+    count1 = 0
 
-count3 = 0
+    count2 = 0
 
-count4 = 0
+    count3 = 0
 
-for num in s:
+    count4 = 0
 
-    if num == 1:
+    for num in s:
 
-        count1 +=1
+        if num == 1:
 
-    elif num == 2:
+            count1 +=1
 
-        count2 +=1
+        elif num == 2:
 
-    elif num ==3:
+            count2 +=1
 
-        count3 +=1
+        elif num ==3:
 
-    else:
+            count3 +=1
 
-        count4 +=1
+        else:
 
-taxis = count4
+            count4 +=1
 
-taxis += count3
+    taxis = count4
 
-count1 = max(0, count1 - count3)
+    taxis += count3
 
-taxis += count2 //2
+    count1 = max(0, count1 - count3)
 
-remaining_2 = count2 % 2
+    taxis += count2 //2
 
-if remaining_2:
+    remaining_2 = count2 % 2
 
-    taxis +=1
+    if remaining_2:
 
-    count1 = max(count1 -2, 0)
+        taxis +=1
 
-taxis += (count1 +3) //4
+        count1 = max(count1 -2, 0)
 
-print(taxis)
+    taxis += (count1 +3) //4
 
-Yes.
+    print(taxis, file=output_stream)
 
-This should handle all cases correctly.
 
-Testing the first sample input:
 
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+2 3 4 4 2 1 3 1
+""",
+            "output": \
+"""\
 5
+""",
+        }, 
+    ]
 
-1 2 4 3 3 → counts are 1,1,2,1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-taxis =1 +2 →3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-count1=1-2=0 (max 0).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-count2//2 =0 → taxis=3.
+    print('Tests passed 😎')
 
-remaining_2=1 → taxis=4. count1 becomes 0-2 →0.
 
-Then (0 +3)//4=0 → taxis=4. Correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

@@ -279,67 +279,92 @@ Now, considering the constraints. For n=1e5, the code needs to read 1e5 lines. U
 
 But in Python, the standard way is to read via sys.stdin for speed. So, the code should read:
 
+Testing against sample input 2.
+
+```python
 import sys
 
-n = int(sys.stdin.readline())
 
-students = []
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
-sum_fixed =0
+    students = []
 
-for _ in range(n):
+    sum_fixed =0
 
-    a, b = map(int, sys.stdin.readline().split())
+    for _ in range(n):
 
-    delta = a -b
+        a, b = map(int, input_stream.readline().split())
 
-    students.append( (delta, a, b) )
+        delta = a -b
 
-    sum_fixed += b *n -a
+        students.append( (delta, a, b) )
 
-students.sort(reverse=True)
+        sum_fixed += b *n -a
 
-sum_var =0
+    students.sort(reverse=True)
 
-for i in range(n):
+    sum_var =0
 
-    sum_var += students[i][0] * (i+1)
+    for i in range(n):
 
-print(sum_var + sum_fixed)
+        sum_var += students[i][0] * (i+1)
 
-This should handle the inputs efficiently.
+    print(sum_var + sum_fixed, file=output_stream)
 
-Testing with the second sample:
 
-Input 4:
 
-4
+def test():
+    import io
 
-2 4 → delta -2
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10
+5 10
+12 4
+31 45
+20 55
+30 17
+29 30
+41 32
+7 1
+5 5
+3 15
+""",
+            "output": \
+"""\
+1423
+""",
+        }, 
+    ]
 
-3 3 → delta 0
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-7 1 → delta 6
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-2 3 → delta -1
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-sum_fixed is sum(4*4 -2=14, 3*4-3=9, 1*4-7=-3, 3*4-2=10 → 14+9-3+10=30.
+    print('Tests passed 😎')
 
-After sorting the students in reverse order of delta:
 
-The deltas are -2,0,6,-1. So the sorted deltas in reverse are 6,0,-1,-2.
+if __name__ == '__main__':
+    test()
 
-So the sorted list is:
 
-6 (from 7,1), 0 (3,3), -1 (2,3), -2 (2,4).
+```
 
-sum_var is 6*1 +0*2 + (-1)*3 + (-2)*4 =6 +0 -3-8= -5.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Total is -5 +30=25, which matches sample 2.
-
-So the code works for that case.
-
-Thus, this approach is correct.
+```
 
 The time complexity is O(n log n), which for n=1e5 is acceptable. The memory is O(n), which is also acceptable.
 

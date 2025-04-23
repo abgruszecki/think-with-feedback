@@ -755,81 +755,112 @@ After reading n, set INF = n + 1.
 
 So in code:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-INF = n +1
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-result = [0]*n
+    INF = n +1
 
-# Left pass
+    result = [0]*n
 
-last_zero = None
+    # Left pass
 
-for i in range(n):
+    last_zero = None
 
-    if a[i] ==0:
+    for i in range(n):
 
-        result[i] =0
+        if a[i] ==0:
 
-        last_zero =i
+            result[i] =0
 
-    else:
-
-        if last_zero is None:
-
-            result[i] = INF
+            last_zero =i
 
         else:
 
-            result[i] = i - last_zero
+            if last_zero is None:
 
-# Right pass
+                result[i] = INF
 
-next_zero = None
+            else:
 
-for i in range(n-1, -1, -1):
+                result[i] = i - last_zero
 
-    if a[i] ==0:
+    # Right pass
 
-        next_zero =i
+    next_zero = None
 
-        current_right =0
+    for i in range(n-1, -1, -1):
 
-    else:
+        if a[i] ==0:
 
-        if next_zero is not None:
+            next_zero =i
 
-            current_right = next_zero -i
+            current_right =0
 
         else:
 
-            current_right = INF
+            if next_zero is not None:
 
-    result[i] = min(result[i], current_right)
+                current_right = next_zero -i
 
-# Print the result as space-separated integers.
+            else:
 
-print(' '.join(map(str, result)))
+                current_right = INF
 
-This code uses integer values, and for cases where the left or right distance is not present, uses INF. But since the problem states that there's at least one zero, in the final result, all entries will have a valid distance (i.e., min of left and right is finite).
+        result[i] = min(result[i], current_right)
 
-Testing this with the first sample:
+    # Print the result as space-separated integers.
 
-n=9, INF=10.
+    print(' '.join(map(str, result)), file=output_stream)
 
-Left pass:
 
-Indices0 and1: result is10.
 
-Then, during the right pass:
+def test():
+    import io
 
-For i=0, next_zero is2. current_right=2-0=2. min(10,2) →2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+0 1 2 3 4
+""",
+            "output": \
+"""\
+0 1 2 3 4
+""",
+        }, 
+    ]
 
-Similarly for i=1: current_right=1. min(10,1) →1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Thus, the output is correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, the code should work correctly.
 

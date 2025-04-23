@@ -357,50 +357,84 @@ Now, for the case where all are 'a's, we have to replace the last character with
 
 But in code:
 
-s = input().strip()
+Testing against sample input 1.
 
-if all(c == 'a' for c in s):
-    # replace last character with 'z'
-    if len(s) == 0:
-        # but the problem says non-empty string
-        pass
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    if all(c == 'a' for c in s):
+        # replace last character with 'z'
+        if len(s) == 0:
+            # but the problem says non-empty string
+            pass
+        else:
+            new_s = list(s)
+            new_s[-1] = 'z'
+            print(''.join(new_s), file=output_stream)
     else:
-        new_s = list(s)
-        new_s[-1] = 'z'
-        print(''.join(new_s))
-else:
-    # find i
-    i = 0
-    n = len(s)
-    while i < n and s[i] == 'a':
-        i +=1
+        # find i
+        i = 0
+        n = len(s)
+        while i < n and s[i] == 'a':
+            i +=1
 
-    # Now find j
-    j = i
-    while j < n and s[j] != 'a':
-        j +=1
-    j -=1
+        # Now find j
+        j = i
+        while j < n and s[j] != 'a':
+            j +=1
+        j -=1
 
-    # Now create the result
-    res = list(s)
-    for k in range(i, j+1):
-        res[k] = chr(ord(res[k]) -1)
+        # Now create the result
+        res = list(s)
+        for k in range(i, j+1):
+            res[k] = chr(ord(res[k]) -1)
 
-    print(''.join(res))
+        print(''.join(res), file=output_stream)
 
-But wait, in Python, for very large strings, creating a list and then modifying it in place is efficient enough. Because even for 1e5 elements, this is manageable.
 
-Let's test the code.
 
-Sample 1:
+def test():
+    import io
 
-Input: codeforces → codeforces is 'c o d e f o r c e s' → all non-'a's.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+abacaba
+""",
+            "output": \
+"""\
+aaacaba
+""",
+        }, 
+    ]
 
-i = 0 (since first character is 'c').
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-j increments until len(s) (10), then j-1 is 9.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Then, each character is shifted by 1. So 'c'→'b', 'o'→'n', 'd'→'c', 'e'→'d', etc. Which gives the sample output.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2: abacaba → i starts at 0. After the first loop, i becomes 1 (s[0] is 'a', s[1] is 'b'). Then j starts at 1. s[j] is 'b' → j increments to 2 (s[2] is 'a'). So j is 2, j-1 is 1. So shift index 1: 'b' becomes 'a'. The rest remains. So output is 'aaacaba', which matches the sample.
 

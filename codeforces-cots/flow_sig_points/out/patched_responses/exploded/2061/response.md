@@ -393,115 +393,259 @@ So, proceed as follows.
 
 So, code outline:
 
-MOD = 998244353
+Testing against sample input 1.
 
-n = int(input())
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-a = list(map(int, input().split()))
+    n = int(input_stream.readline().rstrip("\n"))
 
-b = list(map(int, input().split()))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-x_dict = {}
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for ai, bi in zip(a, b):
+    x_dict = {}
 
-    x_dict[ai] = bi
+    for ai, bi in zip(a, b):
 
-m = int(input())
+        x_dict[ai] = bi
 
-c = list(map(int, input().split()))
+    m = int(input_stream.readline().rstrip("\n"))
 
-d = list(map(int, input().split()))
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-t = 0
+    d = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-valid = True
+    t = 0
 
-# Check if all C primes are in X's primes.
+    valid = True
 
-for cj in c:
+    # Check if all C primes are in X's primes.
 
-    if cj not in x_dict:
+    for cj in c:
 
-        valid = False
+        if cj not in x_dict:
 
-        break
+            valid = False
 
-if not valid:
+            break
 
-    print(0)
+    if not valid:
 
-    exit()
+        print(0, file=output_stream)
 
-# Now check each Y's prime's exponent.
+        return
 
-for j in range(m):
+    # Now check each Y's prime's exponent.
 
-    cj = c[j]
+    for j in range(m):
 
-    dj = d[j]
+        cj = c[j]
 
-    bi = x_dict[cj]
+        dj = d[j]
 
-    if dj > bi:
+        bi = x_dict[cj]
 
-        valid = False
+        if dj > bi:
 
-        break
+            valid = False
 
-    if dj < bi:
+            break
 
-        t +=1
+        if dj < bi:
 
-if not valid:
+            t +=1
 
-    print(0)
+    if not valid:
 
-    exit()
+        print(0, file=output_stream)
 
-# Compute k = t + (n - m)
+        return
 
-k = t + (n - m)
+    # Compute k = t + (n - m)
 
-ans = pow(2, k, MOD)
+    k = t + (n - m)
 
-print(ans)
+    ans = pow(2, k, MOD)
 
-Yes, this should handle all cases. Let's test this code against the examples.
+    print(ans, file=output_stream)
 
-First example:
 
-Input:
 
-4
+def test():
+    import io
 
-2 3 5 7
-
-2 1 1 2
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2
+1299721 1999993
+100000 265
+2
+1299721 1999993
+100000 265
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-3 7
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
+
+    n = int(input_stream.readline().rstrip("\n"))
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    x_dict = {}
+
+    for ai, bi in zip(a, b):
+
+        x_dict[ai] = bi
+
+    m = int(input_stream.readline().rstrip("\n"))
+
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    d = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    t = 0
+
+    valid = True
+
+    # Check if all C primes are in X's primes.
+
+    for cj in c:
+
+        if cj not in x_dict:
+
+            valid = False
+
+            break
+
+    if not valid:
+
+        print(0, file=output_stream)
+
+        return
+
+    # Now check each Y's prime's exponent.
+
+    for j in range(m):
+
+        cj = c[j]
+
+        dj = d[j]
+
+        bi = x_dict[cj]
+
+        if dj > bi:
+
+            valid = False
+
+            break
+
+        if dj < bi:
+
+            t +=1
+
+    if not valid:
+
+        print(0, file=output_stream)
+
+        return
+
+    # Compute k = t + (n - m)
+
+    k = t + (n - m)
+
+    ans = pow(2, k, MOD)
+
+    print(ans, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+2 5
 1 1
+2
+2 3
+1 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-So X's primes are 2,3,5,7. Y's primes are 3 and7.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Check all C_j in X: yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-For Y's primes:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-3: D_j=1 vs X's exponent 1. So equals. t +=0.
+    print('Tests passed 😎')
 
-7: D_j=1 vs X's exponent 2. So 1 <2 → t +=1. So t is 1.
 
-n - m =4-2=2.
+if __name__ == '__main__':
+    test()
 
-k=1+2=3 → 2^3=8. Which matches the first example.
 
-Second example:
+```
 
-X's primes are 1299721 and 1999993. Y's same. Exponents are same. So t=0. n-m=0. 2^0=1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: Y's primes are 2 and 3. X's primes are 2 and5. So C includes 3 which is not in X's primes. So code outputs 0.
 

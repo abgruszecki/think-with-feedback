@@ -254,60 +254,90 @@ But in Python, for numbers up to 1e18, the code handles them as integers.
 
 Now, the code:
 
-def count_zeros(n):
-    res = 0
-    while n >0:
-        n = n //5
-        res +=n
-    return res
+Testing against sample input 1.
 
-def find_min(target):
-    low = 0
-    high = 5 * 10**18
-    answer = 0
-    while low <= high:
-        mid = (low + high) //2
-        cz = count_zeros(mid)
-        if cz >= target:
-            answer = mid
-            high = mid -1
-        else:
-            low = mid +1
-    return answer
+```python
+def main(input_stream, output_stream):
+    def count_zeros(n):
+        res = 0
+        while n >0:
+            n = n //5
+            res +=n
+        return res
 
-m = int(input())
-if m ==0:
-    # According to problem statement, m is at least 1. So this case is not needed.
-    print(5)
-    print(0,1,2,3,4)
-else:
-    n_low = find_min(m)
-    if count_zeros(n_low) != m:
-        print(0)
+    def find_min(target):
+        low = 0
+        high = 5 * 10**18
+        answer = 0
+        while low <= high:
+            mid = (low + high) //2
+            cz = count_zeros(mid)
+            if cz >= target:
+                answer = mid
+                high = mid -1
+            else:
+                low = mid +1
+        return answer
+
+    m = int(input_stream.readline().rstrip("\n"))
+    if m ==0:
+        # According to problem statement, m is at least 1. So this case is not needed.
+        print(5, file=output_stream)
+        print(0,1,2,3,4, file=output_stream)
     else:
-        n_high = find_min(m+1)
-        k = n_high -n_low
-        print(k)
-        if k >0:
-            print(' '.join(map(str, range(n_low, n_high))))
+        n_low = find_min(m)
+        if count_zeros(n_low) != m:
+            print(0, file=output_stream)
+        else:
+            n_high = find_min(m+1)
+            k = n_high -n_low
+            print(k, file=output_stream)
+            if k >0:
+                print(' '.join(map(str, range(n_low, n_high))), file=output_stream)
 
-Testing this code with the sample inputs.
 
-Sample input 1:
 
-1 → output 5 followed by 5 6 7 8 9.
+def test():
+    import io
 
-n_low = find_min(1). Let's compute:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-binary search for minimal n where count_zeros(n)>=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The low starts at 0, high at 5e18. The mid steps.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But for n=5, count_zeros is 1. So the minimal is 5.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Check count_zeros(5) is 1 → yes.
+    print('Tests passed 😎')
 
-n_high = find_min(2). Which is 10. So 10-5=5. The numbers are 5-9.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2: 5 → output 0.
 

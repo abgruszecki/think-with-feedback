@@ -489,31 +489,99 @@ That's correct.
 
 Now, the code should pass all test cases.
 
-Testing the first example:
+Testing against sample input 1.
 
-Input:
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    notes = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(m)]
 
-8 2
+    # Check for validity between consecutive notes
+    possible = True
+    for i in range(m - 1):
+        d1, h1 = notes[i]
+        d2, h2 = notes[i+1]
+        delta_d = d2 - d1
+        if abs(h2 - h1) > delta_d:
+            possible = False
+            break
+    if not possible:
+        print("IMPOSSIBLE", file=output_stream)
+        return
 
+    max_h = max(h for d, h in notes)
+
+    # Check first segment
+    first_d, first_h = notes[0]
+    if first_d > 1:
+        candidate = first_h + (first_d - 1)
+        if candidate > max_h:
+            max_h = candidate
+
+    # Check last segment
+    last_d, last_h = notes[-1]
+    if last_d < n:
+        candidate = last_h + (n - last_d)
+        if candidate > max_h:
+            max_h = candidate
+
+    # Check between consecutive notes
+    for i in range(m - 1):
+        d1, h1 = notes[i]
+        d2, h2 = notes[i+1]
+        delta_d = d2 - d1
+        current_max = (h1 + h2 + delta_d) // 2
+        if current_max > max_h:
+            max_h = current_max
+
+    print(max_h, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 3
 2 0
-
 7 0
+8 3
+""",
+            "output": \
+"""\
+IMPOSSIBLE
+""",
+        }, 
+    ]
 
-notes = [(2,0), (7,0)]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-delta_days between is 5.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-max_between is (0+0+5)//2=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Other maxima:
+    print('Tests passed 😎')
 
-- max_h from notes is 0.
 
-First segment: 2 days (d1=2). first_d is 2, so days before are 1. first_d >1? 2>1 → yes. candidate is 0 + (2-1) =1. So max_h becomes 1.
+if __name__ == '__main__':
+    test()
 
-Last segment: last_d is7, which is <8. candidate is 0 + (8-7) =1. So max_h is 2.
 
-Thus, the output is 2, which is correct.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 The second example:
 

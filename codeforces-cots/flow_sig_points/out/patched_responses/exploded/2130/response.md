@@ -295,55 +295,85 @@ Now, code.
 
 Read the inputs:
 
-c, d = map(int, input().split())
+Testing against sample input 1.
 
-n, m = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    c, d = map(int, input_stream.readline().rstrip("\n").split())
 
-k = int(input())
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-req = max(0, n*m -k)
+    k = int(input_stream.readline().rstrip("\n"))
 
-if req ==0:
+    req = max(0, n*m -k)
 
-    print(0)
+    if req ==0:
 
-else:
+        print(0, file=output_stream)
 
-    x_max = (req +n -1) //n
+    else:
 
-    min_total = float('inf')
+        x_max = (req +n -1) //n
 
-    for x in range(x_max +1):
+        min_total = float('inf')
 
-        y = max(0, req - x *n)
+        for x in range(x_max +1):
 
-        total = x *c + y *d
+            y = max(0, req - x *n)
 
-        if total < min_total:
+            total = x *c + y *d
 
-            min_total = total
+            if total < min_total:
 
-    print(min_total)
+                min_total = total
 
-Yes.
+        print(min_total, file=output_stream)
 
-Testing the first sample:
 
-Sample input 1:
 
-1 10
+def test():
+    import io
 
-7 2 → n=7, m=2 →14. k=1. req=13.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 2
+2 1
+2
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-x_max = (13 +7-1)//7 → (19)//7=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Loop x from 0 to 2:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-x=0: y=13 → total 0*1 +13*10=130.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-x=1: 7 → y=6 → total 1*1 +6*10=61.
+    print('Tests passed 😎')
 
-x=2: 14 → y=0 → 2*1=2 → min. So output 2.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

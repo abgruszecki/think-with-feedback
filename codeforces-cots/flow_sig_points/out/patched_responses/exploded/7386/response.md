@@ -271,59 +271,77 @@ For n=2e5, each element is an integer. So the input line would be 2e5 numbers, w
 
 So code:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-stack = []
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for num in a:
+    stack = []
 
-    current = num
+    for num in a:
 
-    while stack and stack[-1] == current:
+        current = num
 
-        current += 1
+        while stack and stack[-1] == current:
 
-        stack.pop()
+            current += 1
 
-    stack.append(current)
+            stack.pop()
 
-print(len(stack))
+        stack.append(current)
 
-print(' '.join(map(str, stack)))
+    print(len(stack), file=output_stream)
 
-This should work.
+    print(' '.join(map(str, stack)), file=output_stream)
 
-Testing with the first example:
 
-Input:
 
-6
+def test():
+    import io
 
-5 2 1 1 2 2
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1000000000 1000000000 1000000000 1000000000
+""",
+            "output": \
+"""\
+1
+1000000002
+""",
+        }, 
+    ]
 
-Processing:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-stack starts empty.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Process 5 → stack [5]
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Process 2 → [5,2]
+    print('Tests passed 😎')
 
-Process 1 → [5,2,1]
 
-Process 1:
+if __name__ == '__main__':
+    test()
 
-current =1.
 
-stack[-1] is 1. Pop, current=2. Then stack is [5,2]. stack[-1] is 2. Pop, current=3. stack is [5]. Append 3.
+```
 
-Process 2 → stack becomes [5,3,2]
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Process 2:
-
-current=2. stack[-1] is 2. Pop, current=3. stack becomes [5,3]. stack[-1] is 3. Pop, current=4. stack [5]. Append 4. Final stack is [5,4]. Correct.
+```
 
 Another test case: input of four 1e9.
 

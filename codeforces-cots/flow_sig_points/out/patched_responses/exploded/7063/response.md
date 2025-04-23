@@ -563,130 +563,105 @@ First, precompute the cnt array.
 
 In Python:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n, p = map(int, input().split())
-a = list(map(int, input().split()))
-a.sort()
 
-x_min = max( (a[j] - j) for j in range(n) )
-x_min = max(x_min, 1)
+def main(input_stream, output_stream):
+    n, p = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a.sort()
 
-if len(a) ==0:
-    x_end =0
-else:
-    x_end = a[-1] -1
+    x_min = max( (a[j] - j) for j in range(n) )
+    x_min = max(x_min, 1)
 
-if x_min > x_end:
-    print(0)
-    exit()
+    if len(a) ==0:
+        x_end =0
+    else:
+        x_end = a[-1] -1
 
-max_s_possible = x_end + (n-1)  # maximum s_i is x_end + n-1
-max_s = max(max_s_possible, a[-1] if a else 0)
+    if x_min > x_end:
+        print(0, file=output_stream)
+        return
 
-# Precompute cnt[s] for s from 0 to max_s
-max_s_precompute = max_s
-cnt = [0]*(max_s_precompute +2)
-for s in range(0, max_s_precompute +1):
-    cnt[s] = bisect.bisect_right(a, s)
+    max_s_possible = x_end + (n-1)  # maximum s_i is x_end + n-1
+    max_s = max(max_s_possible, a[-1] if a else 0)
 
-good_x = []
+    # Precompute cnt[s] for s from 0 to max_s
+    max_s_precompute = max_s
+    cnt = [0]*(max_s_precompute +2)
+    for s in range(0, max_s_precompute +1):
+        cnt[s] = bisect.bisect_right(a, s)
 
-for x in range(x_min, x_end +1):
-    product = 1
-    valid = True
-    for i in range(1, n+1):
-        s_i = x + (i-1)
-        if s_i > max_s_precompute:
-            c_i = n
-        else:
-            c_i = cnt[s_i]
-        term = c_i - (i-1)
-        if term <=0:
-            valid = False
-            break
-        product = (product * term) % p
-    if valid and product %p !=0:
-        good_x.append(x)
+    good_x = []
 
-print(len(good_x))
-print(' '.join(map(str, good_x)))
+    for x in range(x_min, x_end +1):
+        product = 1
+        valid = True
+        for i in range(1, n+1):
+            s_i = x + (i-1)
+            if s_i > max_s_precompute:
+                c_i = n
+            else:
+                c_i = cnt[s_i]
+            term = c_i - (i-1)
+            if term <=0:
+                valid = False
+                break
+            product = (product * term) % p
+        if valid and product %p !=0:
+            good_x.append(x)
 
-Wait, but for s_i beyond max_s_precompute, cnt[s_i] is not precomputed. So for example, if x is 2000, and i is 2000, then s_i=2000+1999=3999. But if max_s_precompute is 3999, then it's handled. But in the code, max_s_precompute is set to the maximum of (x_end +n-1, a[-1]).
+    print(len(good_x), file=output_stream)
+    print(' '.join(map(str, good_x)), file=output_stream)
 
-But x_end is a[-1]-1. So x_end +n-1 = (a[-1]-1) +n-1 = a[-1]+n-2. For a[-1] up to 2000 and n up to 2000, this can be up to 2000+2000-2=3998.
 
-So max_s_possible is 3998, which is covered by the precompute up to 3998.
 
-But the code's max_s_precompute is set to max(max_s_possible, a[-1]). So if a[-1] is larger than max_s_possible (which could be the case when x_end is small), then we need to precompute up to a[-1]. For example, if a[-1] is 3000 and x_end is 2999, then x_end +n-1 is 2999+1999=4998, but a[-1] is 3000, which is larger than 4998? No, 3000>4998 is false. So max_s_precompute is 4998.
+def test():
+    import io
 
-So the code's precompute for s up to max_s_precompute = max( x_end +n-1, a[-1] ) is correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 3
+2 3 5 6
+""",
+            "output": \
+"""\
+2
+3 4
+""",
+        }, 
+    ]
 
-But in the code, for x in the range x_min to x_end:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-   for each i from 1 to n:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-       s_i =x +i-1
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-       if s_i > max_s_precompute → which is x_end +n-1?
+    print('Tests passed 😎')
 
-But x can be up to x_end, which is a[-1]-1. So x can be 2000-1=1999. i can be up to n=2000. So s_i =1999 +1999=3998. Which is <=max_s_precompute (x_end +n-1= (a[-1]-1)+n-1= (2000-1) +1999=3998). So s_i is within the precomputed cnt array.
 
-Thus, the code's handling of s_i is correct.
+if __name__ == '__main__':
+    test()
 
-But let's test the first sample input.
 
-Sample input 1:
+```
 
-3 2
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-3 4 5
-
-After sorting, a is [3,4,5].
-
-x_min is max(3-0,4-1,5-2) →3,3,3 →3. x_min=3.
-
-x_end is a[-1]-1 =5-1=4.
-
-max_s_possible =4 +3-1=6. a[-1] is5. So max_s_precompute is6.
-
-precompute cnt[s] for s up to6:
-
-s=0:0
-
-s=1:0
-
-s=2:0
-
-s=3:1 (3)
-
-s=4:2 (3,4)
-
-s=5:3 (3,4,5)
-
-s=6:3.
-
-For x=3:
-
-i=1: s_i=3+0=3 →cnt=1 → term=1-0=1.
-
-i=2:3+1=4 →cnt=2 →2-1=1.
-
-i=3:3+2=5 →cnt=3 →3-2=1.
-
-product=1*1*1=1 mod2=1 →good.
-
-x=4:
-
-i=1:4+0=4 →cnt=2 → term=2-0=2 → mod2=0. product=0 → no.
-
-x=4 is not added.
-
-x=4 is in x_end, but product is 2*2*1=4 mod2=0.
-
-x=5 is not in x_end (x_end=4).
-
-So the code correctly adds x=3.
+```
 
 Sample input 3:
 

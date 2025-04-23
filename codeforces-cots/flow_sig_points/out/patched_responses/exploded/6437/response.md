@@ -1725,17 +1725,126 @@ Thus, the loop 'current !=0' will stop when current is 0.
 
 Thus, this code should work.
 
-Testing with the first sample:
+Testing against sample input 1.
 
-Query 1: +2.
+```python
+import sys
 
-current starts at parent[2] =4.
 
-Then, after processing 4 and 1 (parent of 4 is 1, parent of 1 is 0).
+def main(input_stream, output_stream):
+    input = input_stream.read().split()
+    ptr = 0
+    n, m = int(input[ptr]), int(input[ptr+1])
+    ptr +=2
+    
+    p = list(map(int, input[ptr:ptr + n-1]))
+    ptr +=n-1
+    t = list(map(int, input[ptr:ptr +n]))
+    ptr +=n
+    q = list(map(int, input[ptr:ptr +m]))
+    
+    parent = [0]*(n+1)
+    for i in range(2, n+1):
+        parent[i] = int(p[i-2])
+    
+    vacation = [False]*(n+1)
+    cnt = [0]*(n+1)
+    total = 0
+    output = []
+    
+    for query in q:
+        x = abs(query)
+        if query >0:
+            if vacation[x]:
+                output.append(total)
+                continue
+            vacation[x] = True
+            delta = 1
+            current = parent[x]
+        else:
+            if not vacation[x]:
+                output.append(total)
+                continue
+            vacation[x] = False
+            delta = -1
+            current_cnt_x = cnt[x]
+            current_contrib = (current_cnt_x > t[x-1])
+            if current_contrib:
+                total +=1
+            current = parent[x]
+        
+        while current !=0:
+            old_cnt = cnt[current]
+            new_cnt = old_cnt + delta
+            old_state = (not vacation[current]) and (old_cnt > t[current-1])
+            new_state = (not vacation[current]) and (new_cnt > t[current-1])
+            if old_state != new_state:
+                if new_state:
+                    total +=1
+                else:
+                    total -=1
+            cnt[current] = new_cnt
+            current = parent[current]
+        
+        output.append(total)
+    
+    print(' '.join(map(str, output)), file=output_stream)
 
-The code correctly processes 4 and 1.
 
-Thus, the code should produce the correct output.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 6
+1 2 3 4
+4 0 0 1 0
+1 5 2 3 -5 -1
+""",
+            "output": \
+"""\
+0 2 1 0 0 0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 99, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 92, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '0 2 1 0 0 0'
+Got: '0 2 2 2 2 2'
+
+```
 
 But for large inputs, this code will TLE.
 

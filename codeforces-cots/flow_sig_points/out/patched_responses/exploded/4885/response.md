@@ -383,19 +383,74 @@ print(' '.join(answers))
 
 Yes.
 
-Testing this code with the sample inputs:
+Testing against sample input 1.
 
-Sample 1:
+```python
+import bisect
 
-n=7, M=15.
 
-t = [1,2,3,4,5,6,7].
+def main(input_stream, output_stream):
+    n, M = map(int, input_stream.readline().rstrip("\n").split())
+    t = list(map(int, input_stream.readline().rstrip("\n").split()))
+    answers = []
 
-For i=5 (0-based):
+    for i in range(n):
+        current_t = t[i]
+        S = M - current_t
+        prev_list = t[:i]
+        prev_list.sort()
+        prefix = [0]
+        for num in prev_list:
+            prefix.append(prefix[-1] + num)
+        k = bisect.bisect_right(prefix, S) - 1
+        answers.append(str(i - k))
 
-prev_list is [1,2,3,4,5]. sorted is same. prefix is [0,1,3,6,10,15].
+    print(' '.join(answers), file=output_stream)
 
-bisect_right(prefix, 9) returns 4 (since prefix[4]=10>9). So k=3. ans=5-3=2.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 100
+80 40 40 40 60
+""",
+            "output": \
+"""\
+0 1 1 2 3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

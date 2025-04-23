@@ -1586,25 +1586,140 @@ Similarly for b_i.
 
 This seems to handle the sample correctly.
 
-Testing the first sample:
+Testing against sample input 1.
 
-merged list is [9840, 9860, 9920, 9930, 9980, 10020, 10040, 10090].
+```python
+import bisect
 
-merged_cutoff = merged[3] = 9930.
 
-Fourth a_i is 10040 >9930 → step 2 is false.
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    idx = 0
+    n = int(input[idx])
+    idx +=1
+    a_list = []
+    b_list = []
+    for _ in range(n):
+        a = int(input[idx])
+        b = int(input[idx+1])
+        a_list.append(a)
+        b_list.append(b)
+        idx +=2
+    
+    k_max = n // 2
+    
+    # Precompute cutoff for k=0
+    merged = []
+    i = j = 0
+    while i < n and j < n:
+        if a_list[i] < b_list[j]:
+            merged.append(a_list[i])
+            i += 1
+        else:
+            merged.append(b_list[j])
+            j += 1
+    while i < n:
+        merged.append(a_list[i])
+        i +=1
+    while j < n:
+        merged.append(b_list[j])
+        j +=1
+    if n == 0:
+        cutoff_0 = 0
+    else:
+        cutoff_0 = merged[n-1] if len(merged) >= n else merged[-1]
+    
+    result_a = []
+    for i in range(n):
+        position = i + 1
+        if position <= k_max:
+            result_a.append('1')
+            continue
+        ai = a_list[i]
+        if ai <= cutoff_0:
+            result_a.append('1')
+            continue
+        j_b = bisect.bisect_right(b_list, ai)
+        lower = max(n - position, j_b + 1)
+        upper = min(i, k_max)  # since k <= k_max and k < position (i+1) => k <=i
+        if lower <= upper:
+            result_a.append('1')
+        else:
+            result_a.append('0')
+    
+    # Precompute cutoff for k=0 for b
+    merged_b_cutoff = cutoff_0
+    
+    result_b = []
+    for i in range(n):
+        position = i + 1
+        if position <= k_max:
+            result_b.append('1')
+            continue
+        bi = b_list[i]
+        if bi <= cutoff_0:
+            result_b.append('1')
+            continue
+        j_a = bisect.bisect_right(a_list, bi)
+        lower = max(n - position, j_a + 1)
+        upper = min(i, k_max)
+        if lower <= upper:
+            result_b.append('1')
+        else:
+            result_b.append('0')
+    
+    print(''.join(result_a), file=output_stream)
+    print(''.join(result_b), file=output_stream)
 
-j_b =3.
 
-lower = max(4-4=0, 3+1=4) →4.
 
-upper = min(3, 2) →2.
+def test():
+    import io
 
-4>2 →0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+9900 9850
+9940 9930
+10000 10020
+10060 10110
+""",
+            "output": \
+"""\
+1100
+1100
+""",
+        }, 
+    ]
 
-Third a_i is 9930= cutoff_0 →1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Thus, the code produces the correct output.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, this seems to be the correct approach.
 

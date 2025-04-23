@@ -854,87 +854,121 @@ Also, the card indices are from 0 to m-1.
 
 So code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import deque
 
-n, t = map(int, input().split())
-teams = []
-for _ in range(n):
-    a1, b1, a2, b2 = map(int, input().split())
-    teams.append([(a1, b1), (a2, b2)])
 
-m = int(input())
-cards = []
-for _ in range(m):
-    word = input().strip()
-    ck = int(input())
-    cards.append((word, ck))
+def main(input_stream, output_stream):
+    n, t = map(int, input_stream.readline().rstrip("\n").split())
+    teams = []
+    for _ in range(n):
+        a1, b1, a2, b2 = map(int, input_stream.readline().rstrip("\n").split())
+        teams.append([(a1, b1), (a2, b2)])
 
-deck = deque(range(m))
-dik = [[0]*m for _ in range(n)]
-results = [[] for _ in range(n)]
-current_turn = 0
+    m = int(input_stream.readline().rstrip("\n"))
+    cards = []
+    for _ in range(m):
+        word = input_stream.readline().rstrip("\n").strip()
+        ck = int(input_stream.readline().rstrip("\n"))
+        cards.append((word, ck))
 
-while deck:
-    cycle_step = current_turn % (2 * n)
-    if cycle_step < n:
-        team = cycle_step
-        j = 0
-    else:
-        team = cycle_step - n
-        j = 1
-    q = 1 - j
-    aij, bij_teammate = teams[team][j][0], teams[team][q][1]
-    remaining_time = t
-    while remaining_time > 0 and deck:
-        card_index = deck.popleft()
-        ck = cards[card_index][1]
-        current_dik = dik[team][card_index]
-        time_needed = max(1, ck - (aij + bij_teammate) - current_dik)
-        if time_needed <= remaining_time:
-            # guessed
-            results[team].append(cards[card_index][0])
-            dik[team][card_index] += time_needed
-            remaining_time -= time_needed
+    deck = deque(range(m))
+    dik = [[0]*m for _ in range(n)]
+    results = [[] for _ in range(n)]
+    current_turn = 0
+
+    while deck:
+        cycle_step = current_turn % (2 * n)
+        if cycle_step < n:
+            team = cycle_step
+            j = 0
         else:
-            # not guessed
-            time_spent = remaining_time
-            dik[team][card_index] += time_spent
-            deck.append(card_index)
-            remaining_time = 0
-    current_turn += 1
+            team = cycle_step - n
+            j = 1
+        q = 1 - j
+        aij, bij_teammate = teams[team][j][0], teams[team][q][1]
+        remaining_time = t
+        while remaining_time > 0 and deck:
+            card_index = deck.popleft()
+            ck = cards[card_index][1]
+            current_dik = dik[team][card_index]
+            time_needed = max(1, ck - (aij + bij_teammate) - current_dik)
+            if time_needed <= remaining_time:
+                # guessed
+                results[team].append(cards[card_index][0])
+                dik[team][card_index] += time_needed
+                remaining_time -= time_needed
+            else:
+                # not guessed
+                time_spent = remaining_time
+                dik[team][card_index] += time_spent
+                deck.append(card_index)
+                remaining_time = 0
+        current_turn += 1
 
-for res in results:
-    print(len(res), end=' ')
-    print(' '.join(res))
+    for res in results:
+        print(len(res), end=' ', file=output_stream)
+        print(' '.join(res), file=output_stream)
 
-This code should handle the problem.
 
-Testing the first sample:
 
-Yes.
+def test():
+    import io
 
-In code, team is 0-based. So in the first sample, the first team is team 0, second team is team 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 4
+1 2 2 1
+2 3 2 2
+4
+armchair
+3
+quetzalcoatl
+10
+pilotage
+5
+defibrillator
+7
+""",
+            "output": \
+"""\
+2 armchair quetzalcoatl
+2 pilotage defibrillator
+""",
+        }, 
+    ]
 
-The output is team 0's results first, then team1's.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Which matches the sample.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Another test case.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Now, possible optimizations:
+    print('Tests passed 😎')
 
-- Using deque is efficient.
 
-But since m is small, no problem.
+if __name__ == '__main__':
+    test()
 
-What about the dik array? For each card and team, storing the accumulated time. Even for m=100 and n=100, it's 10,000 entries. Which is manageable.
 
-The code reads inputs correctly, processes each turn in order.
+```
 
-Yes.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So this code should work.
+```
+
 </think>
 
 ```python

@@ -252,31 +252,162 @@ Wait, but in the code above, for each neighbor, we check if it's not the parent,
 
 Yes. So this should work.
 
-Testing this code against the examples. Let's see the first example:
+Testing against sample input 1.
 
-n=4.
+```python
+from collections import deque
 
-Adjacency list:
 
-0: [(1,4), (2,2)]
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    adj = [[] for _ in range(n)]
+    for _ in range(n - 1):
+        u, v, c = map(int, input_stream.readline().rstrip("\n").split())
+        adj[u].append((v, c))
+        adj[v].append((u, c))
 
-1: [(0,4)]
+    max_cost = 0
+    q = deque([(0, -1, 0)])
 
-2: [(0,2), (3,3)]
+    while q:
+        node, parent, cost = q.popleft()
+        if cost > max_cost:
+            max_cost = cost
+        for neighbor, c in adj[node]:
+            if neighbor != parent:
+                q.append((neighbor, node, cost + c))
 
-3: [(2,3)]
+    print(max_cost, file=output_stream)
 
-Queue starts with (0, -1, 0). Process 0, cost is 0 (max is 0).
 
-Then enqueue (1,0,4) and (2,0,2). Next, process 1: cost 4. max becomes 4. Neighbors are 0 (parent) and nothing else. So queue now has (2,0,2). Process 2: cost 2. Max is 4. Enqueue (3,2,5). Now max becomes 5 when processing 3. So yes.
 
-The code would output 5.
+def test():
+    import io
 
-Second example:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+1 2 3
+0 2 100
+1 4 2
+0 3 7
+3 5 10
+""",
+            "output": \
+"""\
+105
+""",
+        }, 
+    ]
 
-After building the adjacency list, the code processes each node, and the path 0->2->1->4 gives a sum of 105.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So the code should output that.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+from collections import deque
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    adj = [[] for _ in range(n)]
+    for _ in range(n - 1):
+        u, v, c = map(int, input_stream.readline().rstrip("\n").split())
+        adj[u].append((v, c))
+        adj[v].append((u, c))
+
+    max_cost = 0
+    q = deque([(0, -1, 0)])
+
+    while q:
+        node, parent, cost = q.popleft()
+        if cost > max_cost:
+            max_cost = cost
+        for neighbor, c in adj[node]:
+            if neighbor != parent:
+                q.append((neighbor, node, cost + c))
+
+    print(max_cost, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+11
+1 0 1664
+2 0 881
+3 2 4670
+4 2 1555
+5 1 1870
+6 2 1265
+7 2 288
+8 7 2266
+9 2 1536
+10 6 3378
+""",
+            "output": \
+"""\
+5551
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

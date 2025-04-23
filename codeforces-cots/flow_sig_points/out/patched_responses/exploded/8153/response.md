@@ -1225,17 +1225,76 @@ else:
 
 Yes.
 
-Testing sample 2:
+Testing against sample input 2.
 
-Sample 2's a=1, b=1, c=1.
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    poland = {input_stream.readline().rstrip("\n").strip() for _ in range(n)}
+    enemy = {input_stream.readline().rstrip("\n").strip() for _ in range(m)}
+    common = poland & enemy
+    a = len(poland - common)
+    b = len(enemy - common)
+    c = len(common)
+    s_poland = c % 2 == 0
 
-S is Enemy.
+    if s_poland:
+        if a == 0:
+            print("NO", file=output_stream)
+        else:
+            print("YES" if a > b else "NO", file=output_stream)
+    else:
+        if b == 0:
+            print("YES", file=output_stream)
+        else:
+            print("YES" if a >= b else "NO", file=output_stream)
 
-Check if b ==0? No.
 
-Check if a >= b (1 >= 1) → yes. So output YES.
 
-Which matches the sample.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 2
+a
+a
+b
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case:
 

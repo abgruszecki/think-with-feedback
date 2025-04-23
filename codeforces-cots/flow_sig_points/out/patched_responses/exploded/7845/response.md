@@ -102,15 +102,69 @@ If all are okay, print YES.
 
 That's straightforward.
 
-Let's test with sample 1:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    k = int(input_stream.readline().rstrip("\n"))
+    n = len(s)
+    if n % k != 0:
+        print("NO", file=output_stream)
+    else:
+        m = n // k
+        possible = True
+        for i in range(k):
+            part = s[i*m : (i+1)*m]
+            if part != part[::-1]:
+                possible = False
+                break
+        print("YES" if possible else "NO", file=output_stream)
 
-s = 'saba' → len 4, k=2 → m=2.
 
-Check parts 0-1: 'sa' → reversed 'as' → no.
 
-So output NO.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+saddastavvat
+2
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

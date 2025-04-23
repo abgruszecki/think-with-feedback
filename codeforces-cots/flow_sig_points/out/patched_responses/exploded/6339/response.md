@@ -226,123 +226,106 @@ But for Python, even with 2e5 lines, using standard input with sys.stdin might b
 
 So the code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n, q = map(int, sys.stdin.readline().split())
 
-a = list(map(int, sys.stdin.readline().split()))
+def main(input_stream, output_stream):
+    n, q = map(int, input_stream.readline().split())
 
-diff = [0] * (n + 2)
+    a = list(map(int, input_stream.readline().split()))
 
-for _ in range(q):
+    diff = [0] * (n + 2)
 
-    l, r = map(int, sys.stdin.readline().split())
+    for _ in range(q):
 
-    diff[l] += 1
+        l, r = map(int, input_stream.readline().split())
 
-    if r + 1 <= n:
+        diff[l] += 1
 
-        diff[r + 1] -= 1
+        if r + 1 <= n:
 
-# compute frequency
+            diff[r + 1] -= 1
 
-freq = [0] * (n + 1)  # 1-based
+    # compute frequency
 
-current = 0
+    freq = [0] * (n + 1)  # 1-based
 
-for i in range(1, n + 1):
+    current = 0
 
-    current += diff[i]
+    for i in range(1, n + 1):
 
-    freq[i] = current
+        current += diff[i]
 
-# sort a in descending order
+        freq[i] = current
 
-a_sorted = sorted(a, reverse=True)
+    # sort a in descending order
 
-# sort frequencies (excluding 0th element)
+    a_sorted = sorted(a, reverse=True)
 
-freq_sorted = sorted(freq[1:], reverse=True)
+    # sort frequencies (excluding 0th element)
 
-# compute sum
+    freq_sorted = sorted(freq[1:], reverse=True)
 
-total = 0
+    # compute sum
 
-for x, f in zip(a_sorted, freq_sorted):
+    total = 0
 
-    total += x * f
+    for x, f in zip(a_sorted, freq_sorted):
 
-print(total)
+        total += x * f
 
-Yes. This should work.
+    print(total, file=output_stream)
 
-Testing the first example:
 
-n=3, q=3. a = [5,3,2]
 
-diff after processing queries:
+def test():
+    import io
 
-First query (1,2): diff[1] +=1, diff[3] -=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 3
+5 2 4 1 3
+1 5
+2 3
+2 3
+""",
+            "output": \
+"""\
+33
+""",
+        }, 
+    ]
 
-Second (2,3): diff[2] +=1, diff[4] -=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Third (1,3): diff[1] +=1 → becomes 2, diff[4] -=1 → becomes -1 (since previous was 0? Wait, initial is 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Wait, for the third query, l=1, r=3. So diff[1] +=1 → becomes 2 (since first two steps: first query adds 1, third adds another). Then r+1 is 4, so diff[4] -=1. So after third query:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-diff[1] = 2, diff[2] =1, diff[3] =-1, diff[4] =-1, diff[4] is now -1 (from first query, it was -1, then third subtracts 1 again? Wait, no. Let's see:
+    print('Tests passed 😎')
 
-Let's track each query.
 
-Initially, diff is all zeros.
+if __name__ == '__main__':
+    test()
 
-First query (1,2):
 
-diff[1] +=1 → 1.
+```
 
-diff[3] -=1 → -1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Second query (2,3):
-
-diff[2] +=1 → 1.
-
-diff[4] -=1 → -1.
-
-Third query (1,3):
-
-diff[1] +=1 → becomes 2.
-
-diff[4] -=1 → becomes -2.
-
-So after all queries:
-
-diff[1] = 2
-
-diff[2] = 1
-
-diff[3] = -1
-
-diff[4] = -2
-
-others are 0.
-
-Then, compute frequency:
-
-i=1: current = 0 + 2 → 2.
-
-i=2: current 2 + 1 =3.
-
-i=3: 3 + (-1) =2.
-
-i=4: current 2 + (-2) =0 (but i=4 is beyond n=3. So frequencies are [2,3,2].
-
-sorted_a = [5,3,2]. sorted_freq [3,2,2].
-
-Multiply 5*3 +3*2 +2*2 = 15+6+4=25.
-
-Which matches the sample.
-
-The code seems correct.
+```
 
 Another test case: the second example.
 

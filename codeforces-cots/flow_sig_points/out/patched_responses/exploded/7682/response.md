@@ -189,21 +189,67 @@ Yes.
 
 So the code is straightforward.
 
-Let's check sample 2:
+Testing against sample input 2.
 
-a=101, b=99.
+```python
+def main(input_stream, output_stream):
+    a = int(input_stream.readline().rstrip("\n"))
+    b = int(input_stream.readline().rstrip("\n"))
+    left = min(a, b)
+    right = max(a, b)
+    min_total = float('inf')
+    for x in range(left, right + 1):
+        d1 = abs(x - a)
+        d2 = abs(x - b)
+        total = (d1 * (d1 + 1) // 2) + (d2 * (d2 + 1) // 2)
+        if total < min_total:
+            min_total = total
+    print(min_total, file=output_stream)
 
-left=99, right=101.
 
-x=99: d1=101-99=2, sum 3. d2=0. Total 3.
 
-x=100: d1=1, sum 1. d2=1, sum 1. Total 2.
+def test():
+    import io
 
-x=101: sum 0 + 2 steps sum 3. Total 3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+10
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
 
-So code picks 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Another test case.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

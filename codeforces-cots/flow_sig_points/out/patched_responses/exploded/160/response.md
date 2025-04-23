@@ -1143,91 +1143,118 @@ So, the code is:
 
 Now, code in Python:
 
-MOD = 998244353
+Testing against sample input 1.
 
-n, k = map(int, input().split())
-h = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-# Compute contributing positions
-m = 0
-for j in range(n):
-    next_j = (j+1) % n
-    if h[j] != h[next_j]:
-        m +=1
-c = n -m
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    h = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-if k ==1:
-    sum_d =0
+    # Compute contributing positions
+    m = 0
     for j in range(n):
-        next_j = (j+1) %n
+        next_j = (j+1) % n
         if h[j] != h[next_j]:
-            # delta is (a_j == h[next_j}) - (a_j == h[j})
-            a_j =1
-            term1 = 1 if a_j == h[next_j] else 0
-            term2 = 1 if a_j == h[j] else 0
-            sum_d += (term1 - term2)
-    if sum_d >0:
-        print(1 % MOD)
-    else:
-        print(0)
-    exit()
+            m +=1
+    c = n -m
 
-base = pow(k, c, MOD)
-if m ==0:
-    print(0)
-    exit()
+    if k ==1:
+        sum_d =0
+        for j in range(n):
+            next_j = (j+1) %n
+            if h[j] != h[next_j]:
+                # delta is (a_j == h[next_j}) - (a_j == h[j})
+                a_j =1
+                term1 = 1 if a_j == h[next_j] else 0
+                term2 = 1 if a_j == h[j] else 0
+                sum_d += (term1 - term2)
+        if sum_d >0:
+            print(1 % MOD, file=output_stream)
+        else:
+            print(0, file=output_stream)
+        return
 
-size = 2*m +1
-dp = [0]*(size)
-dp[m] =1  # initial sum is 0
+    base = pow(k, c, MOD)
+    if m ==0:
+        print(0, file=output_stream)
+        return
 
-for _ in range(m):
-    next_dp = [0]*size
-    for s_prev in range(-m, m+1):
-        idx_prev = s_prev +m
-        if dp[idx_prev] ==0:
-            continue
-        for delta in (-1,0,1):
-            s_new = s_prev + delta
-            idx_new = s_new +m
-            if idx_new <0 or idx_new >= size:
+    size = 2*m +1
+    dp = [0]*(size)
+    dp[m] =1  # initial sum is 0
+
+    for _ in range(m):
+        next_dp = [0]*size
+        for s_prev in range(-m, m+1):
+            idx_prev = s_prev +m
+            if dp[idx_prev] ==0:
                 continue
-            if delta == -1 or delta ==1:
-                cnt =1
-            else:
-                cnt = (k-2) % MOD
-            next_dp[idx_new] = (next_dp[idx_new] + dp[idx_prev] * cnt) % MOD
-    dp = next_dp
+            for delta in (-1,0,1):
+                s_new = s_prev + delta
+                idx_new = s_new +m
+                if idx_new <0 or idx_new >= size:
+                    continue
+                if delta == -1 or delta ==1:
+                    cnt =1
+                else:
+                    cnt = (k-2) % MOD
+                next_dp[idx_new] = (next_dp[idx_new] + dp[idx_prev] * cnt) % MOD
+        dp = next_dp
 
-total =0
-for s in range(1, m+1):
-    total += dp[s +m]
-    total %= MOD
+    total =0
+    for s in range(1, m+1):
+        total += dp[s +m]
+        total %= MOD
 
-ans = (total * base) % MOD
-print(ans)
+    ans = (total * base) % MOD
+    print(ans, file=output_stream)
 
-This code should handle all cases, including k=1, m=0, etc.
 
-Let's test the first sample input.
 
-Sample 1:
+def test():
+    import io
 
-3 3
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5
+1 1 4 2 2
+""",
+            "output": \
+"""\
+1000
+""",
+        }, 
+    ]
 
-1 3 1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-m=2, c=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-k !=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-base=3.
+    print('Tests passed 😎')
 
-Processing two steps.
 
-The code computes the DP as discussed earlier.
+if __name__ == '__main__':
+    test()
 
-The final sum of s>0 is 3 (2+1), multiplied by 3 gives 9. Which matches the sample.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

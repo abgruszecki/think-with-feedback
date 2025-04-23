@@ -486,137 +486,221 @@ Now, the code steps:
 
 Read n.
 
-cards = list(input().split())
+Testing against sample input 1.
 
-unique_cards = set(cards)
+```python
+def main(input_stream, output_stream):
+    cards = list(input_stream.readline().rstrip("\n").split())
 
-if len(unique_cards) == 1:
+    unique_cards = set(cards)
 
-    print(0)
+    if len(unique_cards) == 1:
 
-else:
+        print(0, file=output_stream)
 
-    # Preprocess the unique_cards into color and value codes.
+    else:
 
-    color_map = {'R':0, 'G':1, 'B':2, 'Y':3, 'W':4}
+        # Preprocess the unique_cards into color and value codes.
 
-    value_map = {'1':0, '2':1, '3':2, '4':3, '5':4}
+        color_map = {'R':0, 'G':1, 'B':2, 'Y':3, 'W':4}
 
-    processed = []
+        value_map = {'1':0, '2':1, '3':2, '4':3, '5':4}
 
-    for card in unique_cards:
+        processed = []
 
-        c, v = card[0], card[1]
+        for card in unique_cards:
 
-        processed.append( (color_map[c], value_map[v]) )
+            c, v = card[0], card[1]
 
-    min_hints = float('inf')
+            processed.append( (color_map[c], value_map[v]) )
 
-    # Iterate all possible color_masks (0-31) and value_masks (0-31)
+        min_hints = float('inf')
 
-    for color_mask in range(32):
+        # Iterate all possible color_masks (0-31) and value_masks (0-31)
 
-        for value_mask in range(32):
+        for color_mask in range(32):
 
-            valid = True
+            for value_mask in range(32):
 
-            # Check all pairs of cards
+                valid = True
 
-            for i in range(len(processed)):
+                # Check all pairs of cards
 
-                a_c, a_v = processed[i]
+                for i in range(len(processed)):
 
-                for j in range(i+1, len(processed)):
+                    a_c, a_v = processed[i]
 
-                    b_c, b_v = processed[j]
+                    for j in range(i+1, len(processed)):
 
-                    # Check color distinction
+                        b_c, b_v = processed[j]
 
-                    color_a_in = (color_mask & (1 << a_c)) != 0
+                        # Check color distinction
 
-                    color_b_in = (color_mask & (1 << b_c)) != 0
+                        color_a_in = (color_mask & (1 << a_c)) != 0
 
-                    color_diff = (color_a_in != color_b_in) or (color_a_in and color_b_in and (a_c != b_c))
+                        color_b_in = (color_mask & (1 << b_c)) != 0
 
-                    # Check value distinction
 
-                    value_a_in = (value_mask & (1 << a_v)) != 0
 
-                    value_b_in = (value_mask & (1 << b_v)) != 0
+def test():
+    import io
 
-                    value_diff = (value_a_in != value_b_in) or (value_a_in and value_b_in and (a_v != b_v))
-
-                    if not (color_diff or value_diff):
-
-                        valid = False
-
-                        break
-
-                if not valid:
-
-                    break
-
-            if valid:
-
-                current_cost = bin(color_mask).count('1') + bin(value_mask).count('1')
-
-                if current_cost < min_hints:
-
-                    min_hints = current_cost
-
-    print(min_hints)
-
-Wait, but this has a nested loop for pairs. For example, for each color_mask and value_mask, for each pair (i, j) in processed, check the condition.
-
-But in the code above, for each i in 0..m-1, and j in i+1..m-1, check if the pair (i,j) is valid.
-
-But the code as written has a loop for i in range(len(processed)), then for j in range(i+1, len(processed)), but the code above has a loop for j in range(i+1, len(processed)), which is correct.
-
-But the code inside the loops for i and j is:
-
-a_c, a_v = processed[i]
-
-b_c, b_v = processed[j]
-
-Check if (color_diff or value_diff). If not, mark as invalid.
-
-So, the code checks all pairs once.
-
-Now, the code should work.
-
-Testing it against the sample inputs.
-
-Sample 1:
-
-Input:
-
-2
-
-G3 G3
-
-unique_cards has one element. So output is 0. Correct.
-
-Sample 2:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
-
 G4 R4 R3 B3
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-unique_cards is G4, R4, R3, B3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The code will generate color_mask and value_mask pairs.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The optimal solution is to give color hint on R and value hints on 4 and 3. Or perhaps another combination. But the sample output is 2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Wait, the sample output is 2. Let's see:
+    print('Tests passed 😎')
 
-Possible solution: color hints on R and B. Then, for R4 and R3:
 
-Since R is in the color hints, possible_colors for R4 is R, R3 is R. But values need to be distinguished. So value hints on 3 and 4. That would cost 2 + 2 = 4. But the sample output is 2.
+if __name__ == '__main__':
+    test()
 
-Wait, the correct solution is to give a color hint on R and a value hint on 4. So total hints 2.
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 86, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 79, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '2'
+Got: '0'
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    cards = list(input_stream.readline().rstrip("\n").split())
+
+    unique_cards = set(cards)
+
+    if len(unique_cards) == 1:
+
+        print(0, file=output_stream)
+
+    else:
+
+        # Preprocess the unique_cards into color and value codes.
+
+        color_map = {'R':0, 'G':1, 'B':2, 'Y':3, 'W':4}
+
+        value_map = {'1':0, '2':1, '3':2, '4':3, '5':4}
+
+        processed = []
+
+        for card in unique_cards:
+
+            c, v = card[0], card[1]
+
+            processed.append( (color_map[c], value_map[v]) )
+
+        min_hints = float('inf')
+
+        # Iterate all possible color_masks (0-31) and value_masks (0-31)
+
+        for color_mask in range(32):
+
+            for value_mask in range(32):
+
+                valid = True
+
+                # Check all pairs of cards
+
+                for i in range(len(processed)):
+
+                    a_c, a_v = processed[i]
+
+                    for j in range(i+1, len(processed)):
+
+                        b_c, b_v = processed[j]
+
+                        # Check color distinction
+
+                        color_a_in = (color_mask & (1 << a_c)) != 0
+
+                        color_b_in = (color_mask & (1 << b_c)) != 0
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+B1 Y1 W1 G1 R1
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 86, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 79, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '4'
+Got: '0'
+
+```
 
 So for the pairs:
 

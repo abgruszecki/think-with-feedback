@@ -136,27 +136,68 @@ Yes. So this code should work.
 
 Now, in Python, the code would look like this.
 
-Testing the first sample:
+Testing against sample input 1.
 
-Input:
+```python
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    min_dist = float('inf')
+    for i in range(1, n + 1):
+        if i == m:
+            continue
+        price = a[i - 1]
+        if price == 0 or price > k:
+            continue
+        distance = abs(i - m) * 10
+        if distance < min_dist:
+            min_dist = distance
+    print(min_dist, file=output_stream)
 
-5 1 20
 
-0 27 32 21 19
 
-So m=1. The houses:
+def test():
+    import io
 
-i=1: skip.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 3 50
+62 0 0 0 99 33 22
+""",
+            "output": \
+"""\
+30
+""",
+        }, 
+    ]
 
-i=2: a[1]=27>20 → no.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=3: 32>20 → no.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=4:21>20 → no.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=5:19 <=20 → yes. distance is 4*10=40. So output is 40.
+    print('Tests passed 😎')
 
-Which is correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So code seems correct.
 

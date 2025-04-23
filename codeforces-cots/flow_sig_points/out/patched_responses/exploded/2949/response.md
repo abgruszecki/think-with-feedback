@@ -67,17 +67,62 @@ Yes. So this sum is the answer.
 
 So the code can be:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import Counter
 
-shoes = list(map(int, sys.stdin.readline().split()))
-freq = Counter(shoes)
-total = sum(v-1 for v in freq.values())
-print(total)
 
-Wait, but let's test this with some examples.
+def main(input_stream, output_stream):
+    shoes = list(map(int, input_stream.readline().split()))
+    freq = Counter(shoes)
+    total = sum(v-1 for v in freq.values())
+    print(total, file=output_stream)
 
-Test case 1: 1 7 3 3 → Counter has counts {1:1,7:1,3:2} → sum (0+0+1) =1 → correct.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 7 7 7
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Test case 2: 7 7 7 7 → sum(3) → 3 → correct.
 

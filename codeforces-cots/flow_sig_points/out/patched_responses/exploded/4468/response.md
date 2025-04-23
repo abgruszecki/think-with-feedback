@@ -1541,29 +1541,80 @@ else:
 
     print( (a + b) // 2 )
 
-Testing this code for the first sample:
+Testing against sample input 1.
 
-k=4:
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-k-2=2 → bin(2) is '10'.
+    if k == 1:
+        print(1, file=output_stream)
+    elif k == 2:
+        print(n, file=output_stream)
+    else:
+        x = k - 2
+        path = bin(x)[2:]
+        a, b = 1, n
+        for bit in path:
+            mid = (a + b) // 2
+            if bit == '0':
+                b = mid
+            else:
+                a = mid
+        print((a + b) // 2, file=output_stream)
 
-bits = '10'.
 
-a=1, b=6.
 
-Process first bit '1':
+def test():
+    import io
 
-mid=3.5 →3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+39 3
+""",
+            "output": \
+"""\
+20
+""",
+        }, 
+    ]
 
-a=3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Process next bit '0':
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-mid= (3 +6)/2=4.5 →4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-b=4.
+    print('Tests passed 😎')
 
-position (3+4)/2=3.5 →3. Which is incorrect.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 53, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 46, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '20'
+Got: '29'
+
+```
 
 But the correct answer is2.
 

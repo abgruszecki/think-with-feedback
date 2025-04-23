@@ -126,27 +126,191 @@ print(len(s) + len(t) - 2*k)
 
 Yes.
 
-That's the code. Let's test it against all examples.
+Testing against sample input 1.
 
-First example:
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    t = input_stream.readline().rstrip("\n").strip()
 
-s = 'test' (len 4), t = 'west' (len4). i=3, j=3.
+    i, j = len(s) - 1, len(t) - 1
+    k = 0
 
-s[3] == t[3] (t vs t) → yes. k=1. i=2, j=2.
+    while i >= 0 and j >= 0 and s[i] == t[j]:
+        k += 1
+        i -= 1
+        j -= 1
 
-s[2] = s vs t[2] = s → yes. k=2. i=1, j=1.
+    print(len(s) + len(t) - 2 * k, file=output_stream)
 
-s[1] = e vs t[1] = e → yes. k=3. i=0, j=0.
 
-s[0] = t vs t[0] = w → no. Loop breaks. Answer is 4+4-6= 8-6=2. Correct.
 
-Second example: s=codeforces (len10), t=yes (len3). i=9, j=2.
+def test():
+    import io
 
-s[9] is 's', t[2] is 's' → match. k=1. i=8, j=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+codeforces
+yes
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
 
-s[8] is 'e', t[1] is 'e' → match. k=2. i=7, j=0. s[7] is 'c' vs t[0] is 'y' → no. Answer 10+3 -4=9.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Third example: s='test', t='yes' (len4 and 3). i=3, j=2. s[3] is 't' vs t[2] 's' → no. So k=0. Answer is 7.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    t = input_stream.readline().rstrip("\n").strip()
+
+    i, j = len(s) - 1, len(t) - 1
+    k = 0
+
+    while i >= 0 and j >= 0 and s[i] == t[j]:
+        k += 1
+        i -= 1
+        j -= 1
+
+    print(len(s) + len(t) - 2 * k, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+test
+yes
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    t = input_stream.readline().rstrip("\n").strip()
+
+    i, j = len(s) - 1, len(t) - 1
+    k = 0
+
+    while i >= 0 and j >= 0 and s[i] == t[j]:
+        k += 1
+        i -= 1
+        j -= 1
+
+    print(len(s) + len(t) - 2 * k, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+b
+ab
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Fourth example: s='b' (len1), t='ab' (len2). i=0, j=1. s[0] is 'b' vs t[1] 'b' → yes. k=1. i becomes -1, j=0. loop ends. Answer 1+2-2=1. Correct.
 

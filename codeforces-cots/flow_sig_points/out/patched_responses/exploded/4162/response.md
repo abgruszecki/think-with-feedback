@@ -1532,87 +1532,91 @@ print(count)
 
 This code initializes the four values and for each rectangle, checks if any edge is outside the current union's four values. If yes, it contributes and updates the four values to the max and min.
 
-Testing this code on the first sample:
+Testing against sample input 1.
 
-Processing in reverse order:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    rects = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n)]
 
-5:
+    count = 0
+    max_x1 = -float('inf')
+    min_x2 = float('inf')
+    max_y1 = -float('inf')
+    min_y2 = float('inf')
 
-x1=0 >-inf → max_x1=0.
+    for i in reversed(range(n)):
+        x1, y1, x2, y2 = rects[i]
+        if x1 < max_x1 or x2 > min_x2 or y1 < max_y1 or y2 > min_y2:
+            count += 1
+            max_x1 = max(max_x1, x1)
+            min_x2 = min(min_x2, x2)
+            max_y1 = max(max_y1, y1)
+            min_y2 = min(min_y2, y2)
 
-x2=4 <inf → min_x2=4.
+    # Check if the entire plane is covered (color 0 is not present)
+    # If any of the tracked values are still at their initial state, then some area is not covered
+    has_color0 = (max_x1 == -float('inf') or min_x2 == float('inf') or 
+                  max_y1 == -float('inf') or min_y2 == float('inf'))
 
-y1=-4 >-inf → max_y1=-4.
+    print(count + (1 if has_color0 else 0), file=output_stream)
 
-y2=0 <inf → min_y2=0.
 
-contributes. count=1.
 
-4:
+def test():
+    import io
 
-x1=-4 <0 → yes.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+0 0 4 4
+-4 -4 0 0
+0 -4 4 0
+-2 -4 2 4
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-count=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-update: x1=-4 is not >0, so max_x1 remains0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-x2=0 <4 → min_x2=0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-y1=-4 >-4 → no. remains-4.
+    print('Tests passed 😎')
 
-y2=0 <0 → no. remains0.
 
-3:
+if __name__ == '__main__':
+    test()
 
-x1=0 >=0. x2=4 >0 → yes.
 
-count=3.
+```
 
-update:
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 64, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 57, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '5'
+Got: '1'
 
-x2=0 <0 → no. min_x2 remains0.
-
-y1=0 >-4 → yes. max_y1=0.
-
-y2=4 >0 → yes. min_y2=0.
-
-Thus, no change to min_y2.
-
-2:
-
-x1=-4 <0 → yes.
-
-count=4.
-
-update:
-
-x1=-4 <0 → no change.
-
-x2=0 <0 → no.
-
-y1=0 >0 → no.
-
-y2=4 >0 → no.
-
-1:
-
-x1=-1 <0 → yes.
-
-count=5.
-
-update:
-
-x1=-1 <0 → no.
-
-x2=1 <0 → no.
-
-y1=-1 <0 → no.
-
-y2=1 <0 → no.
-
-Thus, the code outputs5, which matches the sample.
-
-Thus, this code is correct.
+```
 
 The key insight is to track the intersection of the processed rectangles. For each rectangle, if it is not contained within the intersection, then it contributes. The intersection is updated to be the intersection of the current rectangle and the previous intersection.
 

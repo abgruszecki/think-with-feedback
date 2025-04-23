@@ -419,279 +419,225 @@ Then, use a deque.
 
 Now, the code outline:
 
-import sys
+Testing against sample input 1.
 
+```python
+import sys
 from collections import deque
 
-n, k = map(int, sys.stdin.readline().split())
 
-left = sys.stdin.readline().strip()
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
 
-right = sys.stdin.readline().strip()
+    left = input_stream.readline().strip()
 
-left_dist = [-1] * (n + 2)
+    right = input_stream.readline().strip()
 
-right_dist = [-1] * (n + 2)
+    left_dist = [-1] * (n + 2)
 
-left_dist[1] = 0
+    right_dist = [-1] * (n + 2)
 
-q = deque()
+    left_dist[1] = 0
 
-q.append( (0, 1) ) # left wall, position 1.
+    q = deque()
 
-found = False
+    q.append( (0, 1) ) # left wall, position 1.
 
-while q:
+    found = False
 
-    wall, x = q.popleft()
+    while q:
 
-    # Get current time
+        wall, x = q.popleft()
 
-    if wall ==0:
-
-        t = left_dist[x]
-
-    else:
-
-        t = right_dist[x]
-
-    # Check if current state is valid (x > t)
-
-    if x <= t:
-
-        continue
-
-    # Check possible moves
-
-    # Move up
-
-    new_x = x +1
-
-    new_t = t +1
-
-    if new_x >n:
-
-        print("YES")
-
-        found = True
-
-        break
-
-    else:
+        # Get current time
 
         if wall ==0:
 
-            safe = (left[new_x -1] == '-')
+            t = left_dist[x]
 
         else:
 
-            safe = (right[new_x -1] == '-')
+            t = right_dist[x]
 
-        if safe and new_x > new_t:
+        # Check if current state is valid (x > t)
+
+        if x <= t:
+
+            continue
+
+        # Check possible moves
+
+        # Move up
+
+        new_x = x +1
+
+        new_t = t +1
+
+        if new_x >n:
+
+            print("YES", file=output_stream)
+
+            found = True
+
+            break
+
+        else:
 
             if wall ==0:
 
-                if left_dist[new_x] == -1:
-
-                    left_dist[new_x] = new_t
-
-                    q.append( (0, new_x) )
+                safe = (left[new_x -1] == '-')
 
             else:
 
-                if right_dist[new_x] == -1:
+                safe = (right[new_x -1] == '-')
 
-                    right_dist[new_x] = new_t
+            if safe and new_x > new_t:
 
-                    q.append( (1, new_x) )
+                if wall ==0:
 
-    # Move down
+                    if left_dist[new_x] == -1:
 
-    new_x = x -1
+                        left_dist[new_x] = new_t
 
-    new_t = t +1
+                        q.append( (0, new_x) )
 
-    if new_x >=1:
+                else:
 
-        if wall ==0:
+                    if right_dist[new_x] == -1:
 
-            safe = (left[new_x -1] == '-')
+                        right_dist[new_x] = new_t
 
-        else:
+                        q.append( (1, new_x) )
 
-            safe = (right[new_x -1] == '-')
+        # Move down
 
-        if safe and new_x > new_t:
+        new_x = x -1
+
+        new_t = t +1
+
+        if new_x >=1:
 
             if wall ==0:
 
-                if left_dist[new_x] == -1:
-
-                    left_dist[new_x] = new_t
-
-                    q.append( (0, new_x) )
+                safe = (left[new_x -1] == '-')
 
             else:
 
-                if right_dist[new_x] == -1:
+                safe = (right[new_x -1] == '-')
 
-                    right_dist[new_x] = new_t
+            if safe and new_x > new_t:
 
-                    q.append( (1, new_x) )
+                if wall ==0:
 
-    # Jump
+                    if left_dist[new_x] == -1:
 
-    new_wall = 1 - wall
+                        left_dist[new_x] = new_t
 
-    new_x = x +k
+                        q.append( (0, new_x) )
 
-    new_t = t +1
+                else:
 
-    if new_x >n:
+                    if right_dist[new_x] == -1:
 
-        print("YES")
+                        right_dist[new_x] = new_t
 
-        found = True
+                        q.append( (1, new_x) )
 
-        break
+        # Jump
 
-    else:
+        new_wall = 1 - wall
 
-        # Check if new_wall's new_x is safe.
+        new_x = x +k
 
-        if new_wall ==0:
+        new_t = t +1
 
-            safe = (left[new_x -1] == '-')
+        if new_x >n:
+
+            print("YES", file=output_stream)
+
+            found = True
+
+            break
 
         else:
 
-            safe = (right[new_x -1] == '-')
-
-        if safe and new_x > new_t:
+            # Check if new_wall's new_x is safe.
 
             if new_wall ==0:
 
-                if left_dist[new_x] == -1:
-
-                    left_dist[new_x] = new_t
-
-                    q.append( (0, new_x) )
+                safe = (left[new_x -1] == '-')
 
             else:
 
-                if right_dist[new_x] == -1:
+                safe = (right[new_x -1] == '-')
 
-                    right_dist[new_x] = new_t
+            if safe and new_x > new_t:
 
-                    q.append( (1, new_x) )
+                if new_wall ==0:
 
-if not found:
+                    if left_dist[new_x] == -1:
 
-    print("NO")
+                        left_dist[new_x] = new_t
 
-But wait, in the code, after processing each possible move, we check if new_x is > new_t. If yes, proceed to check if the cell is safe, then update the distance.
+                        q.append( (0, new_x) )
 
-But the code may process moves in any order, but for the BFS, the earliest time is processed first.
+                else:
 
-Another thing to note is that when we generate new_x (like in jumping), even if new_x is <=n, but adding it to the queue may lead to a possible escape in the next steps.
+                    if right_dist[new_x] == -1:
 
-But the code may have multiple checks for escape. For example, moving up could lead to new_x >n, and we return YES.
+                        right_dist[new_x] = new_t
 
-But what if during the jump, new_x is x +k which is over n? Then we return YES.
+                        q.append( (1, new_x) )
 
-So the code checks for escaping in all possible moves.
+    if not found:
 
-Now, let's test this code with sample input 1.
+        print("NO", file=output_stream)
 
-Sample Input 1:
 
-7 3
 
----X--X
+def test():
+    import io
 
-Left is '---X--X' → positions 1: '-', 2: '-',3: '-',4: 'X',5: '-',6: '-',7: 'X'.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 2
+--X-X-
+X--XX-
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-Right is '-X--XX-' → positions 1: '-', 2: 'X',3: '-',4: '-',5: 'X',6: 'X',7: '-'.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The initial state is left wall, x=1, t=0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing (0,1):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-t=0. x=1>0.
+    print('Tests passed 😎')
 
-Check moves:
 
-Move up: new_x=2. left[1] is '-', safe. new_t=1. 2>1 → yes. left_dist[2] is set to 1. added to queue.
+if __name__ == '__main__':
+    test()
 
-Move down: x-1=0 → invalid.
 
-Jump: new_wall=1 (right), new_x=1+3=4. right[3] is '-', safe. new_t=1. 4>1 → yes. right_dist[4] =1. added to queue.
+```
 
-So queue now has (0,2), (1,4).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Next, process (0,2):
-
-t=1. x=2>1.
-
-Move up: x=3. left[2] is '-'. new_t=2. 3>2 → yes. left_dist[3] =2.
-
-Added to queue.
-
-Move down: x=1. left[0] is '-'. new_t=2. 1>2 → no. So not added.
-
-Jump: new_x=2+3=5. right wall. right[4] is 'X' → not safe. So no.
-
-So added (0,3).
-
-Process (1,4):
-
-t=1. x=4>1.
-
-Move up: x=5. right[4] is 'X' → unsafe.
-
-Move down: x=3. right[2] is '-'. new_t=2. 3>2 → yes. right_dist[3]=2. added to queue.
-
-Jump: new_x=4+3=7. new_wall=0. left[6] is 'X' → unsafe. So no.
-
-So queue has (0,3), (1,3).
-
-Processing (0,3):
-
-t=2. x=3>2.
-
-Move up: x=4. left[3] is 'X' → unsafe.
-
-Move down: x=2. left[1] is '-'. new_t=3. 2>3 → no. Not added.
-
-Jump: new_x=3+3=6. right wall. right[5] is 'X' → unsafe.
-
-So no additions.
-
-Process (1,3):
-
-t=2. x=3>2.
-
-Move up: x=4. right[3] is '-'. new_t=3. 4>3 → yes. right_dist[4] is already 1 (from before?), but we check if it's -1. Since right_dist[4] is 1, which is not -1, so no addition.
-
-Move down: x=2. right[1] is 'X' → unsafe.
-
-Jump: new_x=3+3=6. new_wall=0. left[5] is '-'. new_t=3. 6>3 → yes. left_dist[6] is set to 3. added to queue.
-
-Now, queue has (0,6).
-
-Processing (0,6):
-
-t=3. x=6>3.
-
-Move up: x=7. left[6] is 'X' → unsafe.
-
-Move down: x=5. left[4] is '-'. new_t=4. 5>4 → yes. left_dist[5]=4. added to queue.
-
-Jump: x+3=9. which is >7. So return YES.
-
-Thus, the code would print YES here.
-
-So the code works for sample 1.
+```
 
 Sample 2:
 

@@ -231,133 +231,211 @@ Output the result at position k.
 
 So the code outline:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-n, b, k, x = map(int, input().split())
-digits = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-from collections import defaultdict
-freq = defaultdict(int)
-for d in digits:
-    freq[d] +=1
+    n, b, k, x = map(int, input_stream.readline().rstrip("\n").split())
+    digits = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-# build transition matrix
-x_size = x
-matrix = [[0]*x_size for _ in range(x_size)]
-for r in range(x_size):
-    for d, cnt in freq.items():
-        s = (r *10 + d) %x
-        matrix[r][s] = (matrix[r][s] + cnt) % MOD
+    from collections import defaultdict
+    freq = defaultdict(int)
+    for d in digits:
+        freq[d] +=1
 
-# function to multiply two matrices
-def mat_mult(a, b):
-    res = [[0]*x_size for _ in range(x_size)]
-    for i in range(x_size):
-        for k in range(x_size):
-            if a[i][k] ==0:
-                continue
-            for j in range(x_size):
-                res[i][j] = (res[i][j] + a[i][k] * b[k][j]) % MOD
-    return res
+    # build transition matrix
+    x_size = x
+    matrix = [[0]*x_size for _ in range(x_size)]
+    for r in range(x_size):
+        for d, cnt in freq.items():
+            s = (r *10 + d) %x
+            matrix[r][s] = (matrix[r][s] + cnt) % MOD
 
-# function to compute matrix^power using binary exponentiation
-def mat_pow(mat, power):
-    # Initialize result as identity matrix
-    result = [[0]*x_size for _ in range(x_size)]
-    for i in range(x_size):
-        result[i][i] = 1
-    current = mat
-    while power >0:
-        if power %2 ==1:
-            result = mat_mult(result, current)
-        current = mat_mult(current, current)
-        power = power //2
-    return result
+    # function to multiply two matrices
+    def mat_mult(a, b):
+        res = [[0]*x_size for _ in range(x_size)]
+        for i in range(x_size):
+            for k in range(x_size):
+                if a[i][k] ==0:
+                    continue
+                for j in range(x_size):
+                    res[i][j] = (res[i][j] + a[i][k] * b[k][j]) % MOD
+        return res
 
-# Compute matrix^b
-matrix_b = mat_pow(matrix, b)
+    # function to compute matrix^power using binary exponentiation
+    def mat_pow(mat, power):
+        # Initialize result as identity matrix
+        result = [[0]*x_size for _ in range(x_size)]
+        for i in range(x_size):
+            result[i][i] = 1
+        current = mat
+        while power >0:
+            if power %2 ==1:
+                result = mat_mult(result, current)
+            current = mat_mult(current, current)
+            power = power //2
+        return result
 
-# initial vector is [1, 0, 0, ..., 0]
-# multiply the initial vector by matrix_b
-# the result is the sum over all r of initial[r] * matrix_b[r][k]
-# but initial is only 1 at position 0, so the answer is matrix_b[0][k]
+    # Compute matrix^b
+    matrix_b = mat_pow(matrix, b)
 
-ans = matrix_b[0][k] % MOD
-print(ans)
+    # initial vector is [1, 0, 0, ..., 0]
+    # multiply the initial vector by matrix_b
+    # the result is the sum over all r of initial[r] * matrix_b[r][k]
+    # but initial is only 1 at position 0, so the answer is matrix_b[0][k]
 
-Wait, no. Because the initial vector is a row vector [1, 0, 0, ... 0], and the matrix is applied as a row vector multiplied by the matrix. So the result is the sum over each entry in the row multiplied by the matrix's columns.
+    ans = matrix_b[0][k] % MOD
+    print(ans, file=output_stream)
 
-So the initial vector is a row vector. So after multiplying by matrix_b, which is the result of M^b, the resulting row vector gives the counts for each remainder. So the entry at position k is the answer.
 
-But in the code above, the matrix is stored as a 2D list where matrix[i][j] is the number of ways to go from i to j in one step. So, when you multiply the matrices, the resulting matrix is the transitions after two steps. So the matrix exponentiation gives the transitions after b steps.
 
-Thus, the initial vector is [0, 0, ..., 1 (at position 0), ... 0], and when multiplied by matrix_b, the result is the sum of matrix_b[0][k], which is indeed the answer.
+def test():
+    import io
 
-Wait, no. The matrix represents the transitions. The initial vector is [1, 0, 0, ... 0], and matrix_b[0][k] is the number of ways to go from 0 to k in b steps. So the answer is exactly matrix_b[0][k].
-
-So in the code above, after computing matrix_b, the answer is matrix_b[0][k], modded by MOD.
-
-But in the code, the matrix_b is built as mat_pow(matrix, b), which represents the transitions after b steps. So the code is correct.
-
-Testing the sample inputs:
-
-First sample:
-
-Input:
-12 1 5 10
-3 5 6 7 8 9 5 1 1 1 1 5
-
-The digits are [3,5,6,7,8,9,5,1,1,1,1,5]. The frequency counts for digits:
-
-3:1,5:3,6:1,7:1,8:1,9:1,1:4.
-
-x=10, so the transition matrix M is for each r in 0-9, and each digit d.
-
-For example, for r=0:
-
-Each digit d, the next remainder is (0*10 +d) mod 10 = d mod 10.
-
-So for each digit d, the frequency is added to M[0][d%10]. So for d=3, 5, etc.
-
-So after building M, M[0][3] +=1 (from digit 3), M[0][5] +=3 (from the three 5's), etc. Then, the initial state is [1,0,0,...0]. After one block (b=1), the result is the sum of all transitions from 0. So the answer is the sum of frequencies of digits where d mod 10 ==k. Which in this case k=5. So digits 5 mod10=5 (frequency 3), and 5's frequency is 3. So answer is 3. Which matches the first sample.
-
-Second sample:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3 2 1 2
-
 6 2 2
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Digits are [6,2,2]. So frequencies:6:1, 2:2. x=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Each block contributes transitions. For each r in 0-1, and digits 6,2,2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-For each r, s = (r*10 + d) mod 2. Since 10 mod 2 is 0. So (r*0 +d) mod2 = d mod2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So for any r, the next s is d mod2.
+    print('Tests passed 😎')
 
-So for the digits 6 (mod2 is 0), 2 (mod2 0), 2 (mod2 0). So frequency for d mod2 0 is 3 (1+2=3), and no 1's.
 
-So transition matrix M for r=0: s=0 is 3, s=1 is 0. For r=1: same as for r=0.
+if __name__ == '__main__':
+    test()
 
-So after two blocks, the matrix M^2 is computed as M multiplied by M.
 
-But let's compute M:
+```
 
-For all r (0 and 1), M[r][0] =3, M[r][1] =0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So M^2 is:
+```
 
-For any row r, each entry is sum over k of M[r][k] * M[k][s].
+Testing against sample input 2.
 
-For M^2, each entry for row r and column s is:
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-For s=0: M[r][0]*M[0][0] + M[r][1]*M[1][0] = 3*3 +0*3=9.
+    n, b, k, x = map(int, input_stream.readline().rstrip("\n").split())
+    digits = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-s=1: 3*0 +0*0=0.
+    from collections import defaultdict
+    freq = defaultdict(int)
+    for d in digits:
+        freq[d] +=1
 
-So after two blocks, the transition from 0 to 0 is 9. So the answer is 0 for k=1. Which matches sample 2.
+    # build transition matrix
+    x_size = x
+    matrix = [[0]*x_size for _ in range(x_size)]
+    for r in range(x_size):
+        for d, cnt in freq.items():
+            s = (r *10 + d) %x
+            matrix[r][s] = (matrix[r][s] + cnt) % MOD
+
+    # function to multiply two matrices
+    def mat_mult(a, b):
+        res = [[0]*x_size for _ in range(x_size)]
+        for i in range(x_size):
+            for k in range(x_size):
+                if a[i][k] ==0:
+                    continue
+                for j in range(x_size):
+                    res[i][j] = (res[i][j] + a[i][k] * b[k][j]) % MOD
+        return res
+
+    # function to compute matrix^power using binary exponentiation
+    def mat_pow(mat, power):
+        # Initialize result as identity matrix
+        result = [[0]*x_size for _ in range(x_size)]
+        for i in range(x_size):
+            result[i][i] = 1
+        current = mat
+        while power >0:
+            if power %2 ==1:
+                result = mat_mult(result, current)
+            current = mat_mult(current, current)
+            power = power //2
+        return result
+
+    # Compute matrix^b
+    matrix_b = mat_pow(matrix, b)
+
+    # initial vector is [1, 0, 0, ..., 0]
+    # multiply the initial vector by matrix_b
+    # the result is the sum over all r of initial[r] * matrix_b[r][k]
+    # but initial is only 1 at position 0, so the answer is matrix_b[0][k]
+
+    ans = matrix_b[0][k] % MOD
+    print(ans, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2 1 2
+3 1 2
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

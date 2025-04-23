@@ -447,45 +447,78 @@ But wait, the code should not have any debug outputs. So no prints except the fi
 
 This code should work.
 
-Testing the first sample input:
+Testing against sample input 1.
 
-Sample input 1:
+```python
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
+    a, b = map(int, input_stream.readline().rstrip("\n").split())
 
-4 10 5
+    def get_p_f(x):
+        per_entrance = m * k
+        p = (x - 1) // per_entrance + 1
+        rem = x - (p - 1) * per_entrance
+        f = (rem - 1) // k + 1
+        return p, f
 
-200 6
+    p1, f1 = get_p_f(a)
+    p2, f2 = get_p_f(b)
 
-Compute a=200:
+    d_clock = (p2 - p1) % n
+    steps_entrance = min(d_clock, n - d_clock)
+    time_entrance = steps_entrance * 15
 
-per_entrance=10*5=50.
+    option1 = (f1 - 1) * 5 + (f2 - 1) * 5 + time_entrance
+    option2 = (f1 - 1) * 5 + (10 + (f2 - 1) * 1) + time_entrance
+    option3 = (10 + (f1 - 1) * 1) + (f2 - 1) * 5 + time_entrance
+    option4 = (10 + (f1 - 1) * 1) + (10 + (f2 - 1) * 1) + time_entrance
 
-p1=(199)//50 +1 =3 +1=4.
+    print(min(option1, option2, option3, option4), file=output_stream)
 
-rem=200 - (4-1)*50 =200-150=50.
 
-f1=(50-1)//5 +1=49//5=9 →9+1=10.
 
-p2= (6-1)/50=5/50=0 → p2=1.
+def test():
+    import io
 
-rem=6-0=6.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 1 5
+7 2
+""",
+            "output": \
+"""\
+15
+""",
+        }, 
+    ]
 
-(6-1)/5=5//5=1 →f2=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-d_clock= (1-4) mod4 = (-3) mod4 =1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-steps_entrance=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-time_entrance=15.
+    print('Tests passed 😎')
 
-option1: (10-1)*5 + (2-1)*5 +15 →45 +5 +15=65.
 
-option2:45 + (10 +1) +15=45+11+15=71.
+if __name__ == '__main__':
+    test()
 
-option3: (10+9*1) +5 +15 →19+5+15=39.
 
-option4: 19 + 11 +15=45.
+```
 
-So minimal is 39. Correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2:
 

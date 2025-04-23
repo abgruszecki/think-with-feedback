@@ -1356,201 +1356,244 @@ But since the children have already been processed, their dp0 and dp1 can be acc
 
 So, the code can be:
 
-MOD = 10**9 +7
+Testing against sample input 2.
 
-n, m = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-edges = [tuple(map(int, input().split())) for _ in range(n-1)]
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-k, x = map(int, input().split())
+    edges = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n-1)]
 
-if m ==1:
+    k, x = map(int, input_stream.readline().rstrip("\n").split())
 
-   if k ==1:
+    if m ==1:
 
-       if n ==1 and x >=1:
+       if k ==1:
 
-           print(1)
+           if n ==1 and x >=1:
+
+               print(1, file=output_stream)
+
+           else:
+
+               print(0, file=output_stream)
 
        else:
 
-           print(0)
+           print(0, file=output_stream)
 
-   else:
+       return
 
-       print(0)
+    factor = ( (k-1) * pow(m-1, MOD-2, MOD) ) % MOD
 
-   exit()
+    # Build the tree.
 
-factor = ( (k-1) * pow(m-1, MOD-2, MOD) ) % MOD
+    adj = [[] for _ in range(n+1)]
 
-# Build the tree.
+    for u, v in edges:
 
-adj = [[] for _ in range(n+1)]
+       adj[u].append(v)
 
-for u, v in edges:
+       adj[v].append(u)
 
-   adj[u].append(v)
+    parent = [0]*(n+1)
 
-   adj[v].append(u)
+    children = [[] for _ in range(n+1)]
 
-parent = [0]*(n+1)
+    visited = [False]*(n+1)
 
-children = [[] for _ in range(n+1)]
+    q = deque([1])
 
-visited = [False]*(n+1)
+    visited[1] = True
 
-q = deque([1])
+    while q:
 
-visited[1] = True
+       u = q.popleft()
 
-while q:
+       for v in adj[u]:
 
-   u = q.popleft()
+           if not visited[v]:
 
-   for v in adj[u]:
+               visited[v] = True
 
-       if not visited[v]:
+               parent[v] = u
 
-           visited[v] = True
+               children[u].append(v)
 
-           parent[v] = u
+               q.append(v)
 
-           children[u].append(v)
+    # Compute post-order.
 
-           q.append(v)
+    stack = [ (1, False) ]
 
-# Compute post-order.
+    post_order = []
 
-stack = [ (1, False) ]
+    while stack:
 
-post_order = []
+       u, processed = stack.pop()
 
-while stack:
+       if processed:
 
-   u, processed = stack.pop()
+           post_order.append(u)
 
-   if processed:
+           continue
 
-       post_order.append(u)
+       stack.append( (u, True) )
 
-       continue
+       for v in reversed(children[u]):
 
-   stack.append( (u, True) )
+           stack.append( (v, False) )
 
-   for v in reversed(children[u]):
+    # Process each node in post_order.
 
-       stack.append( (v, False) )
+    # Store dp0 and dp1 for each node.
 
-# Process each node in post_order.
+    dp0_dict = dict()
 
-# Store dp0 and dp1 for each node.
+    dp1_dict = dict()
 
-dp0_dict = dict()
+    for u in post_order:
 
-dp1_dict = dict()
+       dp0 = [0]*(x+1)
 
-for u in post_order:
+       dp0[0] = 1  # base case: no children, not selected.
 
-   dp0 = [0]*(x+1)
+       for v in children[u]:
 
-   dp0[0] = 1  # base case: no children, not selected.
+           v_dp0 = dp0_dict[v]
 
-   for v in children[u]:
+           v_dp1 = dp1_dict[v]
 
-       v_dp0 = dp0_dict[v]
+           new_dp0 = [0]*(x+1)
 
-       v_dp1 = dp1_dict[v]
+           for s_prev in range(x+1):
 
-       new_dp0 = [0]*(x+1)
-
-       for s_prev in range(x+1):
-
-           if dp0[s_prev] ==0:
-
-               continue
-
-           for s_v in range(x+1 - s_prev):
-
-               combined_s = s_prev + s_v
-
-               if combined_s >x:
+               if dp0[s_prev] ==0:
 
                    continue
 
-               ways_v = (v_dp0[s_v] + v_dp1[s_v] * factor) % MOD
+               for s_v in range(x+1 - s_prev):
 
-               new_dp0[combined_s] = (new_dp0[combined_s] + dp0[s_prev] * ways_v) % MOD
+                   combined_s = s_prev + s_v
 
-       dp0 = new_dp0
+                   if combined_s >x:
 
-   dp0_dict[u] = dp0
+                       continue
 
-   dp1 = [0]*(x+1)
+                   ways_v = (v_dp0[s_v] + v_dp1[s_v] * factor) % MOD
 
-   dp1[1] = 1  # initial: selected, no children.
+                   new_dp0[combined_s] = (new_dp0[combined_s] + dp0[s_prev] * ways_v) % MOD
 
-   for v in children[u]:
+           dp0 = new_dp0
 
-       v_dp0 = dp0_dict[v]
+       dp0_dict[u] = dp0
 
-       new_dp1 = [0]*(x+1)
+       dp1 = [0]*(x+1)
 
-       for s_prev in range(x+1):
+       dp1[1] = 1  # initial: selected, no children.
 
-           if dp1[s_prev] ==0:
+       for v in children[u]:
 
-               continue
+           v_dp0 = dp0_dict[v]
 
-           for s_v in range(x+1):
+           new_dp1 = [0]*(x+1)
 
-               new_s = s_prev + s_v
+           for s_prev in range(x+1):
 
-               if new_s >x:
+               if dp1[s_prev] ==0:
 
                    continue
 
-               contribution = (dp1[s_prev] * v_dp0[s_v]) % MOD
+               for s_v in range(x+1):
 
-               contribution = (contribution * factor) % MOD
+                   new_s = s_prev + s_v
 
-               new_dp1[new_s] = (new_dp1[new_s] + contribution) % MOD
+                   if new_s >x:
 
-       dp1 = new_dp1
+                       continue
 
-   dp1_dict[u] = dp1
+                   contribution = (dp1[s_prev] * v_dp0[s_v]) % MOD
 
-# Now, the root is 1.
+                   contribution = (contribution * factor) % MOD
 
-root_dp0 = dp0_dict[1]
+                   new_dp1[new_s] = (new_dp1[new_s] + contribution) % MOD
 
-root_dp1 = dp1_dict[1]
+           dp1 = new_dp1
 
-total =0
+       dp1_dict[u] = dp1
 
-for s in range(x+1):
+    # Now, the root is 1.
 
-   ways = (root_dp0[s] + root_dp1[s]) % MOD
+    root_dp0 = dp0_dict[1]
 
-   if m-1 ==0:
+    root_dp1 = dp1_dict[1]
 
-       # but m is not 1, so m-1 is >=1.
+    total =0
 
-       pass
+    for s in range(x+1):
 
-   pow_term = pow(m-1, n-s, MOD)
+       ways = (root_dp0[s] + root_dp1[s]) % MOD
 
-   total = (total + ways * pow_term) % MOD
+       if m-1 ==0:
 
-print(total)
+           # but m is not 1, so m-1 is >=1.
 
-But wait, when s >n, pow(m-1, n-s) would be 0, but since s can't exceed x (up to 10) and n >=1, but if s >n, then ways is zero.
+           pass
 
-So, it's safe.
+       pow_term = pow(m-1, n-s, MOD)
 
-This code should handle all test cases.
+       total = (total + ways * pow_term) % MOD
 
-Testing sample input 2:
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 1
+1 2
+1 3
+1 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2:
 

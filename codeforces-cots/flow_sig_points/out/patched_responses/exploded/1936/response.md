@@ -452,19 +452,22 @@ else:
 
 So the code would look like:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-def main():
 
-    n = int(sys.stdin.readline())
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
     if n <= 2:
 
-        print("YES")
+        print("YES", file=output_stream)
 
         return
 
-    points = [tuple(map(int, sys.stdin.readline().split())) for _ in range(n)]
+    points = [tuple(map(int, input_stream.readline().split())) for _ in range(n)]
 
     a, b, c = points[0], points[1], points[2]
 
@@ -520,67 +523,60 @@ def main():
 
     if is_valid(a, b) or is_valid(a, c) or is_valid(b, c):
 
-        print("YES")
+        print("YES", file=output_stream)
 
     else:
 
-        print("NO")
+        print("NO", file=output_stream)
 
-But wait, in the code, for each candidate line (p1, p2), the is_valid function returns True if all points not on p1-p2 line are colinear.
 
-So, for example, if the candidate line is a-b, then:
 
-points not on a-b line are checked to see if they form a single line.
+def test():
+    import io
 
-If yes, return True.
-
-Thus, the code is correct.
-
-But let's test with the examples.
-
-First example input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
-
 0 0
-
-0 1
-
+1 0
+2 1
 1 1
+2 3
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-1 -1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-2 2
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The first three points are (0,0), (0,1), (1,1).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Check candidate lines:
+    print('Tests passed 😎')
 
-a-b (0,0) and (0,1): vertical line x=0.
 
-Check which points are not on this line.
+if __name__ == '__main__':
+    test()
 
-(1,1), (1,-1), (2,2) are not on x=0.
 
-Now, the code would check if these three points form a line.
+```
 
-The first two points in this list are (1,1) and (1,-1). The line between them is x=1 (vertical).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Check if (2,2) is on x=1? No. So this candidate line (a-b) would return False.
-
-Next candidate line: a-c (0,0) and (1,1).
-
-This line has slope 1. Equation y=x.
-
-Check which points are not on this line.
-
-The points (0,1) is not on y=x. (1,-1) is not. (2,2) is on.
-
-So the remaining points are (0,1) and (1,-1).
-
-These two form a line. So the code would collect first_remaining as (0,1), second_remaining as (1,-1). Then, the line between them is checked. The slope is (1 - (-1))/(1-0) = 2/1. So equation is y = 2x - 1. Then, any other points not on the candidate line (y=x) would be checked. But in this case, the third point is (2,2), which is on the candidate line, so not included. So the code returns True for this candidate line. Thus, the overall answer is YES.
-
-Which matches the example.
+```
 
 Second example:
 

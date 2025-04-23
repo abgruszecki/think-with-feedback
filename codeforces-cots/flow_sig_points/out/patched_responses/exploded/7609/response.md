@@ -424,93 +424,233 @@ We can adjust the code to use a dictionary for each path.
 
 So the code becomes:
 
-n = int(input())
+Testing against sample input 1.
 
-c = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-a = list(map(lambda x: int(x)-1, input().split()))  # convert to 0-based
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-visited = [0] * n
+    a = list(map(lambda x: int(x)-1, input_stream.readline().rstrip("\n").split()))  # convert to 0-based
 
-total =0
+    visited = [0] * n
 
-for i in range(n):
+    total =0
 
-    if visited[i] !=0:
+    for i in range(n):
 
-        continue
+        if visited[i] !=0:
 
-    path = []
+            continue
 
-    node_to_index = {}
+        path = []
 
-    current =i
+        node_to_index = {}
 
-    while True:
+        current =i
 
-        if visited[current] ==1:
+        while True:
 
-            # find the cycle
+            if visited[current] ==1:
 
-            idx = node_to_index[current]
+                # find the cycle
 
-            cycle = path[idx:]
+                idx = node_to_index[current]
 
-            total += min(c[j] for j in cycle)
+                cycle = path[idx:]
 
-            # mark all nodes in path as 2
+                total += min(c[j] for j in cycle)
 
-            for node in path:
+                # mark all nodes in path as 2
 
-                visited[node] =2
+                for node in path:
 
-            break
+                    visited[node] =2
 
-        elif visited[current] ==2:
+                break
 
-            # mark all nodes in path as 2
+            elif visited[current] ==2:
 
-            for node in path:
+                # mark all nodes in path as 2
 
-                visited[node] =2
+                for node in path:
 
-            break
+                    visited[node] =2
 
-        else:
+                break
 
-            visited[current] =1
+            else:
 
-            path.append(current)
+                visited[current] =1
 
-            node_to_index[current] = len(path)-1
+                path.append(current)
 
-            current = a[current]
+                node_to_index[current] = len(path)-1
 
-print(total)
+                current = a[current]
 
-This should handle all cases in O(n) time.
+    print(total, file=output_stream)
 
-Testing this code against the examples:
 
-First example:
 
-After processing node 0:
+def test():
+    import io
 
-path is [0], current is 0 (since a[0] is 0). Then visited[0] is 0, so mark as 1, add to path. Then current is 0 again. Now, current is visited=1. Check node_to_index for current (0), which is 0. So the cycle is path[0:], which is [0]. sum +=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 10 2 10
+2 4 2 2
+""",
+            "output": \
+"""\
+10
+""",
+        }, 
+    ]
 
-Then process other nodes. For node1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-visited is 0. Process:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-path starts as [1], current is a[1] =2 (0-based). So current is 2. Add to path (index1). Then current is a[2] =3. Add to path (index2). current is a[3]=2. Now, current is 2, which is in the path (index1). So cycle is path[1:], which is [2,3]. c[2] is3, c[3] is2. sum is 1+2=3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Other nodes (4) will be processed, but when current is 4, it's a path that leads to node2 (which is already processed). So the code marks them as 2, but no cycle is added.
+    print('Tests passed 😎')
 
-So the sum is 3, correct.
 
-Second example:
+if __name__ == '__main__':
+    test()
 
-The code processes node0. The path is [0], current is1. Then path [0,1], current is3. Then path [0,1,3], current is1. Now, current is1, which is in the path (index1). So cycle is [1,3]. Their costs are 10 and 10. Sum is 10. Correct.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    a = list(map(lambda x: int(x)-1, input_stream.readline().rstrip("\n").split()))  # convert to 0-based
+
+    visited = [0] * n
+
+    total =0
+
+    for i in range(n):
+
+        if visited[i] !=0:
+
+            continue
+
+        path = []
+
+        node_to_index = {}
+
+        current =i
+
+        while True:
+
+            if visited[current] ==1:
+
+                # find the cycle
+
+                idx = node_to_index[current]
+
+                cycle = path[idx:]
+
+                total += min(c[j] for j in cycle)
+
+                # mark all nodes in path as 2
+
+                for node in path:
+
+                    visited[node] =2
+
+                break
+
+            elif visited[current] ==2:
+
+                # mark all nodes in path as 2
+
+                for node in path:
+
+                    visited[node] =2
+
+                break
+
+            else:
+
+                visited[current] =1
+
+                path.append(current)
+
+                node_to_index[current] = len(path)-1
+
+                current = a[current]
+
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+1 1 1 1 1 1 1
+2 2 2 3 6 7 6
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

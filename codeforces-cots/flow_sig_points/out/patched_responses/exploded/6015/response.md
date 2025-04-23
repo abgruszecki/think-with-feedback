@@ -419,139 +419,118 @@ Yes. So this approach should work.
 
 So in code:
 
-n = int(input())
+Testing against sample input 1.
 
-points = [tuple(map(int, input().split())) for _ in range(n+1)]
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-sum_area = 0
+    points = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n+1)]
 
-for i in range(n):
+    sum_area = 0
 
-    x_i, y_i = points[i]
+    for i in range(n):
 
-    x_next, y_next = points[i+1]
+        x_i, y_i = points[i]
 
-    sum_area += x_i * y_next - x_next * y_i
+        x_next, y_next = points[i+1]
 
-orientation = 1 if sum_area > 0 else -1  # 1 for CCW, -1 for CW
+        sum_area += x_i * y_next - x_next * y_i
 
-count = 0
+    orientation = 1 if sum_area > 0 else -1  # 1 for CCW, -1 for CW
 
-for i in range(n):
+    count = 0
 
-    a = points[i]
+    for i in range(n):
 
-    b = points[i+1]
+        a = points[i]
 
-    if i+1 == n:
+        b = points[i+1]
 
-        c = points[1]
+        if i+1 == n:
 
-    else:
+            c = points[1]
 
-        c = points[i+2] if (i+2) < len(points) else points[0]
+        else:
 
-    # Compute vectors ab and bc
+            c = points[i+2] if (i+2) < len(points) else points[0]
 
-    ab = (b[0] - a[0], b[1] - a[1])
+        # Compute vectors ab and bc
 
-    bc = (c[0] - b[0], c[1] - b[1])
+        ab = (b[0] - a[0], b[1] - a[1])
 
-    cross = ab[0] * bc[1] - ab[1] * bc[0]
+        bc = (c[0] - b[0], c[1] - b[1])
 
-    # Check if cross product indicates a concave turn based on orientation
+        cross = ab[0] * bc[1] - ab[1] * bc[0]
 
-    if (orientation == 1 and cross < 0) or (orientation == -1 and cross > 0):
+        # Check if cross product indicates a concave turn based on orientation
 
-        count += 1
+        if (orientation == 1 and cross < 0) or (orientation == -1 and cross > 0):
 
-print(count)
+            count += 1
 
-Let's test this code with the first sample.
+    print(count, file=output_stream)
 
-Sample 1 input:
 
-6
 
-0 0
+def test():
+    import io
 
-0 1
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+16
 1 1
+1 5
+3 5
+3 7
+2 7
+2 9
+6 9
+6 7
+5 7
+5 3
+4 3
+4 4
+3 4
+3 2
+5 2
+5 1
+1 1
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-1 2
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-2 2
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-2 0
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-0 0
+    print('Tests passed 😎')
 
-sum_area calculation:
 
-i=0: 0*1 -0*0=0.
+if __name__ == '__main__':
+    test()
 
-i=1:0*1 -1*1= -1.
 
-i=2:1*2 -1*1=1.
+```
 
-i=3:1*2 -2*2= 2-4= -2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=4:2*0 -2*2=0-4= -4.
-
-i=5:2*0 -0*0=0.
-
-sum_area is 0 -1 +1 -2 -4 +0 = -6. sum_area is -6 → orientation is -1 (clockwise).
-
-Processing each i from 0 to 5 (n=6).
-
-For i=0:
-
-a = (0,0), b = (0,1). i+1 is 1 <6, so c is points[2] (1,1).
-
-ab = (0,1) - (0,0) → (0,1).
-
-bc = (1,1) - (0,1) → (1,0).
-
-cross = 0*0 -1*1 = -1.
-
-orientation is -1 (CW). So cross is -1 <0. So (orientation is -1 and cross >0) → false. So no count.
-
-i=1:
-
-a=(0,1), b=(1,1). c=(1,2).
-
-ab=(1,0), bc=(0,1). cross is 1*1 -0*0=1>0. So orientation is -1, cross >0 → count +=1. So count becomes 1.
-
-i=2:
-
-a=(1,1), b=(1,2). c= points[3+1] = points[4] (2,2).
-
-ab is (0,1), bc is (1,0). cross 0*0 -1*1 = -1. cross <0. orientation is -1 → cross>0 is false. So no count.
-
-i=3:
-
-a=(1,2), b=(2,2). c= points[5] (2,0).
-
-ab=(1,0), bc=(0,-2). cross 1*(-2) -0*0 = -2. orientation -1 → cross>0 is false. no count.
-
-i=4:
-
-a=(2,2), b=(2,0). c= points[5+1] = points[6] (0,0).
-
-ab=(0,-2), bc= (0-2, 0-0) → (-2,0). cross is 0*0 - (-2)*(-2) → 0 -4= -4. orientation is -1 → cross>0 false. no count.
-
-i=5:
-
-a=(2,0), b=(0,0). since i+1=6 (n=6), so c=points[1] (0,1).
-
-ab= (0-2, 0-0) → (-2,0).
-
-bc= (0,1-0) → (0,1).
-
-cross = (-2)*1 -0*0 = -2. orientation is -1 → cross>0 is false. no count.
-
-Total count is 1. Correct.
+```
 
 Sample 2 input:
 

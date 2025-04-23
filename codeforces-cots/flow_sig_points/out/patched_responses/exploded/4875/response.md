@@ -280,95 +280,167 @@ Which is correct.
 
 So the code can be structured as:
 
+Testing against sample input 1.
+
+```python
 from collections import deque
 
-t = input().strip()
 
-d = deque(t)
+def main(input_stream, output_stream):
+    t = input_stream.readline().rstrip("\n").strip()
 
-res = []
+    d = deque(t)
 
-m = len(t)
+    res = []
 
-for i in range(m, 0, -1):
+    m = len(t)
 
-    if i % 2 == 0:
+    for i in range(m, 0, -1):
 
-        # even, take from end
+        if i % 2 == 0:
 
-        c = d.pop()
+            # even, take from end
 
-    else:
+            c = d.pop()
 
-        # odd, take from start (even for i=1)
+        else:
 
-        c = d.popleft()
+            # odd, take from start (even for i=1)
 
-    res.append(c)
+            c = d.popleft()
 
-# reverse the res to get s in order
+        res.append(c)
 
-s = ''.join(reversed(res))
+    # reverse the res to get s in order
 
-print(s)
+    s = ''.join(reversed(res))
 
-Wait, let's test this code with the first example.
+    print(s, file=output_stream)
 
-Sample Input 1: ncteho → len 6.
 
-Processing steps i=6 to 1:
 
-i=6 → even → pop last (o) → res: [o]
+def test():
+    import io
 
-i=5 → odd → pop left (n) → res: [o,n]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+erfdcoeocs
+""",
+            "output": \
+"""\
+codeforces
+""",
+        }, 
+    ]
 
-i=4 → even → pop last (h) → res: [o,n,h]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=3 → odd → pop left (c) → res: [o,n,h,c]
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=2 → even → pop last (e) → res: [o,n,h,c,e]
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=1 → odd → pop left (t) → res: [o,n,h,c,e,t]
+    print('Tests passed 😎')
 
-Then reversed → [t,e,c,h,n,o] → 'techno' → correct.
 
-Another test case: input 'z' → len 1.
+if __name__ == '__main__':
+    test()
 
-i=1 → odd → pop left (z). res: [z]. reversed → [z]. So output is 'z' → correct.
 
-Second sample input: 'erfdcoeocs' → output is 'codeforces'.
+```
 
-Let's see.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Encrypted string is 'erfdcoeocs' → len 10.
+```
 
-Let's process each step:
+Testing against sample input 2.
 
-i=10: even → pop last character. Original string is 'erfdcoeocs', last character is 's' → res appends 's'. Deque now is 'erfdcoeoc'.
+```python
+from collections import deque
 
-i=9: odd → pop first character 'e' → res is ['s', 'e']. Deque becomes 'rfdcoeoc'.
 
-i=8: even → pop last → 'c' → res ['s','e','c']. Deque now 'rfdcoeo'.
+def main(input_stream, output_stream):
+    t = input_stream.readline().rstrip("\n").strip()
 
-i=7: odd → pop first 'r' → res ['s','e','c','r']. Deque 'fdcoeo'.
+    d = deque(t)
 
-i=6: even → pop last 'o' → res becomes ... adding 'o' → ['s','e','c','r','o']. Deque 'fdcoe'.
+    res = []
 
-i=5: odd → pop first 'f' → res appends 'f' → ['s','e','c','r','o','f']. Deque 'dcoe'.
+    m = len(t)
 
-i=4: even → pop last 'e' → add to res → ['s','e','c','r','o','f','e']. Deque 'dco'.
+    for i in range(m, 0, -1):
 
-i=3: odd → pop first 'd' → add → ['s','e','c','r','o','f','e','d']. Deque 'co'.
+        if i % 2 == 0:
 
-i=2: even → pop last 'o' → add → res is now ... ['s','e','c','r','o','f','e','d','o']. Deque 'c'.
+            # even, take from end
 
-i=1: odd → pop 'c' → res becomes ... appends 'c' → ['s','e','c','r','o','f','e','d','o','c'].
+            c = d.pop()
 
-Then reversed → 'c o d e f o r c e s' → 'codeforces'? Wait, let's see the list after collecting all characters is ['s','e','c','r','o','f','e','d','o','c']. Reversed gives 'c o d e f o r c e s' → 'codeforces'?
+        else:
 
-Wait, the reversed list would be c, o, d, e, f, o, r, c, e, s → no. Let's see the order.
+            # odd, take from start (even for i=1)
 
-The res list after processing all steps is [s, e, c, r, o, f, e, d, o, c]. Reversing this list gives [c, o, d, e, f, o, r, c, e, s]. Wait, no, the list is [s, e, c, r, o, f, e, d, o, c], reversed is [c, o, d, e, f, o, r, c, e, s]. Wait, that's 'cod efor ces' → 'cod eforces'? Wait, 'c' 'o' 'd' 'e' 'f' 'o' 'r' 'c' 'e' 's' → codeforces. Yes. So the output is correct.
+            c = d.popleft()
+
+        res.append(c)
+
+    # reverse the res to get s in order
+
+    s = ''.join(reversed(res))
+
+    print(s, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+z
+""",
+            "output": \
+"""\
+z
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So the code works for this case.
 

@@ -511,70 +511,155 @@ Process them as per the algorithm.
 
 So code:
 
-n, m = map(int, input().split())
-a = list(map(int, input().split()))
-auction_indices = list(map(lambda x: x-1, map(int, input().split())))  # convert to 0-based
+Testing against sample input 1.
 
-auction = []
-regular_sum =0
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    auction_indices = list(map(lambda x: x-1, map(int, input_stream.readline().rstrip("\n").split())))  # convert to 0-based
 
-auction_set = set(auction_indices)
-for i in range(n):
-    if i in auction_set:
-        auction.append(a[i])
-    else:
-        regular_sum += a[i]
+    auction = []
+    regular_sum =0
 
-auction.sort(reverse=True)
+    auction_set = set(auction_indices)
+    for i in range(n):
+        if i in auction_set:
+            auction.append(a[i])
+        else:
+            regular_sum += a[i]
 
-s = regular_sum
-for ai in auction:
-    if s > ai:
-        s += s
-    else:
-        s += ai
+    auction.sort(reverse=True)
 
-print(s)
+    s = regular_sum
+    for ai in auction:
+        if s > ai:
+            s += s
+        else:
+            s += ai
 
-Yes, this should work. Let's test the first sample:
+    print(s, file=output_stream)
 
-Sample 1:
 
-4 1
 
-1 3 7 5
+def test():
+    import io
 
-3 → 0-based index 2 (third element, which is 7).
-
-Regular_sum is 1+3+5 =9.
-
-auction list is [7], sorted in reverse is [7].
-
-Processing:
-
-s=9. 9>7 → s=18. Output 18.
-
-Sample 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3 2
+10 3 8
+2 3
+""",
+            "output": \
+"""\
+40
+""",
+        }, 
+    ]
 
-10 3 8 → a = [10,3,8]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-auction_indices are 2 and 3 (1-based). 0-based 1 and 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-auction a_i's are 3 and 8 → [3,8]. Wait, no. Wait, the third line is 2 3: which are the 1-based indices of auction questions.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So in 0-based, they are 1 and 2. So auction a_i's are 3 and 8.
+    print('Tests passed 😎')
 
-auction list sorted in reverse is [8,3].
 
-regular_sum is 10.
+if __name__ == '__main__':
+    test()
 
-s=10.
 
-Process 8: 10>8 → s=20.
+```
 
-Process 3: 20>3 → s=40. Output 40.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    auction_indices = list(map(lambda x: x-1, map(int, input_stream.readline().rstrip("\n").split())))  # convert to 0-based
+
+    auction = []
+    regular_sum =0
+
+    auction_set = set(auction_indices)
+    for i in range(n):
+        if i in auction_set:
+            auction.append(a[i])
+        else:
+            regular_sum += a[i]
+
+    auction.sort(reverse=True)
+
+    s = regular_sum
+    for ai in auction:
+        if s > ai:
+            s += s
+        else:
+            s += ai
+
+    print(s, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 2
+100 200
+1 2
+""",
+            "output": \
+"""\
+400
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

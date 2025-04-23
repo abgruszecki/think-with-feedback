@@ -515,125 +515,136 @@ Now, code:
 
 Read n, m.
 
-s1 = list(map(int, input().split()))
+Testing against sample input 1.
 
-s2 = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    s1 = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-MOD = 10**9 +7
+    s2 = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-answer =0
+    MOD = 10**9 +7
 
-eq_prob =1
+    answer =0
 
-for a, b in zip(s1, s2):
+    eq_prob =1
 
-    if a !=0 and b !=0:
+    for a, b in zip(s1, s2):
 
-        if a >b:
+        if a !=0 and b !=0:
 
-            answer = (answer + eq_prob) % MOD
+            if a >b:
 
-            eq_prob =0
+                answer = (answer + eq_prob) % MOD
 
-            break
+                eq_prob =0
 
-        elif a <b:
+                break
 
-            eq_prob =0
+            elif a <b:
 
-            break
+                eq_prob =0
 
-        else:
+                break
 
-            continue
+            else:
 
-    else:
-
-        # compute count_gt, count_eq, total
-
-        if a ==0 and b ==0:
-
-            total = m * m
-
-            count_gt = m * (m-1) //2
-
-            count_eq =m
-
-        elif a ==0:
-
-            # b is non-zero
-
-            count_gt = m - b
-
-            total = m
-
-            count_eq =1
+                continue
 
         else:
 
-            # a is non-zero, b is zero
+            # compute count_gt, count_eq, total
 
-            count_gt = a -1
+            if a ==0 and b ==0:
 
-            total =m
+                total = m * m
 
-            count_eq =1
+                count_gt = m * (m-1) //2
 
-        inv_total = pow(total, MOD-2, MOD)
+                count_eq =m
 
-        prob_gt = (count_gt * inv_total) % MOD
+            elif a ==0:
 
-        prob_eq = (count_eq * inv_total) % MOD
+                # b is non-zero
 
-        answer = (answer + eq_prob * prob_gt) % MOD
+                count_gt = m - b
 
-        eq_prob = (eq_prob * prob_eq) % MOD
+                total = m
 
-        if eq_prob ==0:
+                count_eq =1
 
-            break
+            else:
 
-print(answer % MOD)
+                # a is non-zero, b is zero
 
-Wait, but in the case where a is zero and b is non-zero:
+                count_gt = a -1
 
-count_gt is m -b.
+                total =m
 
-But what if m -b is negative? For example, if b is 5 and m is 3. Then m -b is 3-5= -2. So max(0, m -b) is 0.
+                count_eq =1
 
-But in code, in the case where a is zero and b is non-zero, count_gt is computed as m -b. But in that case, since b is non-zero, and according to input constraints, the S2 values are 0 or in 1..m. So if b is 5 and m is 3, the input is invalid. But according to problem statement, the input is such that the S1 and S2 have 0 or in 1..m. So the code can assume that for all a and b in the input, if they are non-zero, they are between 1 and m.
+            inv_total = pow(total, MOD-2, MOD)
 
-So in code, no need to check. So when a is zero and b is non-zero (and in 1..m), count_gt is m -b. But if m <b, then m -b is negative. So in that case, count_gt is negative, which would be 0. So code is wrong here.
+            prob_gt = (count_gt * inv_total) % MOD
 
-Wait, no. For example, if b is 5 and m is 3, then the input is invalid, but according to the problem statement, the input ensures that the numbers are in 0 or 1..m. So in that case, S2's b is 5 which is invalid. But the problem's input constraints state:
+            prob_eq = (count_eq * inv_total) % MOD
 
-"The second line contains n integers a1, a2, ..., an (0 ≤ ai ≤ m) — the symbols of S1. If ai = 0, then the symbol at position i was erased."
+            answer = (answer + eq_prob * prob_gt) % MOD
 
-Same for S2. So the input is guaranteed to have a and b either 0 or in 1..m.
+            eq_prob = (eq_prob * prob_eq) % MOD
 
-So in code, when a is zero and b is non-zero, then b is in 1..m, and m is given as per input. So for example, if m=3 and b=3, then m -b =0.
+            if eq_prob ==0:
 
-So in code, count_gt can be zero or positive.
+                break
 
-Thus, code is correct.
+    print(answer % MOD, file=output_stream)
 
-But wait, when a is zero and b is non-zero, the count_gt is m -b. For example, m=5, b=3 → m-b=2, which is correct. For m=3, b=4: but according to input constraints, b can't be 4. So in code, this case is not possible.
 
-Thus, the code is correct.
 
-Testing sample 1:
+def test():
+    import io
 
-Input is a=0, b=1. m=2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 2
+1
+0
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-count_gt = 2-1=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-prob_gt =1 * inv(2) → 500000004 mod 1e9+7. Then contribution is 1 * 500000004 → 500000004 mod MOD. Then answer is 500000004.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sample 2: a=1, b=0. count_gt is a-1=0. prob_gt is 0. So contribution is 0. Then eq_prob is 1 * 1/2 → 500000004. But since there are no more positions, answer is 0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sample 3 is more complicated, but code should handle it.
+    print('Tests passed 😎')
 
-Thus, the code seems correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

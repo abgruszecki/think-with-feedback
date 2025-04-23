@@ -1216,57 +1216,150 @@ Output (C * 998244353) % (10**9+7)
 
 This code should handle all test cases efficiently, even for n=1e12.
 
-Let's test this code against the samples.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 + 7
+    M = 998244353
 
-n=3.
+    n = int(input_stream.readline().rstrip("\n"))
+    stack = []
+    for d in range(9, 0, -1):
+        stack.append(d)
+    count = 0
+    i = 0
 
-Stack starts with 9..1.
+    while stack:
+        x = stack.pop()
+        if x > n:
+            continue
+        i += 1
+        if i < x:
+            count += 1
+        for d in range(9, -1, -1):
+            child = x * 10 + d
+            stack.append(child)
 
-Process 1: i=1. i<1 → false. Push 19,18,...,10.
+    result = (count % MOD) * (M % MOD) % MOD
+    print(result, file=output_stream)
 
-Process 10: 10>3 → skipped.
 
-Process 11: >3 → skipped.
 
-...
+def test():
+    import io
 
-Process 2: i=2. 2<2 → false.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+12
+""",
+            "output": \
+"""\
+994733045
+""",
+        }, 
+    ]
 
-Process 3: i=3. 3<3 → false.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Thus, C=0. Output is 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sample 2:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-n=12.
+    print('Tests passed 😎')
 
-Process 1: i=1. no. Push 19..10.
 
-Process 10: i=2. 2<10 → yes. Push 109..100.
+if __name__ == '__main__':
+    test()
 
-100>12 → skipped.
 
-Process 10's siblings: 11, 12.
+```
 
-Process 11: i=3. 3<11 → yes.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Process 12: i=4.4<12 → yes.
+```
 
-Process 13>12: skipped.
+Testing against sample input 2.
 
-...
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 + 7
+    M = 998244353
 
-Process 2: i=5.5<2 → no.
+    n = int(input_stream.readline().rstrip("\n"))
+    stack = []
+    for d in range(9, 0, -1):
+        stack.append(d)
+    count = 0
+    i = 0
 
-Thus, C=3 (10,11,12). 3*998244353 = 2994733059 mod 1e9+7 is 994733045 → matches sample.
+    while stack:
+        x = stack.pop()
+        if x > n:
+            continue
+        i += 1
+        if i < x:
+            count += 1
+        for d in range(9, -1, -1):
+            child = x * 10 + d
+            stack.append(child)
 
-Thus, the code works.
+    result = (count % MOD) * (M % MOD) % MOD
+    print(result, file=output_stream)
 
-Now, for the code to be efficient, it's important to note that for n=1e12, the code only processes nodes x where x <=n. For example, x=1e12 is processed, but its children are 1e12*10 +d which are 1e13, which is larger than n and thus skipped.
 
-Thus, the code is efficient and passes the test cases.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+21
+""",
+            "output": \
+"""\
+978932159
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

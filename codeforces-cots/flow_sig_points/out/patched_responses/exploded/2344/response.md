@@ -794,130 +794,298 @@ But in Python, creating a list of size 1e5+1 is acceptable.
 
 So, the code:
 
+Testing against sample input 1.
+
+```python
 import heapq
 
-n, m = map(int, input().split())
-antennas = []
-for _ in range(n):
-    x, s = map(int, input().split())
-    antennas.append( (x, s) )
 
-INF = float('inf')
-dp = [INF] * (m + 2)  # m can be 1e5, indexes up to m+1
-dp[0] = 0
-heap = []
-heapq.heappush(heap, (0, 0))
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    antennas = []
+    for _ in range(n):
+        x, s = map(int, input_stream.readline().rstrip("\n").split())
+        antennas.append( (x, s) )
 
-while heap:
-    cost, current_end = heapq.heappop(heap)
-    if current_end >= m:
-        print(cost)
-        exit()
-    if cost > dp[current_end]:
-        continue
-    for x, s in antennas:
-        # Compute a_i and new_end_a
-        a_i = max(0, (x - s) - (current_end + 1))
-        new_end_a = x + s + a_i
-        new_end_a = min(new_end_a, m)
-        new_end_a = max(new_end_a, current_end)
-        cost_a = cost + a_i
-        if new_end_a <= m and cost_a < dp[new_end_a]:
-            if cost_a < dp[new_end_a]:
-                dp[new_end_a] = cost_a
-                heapq.heappush(heap, (cost_a, new_end_a))
-        # Compute b_i and new_end_b
-        b_i = max(0, m - (x + s))
-        k_i = max(a_i, b_i)
-        new_end_b = x + s + k_i
-        new_end_b = min(new_end_b, m)
-        new_end_b = max(new_end_b, current_end)
-        cost_b = cost + k_i
-        if new_end_b <= m and cost_b < dp[new_end_b]:
-            if cost_b < dp[new_end_b]:
-                dp[new_end_b] = cost_b
-                heapq.heappush(heap, (cost_b, new_end_b))
+    INF = float('inf')
+    dp = [INF] * (m + 2)  # m can be 1e5, indexes up to m+1
+    dp[0] = 0
+    heap = []
+    heapq.heappush(heap, (0, 0))
 
-print(dp[m])
+    while heap:
+        cost, current_end = heapq.heappop(heap)
+        if current_end >= m:
+            print(cost, file=output_stream)
+            return
+        if cost > dp[current_end]:
+            continue
+        for x, s in antennas:
+            # Compute a_i and new_end_a
+            a_i = max(0, (x - s) - (current_end + 1))
+            new_end_a = x + s + a_i
+            new_end_a = min(new_end_a, m)
+            new_end_a = max(new_end_a, current_end)
+            cost_a = cost + a_i
+            if new_end_a <= m and cost_a < dp[new_end_a]:
+                if cost_a < dp[new_end_a]:
+                    dp[new_end_a] = cost_a
+                    heapq.heappush(heap, (cost_a, new_end_a))
+            # Compute b_i and new_end_b
+            b_i = max(0, m - (x + s))
+            k_i = max(a_i, b_i)
+            new_end_b = x + s + k_i
+            new_end_b = min(new_end_b, m)
+            new_end_b = max(new_end_b, current_end)
+            cost_b = cost + k_i
+            if new_end_b <= m and cost_b < dp[new_end_b]:
+                if cost_b < dp[new_end_b]:
+                    dp[new_end_b] = cost_b
+                    heapq.heappush(heap, (cost_b, new_end_b))
 
-But wait, the code has some redundancy. For example, new_end_a and new_end_b may be the same if expanding to m. Also, there might be overlapping transitions. However, using the priority queue ensures that the first time a new_end is processed, it's with the minimal cost.
+    print(dp[m], file=output_stream)
 
-Testing this code against the sample input:
 
-Sample input 1:
 
-3 595
-43 2
-300 4
-554 10
+def test():
+    import io
 
-When current_end=514, processing the third antenna (554,10):
-
-a_i = max(0, 554-10 -515) →544-515=29. 
-
-new_end_a =554 +10 +29=593. cost_a=250+29=279.
-
-b_i = max(0, 595-564)=31.
-
-k_i = max(29,31)=31.
-
-new_end_b =554+10+31=595 → cost_b=250+31=281.
-
-Thus, the code adds (279,593) and (281,595) to the heap. When the (281,595) is popped, since 595 >=m, it returns 281, which is correct.
-
-Another sample input:
-
-Sample input 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 1 1
-
 1 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-The initial coverage is [0, 2], which covers 1. So cost is 0. The code should return 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample input 3:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import heapq
+
+
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    antennas = []
+    for _ in range(n):
+        x, s = map(int, input_stream.readline().rstrip("\n").split())
+        antennas.append( (x, s) )
+
+    INF = float('inf')
+    dp = [INF] * (m + 2)  # m can be 1e5, indexes up to m+1
+    dp[0] = 0
+    heap = []
+    heapq.heappush(heap, (0, 0))
+
+    while heap:
+        cost, current_end = heapq.heappop(heap)
+        if current_end >= m:
+            print(cost, file=output_stream)
+            return
+        if cost > dp[current_end]:
+            continue
+        for x, s in antennas:
+            # Compute a_i and new_end_a
+            a_i = max(0, (x - s) - (current_end + 1))
+            new_end_a = x + s + a_i
+            new_end_a = min(new_end_a, m)
+            new_end_a = max(new_end_a, current_end)
+            cost_a = cost + a_i
+            if new_end_a <= m and cost_a < dp[new_end_a]:
+                if cost_a < dp[new_end_a]:
+                    dp[new_end_a] = cost_a
+                    heapq.heappush(heap, (cost_a, new_end_a))
+            # Compute b_i and new_end_b
+            b_i = max(0, m - (x + s))
+            k_i = max(a_i, b_i)
+            new_end_b = x + s + k_i
+            new_end_b = min(new_end_b, m)
+            new_end_b = max(new_end_b, current_end)
+            cost_b = cost + k_i
+            if new_end_b <= m and cost_b < dp[new_end_b]:
+                if cost_b < dp[new_end_b]:
+                    dp[new_end_b] = cost_b
+                    heapq.heappush(heap, (cost_b, new_end_b))
+
+    print(dp[m], file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2 50
-
 20 0
-
 3 1
+""",
+            "output": \
+"""\
+30
+""",
+        }, 
+    ]
 
-The initial coverage:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Antenna1: 20-0=20 to 20+0=20.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Antenna2: 3-1=2 to 3+1=4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-After expanding:
+    print('Tests passed 😎')
 
-Antenna1 needs to cover from 5 to 50. But it's at 20, with s=0. So the required expansion is 20 - (5) =15 (k_i_min=15). new_end_a is 20+0+15=35. cost_a=15. Then, from 35, expand again to cover up to 50. But the optimal solution is to expand antenna2 to cover up to 50.
 
-But according to the code, when current_end=0:
+if __name__ == '__main__':
+    test()
 
-Antenna2: x=3, s=1.
 
-a_i = max(0, (3-1) - 0+1) →2-1=1. So a_i=1. new_end_a=3+1+1=5. cost_a=1.
+```
 
-b_i = max(0, 50 -4)=46. k_i= max(1,46)=46. new_end_b=3+1+46=50. cost_b=46. So the code adds (1,5) and (46,50) to the heap.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-The (1,5) is processed first. 
+```
 
-When current_end=5, processing antenna1 (20,0):
+Testing against sample input 3.
 
-a_i = max(0, 20-0 -6)=14. new_end_a=20+14=34. cost_a=1+14=15.
+```python
+import heapq
 
-b_i =50-20=30. k_i= max(14,30)=30. new_end_b=20+30=50. cost_b=1+30=31.
 
-So new_end_b=50, cost 31.
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    antennas = []
+    for _ in range(n):
+        x, s = map(int, input_stream.readline().rstrip("\n").split())
+        antennas.append( (x, s) )
 
-Meanwhile, the (46,50) entry is still in the heap. But when current_end=5 is processed, the code adds these transitions. However, when the (46,50) is popped, the cost is 46, which is higher than 31. But the code would first process the (31,50) transition when current_end=34.
+    INF = float('inf')
+    dp = [INF] * (m + 2)  # m can be 1e5, indexes up to m+1
+    dp[0] = 0
+    heap = []
+    heapq.heappush(heap, (0, 0))
 
-But this requires further steps. But the sample's expected output is 30. So the code may not be handling this correctly.
+    while heap:
+        cost, current_end = heapq.heappop(heap)
+        if current_end >= m:
+            print(cost, file=output_stream)
+            return
+        if cost > dp[current_end]:
+            continue
+        for x, s in antennas:
+            # Compute a_i and new_end_a
+            a_i = max(0, (x - s) - (current_end + 1))
+            new_end_a = x + s + a_i
+            new_end_a = min(new_end_a, m)
+            new_end_a = max(new_end_a, current_end)
+            cost_a = cost + a_i
+            if new_end_a <= m and cost_a < dp[new_end_a]:
+                if cost_a < dp[new_end_a]:
+                    dp[new_end_a] = cost_a
+                    heapq.heappush(heap, (cost_a, new_end_a))
+            # Compute b_i and new_end_b
+            b_i = max(0, m - (x + s))
+            k_i = max(a_i, b_i)
+            new_end_b = x + s + k_i
+            new_end_b = min(new_end_b, m)
+            new_end_b = max(new_end_b, current_end)
+            cost_b = cost + k_i
+            if new_end_b <= m and cost_b < dp[new_end_b]:
+                if cost_b < dp[new_end_b]:
+                    dp[new_end_b] = cost_b
+                    heapq.heappush(heap, (cost_b, new_end_b))
 
-Wait, the sample input 3's expected output is 30.
+    print(dp[m], file=output_stream)
 
-The code's approach may not find this. Let's see.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 240
+13 0
+50 25
+60 5
+155 70
+165 70
+""",
+            "output": \
+"""\
+26
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input3:
 

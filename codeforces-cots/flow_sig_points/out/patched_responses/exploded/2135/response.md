@@ -24,44 +24,62 @@ One approach is to loop through each character with their index, and build a new
 
 For example:
 
-s = input().strip()
-result = []
-for i, c in enumerate(s):
-    if i % 2 == 0:  # 0, 2, etc. → position 1,3 → uppercase
-        result.append(c.upper())
-    else:
-        result.append(c.lower())
-print(''.join(result))
+Testing against sample input 1.
 
-That should do it. Let's test with the examples.
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    result = []
+    for i, c in enumerate(s):
+        if i % 2 == 0:  # 0, 2, etc. → position 1,3 → uppercase
+            result.append(c.upper())
+        else:
+            result.append(c.lower())
+    print(''.join(result), file=output_stream)
 
-First example: 'Codeforces' → 'CoDeFoRcEs'
 
-Original string is C o d e f o r c e s.
 
-Indices 0-9 (length 10). Let's see:
+def test():
+    import io
 
-0: C → uppercase (since even index) → remains C.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+VKCup
+""",
+            "output": \
+"""\
+VkCuP
+""",
+        }, 
+    ]
 
-1: o → index 1 (odd), so lower → o → becomes o lowercase → 'o'.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-2: d → index 2 even → uppercase → D.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-3: e → index 3 → lower → e.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-4: f → uppercase → F.
+    print('Tests passed 😎')
 
-5: o → lower → o.
 
-6: r → uppercase → R.
+if __name__ == '__main__':
+    test()
 
-7: c → lower → c.
 
-8: e → uppercase → E.
+```
 
-9: s → lower → s.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So combined: C o D e F o R c E s → 'CoDeFoRcEs' which matches the example.
+```
 
 Second example: 'VKCup' → 'VkCuP'. Let's see.
 

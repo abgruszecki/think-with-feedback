@@ -523,139 +523,138 @@ answer = total_lines * (total_lines -1) //2 - sum_parallel_pairs.
 
 So code:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n = int(input())
 
-points = [tuple(map(int, input().split())) for _ in range(n)]
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-lines = set()
+    points = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n)]
 
-for i in range(n):
+    lines = set()
 
-    x1, y1 = points[i]
+    for i in range(n):
 
-    for j in range(i+1, n):
+        x1, y1 = points[i]
 
-        x2, y2 = points[j]
+        for j in range(i+1, n):
 
-        dx = x2 - x1
+            x2, y2 = points[j]
 
-        dy = y2 - y1
+            dx = x2 - x1
 
-        a = dy
+            dy = y2 - y1
 
-        b = -dx
+            a = dy
 
-        c = dx * y1 - dy * x1
+            b = -dx
 
-        # Compute GCD of a, b, c's absolute values
+            c = dx * y1 - dy * x1
 
-        g = math.gcd(math.gcd(abs(a), abs(b)), abs(c))
+            # Compute GCD of a, b, c's absolute values
 
-        if g != 0:
+            g = math.gcd(math.gcd(abs(a), abs(b)), abs(c))
 
-            a //= g
+            if g != 0:
 
-            b //= g
+                a //= g
 
-            c //= g
+                b //= g
 
-        # Determine sign based on a and b
+                c //= g
 
-        if a !=0:
+            # Determine sign based on a and b
 
-            if a < 0:
+            if a !=0:
 
-                a = -a
+                if a < 0:
 
-                b = -b
+                    a = -a
 
-                c = -c
+                    b = -b
 
-        else:
+                    c = -c
 
-            if b <0:
+            else:
 
-                b = -b
+                if b <0:
 
-                c = -c
+                    b = -b
 
-        lines.add( (a, b, c) )
+                    c = -c
 
-# Now group lines by (a, b)
+            lines.add( (a, b, c) )
 
-from collections import defaultdict
+    # Now group lines by (a, b)
 
-group = defaultdict(int)
+    from collections import defaultdict
 
-for a, b, c in lines:
+    group = defaultdict(int)
 
-    group_key = (a, b)
+    for a, b, c in lines:
 
-    group[group_key] +=1
+        group_key = (a, b)
 
-total = len(lines)
+        group[group_key] +=1
 
-sum_parallel = sum( m * (m-1) //2 for m in group.values() )
+    total = len(lines)
 
-answer = total * (total -1) //2 - sum_parallel
+    sum_parallel = sum( m * (m-1) //2 for m in group.values() )
 
-print(answer)
+    answer = total * (total -1) //2 - sum_parallel
 
-Wait, but for the code, what if the GCD is zero? Because a, b, c can't all be zero (since the points are distinct), but when computing GCD of a, b, c, if all three are zero, then division by zero would happen. But in our case, a and b can't both be zero. Because a= dy and b= -dx. So if dx and dy are zero, the points are same, but the problem says all points are distinct. So the code will never have a=0 and b=0. So g is the GCD of (a, b, c), which can't be zero. So division by g is safe.
+    print(answer, file=output_stream)
 
-Testing the first sample input:
 
-Sample input 1:
 
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
-
 0 0
+0 2
+0 4
+2 0
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-1 1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-0 3
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-1 2
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The lines are:
+    print('Tests passed 😎')
 
-Between (0,0) and (1,1):
 
-dx=1, dy=1 → a=1, b=-1, c=0. GCD is 1. No sign change. So (1, -1, 0).
+if __name__ == '__main__':
+    test()
 
-Between (0,0) and (0,3): dx=0, dy=3. a=3, b=0, c=0. GCD is 3. After division: 1,0,0. So (1,0,0).
 
-Between (0,0) and (1,2): dx=1, dy=2. a=2, b=-1. c=1*0 -2*0=0. GCD(2,1,0) → GCD(1,0) =1. So a=2, b=-1, c=0. Then check a is 2 (positive). So normalized as (2,-1,0).
+```
 
-Wait, but how many lines are there?
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Wait the four points are (0,0), (1,1), (0,3), (1,2).
-
-We need to compute all pairs:
-
-(0,0) and (1,1): line (1,-1,0).
-
-(0,0) and (0,3): line (1,0,0).
-
-(0,0) and (1,2): dx=1, dy=2. a=2, b=-1. c=1*0 - 2*0=0. GCD(2,1,0)=1. So a=2, b=-1, c=0. Since a is positive, no change. So (2, -1, 0).
-
-(1,1) and (0,3): dx =-1, dy=2. a=2, b=1. c= (-1)*1 -2*1 → -1-2= -3. GCD(2,1,3) → GCD(1,3) =1. So (2,1,-3). Then check a=2 positive. So (2,1,-3).
-
-(1,1) and (1,2): dx=0, dy=1. a=1, b=0. c=0*1 -1*1= -1. GCD(1,0,1) → 1. a=1, b=0, c=-1. Since a is positive, no change. So (1,0,-1).
-
-(0,3) and (1,2): dx=1, dy=-1. a=-1, b=-1. c=1*3 - (-1)*0 →3. GCD(1,1,3) →1. So (-1,-1,3). Now, a is -1. Multiply by -1: a=1, b=1, c=-3. So (1,1,-3).
-
-So the lines set will have 6 entries?
-
-Wait, no. Let's compute all possible pairs:
-
-There are 4 points, so 6 pairs.
-
-Each pair generates a line. But some pairs may generate the same line.
-
-The sample output is 14.
+```
 
 Hmm, but according to the code's logic, the lines in the first sample would have:
 

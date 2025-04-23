@@ -201,52 +201,84 @@ Same for y_min and y_max.
 
 So code steps:
 
-n = int(input())
+Testing against sample input 1.
 
-sum_area = 0
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-x_min = float('inf')
-y_min = float('inf')
-x_max = -float('inf')
-y_max = -float('inf')
+    sum_area = 0
 
-for _ in range(n):
-    x1, y1, x2, y2 = map(int, input().split())
-    sum_area += (x2 - x1) * (y2 - y1)
-    x_min = min(x_min, x1)
-    y_min = min(y_min, y1)
-    x_max = max(x_max, x2)
-    y_max = max(y_max, y2)
+    x_min = float('inf')
+    y_min = float('inf')
+    x_max = -float('inf')
+    y_max = -float('inf')
 
-width = x_max - x_min
-height = y_max - y_min
+    for _ in range(n):
+        x1, y1, x2, y2 = map(int, input_stream.readline().rstrip("\n").split())
+        sum_area += (x2 - x1) * (y2 - y1)
+        x_min = min(x_min, x1)
+        y_min = min(y_min, y1)
+        x_max = max(x_max, x2)
+        y_max = max(y_max, y2)
 
-if width != height:
-    print("NO")
-elif sum_area != width * height:
-    print("NO")
-else:
-    print("YES")
+    width = x_max - x_min
+    height = y_max - y_min
 
-That's the code. Let's test sample input 1.
+    if width != height:
+        print("NO", file=output_stream)
+    elif sum_area != width * height:
+        print("NO", file=output_stream)
+    else:
+        print("YES", file=output_stream)
 
-Sample 1:
 
-5
 
-0 0 2 3 → area 2*3=6
+def test():
+    import io
 
-0 3 3 5 → (3-0)*(5-3) =3*2=6
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+0 0 2 3
+0 3 3 5
+2 0 5 2
+3 2 5 5
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-2 0 5 2 → 3*2=6
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-3 2 5 5 →2*3=6 (5-3 is 2, 5-2 is3)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-2 2 3 3 →1*1=1 → sum is6+6+6+6+1=25.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-x_min is 0, x_max is5. y_min 0, y_max5.
+    print('Tests passed 😎')
 
-width 5, height5. 5*5=25=sum. So YES.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

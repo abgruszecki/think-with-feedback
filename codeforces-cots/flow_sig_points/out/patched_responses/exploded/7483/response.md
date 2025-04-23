@@ -1277,245 +1277,219 @@ In the input, ants are read in order, and their original indices are 0-based.
 
 Now, the code:
 
+Testing against sample input 2.
+
+```python
 import bisect
 
-n, m, t = map(int, input().split())
 
-ants = []
-R_s = []
-L_s = []
-for idx in range(n):
-    s, d = input().split()
-    s = int(s) - 1  # convert to 0-based
-    ants.append( (s, d, idx) )
-    if d == 'R':
-        R_s.append(s)
-    else:
-        L_s.append(s)
+def main(input_stream, output_stream):
+    n, m, t = map(int, input_stream.readline().rstrip("\n").split())
 
-R_s.sort()
-L_s.sort()
-
-output = [0] * n
-
-for s, d, idx in ants:
-    if d == 'R':
-        e_i = (s + t) % m
-        if s < e_i:
-            # interval (s, e_i)
-            left = bisect.bisect_right(L_s, s)
-            right = bisect.bisect_left(L_s, e_i)
-            count = right - left
+    ants = []
+    R_s = []
+    L_s = []
+    for idx in range(n):
+        s, d = input_stream.readline().rstrip("\n").split()
+        s = int(s) - 1  # convert to 0-based
+        ants.append( (s, d, idx) )
+        if d == 'R':
+            R_s.append(s)
         else:
-            # interval (s, m) and (0, e_i)
-            left_part = bisect.bisect_right(L_s, s)
-            part1 = len(L_s) - left_part
-            part2 = bisect.bisect_left(L_s, e_i)
-            count = part1 + part2
-        new_index = (idx + count) % n
-    else:
-        s_start = (s - t) % m
-        if s_start < s:
-            # interval (s_start, s)
-            left = bisect.bisect_right(R_s, s_start)
-            right = bisect.bisect_left(R_s, s)
-            count = right - left
+            L_s.append(s)
+
+    R_s.sort()
+    L_s.sort()
+
+    output = [0] * n
+
+    for s, d, idx in ants:
+        if d == 'R':
+            e_i = (s + t) % m
+            if s < e_i:
+                # interval (s, e_i)
+                left = bisect.bisect_right(L_s, s)
+                right = bisect.bisect_left(L_s, e_i)
+                count = right - left
+            else:
+                # interval (s, m) and (0, e_i)
+                left_part = bisect.bisect_right(L_s, s)
+                part1 = len(L_s) - left_part
+                part2 = bisect.bisect_left(L_s, e_i)
+                count = part1 + part2
+            new_index = (idx + count) % n
         else:
-            # interval (s_start, m) and (0, s)
-            part1 = len(R_s) - bisect.bisect_right(R_s, s_start)
-            part2 = bisect.bisect_left(R_s, s)
-            count = part1 + part2
-        new_index = (idx - count) % n
-    virtual = (s + (t if d == 'R' else -t)) % m
-    output[new_index] = virtual + 1  # convert back to 1-based
+            s_start = (s - t) % m
+            if s_start < s:
+                # interval (s_start, s)
+                left = bisect.bisect_right(R_s, s_start)
+                right = bisect.bisect_left(R_s, s)
+                count = right - left
+            else:
+                # interval (s_start, m) and (0, s)
+                part1 = len(R_s) - bisect.bisect_right(R_s, s_start)
+                part2 = bisect.bisect_left(R_s, s)
+                count = part1 + part2
+            new_index = (idx - count) % n
+        virtual = (s + (t if d == 'R' else -t)) % m
+        output[new_index] = virtual + 1  # convert back to 1-based
 
-print(' '.join(map(str, output)))
+    print(' '.join(map(str, output)), file=output_stream)
 
-This should work.
 
-Testing sample2:
 
-Sample2's input:
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 8 2
+1 R
+5 L
+6 L
+8 R
+""",
+            "output": \
+"""\
+3 3 4 2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 1.
+
+```python
+import bisect
+
+
+def main(input_stream, output_stream):
+    n, m, t = map(int, input_stream.readline().rstrip("\n").split())
+
+    ants = []
+    R_s = []
+    L_s = []
+    for idx in range(n):
+        s, d = input_stream.readline().rstrip("\n").split()
+        s = int(s) - 1  # convert to 0-based
+        ants.append( (s, d, idx) )
+        if d == 'R':
+            R_s.append(s)
+        else:
+            L_s.append(s)
+
+    R_s.sort()
+    L_s.sort()
+
+    output = [0] * n
+
+    for s, d, idx in ants:
+        if d == 'R':
+            e_i = (s + t) % m
+            if s < e_i:
+                # interval (s, e_i)
+                left = bisect.bisect_right(L_s, s)
+                right = bisect.bisect_left(L_s, e_i)
+                count = right - left
+            else:
+                # interval (s, m) and (0, e_i)
+                left_part = bisect.bisect_right(L_s, s)
+                part1 = len(L_s) - left_part
+                part2 = bisect.bisect_left(L_s, e_i)
+                count = part1 + part2
+            new_index = (idx + count) % n
+        else:
+            s_start = (s - t) % m
+            if s_start < s:
+                # interval (s_start, s)
+                left = bisect.bisect_right(R_s, s_start)
+                right = bisect.bisect_left(R_s, s)
+                count = right - left
+            else:
+                # interval (s_start, m) and (0, s)
+                part1 = len(R_s) - bisect.bisect_right(R_s, s_start)
+                part2 = bisect.bisect_left(R_s, s)
+                count = part1 + part2
+            new_index = (idx - count) % n
+        virtual = (s + (t if d == 'R' else -t)) % m
+        output[new_index] = virtual + 1  # convert back to 1-based
+
+    print(' '.join(map(str, output)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4 8 6
+6 R
+5 L
+1 R
+8 L
+""",
+            "output": \
+"""\
+7 4 2 7
+""",
+        }, 
+    ]
 
-6 R → s=5 (0-based)
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-5 L → s=4 (0-based)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-1 R → s=0 (0-based)
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-8 L → s=7 (0-based)
+    print('Tests passed 😎')
 
-R_s = [5,0] → sorted R_s is [0,5]
 
-L_s = [4,7] → sorted L_s is [4,7]
+if __name__ == '__main__':
+    test()
 
-Processing each ant:
 
-Ant0 (s=5, R):
+```
 
-e_i = (5 +6) mod8=11 mod8=3. Since 5 <3 is false (5>3), interval is (5,8) and (0,3).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-In L_s [4,7], part1 is L_s elements >5: 7. part2 is elements <3: none.
-
-count = (2 - bisect_right( [4,7],5 )) + bisect_left([4,7],3).
-
-bisect_right([4,7],5) is 1 (4<5<7). So part1=2-1=1.
-
-bisect_left([4,7],3) is 0.
-
-count=1+0=1.
-
-new_index=0+1=1.
-
-virtual=5+6=11 mod8=3 → 3+1=4.
-
-output[1] =4.
-
-Ant1 (s=4, L):
-
-s_start =4-6= -2 mod8=6.
-
-s_start=6, s=4. s_start >s.
-
-So count is R_s elements >6 and <4.
-
-R_s is [0,5].
-
-Elements >6: none.
-
-Elements <4: 0 and5? 0 is <4,5 is not.
-
-bisect_left(R_s,4) → 2 (since 0 and5 are in R_s, 4 is between them. So bisect_left returns 2.
-
-part1= len(R_s) - bisect_right(R_s,6) → 2 - bisect_right([0,5],6) → 2-2=0.
-
-part2= bisect_left(R_s,4) → 1 (because 4 is after 0 and before 5). Wait, R_s is [0,5]. 0,5. 4 is between 0 and5. So bisect_left returns 1.
-
-So count=0+1=1.
-
-new_index =1 -1=0.
-
-virtual=4-6= -2 mod8=6 →6+1=7.
-
-output[0] =7.
-
-Ant2 (s=0, R):
-
-e_i =0+6=6 mod8=6.
-
-s=0 <6: yes.
-
-interval (0,6). L_s [4,7]. 4 and7. In (0,6):4.
-
-bisect_right(L_s,0) →0.
-
-bisect_left(L_s,6) →1.
-
-count=1-0=1.
-
-new_index=2+1=3.
-
-virtual=0+6=6 mod8=6 →6+1=7.
-
-output[3] =7.
-
-Ant3 (s=7, L):
-
-s_start=7-6=1 mod8=1.
-
-s_start=1 <7.
-
-interval (1,7).
-
-R_s [0,5].
-
-bisect_right(R_s,1) →1 (since 0 <1 <5 → returns 1).
-
-bisect_left(R_s,7) →2.
-
-count=2-1=1.
-
-new_index=3-1=2.
-
-virtual=7-6=1 mod8=1 →1+1=2.
-
-output[2]=2.
-
-So output array is [7,4,2,7], which matches sample2.
-
-Yes.
-
-Another test case:
-
-Sample1:
-
-Input:
-
-2 4 8
-
-1 R → s=0.
-
-3 L → s=2.
-
-R_s = [0], L_s=[2].
-
-Ant0: R.
-
-e_i =0+8=8 mod4=0.
-
-s=0 <0? no. So s=0 >=e_i=0.
-
-So part1= len(L_s) - bisect_right(L_s,0) →1- bisect_right([2],0) →1-0=1.
-
-part2= bisect_left([2],0) →0.
-
-count=1+0=1.
-
-new_index=0+1=1 mod2=1.
-
-virtual=0+8=8 mod4=0 →0+1=1.
-
-output[1]=1.
-
-Ant1: L.
-
-s=2-8= -6 mod4= 2.
-
-s_start=2-8 mod4 → (2-8) mod4= (-6) mod4= 2.
-
-s_start=2, s=2. s_start <s? no. s_start ==s. So s_start <s is false.
-
-So count is R_s elements >2 mod4 → R_s is [0]. None.
-
-part1= len(R_s) - bisect_right(R_s,2) →1 -1=0.
-
-part2= bisect_left(R_s,2) →1.
-
-count=0+1=1.
-
-new_index=1-1=0.
-
-virtual=2-8= -6 mod4= 2 →2+1=3.
-
-output[0]=3.
-
-So output array is [3,1]. But the sample output is1 3.
-
-Wait, but the ants are output in order of new indices 0 and 1.
-
-Ant0's new index is1: output[1] is1.
-
-Ant1's new index is0: output[0] is3.
-
-So output array is [3,1], but the sample expects 1 3.
-
-Hmm, this is a problem.
-
-Wait, sample1's output is 1 3. But according to the code, the output array is [3,1].
-
-What's wrong here.
+```
 
 Wait, let's re-examine sample1.
 

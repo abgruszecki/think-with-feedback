@@ -254,19 +254,139 @@ So the code would correctly find this.
 
 So the code would work.
 
-Now, let's test the sample inputs.
+Testing against sample input 1.
 
-First sample:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    t = list(map(int, input_stream.readline().rstrip("\n").split()))
+    t_sorted = sorted(t)
+    unique = []
+    prev = None
+    for num in t_sorted:
+        if num != prev:
+            unique.append(num)
+            prev = num
+    if len(unique) < 3:
+        print("NO", file=output_stream)
+    else:
+        for i in range(len(unique) - 2):
+            if unique[i+2] - unique[i] <= 2:
+                print("YES", file=output_stream)
+                return
+        print("NO", file=output_stream)
 
-4
 
-18 55 16 17 → sorted is [16,17,18,55]. unique is same. i=0: 18-16=2 → yes. So output YES.
 
-Second sample:
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 6
+40 41 43 44 44 44
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-40 41 43 44 44 44 → sorted and deduped is [40,41,43,44]. i=0: 43-40=3>2. i=1:44-41=3>2. So output NO.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    t = list(map(int, input_stream.readline().rstrip("\n").split()))
+    t_sorted = sorted(t)
+    unique = []
+    prev = None
+    for num in t_sorted:
+        if num != prev:
+            unique.append(num)
+            prev = num
+    if len(unique) < 3:
+        print("NO", file=output_stream)
+    else:
+        for i in range(len(unique) - 2):
+            if unique[i+2] - unique[i] <= 2:
+                print("YES", file=output_stream)
+                return
+        print("NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+5 972 3 4 1 4 970 971
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

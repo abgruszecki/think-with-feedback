@@ -604,121 +604,229 @@ Fourth line: n integers separated by spaces.
 
 So code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-m = int(sys.stdin.readline())
 
-q_list = list(map(int, sys.stdin.readline().split()))
+def main(input_stream, output_stream):
+    m = int(input_stream.readline())
 
-n = int(sys.stdin.readline())
+    q_list = list(map(int, input_stream.readline().split()))
 
-a = list(map(int, sys.stdin.readline().split()))
+    n = int(input_stream.readline())
 
-a_sorted = sorted(a, reverse=True)
+    a = list(map(int, input_stream.readline().split()))
 
-q_min = min(q_list)
+    a_sorted = sorted(a, reverse=True)
 
-chunk_size = q_min + 2
+    q_min = min(q_list)
 
-prefix = [0] * (n + 1)
+    chunk_size = q_min + 2
 
-for i in range(n):
+    prefix = [0] * (n + 1)
 
-    prefix[i+1] = prefix[i] + a_sorted[i]
+    for i in range(n):
 
-k = n // chunk_size
+        prefix[i+1] = prefix[i] + a_sorted[i]
 
-sum_full = 0
+    k = n // chunk_size
 
-for i in range(k):
+    sum_full = 0
 
-    start = i * chunk_size
+    for i in range(k):
 
-    end = start + q_min
+        start = i * chunk_size
 
-    sum_full += prefix[end] - prefix[start]
+        end = start + q_min
 
-start_remaining = k * chunk_size
+        sum_full += prefix[end] - prefix[start]
 
-r = n - start_remaining
+    start_remaining = k * chunk_size
 
-sum_remaining = 0
+    r = n - start_remaining
 
-if r > 0:
+    sum_remaining = 0
 
-    if r >= q_min:
+    if r > 0:
 
-        sum_remaining += prefix[start_remaining + q_min] - prefix[start_remaining]
+        if r >= q_min:
 
-        free = min(2, r - q_min)
+            sum_remaining += prefix[start_remaining + q_min] - prefix[start_remaining]
 
-        remaining_start = start_remaining + q_min + free
+            free = min(2, r - q_min)
 
-        sum_remaining += prefix[start_remaining + r] - prefix[remaining_start]
+            remaining_start = start_remaining + q_min + free
 
-    else:
+            sum_remaining += prefix[start_remaining + r] - prefix[remaining_start]
 
-        sum_remaining += prefix[start_remaining + r] - prefix[start_remaining]
+        else:
 
-total = sum_full + sum_remaining
+            sum_remaining += prefix[start_remaining + r] - prefix[start_remaining]
 
-print(total)
+    total = sum_full + sum_remaining
 
-But wait, in the remaining code, when r >= q_min:
+    print(total, file=output_stream)
 
-sum_remaining is sum of the first q_min items (start_remaining to start_remaining + q_min -1), which is prefix[start_remaining + q_min] - prefix[start_remaining].
 
-Then, free is the number of free items, which is min(2, r - q_min). Then, the remaining items after start_remaining + q_min + free are summed. So from start_remaining + q_min + free to start_remaining + r -1 (since r is the total remaining items, which are from start_remaining to start_remaining + r -1).
 
-Yes.
+def test():
+    import io
 
-Testing this code with the samples.
-
-Sample 1:
-
-Input:
-
-1
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2
-
-4
-
-50 50 100 100
-
-a_sorted becomes [100,100,50,50]
-
-prefix is [0, 100, 200, 250, 300]
-
-q_min is 2, chunk_size=4.
-
-k=4//4=1. sum_full = prefix[2] - prefix[0] = 200.
-
-start_remaining=4. r=0. sum_remaining=0. Total 200.
-
-Sample 2:
-
-Input:
-
-2
-
 2 3
-
 5
-
 50 50 50 50 50
+""",
+            "output": \
+"""\
+150
+""",
+        }, 
+    ]
 
-a_sorted [50,50,50,50,50]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-prefix [0,50,100,150,200,250]
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-q_min=2, chunk_size=4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-k=5//4=1. sum_full is prefix[2] - prefix[0] =100.
+    print('Tests passed 😎')
 
-start_remaining=4. r=1.
 
-r < q_min (2). sum_remaining = prefix[4+1] - prefix[4] = 50. Total 150.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import sys
+
+
+def main(input_stream, output_stream):
+    m = int(input_stream.readline())
+
+    q_list = list(map(int, input_stream.readline().split()))
+
+    n = int(input_stream.readline())
+
+    a = list(map(int, input_stream.readline().split()))
+
+    a_sorted = sorted(a, reverse=True)
+
+    q_min = min(q_list)
+
+    chunk_size = q_min + 2
+
+    prefix = [0] * (n + 1)
+
+    for i in range(n):
+
+        prefix[i+1] = prefix[i] + a_sorted[i]
+
+    k = n // chunk_size
+
+    sum_full = 0
+
+    for i in range(k):
+
+        start = i * chunk_size
+
+        end = start + q_min
+
+        sum_full += prefix[end] - prefix[start]
+
+    start_remaining = k * chunk_size
+
+    r = n - start_remaining
+
+    sum_remaining = 0
+
+    if r > 0:
+
+        if r >= q_min:
+
+            sum_remaining += prefix[start_remaining + q_min] - prefix[start_remaining]
+
+            free = min(2, r - q_min)
+
+            remaining_start = start_remaining + q_min + free
+
+            sum_remaining += prefix[start_remaining + r] - prefix[remaining_start]
+
+        else:
+
+            sum_remaining += prefix[start_remaining + r] - prefix[start_remaining]
+
+    total = sum_full + sum_remaining
+
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+1
+7
+1 1 1 1 1 1 1
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

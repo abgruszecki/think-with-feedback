@@ -703,110 +703,205 @@ Then for each a_i, compute the possible gains.
 
 So code:
 
-n = int(input())
-a = list(map(int, input().split()))
-sum_total = sum(a)
-m = min(a)
-cnt_m = a.count(m)
+Testing against sample input 1.
 
-# Compute s_m
-if cnt_m == len(a):
-    s_m = m
-else:
-    # Find the minimal element that's not m.
-    s_m = float('inf')
-    for num in a:
-        if num != m and num < s_m:
-            s_m = num
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    sum_total = sum(a)
+    m = min(a)
+    cnt_m = a.count(m)
 
-max_gain = 0
-
-def get_divisors(n):
-    if n == 1:
-        return []
-    divisors = set()
-    for i in range(2, int(n**0.5) + 1):
-        if n % i == 0:
-            divisors.add(i)
-            other = n // i
-            if other > 1:
-                divisors.add(other)
-    divisors.add(n)  # n can be a divisor of itself (x=n)
-    return sorted(divisors)
-
-for i in range(n):
-    ai = a[i]
-    # Determine min_j for this ai
-    if ai == m:
-        if cnt_m >= 2:
-            current_min_j = m
-        else:
-            current_min_j = s_m
+    # Compute s_m
+    if cnt_m == len(a):
+        s_m = m
     else:
-        current_min_j = m
-    
-    divisors = get_divisors(ai)
-    for x in divisors:
-        new_ai_part = ai // x
-        gain = (x - 1) * (new_ai_part - current_min_j)
-        if gain > max_gain:
-            max_gain = gain
+        # Find the minimal element that's not m.
+        s_m = float('inf')
+        for num in a:
+            if num != m and num < s_m:
+                s_m = num
 
-print(sum_total - max_gain)
+    max_gain = 0
 
-Yes, this should work.
+    def get_divisors(n):
+        if n == 1:
+            return []
+        divisors = set()
+        for i in range(2, int(n**0.5) + 1):
+            if n % i == 0:
+                divisors.add(i)
+                other = n // i
+                if other > 1:
+                    divisors.add(other)
+        divisors.add(n)  # n can be a divisor of itself (x=n)
+        return sorted(divisors)
 
-Let's test the code with the examples.
+    for i in range(n):
+        ai = a[i]
+        # Determine min_j for this ai
+        if ai == m:
+            if cnt_m >= 2:
+                current_min_j = m
+            else:
+                current_min_j = s_m
+        else:
+            current_min_j = m
+        
+        divisors = get_divisors(ai)
+        for x in divisors:
+            new_ai_part = ai // x
+            gain = (x - 1) * (new_ai_part - current_min_j)
+            if gain > max_gain:
+                max_gain = gain
 
-First example:
+    print(sum_total - max_gain, file=output_stream)
 
-Input 5 1 2 3 4 5.
 
-m=1, cnt_m=1. s_m is 2.
 
-For ai=1: min_j is s_m=2. divisors is empty. So no gain.
+def test():
+    import io
 
-ai=2: divisors are 2. current_min_j=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+4 2 4 4
+""",
+            "output": \
+"""\
+14
+""",
+        }, 
+    ]
 
-gain: (2-1)*(1-1)=0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-ai=3: divisors are 3. gain (3-1)*(1-1)=0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-ai=4: divisors are 2,4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-x=2: (2-1)*(2-1) =1*1=1. → max_gain becomes 1.
+    print('Tests passed 😎')
 
-x=4: (4-1)*(1-1)=0.
 
-ai=5: divisors 5. gain (5-1)*(1-1)=0.
+if __name__ == '__main__':
+    test()
 
-So max_gain is 1. sum 15-1=14. Correct.
 
-Second example:
+```
 
-4 4 2 4 4.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-sum is 14.
+```
 
-m=2, cnt_m=1. s_m=4.
+Testing against sample input 2.
 
-For ai=4: current_min_j=2.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    sum_total = sum(a)
+    m = min(a)
+    cnt_m = a.count(m)
 
-divisors are 2,4.
+    # Compute s_m
+    if cnt_m == len(a):
+        s_m = m
+    else:
+        # Find the minimal element that's not m.
+        s_m = float('inf')
+        for num in a:
+            if num != m and num < s_m:
+                s_m = num
 
-x=2: (2-1)*(2-2)=0.
+    max_gain = 0
 
-x=4: (4-1)*(1-2)=3*(-1)=-3.
+    def get_divisors(n):
+        if n == 1:
+            return []
+        divisors = set()
+        for i in range(2, int(n**0.5) + 1):
+            if n % i == 0:
+                divisors.add(i)
+                other = n // i
+                if other > 1:
+                    divisors.add(other)
+        divisors.add(n)  # n can be a divisor of itself (x=n)
+        return sorted(divisors)
 
-For ai=2: current_min_j is s_m=4 (since cnt_m=1).
+    for i in range(n):
+        ai = a[i]
+        # Determine min_j for this ai
+        if ai == m:
+            if cnt_m >= 2:
+                current_min_j = m
+            else:
+                current_min_j = s_m
+        else:
+            current_min_j = m
+        
+        divisors = get_divisors(ai)
+        for x in divisors:
+            new_ai_part = ai // x
+            gain = (x - 1) * (new_ai_part - current_min_j)
+            if gain > max_gain:
+                max_gain = gain
 
-divisors are 2.
+    print(sum_total - max_gain, file=output_stream)
 
-gain (2-1)*(1-4) =1*(-3)=-3.
 
-Other elements are 4, same as first case.
 
-max_gain is 0. sum remains 14. Correct.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+2 4 2 3 7
+""",
+            "output": \
+"""\
+18
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

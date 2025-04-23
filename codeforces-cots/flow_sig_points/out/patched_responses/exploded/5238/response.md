@@ -33,13 +33,69 @@ But wait, what if the two points are the same? But the problem states that they 
 
 So the code is simple.
 
-Testing the examples:
+Testing against sample inputs 1, 2.
 
-First example:
+```python
+def main(input_stream, output_stream):
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
+    print("YES" if a[0] == b[0] or a[1] == b[1] or a[2] == b[2] else "NO", file=output_stream)
 
-a = [0,0,0], b = [0,1,0]. x and z are same. So YES.
 
-Second example: [1,1,0], [0,1,0]. y and z same. So YES.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 1 0
+0 1 0
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+        {
+            "input": \
+"""\
+0 0 0
+1 1 1
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: [0,0,0], [1,1,1]. All differ. Output NO.
 

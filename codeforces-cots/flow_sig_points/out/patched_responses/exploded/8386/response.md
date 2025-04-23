@@ -349,17 +349,81 @@ Yes.
 
 This approach should handle all cases correctly.
 
-Testing sample 2:
+Testing against sample input 2.
 
-diffs are [1,0]. K=1.
+```python
+import heapq
 
-In the else clause:
 
-Heap is [-1, 0]. heapified.
+def main(input_stream, output_stream):
+    n, k1, k2 = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-First iteration: pop -1 → current is 1. subtract 1 → 0. push back. Now heap is [0, 0]. Sum is 0^2 +0^2=0.
+    diffs = [abs(a[i] - b[i]) for i in range(n)]
+    total_reductions = sum(diffs)
+    K = k1 + k2
 
-Which is correct.
+    if K >= total_reductions:
+        remainder = (K - total_reductions) % 2
+        print(remainder, file=output_stream)
+    else:
+        heap = [-d for d in diffs]
+        heapq.heapify(heap)
+        
+        for _ in range(K):
+            current = -heapq.heappop(heap)
+            current -= 1
+            heapq.heappush(heap, -current)
+        
+        min_error = sum((-x)**2 for x in heap)
+        print(min_error, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 5 7
+3 4
+14 4
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

@@ -315,37 +315,64 @@ Which is correct.
 
 So this code works for all cases.
 
-Testing with the first sample:
+Testing against sample input 1.
 
-Input:
+```python
+def main(input_stream, output_stream):
+    w, l = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    window_sum = sum(a[:l])
+    min_sum = window_sum
+    for i in range(l, len(a)):
+        window_sum += a[i] - a[i - l]
+        if window_sum < min_sum:
+            min_sum = window_sum
+    print(min_sum, file=output_stream)
 
-10 5
 
-0 0 1 0 2 0 0 1 0
 
-len(a) is 9. l=5.
+def test():
+    import io
 
-sum_ is a[0] + a[1] + a[2] + a[3] + a[4] = 0+0+1+0+2 =3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 3
+1 1 1 1 2 1 1 1 1
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-Then, for i=5 (a[5] is 0):
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum_ += 0 - a[0] (0-0=0) → sum remains 3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-min_sum is still 3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Next i=6 (a[6] is 0):
+    print('Tests passed 😎')
 
-sum_ +=0 - a[1] (0-0=0) → sum 3.
 
-Same for i=7 (a[7] is 1):
+if __name__ == '__main__':
+    test()
 
-sum_ +=1 - a[2] (1-1=0) → sum 3.
 
-i=8 (a[8] is 0):
+```
 
-sum_ +=0 - a[3] (0-0=0) → sum 3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So all windows sum to 3. min_sum is 3. Output is 3.
+```
 
 Second sample:
 

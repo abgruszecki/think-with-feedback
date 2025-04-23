@@ -729,137 +729,296 @@ print(total)
 
 This should work.
 
-Testing the first sample:
-
-n=5
-
-parents = [1,1,3,3]
-
-children:
-
-children[1] = [2,3]
-
-children[3] = [4,5]
-
-subtree_size[1] =5, [2]=1, [3]=3, [4]=1, [5]=1.
-
-For node 1: children_sizes = [1,3], sum_children=4. target=2.
-
-dp starts as [True, False, False].
-
-Processing s=1:
-
-for j from 2 down to 1:
-
-j=1: j-1=0. dp[0] is True. So set dp[1] = True. max_reachable=1.
-
-Then processing s=3:
-
-s=3 is larger than target=2. No change.
-
-max_reachable=1.
-
-Contribution 1*(4-1)=3.
-
-For node3: children_sizes = [1,1], sum_children=2. target=1.
-
-Processing s=1:
-
-for j in 1 downto 1:
-
-j=1: dp[0] is True. set dp[1] = True. max_reachable=1.
-
-Contribution 1*1=1.
-
-Total is 3+1=4. Correct.
-
-Second sample:
-
-n=2, parents=[1]
-
-children[1] = [2]
-
-subtree_size[1] =2, subtree_size[2]=1.
-
-node1's children_sizes = [1], sum_children=1.
-
-target=0.
-
-processing s=1:
-
-j can be 0 downto 1-1=0.
-
-s=1 is larger than target=0. So no processing.
-
-max_reachable remains 0.
-
-contribution 0*1=0.
-
-node2 has no children. total is 0.
-
-Third sample:
-
-n=6
-
-parents = [1,2,2,1,5]
-
-children:
-
-node1's children are 2,5.
-
-node2's children are 3,4.
-
-node5's children are 6.
-
-subtree sizes:
-
-node1: 6.
-
-node2:3.
-
-node3:1.
-
-node4:1.
-
-node5:2.
-
-node6:1.
-
-For node1's children_sizes [3,2], sum_children=5. target=2.
-
-Processing s=3:
-
-j=2 downto3-1=2: j=2-3 is -1, so no.
-
-s=3 is larger than target=2.
-
-processing s=2:
-
-j=2 downto2:
-
-j=2: j-2=0. set dp[2] = True. max_reachable=2.
-
-Contribution 2*(5-2)=6.
-
-node2's children_sizes [1,1], sum_children=2. target=1.
-
-processing s=1:
-
-j=1 downto1.
-
-set dp[1] = True. max_reachable=1.
-
-contribution 1*1=1.
-
-node5's children_sizes [1]. sum_children=1. target=0.
-
-processing s=1. no j possible.
-
-contribution 0.
-
-total is 6+1=7.
-
-Correct.
+Testing against sample input 1.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    if n == 1:
+        print(0, file=output_stream)
+        return
+    parents = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    children = [[] for _ in range(n + 1)]
+    for i in range(2, n + 1):
+        p = parents[i-2]
+        children[p].append(i)
+
+    subtree_size = [1] * (n + 1)
+    stack = [(1, False)]
+    post_order = []
+
+    while stack:
+        node, visited = stack.pop()
+        if visited:
+            for child in children[node]:
+                subtree_size[node] += subtree_size[child]
+            post_order.append(node)
+        else:
+            stack.append((node, True))
+            for child in reversed(children[node]):
+                stack.append((child, False))
+
+    total = 0
+
+    for node in range(1, n + 1):
+        children_sizes = [subtree_size[child] for child in children[node]]
+        sum_children = sum(children_sizes)
+        if sum_children == 0:
+            continue
+        target = sum_children // 2
+        dp = [False] * (target + 1)
+        dp[0] = True
+        max_reachable = 0
+        for s in children_sizes:
+            for j in range(target, s - 1, -1):
+                if dp[j - s] and not dp[j]:
+                    dp[j] = True
+                    if j > max_reachable:
+                        max_reachable = j
+        contribution = max_reachable * (sum_children - max_reachable)
+        total += contribution
+
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    if n == 1:
+        print(0, file=output_stream)
+        return
+    parents = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    children = [[] for _ in range(n + 1)]
+    for i in range(2, n + 1):
+        p = parents[i-2]
+        children[p].append(i)
+
+    subtree_size = [1] * (n + 1)
+    stack = [(1, False)]
+    post_order = []
+
+    while stack:
+        node, visited = stack.pop()
+        if visited:
+            for child in children[node]:
+                subtree_size[node] += subtree_size[child]
+            post_order.append(node)
+        else:
+            stack.append((node, True))
+            for child in reversed(children[node]):
+                stack.append((child, False))
+
+    total = 0
+
+    for node in range(1, n + 1):
+        children_sizes = [subtree_size[child] for child in children[node]]
+        sum_children = sum(children_sizes)
+        if sum_children == 0:
+            continue
+        target = sum_children // 2
+        dp = [False] * (target + 1)
+        dp[0] = True
+        max_reachable = 0
+        for s in children_sizes:
+            for j in range(target, s - 1, -1):
+                if dp[j - s] and not dp[j]:
+                    dp[j] = True
+                    if j > max_reachable:
+                        max_reachable = j
+        contribution = max_reachable * (sum_children - max_reachable)
+        total += contribution
+
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+1 2 2 1 5
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    if n == 1:
+        print(0, file=output_stream)
+        return
+    parents = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    children = [[] for _ in range(n + 1)]
+    for i in range(2, n + 1):
+        p = parents[i-2]
+        children[p].append(i)
+
+    subtree_size = [1] * (n + 1)
+    stack = [(1, False)]
+    post_order = []
+
+    while stack:
+        node, visited = stack.pop()
+        if visited:
+            for child in children[node]:
+                subtree_size[node] += subtree_size[child]
+            post_order.append(node)
+        else:
+            stack.append((node, True))
+            for child in reversed(children[node]):
+                stack.append((child, False))
+
+    total = 0
+
+    for node in range(1, n + 1):
+        children_sizes = [subtree_size[child] for child in children[node]]
+        sum_children = sum(children_sizes)
+        if sum_children == 0:
+            continue
+        target = sum_children // 2
+        dp = [False] * (target + 1)
+        dp[0] = True
+        max_reachable = 0
+        for s in children_sizes:
+            for j in range(target, s - 1, -1):
+                if dp[j - s] and not dp[j]:
+                    dp[j] = True
+                    if j > max_reachable:
+                        max_reachable = j
+        contribution = max_reachable * (sum_children - max_reachable)
+        total += contribution
+
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 1 1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, the code should work.
 </think>

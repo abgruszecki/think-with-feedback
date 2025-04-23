@@ -1192,55 +1192,105 @@ print(count)
 
 This should handle all cases correctly.
 
-Now, let's test this code against the samples.
+Testing against sample inputs 1, 2.
 
-Sample input 1: output 3.
+```python
+def main(input_stream, output_stream):
+    h, w = map(int, input_stream.readline().rstrip("\n").split())
+    grid = [input_stream.readline().rstrip("\n").strip() for _ in range(h)]
+    current_i, current_j = 0, 0
+    count = 1 if grid[0][0] == '*' else 0
 
-Sample input 2:
+    while (current_i != h - 1) or (current_j != w - 1):
+        east_valid = current_j + 1 < w
+        south_valid = current_i + 1 < h
+        east_berry = grid[current_i][current_j + 1] == '*' if east_valid else False
+        south_berry = grid[current_i + 1][current_j] == '*' if south_valid else False
 
+        valid = []
+        if east_valid:
+            valid.append(('east', east_berry))
+        if south_valid:
+            valid.append(('south', south_berry))
+
+        candidates = []
+        for direction, berry in valid:
+            key = (-berry, direction != 'east')
+            candidates.append((key, direction))
+        candidates.sort()
+        chosen = candidates[0][1]
+
+        if chosen == 'east':
+            current_j += 1
+        else:
+            current_i += 1
+
+        if grid[current_i][current_j] == '*':
+            count += 1
+
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4 4
-
 .*..
-
 *...
-
 ...*
-
 ..*.
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+        {
+            "input": \
+"""\
+3 4
+..**
+*...
+....
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-Output is 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Simulation:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Start at (0,0) '.', count 0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Possible directions: east (0,1) '*' and south (1,0) '*'.
+    print('Tests passed 😎')
 
-Both have berries. So choose east.
 
-current_j=1 → '*', count 1.
+if __name__ == '__main__':
+    test()
 
-At (0,1), possible directions: east (0,2) '.', south (1,1) '.'.
 
-Both are '.', choose east.
+```
 
-current_j=2 → '.', count remains 1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Possible directions: east (0,3) '.', south (1,2) '.'.
+```
 
-Choose east. j=3 → '.', count remains 1.
-
-At (0,3), can only move south.
-
-Move to (1,3) '.'.
-
-Then (2,3) ' * ', count becomes 2.
-
-Then (3,3) '.', so count remains 2.
-
-So the code returns 2. Which matches the sample.
-
-Thus, the code is correct.
 </think>
 
 ```python

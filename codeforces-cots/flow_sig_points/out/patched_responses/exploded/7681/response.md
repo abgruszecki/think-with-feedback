@@ -563,24 +563,87 @@ Then, for x in 0..n-1, model[x][y] gives the character.
 
 Thus, the code should work.
 
-Testing the first sample input:
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    model = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
+    size = n ** k
 
-2 3
+    # Precompute divisors for each step s (1 to k)
+    divisors = [n ** (k - s) for s in range(1, k + 1)]
 
-.*
-..
+    result = []
+    for i in range(size):
+        row = []
+        for j in range(size):
+            for divisor in divisors:
+                x = (i // divisor) % n
+                y = (j // divisor) % n
+                if model[x][y] == '*':
+                    row.append('*')
+                    break
+            else:
+                row.append('.')
+        result.append(''.join(row))
 
-model is ['.*', '..']
+    print('\n'.join(result), file=output_stream)
 
-divisors for k=3 are [4,2,1].
 
-The final grid is 8x8.
 
-Each cell (i,j) is processed as described.
+def test():
+    import io
 
-The output should match the sample.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2
+.*.
+***
+.*.
+""",
+            "output": \
+"""\
+.*.***.*.
+*********
+.*.***.*.
+*********
+*********
+*********
+.*.***.*.
+*********
+.*.***.*.
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample input:
 

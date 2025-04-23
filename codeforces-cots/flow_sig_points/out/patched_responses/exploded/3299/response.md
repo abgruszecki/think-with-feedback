@@ -433,64 +433,73 @@ But the code would handle it.
 
 So the code would be:
 
-n, k = map(int, input().split())
-d = list(map(int, input().split()))
-counts = [0] * k
-for num in d:
-    rem = num % k
-    counts[rem] +=1
+Testing against sample input 2.
 
-total = (counts[0] //2) *2
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    d = list(map(int, input_stream.readline().rstrip("\n").split()))
+    counts = [0] * k
+    for num in d:
+        rem = num % k
+        counts[rem] +=1
 
-for r in range(1, (k//2)+1):
-    comp = k - r
-    if r == comp:
-        # same remainder
-        total += (counts[r] //2)*2
-    else:
-        total += min(counts[r], counts[comp]) *2
+    total = (counts[0] //2) *2
 
-print(total)
+    for r in range(1, (k//2)+1):
+        comp = k - r
+        if r == comp:
+            # same remainder
+            total += (counts[r] //2)*2
+        else:
+            total += min(counts[r], counts[comp]) *2
 
-Wait, but when k is even, the code will run for r up to k//2. For example, when k is4, then r runs from1 to2. For r=2, comp is 2. So handled as same.
+    print(total, file=output_stream)
 
-But what if k is1? Then k//2 is0, so the loop runs for r in range(1, 0+1). Which is r=1. But k=1, so r=1 is not possible. Because for k=1, all remainders are 0. So the loop doesn't run, and the code is correct.
 
-Testing sample input 2:
 
-Input:
+def test():
+    import io
 
-8 2
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 3
+1 2 2 3 2 4 5
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-1 2 2 3 2 4 6 10
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-remainder mod2:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-1%2=1
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-2%2=0
+    print('Tests passed 😎')
 
-2→0
 
-3→1
+if __name__ == '__main__':
+    test()
 
-2→0
 
-4→0
+```
 
-6→0
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-10→0.
-
-counts[0] =6, counts[1]=2.
-
-Processing remainder0: 6//2 *2 =6*1*2=6*1=6? Wait, 6//2 is3 pairs, each contributing 2 boxes. 3*2=6.
-
-Then the loop runs for r in 1 to1 (k//2=1).
-
-comp is 2-1=1. So r==comp. counts[1]=2. 2//2=1 → 1*2=2. So total is 6+2=8. Which matches the sample.
-
-So code is correct.
+```
 
 Another sample:
 

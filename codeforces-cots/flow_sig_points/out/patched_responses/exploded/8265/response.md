@@ -871,75 +871,101 @@ Yes.
 
 But for the code:
 
-n = int(input())
+Testing against sample input 1.
 
-p = list(map(int, input().split())) # p[0] is p_2, p[1] is p_3, etc.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-children = [[] for _ in range(n+1)]
+    p = list(map(int, input_stream.readline().rstrip("\n").split())) # p[0] is p_2, p[1] is p_3, etc.
 
-for i in range(2, n+1):
+    children = [[] for _ in range(n+1)]
 
-    parent = p[i-2] # since p is for 2 to n. i starts at 2, so p[i-2] is the correct index.
+    for i in range(2, n+1):
 
-    children[parent].append(i)
+        parent = p[i-2] # since p is for 2 to n. i starts at 2, so p[i-2] is the correct index.
 
-a = list(map(int, input().split())) # a is 0-based. a[0] is a_1, a[1] is a_2, etc.
+        children[parent].append(i)
 
-value = [0]*(n+1)
+    a = list(map(int, input_stream.readline().rstrip("\n").split())) # a is 0-based. a[0] is a_1, a[1] is a_2, etc.
 
-for u in range(n, 0, -1):
+    value = [0]*(n+1)
 
-    if not children[u]: # leaf node
+    for u in range(n, 0, -1):
 
-        value[u] = a[u-1]
+        if not children[u]: # leaf node
 
-    else:
+            value[u] = a[u-1]
 
-        sum_c = 0
+        else:
 
-        max_c = 0
+            sum_c = 0
 
-        for v in children[u]:
+            max_c = 0
 
-            sum_c += value[v]
+            for v in children[u]:
 
-            if value[v] > max_c:
+                sum_c += value[v]
 
-                max_c = value[v]
+                if value[v] > max_c:
 
-        k = len(children[u])
+                    max_c = value[v]
 
-        total = a[u-1] + sum_c
+            k = len(children[u])
 
-        temp = (total + k -1) // k
+            total = a[u-1] + sum_c
 
-        value[u] = max(max_c, temp)
+            temp = (total + k -1) // k
 
-print(value[1])
+            value[u] = max(max_c, temp)
 
-This code should handle all cases.
+    print(value[1], file=output_stream)
 
-Testing sample 1:
 
-n=3.
 
-p = [1,1]
+def test():
+    import io
 
-children[1] has [2,3].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 1
+3 1 3
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-a = [3,1,2].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-u=3: children are empty → value[3] =a[2] =2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-u=2: value=1.
+    print('Tests passed 😎')
 
-u=1: sum_c=1+2=3, max_c=2, k=2.
 
-total=3+3=6 → (6+2-1)/2=7//2=3. max(2,3) →3.
+if __name__ == '__main__':
+    test()
 
-Output is 3.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

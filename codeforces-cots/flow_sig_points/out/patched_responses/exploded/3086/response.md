@@ -180,75 +180,72 @@ So the code is straightforward. Let's code this.
 
 In Python:
 
-n, t = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, t = map(int, input_stream.readline().rstrip("\n").split())
 
-current = 1
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-while current < n:
+    current = 1
 
-    if current == t:
+    while current < n:
 
-        print("YES")
+        if current == t:
 
-        exit()
+            print("YES", file=output_stream)
 
-    current += a[current-1]
+            return
 
-print("YES" if current == t else "NO")
+        current += a[current-1]
 
-Wait, but in Python, 'exit()' is not the best way. Instead, perhaps, once current reaches t, break and print.
+    print("YES" if current == t else "NO", file=output_stream)
 
-But in the code above, when current is in the loop, and equals t, print YES and exit. Then, after the loop, check if current ==t.
 
-Wait, but during the loop, current is checked before updating. Let me see:
 
-Wait, the code is:
+def test():
+    import io
 
-current starts at 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 5
+1 2 1 2 1 1 1
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-Loop condition: current <n.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Inside loop:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-if current ==t: print yes and exit.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-then, current += a[current-1].
+    print('Tests passed 😎')
 
-So, for example, if current is 4 (t=4) in the first iteration, print yes.
 
-But if during the loop, current is 3 and a[3-1] is 1, then next current is 4. Then, in next iteration, the loop condition is 4 <n (say n=8). So loop runs again. Then check if current ==t (4). So print yes.
+if __name__ == '__main__':
+    test()
 
-So the code is correct.
 
-Yes.
+```
 
-So this code should handle all cases correctly.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Testing sample input 1:
-
-n=8, t=4.
-
-a is [1,2,1,2,1,2,1].
-
-current starts at 1.
-
-Loop runs since 1 <8.
-
-Check current (1) ==4? No.
-
-current +=a[0] (1) → becomes 2.
-
-Loop again (2<8). Check 2==4? No.
-
-current +=a[1] (2) →2+2=4.
-
-Check in next loop iteration:
-
-current is 4 <8: loop runs.
-
-Check 4 ==4 → yes. Print YES and exit.
+```
 
 Sample 2:
 

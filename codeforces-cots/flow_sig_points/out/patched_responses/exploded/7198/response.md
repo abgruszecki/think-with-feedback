@@ -228,29 +228,71 @@ Thus, the code correctly handles all cases.
 
 Now, code:
 
-a, b, c = map(int, input().split())
+Testing against sample input 1.
 
-if c == 0:
-    if a == b:
-        print("YES")
-    else:
-        print("NO")
-else:
-    delta = b - a
-    if delta % c != 0:
-        print("NO")
-    else:
-        k = delta // c
-        if k >= 0:
-            print("YES")
+```python
+def main(input_stream, output_stream):
+    a, b, c = map(int, input_stream.readline().rstrip("\n").split())
+
+    if c == 0:
+        if a == b:
+            print("YES", file=output_stream)
         else:
-            print("NO")
+            print("NO", file=output_stream)
+    else:
+        delta = b - a
+        if delta % c != 0:
+            print("NO", file=output_stream)
+        else:
+            k = delta // c
+            if k >= 0:
+                print("YES", file=output_stream)
+            else:
+                print("NO", file=output_stream)
 
-Let's test all the sample cases.
 
-Sample 1: Input 1 7 3.
 
-c is not zero. delta is 7-1=6. 6%3=0. So k=2 >=0. Output YES. Correct.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 10 0
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2: 10 10 0. c is zero. a ==b. Output YES.
 

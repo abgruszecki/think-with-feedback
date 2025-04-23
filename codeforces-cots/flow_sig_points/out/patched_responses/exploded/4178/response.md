@@ -759,201 +759,288 @@ Then, once collected, sort in reverse order.
 
 So the code:
 
+Testing against sample input 1.
+
+```python
 from collections import defaultdict
 
-n, k = map(int, input().split())
 
-# Compute initial exponents.
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-exponents = []
+    # Compute initial exponents.
 
-temp = n
+    exponents = []
 
-bit = 0
+    temp = n
 
-while temp > 0:
+    bit = 0
 
-    if temp % 2 == 1:
+    while temp > 0:
 
-        exponents.append(bit)
+        if temp % 2 == 1:
 
-    temp = temp // 2
+            exponents.append(bit)
 
-    bit +=1
+        temp = temp // 2
 
-m = len(exponents)
+        bit +=1
 
-if k < m:
+    m = len(exponents)
 
-    print("No")
+    if k < m:
 
-    exit()
+        print("No", file=output_stream)
 
-if k == m:
+        return
 
-    # output sorted in reverse order.
+    if k == m:
 
-    exponents_sorted = sorted(exponents, reverse=True)
+        # output sorted in reverse order.
 
-    print("Yes")
+        exponents_sorted = sorted(exponents, reverse=True)
 
-    print(' '.join(map(str, exponents_sorted)))
+        print("Yes", file=output_stream)
 
-    exit()
+        print(' '.join(map(str, exponents_sorted)), file=output_stream)
 
-# Else, proceed with splitting.
+        return
 
-s = k -m
+    # Else, proceed with splitting.
 
-freq = defaultdict(int)
+    s = k -m
 
-for e in exponents:
+    freq = defaultdict(int)
 
-    freq[e] +=1
+    for e in exponents:
 
-current_max = max(exponents) if exponents else 0
+        freq[e] +=1
 
-while s >0:
+    current_max = max(exponents) if exponents else 0
 
-    # Find current_max with count >0.
+    while s >0:
 
-    # Because initially current_max is valid, but after splits, it may not.
+        # Find current_max with count >0.
 
-    while current_max not in freq or freq[current_max] ==0:
+        # Because initially current_max is valid, but after splits, it may not.
 
-        current_max -=1
+        while current_max not in freq or freq[current_max] ==0:
 
-    # Split current_max.
+            current_max -=1
 
-    freq[current_max] -=1
+        # Split current_max.
 
-    if freq[current_max] ==0:
+        freq[current_max] -=1
 
-        del freq[current_max]
+        if freq[current_max] ==0:
 
-    freq[current_max-1] +=2
+            del freq[current_max]
 
-    s -=1
+        freq[current_max-1] +=2
 
-# Now collect all exponents.
+        s -=1
 
-result = []
+    # Now collect all exponents.
 
-for e in sorted(freq.keys(), reverse=True):
+    result = []
 
-    result.extend([e] * freq[e])
+    for e in sorted(freq.keys(), reverse=True):
 
-# Check if the length is k.
+        result.extend([e] * freq[e])
 
-# Because of the splits, it should be.
+    # Check if the length is k.
 
-print("Yes")
+    # Because of the splits, it should be.
 
-print(' '.join(map(str, result)))
+    print("Yes", file=output_stream)
 
-But let's test this code against the samples.
+    print(' '.join(map(str, result)), file=output_stream)
 
-Sample 1:
 
-Input:
 
-23 5
+def test():
+    import io
 
-23 in binary is 10111 → exponents are 0,1,2,4 (wait, no. Wait, let's compute exponents.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+13 2
+""",
+            "output": \
+"""\
+No
+""",
+        }, 
+    ]
 
-Wait, temp starts as 23.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-temp % 2 → 1 → exponents.append(0)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-temp becomes 11.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-temp %2 → 1 → exponents.append(1)
+    print('Tests passed 😎')
 
-temp becomes 5.
 
-temp%2 →1 → exponents.append(2)
+if __name__ == '__main__':
+    test()
 
-temp becomes 2.
 
-temp%2 →0 → no. temp becomes 1.
+```
 
-temp%2 →1 → exponents.append(3).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-temp becomes 0. loop ends.
+```
 
-So exponents are [0,1,2,3]. Wait, no.
+Testing against sample input 2.
 
-Wait, let's re-calculate for n=23.
+```python
+from collections import defaultdict
 
-n is 23. Let's compute:
 
-bit 0: 23 %2=1 → exponents.append(0) → temp=11, bit 1.
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-bit 1: 11%2=1 → exponents.append(1) → temp=5, bit 2.
+    # Compute initial exponents.
 
-bit 2:5%2=1 → exponents.append(2) → temp=2, bit3.
+    exponents = []
 
-bit3: 2%2=0 → temp=1, bit4.
+    temp = n
 
-bit4:1%2=1 → exponents.append(4) → temp=0, loop ends.
+    bit = 0
 
-So exponents are [0,1,2,4].
+    while temp > 0:
 
-So m=4. k=5. s=1.
+        if temp % 2 == 1:
 
-current_max is 4.
+            exponents.append(bit)
 
-split once:
+        temp = temp // 2
 
-freq[4] becomes 0. del. add 3:2.
+        bit +=1
 
-current_max is 3.
+    m = len(exponents)
 
-collect exponents:
+    if k < m:
 
-sorted(freq.keys(), reverse=True) →3,2,1,0.
+        print("No", file=output_stream)
 
-freq[3] is 2, freq[2] is 1, freq[1] is 1, freq[0] is1.
+        return
 
-so result is [3,3,2,1,0], which matches the sample.
+    if k == m:
 
-Sample 3:
+        # output sorted in reverse order.
 
-n=1, k=2.
+        exponents_sorted = sorted(exponents, reverse=True)
 
-exponents are [0]. m=1. s=1.
+        print("Yes", file=output_stream)
 
-split once.
+        print(' '.join(map(str, exponents_sorted)), file=output_stream)
 
-current_max is 0.
+        return
 
-split into -1: 2.
+    # Else, proceed with splitting.
 
-current_max is now -1.
+    s = k -m
 
-result is sorted in reverse order [-1, -1], which is correct.
+    freq = defaultdict(int)
 
-Sample 2:
+    for e in exponents:
 
-n=13 (binary 1101 → exponents 0,2,3). m=3. k=2 <3 → output No.
+        freq[e] +=1
 
-So code seems to work.
+    current_max = max(exponents) if exponents else 0
 
-Now, test for n=3, k=3.
+    while s >0:
 
-n=3 (11) → exponents 0,1. m=2. s=1.
+        # Find current_max with count >0.
 
-split once.
+        # Because initially current_max is valid, but after splits, it may not.
 
-current_max is 1.
+        while current_max not in freq or freq[current_max] ==0:
 
-split into two 0's. freq[0] becomes 3 (initial 0 and 2 from split).
+            current_max -=1
 
-result is [0,0,0], sum 1+1+1=3.
+        # Split current_max.
 
-sorted in reverse → [0,0,0].
+        freq[current_max] -=1
 
-Yes.
+        if freq[current_max] ==0:
+
+            del freq[current_max]
+
+        freq[current_max-1] +=2
+
+        s -=1
+
+    # Now collect all exponents.
+
+    result = []
+
+    for e in sorted(freq.keys(), reverse=True):
+
+        result.extend([e] * freq[e])
+
+    # Check if the length is k.
+
+    # Because of the splits, it should be.
+
+    print("Yes", file=output_stream)
+
+    print(' '.join(map(str, result)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 2
+""",
+            "output": \
+"""\
+Yes
+-1 -1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case: n=4 (100), exponents [2]. k=3.
 

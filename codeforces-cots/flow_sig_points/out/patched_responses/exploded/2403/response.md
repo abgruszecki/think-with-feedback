@@ -319,37 +319,74 @@ Then, the code proceeds.
 
 So the code would be:
 
-n = int(input())
-s = input().strip()
+Testing against sample input 1.
 
-min_str = '9' * n
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-for k in range(n):
-    # compute rotated string
-    rotated = s[-k:] + s[:-k] if k !=0 else s
-    for m in range(10):
-        # compute transformed string
-        transformed = []
-        for c in rotated:
-            new_digit = (int(c) + m) % 10
-            transformed.append(str(new_digit))
-        transformed = ''.join(transformed)
-        if transformed < min_str:
-            min_str = transformed
+    min_str = '9' * n
 
-print(min_str)
+    for k in range(n):
+        # compute rotated string
+        rotated = s[-k:] + s[:-k] if k !=0 else s
+        for m in range(10):
+            # compute transformed string
+            transformed = []
+            for c in rotated:
+                new_digit = (int(c) + m) % 10
+                transformed.append(str(new_digit))
+            transformed = ''.join(transformed)
+            if transformed < min_str:
+                min_str = transformed
 
-Wait, but for k=0, s[-0:] is the entire string (since in Python, s[-0:] is the same as s[0:], which is the entire string). So s[-0:] + s[:-0] is s + s[:0] (since s[:-0] is s[:n-0], but when k=0, s[:-0] is empty). So for k=0, rotated is s + '' → s. So the code is correct.
+    print(min_str, file=output_stream)
 
-Testing this code with the first sample input:
 
-Sample 1:
 
-n=3, s='579'
+def test():
+    import io
 
-k=0: rotated is '579'.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+2014
+""",
+            "output": \
+"""\
+0142
+""",
+        }, 
+    ]
 
-m=5: 5+5=10 →0, 7+5=12 →2,9+5=14 →4 → transformed is '024', which is the sample output. So when this transformed is generated, it will be compared to the initial min_str (999), and set as new min. Then, no other combination will generate a smaller string. So the code works.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

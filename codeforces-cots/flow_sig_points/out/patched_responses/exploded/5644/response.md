@@ -683,135 +683,121 @@ So let's implement this.
 
 In Python, this code would be:
 
-n, l, k = map(int, input().split())
+Testing against sample input 1.
 
-d = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, l, k = map(int, input_stream.readline().rstrip("\n").split())
 
-a = list(map(int, input().split()))
+    d = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-INF = float('inf')
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-dp = [[INF]*(k+1) for _ in range(n)]
+    INF = float('inf')
 
-dp[0][0] =0
+    dp = [[INF]*(k+1) for _ in range(n)]
 
-for i in range(1, n):
+    dp[0][0] =0
 
-    for m in range(i):
+    for i in range(1, n):
 
-        required = i - m -1
+        for m in range(i):
 
-        max_j_prev = k - required
+            required = i - m -1
 
-        if max_j_prev <0:
+            max_j_prev = k - required
 
-            continue
-
-        for j_prev in range(max_j_prev +1):
-
-            if dp[m][j_prev] == INF:
+            if max_j_prev <0:
 
                 continue
 
-            current_j = j_prev + required
+            for j_prev in range(max_j_prev +1):
 
-            candidate = dp[m][j_prev] + (d[i] -d[m])* a[m]
+                if dp[m][j_prev] == INF:
 
-            if candidate < dp[i][current_j]:
+                    continue
 
-                dp[i][current_j] = candidate
+                current_j = j_prev + required
 
-# Now compute the answer.
+                candidate = dp[m][j_prev] + (d[i] -d[m])* a[m]
 
-ans = INF
+                if candidate < dp[i][current_j]:
 
-for i in range(n):
+                    dp[i][current_j] = candidate
 
-    for j in range(k+1):
+    # Now compute the answer.
 
-        # The number of signs removed after i is (n-1 -i)
+    ans = INF
 
-        # So total removed is j + (n-1 -i)
+    for i in range(n):
 
-        if j + (n-1 -i) >k:
+        for j in range(k+1):
 
-            continue
+            # The number of signs removed after i is (n-1 -i)
 
-        if dp[i][j] == INF:
+            # So total removed is j + (n-1 -i)
 
-            continue
+            if j + (n-1 -i) >k:
 
-        current_time = dp[i][j] + (l - d[i]) * a[i]
+                continue
 
-        if current_time < ans:
+            if dp[i][j] == INF:
 
-            ans = current_time
+                continue
 
-print(ans)
+            current_time = dp[i][j] + (l - d[i]) * a[i]
 
-This code should handle the problem.
+            if current_time < ans:
 
-But wait, for the final segment, after the last kept sign i, all signs after i are removed. The number of signs after i is (n-1 -i) (since the signs are numbered from 0 to n-1). So the total removed is j (removed up to i) + (n-1 -i) (removed after i) must be <=k. So the condition is j + (n-1 -i) <=k.
+                ans = current_time
 
-Thus, in the code, the condition is:
+    print(ans, file=output_stream)
 
-if j + (n-1 -i) >k: continue
 
-Yes.
 
-Now, let's test this code with the first example.
+def test():
+    import io
 
-Sample Input 1:
-
-4 10 0
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 10 2
 0 3 4 8
-
 5 8 3 6
+""",
+            "output": \
+"""\
+38
+""",
+        }, 
+    ]
 
-n=4, l=10, k=0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-d = [0,3,4,8]
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-a = [5,8,3,6]
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The DP for i=1 (m=0):
+    print('Tests passed 😎')
 
-required =1-0-1=0. max_j_prev =0-0=0. j_prev can be 0.
 
-dp[0][0] =0.
+if __name__ == '__main__':
+    test()
 
-current_j=0. candidate =0 + (3-0)*5=15. dp[1][0] =15.
 
-i=2:
+```
 
-m=0: required=2-0-1=1. max_j_prev=0-1 =-1 → skip.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-m=1: required=0. max_j_prev=0.
-
-j_prev=0: current_j=0. candidate =15 + (4-3)*8=15+8=23 → dp[2][0] =23.
-
-i=3:
-
-m=0: required=3-0-1=2. max_j_prev=0-2 =-2 → skip.
-
-m=1: required=3-1-1=1. max_j_prev=0-1 =-1 → skip.
-
-m=2: required=3-2-1=0. max_j_prev=0-0=0.
-
-j_prev=0: current_j=0. candidate =23 + (8-4)*3=23+12=35 → dp[3][0] =35.
-
-In the answer phase:
-
-For i=0: j can be 0. j + (3-0) =3. which is >0. skip.
-
-i=1: j=0. j+ (3-1)=2>0. skip.
-
-i=2: j=0. j+ (3-2)=1>0. skip.
-
-i=3: j=0. j+0=0 <=0. So time is 35 + (10-8)*6=35 +12=47.
-
-Which is correct.
+```
 
 Sample Input 2:
 

@@ -311,54 +311,78 @@ But in Python, for large k, recursion may not be efficient. Wait, but the depth 
 
 So code:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n, k, A, B = map(int, input().split())
-positions = sorted(list(map(int, input().split())))
 
-def compute_min(low, high, start, end):
-    if start >= end:
-        return A
-    na = end - start
-    l = high - low + 1
-    burn = B * na * l
-    if l == 1:
-        return burn
-    mid_segment = (low + high) // 2
-    split_idx = bisect.bisect_right(positions, mid_segment, start, end)
-    left = compute_min(low, mid_segment, start, split_idx)
-    right = compute_min(mid_segment + 1, high, split_idx, end)
-    split = left + right
-    return min(burn, split)
+def main(input_stream, output_stream):
+    n, k, A, B = map(int, input_stream.readline().rstrip("\n").split())
+    positions = sorted(list(map(int, input_stream.readline().rstrip("\n").split())))
 
-total_length = 2 ** n
-print(compute_min(1, total_length, 0, k))
+    def compute_min(low, high, start, end):
+        if start >= end:
+            return A
+        na = end - start
+        l = high - low + 1
+        burn = B * na * l
+        if l == 1:
+            return burn
+        mid_segment = (low + high) // 2
+        split_idx = bisect.bisect_right(positions, mid_segment, start, end)
+        left = compute_min(low, mid_segment, start, split_idx)
+        right = compute_min(mid_segment + 1, high, split_idx, end)
+        split = left + right
+        return min(burn, split)
 
-Wait, but when l is the length of the current segment. For example, when the segment is from low to high, the length is high - low +1. Yes.
+    total_length = 2 ** n
+    print(compute_min(1, total_length, 0, k), file=output_stream)
 
-Testing this code with the first sample:
 
-Sample 1:
 
-n=2 (total_length=4), positions [1,3].
+def test():
+    import io
 
-compute_min(1,4,0,2):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2 1 2
+1 7
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
 
-na=2, l=4. burn is 2*2*4=16.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-split into mid_segment (1+4)//2=2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-split_idx = bisect.bisect_right(positions, 2, 0, 2). The list is [1,3]. bisect_right of 2 is 1. So left: 0-1, right:1-2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Left is compute_min(1,2,0,1). Which gives 3, as discussed.
+    print('Tests passed 😎')
 
-Right is compute_min(3,4,1,2). split_idx is bisect_right(positions, 3, 1, 2). The value is 3 (mid_segment is (3+4)//2=3.5?), wait no: when the right segment is 3-4, mid is (3+4)//2=3.5. Wait, no: (3+4)//2 in Python is 3.5? No, integer division. (3+4)//2 = 3.5? No, 3+4=7 divided by 2 is 3.5, but in Python 3, using integer division, 7//2=3.
 
-Wait, mid_segment is (low + high) // 2. For low=3 and high=4, (3+4)//2=3. So mid_segment is 3. So split into 3-3 and 4-4.
+if __name__ == '__main__':
+    test()
 
-Wait, no: the left half is low to mid_segment (3-3), and right is mid_segment+1 to high (4-4).
 
-Ah, right. So in this case, mid_segment is 3. So left is 3-3, right is 4-4.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So for the right segment (3-4) in the first sample:
 

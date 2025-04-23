@@ -433,112 +433,106 @@ But in Python, the code should start with those imports.
 
 So the complete code would be:
 
+Testing against sample input 2.
+
+```python
 import math
 from collections import defaultdict
 
-def factorize(x):
-    factors = {}
-    while x % 2 == 0:
-        factors[2] = factors.get(2, 0) + 1
-        x = x // 2
-    i = 3
-    while i * i <= x:
-        while x % i == 0:
-            factors[i] = factors.get(i, 0) + 1
-            x = x // i
-        i += 2
-    if x > 1:
-        factors[x] = factors.get(x, 0) + 1
-    return factors
 
-n = int(input())
-a = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    def factorize(x):
+        factors = {}
+        while x % 2 == 0:
+            factors[2] = factors.get(2, 0) + 1
+            x = x // 2
+        i = 3
+        while i * i <= x:
+            while x % i == 0:
+                factors[i] = factors.get(i, 0) + 1
+                x = x // i
+            i += 2
+        if x > 1:
+            factors[x] = factors.get(x, 0) + 1
+        return factors
 
-primes = defaultdict(int)
-for num in a:
-    if num == 1:
-        continue
-    factors = factorize(num)
-    for p, cnt in factors.items():
-        primes[p] += cnt
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-if not primes:
-    print(1)
-else:
-    MOD = 10**9 +7
-    max_a = max(k + n -1 for k in primes.values())
-    # Precompute factorial and inverse factorial up to max_a
-    fact = [1]*(max_a +1)
-    for i in range(1, max_a+1):
-        fact[i] = fact[i-1] *i % MOD
-    inv_fact = [1]*(max_a +1)
-    inv_fact[max_a] = pow(fact[max_a], MOD-2, MOD)
-    for i in range(max_a-1, -1, -1):
-        inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
-    res =1
-    for k in primes.values():
-        a_val = k + n-1
-        comb = fact[a_val] * inv_fact[n-1] % MOD
-        comb = comb * inv_fact[k] % MOD
-        res = res * comb % MOD
-    print(res)
+    primes = defaultdict(int)
+    for num in a:
+        if num == 1:
+            continue
+        factors = factorize(num)
+        for p, cnt in factors.items():
+            primes[p] += cnt
 
-But wait, the factorize function had a different loop structure. Let me check. The code in the factorize function uses while i*i <=x, but in the previous code, the loop was:
+    if not primes:
+        print(1, file=output_stream)
+    else:
+        MOD = 10**9 +7
+        max_a = max(k + n -1 for k in primes.values())
+        # Precompute factorial and inverse factorial up to max_a
+        fact = [1]*(max_a +1)
+        for i in range(1, max_a+1):
+            fact[i] = fact[i-1] *i % MOD
+        inv_fact = [1]*(max_a +1)
+        inv_fact[max_a] = pow(fact[max_a], MOD-2, MOD)
+        for i in range(max_a-1, -1, -1):
+            inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
+        res =1
+        for k in primes.values():
+            a_val = k + n-1
+            comb = fact[a_val] * inv_fact[n-1] % MOD
+            comb = comb * inv_fact[k] % MOD
+            res = res * comb % MOD
+        print(res, file=output_stream)
 
-i=3
 
-max_i = math.isqrt(x) +1
 
-while i <= max_i and x !=1:
+def test():
+    import io
 
-    ...
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+5 7
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-But perhaps the code in the final version uses a more efficient way.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-In the code above, after handling 2, it starts with i=3, and for each i, checks if i*i <=x. For each i, while x is divisible by i, divide and add to factors. Then increment i by 2. Once i*i exceeds x, if x>1, add it as a factor.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-This is correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So the code is correct.
+    print('Tests passed 😎')
 
-Testing the sample inputs:
 
-Sample 2:
+if __name__ == '__main__':
+    test()
 
-3
-1 1 2
 
-After factorization:
+```
 
-The third number is 2, which factorizes into {2:1}. The first two numbers are 1, which are skipped. So primes is {2:1}.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-max_a is 1+3-1=3.
+```
 
-precompute fact up to 3.
-
-fact = [1,1,2,6]
-
-inv_fact[3] = 6^(1e9+7-2) mod MOD. 6^ (MOD-2) is 166666668. So inv_fact[3] = 166666668.
-
-Then inv_fact[2] = inv_fact[3] *3 mod MOD = 166666668 *3 = 500000004 mod MOD.
-
-inv_fact[1] = inv_fact[2] *2 = 500000004 *2 mod MOD = 1,000,000,008 mod MOD =1.
-
-inv_fact[0] = 1.
-
-For k=1:
-
-comb = fact[3] * inv_fact[2] * inv_fact[1] mod MOD.
-
-fact[3] =6, inv_fact[2] =500,000,004, inv_fact[1] =1.
-
-6 * 500,000,004 mod MOD = 3,000,000,024 mod 1e9+7 is 3,000,000,024 - 3*1e9+7 (3*1e9+7=3e9+21). Wait, 3e9+21 is 3,000,000,000+21=3,000,000,021. But 3,000,000,024 -3,000,000,021=3. So 6 *500,000,004 mod MOD is 3.
-
-So the result is 3, which matches sample 2.
-
-Yes.
-
-So the code should work.
 </think>
 
 ```python

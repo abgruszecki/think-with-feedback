@@ -134,31 +134,74 @@ Away = (n-1) - count.
 
 So code:
 
-n = int(input())
-teams = []
-for _ in range(n):
-    x, y = map(int, input().split())
-    teams.append( (x, y) )
+Testing against sample input 1.
 
-xs = [x for x, y in teams]
-from collections import Counter
-freq = Counter(xs)
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    teams = []
+    for _ in range(n):
+        x, y = map(int, input_stream.readline().rstrip("\n").split())
+        teams.append( (x, y) )
 
-for x, y in teams:
-    cnt = freq.get(y, 0)
-    home = (n-1) + cnt
-    away = (n-1) - cnt
-    print(home, away)
+    xs = [x for x, y in teams]
+    from collections import Counter
+    freq = Counter(xs)
 
-This should handle all cases.
+    for x, y in teams:
+        cnt = freq.get(y, 0)
+        home = (n-1) + cnt
+        away = (n-1) - cnt
+        print(home, away, file=output_stream)
 
-Testing sample 1:
 
-n=2, teams [(1,2), (2,1)]. xs is [1,2]. freq is {1:1,2:1}.
 
-For first team, y=2. cnt=1. home=1+1=2, away=0.
+def test():
+    import io
 
-Second team, y=1. cnt=1. home=1+1=2, away 0. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 2
+2 1
+1 3
+""",
+            "output": \
+"""\
+3 1
+4 0
+2 2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

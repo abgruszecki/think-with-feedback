@@ -319,57 +319,103 @@ Wait, but each monster is a tuple, so adding it to a set (since tuples are hasha
 
 So the code should be correct.
 
-Testing this code against the examples:
+Testing against sample input 1.
 
-First example input:
+```python
+def main(input_stream, output_stream):
+    k, n = map(int, input_stream.readline().rstrip("\n").split())
+    stones = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(k)]
+    monsters = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n)]
+    afraid = set()
 
-2 4
+    for s in stones:
+        ax, ay = s
+        for m in monsters:
+            mx, my = m
+            blocked = False
+            for other in monsters:
+                if other == m:
+                    continue
+                ox, oy = other
+                # Check collinearity
+                cross = (mx - ax) * (oy - ay) - (my - ay) * (ox - ax)
+                if cross != 0:
+                    continue
+                # Check if other is on the segment between s and m
+                if not (min(ax, mx) <= ox <= max(ax, mx)):
+                    continue
+                if not (min(ay, my) <= oy <= max(ay, my)):
+                    continue
+                blocked = True
+                break
+            if not blocked:
+                afraid.add(m)
 
-Stones: (-2,-1), (4,5)
+    print(len(afraid), file=output_stream)
 
-Monsters: (4,2), (2,1), (4,-1), (1,-1)
 
-For each stone and monster:
 
-Check if any other monster is on the segment between stone and monster.
+def test():
+    import io
 
-Let's take the first stone (-2,-1):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 8
+10 20
+0 0
+20 40
+300 600
+30 60
+170 340
+50 100
+28 56
+90 180
+-4 -8
+-1 -2
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-Check each monster:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Monster (4,2):
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Check all other monsters (2,1), (4,-1), (1,-1).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For other = (2,1):
+    print('Tests passed 😎')
 
-Check cross product:
 
-(4 - (-2))*(1 - (-1)) - (2 - (-1))*(2 - (-2)) 
+if __name__ == '__main__':
+    test()
 
-= (6)*(2) - (3)*(4) = 12 -12 =0 → collinear.
 
-Check if (2,1) is between (-2,-1) and (4,2):
+```
 
-x: 2 is between -2 and4 → yes.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 76, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 69, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '5'
+Got: '2'
 
-y:1 is between -1 and2 → yes. So (2,1) is on the segment. So blocked. So this monster (4,2) is not visible from the first stone.
-
-Then check the second stone (4,5) for (4,2):
-
-Check other monsters (4,2 is the current monster. Other monsters are (2,1), (4,-1), (1,-1).
-
-Check if any are on the segment between (4,5) and (4,2). The segment is vertical (x=4). For other monsters:
-
-Take (4,-1): x is 4, which is same. Check y: between 5 and2 (since 5 is bigger than 2). The segment is from y=5 to y=2. (4,-1) has y=-1, which is outside. So no. Other monsters:
-
-(2,1): x is 2, which is not 4 → collinearity check fails.
-
-(1,-1): x=1, no.
-
-So no other monsters on the segment. So (4,2) is visible from (4,5). So this monster is added to the set.
-
-Similarly, for each stone and monster:
+```
 
 Another example: monster (4,-1). Check all stones.
 

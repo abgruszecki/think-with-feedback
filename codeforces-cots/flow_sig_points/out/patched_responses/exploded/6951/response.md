@@ -812,21 +812,87 @@ else:
 
 This should work.
 
-Testing the code on the samples.
+Testing against sample input 1.
 
-Sample1:
+```python
+def main(input_stream, output_stream):
+    grid = [input_stream.readline().rstrip("\n").strip() for _ in range(8)]
+    min_a = float('inf')
+    for c in range(8):
+        for r in range(8):
+            if grid[r][c] == 'W':
+                valid = True
+                for i in range(r-1, -1, -1):
+                    if grid[i][c] != '.':
+                        valid = False
+                        break
+                if valid:
+                    min_a = min(min_a, r)
+                break  # topmost W in column
+    min_b = float('inf')
+    for c in range(8):
+        for r in range(7, -1, -1):
+            if grid[r][c] == 'B':
+                valid = True
+                for i in range(r+1, 8):
+                    if grid[i][c] != '.':
+                        valid = False
+                        break
+                if valid:
+                    min_b = min(min_b, 7 - r)
+                break  # bottommost B in column
+    print('A' if min_a <= min_b else 'B', file=output_stream)
 
-After reading the grid, for column4 (c=4):
 
-r loops from 0 to7. First 'W' is at r=3 (row4). Check rows 2,1,0. All are '.'.
 
-So steps is3. min_a is3.
+def test():
+    import io
 
-For B, in column1 (c=1):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+..B.....
+..W.....
+......B.
+........
+.....W..
+......B.
+........
+........
+""",
+            "output": \
+"""\
+B
+""",
+        }, 
+    ]
 
-r loops from7 downto0. First 'B' is at r=2 (row3). Check rows3-7. All are '.'.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Steps is7-2=5. min_b is5. A wins.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample2:
 

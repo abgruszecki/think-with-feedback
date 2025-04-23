@@ -187,45 +187,87 @@ But need to read the inputs. The first line is n and k. Second line is x1 to xn.
 
 In Python, code:
 
+Testing against sample input 2.
+
+```python
 import bisect
 
-n, k = map(int, input().split())
 
-x = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-current = 0
+    x = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-count = 1
+    current = 0
 
-while True:
+    count = 1
 
-    max_reach = x[current] + k
+    while True:
 
-    j = bisect.bisect_right(x, max_reach) -1
+        max_reach = x[current] + k
 
-    if j == current:
+        j = bisect.bisect_right(x, max_reach) -1
 
-        print(-1)
+        if j == current:
 
-        exit()
+            print(-1, file=output_stream)
 
-    if j >= n-1:
+            return
 
-        print(count)
+        if j >= n-1:
 
-        exit()
+            print(count, file=output_stream)
 
-    current = j
+            return
 
-    count +=1
+        current = j
 
-But wait, in the case where the next j is the same as current? Like, if current is 0, and j is 0. Then we can't proceed, so return -1.
+        count +=1
 
-But let's test the second example:
 
-Input 2 9, x=10 20. Then:
 
-current is 0. max_reach is 10+9=19. bisect_right(x,19) returns 1 (since 19 is between 10 and 20), so j=0. So j == current (0), so return -1. Which is correct.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+12 3
+4 6 7 9 10 11 13 15 17 18 20 21
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another case: what if x has a point that's exactly current +k? For example, if x is [0,5,10], k=5. Then starting at 0, max_reach 5. j is 1. Then from 5, max_reach 10. j is 2. So count is 2.
 

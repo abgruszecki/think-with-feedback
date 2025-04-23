@@ -569,47 +569,85 @@ Wait, when d=0: k =n-0 =n. But a is given as a_1, a_2, ..., a_n. So a[k-1] is a_
 
 Yes.
 
-Testing with the first sample:
+Testing against sample input 1.
 
-Sample input:
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-2
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-1 2
+    if n == 0:
+        print(0, file=output_stream)
+        return
 
-n=2.
+    inv_2 = pow(2, MOD - 2, MOD)
+    max_pow = max(n - 2, 0)
+    pow2 = [1] * (max_pow + 1)
+    for i in range(1, max_pow + 1):
+        pow2[i] = (pow2[i-1] * 2) % MOD
 
-max_pow =0.
+    sum_ans = 0
+    for d in range(n):
+        k = n - d
+        ak = a[k-1]
+        factor = (d + 2) % MOD
+        if d == 0:
+            term = ak * factor % MOD
+            term = term * inv_2 % MOD
+        else:
+            power = pow2[d-1] if d-1 <= max_pow else 0
+            term = ak * factor % MOD
+            term = term * power % MOD
+        sum_ans = (sum_ans + term) % MOD
 
-pow2 is [1].
+    print(sum_ans, file=output_stream)
 
-d ranges 0 to 1.
 
-d=0:
 
-k=2, a[1] is 2.
+def test():
+    import io
 
-factor =0+2=2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 3 3 7
+""",
+            "output": \
+"""\
+60
+""",
+        }, 
+    ]
 
-power =inv_2 → 499122177.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-term=2 * 2 * 499122177 mod MOD.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-2*2=4 →4 * 499122177 mod MOD → 4*(499122177) = 1996488708 → mod 998244353 is 1996488708 - 2*998244353 = 1996488708-1996488706=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So term is 2.
+    print('Tests passed 😎')
 
-d=1:
 
-k=2-1=1. a[0] is 1.
+if __name__ == '__main__':
+    test()
 
-factor=1+2=3.
 
-power = pow2[0] =1.
+```
 
-term=1 *3 *1 =3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-sum_ans=2+3=5 → correct.
+```
 
 Yes.
 

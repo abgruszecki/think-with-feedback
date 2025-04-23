@@ -794,19 +794,86 @@ else:
 
 This should handle all cases.
 
-Let's test sample input 2:
+Testing against sample input 2.
 
-3 rows:
+```python
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
+    sum_dist = 0
+    has_single = False
 
-G-R → G at 0, R at 2. d=2-0-1=1.
+    for _ in range(n):
+        row = input_stream.readline().rstrip("\n").strip()
+        g_pos = None
+        r_pos = None
+        for idx, c in enumerate(row):
+            if c == 'G':
+                g_pos = idx
+            elif c == 'R':
+                r_pos = idx
+        if g_pos is not None and r_pos is not None:
+            distance = abs(g_pos - r_pos) - 1
+            sum_dist += distance
+        else:
+            if (g_pos is not None) ^ (r_pos is not None):
+                has_single = True
 
-R-G → R at 0, G at 2. d=2-0-1=1.
+    mod = k + 1
+    sum_mod = sum_dist % mod
 
-G-R → same as first. d=1.
+    if sum_mod != 0:
+        print("First", file=output_stream)
+    else:
+        if has_single:
+            print("Draw", file=output_stream)
+        else:
+            print("Second", file=output_stream)
 
-sum_dist=3. k=2.
 
-sum_mod=3%3=0. has_single is False. So output Second.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 3 1
+-R-
+-G-
+""",
+            "output": \
+"""\
+Draw
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 4:
 

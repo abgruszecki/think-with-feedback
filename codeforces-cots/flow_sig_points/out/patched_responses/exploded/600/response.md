@@ -287,25 +287,78 @@ print("Yes")
 
 This should work.
 
-Testing with the samples:
+Testing against sample input 2.
 
-Sample 2:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    children = [[] for _ in range(n + 1)]
+    for j in range(2, n + 1):
+        pi = int(input_stream.readline().rstrip("\n"))
+        children[pi].append(j)
 
-n=7.
+    for node in range(1, n + 1):
+        if not children[node]:
+            continue
+        cnt = 0
+        for child in children[node]:
+            if not children[child]:
+                cnt += 1
+        if cnt < 3:
+            print("No", file=output_stream)
+            return
+    print("Yes", file=output_stream)
 
-children[1] has [2,3,4], children[2] has [5,6,7], others empty.
 
-Check node1:
 
-children are 2,3,4. Among them, 2 has children (so not a leaf). 3 and 4 are leaves. So cnt is 2. So code returns No.
+def test():
+    import io
 
-Yes.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+1
+1
+1
+1
+3
+3
+3
+""",
+            "output": \
+"""\
+Yes
+""",
+        }, 
+    ]
 
-So the code works.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Now, let's check another case where a node has three non-leaf children. For example, node A has three children B, C, D. Each of B, C, D has their own children. Then node A's cnt is 0 → which is less than 3 → output No.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Thus, code correctly identifies.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another case: a node has two leaf children and one non-leaf. cnt=2 → output No.
 

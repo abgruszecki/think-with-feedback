@@ -110,35 +110,68 @@ So code:
 
 In Python:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-negatives = [x for x in a if x < 0]
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-negatives.sort()
+    negatives = [x for x in a if x < 0]
 
-k = min(m, len(negatives))
+    negatives.sort()
 
-sum_neg = sum(-x for x in negatives[:k])
+    k = min(m, len(negatives))
 
-print(sum_neg)
+    sum_neg = sum(-x for x in negatives[:k])
 
-Let's test with the first sample input:
+    print(sum_neg, file=output_stream)
 
-Sample 1:
 
-n=5, m=3
 
-a = [-6, 0,35,-2,4]
+def test():
+    import io
 
-negatives = [-6, -2]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 2
+7 0 0 -7
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
 
-sorted negatives: [-6, -2]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-k = min(3, 2) = 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sum_neg = (-(-6)) + (-(-2)) = 6 + 2 = 8. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

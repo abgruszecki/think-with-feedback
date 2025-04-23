@@ -342,85 +342,175 @@ Yes.
 
 So the code would be:
 
-mod = 10**9 +7
+Testing against sample input 1.
 
-n = int(input())
+```python
+def main(input_stream, output_stream):
+    mod = 10**9 +7
 
-p = list(map(int, input().split()))
+    n = int(input_stream.readline().rstrip("\n"))
 
-MOD = 10**9 +7
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-dp = [0] * (n+2) # dp[1..n]
+    MOD = 10**9 +7
 
-prefix = [0]*(n+2) # prefix[0] =0, prefix[1} = dp[1}, etc.
+    dp = [0] * (n+2) # dp[1..n]
 
-for i in range(1, n+1):
+    prefix = [0]*(n+2) # prefix[0] =0, prefix[1} = dp[1}, etc.
 
-    a = p[i-1]
+    for i in range(1, n+1):
 
-    # sum from a to i-1 is prefix[i-1] - prefix[a-1]
+        a = p[i-1]
 
-    if a > i-1:
+        # sum from a to i-1 is prefix[i-1] - prefix[a-1]
 
-        current_sum =0
+        if a > i-1:
 
-    else:
+            current_sum =0
 
-        current_sum = (prefix[i-1] - prefix[a-1]) % MOD
+        else:
 
-    dp_i = (2 + current_sum) % MOD
+            current_sum = (prefix[i-1] - prefix[a-1]) % MOD
 
-    dp[i] = dp_i
+        dp_i = (2 + current_sum) % MOD
 
-    prefix[i] = (prefix[i-1] + dp_i) % MOD
+        dp[i] = dp_i
 
-ans = prefix[n] % MOD
+        prefix[i] = (prefix[i-1] + dp_i) % MOD
 
-print(ans)
+    ans = prefix[n] % MOD
 
-Wait, let's test this code with the first sample.
+    print(ans, file=output_stream)
 
-Sample 1:
 
-n=2, p=[1,2].
 
-Processing i=1:
+def test():
+    import io
 
-a=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 1 2 3
+""",
+            "output": \
+"""\
+20
+""",
+        }, 
+    ]
 
-sum from 1 to 0 (i-1=0). So a=1, i-1=0. a > i-1 → sum is 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-dp_i =2. prefix[1} =2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=2:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-a=2.
+    print('Tests passed 😎')
 
-sum from 2 to 1 (i-1=1). a=2, i-1=1 → a> i-1 → sum is 0.
 
-dp_i=2. prefix[2} =2+2=4.
+if __name__ == '__main__':
+    test()
 
-ans=4. Correct.
 
-Sample 2: input 4, p=[1,1,2,3]
+```
 
-i=1:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-a=1. sum from 1 to 0 →0. dp=2. prefix[1}=2.
+```
 
-i=2:
+Testing against sample input 2.
 
-a=1. sum from1 to1: prefix[1} - prefix[0} =2-0=2. dp=2+2=4. prefix[2}=6.
+```python
+def main(input_stream, output_stream):
+    mod = 10**9 +7
 
-i=3:
+    n = int(input_stream.readline().rstrip("\n"))
 
-a=2. sum from2 to 2: prefix[2} - prefix[1} =6-2=4. dp=2+4=6. prefix[3}=12.
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-i=4:
+    MOD = 10**9 +7
 
-a=3. sum from3 to3: prefix[3} - prefix[2} =12-6=6. dp=2+6=8. prefix[4}=20.
+    dp = [0] * (n+2) # dp[1..n]
 
-ans=20. Correct.
+    prefix = [0]*(n+2) # prefix[0] =0, prefix[1} = dp[1}, etc.
+
+    for i in range(1, n+1):
+
+        a = p[i-1]
+
+        # sum from a to i-1 is prefix[i-1] - prefix[a-1]
+
+        if a > i-1:
+
+            current_sum =0
+
+        else:
+
+            current_sum = (prefix[i-1] - prefix[a-1]) % MOD
+
+        dp_i = (2 + current_sum) % MOD
+
+        dp[i] = dp_i
+
+        prefix[i] = (prefix[i-1] + dp_i) % MOD
+
+    ans = prefix[n] % MOD
+
+    print(ans, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 1 1 1 1
+""",
+            "output": \
+"""\
+62
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3: input5, p=[1,1,1,1,1]
 

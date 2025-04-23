@@ -321,45 +321,153 @@ Now, coding this in Python.
 
 The code steps:
 
-s = input().strip()
+Testing against sample input 1.
 
-m = 0
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-n = len(s)
+    m = 0
 
-i = n-1
+    n = len(s)
 
-while i >=0 and s[i] == '0':
+    i = n-1
 
-   m +=1
+    while i >=0 and s[i] == '0':
 
-   i -=1
+       m +=1
 
-for k in range(0, m+1):
+       i -=1
 
-   prefix = s[:n -k]
+    for k in range(0, m+1):
 
-   if prefix == prefix[::-1]:
+       prefix = s[:n -k]
 
-      print("YES")
+       if prefix == prefix[::-1]:
 
-      exit()
+          print("YES", file=output_stream)
 
-print("NO")
+          return
 
-Yes.
+    print("NO", file=output_stream)
 
-Testing the examples:
 
-Example 1: input 131 → s='131'
 
-m=0. So check k=0.
+def test():
+    import io
 
-prefix is '131', which is a palindrome. → YES.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+320
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-Example 2: input 320 → s='320'
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-m=0. Check k=0. '320' is not a palindrome. → NO.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    m = 0
+
+    n = len(s)
+
+    i = n-1
+
+    while i >=0 and s[i] == '0':
+
+       m +=1
+
+       i -=1
+
+    for k in range(0, m+1):
+
+       prefix = s[:n -k]
+
+       if prefix == prefix[::-1]:
+
+          print("YES", file=output_stream)
+
+          return
+
+    print("NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2010200
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Example 3: input 2010200 → s='2010200'
 

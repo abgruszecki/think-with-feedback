@@ -255,48 +255,153 @@ Yes.
 
 So code:
 
-n, k = map(int, input().split())
-p = list(map(int, input().split()))
-MOD = 998244353
+Testing against sample input 1.
 
-if k ==0:
-    # but according to constraints, 1<=k <=n, so this is not possible.
-    pass
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
+    MOD = 998244353
 
-threshold = n -k +1
+    if k ==0:
+        # but according to constraints, 1<=k <=n, so this is not possible.
+        pass
 
-positions = []
-for idx, val in enumerate(p):
-    if val >= threshold:
-        positions.append(idx+1)  # 1-based positions
+    threshold = n -k +1
 
-positions.sort()
+    positions = []
+    for idx, val in enumerate(p):
+        if val >= threshold:
+            positions.append(idx+1)  # 1-based positions
 
-product = 1
-for i in range(1, k):
-    product = (product * (positions[i] - positions[i-1])) % MOD
+    positions.sort()
 
-sum_val = k * (n + (n -k +1)) // 2
+    product = 1
+    for i in range(1, k):
+        product = (product * (positions[i] - positions[i-1])) % MOD
 
-print(sum_val, product)
+    sum_val = k * (n + (n -k +1)) // 2
 
-Yes.
+    print(sum_val, product, file=output_stream)
 
-Testing this code against the samples.
 
-First sample:
 
-n=3, k=2. threshold=3-2+1=2.
+def test():
+    import io
 
-p is [2,1,3].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5
+2 1 5 3 4
+""",
+            "output": \
+"""\
+15 1
+""",
+        }, 
+    ]
 
-positions: 2 is in index 0 (1-based pos 1), 1 is index 1 (pos 2) but val 1<2. 3 is index 2 (pos3, val3>=2). So positions are [1,3]. sorted.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-product is 3-1=2. sum_val is 2*(3 + (3-2 +1)) / 2 → 2*(3+2) /2 = 5. Correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Second sample:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-n=5, k=5. threshold=5-5+1=1. All elements are included. positions sorted are 1,2,3,4,5. product is 1. sum_val is 5+4+3+2+1=15. Correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
+    MOD = 998244353
+
+    if k ==0:
+        # but according to constraints, 1<=k <=n, so this is not possible.
+        pass
+
+    threshold = n -k +1
+
+    positions = []
+    for idx, val in enumerate(p):
+        if val >= threshold:
+            positions.append(idx+1)  # 1-based positions
+
+    positions.sort()
+
+    product = 1
+    for i in range(1, k):
+        product = (product * (positions[i] - positions[i-1])) % MOD
+
+    sum_val = k * (n + (n -k +1)) // 2
+
+    print(sum_val, product, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 3
+2 7 3 1 5 4 6
+""",
+            "output": \
+"""\
+18 6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample: sum_val is 3*(7 +5)/2 →3*(12)/2=18. Correct.
 

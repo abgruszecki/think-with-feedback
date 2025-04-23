@@ -214,57 +214,84 @@ Now, handling the input is important. For n=1e5, the input line has 2e5 elements
 
 So the code:
 
-n = int(input())
+Testing against sample input 1.
 
-socks = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-counts = [0]*(n+1)
+    socks = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-current = 0
+    counts = [0]*(n+1)
 
-max_socks = 0
+    current = 0
 
-for x in socks:
+    max_socks = 0
 
-    if counts[x] == 0:
+    for x in socks:
 
-        current +=1
+        if counts[x] == 0:
 
-        counts[x] +=1
+            current +=1
 
-    else:
+            counts[x] +=1
 
-        current -=1
+        else:
 
-        counts[x] +=1
+            current -=1
 
-    if current > max_socks:
+            counts[x] +=1
 
-        max_socks = current
+        if current > max_socks:
 
-print(max_socks)
+            max_socks = current
 
-Testing the first example:
+    print(max_socks, file=output_stream)
 
-Input:
 
-1
 
-1 1
+def test():
+    import io
 
-Processing:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+2 1 1 3 2 3
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-counts initialized to [0, 0]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-First x=1:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-counts[1] is 0 → current becomes 1. counts[1] becomes 1. max_socks is 1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Second x=1:
+    print('Tests passed 😎')
 
-counts[1] is 1 → current 0. counts[1] becomes 2. max remains 1.
 
-Output 1.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

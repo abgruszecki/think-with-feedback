@@ -238,87 +238,263 @@ So no need to process case. So read each line as is.
 
 So code:
 
-f = input().strip()
+Testing against sample input 1.
 
-m = input().strip()
+```python
+def main(input_stream, output_stream):
+    f = input_stream.readline().rstrip("\n").strip()
 
-s = input().strip()
+    m = input_stream.readline().rstrip("\n").strip()
 
-beats = {'rock': 'scissors', 'scissors': 'paper', 'paper': 'rock'}
+    s = input_stream.readline().rstrip("\n").strip()
 
-candidates = []
+    beats = {'rock': 'scissors', 'scissors': 'paper', 'paper': 'rock'}
 
-# Check F
+    candidates = []
 
-if m == beats[f] and s == beats[f]:
+    # Check F
 
-    candidates.append('F')
+    if m == beats[f] and s == beats[f]:
 
-# Check M
+        candidates.append('F')
 
-if f == beats[m] and s == beats[m]:
+    # Check M
 
-    candidates.append('M')
+    if f == beats[m] and s == beats[m]:
 
-# Check S
+        candidates.append('M')
 
-if f == beats[s] and m == beats[s]:
+    # Check S
 
-    candidates.append('S')
+    if f == beats[s] and m == beats[s]:
 
-if len(candidates) == 1:
+        candidates.append('S')
 
-    print(candidates[0])
+    if len(candidates) == 1:
 
-else:
+        print(candidates[0], file=output_stream)
 
-    print('?')
+    else:
 
-This should handle all cases.
+        print('?', file=output_stream)
 
-Testing the examples.
 
-First example:
 
-Input:
+def test():
+    import io
 
-rock
-
-rock
-
-rock
-
-Check F: m and s are both rock. beats[f] is 'scissors'. So m and s are not. So F not added.
-
-Similarly for M and S. So candidates is empty. Output '?'.
-
-Second example:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 paper
-
 rock
-
 rock
+""",
+            "output": \
+"""\
+F
+""",
+        }, 
+    ]
 
-F's check: m and s are rock. beats['paper'] is 'rock'. So yes. So F is added.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-M's check: beats[m] is 'rock' → beats['rock'] is 'scissors'. So f is paper, which is not 'scissors', so M's condition is (paper == scissors) → no. So M not added.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-S's check: beats[s] is 'rock' → beats['rock'] is 'scissors'. f is paper and m is rock. So (paper == scissors? No. So no. So S not added. So only F in candidates. Output F.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Third example:
+    print('Tests passed 😎')
 
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    f = input_stream.readline().rstrip("\n").strip()
+
+    m = input_stream.readline().rstrip("\n").strip()
+
+    s = input_stream.readline().rstrip("\n").strip()
+
+    beats = {'rock': 'scissors', 'scissors': 'paper', 'paper': 'rock'}
+
+    candidates = []
+
+    # Check F
+
+    if m == beats[f] and s == beats[f]:
+
+        candidates.append('F')
+
+    # Check M
+
+    if f == beats[m] and s == beats[m]:
+
+        candidates.append('M')
+
+    # Check S
+
+    if f == beats[s] and m == beats[s]:
+
+        candidates.append('S')
+
+    if len(candidates) == 1:
+
+        print(candidates[0], file=output_stream)
+
+    else:
+
+        print('?', file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 scissors
-
 rock
+rock
+""",
+            "output": \
+"""\
+?
+""",
+        }, 
+    ]
 
-rock.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-F's condition: beats['scissors'] is paper. M and S are rock → no. So F no.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-M's condition: M's gesture is rock. beats['rock'] is scissors. Check f (scissors) and s (rock). f is scissors (matches), s is rock (doesn't). So (scissors == scissors) and (rock == scissors) → second part no. So M's condition no.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-S's condition: same as M. So no. So candidates empty. Output '?'.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    f = input_stream.readline().rstrip("\n").strip()
+
+    m = input_stream.readline().rstrip("\n").strip()
+
+    s = input_stream.readline().rstrip("\n").strip()
+
+    beats = {'rock': 'scissors', 'scissors': 'paper', 'paper': 'rock'}
+
+    candidates = []
+
+    # Check F
+
+    if m == beats[f] and s == beats[f]:
+
+        candidates.append('F')
+
+    # Check M
+
+    if f == beats[m] and s == beats[m]:
+
+        candidates.append('M')
+
+    # Check S
+
+    if f == beats[s] and m == beats[s]:
+
+        candidates.append('S')
+
+    if len(candidates) == 1:
+
+        print(candidates[0], file=output_stream)
+
+    else:
+
+        print('?', file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+scissors
+paper
+rock
+""",
+            "output": \
+"""\
+?
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Fourth example:
 

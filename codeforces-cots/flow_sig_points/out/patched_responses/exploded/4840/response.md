@@ -160,63 +160,86 @@ Read lines until EOF. For each line:
 
 In Python, to read all lines, we can do:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-participants = set()
-total = 0
 
-for line in sys.stdin:
-    line = line.rstrip('\n')  # remove newline
-    if not line:
-        continue  # skip empty lines? But according to problem statement, each command is in its own line. So maybe no empty lines.
-    if line[0] == '+':
-        name = line[1:]
-        participants.add(name)
-    elif line[0] == '-':
-        name = line[1:]
-        participants.remove(name)
-    else:
-        # send command
-        parts = line.split(':', 1)
-        sender = parts[0]
-        message = parts[1] if len(parts) > 1 else ''
-        message_len = len(message)
-        count = len(participants)
-        total += message_len * count
+def main(input_stream, output_stream):
+    participants = set()
+    total = 0
 
-print(total)
+    for line in input_stream:
+        line = line.rstrip('\n')  # remove newline
+        if not line:
+            continue  # skip empty lines? But according to problem statement, each command is in its own line. So maybe no empty lines.
+        if line[0] == '+':
+            name = line[1:]
+            participants.add(name)
+        elif line[0] == '-':
+            name = line[1:]
+            participants.remove(name)
+        else:
+            # send command
+            parts = line.split(':', 1)
+            sender = parts[0]
+            message = parts[1] if len(parts) > 1 else ''
+            message_len = len(message)
+            count = len(participants)
+            total += message_len * count
 
-Testing this code against the sample input.
+    print(total, file=output_stream)
 
-Sample 1:
 
-Input lines:
 
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 +Mike
-Mike:hello
+-Mike
++Mike
+Mike:Hi   I am here
+-Mike
 +Kate
-+Dmitry
--Dmitry
-Kate:hi
 -Kate
+""",
+            "output": \
+"""\
+14
+""",
+        }, 
+    ]
 
-Processing:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-After line1: participants {'Mike'}
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Line2: split into Mike and hello → len 5. participants size 1 → 5*1 =5. total is 5.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Line3: add Kate → size 2.
+    print('Tests passed 😎')
 
-Line4: add Dmitry → size3.
 
-Line5: remove Dmitry → size2.
+if __name__ == '__main__':
+    test()
 
-Line6: Kate:hi → split into Kate and hi → len2. size 2 → 2*2=4 → total 5+4=9.
 
-Line7: remove Kate → size1.
+```
 
-Final total is 9. Correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

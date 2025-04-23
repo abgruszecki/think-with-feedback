@@ -717,95 +717,112 @@ But we need to read input, compute total_wi and max_j.
 
 Sample code:
 
-n = int(input())
+Testing against sample input 1.
 
-books = []
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-total_wi = 0
+    books = []
 
-sum_contrib = 0
+    total_wi = 0
 
-for _ in range(n):
+    sum_contrib = 0
 
-    ti, wi = map(int, input().split())
+    for _ in range(n):
 
-    books.append( (ti, wi) )
+        ti, wi = map(int, input_stream.readline().rstrip("\n").split())
 
-    total_wi += wi
+        books.append( (ti, wi) )
 
-    sum_contrib += ti + wi
+        total_wi += wi
 
-max_j = sum_contrib
+        sum_contrib += ti + wi
 
-INF = float('inf')
+    max_j = sum_contrib
 
-dp = [INF] * (max_j +1)
+    INF = float('inf')
 
-dp[0] = 0
+    dp = [INF] * (max_j +1)
 
-for ti, wi in books:
+    dp[0] = 0
 
-    contribution = ti + wi
+    for ti, wi in books:
 
-    for j in range(max_j, -1, -1):
+        contribution = ti + wi
 
-        if dp[j] != INF:
+        for j in range(max_j, -1, -1):
 
-            new_j = j + contribution
+            if dp[j] != INF:
 
-            if new_j > max_j:
+                new_j = j + contribution
 
-                new_j = max_j
+                if new_j > max_j:
 
-            if dp[new_j] > dp[j] + ti:
+                    new_j = max_j
 
-                dp[new_j] = dp[j] + ti
+                if dp[new_j] > dp[j] + ti:
 
-# Find the minimal sum_ti where j >= total_wi
+                    dp[new_j] = dp[j] + ti
 
-ans = INF
+    # Find the minimal sum_ti where j >= total_wi
 
-for j in range(total_wi, max_j +1):
+    ans = INF
 
-    if dp[j] < ans:
+    for j in range(total_wi, max_j +1):
 
-        ans = dp[j]
+        if dp[j] < ans:
 
-print(ans)
+            ans = dp[j]
 
-Now, let's test this code against the first sample input.
+    print(ans, file=output_stream)
 
-Sample input 1:
 
-5
 
-1 12
+def test():
+    import io
 
-1 3
-
-2 15
-
-2 5
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 10
 2 1
+2 4
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-The code's variables:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-total_wi = 12+3+15+5+1=36.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sum_contrib = (1+12) + (1+3)+(2+15)+(2+5)+(2+1) → 13+4+17+7+3=44.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-max_j=44.
+    print('Tests passed 😎')
 
-Then, processing each book.
 
-The code should compute dp[37] =5.
+if __name__ == '__main__':
+    test()
 
-In the final loop, j ranges from 36 to 44.
 
-The minimal dp[j] in that range is 5.
+```
 
-Which is correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2:
 

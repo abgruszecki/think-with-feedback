@@ -1241,99 +1241,284 @@ Thus, the code must compute the modular inverse of k_x modulo MOD.
 
 Thus, the code will look like:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n = int(input())
 
-a = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-max_val = max(a)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-m = a.count(max_val)
+    max_val = max(a)
 
-MOD = 10**9+7
+    m = a.count(max_val)
 
-B = [x for x in a if x < max_val]
+    MOD = 10**9+7
 
-t = len(B)
+    B = [x for x in a if x < max_val]
 
-if t ==0:
+    t = len(B)
 
-    print(0)
+    if t ==0:
 
-    exit()
+        print(0, file=output_stream)
 
-B.sort()
+        return
 
-# Precompute factorials
+    B.sort()
 
-fact = [1]*(n+1)
+    # Precompute factorials
 
-for i in range(1, n+1):
+    fact = [1]*(n+1)
 
-    fact[i] = fact[i-1] * i % MOD
+    for i in range(1, n+1):
 
-# Precompute frequency and unique elements
+        fact[i] = fact[i-1] * i % MOD
 
-from collections import defaultdict
+    # Precompute frequency and unique elements
 
-freq = defaultdict(int)
+    from collections import defaultdict
 
-for x in B:
+    freq = defaultdict(int)
 
-    freq[x] +=1
+    for x in B:
 
-unique_B = sorted(freq.keys())
+        freq[x] +=1
 
-total =0
+    unique_B = sorted(freq.keys())
 
-for x in unique_B:
+    total =0
 
-    cnt_x = freq[x]
+    for x in unique_B:
 
-    # find the first index of x in B
+        cnt_x = freq[x]
 
-    idx = bisect.bisect_left(B, x)
+        # find the first index of x in B
 
-    k_x = t - idx
+        idx = bisect.bisect_left(B, x)
 
-    # compute inverse of k_x
+        k_x = t - idx
 
-    inv_k = pow(k_x, MOD-2, MOD)
+        # compute inverse of k_x
 
-    contrib = x * cnt_x % MOD
+        inv_k = pow(k_x, MOD-2, MOD)
 
-    contrib = contrib * m % MOD
+        contrib = x * cnt_x % MOD
 
-    contrib = contrib * fact[n-1] % MOD
+        contrib = contrib * m % MOD
 
-    contrib = contrib * inv_k % MOD
+        contrib = contrib * fact[n-1] % MOD
 
-    total = (total + contrib) % MOD
+        contrib = contrib * inv_k % MOD
 
-print(total)
+        total = (total + contrib) % MOD
 
-Testing this code on the samples:
+    print(total, file=output_stream)
 
-Sample input 1:
 
-n=2
 
-a=[1,3]
+def test():
+    import io
 
-B=[1]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 1 2
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-sorted B is [1]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 109, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 102, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '4'
+Got: '2'
+
+```
+
+Sample input 2:
+
+B = [1,1], sorted.
 
 unique_B is [1]
 
-cnt_x=1
+cnt_x=2.
 
-idx = bisect_left([1], 1) → 0
+idx = bisect_left([1,1],1) →0.
 
-k_x=1-0=1
+k_x=2-0=2.
 
-contrib=1 *1 *1 * fact[1] * inv(1) →1*1*1*1*1=1. Total is 1. Correct.
+contrib = 1*2*1 * fact[2] * inv(2) → 2*2 * inv(2) → (2*2) /2=2. But sample output is 4.
+
+Wait, what's fact[n-1] when n=3?
+
+n-1=2, fact[2]=2.
+
+So contrib is 1*2*1*2 * inv(2).
+
+inv(2) is 500000004 modulo 1e9+7.
+
+So 1*2*1*2 =4. 4 * 500000004 mod MOD is (4 * 500000004) mod 1e9+7 = (2000000016) mod 1e9+7 = 2000000016 - 2*1e9+7 = 2000000016 - 2000000000 = 16 → no, wait 1e9+7 is 1000000007. So 2*1e9+7 is 2000000014. 2000000016 - 2000000014=2. So 4 * 500000004 mod 1e9+7 is 2. So total contrib is 2. Which is incorrect, since the sample output is 4.
+
+Ah, here's the mistake. The formula requires that the contribution for each x is x * cnt_x * m * fact[n-1] / k_x.
+
+But in sample input 2, n=3. fact[n-1] = fact[2] = 2.
+
+For x=1, k_x=2.
+
+So 1 * 2 * 1 * 2 /2 = 2. But the correct contribution is 4. So the formula is incorrect.
+
+This indicates that the formula is still wrong.
+
+But according to the sample input 2's analysis, the contribution from x=1 should be 4. But according to this code, it's 2.
+
+Thus, the formula is incorrect. So where is the mistake?
+
+Ah, the correct formula should be:
+
+For each x in B, the contribution is x * cnt_x * m * (n-1)! / (k_x) * (number of ways to choose the subset and arrange).
+
+But perhaps the correct formula is x * cnt_x * m * fact[n-1] * inv(k_x).
+
+But according to the sample input 2, this gives 2, but the correct answer is 4.
+
+Thus, there's a mistake in the formula.
+
+But wait, the code for sample input 2 would compute:
+
+x=1, cnt_x=2, m=1, fact[n-1] =2.
+
+k_x=2.
+
+contrib= 1*2 *1 * 2 * inv(2) → 4 * 500000004 mod 1e9+7 = 2.
+
+But the correct answer is 4.
+
+Thus, the formula is incorrect.
+
+Thus, the correct formula must be different.
+
+The correct approach is to realize that the number of times x contributes is:
+
+sum_{s=0}^{t-1} [ (number of ways to choose a subset of size s that includes x and has x as a left-to-right maximum) ] * m * (n - (s+1))! )
+
+But again, this is not manageable.
+
+But given time constraints, perhaps the correct formula is:
+
+The correct contribution is x * m * (n-1)! / (k_x), where k_x is the number of elements >=x in the entire array.
+
+But for sample input 2, k_x would be the number of elements >=x in the entire array, which is 3 (two 1's and one 2).
+
+Thus, for x=1, k_x=3.
+
+So contribution is 1 *2 *1 *2! /3 → 2*2 /3 =4/3. But this is not an integer.
+
+Thus, this is incorrect.
+
+Thus, I'm stuck. Given time constraints, perhaps the correct approach is to refer to the original code that passes the samples and is efficient.
+
+The correct code uses the formula:
+
+sum over each x in B of x * (frequency of x) * m * (n! ) / ( (number of elements >=x in B) + m) )
+
+But I'm not sure.
+
+An alternative approach is to realize that the contribution of x is x multiplied by the number of permutations where x is in the prefix before the first MAX and is a left-to-right maximum in that prefix.
+
+The number of such permutations is:
+
+m * (number of permutations of the non-MAX elements where x is a left-to-right maximum) * (number of ways to arrange the MAX elements and the remaining non-MAX elements).
+
+The number of permutations of the non-MAX elements where x is a left-to-right maximum is (frequency of x) * (t-1)! ) / (number of elements >=x in B).
+
+Thus, for each x in B, the contribution is x * (frequency of x) * m * (t! ) / (number of elements >=x in B) ) * (n -t -1)! )
+
+But t = n - m. So n -t -1 = m-1.
+
+So this becomes x * (frequency of x) * m * t! * (m-1)! ) / (number of elements >=x in B).
+
+Which is x * frequency(x) * m! * t! / (number of elements >=x in B).
+
+But for sample input 2:
+
+m=1, t=2, x=1, elements >=x in B is 2.
+
+contrib=1 *2 * 1! * 2! /2 =2 *2/2=2. Sum for two x's is 2*2=4. Which matches the sample.
+
+Yes! This is the correct formula.
+
+Thus, the formula is:
+
+sum_{x in B} x * cnt_x * m! * t! / k_x, where k_x is the number of elements >=x in B.
+
+But wait, for sample input 1:
+
+x=1, cnt_x=1, m=1, t=1, k_x=1.
+
+contrib=1 *1 *1! *1! /1=1. Which matches the sample.
+
+Sample input 2:
+
+x=1, cnt_x=2, m=1, t=2, k_x=2.
+
+contrib=1*2*1! *2! /2 → 2 * 2 /2=2. Sum for two x's is 4.
+
+Thus, the correct formula is:
+
+sum_{x in B} (x * cnt_x * m! * t! / k_x), where k_x is the number of elements >=x in B.
+
+Thus, the code should compute this.
+
+Thus, the code:
+
+Compute m! and t! modulo MOD.
+
+For each unique x in B:
+
+k_x = number of elements in B >=x.
+
+contrib = x * cnt_x * m! * t! / k_x.
+
+Sum all contributions modulo MOD.
+
+Thus, the code should be:
 
 Sample input 2:
 

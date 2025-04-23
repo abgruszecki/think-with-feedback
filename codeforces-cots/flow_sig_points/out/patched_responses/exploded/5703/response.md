@@ -851,85 +851,97 @@ Now, implementing this in Python.
 
 But note that for very large k, 10** (k-1) may be expensive to compute? But for k=18, it's 10^17, which is manageable in Python.
 
-Testing the code with the first example.
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+def main(input_stream, output_stream):
+    l, r = map(int, input_stream.readline().rstrip("\n").split())
+    total = 0
 
-2 47 → output 12.
+    for s in range(1, 10):
+        for k in range(1, 19):
+            if k == 1:
+                group_min = s
+                group_max = s
+            else:
+                power = 10 ** (k-1)
+                group_min = s * power + s
+                group_max = s * power + (10 ** (k-2) - 1) * 10 + s
+            
+            lower = max(l, group_min)
+            upper = min(r, group_max)
+            if lower > upper:
+                continue
+            
+            # Calculate first candidate
+            remainder_lower = lower % 10
+            if remainder_lower <= s:
+                first = lower - remainder_lower + s
+            else:
+                first = lower + (s - remainder_lower + 10)
+            if first > upper:
+                continue
+            
+            # Calculate last candidate
+            remainder_upper = upper % 10
+            if remainder_upper >= s:
+                last = upper - (remainder_upper - s)
+            else:
+                last = upper - (remainder_upper + 10 - s)
+            if last < lower:
+                continue
+            
+            if first > last:
+                continue
+            
+            count = (last - first) // 10 + 1
+            total += count
 
-But let's run through the code.
+    print(total, file=output_stream)
 
-Loop s from 1 to 9:
 
-s=1:
 
-k=1:
+def test():
+    import io
 
-group_min=1, group_max=1. lower = max(2,1)=2. upper = min(47,1)=1. lower>upper → skip.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+47 1024
+""",
+            "output": \
+"""\
+98
+""",
+        }, 
+    ]
 
-k=2:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-group_min=11, group_max=11. lower=11, upper=47. Now compute first_candidate and last_candidate.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-remainder_lower=11%10=1. <=1 → first_candidate=11 -1 +1=11.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-last_candidate: upper=47. remainder_upper=7 >=1? yes. last_candidate=47 - (7-1) =47-6=41.
+    print('Tests passed 😎')
 
-Wait, but s=1. So the group is numbers that start and end with 1. So for k=2, the group is 11. So in the code, group_min=11 and group_max=11. So lower and upper are 11 and 11. So first_candidate=11, last_candidate=11. count is (0)//10 +1=1. So adds 1.
 
-Thus, s=1 contributes 1.
+if __name__ == '__main__':
+    test()
 
-Similarly, s=2:
 
-k=1:
+```
 
-group_min=2, group_max=2. lower=2, upper=2. first_candidate=2. last_candidate=2. count 1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-k=2:
-
-group_min=22, group_max=22. lower=22, upper=47. group_max=22. So upper=22. first_candidate=22. count 1. So s=2 contributes 1 (k=1) and 1 (k=2) → total 2.
-
-Similarly, s=3:
-
-k=1: 3 is in range. count 1.
-
-k=2: group_min=33. upper=47. group_max=33. first_candidate=33. 33<=47 → count 1. So s=3 contributes 2.
-
-Same for s=4:
-
-k=1:4 in range. k=2:44 is 44 <=47 → count 1. So 2.
-
-s=5:
-
-k=1:5 in range. count 1.
-
-k=2: group_min=55>47 → no.
-
-So s=5 contributes 1.
-
-s=6-9: same as s=5. So each contributes 1.
-
-Total:
-
-s=1:1.
-
-s=2:2.
-
-s=3:2.
-
-s=4:2.
-
-s=5:1.
-
-s=6:1.
-
-s=7:1.
-
-s=8:1.
-
-s=9:1.
-
-Total:1+2+2+2+1*5=1+6+5=12. Correct.
+```
 
 So the code works for the first example.
 

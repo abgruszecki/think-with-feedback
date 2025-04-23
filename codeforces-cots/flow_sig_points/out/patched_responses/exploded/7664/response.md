@@ -868,71 +868,117 @@ Add to original_sum.
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n = int(input())
-a = list(map(int, input().split()))
-prefix_sum = [0] * (n +1)
-for i in range(n):
-    prefix_sum[i+1] = prefix_sum[i] + a[i]
 
-original_sum = sum( (i+1)*a[i] for i in range(n) )
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    prefix_sum = [0] * (n +1)
+    for i in range(n):
+        prefix_sum[i+1] = prefix_sum[i] + a[i]
 
-# Build convex hull
-lines = []
-for j in range(1, n+1):
-    m = j
-    b = -prefix_sum[j]
-    # Add to lines and maintain convex hull
-    while len(lines) >=2:
-        # Check if last two lines and new line are such that the second last can be removed
-        line1 = lines[-2]
-        line2 = lines[-1]
-        # Compute intersection of line2 and new line
-        x2 = (b - line2[1]) / (line2[0] - m)
-        # Compute intersection of line1 and line2
-        x1 = (line2[1] - line1[1]) / (line1[0] - line2[0])
-        if x2 <= x1:
-            lines.pop()
-        else:
-            break
-    lines.append( (m, b) )
+    original_sum = sum( (i+1)*a[i] for i in range(n) )
 
-max_delta = 0
+    # Build convex hull
+    lines = []
+    for j in range(1, n+1):
+        m = j
+        b = -prefix_sum[j]
+        # Add to lines and maintain convex hull
+        while len(lines) >=2:
+            # Check if last two lines and new line are such that the second last can be removed
+            line1 = lines[-2]
+            line2 = lines[-1]
+            # Compute intersection of line2 and new line
+            x2 = (b - line2[1]) / (line2[0] - m)
+            # Compute intersection of line1 and line2
+            x1 = (line2[1] - line1[1]) / (line1[0] - line2[0])
+            if x2 <= x1:
+                lines.pop()
+            else:
+                break
+        lines.append( (m, b) )
 
-# Precompute the list of lines for binary search
-lines_list = lines
+    max_delta = 0
 
-for i in range(n):
-    x = a[i]
-    # Find the best line in lines_list for this x
-    # Binary search on the lines_list
-    left = 0
-    right = len(lines_list) -1
-    while left < right:
-        mid = (left + right) //2
-        if mid +1 > len(lines_list)-1:
-            break
-        # Compute intersection between lines[mid] and lines[mid+1]
-        line_mid = lines_list[mid]
-        line_next = lines_list[mid+1]
-        intersect = (line_next[1] - line_mid[1]) / (line_mid[0] - line_next[0])
-        if x <= intersect:
-            right = mid
-        else:
-            left = mid +1
-    best_line = lines_list[left]
-    value = best_line[0] * x + best_line[1]
-    current_term = prefix_sum[i+1] - a[i] * (i+1)
-    delta = value + current_term
-    if delta > max_delta:
-        max_delta = delta
+    # Precompute the list of lines for binary search
+    lines_list = lines
 
-print(original_sum + max_delta)
+    for i in range(n):
+        x = a[i]
+        # Find the best line in lines_list for this x
+        # Binary search on the lines_list
+        left = 0
+        right = len(lines_list) -1
+        while left < right:
+            mid = (left + right) //2
+            if mid +1 > len(lines_list)-1:
+                break
+            # Compute intersection between lines[mid] and lines[mid+1]
+            line_mid = lines_list[mid]
+            line_next = lines_list[mid+1]
+            intersect = (line_next[1] - line_mid[1]) / (line_mid[0] - line_next[0])
+            if x <= intersect:
+                right = mid
+            else:
+                left = mid +1
+        best_line = lines_list[left]
+        value = best_line[0] * x + best_line[1]
+        current_term = prefix_sum[i+1] - a[i] * (i+1)
+        delta = value + current_term
+        if delta > max_delta:
+            max_delta = delta
 
-But wait, there's a potential division by zero in get_intersect? But j ranges from 1 to n, so m is j, which is unique. So all lines have different m values. So lines have unique slopes, so denominator is not zero.
+    print(original_sum + max_delta, file=output_stream)
 
-Testing with the first sample:
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 1 2 7 1
+""",
+            "output": \
+"""\
+49
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample Input 1:
 

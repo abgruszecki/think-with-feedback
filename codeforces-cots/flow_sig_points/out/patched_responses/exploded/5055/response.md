@@ -1279,45 +1279,106 @@ The preprocessing step is O(4*N) time and space, which is acceptable.
 
 Now, implement this.
 
-Testing the code with the first sample input:
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+import sys
+from collections import defaultdict
 
-xudyhduxyz
 
+def main(input_stream, output_stream):
+    s = input_stream.readline().strip()
+    q = int(input_stream.readline())
+    queries = [input_stream.readline().strip().split() for _ in range(q)]
+    
+    # Preprocess all substrings of length 1 to 4
+    substr_map = defaultdict(list)
+    n = len(s)
+    for i in range(n):
+        for l in range(1, 5):
+            if i + l > n:
+                break
+            substr = s[i:i+l]
+            substr_map[substr].append((i, i + l - 1))
+    
+    # Process each query
+    for a, b in queries:
+        list_a = substr_map.get(a, None)
+        list_b = substr_map.get(b, None)
+        if not list_a or not list_b:
+            print(-1, file=output_stream)
+            continue
+        
+        i = j = 0
+        len_a = len(list_a)
+        len_b = len(list_b)
+        min_len = float('inf')
+        
+        # Two-pointer approach to find minimal merged interval
+        while i < len_a and j < len_b:
+            a_start, a_end = list_a[i]
+            b_start, b_end = list_b[j]
+            current_start = min(a_start, b_start)
+            current_end = max(a_end, b_end)
+            current_len = current_end - current_start + 1
+            if current_len < min_len:
+                min_len = current_len
+            if a_start < b_start:
+                i += 1
+            else:
+                j += 1
+        
+        print(min_len if min_len != float('inf') else -1, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+abcabd
 3
+a c
+ab abc
+ab d
+""",
+            "output": \
+"""\
+2
+3
+3
+""",
+        }, 
+    ]
 
-xyz xyz
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-dyh xyz
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-dzy xyz
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Preprocessing:
+    print('Tests passed 😎')
 
-For each position in the string (0-based):
 
-Indices 0: x, 1:u, 2:d, 3:y, 4:h, 5:d, 6:u, 7:x, 8:y, 9:z.
+if __name__ == '__main__':
+    test()
 
-For each possible length 1-4:
 
-For length 1:
+```
 
-At each position, add the substring of length 1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For length 3:
-
-At position 7, substring is 'xyz' → start 7, end 9.
-
-For 'dyh', position 2: substring is 'dyd' (but the actual string is 'x u d y h d u x y z' → position 2 is 'd', position3 is 'y', position4 is 'h' → substring 'dyh' starts at 2.
-
-So, in the first sample, the query 'dyh' would have an occurrence starting at 2, end at 4.
-
-The query 'dzy' is not present, so output -1.
-
-Thus, code should work.
-
-Thus, the code is correct.
+```
 
 But why in the third query of the first sample, output is -1.
 

@@ -905,341 +905,334 @@ But for efficiency, we can represent the subset as a frozenset and track visited
 
 Here's a possible code outline:
 
+Testing against sample input 1.
+
+```python
 from collections import deque
 
-mod = 10**9 +7
 
-nS = int(input())
-adjS = [[] for _ in range(nS+1)]  # nodes are 1-based
+def main(input_stream, output_stream):
+    MOD = 10**9 + 7
 
-for _ in range(nS-1):
-    u, v = map(int, input().split())
-    adjS[u].append(v)
-    adjS[v].append(u)
+    def read_tree(n):
+        adj = [[] for _ in range(n+1)]
+        for _ in range(n-1):
+            u, v = map(int, input_stream.readline().rstrip("\n").split())
+            adj[u].append(v)
+            adj[v].append(u)
+        return adj
 
-nT = int(input())
-adjT = [[] for _ in range(nT+1)]
-for _ in range(nT-1):
-    x, y = map(int, input().split())
-    adjT[x].append(y)
-    adjT[y].append(x)
-
-# Preprocess T's canonical forms
-def find_centers(adj, n):
-    if n ==1:
-        return [1]
-    degree = [0]*(n+1)
-    leaves = deque()
-    for i in range(1, n+1):
-        degree[i] = len(adj[i])
-        if degree[i] ==1:
-            leaves.append(i)
-            degree[i] =0
-    remaining = n
-    while remaining >2:
-        for _ in range(len(leaves)):
-            u = leaves.popleft()
-            for v in adj[u]:
-                if degree[v] >0:
-                    degree[v] -=1
-                    if degree[v] ==1:
-                        leaves.append(v)
-                        degree[v] =0
-            remaining -=1
-    centers = []
-    for i in range(1, n+1):
-        if degree[i] >=0:  # nodes not removed
-            centers.append(i)
-    return centers
-
-def get_subtree_adj(nodes, adj):
-    # build adjacency list for the subtree consisting of 'nodes'
-    # nodes is a set of integers
-    sub_adj = [[] for _ in range(max(nodes)+1)]  # assuming nodes are 1-based
-    for u in nodes:
-        for v in adj[u]:
-            if v in nodes:
-                sub_adj[u].append(v)
-    return sub_adj, len(nodes)
-
-def compute_centers(sub_adj, sub_size):
-    # sub_adj is the adjacency list of the subtree (nodes are up to max_node)
-    # sub_size is the number of nodes in the subtree
-    # returns the centers of the subtree
-    if sub_size ==1:
-        return [list(sub_adj.keys())[0]]
-    # Compute leaves and degrees
-    degree = {}
-    leaves = deque()
-    nodes = []
-    for u in range(len(sub_adj)):
-        if sub_adj[u]:
-            nodes.append(u)
-            degree[u] = len(sub_adj[u])
-            if degree[u] ==1:
+    def find_centers(adj, size):
+        if size == 1:
+            return [1]
+        degree = {}
+        leaves = deque()
+        for u in range(1, size+1):
+            cnt = len(adj[u])
+            degree[u] = cnt
+            if cnt == 1:
                 leaves.append(u)
-    remaining = sub_size
-    while remaining >2:
-        for _ in range(len(leaves)):
-            u = leaves.popleft()
-            for v in sub_adj[u]:
-                if degree.get(v, 0) >1:
-                    degree[v] -=1
-                    if degree[v] ==1:
-                        leaves.append(v)
-            remaining -=1
-    centers = []
-    for u in nodes:
-        if degree.get(u, 0) >0:
-            centers.append(u)
-    return centers
+        remaining = size
+        while remaining > 2:
+            for _ in range(len(leaves)):
+                u = leaves.popleft()
+                for v in adj[u]:
+                    if degree[v] > 1:
+                        degree[v] -= 1
+                        if degree[v] == 1:
+                            leaves.append(v)
+                remaining -= 1
+        centers = []
+        for u in range(1, size+1):
+            if degree.get(u, 0) > 0:
+                centers.append(u)
+        return centers
 
-def ahu_string(root, sub_adj):
-    # Compute the AHU string for the subtree rooted at 'root'
-    # sub_adj is the adjacency list of the subtree
-    visited = set()
-    def dfs(u, parent):
-        children = []
-        for v in sub_adj[u]:
-            if v != parent and v in nodes_set:
-                children.append(dfs(v, u))
-        children.sort()  # to ensure the order is canonical
-        return '(' + ''.join(children) + ')'
-    nodes_set = set()
-    for u in sub_adj:
-        if sub_adj[u]:
-            nodes_set.add(u)
-    return dfs(root, -1)
+    def compute_ahu(root, adj, nodes):
+        visited = set()
 
-# Preprocess T's centers and AHU strings
-T_size = nT
-T_centers = find_centers(adjT, T_size)
-T_ahu_set = set()
+        def dfs(u, parent):
+            children = []
+            for v in adj[u]:
+                if v != parent and v in nodes:
+                    children.append(dfs(v, u))
+            children.sort()
+            return '(' + ''.join(children) + ')'
+        
+        return dfs(root, -1)
 
-# Build T's adjacency list properly
-nodes_T = set(range(1, T_size+1))
-sub_adj_T, _ = get_subtree_adj(nodes_T, adjT)
+    nS = int(input_stream.readline().rstrip("\n"))
+    adjS = read_tree(nS)
+    nT = int(input_stream.readline().rstrip("\n"))
+    adjT = read_tree(nT)
 
-for center in T_centers:
-    ahu = ahu_string(center, sub_adj_T)
-    T_ahu_set.add(ahu)
+    T_centers = find_centers(adjT, nT)
+    T_nodes = set(range(1, nT+1))
+    T_ahu = set()
+    for center in T_centers:
+        ahu = compute_ahu(center, adjT, T_nodes)
+        T_ahu.add(ahu)
 
-# Now process S
-k = T_size
-count =0
+    count = 0
+    k = nT
 
-for u in range(1, nS+1):
-    # Start BFS with u, generating subsets where all nodes are >=u
-    queue = deque()
-    initial_set = frozenset([u])
-    queue.append( (initial_set, [u]) )
-    visited = set()
-    visited.add(initial_set)
-    
-    while queue:
-        current_set, current_list = queue.popleft()
-        current_size = len(current_set)
-        if current_size ==k:
-            # Process this subset
-            # Build subtree adjacency
-            sub_adj, sub_size = get_subtree_adj(current_set, adjS)
-            # Compute centers
-            # To compute centers, first build the adjacency list for the subtree
-            # Then compute centers
-            # Wait, sub_adj is a list where sub_adj[u] contains the neighbors in the subset.
-            # So, for each node in current_set, we can get its neighbors in the subset.
-            # Build the adjacency list for the subtree.
-            nodes_sub = list(current_set)
-            sub_adj_dict = {node: [] for node in nodes_sub}
-            for node in nodes_sub:
+    for u in range(1, nS+1):
+        visited = set()
+        initial = frozenset([u])
+        queue = deque([(initial, [u])])
+        visited.add(initial)
+        
+        while queue:
+            current_set, nodes_list = queue.popleft()
+            current_size = len(current_set)
+            if current_size == k:
+                sub_adj = [[] for _ in range(nS+1)]
+                for node in current_set:
+                    for neighbor in adjS[node]:
+                        if neighbor in current_set:
+                            sub_adj[node].append(neighbor)
+                nodes = list(current_set)
+                degree = {}
+                leaves = deque()
+                for node in nodes:
+                    d = len(sub_adj[node])
+                    degree[node] = d
+                    if d == 1:
+                        leaves.append(node)
+                remaining = k
+                if remaining == 1:
+                    centers = [nodes[0]]
+                else:
+                    centers = []
+                    temp_degree = degree.copy()
+                    temp_leaves = deque(leaves)
+                    temp_remaining = remaining
+                    while temp_remaining > 2:
+                        for _ in range(len(temp_leaves)):
+                            leaf = temp_leaves.popleft()
+                            for v in sub_adj[leaf]:
+                                if temp_degree[v] > 1:
+                                    temp_degree[v] -= 1
+                                    if temp_degree[v] == 1:
+                                        temp_leaves.append(v)
+                            temp_remaining -= 1
+                    centers = []
+                    for node in nodes:
+                        if temp_degree.get(node, 0) > 0:
+                            centers.append(node)
+                valid = False
+                for center in centers:
+                    ahu_sub = compute_ahu(center, sub_adj, current_set)
+                    if ahu_sub in T_ahu:
+                        valid = True
+                        break
+                if valid:
+                    count += 1
+                continue
+            for node in nodes_list:
                 for neighbor in adjS[node]:
-                    if neighbor in current_set:
-                        sub_adj_dict[node].append(neighbor)
-            # Now compute centers
-            # Compute degree for each node in the subtree
-            degree = {}
-            leaves = deque()
-            for node in nodes_sub:
-                d = len(sub_adj_dict[node])
-                degree[node] = d
-                if d ==1:
-                    leaves.append(node)
-            remaining = sub_size
-            while remaining >2:
-                for _ in range(len(leaves)):
-                    leaf = leaves.popleft()
-                    for neighbor in sub_adj_dict[leaf]:
-                        if degree[neighbor] >1:
-                            degree[neighbor] -=1
-                            if degree[neighbor] ==1:
-                                leaves.append(neighbor)
-                    remaining -=1
-            centers_sub = []
-            for node in nodes_sub:
-                if degree.get(node,0) >0:
-                    centers_sub.append(node)
-            # Now compute AHU for each center
-            for center in centers_sub:
-                # Build the AHU string rooted at center
-                # Need to perform a DFS to generate the AHU string
-                # Using the sub_adj_dict
-                visited_ahu = set()
-                def dfs_ahu(node, parent):
-                    children = []
-                    for neighbor in sub_adj_dict[node]:
-                        if neighbor != parent:
-                            children.append( dfs_ahu(neighbor, node) )
-                    children.sort()
-                    return '(' + ''.join(children) + ')'
-                ahu_sub = dfs_ahu(center, -1)
-                if ahu_sub in T_ahu_set:
-                    count +=1
-                    # Once a match is found for this subset, break to avoid double-counting
-                    break
-            continue
-        # Expand the subset
-        # For each node in current_set, explore its neighbors in S that are >=u and not in current_set
-        for node in current_set:
-            for neighbor in adjS[node]:
-                if neighbor not in current_set and neighbor >=u:
-                    new_set = frozenset( current_set | {neighbor} )
-                    if new_set not in visited:
-                        visited.add(new_set)
-                        new_list = current_list + [neighbor]
-                        queue.append( (new_set, new_list) )
-print(count % mod)
+                    if neighbor not in current_set and neighbor >= u:
+                        new_set = frozenset(current_set | {neighbor})
+                        if new_set not in visited:
+                            visited.add(new_set)
+                            new_list = nodes_list + [neighbor]
+                            queue.append((new_set, new_list))
 
-Wait, but this code has several issues.
+    print(count % MOD, file=output_stream)
 
-First, the get_subtree_adj function may not be correctly building the adjacency list. For example, when the nodes are passed as a set, and the adjacency list for S is stored as adjS, the function iterates over each node in the subset and adds their adjacent nodes that are also in the subset.
 
-But in the code for processing each subset, the code builds sub_adj_dict as a dictionary for each node in the subset, listing their neighbors in the subset.
 
-Then, when computing the centers of the subtree, the code uses the degrees from sub_adj_dict.
+def test():
+    import io
 
-But this should correctly compute the subtree's adjacency list.
-
-Next, the AHU string computation is done via a recursive DFS. For small k (up to 12), this is manageable.
-
-However, the code may generate the same subset multiple times in different orders. For example, adding node A then B is the same as B then A. But the code uses a frozenset to track visited subsets, so the same subset in any order is processed only once.
-
-But the BFS starts with the initial node u, and adds nodes in a way that all nodes are >=u. So each subset is processed exactly once, with u being the minimal node.
-
-This should be correct.
-
-But the code may have performance issues for large subsets. For example, when S is a star-shaped tree with 1000 nodes and k=12, generating all (999 choose 11) subsets is impossible, leading to a timeout.
-
-But the problem's time constraints allow 2 seconds per test case. For the worst case, this code may not pass.
-
-But given the problem's constraints, perhaps there's no better approach, and this code is the best possible.
-
-But looking at the third example in the problem statement:
-
-Input:
-7
-1 2
-1 3
-1 4
-1 5
-1 6
-1 7
-4
-4 1
-4 2
-4 3
-
-Output:
-20
-
-Here, T is a star-shaped tree with 4 nodes (root 4 connected to 1, 2, 3). The S is a star with 7 leaves. The number of subtrees isomorphic to T is C(7,3) = 35. But the output is 20. Wait, no, the third example's output is 20. Hmm, perhaps the way the code counts is correct.
-
-But regardless, the code as written may not handle cases where the subtree is a star. For example, when u is 1 in S, the code will generate subsets that include 1 and any 3 other nodes. However, in the third example, the code would generate subsets of size 4 (k=4) that are star-shaped. Each such subset's AHU string would match T's.
-
-But how does the code compute the centers of such a subset?
-
-For a star-shaped subtree with 4 nodes (center u and three leaves), the center is u. When generating the AHU string for u as root, it would be "(()()())", which matches T's AHU string.
-
-Thus, the code should count all possible combinations of u (the center of the star in S) and three leaves. For the third example, the number is C(6,3) = 20 (since S has 6 leaves connected to center 1), which matches the sample output.
-
-Thus, the code should work for this case.
-
-But for the case where S is a star with 999 leaves and T is a star of 12 nodes (one center and 11 leaves), the code would generate C(999, 11) subsets, which is way too many. But given the time constraints, this would not be feasible.
-
-This indicates that the code would time out for such cases.
-
-But given the problem's constraints, perhaps there's a smarter way to generate the subsets or to compute the AHU strings without enumerating all subsets.
-
-Another optimization: note that if T's AHU strings are all of a certain structure, perhaps we can compute the count in S without generating all subsets.
-
-For example, if T is a star-shaped tree, then any subtree of S that is also a star-shaped tree with the same number of leaves would be a match. So, for each node u in S, the number of ways to choose (k-1) leaves from its neighbors.
-
-But this requires that the structure of T is known and that we can find a way to compute the count based on the structure.
-
-But this requires case analysis for different tree structures, which is not general.
-
-An alternative optimization is to precompute all possible AHU strings for T and then, for each node in S, compute how many subtrees rooted at that node have an AHU string matching T's.
-
-But this requires dynamic programming to track the number of ways to form the AHU string for a given node and subtree size.
-
-However, this approach is complex but may be feasible.
-
-For example, the DP state can be defined as:
-
-dp[u][s][t]: the number of ways to form a subtree rooted at u with size s and AHU string t.
-
-But for each node u and size s, the possible AHU strings t can be very large, but since T's possible AHU strings are known, we can track only those that are prefixes leading to T's strings.
-
-This is similar to a trie-based approach, where we track the necessary prefixes.
-
-But this requires a lot of code and is complex.
-
-Given time constraints, the BFS approach may be the only feasible way to code for this problem, even if it's not optimal for all cases.
-
-Thus, the code provided earlier is the best possible approach under time constraints, and it should work for the problem's given constraints, but may time out for certain test cases. However, given that T is up to 12 nodes and S is up to 1000 nodes, and given that the code is optimized to generate subsets with minimal node u and uses BFS with pruning, it's possible that the code will work within the time limits.
-
-After testing, the code passes the sample inputs, but for larger cases, it may be slow.
-
-But according to the problem's constraints, this seems to be the intended approach.
-
-Thus, the final code is as written above, with some corrections.
-
-Now, to ensure the code is correct, let's test it against the samples.
-
-Sample 1:
-
-Input:
-5
-1 2
-2 3
-3 4
-4 5
-3
-1 2
-2 3
-
-Output:3.
-
-In this case, T is a path of 3 nodes. S is a path of 5 nodes. The valid subtrees are [1-2-3], [2-3-4], [3-4-5], but the output is 3. The code should generate these subsets and compute their canonical forms.
-
-The code's BFS for u=1 will generate the subset {1,2,3}. For u=2, subsets like {2,3,4}. For u=3, {3,4,5}. Each of these will have the same AHU string as T, which is a path. The code should count them.
-
-Sample 2:
-
-Input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
 2 3
 3 1
 3
 1 2
 1 3
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-Output:1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Here, T is a star with root 1 connected to 2 and 3. S is a tree where 3 is connected to 1 and 2. The only subtree that matches is the entire S tree. The code should find this.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sample 3:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Input:
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+from collections import deque
+
+
+def main(input_stream, output_stream):
+    MOD = 10**9 + 7
+
+    def read_tree(n):
+        adj = [[] for _ in range(n+1)]
+        for _ in range(n-1):
+            u, v = map(int, input_stream.readline().rstrip("\n").split())
+            adj[u].append(v)
+            adj[v].append(u)
+        return adj
+
+    def find_centers(adj, size):
+        if size == 1:
+            return [1]
+        degree = {}
+        leaves = deque()
+        for u in range(1, size+1):
+            cnt = len(adj[u])
+            degree[u] = cnt
+            if cnt == 1:
+                leaves.append(u)
+        remaining = size
+        while remaining > 2:
+            for _ in range(len(leaves)):
+                u = leaves.popleft()
+                for v in adj[u]:
+                    if degree[v] > 1:
+                        degree[v] -= 1
+                        if degree[v] == 1:
+                            leaves.append(v)
+                remaining -= 1
+        centers = []
+        for u in range(1, size+1):
+            if degree.get(u, 0) > 0:
+                centers.append(u)
+        return centers
+
+    def compute_ahu(root, adj, nodes):
+        visited = set()
+
+        def dfs(u, parent):
+            children = []
+            for v in adj[u]:
+                if v != parent and v in nodes:
+                    children.append(dfs(v, u))
+            children.sort()
+            return '(' + ''.join(children) + ')'
+        
+        return dfs(root, -1)
+
+    nS = int(input_stream.readline().rstrip("\n"))
+    adjS = read_tree(nS)
+    nT = int(input_stream.readline().rstrip("\n"))
+    adjT = read_tree(nT)
+
+    T_centers = find_centers(adjT, nT)
+    T_nodes = set(range(1, nT+1))
+    T_ahu = set()
+    for center in T_centers:
+        ahu = compute_ahu(center, adjT, T_nodes)
+        T_ahu.add(ahu)
+
+    count = 0
+    k = nT
+
+    for u in range(1, nS+1):
+        visited = set()
+        initial = frozenset([u])
+        queue = deque([(initial, [u])])
+        visited.add(initial)
+        
+        while queue:
+            current_set, nodes_list = queue.popleft()
+            current_size = len(current_set)
+            if current_size == k:
+                sub_adj = [[] for _ in range(nS+1)]
+                for node in current_set:
+                    for neighbor in adjS[node]:
+                        if neighbor in current_set:
+                            sub_adj[node].append(neighbor)
+                nodes = list(current_set)
+                degree = {}
+                leaves = deque()
+                for node in nodes:
+                    d = len(sub_adj[node])
+                    degree[node] = d
+                    if d == 1:
+                        leaves.append(node)
+                remaining = k
+                if remaining == 1:
+                    centers = [nodes[0]]
+                else:
+                    centers = []
+                    temp_degree = degree.copy()
+                    temp_leaves = deque(leaves)
+                    temp_remaining = remaining
+                    while temp_remaining > 2:
+                        for _ in range(len(temp_leaves)):
+                            leaf = temp_leaves.popleft()
+                            for v in sub_adj[leaf]:
+                                if temp_degree[v] > 1:
+                                    temp_degree[v] -= 1
+                                    if temp_degree[v] == 1:
+                                        temp_leaves.append(v)
+                            temp_remaining -= 1
+                    centers = []
+                    for node in nodes:
+                        if temp_degree.get(node, 0) > 0:
+                            centers.append(node)
+                valid = False
+                for center in centers:
+                    ahu_sub = compute_ahu(center, sub_adj, current_set)
+                    if ahu_sub in T_ahu:
+                        valid = True
+                        break
+                if valid:
+                    count += 1
+                continue
+            for node in nodes_list:
+                for neighbor in adjS[node]:
+                    if neighbor not in current_set and neighbor >= u:
+                        new_set = frozenset(current_set | {neighbor})
+                        if new_set not in visited:
+                            visited.add(new_set)
+                            new_list = nodes_list + [neighbor]
+                            queue.append((new_set, new_list))
+
+    print(count % MOD, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 7
 1 2
 1 3
@@ -1251,10 +1244,226 @@ Input:
 4 1
 4 2
 4 3
+""",
+            "output": \
+"""\
+20
+""",
+        }, 
+    ]
 
-Output:20.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-T is a star with 4 nodes (center 4 connected to 1, 2, 3). S is a star with 7 leaves. The valid subsets are choosing any 3 of the 6 leaves (since the center is 1 in S). The code should generate all subsets of size 4 that include 1 and 3 leaves. The count is C(6,3) = 20.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+from collections import deque
+
+
+def main(input_stream, output_stream):
+    MOD = 10**9 + 7
+
+    def read_tree(n):
+        adj = [[] for _ in range(n+1)]
+        for _ in range(n-1):
+            u, v = map(int, input_stream.readline().rstrip("\n").split())
+            adj[u].append(v)
+            adj[v].append(u)
+        return adj
+
+    def find_centers(adj, size):
+        if size == 1:
+            return [1]
+        degree = {}
+        leaves = deque()
+        for u in range(1, size+1):
+            cnt = len(adj[u])
+            degree[u] = cnt
+            if cnt == 1:
+                leaves.append(u)
+        remaining = size
+        while remaining > 2:
+            for _ in range(len(leaves)):
+                u = leaves.popleft()
+                for v in adj[u]:
+                    if degree[v] > 1:
+                        degree[v] -= 1
+                        if degree[v] == 1:
+                            leaves.append(v)
+                remaining -= 1
+        centers = []
+        for u in range(1, size+1):
+            if degree.get(u, 0) > 0:
+                centers.append(u)
+        return centers
+
+    def compute_ahu(root, adj, nodes):
+        visited = set()
+
+        def dfs(u, parent):
+            children = []
+            for v in adj[u]:
+                if v != parent and v in nodes:
+                    children.append(dfs(v, u))
+            children.sort()
+            return '(' + ''.join(children) + ')'
+        
+        return dfs(root, -1)
+
+    nS = int(input_stream.readline().rstrip("\n"))
+    adjS = read_tree(nS)
+    nT = int(input_stream.readline().rstrip("\n"))
+    adjT = read_tree(nT)
+
+    T_centers = find_centers(adjT, nT)
+    T_nodes = set(range(1, nT+1))
+    T_ahu = set()
+    for center in T_centers:
+        ahu = compute_ahu(center, adjT, T_nodes)
+        T_ahu.add(ahu)
+
+    count = 0
+    k = nT
+
+    for u in range(1, nS+1):
+        visited = set()
+        initial = frozenset([u])
+        queue = deque([(initial, [u])])
+        visited.add(initial)
+        
+        while queue:
+            current_set, nodes_list = queue.popleft()
+            current_size = len(current_set)
+            if current_size == k:
+                sub_adj = [[] for _ in range(nS+1)]
+                for node in current_set:
+                    for neighbor in adjS[node]:
+                        if neighbor in current_set:
+                            sub_adj[node].append(neighbor)
+                nodes = list(current_set)
+                degree = {}
+                leaves = deque()
+                for node in nodes:
+                    d = len(sub_adj[node])
+                    degree[node] = d
+                    if d == 1:
+                        leaves.append(node)
+                remaining = k
+                if remaining == 1:
+                    centers = [nodes[0]]
+                else:
+                    centers = []
+                    temp_degree = degree.copy()
+                    temp_leaves = deque(leaves)
+                    temp_remaining = remaining
+                    while temp_remaining > 2:
+                        for _ in range(len(temp_leaves)):
+                            leaf = temp_leaves.popleft()
+                            for v in sub_adj[leaf]:
+                                if temp_degree[v] > 1:
+                                    temp_degree[v] -= 1
+                                    if temp_degree[v] == 1:
+                                        temp_leaves.append(v)
+                            temp_remaining -= 1
+                    centers = []
+                    for node in nodes:
+                        if temp_degree.get(node, 0) > 0:
+                            centers.append(node)
+                valid = False
+                for center in centers:
+                    ahu_sub = compute_ahu(center, sub_adj, current_set)
+                    if ahu_sub in T_ahu:
+                        valid = True
+                        break
+                if valid:
+                    count += 1
+                continue
+            for node in nodes_list:
+                for neighbor in adjS[node]:
+                    if neighbor not in current_set and neighbor >= u:
+                        new_set = frozenset(current_set | {neighbor})
+                        if new_set not in visited:
+                            visited.add(new_set)
+                            new_list = nodes_list + [neighbor]
+                            queue.append((new_set, new_list))
+
+    print(count % MOD, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 2
+2 3
+3 4
+4 5
+4
+4 1
+4 2
+4 3
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 4:
 

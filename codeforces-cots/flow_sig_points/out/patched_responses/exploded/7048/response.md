@@ -703,27 +703,16 @@ But since there are only three possible actions (0,1,2), perhaps using a list of
 
 So, initial code:
 
-n = int(input())
-a = list(map(int, input().split()))
+Testing against sample input 2.
 
-prev_dp = {}
-current_actions = []
-ai = a[0]
-if ai == 0:
-    current_actions = [0]
-elif ai == 1:
-    current_actions = [0, 1]
-elif ai == 2:
-    current_actions = [0, 2]
-elif ai == 3:
-    current_actions = [0, 1, 2]
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for action in current_actions:
-    prev_dp[action] = 1 if action == 0 else 0
-
-for i in range(1, n):
-    ai = a[i]
+    prev_dp = {}
     current_actions = []
+    ai = a[0]
     if ai == 0:
         current_actions = [0]
     elif ai == 1:
@@ -732,97 +721,91 @@ for i in range(1, n):
         current_actions = [0, 2]
     elif ai == 3:
         current_actions = [0, 1, 2]
-    
-    curr_dp = {}
+
     for action in current_actions:
-        min_rest = float('inf')
-        # determine allowed_prev_actions
-        if action == 0:  # rest
-            allowed_prev = [0, 1, 2]
-        elif action == 1:  # contest
-            allowed_prev = [0, 2]
-        elif action == 2:  # sport
-            allowed_prev = [0, 1]
+        prev_dp[action] = 1 if action == 0 else 0
+
+    for i in range(1, n):
+        ai = a[i]
+        current_actions = []
+        if ai == 0:
+            current_actions = [0]
+        elif ai == 1:
+            current_actions = [0, 1]
+        elif ai == 2:
+            current_actions = [0, 2]
+        elif ai == 3:
+            current_actions = [0, 1, 2]
         
-        for pa in allowed_prev:
-            if pa in prev_dp:
-                current_rest = prev_dp[pa] + (1 if action ==0 else 0)
-                if current_rest < min_rest:
-                    min_rest = current_rest
-        if min_rest != float('inf'):
-            curr_dp[action] = min_rest
-    prev_dp = curr_dp
+        curr_dp = {}
+        for action in current_actions:
+            min_rest = float('inf')
+            # determine allowed_prev_actions
+            if action == 0:  # rest
+                allowed_prev = [0, 1, 2]
+            elif action == 1:  # contest
+                allowed_prev = [0, 2]
+            elif action == 2:  # sport
+                allowed_prev = [0, 1]
+            
+            for pa in allowed_prev:
+                if pa in prev_dp:
+                    current_rest = prev_dp[pa] + (1 if action ==0 else 0)
+                    if current_rest < min_rest:
+                        min_rest = current_rest
+            if min_rest != float('inf'):
+                curr_dp[action] = min_rest
+        prev_dp = curr_dp
 
-if prev_dp:
-    print(min(prev_dp.values()))
-else:
-    print(0)  # this case should never happen
+    if prev_dp:
+        print(min(prev_dp.values()), file=output_stream)
+    else:
+        print(0, file=output_stream)  # this case should never happen
 
-But wait, the code for the first day is handled in the initial prev_dp setup.
 
-Testing sample 3, which gives output 1. Let's see.
 
-Sample 3:
+def test():
+    import io
 
-n=2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+2 2
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-a = [2,2].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-First day (i=0):
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-ai=2 → current_actions are [0,2].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-prev_dp is initialized as {0:1, 2:0}.
+    print('Tests passed 😎')
 
-Second day (i=1):
 
-ai=2 → current_actions are [0,2].
+if __name__ == '__main__':
+    test()
 
-For action 0:
 
-allowed_prev_actions = [0,1,2].
+```
 
-prev_dp has 0 and 2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-so pa can be 0 and 2.
-
-For pa=0: prev_dp[0] is 1 → current_rest 1+1=2.
-
-pa=2: prev_dp[2] is 0 → 0+1=1.
-
-so min_rest is 1. curr_dp[0] =1.
-
-For action 2:
-
-allowed_prev_actions are [0,1].
-
-prev_dp has 0 and 2 (pa 1 is not in prev_dp).
-
-so pa=0: prev_dp[0] is 1 → 1+0=1.
-
-so min_rest is 1. curr_dp[2] =1.
-
-curr_dp is {0:1, 2:1}.
-
-min is 1. Correct.
-
-So code works.
-
-Now, for the sample where the answer is 0:
-
-Sample 2:
-
-7
-
-1 3 3 2 1 2 3.
-
-Each day allows for certain actions, and the code should compute that all days can be filled without rests.
-
-But how?
-
-But perhaps in the code, after each day, the curr_dp has entries with 0 rest days.
-
-But since the code is correct, let's proceed.
+```
 
 Now, the code should handle this.
 

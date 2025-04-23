@@ -895,285 +895,124 @@ Reverse the result to get the final sequence.
 
 Thus, the code can be written as follows:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n, m = map(int, input().split())
-a = list(map(int, input().split()))
-events = [int(input().strip()) for _ in range(n)]
 
-# Precompute b array
-b = []
-for i in range(m):
-    b.append(a[i] - (i + 1))
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    events = [int(input_stream.readline().rstrip("\n").strip()) for _ in range(n)]
 
-# Forward processing to compute final current_length (current_need)
-current_length = 0
-sum_k = 0
-forward_events = []
-for event in events:
-    if event == -1:
-        # Hit event
-        k = bisect.bisect_right(a, current_length)
-        sum_k += k
-        current_length -= k
+    # Precompute b array
+    b = []
+    for i in range(m):
+        b.append(a[i] - (i + 1))
+
+    # Forward processing to compute final current_length (current_need)
+    current_length = 0
+    sum_k = 0
+    forward_events = []
+    for event in events:
+        if event == -1:
+            # Hit event
+            k = bisect.bisect_right(a, current_length)
+            sum_k += k
+            current_length -= k
+        else:
+            current_length += 1
+
+    current_need = current_length
+
+    # Reverse processing
+    result = []
+    for event in reversed(events):
+        if event == -1:
+            # Hit event during reverse processing
+            # Find largest i where b[i] <= current_need
+            left = 0
+            right = m - 1
+            best = -1
+            while left <= right:
+                mid = (left + right) // 2
+                if b[mid] <= current_need:
+                    best = mid
+                    left = mid + 1
+                else:
+                    right = mid - 1
+            k = best + 1 if best != -1 else 0
+            current_need += k
+        else:
+            # Append event during reverse processing
+            if current_need > 0:
+                result.append(str(event))
+                current_need -= 1
+
+    # Reverse the result to get the correct order
+    result = result[::-1]
+
+    if not result:
+        print("Poor stack!", file=output_stream)
     else:
-        current_length += 1
+        print(''.join(result), file=output_stream)
 
-current_need = current_length
 
-# Reverse processing
-result = []
-for event in reversed(events):
-    if event == -1:
-        # Hit event during reverse processing
-        # Find largest i where b[i] <= current_need
-        left = 0
-        right = m - 1
-        best = -1
-        while left <= right:
-            mid = (left + right) // 2
-            if b[mid] <= current_need:
-                best = mid
-                left = mid + 1
-            else:
-                right = mid - 1
-        k = best + 1 if best != -1 else 0
-        current_need += k
-    else:
-        # Append event during reverse processing
-        if current_need > 0:
-            result.append(str(event))
-            current_need -= 1
 
-# Reverse the result to get the correct order
-result = result[::-1]
+def test():
+    import io
 
-if not result:
-    print("Poor stack!")
-else:
-    print(''.join(result))
-
-This code should handle all cases efficiently.
-
-Let's test it against the first example:
-
-Input:
-10 3
-1 3 6
--1
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 1
 1
-1
-0
-0
--1
-0
 1
 -1
-1
-
-Forward processing:
-
-events = [-1, 1, 1, 0, 0, -1, 0, 1, -1, 1]
-
-Processing forward:
-
-current_length starts at 0.
-
-Event 0: -1 (hit). current_length is 0. bisect.bisect_right(a, 0) is 0. sum_k +=0. current_length remains 0.
-
-Event 1: 1. append. current_length becomes 1.
-
-Event 2: 1. append. current_length becomes 2.
-
-Event 3: 0. append. current_length becomes 3.
-
-Event 4: 0. append. current_length becomes 4.
-
-Event 5: -1 (hit). current_length is 4. a is [1,3,6]. bisect.bisect_right(a,4) returns 2 (a[0]=1, a[1]=3 <=4, a[2]=6>4). k=2. sum_k +=2. current_length becomes 4-2=2.
-
-Event 6:0. append. current_length becomes 3.
-
-Event7:1. append. current_length becomes4.
-
-Event8:-1 (hit). current_length is4. bisect.bisect_right(a,4) returns 2. a[1]=3 <=4, a[2]=6>4. k=2. sum_k +=2. current_length becomes 4-2=2.
-
-Event9:1. append. current_length becomes3.
-
-So after forward processing, current_length is3. sum_k is0+2+2=4.
-
-During reverse processing, current_need is3.
-
-Processing events in reverse order:
-
-events are reversed: [1, -1, 1, 0, -1, 0, 0, 1, 1, -1]
-
-Process each event:
-
-event1:1 (append in reverse). current_need=3>0. append '1' to result. current_need=2.
-
-event2:-1 (hit). Compute k.
-
-current_need=2.
-
-b is [1-1=0, 3-2=1, 6-3=3]. So b = [0,1,3].
-
-We need to find largest i where b[i] <= 2.
-
-b[2] is3>2. b[1] is1<=2. So best=1. k=2. current_need becomes 2+2=4.
-
-event3:1 (append). current_need=4>0. append '1'. current_need=3.
-
-event4:0. current_need=3>0. append '0'. current_need=2.
-
-event5:-1 (hit). current_need=2.
-
-Looking for largest i where b[i] <=2.
-
-b[2]=3>2. b[1]=1<=2. best=1. k=2. current_need becomes2+2=4.
-
-event6:0. append, current_need=3.
-
-event7:0. append, current_need=2.
-
-event8:1. append, current_need=1.
-
-event9:1. append, current_need=0.
-
-event10:-1. current_need=0. Process hit. Compute k.
-
-current_need=0.
-
-b[i] <=0. looking for largest i. b[0] is0 <=0. best=0. k=1. current_need becomes0+1=1.
-
-But during reverse processing of this hit, current_need is increased by1. So current_need becomes1.
-
-So after processing all events in reverse, the result is ['1', '1', '0', '0', '0', '1'], but in reverse order. Wait, no. Let's recheck.
-
-Wait, the result is collected during reverse processing of the events. Let's step through each event in reversed order.
-
-The events in reversed order are:
-
-1. event9: 1 (append)
-
-2. event8: -1 (hit)
-
-3. event7:1 (append)
-
-4. event6:0 (append)
-
-5. event5:-1 (hit)
-
-6. event4:0 (append)
-
-7. event3:0 (append)
-
-8. event2:1 (append)
-
-9. event1:1 (append)
-
-10. event0:-1 (hit)
-
-Let me reindex:
-
-The events list is [ -1, 1, 1, 0, 0, -1, 0, 1, -1, 1 ]
-
-Reversed, the order is: 1, -1, 1, 0, -1, 0, 0, 1, 1, -1.
-
-Let's process each:
-
-event 9: 1 (append):
-
-current_need is3. append '1', current_need becomes2.
-
-event8: -1 (hit):
-
-current_need is2.
-
-Compute k:
-
-b is [0,1,3]. Find largest i where b[i] <=2.
-
-i=1: b[1] =1 <=2.
-
-i=2:3>2. So best=1. k=2.
-
-current_need +=2 → 2+2=4.
-
-event7:1 (append):
-
-current_need=4 → append '1', current_need=3.
-
-event6:0 (append):
-
-append '0', current_need=2.
-
-event5: -1 (hit):
-
-current_need=2. Find i where b[i] <=2.
-
-i=1 (b=1) is <=2. best=1. k=2.
-
-current_need +=2 → 2+2=4.
-
-event4:0 (append):
-
-current_need=4 → append '0', current_need=3.
-
-event3:0 (append):
-
-current_need=3 → append '0', current_need=2.
-
-event2:1 (append):
-
-current_need=2 → append '1', current_need=1.
-
-event1:1 (append):
-
-current_need=1 → append '1', current_need=0.
-
-event0: -1 (hit):
-
-current_need=0. find i where b[i] <=0.
-
-i=0: b[0]=0 <=0. best=0. k=1.
-
-current_need +=1 → 0+1=1.
-
-Thus, after processing all events, the result list is ['1', '1', '0', '0', '0', '1', '0', '1']? No, let's see:
-
-Wait, the events are processed in reversed order, and for each append event (0 or 1) in reversed order:
-
-The reversed events list is:
-
-1 (event9), -1 (event8), 1 (event7), 0 (event6), -1 (event5), 0 (event4), 0 (event3), 1 (event2), 1 (event1), -1 (event0).
-
-Processing:
-
-event9: append 1 → current_need=3 → add to result, current_need=2.
-
-event8: hit → k=2 → current_need becomes4.
-
-event7: append 1 → current_need=4 → add to result, current_need=3.
-
-event6: append 0 → add to result, current_need=2.
-
-event5: hit → k=2 → current_need becomes4.
-
-event4: append0 → add to result, current_need=3.
-
-event3: append0 → add to result, current_need=2.
-
-event2: append1 → add to result, current_need=1.
-
-event1: append1 → add to result, current_need=0.
-
-event0: hit → k=1 → current_need becomes1.
-
-So the result list after processing is ['1', '1', '0', '0', '0', '1', '0', '1'].
-
-But when reversed, this becomes '1 0 1 0 0 0 1 1'.
-
-Wait, no. The result list is collected in reverse order. So when we reverse it, it becomes the correct order.
+""",
+            "output": \
+"""\
+Poor stack!
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 97, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 90, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: 'Poor stack!'
+Got: '1'
+
+```
 
 Wait, during reverse processing, the appends are processed in reverse order, so the first append in reversed events is the last element in the original sequence. Collecting these appends in reverse order gives the elements in reverse order of the final sequence. So after reversing, we get the correct order.
 

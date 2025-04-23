@@ -66,62 +66,71 @@ Now, possible optimizations. For n=2e5, creating a list of diffs with 2e5-1 elem
 
 So the code can be written as:
 
-n = int(input())
-a = list(map(int, input().split()))
-a.sort()
+Testing against sample input 1.
 
-min_diff = float('inf')
-count = 0
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a.sort()
 
-for i in range(1, n):
-    diff = a[i] - a[i-1]
-    if diff < min_diff:
-        min_diff = diff
-        count = 1
-    elif diff == min_diff:
-        count +=1
+    min_diff = float('inf')
+    count = 0
 
-print(min_diff, count)
+    for i in range(1, n):
+        diff = a[i] - a[i-1]
+        if diff < min_diff:
+            min_diff = diff
+            count = 1
+        elif diff == min_diff:
+            count +=1
 
-Wait, but this approach only requires O(1) extra space (except for the sorted list), which is better. Because we can compute the differences on the fly, track the current minimal, and count how many times it occurs. This is more efficient in terms of memory, which could be important for large n.
+    print(min_diff, count, file=output_stream)
 
-Yes, because in the previous approach of creating a list of diffs, we use O(n) space for that list. But with n up to 2e5, 200k integers is about 1.6MB (since each int in Python is 28 bytes or something, but maybe more). Hmm, but 2e5 * 28 bytes is around 5.6 million bytes, which is about 5.6MB. Still manageable under 256MB. But the second approach is better for memory, even though both are O(n). But in Python, the code that computes the difference on the fly and tracks min and count is better, as it avoids creating a separate list. So that's the way to go.
 
-So code:
 
-After sorting, loop through the array once, compute each difference. For each difference:
+def test():
+    import io
 
-- if it's smaller than current min_diff, reset min_diff to this value, reset count to 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+-2 0 2
+""",
+            "output": \
+"""\
+2 2
+""",
+        }, 
+    ]
 
-- else if equal to current min_diff, increment count.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-- else do nothing.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So this way, we process all consecutive pairs and track the minimal difference and count in O(n) time, O(1) space (excluding the sorted list).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Yes. So the code should be efficient.
+    print('Tests passed 😎')
 
-Testing the sample inputs.
 
-First sample:
+if __name__ == '__main__':
+    test()
 
-Input:
 
-4
+```
 
-6 -3 0 4
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-After sorting: -3,0,4,6.
-
-Differences:
-
-0 - (-3) = 3
-
-4-0=4
-
-6-4=2.
-
-So min_diff starts as inf. The first diff is 3. min_diff becomes 3, count 1. Next diff 4: larger, no change. Next diff 2: less than 3. So min_diff becomes 2, count reset to 1. So the output is 2 1.
+```
 
 Second sample:
 

@@ -297,88 +297,104 @@ Output min_answer.
 
 So, in code:
 
-n = int(input())
+Testing against sample input 1.
 
-marbles = []
-for _ in range(n):
-    x, c = map(int, input().split())
-    marbles.append( (x, c) )
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-# Sort by x
-marbles.sort()
+    marbles = []
+    for _ in range(n):
+        x, c = map(int, input_stream.readline().rstrip("\n").split())
+        marbles.append( (x, c) )
 
-# Compute prefix sums of x
-prefix_sum = [0] * n
-prefix_sum[0] = marbles[0][0]
-for i in range(1, n):
-    prefix_sum[i] = prefix_sum[i-1] + marbles[i][0]
+    # Sort by x
+    marbles.sort()
 
-total_sum = prefix_sum[-1]
+    # Compute prefix sums of x
+    prefix_sum = [0] * n
+    prefix_sum[0] = marbles[0][0]
+    for i in range(1, n):
+        prefix_sum[i] = prefix_sum[i-1] + marbles[i][0]
 
-# Initialize DP
-dp = [float('inf')] * n
-dp[0] = marbles[0][1]
+    total_sum = prefix_sum[-1]
 
-for i in range(1, n):
-    for j in range(i):
-        # Calculate the sum between j+1 and i-1
-        if j == i-1:
+    # Initialize DP
+    dp = [float('inf')] * n
+    dp[0] = marbles[0][1]
+
+    for i in range(1, n):
+        for j in range(i):
+            # Calculate the sum between j+1 and i-1
+            if j == i-1:
+                sum_terms = 0
+            else:
+                sum_terms = prefix_sum[i-1] - prefix_sum[j]
+                sum_terms -= marbles[j][0] * (i - j -1)
+            cost = dp[j] + marbles[i][1] + sum_terms
+            if cost < dp[i]:
+                dp[i] = cost
+
+    # Now compute the final answer
+    min_fine = float('inf')
+    for j in range(n):
+        if j == n-1:
             sum_terms = 0
         else:
-            sum_terms = prefix_sum[i-1] - prefix_sum[j]
-            sum_terms -= marbles[j][0] * (i - j -1)
-        cost = dp[j] + marbles[i][1] + sum_terms
-        if cost < dp[i]:
-            dp[i] = cost
+            sum_terms = (total_sum - prefix_sum[j]) - marbles[j][0] * ( (n-1) - j )
+        current = dp[j] + sum_terms
+        if current < min_fine:
+            min_fine = current
 
-# Now compute the final answer
-min_fine = float('inf')
-for j in range(n):
-    if j == n-1:
-        sum_terms = 0
-    else:
-        sum_terms = (total_sum - prefix_sum[j]) - marbles[j][0] * ( (n-1) - j )
-    current = dp[j] + sum_terms
-    if current < min_fine:
-        min_fine = current
+    print(min_fine, file=output_stream)
 
-print(min_fine)
 
-Wait, but in the code, when j is n-1 (last marble), sum_terms is (total_sum - prefix_sum[j]) - ... but prefix_sum[j] is total_sum, so sum_terms is zero. So yes.
 
-Testing the first sample:
+def test():
+    import io
 
-Sample 1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 7
+3 1
+5 10
+6 1
+""",
+            "output": \
+"""\
+11
+""",
+        }, 
+    ]
 
-After sorting:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-marble 0: x=1, c=2
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-marble 1: x=2, c=3
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-marble 2: x=3, c=4.
+    print('Tests passed 😎')
 
-prefix_sum [1,3,6]
 
-dp[0] =2.
+if __name__ == '__main__':
+    test()
 
-i=1:
 
-j=0:
+```
 
-sum_terms = prefix_sum[0] (i-1=0) - prefix_sum[0] → 1-1=0. Then subtract 1 * (1-0-1) =1*0=0. sum_terms=0. cost=2+3+0=5. dp[1]=5.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=2:
-
-j=0:
-
-sum_terms = prefix_sum[1] - prefix_sum[0] →3-1=2. subtract x[j=0] (1) * (2-0-1)=1*1=1. sum_terms=2-1=1. cost=2+4+1=7. But earlier analysis said it should be 8. Wait, wait:
-
-Wait i=2 is the third marble (index 2). i-1 is 1. j is 0.
-
-sum_terms is marbles from j+1=1 to i-1=1, which is just marble 1 (x=2).
-
-prefix_sum[i-1] is prefix_sum[1] =3. prefix_sum[j] is prefix_sum[0] =1. 3-1=2. Then, x[j] is 1. i-j-1 is 2-0-1=1. 1*1=1. So sum_terms is 2-1=1. So cost is 2 +4 +1=7. But in the manual calculation earlier, j=0 for i=2 gives sum_terms 2 (since sum of x_k between j and i-1 is x_1=2, x_j=1. So sum_terms= (2-1) =1. So cost is 2+4 +1=7. But in the manual calculation earlier, when i=2 (third marble, x=3), j=0: sum_terms is 2 marbles (x1 and x2? No. Wait i=2, j=0. i-1=1. So marbles from j+1=1 to i-1=1: just marble 1. So x1=2. sum_terms is 2 - x_j (1) * 1 (i-j-1=2-0-1=1). 2-1=1. So sum_terms is 1. Then cost is 7, but earlier manual calculation said 2+4+2=8. Wait, there's a discrepancy here. Oh wait, the marbles between j and i are j+1 to i-1. For j=0 and i=2, marbles between are 1 (x=2). So sum_terms is (x_1 - x_0) =1. So the code's calculation is correct. But in the manual calculation earlier, when j=0 and i=2, the sum_terms was 2. So why is this different?
+```
 
 Ah, in the manual analysis, when j=0 and i=2 (third marble), the marbles between j and i are 1 (marble 1), x=2. The sum of (x_k -x_j) is (2-1) =1. So sum_terms is 1. So code is correct. So why earlier manual calculation said 2? Because perhaps there was a mistake in the manual steps.
 

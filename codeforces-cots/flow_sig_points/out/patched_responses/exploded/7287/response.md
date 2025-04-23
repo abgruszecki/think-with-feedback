@@ -260,60 +260,73 @@ If n is 1, but according to the constraints, n is at least 2. So no problem.
 
 So code:
 
-n = int(input())
-t = list(map(int, input().split()))
+Testing against sample input 1.
 
-prefix = [0]*(n+1)
-for i in range(1, n+1):
-    prefix[i] = prefix[i-1] + (t[i-1] >=0)
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    t = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-suffix = [0]*(n+2)
-for j in range(n, 0, -1):
-    suffix[j] = suffix[j+1] + (t[j-1] <=0)
+    prefix = [0]*(n+1)
+    for i in range(1, n+1):
+        prefix[i] = prefix[i-1] + (t[i-1] >=0)
 
-min_changes = float('inf')
-for k in range(1, n):
-    current = prefix[k] + suffix[k+1]
-    if current < min_changes:
-        min_changes = current
+    suffix = [0]*(n+2)
+    for j in range(n, 0, -1):
+        suffix[j] = suffix[j+1] + (t[j-1] <=0)
 
-print(min_changes)
+    min_changes = float('inf')
+    for k in range(1, n):
+        current = prefix[k] + suffix[k+1]
+        if current < min_changes:
+            min_changes = current
 
-Yes. Let's test the first sample.
+    print(min_changes, file=output_stream)
 
-Sample 1:
 
-n=4, t = [-1, 1, -2, 1]
 
-prefix is:
+def test():
+    import io
 
-prefix[0] =0
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+0 -1 1 2 -5
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-prefix[1] = ( -1 >=0 ? 0 →0 )
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-prefix[2] = 0 + (1 >=0 →1 →1)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-prefix[3] =1 + (-2 >=0 →0 →1)
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-prefix[4] =1 +1 (t[3] >=0 →yes) →2.
+    print('Tests passed 😎')
 
-suffix:
 
-for j=4, t[3] is1 <=0? No →0. suffix[4] =0 + suffix[5] (0) →0.
+if __name__ == '__main__':
+    test()
 
-j=3: t[2] is-2 <=0 →1 + 0 →1.
 
-j=2: t[1] is1 <=0 →0 +1 →1.
+```
 
-j=1: t[0] is-1 <=0 →1 +1 →2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So for k=1: prefix[1] is0, suffix[2] is1 →0+1=1.
-
-k=2: prefix[2] is1, suffix[3] is1 →2.
-
-k=3: prefix[3] is1, suffix[4] is0 →1.
-
-So min is1.
+```
 
 Sample 2:
 

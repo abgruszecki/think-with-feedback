@@ -795,7 +795,11 @@ Store the answers in a list and output.
 
 Thus, the code should look like:
 
+Testing against sample input 1.
+
+```python
 import bisect
+
 
 class SegmentTree:
     def __init__(self, data_sj, data_fj):
@@ -835,9 +839,9 @@ class SegmentTree:
             return left_res
         return self._query_helper(right_child, mid + 1, r_current, l_query, r_query, li, ri)
 
-def main():
+def main(input_stream, output_stream):
     import sys
-    input = sys.stdin.read
+    input = input_stream.read
     data = input().split()
     ptr = 0
     n = int(data[ptr])
@@ -893,46 +897,53 @@ def main():
             output[q] = buses[idx][3]
     
     # Print the output in the order of queries
-    print(' '.join(map(str, output)))
+    print(' '.join(map(str, output)), file=output_stream)
 
-if __name__ == "__main__":
-    main()
 
-But wait, the code above has a mistake. The query method of the SegmentTree class returns the earliest index in the current node's range that satisfies the conditions. However, the current code's query helper function may not properly restrict the search to the [l_query, r_query] range.
 
-For example, if the current node's range is [0,3], and the query range is [2,3], the code should only consider those indices.
+def test():
+    import io
 
-But in the current code, the query helper function checks if the current node's range is entirely outside the query range (returns -1), otherwise checks the left and right children.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 1
+1 1000000000 1000000000
+1 1000000000 1000000000
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-But the current code may return indices outside the query range. For example, the left child's range may partially overlap with the query range, but the earliest index found may be in the overlapping part.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But the code ensures that the indices are within the query range by checking the left and right children.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But how?
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Let's see:
+    print('Tests passed 😎')
 
-The function checks if the current node's range is outside the query range. If not, then it checks if the current node's min_sj and max_fj meet the conditions.
 
-If so, it proceeds to check the left and right children. But when checking the left child, the function's parameters l_query and r_query are passed, so the left child's query is still restricted to the original query range.
+if __name__ == '__main__':
+    test()
 
-Thus, even if the left child's range overlaps with the query range, the earliest index found will be within the query range.
 
-Thus, the code should correctly find the earliest index within [l_query, r_query].
+```
 
-Testing with the first sample input:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Queries:
-
-5 7 1 → bi=1.
-
-s is 0 (since tj_list is [2,3,4,10], bisect_left for bi=1 is 0).
-
-query_range is [0,3].
-
-The segment tree query will check left children first, but bus 0's s=5<=5 and fj=6 <7 → no. Then bus1's s=6>5 → no. Bus2's s=5<=5 and fj=7>=7 → yes. So returns index 2.
-
-Which is correct.
+```
 
 Thus, the code should work.
 

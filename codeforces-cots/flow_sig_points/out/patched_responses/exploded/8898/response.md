@@ -403,66 +403,74 @@ Finally, print each row as a string.
 
 So the code:
 
-grid = [list(map(int, input().split())) for _ in range(3)]
+Testing against sample input 1.
 
-for i in range(3):
-    row = []
-    for j in range(3):
-        total = grid[i][j]
-        if i > 0:
-            total += grid[i-1][j]
-        if i < 2:
-            total += grid[i+1][j]
-        if j > 0:
-            total += grid[i][j-1]
-        if j < 2:
-            total += grid[i][j+1]
-        row.append('1' if total % 2 == 0 else '0')
-    print(''.join(row))
+```python
+def main(input_stream, output_stream):
+    grid = [list(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(3)]
 
-Yes, this should do it.
+    for i in range(3):
+        row = []
+        for j in range(3):
+            total = grid[i][j]
+            if i > 0:
+                total += grid[i-1][j]
+            if i < 2:
+                total += grid[i+1][j]
+            if j > 0:
+                total += grid[i][j-1]
+            if j < 2:
+                total += grid[i][j+1]
+            row.append('1' if total % 2 == 0 else '0')
+        print(''.join(row), file=output_stream)
 
-Testing with the first sample input:
 
-Sample 1 input:
 
-1 0 0
+def test():
+    import io
 
-0 0 0
-
-0 0 1
-
-For cell (2,2):
-
-sum = 1 (itself) + up (0) + left (0).
-
-sum is 1+0+0=1 → mod2 is 1 → '0'. But sample output for (2,2) is 0?
-
-Wait sample output is:
-
-001
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 0 1
+8 8 8
+2 0 3
+""",
+            "output": \
+"""\
 010
-
+011
 100
+""",
+        }, 
+    ]
 
-So (2,2) is 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Wait for cell (2,2):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-adjacent cells are (1,2) and (2,1).
+    print('Tests passed 😎')
 
-grid[2][2] is 1.
 
-adjacent: up (1,2) is 0. left (2,1) is 0.
+if __name__ == '__main__':
+    test()
 
-sum is 1 + 0 +0 =1 → mod2 is 1 → '0'.
 
-Which matches the third line's third character.
+```
 
-So code is correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case: sample 2.
 

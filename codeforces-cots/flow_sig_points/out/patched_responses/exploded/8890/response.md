@@ -927,61 +927,403 @@ But the code as described should handle it.
 
 Now, let's write the code.
 
-Testing the code with sample input 3:
+Testing against sample input 3.
 
+```python
+import sys
+from sys import stdin
+
+
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    grid = []
+    for _ in range(n):
+        grid.append(input_stream.readline().strip())
+    
+    visited = [[False for _ in range(m)] for _ in range(n)]
+    steps = [[0 for _ in range(m)] for _ in range(n)]
+    has_cycle = False
+    
+    for i in range(n):
+        for j in range(m):
+            if grid[i][j] == '#' or visited[i][j]:
+                continue
+            path = []
+            current_set = set()
+            current = (i, j)
+            is_blocked = False
+            while True:
+                ci, cj = current
+                if grid[ci][cj] == '#':
+                    is_blocked = True
+                    break
+                if current in current_set:
+                    print(-1, file=output_stream)
+                    return
+                if visited[ci][cj]:
+                    break
+                visited[ci][cj] = True
+                current_set.add(current)
+                path.append(current)
+                direction = grid[ci][cj]
+                ni, nj = ci, cj
+                if direction == '>':
+                    nj += 1
+                elif direction == '<':
+                    nj -= 1
+                elif direction == '^':
+                    ni -= 1
+                elif direction == 'v':
+                    ni += 1
+                current = (ni, nj)
+            
+            if is_blocked:
+                step = 1
+                for cell in reversed(path):
+                    steps[cell[0]][cell[1]] = step
+                    step += 1
+            else:
+                ci, cj = current
+                step = steps[ci][cj] + 1
+                for cell in reversed(path):
+                    steps[cell[0]][cell[1]] = step
+                    step += 1
+    
+    max_steps = []
+    for i in range(n):
+        for j in range(m):
+            if grid[i][j] != '#':
+                max_steps.append(steps[i][j])
+    
+    if not max_steps:
+        print(0, file=output_stream)
+        return
+    
+    sorted_steps = sorted(max_steps, reverse=True)
+    if len(sorted_steps) >= 2:
+        max_sum = sorted_steps[0] + sorted_steps[1]
+    else:
+        max_sum = sorted_steps[0]
+    
+    print(max_sum, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 5
+#####
+##v##
+##v##
+#####
+##^##
+##^##
+#####
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import sys
+from sys import stdin
+
+
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    grid = []
+    for _ in range(n):
+        grid.append(input_stream.readline().strip())
+    
+    visited = [[False for _ in range(m)] for _ in range(n)]
+    steps = [[0 for _ in range(m)] for _ in range(n)]
+    has_cycle = False
+    
+    for i in range(n):
+        for j in range(m):
+            if grid[i][j] == '#' or visited[i][j]:
+                continue
+            path = []
+            current_set = set()
+            current = (i, j)
+            is_blocked = False
+            while True:
+                ci, cj = current
+                if grid[ci][cj] == '#':
+                    is_blocked = True
+                    break
+                if current in current_set:
+                    print(-1, file=output_stream)
+                    return
+                if visited[ci][cj]:
+                    break
+                visited[ci][cj] = True
+                current_set.add(current)
+                path.append(current)
+                direction = grid[ci][cj]
+                ni, nj = ci, cj
+                if direction == '>':
+                    nj += 1
+                elif direction == '<':
+                    nj -= 1
+                elif direction == '^':
+                    ni -= 1
+                elif direction == 'v':
+                    ni += 1
+                current = (ni, nj)
+            
+            if is_blocked:
+                step = 1
+                for cell in reversed(path):
+                    steps[cell[0]][cell[1]] = step
+                    step += 1
+            else:
+                ci, cj = current
+                step = steps[ci][cj] + 1
+                for cell in reversed(path):
+                    steps[cell[0]][cell[1]] = step
+                    step += 1
+    
+    max_steps = []
+    for i in range(n):
+        for j in range(m):
+            if grid[i][j] != '#':
+                max_steps.append(steps[i][j])
+    
+    if not max_steps:
+        print(0, file=output_stream)
+        return
+    
+    sorted_steps = sorted(max_steps, reverse=True)
+    if len(sorted_steps) >= 2:
+        max_sum = sorted_steps[0] + sorted_steps[1]
+    else:
+        max_sum = sorted_steps[0]
+    
+    print(max_sum, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3 4
-
 ####
-
 #><#
-
 ####
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-Processing cell (1,1) (assuming 0-based indices). It's '>', next cell is (1,2). (1,2) is '<', next cell is (1,1). So during the traversal:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-current_set starts empty. current is (1,1).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Add to current_set, path becomes [(1,1)].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Next cell is (1,2). Not blocked, not in current_set, not visited. Add to current_set and path.
+    print('Tests passed 😎')
 
-Current is (1,2). Next cell is (1,1), which is in current_set. Cycle detected. Output -1.
 
-Yes.
+if __name__ == '__main__':
+    test()
 
-Sample input 2:
 
-3 4
+```
 
-####
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-#>^#
+```
 
-####
+Testing against sample input 4.
 
-The non-blocked cells are (1,1) and (1,2).
+```python
+import sys
+from sys import stdin
 
-Processing (1,1):
 
-direction '>', next cell is (1,2). (1,2) is '^', next cell is (0,2), which is blocked. So path is [(1,1), (1,2)]. 
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    grid = []
+    for _ in range(n):
+        grid.append(input_stream.readline().strip())
+    
+    visited = [[False for _ in range(m)] for _ in range(n)]
+    steps = [[0 for _ in range(m)] for _ in range(n)]
+    has_cycle = False
+    
+    for i in range(n):
+        for j in range(m):
+            if grid[i][j] == '#' or visited[i][j]:
+                continue
+            path = []
+            current_set = set()
+            current = (i, j)
+            is_blocked = False
+            while True:
+                ci, cj = current
+                if grid[ci][cj] == '#':
+                    is_blocked = True
+                    break
+                if current in current_set:
+                    print(-1, file=output_stream)
+                    return
+                if visited[ci][cj]:
+                    break
+                visited[ci][cj] = True
+                current_set.add(current)
+                path.append(current)
+                direction = grid[ci][cj]
+                ni, nj = ci, cj
+                if direction == '>':
+                    nj += 1
+                elif direction == '<':
+                    nj -= 1
+                elif direction == '^':
+                    ni -= 1
+                elif direction == 'v':
+                    ni += 1
+                current = (ni, nj)
+            
+            if is_blocked:
+                step = 1
+                for cell in reversed(path):
+                    steps[cell[0]][cell[1]] = step
+                    step += 1
+            else:
+                ci, cj = current
+                step = steps[ci][cj] + 1
+                for cell in reversed(path):
+                    steps[cell[0]][cell[1]] = step
+                    step += 1
+    
+    max_steps = []
+    for i in range(n):
+        for j in range(m):
+            if grid[i][j] != '#':
+                max_steps.append(steps[i][j])
+    
+    if not max_steps:
+        print(0, file=output_stream)
+        return
+    
+    sorted_steps = sorted(max_steps, reverse=True)
+    if len(sorted_steps) >= 2:
+        max_sum = sorted_steps[0] + sorted_steps[1]
+    else:
+        max_sum = sorted_steps[0]
+    
+    print(max_sum, file=output_stream)
 
-Process steps:
 
-current is blocked. steps for (1,2) is 1, (1,1) is 2.
 
-Processing (1,2) is already visited.
+def test():
+    import io
 
-So max_steps is [2, 1]. sorted is [2,1], sum is 3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 5
+#####
+##v##
+##v##
+##<##
+##^##
+##^##
+#####
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-Sample input 4:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-After processing, each of the two v's in row 1 and 2 (assuming 0-based) points down. Then they reach a blocked cell. The steps for those cells would be 2 each. Then, the sum is 4.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Now, code:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Implementing the steps.
+    print('Tests passed 😎')
 
-Edge cases: all cells blocked. Output 0.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 118, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 111, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '5'
+Got: '6'
+
+```
 
 Another case: one cell non-blocked. Output its steps.
 

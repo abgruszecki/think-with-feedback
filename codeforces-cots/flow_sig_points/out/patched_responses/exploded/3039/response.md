@@ -247,111 +247,93 @@ print(ans)
 
 Yes. This should work.
 
-Let's test the first sample input.
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+def main(input_stream, output_stream):
+    t = input_stream.readline().rstrip("\n").strip()
+    p = input_stream.readline().rstrip("\n").strip()
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-ababcba
+    n = len(t)
+    m = len(p)
+    if m == 0:
+        print(n, file=output_stream)
+        return
 
-abb
+    # Precompute the step at which each index (0-based in t) is removed
+    removed_step = [0] * n
+    for step, idx in enumerate(a):
+        original_1based = idx
+        original_0based = original_1based - 1
+        removed_step[original_0based] = step
 
-5 3 4 1 7 6 2
+    low = 0
+    high = n - m
+    max_k = 0
 
-t is 'ababcba' (n=7)
+    while low <= high:
+        mid = (low + high) // 2
+        ptr = 0
+        for i in range(n):
+            if removed_step[i] >= mid:
+                if ptr < m and t[i] == p[ptr]:
+                    ptr += 1
+                    if ptr == m:
+                        break
+        if ptr == m:
+            max_k = mid
+            low = mid + 1
+        else:
+            high = mid - 1
 
-p is 'abb' (m=3)
+    print(max_k, file=output_stream)
 
-a is [5,3,4,1,7,6,2]
 
-The permutation a is 5,3,4,1,7,6,2. So:
 
-a[0] =5 (1-based, which is 0-based index 4)
+def test():
+    import io
 
-a[1] =3 (0-based index 2)
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+bbbabb
+bb
+1 6 3 4 2 5
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-a[2] =4 (0-based index 3)
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-a[3] =1 (0-based 0)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-a[4] =7 (0-based 6)
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-a[5] =6 (0-based 5)
+    print('Tests passed 😎')
 
-a[6] =2 (0-based 1)
 
-So the removed_step array for each 0-based index:
+if __name__ == '__main__':
+    test()
 
-For j in 1-based:
 
-a[0] =5 (1-based j=5, 0-based idx=4) → removed_step[4] =0
+```
 
-a[1] =3 (j=3, idx=2) → removed_step[2] =1
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-a[2] =4 (j=4, idx=3) → removed_step[3] =2
-
-a[3] =1 (j=1, idx=0) → removed_step[0] =3
-
-a[4] =7 (j=7, idx=6) → removed_step[6] =4
-
-a[5] =6 (j=6, idx=5) → removed_step[5] =5
-
-a[6] =2 (j=2, idx=1) → removed_step[1] =6
-
-So the removed_step array is:
-
-index 0:3 (step 3)
-
-index 1:6 (step 6)
-
-index 2:1 (step 1)
-
-index 3:2 (step 2)
-
-index 4:0 (step 0)
-
-index 5:5 (step5)
-
-index6:4 (step4)
-
-So when k=3:
-
-For each idx, check if removed_step[idx] >=3.
-
-idx0:3 >=3 → yes. So character is 'a' (t[0] = 'a').
-
-But the first element of p is 'a', so ptr increments.
-
-Then, check next.
-
-Wait, the code for checking is:
-
-ptr starts at 0.
-
-Loop through each idx in 0..6:
-
-For idx=0:
-
-removed_step[0] is 3 >=3 → yes.
-
-t[0] is 'a' == p[0] → ptr becomes 1.
-
-idx=1: removed_step[1] is6 >=3 → yes. t[1] is 'b' == p[1] → ptr=2.
-
-idx=2: removed_step is1 >=3? No → skipped.
-
-idx=3: removed_step[3] is2 >=3? No → skipped.
-
-idx=4: removed_step[4] is0 >=3? No → skipped.
-
-idx=5: removed_step[5] is5 >=3 → yes. t[5] is 'b' → p[2] is 'b' → ptr becomes3. Break.
-
-So returns true. So k=3 is possible.
-
-But the answer is 3, which matches the sample.
-
-The code would find the maximum k possible.
-
-So the code seems correct.
+```
 
 Now, considering the time constraints. For n=2e5, each binary step is O(n) time. Log2(2e5) is about 18 steps. So total time is 2e5 *18=3.6e6 operations, which is acceptable.
 

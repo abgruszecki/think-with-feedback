@@ -134,37 +134,71 @@ But how to find the index i efficiently.
 
 So, code:
 
-s = input().strip()
+Testing against sample input 1.
 
-n = len(s)
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-index_to_delete = n-1  # default to last character
+    n = len(s)
 
-for i in range(n-1):
+    index_to_delete = n-1  # default to last character
 
-    if s[i] < s[i+1]:
+    for i in range(n-1):
 
-        index_to_delete = i
+        if s[i] < s[i+1]:
 
-        break
+            index_to_delete = i
 
-result = s[:index_to_delete] + s[index_to_delete+1:]
+            break
 
-print(result)
+    result = s[:index_to_delete] + s[index_to_delete+1:]
 
-Wait, but in the loop, once we find the first occurrence where s[i] < s[i+1], we break. So that gives the first such index. Then we delete it.
+    print(result, file=output_stream)
 
-Yes. Let's test with the first sample:
 
-Input '101' → n=3.
 
-Loop i=0 to 1.
+def test():
+    import io
 
-i=0: s[0] is '1', s[1] is '0' → not less.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+110010
+""",
+            "output": \
+"""\
+11010
+""",
+        }, 
+    ]
 
-i=1: '0' < '1' → yes. index_to_delete=1. break.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-result is s[:1] + s[2:] → '1' + '1' → '11'. Correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample: '110010' → i goes up to 4.
 

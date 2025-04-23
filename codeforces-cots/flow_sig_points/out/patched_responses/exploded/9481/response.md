@@ -1354,15 +1354,79 @@ print(total)
 
 This should work.
 
-Testing this code with the sample inputs:
+Testing against sample input 1.
 
-First sample: 'ab' → 'a' at position 0.
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    n = len(s)
+    MOD = 10**9 + 7
 
-suffix_b[0] =1 (position 1 is 'b').
+    if n == 0:
+        print(0, file=output_stream)
+        return
 
-suffix_a[0] =0.
+    # Compute suffix_b and suffix_a arrays
+    suffix_b = [0] * n
+    suffix_a = [0] * n
 
-term = (2^1-1)*1 →1*1=1. total=1.
+    for i in range(n-2, -1, -1):
+        suffix_b[i] = suffix_b[i+1] + (1 if s[i+1] == 'b' else 0)
+        suffix_a[i] = suffix_a[i+1] + (1 if s[i+1] == 'a' else 0)
+
+    total = 0
+    for i in range(n):
+        if s[i] == 'a':
+            b = suffix_b[i]
+            a = suffix_a[i]
+            term = (pow(2, b, MOD) - 1) * pow(2, a, MOD) % MOD
+            total = (total + term) % MOD
+
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+aab
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample: 'aab' → 'a's at 0 and 1.
 

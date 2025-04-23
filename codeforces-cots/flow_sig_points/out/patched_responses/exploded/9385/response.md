@@ -295,77 +295,137 @@ The minimum of these is the answer.
 
 So code steps:
 
+Testing against sample input 1.
+
+```python
 import collections
 
-s = input().strip()
-count = collections.Counter(s)
 
-required = {
-    'B': 1,
-    'u': 2,
-    'l': 1,
-    'b': 1,
-    'a': 2,
-    's': 1,
-    'r': 1
-}
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    count = collections.Counter(s)
 
-max_bulb = float('inf')
+    required = {
+        'B': 1,
+        'u': 2,
+        'l': 1,
+        'b': 1,
+        'a': 2,
+        's': 1,
+        'r': 1
+    }
 
-for char in required:
-    # Get the required count for this character per Bulbasaur
-    req = required[char]
-    # Get the available count in the input
-    avail = count.get(char, 0)
-    # How many times can we take req from avail?
-    max_possible = avail // req
-    if max_possible < max_bulb:
-        max_bulb = max_possible
+    max_bulb = float('inf')
 
-print(max_bulb)
+    for char in required:
+        # Get the required count for this character per Bulbasaur
+        req = required[char]
+        # Get the available count in the input
+        avail = count.get(char, 0)
+        # How many times can we take req from avail?
+        max_possible = avail // req
+        if max_possible < max_bulb:
+            max_bulb = max_possible
 
-Wait, but wait: for 'u', the required is 2 per Bulbasaur. So if we have 3 'u's, that's enough for 1 Bulbasaur (3//2=1).
+    print(max_bulb, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+F
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Third example input gives 2, which implies that all required characters' counts allow for 2. For example:
+
+B: 2 (from two uppercase B's) → 2/1=2.
+
+u: 4? Because 4//2=2.
+
+Similarly, a: 4 →4//2=2.
+
+Other characters:
+
+l: at least 2.
+
+b: at least 2.
+
+s: at least 2.
+
+r: at least 2.
+
+So all of them are 2 or more.
+
+So the code returns 2.
 
 Yes.
 
-But in the required dictionary, the keys are the characters that must be present. So for example, if any of the required characters are missing (i.e., count is zero), then the answer is zero.
+What about the second example input 'F'? The required characters all have count zero except 'F' which is not required. So the code will check 'B' first. count.get('B') returns 0. 0//1=0. So max_bulb is 0.
 
-For example, in the second test case input 'F', the code checks 'B' count which is zero. So the max_bulb is min(0, ...) → zero.
+Yes.
 
-This should work.
+So the code should work.
 
-But let's test some examples.
+Now, considering the constraints. The input string can be up to 1e5 characters. The Counter will process it in O(n) time, which is acceptable. Then for each of the 7 required characters, we check their counts. So overall time is O(n) + O(1), which is acceptable for 1e5.
 
-First example input: 'Bulbbasaur'
+Space is O(1) for the Counter, as there are at most 52 possible characters (26 lowercase and 26 uppercase), but in practice, the code only uses counts for the required characters. Wait, no: the Counter will store all characters in the input. But for n=1e5, even if all characters are unique, the Counter would have O(n) entries, but in practice, in Python, it's manageable.
 
-The counts are:
+Wait, but the input can have up to 1e5 characters. The Counter will count all of them, which is O(n) time and O(k) space, where k is the number of distinct characters. Since each character is a letter (upper or lower), k can be up to 52. So the space is acceptable.
 
-B:1 (uppercase)
-u:2 (lowercase)
-l:1 (lowercase)
-b:3 (lowercase)
-a:2 (lowercase)
-s:1 (lowercase)
-r:1 (lowercase)
-others: like 'd' etc. not present.
+So the code should work efficiently.
 
-So for each required character:
+Now, possible optimizations: since we only need the counts for 7 specific characters, perhaps we can avoid counting all characters. Instead, we can iterate through the string once and count only the required characters.
 
-B: 1/1=1.
+This would save memory and time, especially in cases where the input is very large but has many characters not part of the required set. For example, in a string of 1e5 characters, all of which are 'Z's. Then the code would count all 'Z's but they are irrelevant. However, in practice, the Counter is efficient, but perhaps for the problem's constraints, it's better to optimize.
 
-u: 2/2=1.
+So, modifying the code to count only the required characters.
 
-l:1/1=1.
+The required characters are 'B', 'u', 'l', 'b', 'a', 's', 'r' (all lowercase except 'B'). So, in code:
 
-b:3/1=3.
+Initialize a dictionary with keys as these seven characters, and counts initialized to zero. Then, iterate through each character in the input string. For each character, if it is in the required keys, increment the count.
 
-a:2/2=1.
+This would reduce the number of characters being counted, thus saving memory and time.
 
-s:1/1=1.
+Yes, that's a good optimization.
 
-r:1/1=1.
-
-Minimum is 1. Correct.
+So code:
 
 Third example input gives 2, which implies that all required characters' counts allow for 2. For example:
 

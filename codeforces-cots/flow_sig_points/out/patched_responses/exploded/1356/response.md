@@ -168,79 +168,111 @@ Once that's done, compute C(n, k) as (fact[n] * inv_fact[k] % MOD) * inv_fact[n 
 
 So the code structure would be:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-a, b, n = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-max_n = n
+    a, b, n = map(int, input_stream.readline().rstrip("\n").split())
 
-fact = [1]*(max_n+1)
+    max_n = n
 
-for i in range(1, max_n+1):
+    fact = [1]*(max_n+1)
 
-    fact[i] = fact[i-1] *i % MOD
+    for i in range(1, max_n+1):
 
-inv_fact = [1]*(max_n+1)
+        fact[i] = fact[i-1] *i % MOD
 
-inv_fact[max_n] = pow(fact[max_n], MOD-2, MOD)
+    inv_fact = [1]*(max_n+1)
 
-for i in range(max_n-1, -1, -1):
+    inv_fact[max_n] = pow(fact[max_n], MOD-2, MOD)
 
-    inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
+    for i in range(max_n-1, -1, -1):
 
-ans =0
+        inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
 
-for k in range(0, n+1):
+    ans =0
 
-    s = a *k + b*(n -k)
+    for k in range(0, n+1):
 
-    temp = s
+        s = a *k + b*(n -k)
 
-    valid = True
+        temp = s
 
-    if temp ==0:
+        valid = True
 
-        valid = False
+        if temp ==0:
 
-    else:
+            valid = False
 
-        while temp>0:
+        else:
 
-            d = temp %10
+            while temp>0:
 
-            if d != a and d !=b:
+                d = temp %10
 
-                valid = False
+                if d != a and d !=b:
 
-                break
+                    valid = False
 
-            temp = temp //10
+                    break
 
-    if valid:
+                temp = temp //10
 
-        c = fact[n] * inv_fact[k] % MOD
+        if valid:
 
-        c = c * inv_fact[n -k] % MOD
+            c = fact[n] * inv_fact[k] % MOD
 
-        ans = (ans + c) % MOD
+            c = c * inv_fact[n -k] % MOD
 
-print(ans)
+            ans = (ans + c) % MOD
 
-This code should work.
+    print(ans, file=output_stream)
 
-Testing the first sample input:
 
-Input: 1 3 3
 
-For k from 0 to 3:
+def test():
+    import io
 
-k=0: s=0*1 +3*3=9. Check digits:9 is not 1 or 3. So invalid.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 3 10
+""",
+            "output": \
+"""\
+165
+""",
+        }, 
+    ]
 
-k=1: s=1*1 +2*3=7. Digits 7 invalid.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-k=2: 2*1 +1*3=5. Invalid.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-k=3: 3*1 +0*3=3. Digits 3, which is valid. So C(3,3)=1. So answer is 1. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample input:
 

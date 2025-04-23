@@ -1019,135 +1019,233 @@ for i in range(1, n+1):
 
 print(' '.join(map(str, result)))
 
-Testing this code with sample input.
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    x = list(map(int, input_stream.readline().rstrip("\n").split()))
+    pairs = []
+    for i in range(m-1):
+        a, b = x[i], x[i+1]
+        pairs.append((a, b))
 
-4 4
+    ans = [0] * (n + 2)
+    delta = [0] * (n + 2)
 
-1 2 3 4
+    for a, b in pairs:
+        if a == b:
+            continue
+        D = abs(a - b)
+        min_ab = min(a, b)
+        max_ab = max(a, b)
+        
+        # Range i < min_ab: add D
+        if min_ab > 1:
+            delta[1] += D
+            delta[min_ab] -= D
+        
+        # Range min_ab < i < max_ab: add D-1
+        if max_ab - min_ab > 1:
+            L = min_ab + 1
+            R = max_ab - 1
+            delta[L] += (D - 1)
+            delta[R + 1] -= (D - 1)
+        
+        # Range i > max_ab: add D
+        if max_ab < n:
+            L = max_ab + 1
+            R = n
+            delta[L] += D
+            delta[R + 1] -= D
+        
+        # Contribution for i = a
+        if b < a:
+            contribution_a = b
+        else:
+            contribution_a = b - 1
+        ans[a] += contribution_a
+        
+        # Contribution for i = b
+        if a < b:
+            contribution_b = a
+        else:
+            contribution_b = a - 1
+        ans[b] += contribution_b
 
-pairs are (1,2), (2,3), (3,4).
+    # Compute prefix sums for delta
+    current = 0
+    prefix = [0] * (n + 1)
+    for i in range(1, n+1):
+        current += delta[i]
+        prefix[i] = current
 
-Processing (1,2):
+    # Calculate the result
+    result = []
+    for i in range(1, n+1):
+        total = prefix[i] + ans[i]
+        result.append(str(total))
 
-a=1, b=2.
+    print(' '.join(result), file=output_stream)
 
-D=1.
 
-min_ab=1, max_ab=2.
 
-i <1: no.
+def test():
+    import io
 
-i between 1+1=2 and 2-1=1: no.
-
-i>2: add D=1 to 3..4.
-
-delta[3] +=1, delta[5] -=1.
-
-contributions for i=1: a=1, b=2.
-
-since b> a: contribution_a =2-1=1. ans[1] +=1.
-
-contribution_b: a <b → contribution_b =1. ans[2] +=1.
-
-Processing (2,3):
-
-a=2, b=3.
-
-D=1.
-
-min_ab=2, max_ab=3.
-
-i <2: add D=1 to 1.
-
-delta[1] +=1, delta[2] -=1.
-
-i between 3-1: but 3-2=1, so no.
-
-i>3: add D=1 to 4.
-
-delta[4] +=1, delta[5] -=1.
-
-contributions:
-
-i=2: b=3>2 → contribution_a=3-1=2. ans[2] +=2.
-
-i=3: a=2 <3 → contribution_b=2. ans[3] +=2.
-
-Processing (3,4):
-
-a=3, b=4.
-
-D=1.
-
-min_ab=3, max_ab=4.
-
-i <3: add D=1 to 1-2.
-
-delta[1] +=1, delta[3] -=1.
-
-i between 4-1=3: no.
-
-i>4: no (n=4).
-
-contributions:
-
-i=3: b=4>3 → contribution_a=4-1=3. ans[3] +=3.
-
-i=4: a=3 <4 → contribution_b=3. ans[4] +=3.
-
-So after processing:
-
-ans[1] =1, ans[2]=1+2=3, ans[3]=2+3=5, ans[4]=3.
-
-delta:
-
-delta[1] =1+1=2 (from pair 2 and 3).
-
-delta[2] =-1 (from pair 2).
-
-delta[3] =1 (from pair 1) -1 (from pair3) → 0.
-
-delta[4] =1 (from pair2).
-
-delta[5] =-1 (from pair1, pair2).
-
-prefix sum:
-
-current starts at 0.
-
-i=1: current +=2 → 2.
-
-i=2: current +=-1 →1.
-
-i=3: current +=0 →1.
-
-i=4: current +=1 →2.
-
-prefix is [0, 2, 1, 1, 2].
-
-So for each i:
-
-i=1: 2 +1=3.
-
-i=2:1+3=4.
-
-i=3:1+5=6.
-
-i=4:2+3=5. Which matches the sample.
-
-Another sample input:
-
-Sample Input 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5 5
-
 2 1 5 3 5
+""",
+            "output": \
+"""\
+9 8 12 6 8
+""",
+        }, 
+    ]
 
-Output: 9 8 12 6 8.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-We can test this, but perhaps time is tight. But the code seems correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    x = list(map(int, input_stream.readline().rstrip("\n").split()))
+    pairs = []
+    for i in range(m-1):
+        a, b = x[i], x[i+1]
+        pairs.append((a, b))
+
+    ans = [0] * (n + 2)
+    delta = [0] * (n + 2)
+
+    for a, b in pairs:
+        if a == b:
+            continue
+        D = abs(a - b)
+        min_ab = min(a, b)
+        max_ab = max(a, b)
+        
+        # Range i < min_ab: add D
+        if min_ab > 1:
+            delta[1] += D
+            delta[min_ab] -= D
+        
+        # Range min_ab < i < max_ab: add D-1
+        if max_ab - min_ab > 1:
+            L = min_ab + 1
+            R = max_ab - 1
+            delta[L] += (D - 1)
+            delta[R + 1] -= (D - 1)
+        
+        # Range i > max_ab: add D
+        if max_ab < n:
+            L = max_ab + 1
+            R = n
+            delta[L] += D
+            delta[R + 1] -= D
+        
+        # Contribution for i = a
+        if b < a:
+            contribution_a = b
+        else:
+            contribution_a = b - 1
+        ans[a] += contribution_a
+        
+        # Contribution for i = b
+        if a < b:
+            contribution_b = a
+        else:
+            contribution_b = a - 1
+        ans[b] += contribution_b
+
+    # Compute prefix sums for delta
+    current = 0
+    prefix = [0] * (n + 1)
+    for i in range(1, n+1):
+        current += delta[i]
+        prefix[i] = current
+
+    # Calculate the result
+    result = []
+    for i in range(1, n+1):
+        total = prefix[i] + ans[i]
+        result.append(str(total))
+
+    print(' '.join(result), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 10
+1 2 1 1 2 2 2 2 2 2
+""",
+            "output": \
+"""\
+3 3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, the code should handle all cases.
 </think>

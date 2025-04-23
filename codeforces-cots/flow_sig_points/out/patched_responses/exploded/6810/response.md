@@ -1081,69 +1081,119 @@ Print(answer)
 
 This should handle all cases.
 
-Testing this code with the samples.
+Testing against sample input 1.
 
-First sample:
+```python
+from collections import deque
 
-Input:
 
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read
+    data = input().split()
+    idx = 0
+    
+    n, d = int(data[idx]), int(data[idx+1])
+    idx +=2
+    
+    adj = [[] for _ in range(n+1)]
+    for _ in range(n-1):
+        u = int(data[idx])
+        v = int(data[idx+1])
+        adj[u].append(v)
+        adj[v].append(u)
+        idx +=2
+    
+    parent = [0]*(n+1)
+    depth = [0]*(n+1)
+    q = deque([1])
+    parent[1] = 0
+    while q:
+        u = q.popleft()
+        for v in adj[u]:
+            if v != parent[u]:
+                parent[v] = u
+                depth[v] = depth[u] +1
+                q.append(v)
+    
+    def process_req(m, nodes):
+        visited = [False]*(n+1)
+        s = 0
+        max_depth = 0
+        for node in nodes:
+            max_depth = max(max_depth, depth[node])
+            current = node
+            while current != 1 and not visited[current]:
+                visited[current] = True
+                s +=1
+                current = parent[current]
+        return s, max_depth
+    
+    # Process first piece
+    m1 = int(data[idx])
+    a_list = list(map(int, data[idx+1 : idx+1+m1]))
+    idx +=1 + m1
+    s1, a_max = process_req(m1, a_list)
+    
+    # Process second piece
+    m2 = int(data[idx])
+    b_list = list(map(int, data[idx+1 : idx+1+m2]))
+    idx +=1 + m2
+    s2, b_max = process_req(m2, b_list)
+    
+    max_depth = max(a_max, b_max)
+    additional = max(0, max_depth - d) *2
+    total = 2*(s1 + s2) + additional
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4 2
-
 1 2
+2 3
+3 4
+4 1 2 3 4
+1 1
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
 
-1 3
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-2 4
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-1 3
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-1 4
+    print('Tests passed 😎')
 
-Processing:
 
-parent array:
+if __name__ == '__main__':
+    test()
 
-node 2's parent is 1.
 
-node3's parent is 1.
+```
 
-node4's parent is 2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-depth:
-
-1:0
-
-2:1
-
-3:1
-
-4:2
-
-First piece's required nodes: [3]
-
-max_depth_a =1.
-
-Processing node3:
-
-current=3. not visited. mark. S1=1. current=1. loop ends.
-
-S1=1.
-
-Second piece's required nodes: [4].
-
-Processing node4:
-
-current=4. not visited. mark. S2=1. current=2.
-
-current=2. not visited. mark. S2=2. current=1. loop ends.
-
-max_depth_b=2.
-
-max(a1, a2)=2. 2-2=0.
-
-answer=2*(1+2) +0 =6.
-
-Which matches.
+```
 
 Second sample:
 

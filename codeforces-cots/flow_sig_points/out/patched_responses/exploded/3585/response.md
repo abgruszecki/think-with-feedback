@@ -502,21 +502,89 @@ print(count)
 
 Yes, that's the code.
 
-Testing the first sample:
+Testing against sample input 1.
 
-s is 'ababab', len 6.
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    good = input_stream.readline().rstrip("\n").strip()
+    k = int(input_stream.readline().rstrip("\n"))
 
-good is '010000...' → bad array for 'a' is True, others except 'b' are True.
+    # Determine which characters are considered bad
+    bad = [False] * 26
+    for i in range(26):
+        if good[i] == '0':
+            bad[i] = True
 
-s_bad is [True, False, True, False, True, False].
+    # Precompute bad status for each character in the input string
+    s_bad = [bad[ord(c) - ord('a')] for c in s]
 
-For each i, process j from i.
+    # Use a trie to track unique substrings
+    trie = {}
+    count = 0
 
-The code counts 5, as expected.
+    for i in range(len(s)):
+        current_node = trie
+        current_bad = 0
+        for j in range(i, len(s)):
+            char = s[j]
+            if s_bad[j]:
+                current_bad += 1
+            if current_bad > k:
+                break
+            if char not in current_node:
+                current_node[char] = {}
+                count += 1
+            current_node = current_node[char]
 
-The second sample's code should work similarly.
+    print(count, file=output_stream)
 
-Thus, this code should handle all cases correctly.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+acbacbacaa
+00000000000000000000000000
+2
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

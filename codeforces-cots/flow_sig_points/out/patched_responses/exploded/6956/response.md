@@ -544,101 +544,114 @@ Read x and y, then compute f(x, y).
 
 The code:
 
+Testing against sample input 1.
+
+```python
 import math
 
-def get_unique_prime_factors(n):
 
-    factors = set()
+def main(input_stream, output_stream):
+    def get_unique_prime_factors(n):
 
-    if n == 1:
+        factors = set()
+
+        if n == 1:
+
+            return factors
+
+        i = 2
+
+        while i * i <= n:
+
+            if n % i == 0:
+
+                factors.add(i)
+
+                while n % i == 0:
+
+                    n = n // i
+
+            i += 1
+
+        if n > 1:
+
+            factors.add(n)
 
         return factors
 
-    i = 2
+    x, y = map(int, input_stream.readline().rstrip("\n").split())
 
-    while i * i <= n:
+    res = 0
 
-        if n % i == 0:
+    current_b = y
 
-            factors.add(i)
+    while current_b > 0:
 
-            while n % i == 0:
+        g = math.gcd(x, current_b)
 
-                n = n // i
+        x_prime = x // g
 
-        i += 1
+        b_prime = current_b // g
 
-    if n > 1:
+        if x_prime == 1:
 
-        factors.add(n)
+            res += b_prime
 
-    return factors
+            break
 
-x, y = map(int, input().split())
+        primes = get_unique_prime_factors(x_prime)
 
-res = 0
+        s_min = min( (b_prime % p) for p in primes )
 
-current_b = y
+        res += s_min
 
-while current_b > 0:
+        current_b = current_b - s_min * g
 
-    g = math.gcd(x, current_b)
+    print(res, file=output_stream)
 
-    x_prime = x // g
 
-    b_prime = current_b // g
 
-    if x_prime == 1:
+def test():
+    import io
 
-        res += b_prime
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 3
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-        break
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-    primes = get_unique_prime_factors(x_prime)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-    s_min = min( (b_prime % p) for p in primes )
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-    res += s_min
+    print('Tests passed 😎')
 
-    current_b = current_b - s_min * g
 
-print(res)
+if __name__ == '__main__':
+    test()
 
-Wait, but in the code, when x_prime is 1, we add b_prime to res and break. That's correct.
 
-But let's test this code with the examples.
+```
 
-First example:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Input 3 5:
-
-The code:
-
-current_b =5.
-
-g = gcd(3,5)=1.
-
-x_prime=3/1=3.
-
-b_prime=5/1=5.
-
-primes of 3: {3}.
-
-s_min =5%3=2.
-
-res +=2. current_b=5 - 2*1=3.
-
-Next iteration:
-
-current_b=3.
-
-g =3.
-
-x_prime=3/3=1.
-
-b_prime=3/3=1.
-
-add 1 to res. res is 2+1=3. Break. Correct.
+```
 
 Second example:
 

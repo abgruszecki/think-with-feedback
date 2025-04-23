@@ -400,47 +400,86 @@ But wait, in Python, the input must be read as a list of integers.
 
 So:
 
-n = int(input())
+Testing against sample input 1.
 
-snacks = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-received = [False] * (n+2)  # 0 to n+1, but using 1-based.
+    snacks = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-target = n
+    received = [False] * (n+2)  # 0 to n+1, but using 1-based.
 
-for s in snacks:
+    target = n
 
-    received[s] = True
+    for s in snacks:
 
-    output = []
+        received[s] = True
 
-    while target >=1 and received[target]:
+        output = []
 
-        output.append(str(target))
+        while target >=1 and received[target]:
 
-        target -=1
+            output.append(str(target))
 
-    print(' '.join(output) if output else '')
+            target -=1
 
-This code should handle all test cases.
+        print(' '.join(output) if output else '', file=output_stream)
 
-Testing the first sample:
 
-Input 3 3 1 2.
 
-Day1:
+def test():
+    import io
 
-s=3: received[3] = True.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+4 5 1 2 3
+""",
+            "output": \
+"""\
+5 4
+3 2 1
+""",
+        }, 
+    ]
 
-target is 3: present. Add to output, target becomes 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Check target 2: not present. Output is ['3'], print '3'.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Day2: s=1. received[1] = True. Check target 2: no. Output empty.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Day3: s=2. received[2] = True. Check target 2: yes. Add 2, target 1. Check target 1: yes. Add 1, target 0. Output is ['2','1'], printed as '2 1'.
+    print('Tests passed 😎')
 
-Which matches.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 59, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 52, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '5 4\n3 2 1'
+Got: '\n5 4\n\n\n3 2 1'
+
+```
 
 Second sample:
 

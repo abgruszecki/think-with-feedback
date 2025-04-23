@@ -161,65 +161,91 @@ But for m, the holes are given in the second line. So split that line into integ
 
 So code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n, m, k = map(int, sys.stdin.readline().split())
 
-holes = set(map(int, sys.stdin.readline().split()))
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().split())
 
-if 1 in holes:
+    holes = set(map(int, input_stream.readline().split()))
 
-    print(1)
+    if 1 in holes:
 
-    exit()
+        print(1, file=output_stream)
 
-current = 1
+        return
 
-for _ in range(k):
+    current = 1
 
-    u, v = map(int, sys.stdin.readline().split())
+    for _ in range(k):
 
-    if current == u:
+        u, v = map(int, input_stream.readline().split())
 
-        current = v
+        if current == u:
 
-    elif current == v:
+            current = v
 
-        current = u
+        elif current == v:
 
-    # else, do nothing
+            current = u
 
-    if current in holes:
+        # else, do nothing
 
-        break
+        if current in holes:
 
-print(current)
+            break
 
-This code should work.
+    print(current, file=output_stream)
 
-But in Python, for large k, reading each line with sys.stdin.readline() is better. The code uses a loop for k times, each time reading a line and splitting into u and v.
 
-This should be efficient enough.
 
-Testing for the sample input 1:
+def test():
+    import io
 
-n=7, m=3, k=4.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 1 2
+2
+1 2
+2 4
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-holes are 3,4,6.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The code checks 1 not in holes, so proceeds.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Then for each swap:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-First swap: 1 and 2 → current becomes 2. Check 2 not in holes.
+    print('Tests passed 😎')
 
-Second swap: 2 and5 → current 5. Not in holes.
 
-Third:5 and7 → current7. Not in holes.
+if __name__ == '__main__':
+    test()
 
-Fourth:7 and1 → current1. Not in holes. After all swaps, print 1.
 
-Yes.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

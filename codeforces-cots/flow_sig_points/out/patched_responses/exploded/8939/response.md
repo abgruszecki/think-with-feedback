@@ -508,33 +508,69 @@ So the code does not need to validate the input. The input is correct as per the
 
 Therefore, the code above should work.
 
-Now, let's test the code against the samples.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    path = input_stream.readline().rstrip("\n").strip()
+    parts = path.split('/')
+    stack = []
+    for part in parts[1:]:
+        if not part:
+            continue
+        if part == '..':
+            if stack:
+                stack.pop()
+            else:
+                print(-1, file=output_stream)
+                return
+        elif part != '.':
+            stack.append(part)
+    print('/' + '/'.join(stack) if stack else '/', file=output_stream)
 
-Input: /usr/share/mysql/../tomcat6/conf/server.xml
 
-Split into parts:
 
-['', 'usr', 'share', 'mysql', '..', 'tomcat6', 'conf', 'server.xml']
+def test():
+    import io
 
-Processing parts[1:]:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+/a/./././..
+""",
+            "output": \
+"""\
+/
+""",
+        }, 
+    ]
 
-'usr' → stack ['usr']
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-'share' → stack ['usr', 'share']
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-'mysql' → stack ['usr', 'share', 'mysql']
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-'..' → pop to ['usr', 'share']
+    print('Tests passed 😎')
 
-'tomcat6' → append → ['usr', 'share', 'tomcat6']
 
-'conf' → append → ['usr', 'share', 'tomcat6', 'conf']
+if __name__ == '__main__':
+    test()
 
-'server.xml' → append → stack has those elements.
 
-Output is '/' + 'usr/share/tomcat6/conf/server.xml', which is correct.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

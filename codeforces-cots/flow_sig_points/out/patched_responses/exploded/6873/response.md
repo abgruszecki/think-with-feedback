@@ -773,83 +773,181 @@ Yes.
 
 So putting it all together.
 
-Testing the first sample input:
+Testing against sample input 1.
 
-Input: <a><b><c></c></b></a>
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    tags = []
+    i = 0
+    n = len(s)
+    while i < n:
+        if s[i] == '<':
+            j = i
+            while j < n and s[j] != '>':
+                j += 1
+            j += 1
+            tags.append(s[i:j])
+            i = j
+        else:
+            i += 1
 
-Processing tags:
+    depth = 0
+    for tag in tags:
+        if tag.startswith('</'):
+            depth -= 1
+            print('  ' * depth + tag, file=output_stream)
+        else:
+            print('  ' * depth + tag, file=output_stream)
+            depth += 1
 
-['<a>', '<b>', '<c>', '</c>', '</b>', '</a>']
 
-depth starts at 0.
 
-<a> → print with 0 spaces → then depth 1.
+def test():
+    import io
 
-<b> → 2 → depth 2.
-
-<c> →4 → depth3.
-
-</c> → subtract 1 → depth2. print 4 spaces.
-
-</b> → subtract →1. print 2.
-
-</a> → subtract →0. print 0.
-
-Which matches the sample.
-
-Another test case with the second sample.
-
-Tags list: ['<a>', '<b>', '</b>', '<d>', '<c>', '</c>', '</d>', '</a>']
-
-Processing:
-
-depth 0.
-
-<a> →0 → depth1.
-
-<b> →2 → depth2.
-
-</b> → subtract1 → depth1. print 2 spaces (1*2).
-
-<d> → print 2 → depth2.
-
-<c> →4 → depth3.
-
-</c> → subtract →2. print 4.
-
-</d> → subtract→1. print2.
-
-</a> → subtract →0. print0.
-
-Which matches the sample.
-
-Thus, the code should work.
-
-Now, considering edge cases.
-
-Edge case 1: empty string? The problem says the input is a non-empty string.
-
-Another edge case: a single tag.
-
-Wait, the problem says that the input is a valid XML-text, which can't be a single tag. Because XML-text is defined as either empty, or a properly nested structure. So a single tag like <a> is not possible. The minimal XML-text is <a></a>, but according to the problem statement, the input is non-empty. So for example, the input is "<a></a>".
-
-Processing:
-
-Tags list is ['<a>', '</a>'].
-
-depth starts at 0.
-
-First tag <a> → printed at 0, depth 1.
-
-Second tag </a> → subtract 1, depth 0. printed with 0 *2 spaces.
-
-So output:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+<a><b></b><d><c></c></d></a>
+""",
+            "output": \
+"""\
 <a>
-
+<b>
+</b>
+<d>
+<c>
+</c>
+</d>
 </a>
+""",
+        }, 
+    ]
 
-Yes.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 66, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 59, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '<a>\n<b>\n</b>\n<d>\n<c>\n</c>\n</d>\n</a>'
+Got: '<a>\n  <b>\n  </b>\n  <d>\n    <c>\n    </c>\n  </d>\n</a>'
+
+```
+
+Testing against sample input 1.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    tags = []
+    i = 0
+    n = len(s)
+    while i < n:
+        if s[i] == '<':
+            j = i
+            while j < n and s[j] != '>':
+                j += 1
+            j += 1
+            tags.append(s[i:j])
+            i = j
+        else:
+            i += 1
+
+    depth = 0
+    for tag in tags:
+        if tag.startswith('</'):
+            depth -= 1
+            print('  ' * depth + tag, file=output_stream)
+        else:
+            print('  ' * depth + tag, file=output_stream)
+            depth += 1
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+<a><b></b><d><c></c></d></a>
+""",
+            "output": \
+"""\
+<a>
+<b>
+</b>
+<d>
+<c>
+</c>
+</d>
+</a>
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 66, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 59, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '<a>\n<b>\n</b>\n<d>\n<c>\n</c>\n</d>\n</a>'
+Got: '<a>\n  <b>\n  </b>\n  <d>\n    <c>\n    </c>\n  </d>\n</a>'
+
+```
 
 Another case: nested tags with siblings.
 

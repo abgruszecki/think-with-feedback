@@ -37,55 +37,289 @@ Compare the lengths first. If a_len > b_len → a is larger. If a_len < b_len �
 
 So in code:
 
-a = input().strip()
-b = input().strip()
+Testing against sample input 1.
 
-a_stripped = a.lstrip('0') or '0'
-b_stripped = b.lstrip('0') or '0'
+```python
+def main(input_stream, output_stream):
+    a = input_stream.readline().rstrip("\n").strip()
+    b = input_stream.readline().rstrip("\n").strip()
 
-len_a = len(a_stripped)
-len_b = len(b_stripped)
+    a_stripped = a.lstrip('0') or '0'
+    b_stripped = b.lstrip('0') or '0'
 
-if len_a > len_b:
-    print('>')
-elif len_a < len_b:
-    print('<')
-else:
-    # same length, compare each digit
-    if a_stripped > b_stripped:
-        print('>')
-    elif a_stripped < b_stripped:
-        print('<')
+    len_a = len(a_stripped)
+    len_b = len(b_stripped)
+
+    if len_a > len_b:
+        print('>', file=output_stream)
+    elif len_a < len_b:
+        print('<', file=output_stream)
     else:
-        print('=')
+        # same length, compare each digit
+        if a_stripped > b_stripped:
+            print('>', file=output_stream)
+        elif a_stripped < b_stripped:
+            print('<', file=output_stream)
+        else:
+            print('=', file=output_stream)
 
-Wait, but when comparing the stripped strings lexicographically, since they are numbers, this should work because all leading zeros are removed. For example, '123' vs '124' → '123' is lex smaller, so correct. '9' vs '10' → len is 1 vs 2, so no. But in the case where lengths are the same, then lex order is correct.
 
-Yes, this approach should work.
 
-Testing examples:
+def test():
+    import io
 
-First example:
-
-Input:
-
-9
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+11
 10
+""",
+            "output": \
+"""\
+>
+""",
+        }, 
+    ]
 
-After stripping, a is '9', b is '10'. Lengths 1 vs 2 → a has shorter length. So output '<'. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Second example:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-11 and 10 → stripped lengths 2 each. Compare '11' vs '10' → '11' is larger. So '>'.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Third example:
+    print('Tests passed 😎')
 
-00012345 → stripped is 12345 (length 5), and 12345 (length 5). Equal, so '='.
 
-Fourth example:
+if __name__ == '__main__':
+    test()
 
-0123 → stripped is '123' (len 3), b is '9' (len 1). So 3>1 → output '>'.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    a = input_stream.readline().rstrip("\n").strip()
+    b = input_stream.readline().rstrip("\n").strip()
+
+    a_stripped = a.lstrip('0') or '0'
+    b_stripped = b.lstrip('0') or '0'
+
+    len_a = len(a_stripped)
+    len_b = len(b_stripped)
+
+    if len_a > len_b:
+        print('>', file=output_stream)
+    elif len_a < len_b:
+        print('<', file=output_stream)
+    else:
+        # same length, compare each digit
+        if a_stripped > b_stripped:
+            print('>', file=output_stream)
+        elif a_stripped < b_stripped:
+            print('<', file=output_stream)
+        else:
+            print('=', file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+00012345
+12345
+""",
+            "output": \
+"""\
+=
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    a = input_stream.readline().rstrip("\n").strip()
+    b = input_stream.readline().rstrip("\n").strip()
+
+    a_stripped = a.lstrip('0') or '0'
+    b_stripped = b.lstrip('0') or '0'
+
+    len_a = len(a_stripped)
+    len_b = len(b_stripped)
+
+    if len_a > len_b:
+        print('>', file=output_stream)
+    elif len_a < len_b:
+        print('<', file=output_stream)
+    else:
+        # same length, compare each digit
+        if a_stripped > b_stripped:
+            print('>', file=output_stream)
+        elif a_stripped < b_stripped:
+            print('<', file=output_stream)
+        else:
+            print('=', file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0123
+9
+""",
+            "output": \
+"""\
+>
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 4.
+
+```python
+def main(input_stream, output_stream):
+    a = input_stream.readline().rstrip("\n").strip()
+    b = input_stream.readline().rstrip("\n").strip()
+
+    a_stripped = a.lstrip('0') or '0'
+    b_stripped = b.lstrip('0') or '0'
+
+    len_a = len(a_stripped)
+    len_b = len(b_stripped)
+
+    if len_a > len_b:
+        print('>', file=output_stream)
+    elif len_a < len_b:
+        print('<', file=output_stream)
+    else:
+        # same length, compare each digit
+        if a_stripped > b_stripped:
+            print('>', file=output_stream)
+        elif a_stripped < b_stripped:
+            print('<', file=output_stream)
+        else:
+            print('=', file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0123
+111
+""",
+            "output": \
+"""\
+>
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: 0123 (stripped len 3) vs 111 (stripped len 3). Compare '123' vs '111' → '123' is larger. So output '>'.
 

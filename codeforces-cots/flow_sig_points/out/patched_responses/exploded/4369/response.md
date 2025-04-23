@@ -1835,232 +1835,181 @@ For each i from 1 to n-1:
 
                    So the code would be:
 
-                   n = int(input())
-                   a = list(map(int, input().split()))
-                   MOD = 998244353
-
-                   if n == 1:
-                       # Not possible per problem constraints.
-                       pass
-
-                   # Initialize for i=1 (first element)
-                   initial_dp = [0] * 201  # 1-based
-                   if a[0] == -1:
-                       for v in range(1, 201):
-                           initial_dp[v] = 1
-                   else:
-                       v = a[0]
-                       initial_dp[v] = 1
-
-                   # Handle transition to i=2
-                   dp_prev = [[0]*2 for _ in range(201)]
-                   current_a = a[1] if 1 < len(a) else -1  # a[1] is the second element (i=2)
-
-                   if current_a != -1:
-                       next_val = current_a
-                       for current_val in range(1, 201):
-                           cnt = initial_dp[current_val]
-                           if cnt ==0:
-                               continue
-                           if next_val >= current_val:
-                               dp_prev[next_val][1] = (dp_prev[next_val][1] + cnt) % MOD
-                   else:
-                       # Use prefix sums for next_val >= current_val
-                       prefix = [0] * 201
-                       for current_val in range(1, 201):
-                           cnt = initial_dp[current_val]
-                           if cnt ==0:
-                               continue
-                           start = current_val
-                           end = 200
-                           prefix[start] = (prefix[start] + cnt) % MOD
-                           if end +1 <= 200:
-                               prefix[end+1] = (prefix[end+1] - cnt) % MOD
-
-                       current_sum =0
-                       for next_val in range(1, 201):
-                           current_sum = (current_sum + prefix[next_val]) % MOD
-                           dp_prev[next_val][1] = current_sum % MOD
-
-                   # Now, dp_prev is in the new state format for i=2.
-
-                   # Proceed with loop for i=3 to n-1.
-                   for i in range(3, n):
-                       current_a = a[i-1]
-                       dp_next = [[0]*2 for _ in range(201)]
-
-                       if current_a != -1:
-                           next_val = current_a
-                           for current_val in range(1, 201):
-                               for flag in [0, 1]:
-                                   cnt = dp_prev[current_val][flag]
-                                   if cnt ==0:
-                                       continue
-                                   if flag ==1 and next_val < current_val:
-                                       continue
-                                   new_flag = 1 if next_val >= current_val else 0
-                                   dp_next[next_val][new_flag] = (dp_next[next_val][new_flag] + cnt) % MOD
-                       else:
-                           # Use prefix sums
-                           prefix = [[0]*201 for _ in range(2)]
-                           for current_val in range(1, 201):
-                               for flag in [0, 1]:
-                                   cnt = dp_prev[current_val][flag]
-                                   if cnt ==0:
-                                       continue
-                                   if flag ==1:
-                                       start = current_val
-                                       end = 200
-                                       prefix[1][start] = (prefix[1][start] + cnt) % MOD
-                                       if end +1 <= 200:
-                                           prefix[1][end+1] = (prefix[1][end+1] - cnt) % MOD
-                                   else:
-                                       start_true = current_val
-                                       end_true = 200
-                                       prefix[1][start_true] = (prefix[1][start_true] + cnt) % MOD
-                                       if end_true +1 <= 200:
-                                           prefix[1][end_true+1] = (prefix[1][end_true+1] - cnt) % MOD
-
-                                       start_false = 1
-                                       end_false = current_val -1
-                                       if start_false <= end_false:
-                                           prefix[0][start_false] = (prefix[0][start_false] + cnt) % MOD
-                                           if end_false +1 <= 200:
-                                               prefix[0][end_false+1] = (prefix[0][end_false+1] - cnt) % MOD
-
-                           for new_flag in [0, 1]:
-                               current_sum =0
-                               for next_val in range(1, 201):
-                                   current_sum = (current_sum + prefix[new_flag][next_val]) % MOD
-                                   dp_next[next_val][new_flag] = current_sum % MOD
-
-                       dp_prev = dp_next
-
-                   # Handle the last element
-                   last_val = a[-1]
-                   total =0
-                   for current_val in range(1, 201):
-                       for flag in [0, 1]:
-                           cnt = dp_prev[current_val][flag]
-                           if cnt ==0:
-                               continue
-                           if last_val != -1:
-                               if last_val > current_val:
-                                   continue
-                               total = (total + cnt) % MOD
-                           else:
-                               total = (total + cnt * current_val) % MOD
-
-                   print(total % MOD)
-
-                   This code should handle the first transition separately and then proceed with the loop.
-
-                   Now, let's test this code against the sample inputs.
-
-                   Sample input 1:
-
-3
-1 -1 2
-
-The array is [1, -1, 2].
-
-For i=1 (initial element), current_val is 1.
-
-Transition to i=2 (second element, a[1] is -1). So next_val can be >=1.
-
-The code for the first transition (i=2) allows next_val >=1.
-
-But since a[1] is -1, the code uses prefix sums to add 1 to all next_val >=1.
-
-So dp_prev for i=2 is:
-
-next_val ranges from 1 to 200.
-
-For new_flag=1 (next_val >=1), the count for each next_val is 1.
-
-But the next element is the second element (i=2 in the problem), which is a[1] = -1.
-
-So for i=3 (third element in code's loop?), the current_a is a[2] = 2.
-
-But in the code's loop for i in range(3, n), where n=3, the loop doesn't execute.
-
-So after handling i=2, the code processes the last element.
-
-The last_val is 2.
-
-For the last element, the code checks if 2 <= current_val (which is the current_val in i=2's state).
-
-For i=2, the state is (current_val, flag).
-
-For example, during the first transition (i=1 to i=2), next_val can be any >=1.
-
-But the third element is fixed to 2, which is a[2] = 2.
-
-So the last_val is 2.
-
-In the last step, for each current_val in i=2's state, we check if 2 <= current_val.
-
- current_val can be any >=1 (since i=2's next_val is >=1).
-
-But in i=2's state, current_val is >=1, and the flag is 1 (since next_val >= current_val).
-
-So for each current_val >=1:
-
-   last_val is 2.
-
-   if current_val >=2, then 2 <= current_val is allowed.
-
-   else (current_val=1), 2 <=1 is false.
-
-So only current_val >=2 contribute.
-
-But in the initial transition to i=2, the allowed next_val is >=1. So current_val can be 1, 2, ..., 200.
-
-But the third element is fixed to 2. So during the transition from i=2 to i=3 (the last element), which is the third element in the problem's array (a[2] = 2), the code checks if 2 <= current_val.
-
-For example, current_val is 1: 2 <=1 is false.
-
- current_val is 2: 2 <=2 is true.
-
- current_val is 3: 2 <=3 is true.
-
- etc.
-
-But for the code's last step, the current_val in i=2's state is the value of a_2 (second element), which is variable.
-
-But the third element's a_3 is fixed to 2.
-
-So for the last step:
-
-For current_val in i=2's state (which is the value of the second element):
-
-   if current_val >=2, then the third element can be 2.
-
-   else, current_val <2, so 2 <= current_val is false.
-
-So the valid current_val in i=2's state are >=2.
-
-But in the initial transition to i=2, the allowed values for next_val are >=1.
-
-So for i=2's state, current_val is 1, 2, ..., 200.
-
-For each of these, the count is 1.
-
-So during the last step, the total is the sum of counts for current_val >=2.
-
-How many current_val are >=2?
-
- current_val ranges from 1 to 200.
-
- current_val >=2: 199 values (2 to 200).
-
- So the total is 199 * 1 = 199?
-
- But the sample output is 1.
-
-Hmm, this suggests that there's an error in the code.
-
-Wait, what's wrong here?
+Testing against sample input 1.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    MOD = 998244353
+
+    if n == 1:
+        # Not possible per problem constraints.
+        pass
+
+    # Initialize for i=1 (first element)
+    initial_dp = [0] * 201  # 1-based
+    if a[0] == -1:
+        for v in range(1, 201):
+            initial_dp[v] = 1
+    else:
+        v = a[0]
+        initial_dp[v] = 1
+
+    # Handle transition to i=2
+    dp_prev = [[0]*2 for _ in range(201)]
+    current_a = a[1] if 1 < len(a) else -1  # a[1] is the second element (i=2)
+
+    if current_a != -1:
+        next_val = current_a
+        for current_val in range(1, 201):
+            cnt = initial_dp[current_val]
+            if cnt ==0:
+                continue
+            if next_val >= current_val:
+                dp_prev[next_val][1] = (dp_prev[next_val][1] + cnt) % MOD
+    else:
+        # Use prefix sums for next_val >= current_val
+        prefix = [0] * 201
+        for current_val in range(1, 201):
+            cnt = initial_dp[current_val]
+            if cnt ==0:
+                continue
+            start = current_val
+            end = 200
+            prefix[start] = (prefix[start] + cnt) % MOD
+            if end +1 <= 200:
+                prefix[end+1] = (prefix[end+1] - cnt) % MOD
+
+        current_sum =0
+        for next_val in range(1, 201):
+            current_sum = (current_sum + prefix[next_val]) % MOD
+            dp_prev[next_val][1] = current_sum % MOD
+
+    # Now, dp_prev is in the new state format for i=2.
+
+    # Proceed with loop for i=3 to n-1.
+    for i in range(3, n):
+        current_a = a[i-1]
+        dp_next = [[0]*2 for _ in range(201)]
+
+        if current_a != -1:
+            next_val = current_a
+            for current_val in range(1, 201):
+                for flag in [0, 1]:
+                    cnt = dp_prev[current_val][flag]
+                    if cnt ==0:
+                        continue
+                    if flag ==1 and next_val < current_val:
+                        continue
+                    new_flag = 1 if next_val >= current_val else 0
+                    dp_next[next_val][new_flag] = (dp_next[next_val][new_flag] + cnt) % MOD
+        else:
+            # Use prefix sums
+            prefix = [[0]*201 for _ in range(2)]
+            for current_val in range(1, 201):
+                for flag in [0, 1]:
+                    cnt = dp_prev[current_val][flag]
+                    if cnt ==0:
+                        continue
+                    if flag ==1:
+                        start = current_val
+                        end = 200
+                        prefix[1][start] = (prefix[1][start] + cnt) % MOD
+                        if end +1 <= 200:
+                            prefix[1][end+1] = (prefix[1][end+1] - cnt) % MOD
+                    else:
+                        start_true = current_val
+                        end_true = 200
+                        prefix[1][start_true] = (prefix[1][start_true] + cnt) % MOD
+                        if end_true +1 <= 200:
+                            prefix[1][end_true+1] = (prefix[1][end_true+1] - cnt) % MOD
+
+                        start_false = 1
+                        end_false = current_val -1
+                        if start_false <= end_false:
+                            prefix[0][start_false] = (prefix[0][start_false] + cnt) % MOD
+                            if end_false +1 <= 200:
+                                prefix[0][end_false+1] = (prefix[0][end_false+1] - cnt) % MOD
+
+            for new_flag in [0, 1]:
+                current_sum =0
+                for next_val in range(1, 201):
+                    current_sum = (current_sum + prefix[new_flag][next_val]) % MOD
+                    dp_next[next_val][new_flag] = current_sum % MOD
+
+        dp_prev = dp_next
+
+    # Handle the last element
+    last_val = a[-1]
+    total =0
+    for current_val in range(1, 201):
+        for flag in [0, 1]:
+            cnt = dp_prev[current_val][flag]
+            if cnt ==0:
+                continue
+            if last_val != -1:
+                if last_val > current_val:
+                    continue
+                total = (total + cnt) % MOD
+            else:
+                total = (total + cnt * current_val) % MOD
+
+    print(total % MOD, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+-1 -1
+""",
+            "output": \
+"""\
+200
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 154, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 147, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '200'
+Got: '2686700'
+
+```
 
 Let me re-express the problem.
 

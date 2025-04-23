@@ -195,49 +195,86 @@ Then, output the length of the list, followed by the elements in the list.
 
 So the Python code would be:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n, k = map(int, input().split())
 
-a = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-g = 0
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for num in a:
+    g = 0
 
-    mod = num % k
+    for num in a:
 
-    di = math.gcd(mod, k)
+        mod = num % k
 
-    g = math.gcd(g, di)
+        di = math.gcd(mod, k)
 
-if g ==0:  # but this can't happen because k >=2 and di >=1, so g >=1.
+        g = math.gcd(g, di)
 
-    print(0)
+    if g ==0:  # but this can't happen because k >=2 and di >=1, so g >=1.
 
-else:
+        print(0, file=output_stream)
 
-    count = k // g
+    else:
 
-    divisors = [i * g for i in range(count)]
+        count = k // g
 
-    print(len(divisors))
+        divisors = [i * g for i in range(count)]
 
-    print(' '.join(map(str, divisors)))
+        print(len(divisors), file=output_stream)
 
-But wait, what if g is zero? But according to our previous reasoning, since all d_i's are at least 1 (since k >=2), the initial g starts at 0, but after the first iteration, g becomes the first di (which is >=1). So g can't be zero. So the 'if g ==0' clause is unnecessary, but it's there just for safety.
+        print(' '.join(map(str, divisors)), file=output_stream)
 
-Testing this code with the first sample input:
 
-Sample input 1:
 
-2 8
+def test():
+    import io
 
-12 20
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 10
+10 20 30
+""",
+            "output": \
+"""\
+1
+0
+""",
+        }, 
+    ]
 
-mod is 12%8=4, di = gcd(4,8)=4. Then next a_i is 20 mod8=4, di=4. Then g = gcd(0,4) =4, then gcd(4,4)=4. So g=4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-count is 8//4=2. divisors are [0,4]. Output is 2, then 0 4. Correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2:
 

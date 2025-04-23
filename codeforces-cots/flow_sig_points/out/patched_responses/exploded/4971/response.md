@@ -115,47 +115,75 @@ But wait, converting the substring to integer each time could be a problem for t
 
 So code steps:
 
-s = input().strip()
+Testing against sample input 1.
 
-count = 0
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-n = len(s)
+    count = 0
 
-for i in range(n):
+    n = len(s)
 
-    if s[i] in {'0', '4', '8'}:
+    for i in range(n):
 
-        count +=1
+        if s[i] in {'0', '4', '8'}:
 
-for i in range(n-1):
+            count +=1
 
-    two_digit = int(s[i]) *10 + int(s[i+1])
+    for i in range(n-1):
 
-    if two_digit %4 ==0:
+        two_digit = int(s[i]) *10 + int(s[i+1])
 
-        count += (i+1)
+        if two_digit %4 ==0:
 
-print(count)
+            count += (i+1)
 
-Wait, in the second loop, the i ranges from 0 to n-2 (since i+1 must be <n). So the loop should be in range(n-1). For example, if n is 2 (like "04"), then i ranges from 0 to 1-1=0. Correct.
+    print(count, file=output_stream)
 
-Testing the first sample:
 
-s = '124'
 
-First loop:
+def test():
+    import io
 
-i=0: '1' → no.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+04
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-i=1: '2' → no.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=2: '4' → yes. count=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Second loop (n=3, so i ranges from 0 to 1):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=0: 1*10 +2=12 → 12%4=0 → add 0+1=1 → count becomes 2.
+    print('Tests passed 😎')
 
-i=1: 2*10+4=24 → 24%4=0 → add 1+1=2 → count becomes 4. Correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case: '04' → count becomes 2 from the first loop (0 and 4). Then the two-digit loop:
 

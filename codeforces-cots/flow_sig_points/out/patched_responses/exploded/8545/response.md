@@ -765,265 +765,179 @@ Then, generate the group's options as described.
 
 Now, code:
 
-class DSU:
+Testing against sample input 1.
 
-    def __init__(self, size):
+```python
+def main(input_stream, output_stream):
+    class DSU:
 
-        self.parent = list(range(size +1)) # 1-based
+        def __init__(self, size):
 
-        self.rank = [0]*(size+1)
+            self.parent = list(range(size +1)) # 1-based
 
-    def find(self, x):
+            self.rank = [0]*(size+1)
 
-        if self.parent[x] != x:
+        def find(self, x):
 
-            self.parent[x] = self.find(self.parent[x])
+            if self.parent[x] != x:
 
-        return self.parent[x]
+                self.parent[x] = self.find(self.parent[x])
 
-    def union(self, x, y):
+            return self.parent[x]
 
-        xr = self.find(x)
+        def union(self, x, y):
 
-        yr = self.find(y)
+            xr = self.find(x)
 
-        if xr == yr:
+            yr = self.find(y)
 
-            return
+            if xr == yr:
 
-        if self.rank[xr] < self.rank[yr]:
+                return
 
-            self.parent[xr] = yr
+            if self.rank[xr] < self.rank[yr]:
 
-        else:
+                self.parent[xr] = yr
 
-            self.parent[yr] = xr
+            else:
 
-            if self.rank[xr] == self.rank[yr]:
+                self.parent[yr] = xr
 
-                self.rank[xr] +=1
+                if self.rank[xr] == self.rank[yr]:
 
-n, m, w_max = map(int, input().split())
+                    self.rank[xr] +=1
 
-weights = list(map(int, input().split()))
+    n, m, w_max = map(int, input_stream.readline().rstrip("\n").split())
 
-beauties = list(map(int, input().split()))
+    weights = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-edges = [tuple(map(int, input().split())) for _ in range(m)]
+    beauties = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-# build DSU
+    edges = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(m)]
 
-dsu = DSU(n)
+    # build DSU
 
-for x, y in edges:
+    dsu = DSU(n)
 
-    dsu.union(x, y)
+    for x, y in edges:
 
-# collect groups
+        dsu.union(x, y)
 
-groups = {}
+    # collect groups
 
-for i in range(1, n+1):
+    groups = {}
 
-    root = dsu.find(i)
+    for i in range(1, n+1):
 
-    if root not in groups:
+        root = dsu.find(i)
 
-        groups[root] = []
+        if root not in groups:
 
-    groups[root].append(i-1) # convert to 0-based index
+            groups[root] = []
 
-groups = list(groups.values())
+        groups[root].append(i-1) # convert to 0-based index
 
-# Initialize DP
+    groups = list(groups.values())
 
-dp = [-float('inf')] * (w_max + 1)
+    # Initialize DP
 
-dp[0] = 0
+    dp = [-float('inf')] * (w_max + 1)
 
-for group in groups:
+    dp[0] = 0
 
-    sum_w = sum( weights[i] for i in group )
+    for group in groups:
 
-    sum_b = sum( beauties[i] for i in group )
+        sum_w = sum( weights[i] for i in group )
 
-    group_options = []
+        sum_b = sum( beauties[i] for i in group )
 
-    if sum_w <= w_max:
+        group_options = []
 
-        group_options.append( (sum_w, sum_b) )
+        if sum_w <= w_max:
 
-    # add option2 options: 0 and all members
+            group_options.append( (sum_w, sum_b) )
 
-    group_options.append( (0, 0) )
+        # add option2 options: 0 and all members
 
-    for i in group:
+        group_options.append( (0, 0) )
 
-        group_options.append( (weights[i], beauties[i]) )
+        for i in group:
 
-    # process group
+            group_options.append( (weights[i], beauties[i]) )
 
-    temp_dp = [ -float('inf') ] * (w_max + 1 )
+        # process group
 
-    for j in range(w_max + 1):
+        temp_dp = [ -float('inf') ] * (w_max + 1 )
 
-        if dp[j] == -float('inf'):
+        for j in range(w_max + 1):
 
-            continue
-
-        for option_w, option_b in group_options:
-
-            new_j = j + option_w
-
-            if new_j > w_max:
+            if dp[j] == -float('inf'):
 
                 continue
 
-            if temp_dp[new_j] < dp[j] + option_b:
+            for option_w, option_b in group_options:
 
-                temp_dp[new_j] = dp[j] + option_b
+                new_j = j + option_w
 
-    dp = temp_dp
+                if new_j > w_max:
 
-print(max(dp) if max(dp) != -float('inf') else 0)
+                    continue
 
-But wait, in the code, for each group, the temp_dp is initialized to -inf, and for each j in the previous dp, and each option in group_options, the new_j is computed and updated.
+                if temp_dp[new_j] < dp[j] + option_b:
 
-But this is correct.
+                    temp_dp[new_j] = dp[j] + option_b
 
-Testing with the first example:
+        dp = temp_dp
 
-Input:
+    print(max(dp) if max(dp) != -float('inf') else 0, file=output_stream)
 
-3 1 5
 
-3 2 5
 
-2 4 2
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 2 11
+2 4 6 6
+6 4 2 1
 1 2
+2 3
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
 
-Groups after DSU:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Group 1: 0 and 1 (indices 0 and 1, which are Hose 1 and 2?)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Wait, the Hoses are 1-based in the input. So when converted to 0-based indices, the group for Hose 1 and 2 is [0,1].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-sum_w = 3 + 2 =5, sum_b=2+4=6.
+    print('Tests passed 😎')
 
-Since sum_w=5 <=5, option1 is added.
 
-group_options includes (5,6), (0,0), (3,2), (2,4).
+if __name__ == '__main__':
+    test()
 
-Then, processing this group:
 
-The initial dp is [0, -inf, ...].
+```
 
-For j=0:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-for each option in group_options:
-
-option (5,6) → new_j=5, new_b=6. So temp_dp[5] becomes 6.
-
-option (0,0) → new_j=0 → 0 → temp_dp[0] is max(0, -inf) → 0.
-
-option (3,2) → new_j=3 → 0+2=2. temp_dp[3] =2.
-
-option (2,4) → new_j=2 → 0+4=4 → temp_dp[2] =4.
-
-So temp_dp after group processing is:
-
-temp_dp[0] =0 (from option (0,0)),
-
-temp_dp[2] =4,
-
-temp_dp[3] =2,
-
-temp_dp[5] =6.
-
-Next group is group 3 (Hose 3, index 2).
-
-sum_w=5. Since sum_w=5 <=5, option1 is added (5,2).
-
-group_options: (5,2), (0,0), (5,2).
-
-Processing this group:
-
-prev dp is the temp_dp from previous step.
-
-For each j in 0..5:
-
-j=0:
-
-prev value is 0.
-
-process options:
-
-option (5,2): new_j=5. 0+2=2. current temp_dp[5] is 6 (from previous group), so new value is 2. no change.
-
-option (0,0): new_j=0 → 0 +0=0. temp_dp[0] is max(0, ...) → 0.
-
-option (5,2): same as option1.
-
-So for j=0, processing all options, the temp_dp[0] would be 0 (from option (0,0)), temp_dp[5] would remain 6.
-
-But wait, in this group's processing, the temp_dp is initialized to -inf.
-
-Wait, no. The group processing for each group creates a new temp_dp array.
-
-So after processing the first group (group 1), the dp becomes [0, -inf, 4, 2, -inf, 6].
-
-Then, when processing the second group (group 3):
-
-The group's options are (5,2) (since sum_w=5 <=5), (0,0), and (5,2).
-
-So group_options = [ (5,2), (0,0), (5,2) ].
-
-For each j in the previous dp (the dp from the first group):
-
-j=0:
-
-for each option:
-
-option (5,2): new_j=5. dp[j] (0) + 2 → 2. So temp_dp[5] is 2, but previous temp_dp may have other values.
-
-But initial temp_dp is all -inf. So for j=0:
-
-option (5,2): new_j=5 → temp_dp[5] becomes 2.
-
-option (0,0): new_j=0 → temp_dp[0] becomes 0.
-
-option (5,2): same as first option.
-
-Similarly for j=2 (4), j=3 (2), j=5 (6).
-
-So for j=0:
-
-processing (5,2) → temp_dp[5] = 0+2=2.
-
-processing (0,0) → temp_dp[0] =0.
-
-processing (5,2) → same as before.
-
-For j=5 (current value 6):
-
-processing (5,2) → new_j=5+5=10 (exceeds w=5, so skipped).
-
-processing (0,0) → new_j=5 → 6 +0=6. So temp_dp[5] is max(2, 6) →6.
-
-processing (5,2) → same as first option.
-
-So after processing j=5, temp_dp[5] would be 6.
-
-Thus, the final dp after both groups would have:
-
-temp_dp[0] =0 (from j=0, option (0,0)),
-
-temp_dp[5] = max(2 from j=0, 6 from j=5).
-
-So the maximum is 6, which matches the sample.
-
-So the code seems correct.
+```
 
 Now, for the second sample:
 

@@ -185,79 +185,217 @@ Then, from b_end to the end, all characters must be 'c's.
 
 So code steps:
 
-s = input().strip()
+Testing against sample input 1.
 
-n = len(s)
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-a_end = 0
+    n = len(s)
 
-while a_end < n and s[a_end] == 'a':
+    a_end = 0
 
-    a_end +=1
+    while a_end < n and s[a_end] == 'a':
 
-if a_end ==0:
+        a_end +=1
 
-    print("NO")
+    if a_end ==0:
 
-    exit()
+        print("NO", file=output_stream)
 
-b_end = a_end
+        return
 
-while b_end <n and s[b_end] == 'b':
+    b_end = a_end
 
-    b_end +=1
+    while b_end <n and s[b_end] == 'b':
 
-if b_end == a_end:
+        b_end +=1
 
-    print("NO")
+    if b_end == a_end:
 
-    exit()
+        print("NO", file=output_stream)
 
-c_start = b_end
+        return
 
-for i in range(c_start, n):
+    c_start = b_end
 
-    if s[i] != 'c':
+    for i in range(c_start, n):
 
-        print("NO")
+        if s[i] != 'c':
 
-        exit()
+            print("NO", file=output_stream)
 
-a_count = a_end
+            return
 
-b_count = b_end - a_end
+    a_count = a_end
 
-c_count = n - b_end
+    b_count = b_end - a_end
 
-if a_count ==0 or b_count ==0 or c_count ==0:
+    c_count = n - b_end
 
-    print("NO")
+    if a_count ==0 or b_count ==0 or c_count ==0:
 
-    exit()
+        print("NO", file=output_stream)
 
-if c_count == a_count or c_count == b_count:
+        return
 
-    print("YES")
+    if c_count == a_count or c_count == b_count:
 
-else:
+        print("YES", file=output_stream)
 
-    print("NO")
+    else:
 
-Yes, that should cover the structure checks and the counts.
+        print("NO", file=output_stream)
 
-Let's test some examples.
 
-First example input: aaabccc.
 
-a_end is 3 (indices 0,1,2 are 'a's). Then b_end starts at 3. The next characters are 'b's until index 4 (since s[3] is 'b', and then s[4] is 'c'). Wait, in the example 'aaabccc' is 'a a a b c c c'.
+def test():
+    import io
 
-Wait, the b's part is just one 'b'. So after a_end=3 (since 3 a's), the next character is 'b' (index 3), then the next is 'c' (index 4). So b_end will be 4 (since the first non-b after a_end is index 4). So b_count =4-3=1. Then from 4 to end (indices 4,5,6) are 'c's.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+bbacc
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-c_count is 3. So a_count=3, c_count=3. So condition holds. Output is YES.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Second example: 'bbacc'.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The first character is 'b', so a_end is 0. So output NO immediately.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    n = len(s)
+
+    a_end = 0
+
+    while a_end < n and s[a_end] == 'a':
+
+        a_end +=1
+
+    if a_end ==0:
+
+        print("NO", file=output_stream)
+
+        return
+
+    b_end = a_end
+
+    while b_end <n and s[b_end] == 'b':
+
+        b_end +=1
+
+    if b_end == a_end:
+
+        print("NO", file=output_stream)
+
+        return
+
+    c_start = b_end
+
+    for i in range(c_start, n):
+
+        if s[i] != 'c':
+
+            print("NO", file=output_stream)
+
+            return
+
+    a_count = a_end
+
+    b_count = b_end - a_end
+
+    c_count = n - b_end
+
+    if a_count ==0 or b_count ==0 or c_count ==0:
+
+        print("NO", file=output_stream)
+
+        return
+
+    if c_count == a_count or c_count == b_count:
+
+        print("YES", file=output_stream)
+
+    else:
+
+        print("NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+aabc
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: 'aabc'.
 

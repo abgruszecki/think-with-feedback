@@ -105,41 +105,82 @@ We need to read n lines of xi and yi.
 
 In Python, the code can be:
 
-n, s = map(int, input().split())
+Testing against sample input 1.
 
-max_sweets = -1
+```python
+def main(input_stream, output_stream):
+    n, s = map(int, input_stream.readline().rstrip("\n").split())
 
-for _ in range(n):
+    max_sweets = -1
 
-    xi, yi = map(int, input().split())
+    for _ in range(n):
 
-    cost = xi * 100 + yi
+        xi, yi = map(int, input_stream.readline().rstrip("\n").split())
 
-    if cost > s * 100:
+        cost = xi * 100 + yi
 
-        continue
+        if cost > s * 100:
 
-    change = (s * 100) - cost
+            continue
 
-    sweets = change % 100
+        change = (s * 100) - cost
 
-    if sweets > max_sweets:
+        sweets = change % 100
 
-        max_sweets = sweets
+        if sweets > max_sweets:
 
-print(max_sweets if max_sweets != -1 else -1)
+            max_sweets = sweets
 
-Wait, but in the case where change is 0 (i.e., sweets is 0), the code would set max_sweets to 0, which is correct.
+    print(max_sweets if max_sweets != -1 else -1, file=output_stream)
 
-Yes.
 
-Testing the first example:
 
-After processing the fourth line (5 50):
+def test():
+    import io
 
-cost is 550. 1000-550=450. 450 mod 100 is 50. So max_sweets is 50.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5
+10 10
+20 20
+30 30
+40 40
+50 50
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-Which is correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case where a sugar costs exactly s dollars. For example, s=3, xi=3, yi=0. Then change is 0. Sweets is 0. So output is 0.
 

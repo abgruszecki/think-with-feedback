@@ -252,111 +252,227 @@ But what about the precomputing step? For n=5e5, precomputing up to 5e5 is manag
 
 So in code:
 
-mod =998244353
+Testing against sample input 1.
 
-n, k = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    mod =998244353
 
-if k ==0:
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-   print(0)
+    if k ==0:
 
-elif k==1:
+       print(0, file=output_stream)
 
-   print(n % mod)
+    elif k==1:
 
-else:
+       print(n % mod, file=output_stream)
 
-   r =k-1
+    else:
 
-   max_needed =n-1 # when d=1, t=n//1-1= n-1.
+       r =k-1
 
-   if r>max_needed:
+       max_needed =n-1 # when d=1, t=n//1-1= n-1.
 
-       print(0)
+       if r>max_needed:
 
-   else:
+           print(0, file=output_stream)
 
-       # precompute fact and inv_fact up to max_needed.
+       else:
 
-       max_fact =max_needed
+           # precompute fact and inv_fact up to max_needed.
 
-       fact = [1]*(max_fact+1)
+           max_fact =max_needed
 
-       for i in range(1, max_fact+1):
+           fact = [1]*(max_fact+1)
 
-           fact[i] = fact[i-1] *i %mod
+           for i in range(1, max_fact+1):
 
-       inv_fact = [1]*(max_fact+1)
+               fact[i] = fact[i-1] *i %mod
 
-       inv_fact[max_fact] = pow(fact[max_fact], mod-2, mod)
+           inv_fact = [1]*(max_fact+1)
 
-       for i in range(max_fact-1, -1, -1):
+           inv_fact[max_fact] = pow(fact[max_fact], mod-2, mod)
 
-           inv_fact[i] = inv_fact[i+1] * (i+1) %mod
+           for i in range(max_fact-1, -1, -1):
 
-       ans =0
+               inv_fact[i] = inv_fact[i+1] * (i+1) %mod
 
-       for d in range(1, n+1):
+           ans =0
 
-           t = (n//d) -1
+           for d in range(1, n+1):
 
-           if t >=r:
+               t = (n//d) -1
 
-               comb = fact[t] * inv_fact[r] % mod
+               if t >=r:
 
-               comb = comb * inv_fact[t -r] % mod
+                   comb = fact[t] * inv_fact[r] % mod
 
-               ans = (ans + comb) % mod
+                   comb = comb * inv_fact[t -r] % mod
 
-       print(ans)
+                   ans = (ans + comb) % mod
 
-But wait, when k=1, r=0. So the code would go into the 'else' part and check if r>max_needed. For example, when n=500000 and k=1, r=0. max_needed=500000-1=499999. So 0 <=499999, so proceed.
+           print(ans, file=output_stream)
 
-But then, the code precomputes up to max_needed=499999. Then for each d from 1 to n=5e5:
 
-t = (5e5//d) -1.
 
-We need to compute C(t, 0), which is 1 for any t>=0.
+def test():
+    import io
 
-But in this case, t can be (5e5//d) -1. For example, d=1: t=5e5-1. Which is >=0. So comb is C(5e5-1,0) =1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 7
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-d=2: (5e5//2)-1 =250000-1=249999. >=0. So add 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-And so on, for all d from 1 to 5e5. So the sum is 5e5. Which is correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But for k=1, the code in the else part would compute this correctly.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But for k=1, the code would go into the else part, compute r=0, and proceed. So the code's handling of k=1 is correct.
+    print('Tests passed 😎')
 
-But what about when k=0? The problem constraints say 1<=k<=5e5, so k=0 is not possible, but the code has a check for k==0.
 
-Thus, the code should work.
+if __name__ == '__main__':
+    test()
 
-Now, let's test the code against the sample inputs.
 
-Sample Input 1:
+```
 
-7 3 → k=3 → r=2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-max_needed=7-1=6. r=2<=6. Precompute up to 6.
+```
 
-For d=1: t=7//1 -1=6. C(6,2)=15.
+Testing against sample inputs 2, 3.
 
-For d=2:7//2=3, t=2. C(2,2)=1. So sum 15+1=16.
+```python
+def main(input_stream, output_stream):
+    mod =998244353
 
-Other d's: for d=3, t=(7//3)-1=2-1=1 <2 → no. So sum is 16.
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-Sample Input 2:
+    if k ==0:
 
-3 7 →k=7, r=6. max_needed=3-1=2. r=6>2 → output 0.
+       print(0, file=output_stream)
 
-Sample Input 3:
+    elif k==1:
 
-1337 42 → r=41. Compute for all d where t >=41.
+       print(n % mod, file=output_stream)
 
-t = (1337//d) -1 >=41 → 1337//d >=42 → d <=1337//42 → 1337//42=31. So d can be from 1 to 31. For each d, compute t= (1337//d)-1, then check if t>=41. For example, d=31 → 1337//31=43 → t=42. So t=42 >=41 → C(42,41)=42. Similarly for other d's.
+    else:
 
-But the actual code will sum all such possibilities.
+       r =k-1
+
+       max_needed =n-1 # when d=1, t=n//1-1= n-1.
+
+       if r>max_needed:
+
+           print(0, file=output_stream)
+
+       else:
+
+           # precompute fact and inv_fact up to max_needed.
+
+           max_fact =max_needed
+
+           fact = [1]*(max_fact+1)
+
+           for i in range(1, max_fact+1):
+
+               fact[i] = fact[i-1] *i %mod
+
+           inv_fact = [1]*(max_fact+1)
+
+           inv_fact[max_fact] = pow(fact[max_fact], mod-2, mod)
+
+           for i in range(max_fact-1, -1, -1):
+
+               inv_fact[i] = inv_fact[i+1] * (i+1) %mod
+
+           ans =0
+
+           for d in range(1, n+1):
+
+               t = (n//d) -1
+
+               if t >=r:
+
+                   comb = fact[t] * inv_fact[r] % mod
+
+                   comb = comb * inv_fact[t -r] % mod
+
+                   ans = (ans + comb) % mod
+
+           print(ans, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1337 42
+""",
+            "output": \
+"""\
+95147305
+""",
+        }, 
+        {
+            "input": \
+"""\
+1 1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample Input 4:
 

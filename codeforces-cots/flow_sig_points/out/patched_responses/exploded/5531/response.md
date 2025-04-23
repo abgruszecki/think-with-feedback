@@ -597,27 +597,115 @@ But this code may not handle some edge cases. For example, when one of a or b is
 
 But considering that the code iterates all possible x and y up to the maximum required, this should find the minimal time.
 
-Testing this code against the examples.
+Testing against sample input 1.
 
-First example:
+```python
+import math
 
-Input:
 
-5 10
+def main(input_stream, output_stream):
+    import sys
+    p1, t1 = map(int, input_stream.readline().split())
+    p2, t2 = map(int, input_stream.readline().split())
+    h, s = map(int, input_stream.readline().split())
+    
+    a = p1 - s
+    b = p2 - s
+    dual_damage = p1 + p2 - s
+    m = max(t1, t2)
+    
+    min_time = float('inf')
+    max_k = h // dual_damage + 2 if dual_damage != 0 else 0
+    
+    for k in range(max_k + 1):
+        total_damage = k * dual_damage
+        rem = h - total_damage
+        if rem <= 0:
+            current = k * m
+            if current < min_time:
+                min_time = current
+            continue
+        
+        current_min = float('inf')
+        x_max = (rem + a - 1) // a if a != 0 else 0
+        for x in range(x_max + 1):
+            damage_x = a * x
+            rem_y = max(0, rem - damage_x)
+            if b == 0:
+                y = 0
+            else:
+                y = (rem_y + b - 1) // b
+            time_x = x * t1
+            time_y = y * t2
+            current = max(time_x, time_y)
+            if current < current_min:
+                current_min = current
+        
+        y_max = (rem + b - 1) // b if b != 0 else 0
+        for y in range(y_max + 1):
+            damage_y = b * y
+            rem_x = max(0, rem - damage_y)
+            if a == 0:
+                x = 0
+            else:
+                x = (rem_x + a - 1) // a
+            time_x = x * t1
+            time_y = y * t2
+            current = max(time_x, time_y)
+            if current < current_min:
+                current_min = current
+        
+        candidate = k * m + current_min
+        if candidate < min_time:
+            min_time = candidate
+    
+    print(min_time, file=output_stream)
 
-4 9
 
-16 1
 
-So a =5-1=4, b=4-1=3.
+def test():
+    import io
 
-m = max(10,9) =10.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 1
+5000 100000
+25 9
+""",
+            "output": \
+"""\
+25
+""",
+        }, 
+    ]
 
-h=16.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For k=2:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-total_dual_damage=2*(5+4-1) =2*8=16. rem=0. So candidate is 2*10=20. Which is correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 For k=1:
 

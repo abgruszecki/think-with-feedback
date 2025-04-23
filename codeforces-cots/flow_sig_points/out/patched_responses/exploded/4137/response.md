@@ -375,94 +375,85 @@ Then, set up the DP.
 
 In Python, the code would look like this:
 
-v1, v2 = map(int, input().split())
-t, d = map(int, input().split())
+Testing against sample input 1.
 
-dp_prev = {v1: v1}
+```python
+def main(input_stream, output_stream):
+    v1, v2 = map(int, input_stream.readline().rstrip("\n").split())
+    t, d = map(int, input_stream.readline().rstrip("\n").split())
 
-for i in range(2, t+1):
-    dp_current = {}
-    if i == t:
-        target = v2
-        for s_prev, total in dp_prev.items():
-            if abs(s_prev - target) <= d:
-                new_total = total + target
-                if target in dp_current:
-                    if new_total > dp_current[target]:
+    dp_prev = {v1: v1}
+
+    for i in range(2, t+1):
+        dp_current = {}
+        if i == t:
+            target = v2
+            for s_prev, total in dp_prev.items():
+                if abs(s_prev - target) <= d:
+                    new_total = total + target
+                    if target in dp_current:
+                        if new_total > dp_current[target]:
+                            dp_current[target] = new_total
+                    else:
                         dp_current[target] = new_total
-                else:
-                    dp_current[target] = new_total
-    else:
-        for s_prev, total in dp_prev.items():
-            for delta in range(-d, d+1):
-                s_current = s_prev + delta
-                new_total = total + s_current
-                if s_current in dp_current:
-                    if new_total > dp_current[s_current]:
+        else:
+            for s_prev, total in dp_prev.items():
+                for delta in range(-d, d+1):
+                    s_current = s_prev + delta
+                    new_total = total + s_current
+                    if s_current in dp_current:
+                        if new_total > dp_current[s_current]:
+                            dp_current[s_current] = new_total
+                    else:
                         dp_current[s_current] = new_total
-                else:
-                    dp_current[s_current] = new_total
-    dp_prev = dp_current
+        dp_prev = dp_current
 
-print(dp_prev[v2])
+    print(dp_prev[v2], file=output_stream)
 
-Wait, but in the code for i < t, the code loops through delta from -d to d, inclusive. That's the same as generating s_current in s_prev -d to s_prev +d. Which is correct.
 
-Alternatively, using a loop from -d to d, which is perhaps more efficient than generating a range. But either way, the code is correct.
 
-Testing this code on the first sample:
+def test():
+    import io
 
-Sample input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 10
+10 0
+""",
+            "output": \
+"""\
+100
+""",
+        }, 
+    ]
 
-5 6
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-4 2
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The code would process:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-t=4.
+    print('Tests passed 😎')
 
-Loop for i from 2 to 4.
 
-i=2:
+if __name__ == '__main__':
+    test()
 
-Not the last step. For s_prev=5, delta ranges from -2 to +2. So s_current can be 3,4,5,6,7. The sum_prev is 5, so new_total is 5 + delta +5 (Wait, wait: for s_prev=5, total is 5 (from previous step). Then, s_current = 5 + delta. So delta ranges from -2 to +2. So s_current is 3,4,5,6,7. So for each delta, s_current is 5+delta. The new_total is 5 (sum_prev) + s_current.
 
-So for delta=-2: s_current=3, new_total=5+3=8.
+```
 
-delta=-1: 4 → 5+4=9.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-delta=0:5 → sum 10.
-
-delta=1:6 → sum 11.
-
-delta=2:7 → sum 12.
-
-So dp_current becomes {3:8,4:9,5:10,6:11,7:12}.
-
-i=3:
-
-Not the last step. For each s_prev in dp_prev (3,4,5,6,7) with their sums (8,9,10,11,12).
-
-For example, s_prev=7, sum=12:
-
-delta ranges from -2 to +2. So s_current can be 5,6,7,8,9.
-
-sum_prev=12, adding these s_currents gives sums 12+5=17, 12+6=18, 12+7=19, 12+8=20, 12+9=21.
-
-So for each of these s_current, the code would check if they are in the current_dp and update accordingly.
-
-But the maximum possible for each s_current is tracked.
-
-So for example, the s_current=8 can be achieved by delta=+1 from s_prev=7 (sum_prev=12, sum 20), but also by s_prev=6 (delta=+2 → s_prev=6 → delta=2: s_current=6+2=8. sum_prev is 11 → 11+8=19). So for s_current=8, the maximum sum is 20 (from s_prev=7).
-
-So the code would correctly track the maximum.
-
-Then, for i=4 (the last step), the code checks each s_prev in the previous step's dp (which is after processing i=3).
-
-In the sample's optimal path, after i=3, the sum is 20 (from s_prev=7 → s_current=8 → sum 20). Then, for i=4, s_prev=8 must be within d=2 of v2=6 → 8-6=2, which is allowed. So the new_total is 20+6=26.
-
-Which is the correct answer.
+```
 
 Thus, the code should work.
 

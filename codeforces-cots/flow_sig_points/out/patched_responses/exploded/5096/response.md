@@ -215,68 +215,82 @@ If all i checked and none pass, return NO.
 
 In code:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-rows = []
-for _ in range(n):
-    s = input().strip()
-    ones = [j for j, c in enumerate(s) if c == '1']
-    rows.append(ones)
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-cnt = [0] * m
-for i in range(n):
-    for j in rows[i]:
-        cnt[j] += 1
+    rows = []
+    for _ in range(n):
+        s = input_stream.readline().rstrip("\n").strip()
+        ones = [j for j, c in enumerate(s) if c == '1']
+        rows.append(ones)
 
-for i in range(n):
-    valid = True
-    for j in rows[i]:
-        if cnt[j] < 2:
-            valid = False
-            break
-    if valid:
-        print("YES")
-        exit()
+    cnt = [0] * m
+    for i in range(n):
+        for j in rows[i]:
+            cnt[j] += 1
 
-print("NO")
+    for i in range(n):
+        valid = True
+        for j in rows[i]:
+            if cnt[j] < 2:
+                valid = False
+                break
+        if valid:
+            print("YES", file=output_stream)
+            return
 
-Yes. That's the code.
+    print("NO", file=output_stream)
 
-Testing the first sample:
 
-rows[0] = [0, 2,4]
 
-rows[1] = [1]
+def test():
+    import io
 
-rows[2] = [2,3,4]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 5
+10100
+01000
+00110
+00101
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-rows[3] = [0]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-cnt:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-For j=0: rows 0,3 → cnt[0] =2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-j=1: row1 → cnt=1.
+    print('Tests passed 😎')
 
-j=2: rows0,2 → cnt=2.
 
-j=3: row2 → cnt=1.
+if __name__ == '__main__':
+    test()
 
-j=4: rows0,2 → cnt=2.
 
-For i=0, the ones are 0,2,4.
+```
 
-Check cnt[j] >=2 for each:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-0: 2 >=2 → ok.
-
-2: 2 → ok.
-
-4: 2 → ok.
-
-So valid is True. So output YES.
-
-Yes.
+```
 
 Second sample:
 

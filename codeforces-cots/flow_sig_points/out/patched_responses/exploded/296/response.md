@@ -1328,45 +1328,86 @@ Yes.
 
 So the code should work.
 
-Testing it with the sample inputs:
+Testing against sample input 1.
 
-Sample 1:
+```python
+import math
 
-n=3.
 
-counts: [2,0,1,0]
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    counts = [0, 0, 0, 0]
 
-sum_1: comb(2,3)=0 + 0 + 0 +0 =0.
+    for _ in range(n):
+        x, y = map(int, input_stream.readline().rstrip("\n").split())
+        a = (x // 2) % 2
+        b = (y // 2) % 2
+        typ = a * 2 + b
+        counts[typ] += 1
 
-sum_2:
+    sum_case1 = 0
+    for cnt in counts:
+        sum_case1 += math.comb(cnt, 3)
 
-t=0:
+    sum_case2 = 0
+    for t in range(4):
+        c_t = counts[t]
+        if c_t >= 2:
+            combinations = c_t * (c_t - 1) // 2  # math.comb(c_t, 2)
+            for s in range(4):
+                if s != t:
+                    sum_case2 += combinations * counts[s]
 
-c=2 >=2.
+    print(sum_case1 + sum_case2, file=output_stream)
 
-term = comb(2,2) =1.
 
-sum s=0,1,2,3:
 
-s=0: no.
+def test():
+    import io
 
-s=1: 1*0=0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+0 0
+2 16
+30 14
+4 6
+2 10
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-s=2: 1*1=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-s=3: 1*0=0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sum adds 1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-t=1: c=0 → no.
+    print('Tests passed 😎')
 
-t=2: c=1 <2 → no.
 
-t=3: c=0.
+if __name__ == '__main__':
+    test()
 
-So sum_2 =1.
 
-Total 0+1=1.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

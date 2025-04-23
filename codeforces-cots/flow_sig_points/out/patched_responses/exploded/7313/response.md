@@ -1356,79 +1356,312 @@ Thus, component[i] gives the TCC ID for node i.
 
 Thus, the code.
 
-Now, let's test this approach against the samples.
+Testing against sample input 1.
 
-First sample:
+```python
+import sys
+from collections import deque
 
-6 7
 
-1 2 0
+def main(input_stream, output_stream):
+    sys.setrecursionlimit(1 << 25)
+    n, m = map(int, input_stream.readline().split())
+    edges = []
+    adj = [[] for _ in range(n+1)]
+    for i in range(m):
+        xi, yi, zi = map(int, input_stream.readline().split())
+        edges.append((xi, yi, zi))
+        adj[xi].append((yi, i))
+        adj[yi].append((xi, i))
+    a, b = map(int, input_stream.readline().split())
 
-2 3 0
+    # Tarjan's algorithm to find bridges
+    bridges = set()
+    disc = [0] * (n + 1)
+    low = [0] * (n + 1)
+    time_stamp = 1
+    parent = [-1] * (n + 1)
+    stack = []
+    visited = [False] * (n + 1)
+    for start in range(1, n+1):
+        if not visited[start]:
+            stack.append((start, -1, False))
+            while stack:
+                u, p, is_back = stack.pop()
+                if visited[u]:
+                    if not is_back:
+                        # Update low values during backtracking
+                        for v, idx in adj[u]:
+                            if v != p and parent[v] == u:
+                                low[u] = min(low[u], low[v])
+                                if low[v] > disc[u]:
+                                    xi, yi = sorted((u, v))
+                                    bridges.add((xi, yi))
+                    continue
+                visited[u] = True
+                disc[u] = low[u] = time_stamp
+                time_stamp += 1
+                stack.append((u, p, True))  # backtracking step
+                for v, idx in adj[u]:
+                    if v == p:
+                        continue
+                    if not visited[v]:
+                        parent[v] = u
+                        stack.append((v, u, False))
+                    else:
+                        low[u] = min(low[u], disc[v])
 
-3 1 0
+    # Build TCC graph (without bridges)
+    tcc_adj = [[] for _ in range(n+1)]
+    for xi, yi, zi in edges:
+        if (min(xi, yi), max(xi, yi)) not in bridges:
+            tcc_adj[xi].append(yi)
+            tcc_adj[yi].append(xi)
 
-3 4 1
+    # Compute TCC components
+    component = [0] * (n + 1)
+    current_component = 0
+    for u in range(1, n+1):
+        if component[u] == 0:
+            current_component += 1
+            queue = deque([u])
+            component[u] = current_component
+            while queue:
+                node = queue.popleft()
+                for neighbor in tcc_adj[node]:
+                    if component[neighbor] == 0:
+                        component[neighbor] = current_component
+                        queue.append(neighbor)
 
-4 5 0
+    # Process artifact edges
+    artifact_edges = []
+    for xi, yi, zi in edges:
+        if zi == 1:
+            artifact_edges.append((xi, yi))
 
-5 6 0
+    for xi, yi in artifact_edges:
+        u, v = sorted((xi, yi))
+        if (u, v) not in bridges:
+            print("YES", file=output_stream)
+            return
+        else:
+            a_comp = component[a]
+            b_comp = component[b]
+            xi_comp = component[xi]
+            yi_comp = component[yi]
+            if (a_comp == xi_comp and b_comp == yi_comp) or (a_comp == yi_comp and b_comp == xi_comp):
+                print("YES", file=output_stream)
+                return
 
-6 4 0
+    print("NO", file=output_stream)
 
-a=1, b=6.
 
-Artifact edge is 3-4 (z=1).
 
-During Tarjan's algorithm, the bridge is 3-4 (since removing it disconnects the graph).
+def test():
+    import io
 
-Thus, bridge_set contains (3,4).
-
-The TCC graph is the original graph without the bridge.
-
-The TCCs are:
-
-Component 1: 1, 2, 3.
-
-Component 2:4,5,6.
-
-Thus, component[a] = component[1] = 1.
-
-component[b] = component[6] = 2.
-
-The artifact bridge (3,4) is a bridge.
-
-Check if component[a] (1) == component[3] (1) and component[b] (2) == component[4] (2). Yes. So output YES.
-
-Second sample:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5 4
-
 1 2 0
-
 2 3 0
-
 3 4 0
-
 2 5 1
+1 4
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-a=1, b=4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Artifact bridge is 2-5 (z=1).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-During Tarjan's algorithm, bridge is 2-5.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-TCCs after removing bridge:
+    print('Tests passed 😎')
 
-Component 1:1,2,3,4.
 
-Component 2:5.
+if __name__ == '__main__':
+    test()
 
-component[a] = 1, component[b] = 1. So artifact bridge's components are 2 (2) and 5 (2). So a's component is 1 (same as 2?), no.
 
-Wait, the artifact bridge is 2-5. So component[2] is in component 1 (since when the bridge is removed, 2 is in the main component). component[5] is component 2.
+```
 
-Thus, a=1 is in component 1, b=4 is in component 1. So the artifact bridge is a bridge. Check if a's component is component of u=2 (component 1) and b's component is component of v=5 (component 2): no. Also, check if a is component of v=5 (2) and b is component of u=2 (1): no. Thus, no. So output is NO.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 135, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 128, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: 'NO'
+Got: 'YES'
+
+```
+
+Testing against sample input 2.
+
+```python
+import sys
+from collections import deque
+
+
+def main(input_stream, output_stream):
+    sys.setrecursionlimit(1 << 25)
+    n, m = map(int, input_stream.readline().split())
+    edges = []
+    adj = [[] for _ in range(n+1)]
+    for i in range(m):
+        xi, yi, zi = map(int, input_stream.readline().split())
+        edges.append((xi, yi, zi))
+        adj[xi].append((yi, i))
+        adj[yi].append((xi, i))
+    a, b = map(int, input_stream.readline().split())
+
+    # Tarjan's algorithm to find bridges
+    bridges = set()
+    disc = [0] * (n + 1)
+    low = [0] * (n + 1)
+    time_stamp = 1
+    parent = [-1] * (n + 1)
+    stack = []
+    visited = [False] * (n + 1)
+    for start in range(1, n+1):
+        if not visited[start]:
+            stack.append((start, -1, False))
+            while stack:
+                u, p, is_back = stack.pop()
+                if visited[u]:
+                    if not is_back:
+                        # Update low values during backtracking
+                        for v, idx in adj[u]:
+                            if v != p and parent[v] == u:
+                                low[u] = min(low[u], low[v])
+                                if low[v] > disc[u]:
+                                    xi, yi = sorted((u, v))
+                                    bridges.add((xi, yi))
+                    continue
+                visited[u] = True
+                disc[u] = low[u] = time_stamp
+                time_stamp += 1
+                stack.append((u, p, True))  # backtracking step
+                for v, idx in adj[u]:
+                    if v == p:
+                        continue
+                    if not visited[v]:
+                        parent[v] = u
+                        stack.append((v, u, False))
+                    else:
+                        low[u] = min(low[u], disc[v])
+
+    # Build TCC graph (without bridges)
+    tcc_adj = [[] for _ in range(n+1)]
+    for xi, yi, zi in edges:
+        if (min(xi, yi), max(xi, yi)) not in bridges:
+            tcc_adj[xi].append(yi)
+            tcc_adj[yi].append(xi)
+
+    # Compute TCC components
+    component = [0] * (n + 1)
+    current_component = 0
+    for u in range(1, n+1):
+        if component[u] == 0:
+            current_component += 1
+            queue = deque([u])
+            component[u] = current_component
+            while queue:
+                node = queue.popleft()
+                for neighbor in tcc_adj[node]:
+                    if component[neighbor] == 0:
+                        component[neighbor] = current_component
+                        queue.append(neighbor)
+
+    # Process artifact edges
+    artifact_edges = []
+    for xi, yi, zi in edges:
+        if zi == 1:
+            artifact_edges.append((xi, yi))
+
+    for xi, yi in artifact_edges:
+        u, v = sorted((xi, yi))
+        if (u, v) not in bridges:
+            print("YES", file=output_stream)
+            return
+        else:
+            a_comp = component[a]
+            b_comp = component[b]
+            xi_comp = component[xi]
+            yi_comp = component[yi]
+            if (a_comp == xi_comp and b_comp == yi_comp) or (a_comp == yi_comp and b_comp == xi_comp):
+                print("YES", file=output_stream)
+                return
+
+    print("NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 6
+1 2 0
+2 3 0
+3 1 0
+3 4 0
+4 5 1
+5 3 0
+1 2
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

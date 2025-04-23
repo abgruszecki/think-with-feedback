@@ -252,77 +252,93 @@ But in Python, grid is a list of strings. So for each column c, iterate through 
 
 So for the code:
 
-R, C = map(int, input().split())
+Testing against sample input 1.
 
-grid = [input().strip() for _ in range(R)]
+```python
+def main(input_stream, output_stream):
+    R, C = map(int, input_stream.readline().rstrip("\n").split())
 
-non_empty = [False] * C
+    grid = [input_stream.readline().rstrip("\n").strip() for _ in range(R)]
 
-for c in range(C):
+    non_empty = [False] * C
 
-    for r in range(R):
+    for c in range(C):
 
-        if grid[r][c] == 'B':
+        for r in range(R):
 
-            non_empty[c] = True
+            if grid[r][c] == 'B':
 
-            break
+                non_empty[c] = True
 
-count = 0
+                break
 
-prev = False
+    count = 0
 
-for curr in non_empty:
+    prev = False
 
-    if curr:
+    for curr in non_empty:
 
-        if not prev:
+        if curr:
 
-            count +=1
+            if not prev:
 
-        prev = True
+                count +=1
 
-    else:
+            prev = True
 
-        prev = False
+        else:
 
-print(count)
+            prev = False
 
-Yes.
+    print(count, file=output_stream)
 
-This should handle all cases.
 
-Let's test against the first sample input.
 
-Sample 1:
+def test():
+    import io
 
-R=3, C=7.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 5
+..B..
+..B..
+B.B.B
+BBB.B
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-grid lines are:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Line 0: ....... (all dots)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Line 1: ....... (all dots)
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Line 2: .BB.B.. (so the third line in input is ".BB.B..")
+    print('Tests passed 😎')
 
-So for column 0:
 
-Check grid[0][0] is '.', grid[1][0] is '.', grid[2][0] is '.', so non_empty[0] is False.
+if __name__ == '__main__':
+    test()
 
-Column 1:
 
-grid[0][1] is '.', grid[1][1] is '.', grid[2][1] is 'B' → non_empty[1] is True.
+```
 
-Similarly column 2: grid[2][2] is 'B' → True.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Column 3: grid[2][3] is '.'; all others in column 3 are '.' → False.
-
-Column 4: grid[2][4] is 'B' → True.
-
-So non_empty is [F, T, T, F, T, F, F].
-
-Processing: each T where previous is F increments the count. So first T (index 1) → count 1. Then next T (index 2) is part of same. Then F (index3). Then T (index4) → count 2. So output is 2. Correct.
+```
 
 So the code works.
 

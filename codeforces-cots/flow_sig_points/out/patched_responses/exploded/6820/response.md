@@ -991,19 +991,120 @@ But this will compute sum from a to max_steps of 8*i.
 
 Thus, this code should correctly calculate the remaining steps.
 
-Now, let's test the code against the examples.
+Testing against sample input 1.
 
-First example:
+```python
+import sys
 
-Input:
 
-1 0
+def main(input_stream, output_stream):
+    MOD = 10**9 + 7
+    k, n = map(int, input_stream.readline().split())
+    blocked = set()
+    for _ in range(n):
+        x, y = map(int, input_stream.readline().split())
+        blocked.add((x, y))
+    
+    # Check if (0,0) is blocked, but problem states it's not
+    visited = set(blocked)
+    if (0, 0) in visited:
+        print(0, file=output_stream)
+        return
+    visited.add((0, 0))
+    current_level = [(0, 0)]
+    count = 1
+    pattern_steps = []
+    max_steps = k
+    current_step = 0
+    
+    for step in range(1, max_steps + 1):
+        new_squares = 0
+        next_level = []
+        for (x, y) in current_level:
+            for dx, dy in [(2, 1), (2, -1), (-2, 1), (-2, -1),
+                          (1, 2), (1, -2), (-1, 2), (-1, -2)]:
+                nx, ny = x + dx, y + dy
+                if (nx, ny) not in visited:
+                    visited.add((nx, ny))
+                    new_squares += 1
+                    next_level.append((nx, ny))
+        count += new_squares
+        current_level = next_level
+        # Check pattern conditions
+        expected = 8 * step
+        if new_squares == expected:
+            if pattern_steps and pattern_steps[-1] == step - 1:
+                # Two consecutive steps, pattern detected
+                break
+            pattern_steps.append(step)
+        else:
+            pattern_steps = []
+        # Check if two consecutive steps are found
+        if len(pattern_steps) >= 2 and pattern_steps[-1] == pattern_steps[-2] + 1:
+            break
+        current_step = step
+    
+    # Check if pattern was detected and compute remaining sum
+    if len(pattern_steps) >= 2 and pattern_steps[-1] == pattern_steps[-2] + 1:
+        s = pattern_steps[-1]
+        a = s + 1
+        if a <= max_steps:
+            total = max_steps
+            sum_remaining = 8 * ((total * (total + 1) // 2) - ((a - 1) * a // 2))
+            count = (count + sum_remaining) % MOD
+    
+    print(count % MOD, file=output_stream)
 
-Output:9
 
-In this case, the BFS processes step 1:
 
-new_squares is 8, which equals 8*1. So pattern_steps is [1]. Since no consecutive steps yet, loop continues. But max_steps is 1. So the loop finishes, and no sum_remaining is added. The count is 1+8=9. Correct.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 7
+-1 2
+1 2
+2 1
+2 -1
+1 -2
+-1 -2
+-2 -1
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

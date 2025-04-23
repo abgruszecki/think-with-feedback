@@ -315,27 +315,115 @@ else:
 
     print("Black")
 
-Testing the sample inputs:
+Testing against sample input 1.
 
-First sample:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    x, y = map(int, input_stream.readline().rstrip("\n").split())
+    s_white = max(x-1, y-1)
+    s_black = max(n - x, n - y)
+    print("White" if s_white <= s_black else "Black", file=output_stream)
 
-n=4, x=2, y=3.
 
-s_white = max(1,2) =2.
 
-s_black = max(4-2=2, 4-3=1) →2.
+def test():
+    import io
 
-2 <=2 → white. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+3 5
+""",
+            "output": \
+"""\
+Black
+""",
+        }, 
+    ]
 
-Second sample:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-n=5, x=3, y=5.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-s_white = max(2,4)=4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-s_black= max(5-3=2, 0) →2.
+    print('Tests passed 😎')
 
-4>2 → black. Correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    x, y = map(int, input_stream.readline().rstrip("\n").split())
+    s_white = max(x-1, y-1)
+    s_black = max(n - x, n - y)
+    print("White" if s_white <= s_black else "Black", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+2 2
+""",
+            "output": \
+"""\
+Black
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

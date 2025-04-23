@@ -72,50 +72,68 @@ But wait, in Python, for handling large n (up to 1e5), reading input efficiently
 
 So code outline:
 
-n = int(input())
-x = list(map(int, input().split()))
+Testing against sample input 1.
 
-for i in range(n):
-    if i ==0:
-        mini = x[1] - x[0]
-    elif i ==n-1:
-        mini = x[i] - x[i-1]
-    else:
-        mini = min(x[i] - x[i-1], x[i+1] - x[i])
-    maxi = max(x[i] - x[0], x[-1] - x[i])
-    print(mini, maxi)
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    x = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-But wait, in the first sample, the first city's maxi is x[-1] - x[0], which is 7 - (-5) =12. For city 0, x[i] -x[0] is zero, but x[-1] -x[i] is 12. So the max is 12, which is correct.
+    for i in range(n):
+        if i ==0:
+            mini = x[1] - x[0]
+        elif i ==n-1:
+            mini = x[i] - x[i-1]
+        else:
+            mini = min(x[i] - x[i-1], x[i+1] - x[i])
+        maxi = max(x[i] - x[0], x[-1] - x[i])
+        print(mini, maxi, file=output_stream)
 
-Yes. So that code should work.
 
-Testing the code with the first sample:
 
-Input is 4, then -5 -2 2 7.
+def test():
+    import io
 
-i=0:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+-1 1
+""",
+            "output": \
+"""\
+2 2
+2 2
+""",
+        }, 
+    ]
 
-mini = x[1]-x[0] →3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-maxi = max(0, 12) →12. So output 3 12.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=1:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-mini is min(3 (from x[1]-x[0]), 4 (x[2]-x[1])) →3.
+    print('Tests passed 😎')
 
-maxi is max( (-2 - (-5) )=3, (7 - (-2))=9 →9. So output 3 9.
 
-i=2:
+if __name__ == '__main__':
+    test()
 
-mini is min(4 (x[2]-x[1]=4), 5 (x[3]-x[2]=5) →4.
 
-maxi: x[2]-x[0] →2 - (-5)=7, x[-1]-x[2] →5. So max 7. Output 4 7.
+```
 
-i=3:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-mini is x[3]-x[2]=5.
-
-maxi: 7 - (-5) =12. Output 5 12. Correct.
+```
 
 Second sample: n=2. x[0]=-1, x[1]=1.
 

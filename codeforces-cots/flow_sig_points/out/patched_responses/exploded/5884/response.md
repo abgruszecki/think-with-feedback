@@ -135,25 +135,65 @@ This is O(n) time and O(1) space. So for n=100, it's optimal.
 
 So the code is straightforward.
 
-Testing the first sample:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    max_k = 0
+    last_idx = 0
+    for i in range(n):
+        k = (a[i] + m - 1) // m
+        if k >= max_k:
+            max_k = k
+            last_idx = i
+    print(last_idx + 1, file=output_stream)
 
-n=5, m=2.
 
-a = [1,3,1,4,2]
 
-Compute k_i:
+def test():
+    import io
 
-1: (1+2-1)//2 = 2//2=1
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 4
+1 1 2 2 3 3
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-3: (3+2-1)/2=4/2=2
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-1: 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-4: (4+2-1)/2=5//2=2.5 → 2.5 floored to 2? Wait, no. (4+1)/2 is 5/2=2.5, integer division in Python gives 2. So ceil(4/2) is 2. So yes.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Wait, (a_i + m -1) // m is the formula for ceil(a_i / m). So for 4, (4+1) //2 =5//2=2. Which is correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So k_i's are [1,2,1,2,1]. max_k=2.
 

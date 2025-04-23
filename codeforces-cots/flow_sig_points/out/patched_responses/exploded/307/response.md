@@ -150,75 +150,111 @@ Then compare.
 
 So code:
 
-x = int(input())
+Testing against sample input 1.
 
-best_a = -1
+```python
+def main(input_stream, output_stream):
+    x = int(input_stream.readline().rstrip("\n"))
 
-best_priority = -1
+    best_a = -1
 
-best_cat = ''
+    best_priority = -1
 
-for a in range(3):
+    best_cat = ''
 
-    new_x = x +a
+    for a in range(3):
 
-    rem = new_x %4
+        new_x = x +a
 
-    if rem ==1:
+        rem = new_x %4
 
-        cat = 'A'
+        if rem ==1:
 
-        priority =4
+            cat = 'A'
 
-    elif rem ==3:
+            priority =4
 
-        cat = 'B'
+        elif rem ==3:
 
-        priority =3
+            cat = 'B'
 
-    elif rem ==2:
+            priority =3
 
-        cat = 'C'
+        elif rem ==2:
 
-        priority =2
+            cat = 'C'
 
-    else:  # rem 0
+            priority =2
 
-        cat = 'D'
+        else:  # rem 0
 
-        priority =1
+            cat = 'D'
 
-    # compare
+            priority =1
 
-    if priority > best_priority:
+        # compare
 
-        best_priority = priority
+        if priority > best_priority:
 
-        best_a =a
-
-        best_cat = cat
-
-    elif priority == best_priority:
-
-        if a < best_a:
+            best_priority = priority
 
             best_a =a
 
-            # cat is same as previous, so no need to change
+            best_cat = cat
 
-print(f"{best_a} {best_cat}")
+        elif priority == best_priority:
 
-Wait, but what if two a's have the same priority and same a? Well, since a is 0,1,2, and we check in order, the first one (smallest a) will be chosen. Wait, but in the loop, a is 0,1,2. For example, if a=0 and a=1 have same priority. Then, when a=0 is checked, best_priority is set, best_a is 0. Then a=1 comes, priority is same as current best. So the code checks if a (1) is less than best_a (0), which is not. So no change. So in this case, the best_a remains 0. Which is correct, because for same priority, we choose the smallest a.
+            if a < best_a:
 
-So the code is correct.
+                best_a =a
 
-Testing the first sample:
+                # cat is same as previous, so no need to change
 
-x=33, a=0: priority4. So best becomes a=0.
+    print(f"{best_a} {best_cat}", file=output_stream)
 
-Then a=1: priority2, so not better.
 
-a=2: priority3, not better. So output 0 A.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+98
+""",
+            "output": \
+"""\
+1 B
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample: x=98.
 

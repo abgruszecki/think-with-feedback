@@ -94,29 +94,127 @@ Now, what about the time? For n=1000, two passes are O(n) each, which is accepta
 
 So in code:
 
-n = int(input())
+Testing against sample input 1.
 
-p = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-max_val = max(p)
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-winner_index = p.index(max_val) + 1
+    max_val = max(p)
 
-second_max = max( x for x in p if x != max_val )
+    winner_index = p.index(max_val) + 1
 
-print(winner_index, second_max)
+    second_max = max( x for x in p if x != max_val )
 
-That's straightforward.
+    print(winner_index, second_max, file=output_stream)
 
-Testing the first example:
 
-Input 2: 5 7.
 
-max_val is 7, index 1 (0-based) +1 is 2. second_max is 5. Output 2 5. Correct.
+def test():
+    import io
 
-Second example: 10, 2,8.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+10 2 8
+""",
+            "output": \
+"""\
+1 8
+""",
+        }, 
+    ]
 
-max_val is 10. index is 0, +1 is 1. second_max is max(2,8) is 8. So output 1 8. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    max_val = max(p)
+
+    winner_index = p.index(max_val) + 1
+
+    second_max = max( x for x in p if x != max_val )
+
+    print(winner_index, second_max, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+3 8 2 9 4 14
+""",
+            "output": \
+"""\
+6 9
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: 3 8 2 9 4 14.
 

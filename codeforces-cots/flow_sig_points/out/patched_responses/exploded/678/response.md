@@ -1035,9 +1035,12 @@ But in Python, lists are zero-based, so for max_x=1e7, we need a list of size 1e
 
 Sample code:
 
-def main():
+Testing against sample input 1.
+
+```python
+def main(input_stream, output_stream):
     import sys
-    a, n = map(int, sys.stdin.readline().split())
+    a, n = map(int, input_stream.readline().split())
     upper = a +n -1
     max_x = upper
 
@@ -1069,18 +1072,51 @@ def main():
     for x in range(a, upper+1):
         total += square_free[x]
 
-    print(total)
+    print(total, file=output_stream)
 
-if __name__ == "__main__":
-    main()
 
-But this code may not be efficient enough for large inputs.
 
-Testing this code with the sample inputs:
+def test():
+    import io
 
-First sample input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+50 5
+""",
+            "output": \
+"""\
+125
+""",
+        }, 
+    ]
 
-25 3 → output 30.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

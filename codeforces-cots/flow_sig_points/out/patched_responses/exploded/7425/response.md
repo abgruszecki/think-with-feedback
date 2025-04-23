@@ -280,147 +280,96 @@ k=3: returns 10.
 
 So exact[1] =4-0=4; exact[2]=7-4=3; exact[3]=10-7=3. Which matches the sample.
 
-Another sample:
+Testing against sample input 1.
 
-Input 'aabacaabbad' → output 4, then 14,19,28,5.
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    if not s:
+        print(0, file=output_stream)
+        return
 
-So d_total=4.
+    pre_s = [ord(c) - ord('a') for c in s]
+    d_total = len(set(pre_s))
 
-Compute at_most[1], at_most[2], at_most[3], at_most[4].
+    def count_at_most_k(pre_s, k):
+        count = [0] * 26
+        current_distinct = 0
+        left = 0
+        res = 0
+        for right in range(len(pre_s)):
+            c = pre_s[right]
+            if count[c] == 0:
+                current_distinct += 1
+            count[c] += 1
+            while current_distinct > k:
+                left_c = pre_s[left]
+                count[left_c] -= 1
+                if count[left_c] == 0:
+                    current_distinct -= 1
+                left += 1
+            res += right - left + 1
+        return res
 
-Then exact[1] = at_most[1], exact[2] = at_most[2] - at_most[1], etc.
+    at_most = [0] * (d_total + 1)
+    for k in range(1, d_total + 1):
+        at_most[k] = count_at_most_k(pre_s, k)
 
-But how to verify these numbers? Well, the sample shows that for k=4, the exact is 5. So at_most[4] - at_most[3] =5. Which implies that at_most[4] is the total number of substrings (since all substrings can have up to 4 distinct characters). Let's compute that. The length of the input is len('aabacaabbad') → let's count:
+    exact = [0] * (d_total + 1)
+    for k in range(1, d_total + 1):
+        exact[k] = at_most[k] - at_most[k-1]
 
-a a b a c a a b b a d → 11 characters.
+    print(d_total, file=output_stream)
+    for k in range(1, d_total + 1):
+        print(exact[k], file=output_stream)
 
-The total number of substrings is n*(n+1)/2 = 11*12/2 =66. So at_most[4] is 66. Then at_most[3] would be 66-5=61. Then exact[3] is at_most[3] - at_most[2] =28, so at_most[2] is 61-28=33. And so on.
 
-But I think the code would handle it correctly.
 
-Now, potential optimizations.
+def test():
+    import io
 
-The current code calls count_at_most_k for each k from 1 to d_total. Each call is O(n) time. But perhaps there's a way to compute all at_most values in a single pass. But I don't think so. The sliding window approach for different k's are independent.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+aabacaabbad
+""",
+            "output": \
+"""\
+4
+14
+19
+28
+5
+""",
+        }, 
+    ]
 
-Another optimization: since the maximum possible k is 26, and each call is O(n), it's manageable.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But in Python, loops over 3e5 characters can be slow. So using a precompiled list of the ord values might speed things up. For example, converting the string to a list of integers (0-25) once, and then processing that.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Yes. So, for example, converting the string s into a list of ordinals once can save time in the loops. Because in each function call, we have to convert each character to an integer. So for each function call, for each character, ord(s[right]) is called. But if we precompute this once, then each function can use the precomputed list.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So modifying the code:
+    print('Tests passed 😎')
 
-pre_s = [ord(c) - ord('a') for c in s]
 
-Then, in the count_at_most_k function, instead of s, we pass pre_s. So inside the function:
+if __name__ == '__main__':
+    test()
 
-for right in range(len(pre_s)):
 
-    c = pre_s[right]
+```
 
-Similarly for the left_c.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-This saves the time of converting characters to integers each time.
-
-This can save some time in Python, as ord is called once per character, not once per function call per character.
-
-So, integrating that into the code:
-
-s = input().strip()
-
-pre_s = [ord(c) - ord('a') for c in s]
-
-d_total = len(set(pre_s))  # since each element is 0-25, but the number of unique elements is the same as the original string.
-
-def count_at_most_k(pre_s, k):
-    count = [0] * 26
-    current_distinct = 0
-    left = 0
-    res = 0
-    for right in range(len(pre_s)):
-        c = pre_s[right]
-        if count[c] == 0:
-            current_distinct += 1
-        count[c] += 1
-        while current_distinct > k:
-            left_c = pre_s[left]
-            count[left_c] -= 1
-            if count[left_c] == 0:
-                current_distinct -= 1
-            left += 1
-        res += right - left + 1
-    return res
-
-Then, the loop for k in 1 to d_total:
-
-at_most = [0]*(d_total +1)
-
-for k in range(1, d_total+1):
-    at_most[k] = count_at_most_k(pre_s, k)
-
-This should be more efficient as it avoids recomputing ord(c) each time.
-
-Another optimization: the 'count' array can be reused between function calls. However, since each call to count_at_most_k is for a different k, and each call is independent, it's better to reset the count array for each function call. So the code above is correct.
-
-Another point: in Python, list comprehensions and pre-processing can speed up the code. For example, pre_s is a list of integers, which is fast to access.
-
-Now, considering the memory constraints. The pre_s array is O(n), which for n=3e5 is acceptable. 3e5 integers is about 2.4MB (each int is 28 bytes in Python, but lists have some overhead). For 3e5 elements, that's manageable.
-
-So the code should work within the memory limit.
-
-Now, putting all together.
-
-The code steps are:
-
-1. Read the input string.
-
-2. Precompute pre_s as list of integers (0-25).
-
-3. Compute d_total as the number of unique elements in pre_s.
-
-4. Compute at_most for k from 1 to d_total.
-
-5. Compute exact counts as at_most[k] - at_most[k-1].
-
-6. Output d_total followed by each exact count in order.
-
-Testing this code against the samples.
-
-Sample 1:
-
-Input: abca → pre_s is [0, 1, 2, 0].
-
-d_total is 3.
-
-count_at_most_k for k=1:
-
-current_distinct starts at 0.
-
-At right=0 (c=0):
-
-count[0] was 0 → current_distinct becomes 1. Add 1 to count[0]. Since current_distinct (1) is not >k (1), proceed. res += 1-0+1=1.
-
-Wait, wait. Wait, the code adds (right - left +1) to res. Because the number of substrings ending at right is (right - left +1). For right=0, left is 0: 0-0+1=1. res is 1.
-
-Then right=1 (c=1):
-
-count[1] is 0 → current_distinct becomes 2. Now current_distinct (2) >k (1). So enter the while loop.
-
-Move left: left=0. left_c is 0. count[0] is decremented to 0. current_distinct becomes 1. left becomes 1. Now, current_distinct is 1 <=1. So exit loop.
-
-Add (1-1+1) =1. res is 2.
-
-Right=2 (c=2):
-
-count[2] is 0 → current_distinct becomes 2. Enter loop. current_distinct (2) >1.
-
-Decrement left_c (pre_s[1] is 1). count[1] was 1. Now 0. current_distinct becomes 1. left becomes 2. Add (2-2+1) =1. res is 3.
-
-Right=3 (c=0):
-
-count[0] is 0 → current_distinct becomes 2. Enter loop. left=2. left_c is pre_s[2] =2. count[2] is 1 → decrement to 0. current_distinct becomes 1. left becomes 3. Add (3-3+1) =1. res is 4. So for k=1, returns 4.
-
-Similarly for k=2 and k=3, which gives the correct results.
+```
 
 So the code works.
 

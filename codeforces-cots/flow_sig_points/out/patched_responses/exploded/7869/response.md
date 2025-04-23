@@ -239,165 +239,217 @@ Let's implement this step by step.
 
 So in code:
 
-t = [list(map(int, input().split())) for _ in range(3)]
+Testing against sample input 1.
 
-n = int(input())
+```python
+def main(input_stream, output_stream):
+    t = [list(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(3)]
 
-if n ==0:
+    n = int(input_stream.readline().rstrip("\n"))
 
-    print(0)
+    if n ==0:
 
-else:
+        print(0, file=output_stream)
 
-    # Initialize for k=1
+    else:
 
-    prev = [[0]*3 for _ in range(3)]
+        # Initialize for k=1
 
-    for i in range(3):
-
-        for j in range(3):
-
-            if i != j:
-
-                prev[i][j] = t[i][j]
-
-    for k in range(2, n+1):
-
-        current = [[0]*3 for _ in range(3)]
+        prev = [[0]*3 for _ in range(3)]
 
         for i in range(3):
 
             for j in range(3):
 
-                if i == j:
+                if i != j:
 
-                    continue
+                    prev[i][j] = t[i][j]
 
-                aux = 3 - i - j
+        for k in range(2, n+1):
 
-                option1 = prev[i][aux] + t[i][j] + prev[aux][j]
+            current = [[0]*3 for _ in range(3)]
 
-                option2 = 2 * prev[i][j] + prev[j][i] + t[i][aux] + t[aux][j]
+            for i in range(3):
 
-                current[i][j] = min(option1, option2)
+                for j in range(3):
 
-        prev = current
+                    if i == j:
 
-    print(prev[0][2])
+                        continue
 
-Wait, but for each k, current is a 3x3 matrix where for each i and j (i !=j), we compute the minimal cost. The rest (i ==j) are 0, but they are not used.
+                    aux = 3 - i - j
 
-In the end, the answer is prev[0][2], which represents moving n disks from rod 0 to rod 2.
+                    option1 = prev[i][aux] + t[i][j] + prev[aux][j]
 
-Let's test this code against the examples.
+                    option2 = 2 * prev[i][j] + prev[j][i] + t[i][aux] + t[aux][j]
 
-First example:
+                    current[i][j] = min(option1, option2)
 
-Input:
+            prev = current
 
-0 1 1
+        print(prev[0][2], file=output_stream)
 
-1 0 1
 
-1 1 0
 
-3
+def test():
+    import io
 
-So t is:
-
-t[0][0] =0, t[0][1]=1, t[0][2] =1
-
-t[1][0] =1, t[1][1]=0, t[1][2] =1
-
-t[2][0] =1, t[2][1]=1, t[2][2]=0
-
-n=3.
-
-Let's compute step by step.
-
-For k=1:
-
-prev[i][j] = t[i][j]
-
-prev[0][1] =1, prev[0][2]=1
-
-prev[1][0]=1, prev[1][2]=1
-
-prev[2][0]=1, prev[2][1]=1.
-
-For k=2:
-
-current[i][j] computed.
-
-For i=0, j=2:
-
-aux is 1 (since 3-0-2=1).
-
-option1: prev[0][1] (1) + t[0][2] (1) + prev[1][2] (1) → 1+1+1=3.
-
-option2: 2*prev[0][2] (2*1=2) + prev[2][0] (1) + t[0][1] (1) + t[1][2] (1) → 2+1+1+1=5. So min(3,5) is 3. So current[0][2] =3.
-
-Similarly, for other i and j.
-
-After k=2, the prev is updated.
-
-For k=3, again compute current[0][2].
-
-aux is 1.
-
-option1: prev[0][1] + t[0][2] (1) + prev[1][2].
-
-prev for k=2:
-
-prev[0][1] would have been computed as min of option1 and option2 when moving 2 disks from 0 to 1.
-
-Wait, perhaps I should not step through all possibilities, but trust that the code works for the sample.
-
-In the first sample, the output is 7. Let's see:
-
-n=3.
-
-The code's final prev[0][2] is 7. So the code returns 7. Which matches the sample.
-
-Second example:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 0 2 2
-
 1 0 100
-
 1 2 0
-
 3
+""",
+            "output": \
+"""\
+19
+""",
+        }, 
+    ]
 
-The t matrix is:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Row 0: [0,2,2]
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Row 1: [1,0,100]
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Row 2: [1,2,0]
+    print('Tests passed 😎')
 
-n=3.
 
-Sample output is 19.
+if __name__ == '__main__':
+    test()
 
-Let's see.
 
-For k=1, prev[0][2] is 2.
+```
 
-For k=2:
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 84, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 77, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '19'
+Got: '111'
 
-current[0][2] would be option1 and option2.
+```
 
-aux for 0→2 is 1.
+Testing against sample input 2.
 
-option1: prev[0][1] (2) + t[0][2] (2) + prev[1][2] (100). So 2+2+100=104.
+```python
+def main(input_stream, output_stream):
+    t = [list(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(3)]
 
-option2: 2*prev[0][2] (2*2=4) + prev[2][0] (1) + t[0][1] (2) + t[1][2] (100). 4+1 +2+100=107. So min(104,107) → 104. So current[0][2] is 104?
+    n = int(input_stream.readline().rstrip("\n"))
 
-But wait, the sample output for n=3 is 19. Hmm, maybe my approach is wrong. Alternatively, perhaps the code isn't correct.
+    if n ==0:
+
+        print(0, file=output_stream)
+
+    else:
+
+        # Initialize for k=1
+
+        prev = [[0]*3 for _ in range(3)]
+
+        for i in range(3):
+
+            for j in range(3):
+
+                if i != j:
+
+                    prev[i][j] = t[i][j]
+
+        for k in range(2, n+1):
+
+            current = [[0]*3 for _ in range(3)]
+
+            for i in range(3):
+
+                for j in range(3):
+
+                    if i == j:
+
+                        continue
+
+                    aux = 3 - i - j
+
+                    option1 = prev[i][aux] + t[i][j] + prev[aux][j]
+
+                    option2 = 2 * prev[i][j] + prev[j][i] + t[i][aux] + t[aux][j]
+
+                    current[i][j] = min(option1, option2)
+
+            prev = current
+
+        print(prev[0][2], file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0 2 1
+1 0 100
+1 2 0
+5
+""",
+            "output": \
+"""\
+87
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 84, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 77, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '87'
+Got: '437'
+
+```
 
 Wait, perhaps I need to step through the example step by step.
 

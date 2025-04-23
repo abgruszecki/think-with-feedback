@@ -383,60 +383,171 @@ But for handling the current_pos in O(1) steps per current_pos, but the worst-ca
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n, k = map(int, input().split())
-s = input().strip()
-allowed_j = [i+1 for i in range(n) if s[i] == '1']
 
-total = 0
-last_covered = 0
-current_pos = 1
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    s = input_stream.readline().rstrip("\n").strip()
+    allowed_j = [i+1 for i in range(n) if s[i] == '1']
 
-while current_pos <= n:
-    if current_pos > last_covered:
-        # find best_j
-        start_j = max(1, current_pos - k)
-        end_j = min(n, current_pos + k)
-        # find the largest j in allowed_j <= end_j and >= start_j
-        idx = bisect.bisect_right(allowed_j, end_j) -1
-        if idx >=0 and idx < len(allowed_j) and allowed_j[idx] >= start_j:
-            best_j = allowed_j[idx]
-            best_reach = min(n, best_j + k)
-            total += best_j
-            last_covered = best_reach
-            current_pos = best_reach +1
+    total = 0
+    last_covered = 0
+    current_pos = 1
+
+    while current_pos <= n:
+        if current_pos > last_covered:
+            # find best_j
+            start_j = max(1, current_pos - k)
+            end_j = min(n, current_pos + k)
+            # find the largest j in allowed_j <= end_j and >= start_j
+            idx = bisect.bisect_right(allowed_j, end_j) -1
+            if idx >=0 and idx < len(allowed_j) and allowed_j[idx] >= start_j:
+                best_j = allowed_j[idx]
+                best_reach = min(n, best_j + k)
+                total += best_j
+                last_covered = best_reach
+                current_pos = best_reach +1
+            else:
+                # no router, pay current_pos
+                total += current_pos
+                last_covered = current_pos
+                current_pos +=1
         else:
-            # no router, pay current_pos
-            total += current_pos
-            last_covered = current_pos
             current_pos +=1
-    else:
-        current_pos +=1
 
-print(total)
+    print(total, file=output_stream)
 
-Let's test this code against the samples.
 
-First sample:
 
-Input: 5 2 00100 → allowed_j is [3]
+def test():
+    import io
 
-current_pos=1>0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 1
+000000
+""",
+            "output": \
+"""\
+21
+""",
+        }, 
+    ]
 
-start_j=1-2= -1 → max 1. end_j=1+2=3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-bisect_right in allowed_j [3] for end_j=3 → idx=0. allowed_j[0] is 3 >=1. So best_j=3, best_reach=3+2=5. total becomes 3. current_pos is 6. Loop ends. Correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Third sample: allowed_j [3,4].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-current_pos=1>0.
+    print('Tests passed 😎')
 
-start_j=0 (1-1=0 → max 1?), wait no:
 
-current_pos is 1. start_j is max(1, 1-1) → 0? Wait, the code says start_j = max(1, current_pos -k). Wait, current_pos is 1, k is1. 1-1=0. max(1,0) is 1. So start_j=1. end_j=1+1=2. So allowed_j is [3,4], so bisect_right(allowed_j,2) returns 0 (since all elements are >2). idx= -1. So no j found. So add 1 to total. last_covered=1. current_pos=2.
+if __name__ == '__main__':
+    test()
 
-current_pos=2>1. start_j=2-1=1. end_j=2+1=3. allowed_j is [3,4]. bisect_right(allowed_j,3) gives 1 (since 3 is at index 0, allowed_j[0]=3 <=3, the next element is 4. So bisect_right returns 1. idx=0. allowed_j[0] is 3 >=1. So best_j=3. best_reach=3+1=4. total becomes 1+3=4. current_pos=5. Now 5>4. Then start_j=5-1=4. end_j=5+1=6. allowed_j is [3,4]. bisect_right(allowed_j,6)=2-1=1. allowed_j[1] is4. 4 >=4. So best_j=4. best_reach=4+1=5. But current_pos is5, and 4+1=5. So current_pos becomes 6. Wait, but n is4. So best_reach is min(4, 4+1)=5→4. So last_covered=4. current_pos=5. Then current_pos=5>4. But now, start_j=5-1=4. end_j=5+1=6 (but n=4 → end_j=4. So allowed_j in [4,4]. allowed_j has 3 and4. allowed_j[1] is4. So best_j=4. best_reach=4+1=5 →4. So add 4 to total. Now total is1+3+4=8. But the correct answer is 4. Wait, what's wrong here.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+import bisect
+
+
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    s = input_stream.readline().rstrip("\n").strip()
+    allowed_j = [i+1 for i in range(n) if s[i] == '1']
+
+    total = 0
+    last_covered = 0
+    current_pos = 1
+
+    while current_pos <= n:
+        if current_pos > last_covered:
+            # find best_j
+            start_j = max(1, current_pos - k)
+            end_j = min(n, current_pos + k)
+            # find the largest j in allowed_j <= end_j and >= start_j
+            idx = bisect.bisect_right(allowed_j, end_j) -1
+            if idx >=0 and idx < len(allowed_j) and allowed_j[idx] >= start_j:
+                best_j = allowed_j[idx]
+                best_reach = min(n, best_j + k)
+                total += best_j
+                last_covered = best_reach
+                current_pos = best_reach +1
+            else:
+                # no router, pay current_pos
+                total += current_pos
+                last_covered = current_pos
+                current_pos +=1
+        else:
+            current_pos +=1
+
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+12 6
+000010000100
+""",
+            "output": \
+"""\
+15
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Wait the third sample's correct answer is4. Let's see what's happening.
 

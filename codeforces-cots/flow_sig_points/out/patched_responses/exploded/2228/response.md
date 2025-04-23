@@ -815,199 +815,161 @@ But for the last line (the m indexes), when m is 250,000, using input().split() 
 
 But for code submission, the code must read from standard input. So the code can be written as:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n, m = map(int, sys.stdin.readline().split())
 
-arrays = []
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
 
-for _ in range(n):
+    arrays = []
 
-    parts = list(map(int, sys.stdin.readline().split()))
+    for _ in range(n):
 
-    l = parts[0]
+        parts = list(map(int, input_stream.readline().split()))
 
-    arr = parts[1:]
+        l = parts[0]
 
-    arrays.append(arr)
+        arr = parts[1:]
 
-indexes = list(map(int, sys.stdin.readline().split()))
+        arrays.append(arr)
 
-precomputed = []
+    indexes = list(map(int, input_stream.readline().split()))
 
-for arr in arrays:
+    precomputed = []
 
-    # compute prefix
+    for arr in arrays:
 
-    current_sum = 0
+        # compute prefix
 
-    max_prefix = -float('inf')
+        current_sum = 0
 
-    for num in arr:
+        max_prefix = -float('inf')
 
-        current_sum += num
+        for num in arr:
 
-        max_prefix = max(max_prefix, current_sum)
+            current_sum += num
 
-    # compute suffix
+            max_prefix = max(max_prefix, current_sum)
 
-    current_sum =0
+        # compute suffix
 
-    max_suffix = -float('inf')
+        current_sum =0
 
-    for num in reversed(arr):
+        max_suffix = -float('inf')
 
-        current_sum += num
+        for num in reversed(arr):
 
-        max_suffix = max(max_suffix, current_sum)
+            current_sum += num
 
-    # compute total
+            max_suffix = max(max_suffix, current_sum)
 
-    total = sum(arr)
+        # compute total
 
-    # compute best using kadane's algorithm
+        total = sum(arr)
 
-    current_max = 0
+        # compute best using kadane's algorithm
 
-    max_sub = -float('inf')
+        current_max = 0
 
-    for num in arr:
+        max_sub = -float('inf')
 
-        current_max = max(num, current_max + num)
+        for num in arr:
 
-        max_sub = max(max_sub, current_max)
+            current_max = max(num, current_max + num)
 
-    precomputed.append( (max_prefix, max_suffix, total, max_sub) )
+            max_sub = max(max_sub, current_max)
 
-current = None
+        precomputed.append( (max_prefix, max_suffix, total, max_sub) )
 
-max_sum = -float('inf')
+    current = None
 
-for i in indexes:
+    max_sum = -float('inf')
 
-    idx = i-1  # convert to 0-based
+    for i in indexes:
 
-    small = precomputed[idx]
+        idx = i-1  # convert to 0-based
 
-    if current is None:
+        small = precomputed[idx]
 
-        current = small
+        if current is None:
 
-    else:
+            current = small
 
-        left_p, left_s, left_t, left_b = current
+        else:
 
-        right_p, right_s, right_t, right_b = small
+            left_p, left_s, left_t, left_b = current
 
-        new_p = max(left_p, left_t + right_p)
+            right_p, right_s, right_t, right_b = small
 
-        new_s = max(right_s, left_s + right_t)
+            new_p = max(left_p, left_t + right_p)
 
-        new_t = left_t + right_t
+            new_s = max(right_s, left_s + right_t)
 
-        new_b = max(left_b, right_b, left_s + right_p)
+            new_t = left_t + right_t
 
-        current = (new_p, new_s, new_t, new_b)
+            new_b = max(left_b, right_b, left_s + right_p)
 
-    if current[3] > max_sum:
+            current = (new_p, new_s, new_t, new_b)
 
-        max_sum = current[3]
+        if current[3] > max_sum:
 
-print(max_sum)
+            max_sum = current[3]
 
-This should handle all test cases.
+    print(max_sum, file=output_stream)
 
-Testing the first example:
 
-Input:
 
-3 4
+def test():
+    import io
 
-3 1 6 -2
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 1
+4 0 8 -3 -10
+8 3 -2 -5 10 8 -9 -5 -4
+1 0
+1 -3
+3 -8 5 6
+2 9 6
+1
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
 
-2 3 3
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-2 -5 1
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-2 3 1 3
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The code would precompute for each small array:
+    print('Tests passed 😎')
 
-Array 1: [1,6,-2]
 
-prefix: 1, 7, 5 →7
+if __name__ == '__main__':
+    test()
 
-suffix: -2 →4 (6-2) →5 (1+6-2). So suffix is5.
 
-total:5.
+```
 
-best:7.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Array2: [3,3]
-
-prefix:6, suffix:6, total:6, best:6.
-
-Array3: [-5,1]
-
-prefix: -5, -4 →-4.
-
-suffix:1, -4 →1.
-
-total:-4.
-
-best:1.
-
-The indexes are [2,3,1,3], which become [1,2,0,2].
-
-Processing:
-
-First index is 1 (array2):
-
-current is (6,6,6,6). max_sum is 6.
-
-Second index is2 (array3):
-
-combine (6,6,6,6) with ( -4,1,-4,1).
-
-new_p = max(6, 6 + (-4)=2 →6.
-
-new_s = max(1, 6 + (-4)=2 →2.
-
-new_t=6-4=2.
-
-new_b= max(6,1,6 + (-4)=2 →6.
-
-current is (6,2,2,6). max_sum remains 6.
-
-Third index is0 (array1):
-
-current data (6,2,2,6) combines with array1's (7,5,5,7).
-
-new_p= max(6, 2+7=9 →9).
-
-new_s= max(5, 2+5=7 →7.
-
-new_t=2+5=7.
-
-new_b= max(6,7, 2+7=9 →9. current becomes (9,7,7,9). max_sum is 9.
-
-Fourth index is2 (array3 again):
-
-current combines with array3's data.
-
-new_p= max(9, 7 + (-4)=3 →9.
-
-new_s= max(1,7 + (-4)=3 →3.
-
-new_t=7-4=3.
-
-new_b= max(9,1,7+ (-4)=3 →9.
-
-current is (9,3,3,9). max_sum remains 9.
-
-Final output is 9.
-
-Which is correct.
+```
 
 Another test case where the best is achieved by a cross between two copies of the same array.
 

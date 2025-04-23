@@ -143,63 +143,151 @@ Wait, but in Python, strings are immutable. So each step creates a new string. F
 
 Thus, the code can be written as:
 
-n = int(input())
+Testing against sample input 1.
 
-t = input().strip()
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-divisors = []
+    t = input_stream.readline().rstrip("\n").strip()
 
-for i in range(n, 0, -1):
+    divisors = []
 
-    if n % i == 0:
+    for i in range(n, 0, -1):
 
-        divisors.append(i)
+        if n % i == 0:
 
-# Now reverse the divisors to get decryption steps.
+            divisors.append(i)
 
-decryption_order = divisors[::-1]
+    # Now reverse the divisors to get decryption steps.
 
-s = t
+    decryption_order = divisors[::-1]
 
-for d in decryption_order:
+    s = t
 
-    s = s[:d][::-1] + s[d:]
+    for d in decryption_order:
 
-print(s)
+        s = s[:d][::-1] + s[d:]
 
-Wait, but in the first example, this code would generate the correct result?
+    print(s, file=output_stream)
 
-Let's test the first example:
 
-Input:
 
-10
+def test():
+    import io
 
-rocesfedoc
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+16
+plmaetwoxesisiht
+""",
+            "output": \
+"""\
+thisisexampletwo
+""",
+        }, 
+    ]
 
-divisors in decreasing order are [10,5,2,1].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Reversed list is [1,2,5,10].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So for each d in [1,2,5,10]:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-First d=1: reverse first 1 character → no change. s remains 'rocesfedoc'.
+    print('Tests passed 😎')
 
-Then d=2: reverse first 2 → 'orcesfedoc'.
 
-Then d=5: reverse first 5 characters of 'orcesfedoc' → first 5 letters are 'o r c e s' → reversed is 's e c r o'. So the string becomes 'secro fedoc' → 'secrofedoc'.
+if __name__ == '__main__':
+    test()
 
-Then d=10: reverse entire string → 'codeforces'.
 
-Which matches the sample output.
+```
 
-So yes, this code should work.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Another test case: input is 1 and 'z'. The divisors in decreasing order are [1]. Reversed list is [1]. Apply reverse(1) → 'z' remains. So output is 'z'.
+```
 
-Second sample input: 16, encrypted string is 'plmaetwoxesisiht'.
+Testing against sample input 2.
 
-The correct output is 'thisisexampletwo'.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    t = input_stream.readline().rstrip("\n").strip()
+
+    divisors = []
+
+    for i in range(n, 0, -1):
+
+        if n % i == 0:
+
+            divisors.append(i)
+
+    # Now reverse the divisors to get decryption steps.
+
+    decryption_order = divisors[::-1]
+
+    s = t
+
+    for d in decryption_order:
+
+        s = s[:d][::-1] + s[d:]
+
+    print(s, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+z
+""",
+            "output": \
+"""\
+z
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Let's see. The divisors of 16 in decreasing order are 16,8,4,2,1. Reversed list is [1,2,4,8,16]. Applying reverses in that order.
 

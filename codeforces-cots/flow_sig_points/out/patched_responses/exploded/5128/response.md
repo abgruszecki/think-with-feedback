@@ -929,167 +929,161 @@ Then proceed.
 
 So code:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n = int(input())
 
-vertices = [tuple(map(int, input().split())) for _ in range(n)]
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-A = vertices[0]
+    vertices = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n)]
 
-B = vertices[1]
+    A = vertices[0]
 
-y_ab = A[1]
+    B = vertices[1]
 
-x_min = min(A[0], B[0])
+    y_ab = A[1]
 
-x_max = max(A[0], B[0])
+    x_min = min(A[0], B[0])
 
-lower = -math.inf
+    x_max = max(A[0], B[0])
 
-upper = math.inf
+    lower = -math.inf
 
-# Process all edges except AB (which is first edge)
+    upper = math.inf
 
-for i in range(1, n):
+    # Process all edges except AB (which is first edge)
 
-    u = vertices[i]
+    for i in range(1, n):
 
-    if i == n-1:
+        u = vertices[i]
 
-        v = vertices[0]
+        if i == n-1:
 
-    else:
-
-        v = vertices[i+1]
-
-    u_x, u_y = u
-
-    v_x, v_y = v
-
-    coeff = -(v_y - u_y)
-
-    const_term = (v_x - u_x) * (y_ab - u_y) + (v_y - u_y) * u_x
-
-    if coeff == 0:
-
-        if const_term > 0:
-
-            # No solution
-
-            lower = math.inf
-
-            upper = -math.inf
-
-            break
+            v = vertices[0]
 
         else:
 
-            # No constraint
+            v = vertices[i+1]
 
-            continue
+        u_x, u_y = u
 
-    rhs = (-const_term) / coeff
+        v_x, v_y = v
 
-    if coeff > 0:
+        coeff = -(v_y - u_y)
 
-        # x_p <= rhs
+        const_term = (v_x - u_x) * (y_ab - u_y) + (v_y - u_y) * u_x
 
-        upper = min(upper, rhs)
+        if coeff == 0:
+
+            if const_term > 0:
+
+                # No solution
+
+                lower = math.inf
+
+                upper = -math.inf
+
+                break
+
+            else:
+
+                # No constraint
+
+                continue
+
+        rhs = (-const_term) / coeff
+
+        if coeff > 0:
+
+            # x_p <= rhs
+
+            upper = min(upper, rhs)
+
+        else:
+
+            # x_p >= rhs
+
+            lower = max(lower, rhs)
+
+        # Check if current bounds are invalid
+
+        if lower > upper:
+
+            break
+
+    x_start = max(lower, x_min)
+
+    x_end = min(upper, x_max)
+
+    if x_start > x_end:
+
+        print(0, file=output_stream)
 
     else:
 
-        # x_p >= rhs
+        x_start_ceil = math.ceil(x_start)
 
-        lower = max(lower, rhs)
+        x_end_floor = math.floor(x_end)
 
-    # Check if current bounds are invalid
+        if x_start_ceil > x_end_floor:
 
-    if lower > upper:
+            print(0, file=output_stream)
 
-        break
+        else:
 
-x_start = max(lower, x_min)
+            print(x_end_floor - x_start_ceil + 1, file=output_stream)
 
-x_end = min(upper, x_max)
 
-if x_start > x_end:
 
-    print(0)
+def test():
+    import io
 
-else:
-
-    x_start_ceil = math.ceil(x_start)
-
-    x_end_floor = math.floor(x_end)
-
-    if x_start_ceil > x_end_floor:
-
-        print(0)
-
-    else:
-
-        print(x_end_floor - x_start_ceil + 1)
-
-Testing this code against the first example:
-
-Sample input 1:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
-
 4 8
+5 8
+5 4
+7 4
+2 2
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-8 8
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-9 4
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-4 0
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-0 4
+    print('Tests passed 😎')
 
-Processing edges:
 
-i=1: u = (8,8), v=(9,4)
+if __name__ == '__main__':
+    test()
 
-coeff = -(4-8) =4
 
-const_term = (9-8)*(8-8) + (4-8)*8 → 1*0 + (-4)*8 =-32.
+```
 
-rhs = (- (-32)) /4 → 32/4=8.0. Since coeff>0 → upper =8.0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=2: u=9,4 → v=4,0.
-
-coeff= -(0-4)=4.
-
-const_term= (4-9)*(8-4) + (0-4)*9 → (-5)*4 + (-4)*9 →-20-36= -56.
-
-rhs= (-(-56))/4 →56/4=14 → upper = min(8,14) →8.
-
-i=3: u=4,0 → v=0,4.
-
-coeff= -(4-0) =-4.
-
-const_term= (0-4)*(8-0) + (4-0)*4 → (-4)*8 +4*4 →-32+16= -16.
-
-rhs = (-(-16)) / (-4) →16/-4= -4.
-
-coeff is -4 <0 → so lower = max(-inf, -4) →-4.
-
-i=4: u=0,4 →v=4,8.
-
-coeff= -(8-4) =-4.
-
-const_term= (4-0)*(8-4) + (8-4)*0 →4*4 +4*0 →16 +0=16.
-
-rhs= (-16)/ (-4) →4 → lower becomes max(-4,4) →4.
-
-Now x_start is max(4,4) →4.
-
-x_end is min(8,8) →8.
-
-x_start_ceil is4, x_end_floor is8. Count is 8-4+1=5.
-
-Which is correct.
+```
 
 Sample input 2:
 

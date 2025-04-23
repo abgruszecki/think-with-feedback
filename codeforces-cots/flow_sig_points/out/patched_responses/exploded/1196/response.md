@@ -137,73 +137,163 @@ Yes.
 
 So the code would look something like this:
 
-n = int(input())
+Testing against sample input 1.
 
-arr = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-step_map = {4:0, 8:1, 15:2, 16:3, 23:4, 42:5}
+    arr = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-counts = [0]*6
+    step_map = {4:0, 8:1, 15:2, 16:3, 23:4, 42:5}
 
-for num in arr:
+    counts = [0]*6
 
-    s = step_map[num]
+    for num in arr:
 
-    if s ==0:
+        s = step_map[num]
 
-        counts[0] +=1
+        if s ==0:
 
-    else:
+            counts[0] +=1
 
-        if counts[s-1] >0:
+        else:
 
-            counts[s-1] -=1
+            if counts[s-1] >0:
 
-            counts[s] +=1
+                counts[s-1] -=1
 
-# The number of valid elements is counts[5] *6
+                counts[s] +=1
 
-removals = n - (counts[5] *6)
+    # The number of valid elements is counts[5] *6
 
-print(removals)
+    removals = n - (counts[5] *6)
 
-Wait, let's test this code against the examples.
+    print(removals, file=output_stream)
 
-First example:
 
-Input: 5 elements [4,8,15,16,23]
 
-Processing each:
+def test():
+    import io
 
-4 → s=0 → counts[0] =1
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+12
+4 8 4 15 16 8 23 15 16 42 23 42
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-8 → s=1. counts[0] is 1 → counts[0] becomes 0, counts[1] becomes 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-15 → s=2. counts[1] is 1 → counts[1] 0, counts[2] 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-16 → s=3 → counts[2] 0? Wait, counts[2] is 1. So counts[2] becomes 0, counts[3] becomes 1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-23 → s=4 → counts[3] is 1 → counts[3] 0, counts[4] becomes 1.
+    print('Tests passed 😎')
 
-So counts after processing all elements:
 
-counts[0] =0
+if __name__ == '__main__':
+    test()
 
-counts[1] =0
 
-counts[2] =0
+```
 
-counts[3] =0
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-counts[4] =1
+```
 
-counts[5] =0
+Testing against sample input 2.
 
-So counts[5] is 0. So removals is 5 -0 →5. Correct.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-Second example:
+    arr = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-Input has 12 elements that form two sequences. So after processing all, counts[5] is 2. So 2*6=12. Removals 0.
+    step_map = {4:0, 8:1, 15:2, 16:3, 23:4, 42:5}
+
+    counts = [0]*6
+
+    for num in arr:
+
+        s = step_map[num]
+
+        if s ==0:
+
+            counts[0] +=1
+
+        else:
+
+            if counts[s-1] >0:
+
+                counts[s-1] -=1
+
+                counts[s] +=1
+
+    # The number of valid elements is counts[5] *6
+
+    removals = n - (counts[5] *6)
+
+    print(removals, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+15
+4 8 4 8 15 16 8 16 23 15 16 4 42 23 42
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

@@ -245,65 +245,79 @@ Then the remaining a can be split into pairs, each adding 2.
 
 So the code can be written as:
 
-l, r, a = map(int, input().split())
+Testing against sample input 1.
 
-d = abs(l - r)
+```python
+def main(input_stream, output_stream):
+    l, r, a = map(int, input_stream.readline().rstrip("\n").split())
 
-a_used = min(d, a)
+    d = abs(l - r)
 
-if l > r:
+    a_used = min(d, a)
 
-    new_r = r + a_used
+    if l > r:
 
-    base = 2 * min(l, new_r)
+        new_r = r + a_used
 
-else:
+        base = 2 * min(l, new_r)
 
-    new_l = l + a_used
+    else:
 
-    base = 2 * min(new_l, r)
+        new_l = l + a_used
 
-remaining_a = a - a_used
+        base = 2 * min(new_l, r)
 
-additional = (remaining_a // 2) * 2
+    remaining_a = a - a_used
 
-total = base + additional
+    additional = (remaining_a // 2) * 2
 
-print(total)
+    total = base + additional
 
-Wait, but when l > r, we assign the a_used to r. So new_r = r + a_used. Then the min of l and new_r is min(l, new_r). Similarly for the else case.
+    print(total, file=output_stream)
 
-Yes.
 
-Testing the first example:
 
-1,4,2. d=3. a_used=2.
+def test():
+    import io
 
-since r>l, new_l=1+2=3. min(3,4) is3. base=6. remaining_a=0. total=6.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5 5
+""",
+            "output": \
+"""\
+14
+""",
+        }, 
+    ]
 
-Yes.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Another example where a is larger than the difference:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-l=5, r=5, a=5. d=0. a_used=0. new_l=5. base=10. remaining_a=5. 5//2=2, 2*2=4. total=14.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Another example where l=3, r=1, a=5.
+    print('Tests passed 😎')
 
-d=2. a_used=2. since l>r, new_r=1+2=3. min(3,3) is3. base=6. remaining_a=3. additional=2. total=8.
 
-So total team size is 6+2=8.
+if __name__ == '__main__':
+    test()
 
-Yes, because after bridging, l and r are 3 each. Then remaining a is 3. split into 1 pair (2 a's), adding 2. total is 3+3 +2 =8.
 
-Yes.
+```
 
-So this code should work.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Now, considering edge cases.
-
-Case where a is zero:
-
-Like input 0 2 0. Output is 0.
+```
 
 Another case: l=0, r=0, a=0. Output is 0.
 

@@ -443,103 +443,115 @@ But in Python, the code must read x, loop a from 1 upwards until term >x. For ea
 
 So code:
 
-x = int(input())
+Testing against sample input 1.
 
-result = set()
+```python
+def main(input_stream, output_stream):
+    x = int(input_stream.readline().rstrip("\n"))
 
-a = 1
+    result = set()
 
-while True:
+    a = 1
 
-    term = a * (a + 1) * (2 * a + 1) // 6
+    while True:
 
-    if term > x:
+        term = a * (a + 1) * (2 * a + 1) // 6
 
-        break
+        if term > x:
 
-    delta = x - term
+            break
 
-    if delta < 0:
+        delta = x - term
+
+        if delta < 0:
+
+            a += 1
+
+            continue
+
+        denominator = a * (a + 1)
+
+        if denominator == 0:
+
+            a += 1
+
+            continue
+
+        numerator = 2 * delta
+
+        if numerator % denominator != 0:
+
+            a += 1
+
+            continue
+
+        d = numerator // denominator
+
+        m = a + d
+
+        # m must be >= a, which it is since d >=0
+
+        result.add( (a, m) )
+
+        if a != m:
+
+            result.add( (m, a) )
 
         a += 1
 
-        continue
+    sorted_pairs = sorted(result)
 
-    denominator = a * (a + 1)
+    print(len(sorted_pairs), file=output_stream)
 
-    if denominator == 0:
+    for pair in sorted_pairs:
 
-        a += 1
+        print(pair[0], pair[1], file=output_stream)
 
-        continue
 
-    numerator = 2 * delta
 
-    if numerator % denominator != 0:
+def test():
+    import io
 
-        a += 1
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+""",
+            "output": \
+"""\
+2
+1 2
+2 1
+""",
+        }, 
+    ]
 
-        continue
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-    d = numerator // denominator
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-    m = a + d
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-    # m must be >= a, which it is since d >=0
+    print('Tests passed 😎')
 
-    result.add( (a, m) )
 
-    if a != m:
+if __name__ == '__main__':
+    test()
 
-        result.add( (m, a) )
 
-    a += 1
+```
 
-sorted_pairs = sorted(result)
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-print(len(sorted_pairs))
-
-for pair in sorted_pairs:
-
-    print(pair[0], pair[1])
-
-But wait, this code may not process a=0. But a starts at 1, and term for a=1 is 1*2*3//6=1, which is correct.
-
-Another edge case: x=5.
-
-What's the valid pairs?
-
-For a=1:
-
-term=1. delta=4. numerator=8. denominator=2 →4. m=5. add (1,5) and (5,1).
-
-a=2:
-
-term=5. delta=0. numerator=0. denominator=6 →0. d=0. m=2. add (2,2).
-
-So sorted pairs would be (1,5), (2,2), (5,1). Wait, but (2,2) is added once. So total 3 pairs. But what's the sum for (2,2):
-
-sum for k=1: 2*2=4, k=2: 1*1=1 → total 5. Correct.
-
-So output would be:
-
-3
-
-1 5
-
-2 2
-
-5 1
-
-But according to the code, for a=2, delta=0. d=0. m=2. So (2,2) is added once. Then since a ==m, no other pair is added.
-
-Yes.
-
-So the code works.
-
-Now, let's test the first sample input:
-
-Input 26: code generates 6 pairs. Correct.
+```
 
 Thus, the code should be correct.
 </think>

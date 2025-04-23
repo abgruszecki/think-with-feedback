@@ -1413,55 +1413,305 @@ But the function has_any_prime_factor_less_than_k is designed to check whether m
 
 Thus, the code should handle all cases.
 
-Testing the sample inputs.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    def is_prime(n):
+        if n <= 1:
+            return False
+        elif n <= 3:
+            return True
+        elif n % 2 == 0:
+            return False
+        d = n - 1
+        s = 0
+        while d % 2 == 0:
+            d //= 2
+            s += 1
+        bases = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37]
+        for a in bases:
+            if a >= n:
+                continue
+            x = pow(a, d, n)
+            if x == 1 or x == n - 1:
+                continue
+            for _ in range(s - 1):
+                x = pow(x, 2, n)
+                if x == n - 1:
+                    break
+            else:
+                return False
+        return True
 
-Input:
+    def has_any_prime_factor_less_than_k(m, k):
+        if m == 1:
+            return False
+        if m < k:
+            return True
+        if m % 2 == 0:
+            return 2 < k
+        i = 3
+        while i * i <= m:
+            if m % i == 0:
+                if i < k:
+                    return True
+                while m % i == 0:
+                    m //= i
+                if m == 1:
+                    break
+            i += 2
+        if m > 1:
+            return m < k
+        return False
 
-1 10 2
+    def inclusion_exclusion(m_start, m_end, primes):
+        n = len(primes)
+        total = 0
+        for mask in range(1, 1 << n):
+            bits = bin(mask).count('1')
+            product = 1
+            overflow = False
+            for i in range(n):
+                if mask & (1 << i):
+                    if product > m_end // primes[i]:
+                        overflow = True
+                        break
+                    product *= primes[i]
+            if overflow or product > m_end:
+                continue
+            cnt = (m_end // product) - ((m_start - 1) // product)
+            if bits % 2 == 1:
+                total += cnt
+            else:
+                total -= cnt
+        return (m_end - m_start + 1) - total
 
-k=2 is prime.
+    a, b, k = map(int, input_stream.readline().rstrip("\n").split())
 
-m_start = (1 +2-1)//2 = (2)//2 =1.
+    if not is_prime(k):
+        print(0, file=output_stream)
+    else:
+        m_start = (a + k - 1) // k
+        m_end = b // k
+        if m_start > m_end:
+            print(0, file=output_stream)
+        elif k == 2:
+            print(m_end - m_start + 1, file=output_stream)
+        else:
+            primes_less_than_k = []
+            if k <= 10**6:
+                sieve = [True] * k
+                sieve[0] = sieve[1] = False
+                for i in range(2, int(k**0.5) + 1):
+                    if sieve[i]:
+                        sieve[i*i : k : i] = [False] * len(sieve[i*i : k : i])
+                primes_less_than_k = [i for i, is_p in enumerate(sieve) if is_p]
+            if primes_less_than_k and len(primes_less_than_k) <= 20 and k <= 10**6:
+                count = inclusion_exclusion(m_start, m_end, primes_less_than_k)
+                print(count, file=output_stream)
+            else:
+                count = 0
+                for m in range(m_start, m_end + 1):
+                    if m == 0:
+                        continue
+                    if not has_any_prime_factor_less_than_k(m, k):
+                        count += 1
+                print(count, file=output_stream)
 
-m_end =10//2=5.
 
-So m in 1-5.
 
-Since k=2, the primes less than k are none. So output 5-1+1=5. Which matches the sample.
+def test():
+    import io
 
-Sample 2:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 12 23 3
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-k=3 is prime.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-primes less than 3: [2].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-m_start =12//3 =4 (since 3*4=12 >=12).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-m_end=23//3=7.
+    print('Tests passed 😎')
 
-So m ranges from 4 to 7.
 
-We need to count m in 4-7 that are not divisible by 2.
+if __name__ == '__main__':
+    test()
 
-The numbers are 5,7.
 
-But wait, m=4: divisible by 2, no.
+```
 
-m=5: not divisible by 2, yes. x=3*5=15.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-m=6: divisible by 2.
+```
 
-m=7: yes. x=21.
+Testing against sample input 2.
 
-So count 2.
+```python
+def main(input_stream, output_stream):
+    def is_prime(n):
+        if n <= 1:
+            return False
+        elif n <= 3:
+            return True
+        elif n % 2 == 0:
+            return False
+        d = n - 1
+        s = 0
+        while d % 2 == 0:
+            d //= 2
+            s += 1
+        bases = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37]
+        for a in bases:
+            if a >= n:
+                continue
+            x = pow(a, d, n)
+            if x == 1 or x == n - 1:
+                continue
+            for _ in range(s - 1):
+                x = pow(x, 2, n)
+                if x == n - 1:
+                    break
+            else:
+                return False
+        return True
 
-Which matches the sample.
+    def has_any_prime_factor_less_than_k(m, k):
+        if m == 1:
+            return False
+        if m < k:
+            return True
+        if m % 2 == 0:
+            return 2 < k
+        i = 3
+        while i * i <= m:
+            if m % i == 0:
+                if i < k:
+                    return True
+                while m % i == 0:
+                    m //= i
+                if m == 1:
+                    break
+            i += 2
+        if m > 1:
+            return m < k
+        return False
+
+    def inclusion_exclusion(m_start, m_end, primes):
+        n = len(primes)
+        total = 0
+        for mask in range(1, 1 << n):
+            bits = bin(mask).count('1')
+            product = 1
+            overflow = False
+            for i in range(n):
+                if mask & (1 << i):
+                    if product > m_end // primes[i]:
+                        overflow = True
+                        break
+                    product *= primes[i]
+            if overflow or product > m_end:
+                continue
+            cnt = (m_end // product) - ((m_start - 1) // product)
+            if bits % 2 == 1:
+                total += cnt
+            else:
+                total -= cnt
+        return (m_end - m_start + 1) - total
+
+    a, b, k = map(int, input_stream.readline().rstrip("\n").split())
+
+    if not is_prime(k):
+        print(0, file=output_stream)
+    else:
+        m_start = (a + k - 1) // k
+        m_end = b // k
+        if m_start > m_end:
+            print(0, file=output_stream)
+        elif k == 2:
+            print(m_end - m_start + 1, file=output_stream)
+        else:
+            primes_less_than_k = []
+            if k <= 10**6:
+                sieve = [True] * k
+                sieve[0] = sieve[1] = False
+                for i in range(2, int(k**0.5) + 1):
+                    if sieve[i]:
+                        sieve[i*i : k : i] = [False] * len(sieve[i*i : k : i])
+                primes_less_than_k = [i for i, is_p in enumerate(sieve) if is_p]
+            if primes_less_than_k and len(primes_less_than_k) <= 20 and k <= 10**6:
+                count = inclusion_exclusion(m_start, m_end, primes_less_than_k)
+                print(count, file=output_stream)
+            else:
+                count = 0
+                for m in range(m_start, m_end + 1):
+                    if m == 0:
+                        continue
+                    if not has_any_prime_factor_less_than_k(m, k):
+                        count += 1
+                print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 19 5
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

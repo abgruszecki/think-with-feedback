@@ -510,15 +510,80 @@ else:
 
 That should handle all cases.
 
-Let's test the sample inputs.
+Testing against sample inputs 1, 2.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    sorted_a = sorted(a)
+    diffs = [i for i in range(n) if a[i] != sorted_a[i]]
+    if len(diffs) == 0:
+        print("YES", file=output_stream)
+    elif len(diffs) == 2:
+        i, j = diffs
+        if a[i] == sorted_a[j] and a[j] == sorted_a[i]:
+            print("YES", file=output_stream)
+        else:
+            print("NO", file=output_stream)
+    else:
+        print("NO", file=output_stream)
 
-Input: 2 1 2. Sorted array is [1,2]. diffs is empty → yes.
 
-Sample2:
 
-Input 3: 3 2 1. Sorted is [1,2,3]. diffs are 0 and2. a[0]=3, sorted_a[2]=3. a[2]=1, sorted_a[0]=1. So swapping 0 and2 gives sorted array. So code returns yes.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+3 2 1
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+        {
+            "input": \
+"""\
+4
+4 3 2 1
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

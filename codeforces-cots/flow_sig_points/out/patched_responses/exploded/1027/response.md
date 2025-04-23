@@ -274,27 +274,127 @@ for k in range(n):
 
 print(res % mod)
 
-Wait, but let's test this with the sample inputs.
+Testing against sample input 1.
 
-Sample Input 1: '11' → n=2.
+```python
+def main(input_stream, output_stream):
+    x = input_stream.readline().rstrip("\n").strip()
+    n = len(x)
+    mod = 10**9 + 7
+    result = 0
 
-k ranges from 0 to 1.
+    for k in range(n):
+        pos = n - 1 - k
+        if x[pos] == '1':
+            exponent = (n - 1) + k
+            result = (result + pow(2, exponent, mod)) % mod
 
-k=0:
+    print(result, file=output_stream)
 
-pos =2-1 -0=1. x_str[1] is '1'. So exponent= 2-1 +0=1. 2^1=2. So add 2.
 
-k=1:
 
-pos=2-1-1=0. x_str[0] is '1'. exponent=1+1=2. 2^2=4. Add 4+2=6. Correct.
+def test():
+    import io
 
-Sample Input 2: '01' → n=2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+01
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-k=0: pos=2-1-0=1. x_str[1] is '1' → exponent 1+0=1. 2^1=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-k=1: pos=2-1-1=0. x_str[0] is '0' → no contribution.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sum is 2. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    x = input_stream.readline().rstrip("\n").strip()
+    n = len(x)
+    mod = 10**9 + 7
+    result = 0
+
+    for k in range(n):
+        pos = n - 1 - k
+        if x[pos] == '1':
+            exponent = (n - 1) + k
+            result = (result + pow(2, exponent, mod)) % mod
+
+    print(result, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample Input 3: '1' → n=1.
 

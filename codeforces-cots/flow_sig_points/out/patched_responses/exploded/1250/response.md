@@ -251,101 +251,107 @@ Else, generate all 12 possibilities, check each, and if any returns True, output
 
 So the code:
 
-x1, y1, x2, y2, x3, y3 = map(int, input().split())
+Testing against sample input 2.
 
-points = [(x1, y1), (x2, y2), (x3, y3)]
+```python
+def main(input_stream, output_stream):
+    x1, y1, x2, y2, x3, y3 = map(int, input_stream.readline().rstrip("\n").split())
 
-def is_right(a, b, c):
-    # Check area is non-zero
-    area = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
-    if area == 0:
+    points = [(x1, y1), (x2, y2), (x3, y3)]
+
+    def is_right(a, b, c):
+        # Check area is non-zero
+        area = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+        if area == 0:
+            return False
+        # Check right angles
+        ab_x = b[0] - a[0]
+        ab_y = b[1] - a[1]
+        ac_x = c[0] - a[0]
+        ac_y = c[1] - a[1]
+        dot_a = ab_x * ac_x + ab_y * ac_y
+        if dot_a == 0:
+            return True
+        ba_x = a[0] - b[0]
+        ba_y = a[1] - b[1]
+        bc_x = c[0] - b[0]
+        bc_y = c[1] - b[1]
+        dot_b = ba_x * bc_x + ba_y * bc_y
+        if dot_b == 0:
+            return True
+        ca_x = a[0] - c[0]
+        ca_y = a[1] - c[1]
+        cb_x = b[0] - c[0]
+        cb_y = b[1] - c[1]
+        dot_c = ca_x * cb_x + ca_y * cb_y
+        if dot_c == 0:
+            return True
         return False
-    # Check right angles
-    ab_x = b[0] - a[0]
-    ab_y = b[1] - a[1]
-    ac_x = c[0] - a[0]
-    ac_y = c[1] - a[1]
-    dot_a = ab_x * ac_x + ab_y * ac_y
-    if dot_a == 0:
-        return True
-    ba_x = a[0] - b[0]
-    ba_y = a[1] - b[1]
-    bc_x = c[0] - b[0]
-    bc_y = c[1] - b[1]
-    dot_b = ba_x * bc_x + ba_y * bc_y
-    if dot_b == 0:
-        return True
-    ca_x = a[0] - c[0]
-    ca_y = a[1] - c[1]
-    cb_x = b[0] - c[0]
-    cb_y = b[1] - c[1]
-    dot_c = ca_x * cb_x + ca_y * cb_y
-    if dot_c == 0:
-        return True
-    return False
 
-# Check original
-if is_right(points[0], points[1], points[2]):
-    print("RIGHT")
-else:
-    directions = [(1,0), (-1,0), (0,1), (0,-1)]
-    found = False
-    for i in range(3):
-        x, y = points[i]
-        for dx, dy in directions:
-            new_x = x + dx
-            new_y = y + dy
-            new_points = list(points)
-            new_points[i] = (new_x, new_y)
-            a, b, c = new_points
-            if is_right(a, b, c):
-                found = True
+    # Check original
+    if is_right(points[0], points[1], points[2]):
+        print("RIGHT", file=output_stream)
+    else:
+        directions = [(1,0), (-1,0), (0,1), (0,-1)]
+        found = False
+        for i in range(3):
+            x, y = points[i]
+            for dx, dy in directions:
+                new_x = x + dx
+                new_y = y + dy
+                new_points = list(points)
+                new_points[i] = (new_x, new_y)
+                a, b, c = new_points
+                if is_right(a, b, c):
+                    found = True
+                    break
+            if found:
                 break
-        if found:
-            break
-    print("ALMOST" if found else "NEITHER")
+        print("ALMOST" if found else "NEITHER", file=output_stream)
 
-Wait, but this code may have a problem. Because the original triangle is non-degenerate, but the modified one may be degenerate. So the is_right function checks for both: non-degenerate and right-angled.
 
-So in the modified code, the helper function correctly returns True only if the triangle is non-degenerate and right-angled.
 
-Testing the code with sample input 3:
+def test():
+    import io
 
-Original points are (-1,0), (2,0), (0,1).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+-1 0 2 0 0 1
+""",
+            "output": \
+"""\
+ALMOST
+""",
+        }, 
+    ]
 
-Original is not right. Then, modifying point (-1,0) to (0,0) gives (0,0), (2,0), (0,1). The area is (2-0)*(1-0) - (0-0)*(0-0) = 2*1 - 0 = 2, so area is non-zero. The vectors from (0,0) to (2,0) and (0,1) are (2,0) and (0,1). Dot product is 0. So returns True. So the code would find this and output ALMOST.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So the code should work.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But wait, in the code, after generating the new points, we check if is_right returns True. So in that case, the code for the modified triangle would check, and return True, so found is set to True.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But in the code above, after the first modification that works, the code breaks out of the loops. So the code checks all possible modifications in order, but stops at the first one that works.
+    print('Tests passed 😎')
 
-Which is correct, since we just need to know if any exists.
 
-Now, in the code, the directions are (1,0), (-1,0), (0,1), (0,-1). So for each point, we check moving right, left, up, down.
+if __name__ == '__main__':
+    test()
 
-But what about points that, after movement, have coordinates that could be out of bounds? But the problem allows any coordinates as long as they are integers. So no problem.
 
-But the code doesn't have any checks for that. Because the problem says that Peter can move the point exactly by distance 1, and the coordinates can be any integers.
+```
 
-So even if moving a point from (x,y) to (x+1, y) would make x+1 exceed 100, but the problem allows that because the movement is allowed as per Peter's statement.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So the code is correct.
-
-Now, the code for the helper function. Wait, in the code, the helper function is named is_right, but it actually checks both the area and the right angle. So the name is a bit confusing, but the code is correct.
-
-But perhaps rename the helper function to is_right_and_non_degenerate. But given the code, it's okay.
-
-Another test case:
-
-Sample Input 2:
-
-2 3 4 5 6 6 → output NEITHER.
-
-Original is not right, and modifying any of the three points in any direction doesn't lead to a right-angled triangle.
-
-So code should return NEITHER.
+```
 
 Now, let's test another case. For example, input 0 0 1 0 0 1. This is a right-angled triangle (at 0,0). So code outputs RIGHT.
 

@@ -337,60 +337,93 @@ But for example, n1 =4, then the wash_heap is [0,0,0,0], then heapify.
 
 So:
 
+Testing against sample input 1.
+
+```python
 import heapq
 
-k, n1, n2, n3, t1, t2, t3 = map(int, input().split())
 
-# Initialize heaps for each machine type
-wash = [0] * n1
-heapq.heapify(wash)
+def main(input_stream, output_stream):
+    k, n1, n2, n3, t1, t2, t3 = map(int, input_stream.readline().rstrip("\n").split())
 
-dry = [0] * n2
-heapq.heapify(dry)
+    # Initialize heaps for each machine type
+    wash = [0] * n1
+    heapq.heapify(wash)
 
-fold = [0] * n3
-heapq.heapify(fold)
+    dry = [0] * n2
+    heapq.heapify(dry)
 
-max_time = 0
+    fold = [0] * n3
+    heapq.heapify(fold)
 
-for _ in range(k):
-    # Washing step
-    w = heapq.heappop(wash)
-    end_wash = w + t1
-    heapq.heappush(wash, end_wash)
-    
-    # Drying step
-    d = heapq.heappop(dry)
-    start_dry = max(end_wash, d)
-    end_dry = start_dry + t2
-    heapq.heappush(dry, end_dry)
-    
-    # Folding step
-    f = heapq.heappop(fold)
-    start_fold = max(end_dry, f)
-    end_fold = start_fold + t3
-    heapq.heappush(fold, end_fold)
-    
-    if end_fold > max_time:
-        max_time = end_fold
+    max_time = 0
 
-print(max_time)
+    for _ in range(k):
+        # Washing step
+        w = heapq.heappop(wash)
+        end_wash = w + t1
+        heapq.heappush(wash, end_wash)
+        
+        # Drying step
+        d = heapq.heappop(dry)
+        start_dry = max(end_wash, d)
+        end_dry = start_dry + t2
+        heapq.heappush(dry, end_dry)
+        
+        # Folding step
+        f = heapq.heappop(fold)
+        start_fold = max(end_dry, f)
+        end_fold = start_fold + t3
+        heapq.heappush(fold, end_fold)
+        
+        if end_fold > max_time:
+            max_time = end_fold
 
-Yes, that's the code.
+    print(max_time, file=output_stream)
 
-Testing this with the sample inputs.
 
-Sample 1:
 
-Input: 1 1 1 1 5 5 5.
+def test():
+    import io
 
-The code processes one laundry.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 4 3 2 10 5 2
+""",
+            "output": \
+"""\
+32
+""",
+        }, 
+    ]
 
-wash: pop 0 → end_wash 5. Push 5.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-dry: pop 0 → start_dry 5. end_dry 10. Push 10.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-fold: pop 0 → start_fold 10. end 15. Push 15. max_time 15.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

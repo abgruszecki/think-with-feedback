@@ -1041,99 +1041,184 @@ Print sum_total.
 
 So that's the code.
 
-Now, let's test with the first example.
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+import bisect
 
-2
 
-3 7
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read
+    data = input().split()
+    ptr = 0
+    n = int(data[ptr])
+    ptr +=1
+    
+    a = list(map(int, data[ptr:ptr+n]))
+    ptr +=n
+    
+    b = list(map(int, data[ptr:ptr+n]))
+    ptr +=n
+    
+    q = int(data[ptr])
+    ptr +=1
+    queries = list(map(int, data[ptr:ptr+q]))
+    
+    # Compute mu using sieve
+    max_i = n
+    spf = [0]*(max_i+1)
+    for i in range(2, max_i+1):
+        if spf[i] ==0:
+            spf[i] =i
+            for j in range(i*i, max_i+1, i):
+                if spf[j] ==0:
+                    spf[j] =i
+    
+    mu = [0]*(max_i+1)
+    mu[1] =1
+    for i in range(2, max_i+1):
+        x = i
+        res =1
+        flag =False
+        while x !=1:
+            p = spf[x]
+            cnt =0
+            while x % p ==0:
+                cnt +=1
+                x =x //p
+            if cnt >=2:
+                res =0
+                flag =True
+                break
+            res *= -1
+        if flag:
+            mu[i] =0
+        else:
+            mu[i] =res
+    
+    # Compute c_i
+    c = [0]*(max_i+1)
+    for j in range(2, n+1):
+        # j is 1-based here
+        a_j = a[j-1]
+        b_j = b[j-1]
+        dj = b_j - a_j
+        max_d = n // j
+        for d in range(1, max_d+1):
+            i = j *d
+            if i >n:
+                break
+            c[i] += mu[d] * dj
+    
+    # Split into groups and precompute prefix sums
+    sum_0 =0
+    group_A = []
+    group_B = []
+    for i in range(1, n+1):
+        m = mu[i]
+        if m ==0:
+            sum_0 += abs(c[i])
+        elif m ==1:
+            group_A.append(c[i])
+        elif m ==-1:
+            group_B.append(c[i])
+    
+    # Sort and prefix sums for A and B
+    group_A.sort()
+    prefix_A = [0]
+    for num in group_A:
+        prefix_A.append(prefix_A[-1] + num)
+    total_A = prefix_A[-1]
+    
+    group_B.sort()
+    prefix_B = [0]
+    for num in group_B:
+        prefix_B.append(prefix_B[-1] + num)
+    total_B = prefix_B[-1]
+    
+    # Process queries
+    a1 = a[0]
+    output = []
+    for x in queries:
+        t = x - a1
+        current = sum_0
+        
+        # Handle group_A: |c_i + t|
+        key = -t
+        split = bisect.bisect_left(group_A, key)
+        sum_less = prefix_A[split]
+        sum_ge = total_A - sum_less
+        count_less = split
+        count_ge = len(group_A) - split
+        sum_A = (sum_ge + t * count_ge) - (sum_less + t * count_less)
+        current += sum_A
+        
+        # Handle group_B: |c_i - t|
+        key = t
+        split = bisect.bisect_right(group_B, key)
+        sum_leq = prefix_B[split]
+        sum_gt = total_B - sum_leq
+        count_leq = split
+        count_gt = len(group_B) - split
+        sum_B = (t * count_leq - sum_leq) + (sum_gt - t * count_gt)
+        current += sum_B
+        
+        output.append(current)
+    
+    print('\n'.join(map(str, output)), file=output_stream)
 
--1 5
 
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+2 5 4 1 3 6
+-1 4 6 2 3 5
 3
-
 1
-
+8
 4
+""",
+            "output": \
+"""\
+10
+29
+9
+""",
+        }, 
+    ]
 
-3
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample Output:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-2
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-4
+    print('Tests passed 😎')
 
-2
 
-So, a is [3,7], b is [-1,5]. n=2.
+if __name__ == '__main__':
+    test()
 
-Compute mu for i=1 and 2.
 
-For i=1: mu[1] =1.
+```
 
-For i=2: factorization. 2 is prime. So mu[2] =-1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Then, for j=2 (1-based j=2):
-
-d_j =b[1] -a[1] =5-7 =-2.
-
-For d in 1..n//j =2//2=1.
-
-d=1: i=2*1=2. Add mu[1] * (-2) to c[2]. mu[1] is 1, so c[2] += 1 * (-2) =-2.
-
-So c[1] is 0 (since j=2, and for i=2*d=2*1=2, and j=2 is >=2.
-
-So after this loop, c[2] =-2.
-
-Then, group_A and group_B.
-
-For i=1: mu[1]=1. c[1] is 0. So group_A adds 0.
-
-For i=2: mu[2] =-1. So group_B adds c[2] =-2.
-
-So group_A = [0], group_B = [-2].
-
-sum_0 is 0 (no i with mu=0).
-
-For each query x_i:
-
-First query x=1:
-
-t =1-3= -2.
-
-sum_0=0.
-
-Group A: sorted_A is [0].
-
-key =-t=2.
-
-bisect_left finds index where 0 >=2: index=1.
-
-sum_less=prefix_A[1] =0.
-
-sum_ge=0.
-
-count_less=1.
-
-sum_A= 0 + (-2)*0 -0 - (-2)*1 =0 +0 -0 +2 =2.
-
-Group B: sorted_B is [-2].
-
-key =t=-2.
-
-bisect_right finds the first index after elements <=-2. sorted_B is [-2], so split=1.
-
-sum_leq=prefix_B[1] =-2.
-
-sum_gt=0.
-
-count_leq=1.
-
-sum_B= (-2)*1 - (-2) ) + (0 - (-2)*0) → (-2 +2) + 0=0.
-
-sum_total=0+2+0=2. Correct.
+```
 
 Second query x=4:
 

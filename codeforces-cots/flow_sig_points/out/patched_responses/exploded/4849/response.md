@@ -417,11 +417,14 @@ Now, code.
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-def main():
 
-    data = sys.stdin.read().split()
+def main(input_stream, output_stream):
+    data = input_stream.read().split()
 
     s = data[0]
 
@@ -447,7 +450,7 @@ def main():
 
     if n <2:
 
-        print(0)
+        print(0, file=output_stream)
 
         return
 
@@ -489,30 +492,61 @@ def main():
 
             res.append(total)
 
-    print('\n'.join(map(str, res)))
+    print('\n'.join(map(str, res)), file=output_stream)
 
-if __name__ == "__main__":
 
-    main()
 
-Wait, but the code checks if n <2. According to the problem statement, the input string has n ≥2, so this check is redundant.
+def test():
+    import io
 
-But let's proceed.
-
-Testing the first sample:
-
-Input is:
-
-......
-4
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+#..###
+5
+1 3
+5 6
+1 5
+3 6
 3 4
-2 3
-1 6
-2 6
+""",
+            "output": \
+"""\
+1
+1
+2
+2
+0
+""",
+        }, 
+    ]
 
-The matches array is 5 elements of 1. The prefix array is [0,1,2,3,4,5]. For query 3 4: li=3, ri=4. l_start=2, r_end=2. sum is prefix[3] - prefix[2] =3-2=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Which is correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 The code should output 1,1,5,4, which matches the sample.
 

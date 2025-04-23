@@ -745,126 +745,115 @@ But how to handle the dp as a list of dictionaries. Let's use a list of defaultd
 
 So here's the code:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-n, l = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-types = []
-for _ in range(n):
-    a, b = map(int, input().split())
-    orientations = []
-    if a == b:
-        orientations.append( (a, b) )
-    else:
-        orientations.append( (a, b) )
-        orientations.append( (b, a) )
-    types.append(orientations)
+    n, l = map(int, input_stream.readline().rstrip("\n").split())
 
-# Precompute length_to_types: for each possible length, list of (k, width)
-from collections import defaultdict
-
-length_to_types = defaultdict(list)
-for k in range(n):
-    for a, b in types[k]:
-        length_to_types[a].append( (k, b) )
-
-# Initialize DP
-dp = [dict() for _ in range(l+1)]
-
-# Initialize first step
-for k in range(n):
-    for a, b in types[k]:
-        if a > l:
-            continue
-        key = (k, b)
-        if key in dp[a]:
-            dp[a][key] = (dp[a][key] + 1) % MOD
+    types = []
+    for _ in range(n):
+        a, b = map(int, input_stream.readline().rstrip("\n").split())
+        orientations = []
+        if a == b:
+            orientations.append( (a, b) )
         else:
-            dp[a][key] = 1
+            orientations.append( (a, b) )
+            orientations.append( (b, a) )
+        types.append(orientations)
 
-# Process transitions
-for s in range(1, l+1):
-    if not dp[s]:
-        continue
-    # Iterate over all (t, w_current) in dp[s]
-    for (t, w_current), cnt in list(dp[s].items()):
-        # Iterate over all possible (k, new_width) for w_current
-        for (k, new_width) in length_to_types.get(w_current, []):
-            if k == t:
+    # Precompute length_to_types: for each possible length, list of (k, width)
+    from collections import defaultdict
+
+    length_to_types = defaultdict(list)
+    for k in range(n):
+        for a, b in types[k]:
+            length_to_types[a].append( (k, b) )
+
+    # Initialize DP
+    dp = [dict() for _ in range(l+1)]
+
+    # Initialize first step
+    for k in range(n):
+        for a, b in types[k]:
+            if a > l:
                 continue
-            new_sum = s + w_current
-            if new_sum > l:
-                continue
-            key = (k, new_width)
-            if key in dp[new_sum]:
-                dp[new_sum][key] = (dp[new_sum][key] + cnt) % MOD
+            key = (k, b)
+            if key in dp[a]:
+                dp[a][key] = (dp[a][key] + 1) % MOD
             else:
-                dp[new_sum][key] = cnt % MOD
+                dp[a][key] = 1
 
-# Sum all possibilities in dp[l]
-result = sum(dp[l].values()) % MOD
+    # Process transitions
+    for s in range(1, l+1):
+        if not dp[s]:
+            continue
+        # Iterate over all (t, w_current) in dp[s]
+        for (t, w_current), cnt in list(dp[s].items()):
+            # Iterate over all possible (k, new_width) for w_current
+            for (k, new_width) in length_to_types.get(w_current, []):
+                if k == t:
+                    continue
+                new_sum = s + w_current
+                if new_sum > l:
+                    continue
+                key = (k, new_width)
+                if key in dp[new_sum]:
+                    dp[new_sum][key] = (dp[new_sum][key] + cnt) % MOD
+                else:
+                    dp[new_sum][key] = cnt % MOD
 
-print(result)
+    # Sum all possibilities in dp[l]
+    result = sum(dp[l].values()) % MOD
 
-Wait, but in the code, for the transitions, when processing s, and for each (t, w_current) in dp[s], and for each (k, new_width) in length_to_types[w_current], the new_sum is s + w_current, which could be up to s + 100 (since w_current is up to 100). But l is up to 3000, so s can be up to 3000.
+    print(result, file=output_stream)
 
-But the code checks if new_sum exceeds l. So that's correct.
 
-Testing the first sample:
 
-n=2, l=3
+def test():
+    import io
 
-types 0: (1,2) and (2,1)
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 2
+2 2
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-type 0's orientations are [(1,2), (2,1)]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-type 1's orientations are [(2,3), (3,2)]
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-length_to_types:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For a=1: [(0, 2)]
+    print('Tests passed 😎')
 
-a=2: [(0,1), (1,3)]
 
-a=3: [(1,2)]
+if __name__ == '__main__':
+    test()
 
-a=2 (from type 0's (2,1) orientation) is in length_to_types[2], adding (0,1)
 
-type 1's (2,3) adds (1,3) to a=2.
+```
 
-So length_to_types[2] has (0,1) and (1,3).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Then, the initial steps:
-
-For type 0:
-
-a=1, b=2. sum=1.
-
-Add (0, 2) to dp[1] with count 1.
-
-a=2, b=1. sum=2. Add (0,1) to dp[2], count 1.
-
-For type 1:
-
-a=2, b=3. sum=2. Add (1,3) to dp[2], count 1.
-
-a=3, b=2. sum=3. Add (1,2) to dp[3], count 1.
-
-So dp[3] has (1,2) with count 1.
-
-Then, processing s=1:
-
-dp[1] has (0,2) with count 1.
-
-For each (k, new_width) in length_to_types[2] (which are (0,1) and (1,3)):
-
-k can't be 0.
-
-So (1,3) is considered. new_sum=1+2=3.
-
-Add (1,3) to dp[3] with count 1.
-
-So dp[3] now has (1,2) and (1,3), each with count 1. Total 2, which is correct.
+```
 
 This code should handle the samples correctly.
 

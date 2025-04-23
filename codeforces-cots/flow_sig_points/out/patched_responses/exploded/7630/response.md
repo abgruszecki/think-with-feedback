@@ -829,281 +829,161 @@ Else, output 2.
 
 Thus, the code would look something like:
 
-n = int(input())
+Testing against sample inputs 1, 2.
 
-sequence = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    sequence = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-def is_gp(s):
-
-    if len(s) <=1:
-
-        return True
-
-    if s[0] ==0:
-
-        return all(x ==0 for x in s)
-
-    else:
-
-        num = s[1]
-
-        den = s[0]
-
-        for i in range(2, len(s)):
-
-            if s[i] * den != s[i-1] * num:
-
-                return False
-
-        return True
-
-if is_gp(sequence):
-
-    print(0)
-
-else:
-
-    # Find the first violation index.
-
-    def find_first_violation(s):
-
-        if len(s) <=1:
-
-            return -1
-
-        if s[0] ==0:
-
-            # Check if all are zero.
-
-            for i in range(1, len(s)):
-
-                if s[i] !=0:
-
-                    return i
-
-            return -1
-
+    def is_gp(s):
+        if len(s) <= 1:
+            return True
+        if s[0] == 0:
+            return all(x == 0 for x in s)
         else:
-
             num = s[1]
-
             den = s[0]
-
             for i in range(2, len(s)):
-
                 if s[i] * den != s[i-1] * num:
-
-                    return i
-
-            return -1
-
-    first_violation = find_first_violation(sequence)
-
-    candidates = [0, 1, len(sequence)-1]
-
-    if first_violation !=-1:
-
-        candidates.append(first_violation)
-
-        candidates.append(first_violation-1)
-
-    # Remove duplicate candidates and those out of bounds.
-
-    unique_candidates = []
-
-    seen = set()
-
-    for c in candidates:
-
-        if 0 <= c < len(sequence) and c not in seen:
-
-            unique_candidates.append(c)
-
-            seen.add(c)
-
-    # Check each unique candidate.
-
-    found = False
-
-    for c in unique_candidates:
-
-        # Check if removing c makes the sequence a GP.
-
-        if helper_is_valid_after_removal(sequence, c):
-
-            found = True
-
-            break
-
-    if found:
-
-        print(1)
-
-    else:
-
-        print(2)
-
-But now, the helper_is_valid_after_removal is the same as the helper function described earlier.
-
-But wait, the helper function must be implemented correctly.
-
-Implementing the helper function:
-
-def helper_is_valid_after_removal(sequence, skip_index):
-
-    n = len(sequence)
-
-    new_len = n -1
-
-    if new_len ==0:
-
-        return False  # empty sequence is not a GP.
-
-    first = None
-
-    second = None
-
-    prev = None
-
-    zero_in_first = False
-
-    ratio_num = None
-
-    ratio_den = None
-
-    for i in range(n):
-
-        if i == skip_index:
-
-            continue
-
-        current = sequence[i]
-
-        if first is None:
-
-            first = current
-
-            prev = first
-
-        elif second is None:
-
-            second = current
-
-            prev = second
-
-            if first ==0:
-
-                if second !=0:
-
                     return False
+            return True
 
+    if is_gp(sequence):
+        print(0, file=output_stream)
+    else:
+        def find_first_violation(s):
+            if len(s) <= 1:
+                return -1
+            if s[0] == 0:
+                for i in range(1, len(s)):
+                    if s[i] != 0:
+                        return i
+                return -1
+            else:
+                num = s[1]
+                den = s[0]
+                for i in range(2, len(s)):
+                    if s[i] * den != s[i-1] * num:
+                        return i
+                return -1
+
+        first_violation = find_first_violation(sequence)
+        candidates = [0, 1, len(sequence) - 1]
+        if first_violation != -1:
+            candidates.extend([first_violation, first_violation - 1])
+
+        seen = set()
+        unique_candidates = []
+        for c in candidates:
+            if 0 <= c < len(sequence) and c not in seen:
+                seen.add(c)
+                unique_candidates.append(c)
+
+        def check_removal(s, skip):
+            new_len = len(s) - 1
+            if new_len == 0:
+                return False
+            first = None
+            second = None
+            prev = None
+            zero_in_first = False
+            ratio_num = None
+            ratio_den = None
+            for i in range(len(s)):
+                if i == skip:
+                    continue
+                current = s[i]
+                if first is None:
+                    first = current
+                    prev = first
+                elif second is None:
+                    second = current
+                    prev = second
+                    if first == 0:
+                        if second != 0:
+                            return False
+                        else:
+                            zero_in_first = True
+                    else:
+                        ratio_num = second
+                        ratio_den = first
                 else:
+                    if zero_in_first:
+                        if current != 0:
+                            return False
+                    else:
+                        if current * ratio_den != prev * ratio_num:
+                            return False
+                        prev = current
+            if new_len == 1:
+                return True
+            if first == 0:
+                return True
+            return True
 
-                    zero_in_first = True
+        found = False
+        for c in unique_candidates:
+            if check_removal(sequence, c):
+                found = True
+                break
+        print(1 if found else 2, file=output_stream)
 
-            else:
 
-                ratio_num = second
 
-                ratio_den = first
+def test():
+    import io
 
-        else:
-
-            if zero_in_first:
-
-                if current !=0:
-
-                    return False
-
-            else:
-
-                if current * ratio_den != prev * ratio_num:
-
-                    return False
-
-                prev = current
-
-    # After processing all elements.
-
-    # Check if there are at least one element.
-
-    if new_len ==1:
-
-        return True  # single element is a GP.
-
-    # Check if we have at least two elements.
-
-    if second is None:
-
-        # new_len is 1.
-
-        return True
-
-    # For cases where first is zero.
-
-    if first ==0:
-
-        # Since new_len >=2, we need to ensure all elements are zero.
-
-        # We have already checked in the loop.
-
-        return True
-
-    else:
-
-        # Check if all elements after the first two have passed.
-
-        return True
-
-So the helper function returns True only if the modified sequence is a GP.
-
-Now, putting it all together.
-
-But for the code to be efficient, we need to avoid redundant computations.
-
-Now, in Python, for n=1e5, even O(n) operations per candidate (with a few candidates) should be acceptable.
-
-Thus, the code should handle all test cases within the time constraints.
-
-But let's test the code against the sample inputs.
-
-Sample Input 1:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
-
-3 6 12 24
-
-Original sequence is a GP. So output 0.
-
-Sample Input 2:
-
-4
-
 -8 -16 24 -32
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+        {
+            "input": \
+"""\
+4
+0 1 2 3
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-Original sequence is not a GP.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Find first violation: check first two elements: -16 / -8 = 2. Next element is 24. 24 * -8 should equal 6 * -16. 24*-8= -192, 6*-16 is -96. Not equal. So first violation is at index 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Candidates: 0,1,-1,2,1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Check each:
+    print('Tests passed 😎')
 
-Removing 0: new sequence is [-16,24,-32]. Check:
 
--16 is first element. 24 is second. ratio is 24 / -16 = -1.5. Next element is -32. Check -32 * (-16) = 24 * 24 → 512 =576 → no. So invalid.
+if __name__ == '__main__':
+    test()
 
-Removing 1: new sequence is [-8,24,-32]. Check:
 
-24/-8 = -3. next element: -32 must be 24 *-3 =-72. Not the case. So invalid.
+```
 
-Removing -1 (index 3): new sequence is [-8,-16,24]. Check:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
--16/-8=2. Next term 24 must be -16*2= -32 → no. Invalid.
-
-Removing 2 (index 2): new sequence is [-8,-16,-32]. Check:
-
--16/-8=2. Next term is -32 → -16*2= -32. Valid. So returns True. So output 1.
+```
 
 Sample Input 3:
 

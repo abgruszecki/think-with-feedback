@@ -843,183 +843,146 @@ Each child is represented as a tuple (v, d, p, index).
 
 In the code:
 
-n = int(input())
+Testing against sample input 1.
 
-children = []
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-for i in range(n):
+    children = []
 
-    v, d, p = map(int, input().split())
+    for i in range(n):
 
-    children.append( (v, d, p, i+1) )
+        v, d, p = map(int, input_stream.readline().rstrip("\n").split())
 
-queue = children.copy()
+        children.append( (v, d, p, i+1) )
 
-start = 0
+    queue = children.copy()
 
-result = []
+    start = 0
 
-while start < len(queue):
+    result = []
 
-    # Treat the first child (at start index)
+    while start < len(queue):
 
-    treated_child = queue[start]
+        # Treat the first child (at start index)
 
-    start +=1
+        treated_child = queue[start]
 
-    result.append( treated_child[3] )
+        start +=1
 
-    # Apply v effect to the remaining children (start to end of queue)
+        result.append( treated_child[3] )
 
-    current_length = len(queue) - start
+        # Apply v effect to the remaining children (start to end of queue)
 
-    v_i = treated_child[0]
+        current_length = len(queue) - start
 
-    m = min(v_i, current_length)
+        v_i = treated_child[0]
 
-    for k in range(m):
+        m = min(v_i, current_length)
 
-        reduction = v_i - k
+        for k in range(m):
 
-        if reduction <=0:
+            reduction = v_i - k
 
-            break
+            if reduction <=0:
 
-        pos = start + k
+                break
 
-        # Update the child's p
+            pos = start + k
 
-        child = queue[pos]
+            # Update the child's p
 
-        new_p = child[2] - reduction
+            child = queue[pos]
 
-        queue[pos] = (child[0], child[1], new_p, child[3])
+            new_p = child[2] - reduction
 
-    # Process chain reaction on remaining_children = queue[start:]
+            queue[pos] = (child[0], child[1], new_p, child[3])
 
-    remaining_children = queue[start:]
+        # Process chain reaction on remaining_children = queue[start:]
 
-    current_delta = 0
+        remaining_children = queue[start:]
 
-    new_remaining = []
+        current_delta = 0
 
-    for child in remaining_children:
+        new_remaining = []
 
-        effective_p = child[2] - current_delta
+        for child in remaining_children:
 
-        if effective_p <0:
+            effective_p = child[2] - current_delta
 
-            current_delta += child[1]
+            if effective_p <0:
 
-        else:
+                current_delta += child[1]
 
-            new_p = effective_p
+            else:
 
-            new_remaining.append( (child[0], child[1], new_p, child[3]) )
+                new_p = effective_p
 
-    # Update queue and reset start
+                new_remaining.append( (child[0], child[1], new_p, child[3]) )
 
-    queue = new_remaining
+        # Update queue and reset start
 
-    start =0
+        queue = new_remaining
 
-# Output the result
+        start =0
 
-print(len(result))
+    # Output the result
 
-print(' '.join(map(str, result)))
+    print(len(result), file=output_stream)
 
-This should work.
+    print(' '.join(map(str, result)), file=output_stream)
 
-Now, let's test the first example.
 
-Sample Input 1:
 
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
-
-4 2 2
-
+4 5 1
+5 3 9
 4 1 2
+2 1 8
+4 1 9
+""",
+            "output": \
+"""\
+4
+1 2 4 5
+""",
+        }, 
+    ]
 
-5 2 4
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-3 3 5
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-5 1 2
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The code should output 2 and the numbers 1 3.
+    print('Tests passed 😎')
 
-Let's step through:
 
-Initial queue is [ (4,2,2,1), (4,1,2,2), (5,2,4,3), (3,3,5,4), (5,1,2,5) ]
+if __name__ == '__main__':
+    test()
 
-start=0.
 
-First iteration:
+```
 
-treated_child is (4,2,2,1). start becomes 1. Add 1 to result.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-v_i=4. current_length is 5-1=4. m=4.
+```
 
-Loop k=0 to 3:
-
-pos=1+0=1: child is (4,1,2,2). new_p=2-4= -2 → queue[1] = (4,1,-2,2)
-
-k=1: pos=2. child (5,2,4,3). new_p=4-3=1 → queue[2] = (5,2,1,3)
-
-k=2: pos=3. child (3,3,5,4). new_p=5-2=3 → queue[3] = (3,3,3,4)
-
-k=3: pos=4. child (5,1,2,5). new_p=2-1=1 → queue[4] = (5,1,1,5)
-
-remaining_children is queue[1:5] → [ (4,1,-2,2), (5,2,1,3), (3,3,3,4), (5,1,1,5) ]
-
-Process chain reaction:
-
-current_delta=0.
-
-Child 2: effective_p=-2 -0 =-2 <0 → current_delta +=1.
-
-Child 3: effective_p=1-1=0 → added with p=0.
-
-Child4: effective_p=3-1=2 → added with p=2.
-
-Child5: effective_p=1-1=0 → added.
-
-new_remaining is [ (5,2,0,3), (3,3,2,4), (5,1,0,5) ]
-
-queue becomes this list, start=0.
-
-Next iteration:
-
-treated_child is (5,2,0,3). start=1. Add 3 to result.
-
-v_i=5. current_length is 3-1=2 → m=2.
-
-Loop k=0 and 1.
-
-pos=1+0=1: child (3,3,2,4). new_p=2-5= -3 → queue[1] = (3,3,-3,4)
-
-pos=1+1=2: child (5,1,0,5). new_p=0-4= -4 → queue[2] = (5,1,-4,5)
-
-remaining_children = queue[1:3] → [ (3,3,-3,4), (5,1,-4,5) ]
-
-chain reaction processing:
-
-current_delta=0.
-
-Child4: effective_p=-3-0=-3 <0 → current_delta +=3 → 3.
-
-Child5: effective_p=-4-3= -7 <0 → current_delta +=1 →4.
-
-new_remaining is empty.
-
-queue is empty. start=0.
-
-Loop ends. Result is [1,3].
-
-Which matches the sample.
-
-So the code should be correct.
 </think>
 
 ```python

@@ -567,110 +567,226 @@ But in Python, for each permutation, check it as a list, and pass to the helper.
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from itertools import permutations
 
-n = int(sys.stdin.readline())
-leshas_words = sys.stdin.readline().split()
-original_order = {word: idx for idx, word in enumerate(leshas_words)}
-m = int(sys.stdin.readline())
-archives = []
-for _ in range(m):
-    parts = sys.stdin.readline().split()
-    k = int(parts[0])
-    words = parts[1:]
-    archives.append(words)
 
-max_p = -1
-best_idx = -1
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    leshas_words = input_stream.readline().split()
+    original_order = {word: idx for idx, word in enumerate(leshas_words)}
+    m = int(input_stream.readline())
+    archives = []
+    for _ in range(m):
+        parts = input_stream.readline().split()
+        k = int(parts[0])
+        words = parts[1:]
+        archives.append(words)
 
-for archive_idx, words in enumerate(archives, 1):
-    best_x = None
-    for perm in permutations(leshas_words):
-        # Check if perm is a subsequence of words
-        i = 0
-        j = 0
-        len_perm = len(perm)
-        len_words = len(words)
-        while i < len_perm and j < len_words:
-            if perm[i] == words[j]:
-                i += 1
-            j += 1
-        if i == len_perm:
-            # Compute x for this permutation
-            x = 0
-            for a in range(len(perm)):
-                for b in range(a + 1, len(perm)):
-                    if original_order[perm[a]] > original_order[perm[b]]:
-                        x += 1
-            if best_x is None or x < best_x:
-                best_x = x
-    if best_x is not None:
-        n_val = n
-        total_pairs = n_val * (n_val - 1) // 2
-        p = total_pairs - best_x + 1
-        if p > max_p or (p == max_p and archive_idx < best_idx):
-            max_p = p
-            best_idx = archive_idx
+    max_p = -1
+    best_idx = -1
 
-if best_idx == -1:
-    print("Brand new problem!")
-else:
-    print(best_idx)
-    line = "[:"
-    line += "|" * max_p
-    line += ":]"
-    print(line)
+    for archive_idx, words in enumerate(archives, 1):
+        best_x = None
+        for perm in permutations(leshas_words):
+            # Check if perm is a subsequence of words
+            i = 0
+            j = 0
+            len_perm = len(perm)
+            len_words = len(words)
+            while i < len_perm and j < len_words:
+                if perm[i] == words[j]:
+                    i += 1
+                j += 1
+            if i == len_perm:
+                # Compute x for this permutation
+                x = 0
+                for a in range(len(perm)):
+                    for b in range(a + 1, len(perm)):
+                        if original_order[perm[a]] > original_order[perm[b]]:
+                            x += 1
+                if best_x is None or x < best_x:
+                    best_x = x
+        if best_x is not None:
+            n_val = n
+            total_pairs = n_val * (n_val - 1) // 2
+            p = total_pairs - best_x + 1
+            if p > max_p or (p == max_p and archive_idx < best_idx):
+                max_p = p
+                best_idx = archive_idx
 
-Testing this code against the first sample:
+    if best_idx == -1:
+        print("Brand new problem!", file=output_stream)
+    else:
+        print(best_idx, file=output_stream)
+        line = "[:"
+        line += "|" * max_p
+        line += ":]"
+        print(line, file=output_stream)
 
-Sample input 1:
 
-4
 
-find the next palindrome
+def test():
+    import io
 
-1
-
-10 find the previous palindrome or print better luck next time
-
-The archive's words are:
-
-['find', 'the', 'previous', 'palindrome', 'or', 'print', 'better', 'luck', 'next', 'time']
-
-Now, the code checks all 24 permutations.
-
-The permutation that is a subsequence with minimal x is the one with x=1. So p=6-1+1=6.
-
-So the output is 1 and [:||||||:].
-
-Which matches the sample.
-
-Another sample: input 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
-
 add two numbers
-
 3
-
 1 add
-
 2 two two
-
 3 numbers numbers numbers
+""",
+            "output": \
+"""\
+Brand new problem!
+""",
+        }, 
+    ]
 
-No permutation of 'add two numbers' can be a subsequence of any of the three archives. So output is Brand new problem.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Third sample:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Lesha's words: these papers are formulas. Original_order: these:0, papers:1, are:2, formulas:3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Archive 1's words: ['what', 'are', 'these', 'formulas', 'and', 'papers']
+    print('Tests passed 😎')
 
-The code finds that permutation 'are these formulas papers' is a subsequence. x=3. p=4. So output 1 and [:||||:].
 
-Which matches.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+import sys
+from itertools import permutations
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    leshas_words = input_stream.readline().split()
+    original_order = {word: idx for idx, word in enumerate(leshas_words)}
+    m = int(input_stream.readline())
+    archives = []
+    for _ in range(m):
+        parts = input_stream.readline().split()
+        k = int(parts[0])
+        words = parts[1:]
+        archives.append(words)
+
+    max_p = -1
+    best_idx = -1
+
+    for archive_idx, words in enumerate(archives, 1):
+        best_x = None
+        for perm in permutations(leshas_words):
+            # Check if perm is a subsequence of words
+            i = 0
+            j = 0
+            len_perm = len(perm)
+            len_words = len(words)
+            while i < len_perm and j < len_words:
+                if perm[i] == words[j]:
+                    i += 1
+                j += 1
+            if i == len_perm:
+                # Compute x for this permutation
+                x = 0
+                for a in range(len(perm)):
+                    for b in range(a + 1, len(perm)):
+                        if original_order[perm[a]] > original_order[perm[b]]:
+                            x += 1
+                if best_x is None or x < best_x:
+                    best_x = x
+        if best_x is not None:
+            n_val = n
+            total_pairs = n_val * (n_val - 1) // 2
+            p = total_pairs - best_x + 1
+            if p > max_p or (p == max_p and archive_idx < best_idx):
+                max_p = p
+                best_idx = archive_idx
+
+    if best_idx == -1:
+        print("Brand new problem!", file=output_stream)
+    else:
+        print(best_idx, file=output_stream)
+        line = "[:"
+        line += "|" * max_p
+        line += ":]"
+        print(line, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+add two decimals
+5
+4 please two decimals add
+5 decimals want to be added
+4 two add decimals add
+4 add one two three
+7 one plus two plus three equals six
+""",
+            "output": \
+"""\
+3
+[:|||:]
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Fourth sample:
 

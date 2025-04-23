@@ -51,35 +51,135 @@ Now, parsing the input. The input is two lines. The first line is s, which is sp
 
 So in Python, code would be:
 
-s = input().strip()
-t = input().strip()
+Testing against sample input 1.
 
-s_h, s_m = map(int, s.split(':'))
-t_h, t_m = map(int, t.split(':'))
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    t = input_stream.readline().rstrip("\n").strip()
 
-current_total = s_h * 60 + s_m
-sleep_total = t_h *60 + t_m
+    s_h, s_m = map(int, s.split(':'))
+    t_h, t_m = map(int, t.split(':'))
 
-bedtime_total = (current_total - sleep_total) % 1440
+    current_total = s_h * 60 + s_m
+    sleep_total = t_h *60 + t_m
 
-hours = bedtime_total //60
-mins = bedtime_total %60
+    bedtime_total = (current_total - sleep_total) % 1440
 
-print(f"{hours:02}:{mins:02}")
+    hours = bedtime_total //60
+    mins = bedtime_total %60
 
-Wait, but what about the third example, where t is 00:00. So sleep_total is zero. So bedtime_total is current_total - 0 mod 1440. Which is the same as current_total. So the output is the same as the input. Which matches the third sample.
+    print(f"{hours:02}:{mins:02}", file=output_stream)
 
-Yes. So this code should handle all cases.
 
-Testing the samples:
 
-First sample:
+def test():
+    import io
 
-s is 05:50 → 5*60+50 = 350.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+00:00
+01:00
+""",
+            "output": \
+"""\
+23:00
+""",
+        }, 
+    ]
 
-t is 05:44 → 344. 350-344=6. 6 mod 1440 is 6 → 0 h 6 m → 00:06. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Second sample: 00:00 → 0. t is 01:00 → 60. 0-60= -60. mod 1440 is 1380 → 23:00. Correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    t = input_stream.readline().rstrip("\n").strip()
+
+    s_h, s_m = map(int, s.split(':'))
+    t_h, t_m = map(int, t.split(':'))
+
+    current_total = s_h * 60 + s_m
+    sleep_total = t_h *60 + t_m
+
+    bedtime_total = (current_total - sleep_total) % 1440
+
+    hours = bedtime_total //60
+    mins = bedtime_total %60
+
+    print(f"{hours:02}:{mins:02}", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+00:01
+00:00
+""",
+            "output": \
+"""\
+00:01
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample: 00:01 minus 0 → 00:01. Correct.
 

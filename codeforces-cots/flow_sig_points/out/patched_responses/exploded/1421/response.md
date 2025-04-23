@@ -130,21 +130,78 @@ answer = count +1
 
 print(answer)
 
-Yes. Now, let's test this code against the samples.
+Testing against sample input 1.
 
-First sample:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    h = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-n=3, h=[1,2,3]
+    if n == 0:
+        print(0, file=output_stream)
+        return
 
-max_so_far is [1,2,3]
+    max_so_far = [0] * n
+    max_so_far[0] = h[0]
+    for i in range(1, n):
+        max_so_far[i] = max(max_so_far[i-1], h[i])
 
-min_so_far is [1,2,3]
+    min_so_far = [0] * n
+    min_so_far[-1] = h[-1]
+    for i in range(n-2, -1, -1):
+        min_so_far[i] = min(min_so_far[i+1], h[i])
 
-Check i=0: 1 <= 2 → yes → count=1
+    count = 0
+    for i in range(n-1):
+        if max_so_far[i] <= min_so_far[i+1]:
+            count += 1
 
-i=1: 2 <=3 → yes → count=2
+    print(count + 1, file=output_stream)
 
-total count=2 → answer=3. Correct.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+2 1 3 2
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

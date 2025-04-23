@@ -689,147 +689,126 @@ We need to read the input.
 
 In code:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-O = [i+1 for i, x in enumerate(a) if x ==1]
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-F = [i+1 for i, x in enumerate(a) if x ==0]
+    O = [i+1 for i, x in enumerate(a) if x ==1]
 
-O.sort()
+    F = [i+1 for i, x in enumerate(a) if x ==0]
 
-F.sort()
+    O.sort()
 
-m = len(O)
+    F.sort()
 
-k = len(F)
+    m = len(O)
 
-if m ==0:
+    k = len(F)
 
-    print(0)
+    if m ==0:
 
-else:
+        print(0, file=output_stream)
 
-    INF = float('inf')
+    else:
 
-    prev = [INF]*(k+1)
+        INF = float('inf')
 
-    # Initialize for i=0 (no O's), all possible j have cost 0.
+        prev = [INF]*(k+1)
 
-    # Because when there are 0 O's, we need 0 cost.
+        # Initialize for i=0 (no O's), all possible j have cost 0.
 
-    for j in range(k+1):
+        # Because when there are 0 O's, we need 0 cost.
 
-        prev[j] =0
+        for j in range(k+1):
 
-    for i in range(1, m+1):
+            prev[j] =0
 
-        curr = [INF]*(k+1)
+        for i in range(1, m+1):
 
-        for j in range(i, k+1):
+            curr = [INF]*(k+1)
 
-            if j < i:
+            for j in range(i, k+1):
 
-                continue
+                if j < i:
 
-            if j == i:
+                    continue
 
-                # can only take F[j-1]
+                if j == i:
 
-                if j-1 >=0:
+                    # can only take F[j-1]
 
-                    curr[j] = prev[j-1] + abs(O[i-1] - F[j-1])
+                    if j-1 >=0:
+
+                        curr[j] = prev[j-1] + abs(O[i-1] - F[j-1])
+
+                    else:
+
+                        curr[j] = INF
 
                 else:
 
-                    curr[j] = INF
+                    # option1: take F[j-1]
 
-            else:
+                    option1 = prev[j-1] + abs(O[i-1] - F[j-1])
 
-                # option1: take F[j-1]
+                    # option2: not take
 
-                option1 = prev[j-1] + abs(O[i-1] - F[j-1])
+                    option2 = curr[j-1]
 
-                # option2: not take
+                    curr[j] = min(option1, option2)
 
-                option2 = curr[j-1]
+            prev = curr
 
-                curr[j] = min(option1, option2)
+        print(prev[k], file=output_stream)
 
-        prev = curr
 
-    print(prev[k])
 
-Wait, but in the code, for i=0, prev is initialized to 0 for all j. Then, for i=1, j starts at 1.
+def test():
+    import io
 
-Yes.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+1 1 1 0 0 0
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
 
-Testing this code with the first example:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-O = [1,4,7], F = [2,3,5,6], m=3, k=4.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-prev is [0,0,0,0,0].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=1:
+    print('Tests passed 😎')
 
-curr starts as [inf, ... ]
 
-j=1:
+if __name__ == '__main__':
+    test()
 
-curr[1] = prev[0] + |1-2| =0 +1=1.
 
-j=2:
+```
 
-option1: prev[1] (0) + |1-3|=2 →0+2=2. option2 is curr[1] (1). curr[2] =1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-j=3: prev[2] (0) + 4 →4. option2 is 1 →1.
-
-curr[3] =1.
-
-j=4: prev[3] (0) +5 →5. option2 is1 →1.
-
-curr[4] =1.
-
-prev is now [inf, 1,1,1,1].
-
-i=2:
-
-curr starts as inf.
-
-j=2:
-
-curr[2] = prev[1] (1) + |4-3|=1 →1+1=2.
-
-j=3:
-
-option1: prev[2] (1) + |4-5|=1 →2. option2 is curr[2]=2 → min(2,2)=2.
-
-curr[3] =2.
-
-j=4:
-
-option1: prev[3] (1) + |4-6|=2 →3. option2 is curr[3] (2) →2. so curr[4] =2.
-
-prev becomes [inf, inf, 2,2,2].
-
-i=3:
-
-j starts at3.
-
-j=3:
-
-curr[3] = prev[2] (2) + |7-5|=2 →4.
-
-j=4:
-
-option1: prev[3] (2) + |7-6|=1 →3. option2 is curr[3] (4) →3.
-
-curr[4] =3.
-
-prev is [inf, inf, inf,4,3].
-
-So prev[k=4] is 3. Correct.
+```
 
 So the code works.
 

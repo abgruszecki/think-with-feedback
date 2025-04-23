@@ -696,89 +696,105 @@ Finally, build the result.
 
 The code:
 
-s = input().strip()
+Testing against sample input 1.
 
-n = len(s)
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-if n == 0:
+    n = len(s)
 
-    print("")
+    if n == 0:
 
-else:
+        print("", file=output_stream)
 
-    max_char = [c for c in s]
+    else:
 
-    # Compute max_char from right to left
+        max_char = [c for c in s]
 
-    for i in range(n-2, -1, -1):
+        # Compute max_char from right to left
 
-        if max_char[i+1] > max_char[i]:
+        for i in range(n-2, -1, -1):
 
-            max_char[i] = max_char[i+1]
+            if max_char[i+1] > max_char[i]:
 
-    # Now compute next_max_pos
+                max_char[i] = max_char[i+1]
 
-    next_max_pos = [0]*n
+        # Now compute next_max_pos
 
-    next_max_pos[-1] = n-1
+        next_max_pos = [0]*n
 
-    for i in range(n-2, -1, -1):
+        next_max_pos[-1] = n-1
 
-        if s[i] == max_char[i]:
+        for i in range(n-2, -1, -1):
 
-            next_max_pos[i] = i
+            if s[i] == max_char[i]:
 
-        else:
+                next_max_pos[i] = i
 
-            next_max_pos[i] = next_max_pos[i+1]
+            else:
 
-    # Build the result
+                next_max_pos[i] = next_max_pos[i+1]
 
-    result = []
+        # Build the result
 
-    current_pos =0
+        result = []
 
-    while current_pos <n:
+        current_pos =0
 
-        pos = next_max_pos[current_pos]
+        while current_pos <n:
 
-        result.append(s[pos])
+            pos = next_max_pos[current_pos]
 
-        current_pos = pos +1
+            result.append(s[pos])
 
-    print(''.join(result))
+            current_pos = pos +1
 
-Wait, wait. The code above for max_char starts by initializing max_char as a list of characters from s. Then, for each i from n-2 downto 0, we compare max_char[i+1] with s[i], and set max_char[i] to the maximum of the two.
+        print(''.join(result), file=output_stream)
 
-Yes, because max_char[i] should be the maximum of s[i] and max_char[i+1].
 
-Yes. Because:
 
-Initially, max_char[i] is s[i]. Then, for i from n-2 downto 0:
+def test():
+    import io
 
-if the max_char[i+1] (the maximum of the suffix starting at i+1) is larger than s[i], then max_char[i] is set to max_char[i+1]. Otherwise, it remains s[i].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+abbcbccacbbcbaaba
+""",
+            "output": \
+"""\
+cccccbba
+""",
+        }, 
+    ]
 
-Yes.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Testing this code with the first example:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Input 'ababba' → 'a','b','a','b','b','a'.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-max_char after processing:
+    print('Tests passed 😎')
 
-At i=5 (last character), max_char[5] = 'a'.
 
-i=4: compare s[4] ('b') with max_char[5] ('a') → max is 'b'. So max_char[4] = 'b'.
+if __name__ == '__main__':
+    test()
 
-i=3: s[3] is 'b', compare with max_char[4] ('b') → same. So max_char[3] remains 'b'.
 
-i=2: s[2] is 'a', compare with max_char[3] ('b') → 'b' is larger. So max_char[2] = 'b'.
+```
 
-i=1: s[1] is 'b', compare with max_char[2] ('b') → same. So max_char[1] = 'b'.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=0: s[0] is 'a', compare with max_char[1] ('b') → 'b' is larger. So max_char[0] = 'b'.
-
-So the max_char array is ['b', 'b', 'b', 'b', 'b', 'a'], which is correct.
+```
 
 The next_max_pos array is computed as:
 

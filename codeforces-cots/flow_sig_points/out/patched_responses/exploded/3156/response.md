@@ -919,47 +919,91 @@ Thus, the algorithm is:
 
    But according to the problem statement, a and l can be up to 1e9, but this code would handle it.
 
-   Let's test the first sample:
+Testing against sample input 1.
 
-   a=7, l=4 → end=10.
+```python
+def main(input_stream, output_stream):
+    a, l = map(int, input_stream.readline().rstrip("\n").split())
+    start = a
+    end = a + l - 1
 
-   For p=0:
+    def has_4_or7_in_p(p):
+        divisor = 10 ** p
+        higher_start = start // divisor
+        higher_end = end // divisor
+        if higher_start == higher_end:
+            digit = higher_start % 10
+            return digit == 4 or digit == 7
+        else:
+            if higher_end - higher_start >= 10:
+                return True
+            else:
+                for higher in range(higher_start, higher_end + 1):
+                    if higher % 10 in (4, 7):
+                        return True
+                return False
 
-       higher_start =7//1=7, higher_end=10//1=10.
+    max_d = -1
+    for p in range(20):  # Sufficient for numbers up to 1e20
+        if has_4_or7_in_p(p):
+            max_d = p
 
-       higher_start != higher_end.
+    if max_d == -1:
+        print(a + 1, file=output_stream)
+    else:
+        m = max_d + 1
+        n = 1
+        while True:
+            s = str(n)
+            if '4' not in s and '7' not in s:
+                break
+            n += 1
+        k = n * (10 ** m)
+        print(a + k, file=output_stream)
 
-       higher_end - higher_start =3 <10.
 
-       Check higher parts 7,8,9,10.
 
-       higher_part 7: 7%10=7 → yes.
+def test():
+    import io
 
-       So returns True. So p=0 is possible.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 7
+""",
+            "output": \
+"""\
+14
+""",
+        }, 
+    ]
 
-   p=1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-       divisor=10.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-       higher_start=7//10=0, higher_end=10//10=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-       higher_start=0, higher_end=1. So different.
+    print('Tests passed 😎')
 
-       higher_end - higher_start=1 <10.
 
-       check higher_part 0: 0%10=0 → no.
+if __name__ == '__main__':
+    test()
 
-       higher_part 1:1%10=1 → no.
 
-       So returns False. So p=1 does not have any digits 4/7.
+```
 
-   p=2: divisor=100 → higher_start=0, higher_end=0. higher_start == higher_end. digit 0 → no.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-   So max_d=0.
-
-   m=0+1=1.
-
-   Find minimal n=1. k=1*10^1=10. a +k =7+10=17 → correct.
+```
 
    Second sample:
 

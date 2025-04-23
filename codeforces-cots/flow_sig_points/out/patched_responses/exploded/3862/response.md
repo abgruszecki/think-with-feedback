@@ -125,37 +125,72 @@ After processing all groups, find the maximum value in counts, and that's the an
 
 So the code in Python would be something like:
 
-n = int(input())
+Testing against sample input 1.
 
-counts = [0]*7
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-for _ in range(n):
+    counts = [0]*7
 
-    s = input().strip()
+    for _ in range(n):
 
-    for j in range(7):
+        s = input_stream.readline().rstrip("\n").strip()
 
-        if s[j] == '1':
+        for j in range(7):
 
-            counts[j] +=1
+            if s[j] == '1':
 
-print(max(counts))
+                counts[j] +=1
 
-Yes. That's straightforward.
+    print(max(counts), file=output_stream)
 
-Testing this with the examples:
 
-First example:
 
-n=2. The two strings are '0101010' and '1010101'.
+def test():
+    import io
 
-For the first string, j=1,3,5 are '1's. So counts[1], counts[3], counts[5] each get +1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+0101011
+0011001
+0110111
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-Second string: '1010101' → j=0,2,4,6 are '1's. So counts[0], counts[2], counts[4], counts[6] each get +1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-After processing, counts are:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-counts[0] =1, counts[1]=1, counts[2]=1, counts[3]=1, counts[4]=1, counts[5]=1, counts[6]=1. Max is 1. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

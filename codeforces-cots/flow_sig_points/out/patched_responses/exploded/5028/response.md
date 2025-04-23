@@ -575,64 +575,165 @@ But perhaps in practice, we need to check even higher t's. But given the example
 
 Thus, the code can be written as:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n = int(input())
-if n == 1:
-    print("0/1")
-else:
-    t_min = (n-1).bit_length()
-    min_num = None
-    min_den = None
-    for t in range(t_min, t_min + 100):
-        pow2_t = 1 << t
-        s = pow2_t // n
-        if s == 0:
-            continue  # impossible since t >= t_min
-        numerator = t * pow2_t
-        denominator = n * s
-        if min_num is None:
-            min_num = numerator
-            min_den = denominator
-        else:
-            # Compare fractions numerator/denominator and min_num/min_den
-            # a/b < c/d iff a*d < c*b
-            if numerator * min_den < min_num * denominator:
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    if n == 1:
+        print("0/1", file=output_stream)
+    else:
+        t_min = (n-1).bit_length()
+        min_num = None
+        min_den = None
+        for t in range(t_min, t_min + 100):
+            pow2_t = 1 << t
+            s = pow2_t // n
+            if s == 0:
+                continue  # impossible since t >= t_min
+            numerator = t * pow2_t
+            denominator = n * s
+            if min_num is None:
                 min_num = numerator
                 min_den = denominator
-    # Reduce the fraction
-    g = math.gcd(min_num, min_den)
-    a = min_num // g
-    b = min_den // g
-    print(f"{a}/{b}")
+            else:
+                # Compare fractions numerator/denominator and min_num/min_den
+                # a/b < c/d iff a*d < c*b
+                if numerator * min_den < min_num * denominator:
+                    min_num = numerator
+                    min_den = denominator
+        # Reduce the fraction
+        g = math.gcd(min_num, min_den)
+        a = min_num // g
+        b = min_den // g
+        print(f"{a}/{b}", file=output_stream)
 
-Testing this code with the sample inputs:
 
-Sample 1:
 
-Input 2:
+def test():
+    import io
 
-n=2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+""",
+            "output": \
+"""\
+8/3
+""",
+        }, 
+    ]
 
-t_min = (2-1).bit_length() = 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Loop t from 1 to 100:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-t=1: pow2=2. s=1. numerator=2. denominator=2. 2/2=1. So min_num=2, min_den=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-t=2: pow2=4. s=2. numerator=2*4=8. denominator=2*2=4. 8/4=2. So 8/4 is 2, which is worse. So the minimal is 1/1.
+    print('Tests passed 😎')
 
-After loop, reduce 2/2 → 1/1.
 
-Sample 2: n=3.
+if __name__ == '__main__':
+    test()
 
-t_min is 2.
 
-t=2: 4//3=1. numerator=2*4=8. denominator=3*1=3. 8/3.
+```
 
-t=3:8//3=2. numerator 3*8=24. denominator 3*2=6. 24/6=4. Worse.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Thus, minimal is 8/3.
+```
+
+Testing against sample input 2.
+
+```python
+import math
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    if n == 1:
+        print("0/1", file=output_stream)
+    else:
+        t_min = (n-1).bit_length()
+        min_num = None
+        min_den = None
+        for t in range(t_min, t_min + 100):
+            pow2_t = 1 << t
+            s = pow2_t // n
+            if s == 0:
+                continue  # impossible since t >= t_min
+            numerator = t * pow2_t
+            denominator = n * s
+            if min_num is None:
+                min_num = numerator
+                min_den = denominator
+            else:
+                # Compare fractions numerator/denominator and min_num/min_den
+                # a/b < c/d iff a*d < c*b
+                if numerator * min_den < min_num * denominator:
+                    min_num = numerator
+                    min_den = denominator
+        # Reduce the fraction
+        g = math.gcd(min_num, min_den)
+        a = min_num // g
+        b = min_den // g
+        print(f"{a}/{b}", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+""",
+            "output": \
+"""\
+2/1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3: n=4. Output is 2/1.
 

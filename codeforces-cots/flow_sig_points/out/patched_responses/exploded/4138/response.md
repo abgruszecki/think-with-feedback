@@ -740,39 +740,100 @@ print(result if result != float('inf') else -1)
 
 Yes.
 
-Testing this code against the examples.
+Testing against sample input 1.
 
-But wait, the code for the first example:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
+    strings = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
+    reversed_str = [s[::-1] for s in strings]
 
-n=2.
+    if n == 0:
+        print(0, file=output_stream)
+        return
 
-prev0 starts as 0, prev1 as 1.
+    # Initialize previous states
+    prev0 = 0  # not reversed
+    prev1 = c[0]  # reversed
 
-i=1:
+    for i in range(1, n):
+        curr_s = strings[i]
+        curr_rev = reversed_str[i]
+        prev_s = strings[i-1]
+        prev_rev = reversed_str[i-1]
+        
+        new0 = float('inf')
+        new1 = float('inf')
+        
+        # Transition to new0 (current not reversed)
+        if prev0 != float('inf') and prev_s <= curr_s:
+            new0 = prev0
+        if prev1 != float('inf') and prev_rev <= curr_s:
+            new0 = min(new0, prev1)
+        
+        # Transition to new1 (current reversed)
+        if prev0 != float('inf') and prev_s <= curr_rev:
+            new1 = prev0 + c[i]
+        if prev1 != float('inf') and prev_rev <= curr_rev:
+            new1 = min(new1, prev1 + c[i])
+        
+        prev0, prev1 = new0, new1
+        
+        if prev0 == float('inf') and prev1 == float('inf'):
+            print(-1, file=output_stream)
+            return
 
-prev_s is 'ba' (strings[0]), prev_rev is 'ab' (reversed_str[0]).
+    result = min(prev0, prev1)
+    print(result if result != float('inf') else -1, file=output_stream)
 
-curr_s is 'ac' (strings[1]), curr_rev is 'ca' (reversed_str[1]).
 
-Check transitions to new0:
 
-prev_s is 'ba' <= 'ac'? 'ba' is 'b' vs 'a' → no. So prev0 (0) is not considered.
+def test():
+    import io
 
-prev_rev is 'ab' <= 'ac' → yes. So new0 is prev1 (1).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 3 1
+aa
+ba
+ac
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-new1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-prev_s 'ba' <= 'ca' → yes. So new1 is prev0 (0) + 2 = 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-prev_rev 'ab' <= 'ca' → yes. prev1 (1) + 2 = 3. So new1 is min(2,3) =2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-prev0 and prev1 become 1 and 2.
+    print('Tests passed 😎')
 
-Result is 1.
 
-Yes.
+if __name__ == '__main__':
+    test()
 
-So code works.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case: the fourth example.
 

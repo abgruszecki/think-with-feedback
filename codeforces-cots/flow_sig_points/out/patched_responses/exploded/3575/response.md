@@ -469,33 +469,125 @@ But wait, for m=6 and x=2: k=12, but if n is 6, it's not processed. So the code 
 
 Yes.
 
-Testing this code on the samples:
+Testing against sample input 1.
 
-Sample 1: n=4.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    total = 0
+    for m in range(2, n + 1):
+        x = 2
+        while True:
+            k = m * x
+            if k > n:
+                break
+            total += 4 * x
+            x += 1
+    print(total, file=output_stream)
 
-m=2: x=2 →k=4. Add 8. x=3 →k=6>4. Break.
 
-Other m (3,4):
 
-m=3: x=2 →k=6>4. Break.
+def test():
+    import io
 
-m=4: x=2 →k=8>4. Break.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+""",
+            "output": \
+"""\
+28
+""",
+        }, 
+    ]
 
-Sum is 8.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample 2: n=6.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-m=2: x=2 →k=4: add 8. x=3 →k=6: add 12. x=4 →k=8>6. Break.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-m=3: x=2 →k=6: add 8. x=3 →k=9>6. Break.
+    print('Tests passed 😎')
 
-m=4: x=2 →k=8>6. Break.
 
-m=5: x=2 →k=10>6. Break.
+if __name__ == '__main__':
+    test()
 
-m=6: x=2 →k=12>6. Break.
 
-Sum is 8+12+8=28.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    total = 0
+    for m in range(2, n + 1):
+        x = 2
+        while True:
+            k = m * x
+            if k > n:
+                break
+            total += 4 * x
+            x += 1
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3: n=2. All m=2:
 

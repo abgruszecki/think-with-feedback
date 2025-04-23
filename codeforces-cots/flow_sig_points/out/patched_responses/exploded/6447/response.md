@@ -622,16 +622,19 @@ But converting to integers is straightforward.
 
 So code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from itertools import permutations
+
 
 def is_leap(year):
     return year %4 ==0
 
-def main():
-    # Read input
-    finals = input().strip().split('.')
-    birth = input().strip().split('.')
+def main(input_stream, output_stream):
+    finals = input_stream.readline().rstrip("\n").strip().split('.')
+    birth = input_stream.readline().rstrip("\n").strip().split('.')
     # finals is DD.MM.YY → [dd, mm, yy]
     # birth is BD.BM.BY → [bd, bm, by]
     # Generate all permutations of birth parts
@@ -684,26 +687,168 @@ def main():
         adjusted_date = (new_year, new_month, adjusted_day)
         finals_date = (finals_year, finals_month, finals_day)
         if adjusted_date <= finals_date:
-            print("YES")
+            print("YES", file=output_stream)
             return
-    print("NO")
+    print("NO", file=output_stream)
 
-if __name__ == "__main__":
-    main()
 
-Hmm, this code should handle all cases. Let's test the first example.
 
-Sample Input 1:
+def test():
+    import io
 
-01.01.98 → finals date is 2098-01-01.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+20.10.20
+10.02.30
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-birth is 01.01.80 → permutations include (01, 01, 80). So birth year is 2080. Adding 18 → 2098. Birth date is 01 Jan 2080. 18 years later is 2098-01-01. adjusted date is same as finals date. So adjusted_date equals finals_date → YES.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample Input 2:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-20.10.20 → finals date 2020-10-20.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-birth parts 10,02,30. permutations include (30, 02, 10) → month is 02, day 30. For February, 30 days is invalid. So all permutations would either have invalid months or days. So output NO.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import sys
+from itertools import permutations
+
+
+def is_leap(year):
+    return year %4 ==0
+
+def main(input_stream, output_stream):
+    finals = input_stream.readline().rstrip("\n").strip().split('.')
+    birth = input_stream.readline().rstrip("\n").strip().split('.')
+    # finals is DD.MM.YY → [dd, mm, yy]
+    # birth is BD.BM.BY → [bd, bm, by]
+    # Generate all permutations of birth parts
+    for perm in permutations(birth):
+        d_part, m_part, y_part = perm
+        # Check month is valid
+        try:
+            m = int(m_part)
+        except:
+            continue
+        if m <1 or m >12:
+            continue
+        # Check day is valid for month m and year 20y_part
+        try:
+            y = int(y_part)
+            birth_year = 2000 + y
+        except:
+            continue
+        try:
+            d = int(d_part)
+        except:
+            continue
+        # compute max_day for birth date
+        if m ==2:
+            max_day = 29 if is_leap(birth_year) else 28
+        elif m in [4,6,9,11]:
+            max_day =30
+        else:
+            max_day =31
+        if d <1 or d> max_day:
+            continue
+        # Now, check 18 years later
+        new_year = birth_year +18
+        new_month = m
+        new_day = d
+        # compute adjusted_day
+        if new_month ==2:
+            new_max_day = 29 if is_leap(new_year) else 28
+        elif new_month in [4,6,9,11]:
+            new_max_day =30
+        else:
+            new_max_day=31
+        adjusted_day = min(new_day, new_max_day)
+        # finals date
+        finals_dd, finals_mm, finals_yy = finals
+        finals_year = 2000 + int(finals_yy)
+        finals_month = int(finals_mm)
+        finals_day = int(finals_dd)
+        # compare dates
+        adjusted_date = (new_year, new_month, adjusted_day)
+        finals_date = (finals_year, finals_month, finals_day)
+        if adjusted_date <= finals_date:
+            print("YES", file=output_stream)
+            return
+    print("NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+28.02.74
+28.02.64
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample Input 3:
 

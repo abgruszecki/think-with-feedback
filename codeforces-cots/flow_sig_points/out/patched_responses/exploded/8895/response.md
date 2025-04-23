@@ -355,11 +355,90 @@ After adding C[i] to the heap, we enter the while loop. The while loop runs as l
 
 Yes. So the code is correct.
 
-Testing this code with the sample inputs.
+Testing against sample input 1.
 
-Sample 1:
+```python
+import heapq
 
-After processing day 3 (i=3), the code checks if current_capacity (50000) >=40000. Yes.
+
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    ptr = 0
+    N, K = int(input[ptr]), int(input[ptr+1])
+    ptr +=2
+    X = list(map(int, input[ptr:ptr+N]))
+    ptr +=N
+    A = int(input[ptr])
+    ptr +=1
+    C = list(map(int, input[ptr:ptr+N]))
+    
+    current_capacity = K
+    total_cost = 0
+    heap = []
+    
+    for i in range(N):
+        heapq.heappush(heap, C[i])
+        while current_capacity < X[i]:
+            if not heap:
+                print(-1, file=output_stream)
+                return
+            cost = heapq.heappop(heap)
+            total_cost += cost
+            current_capacity += A
+            if current_capacity >= X[i]:
+                break
+        if current_capacity < X[i]:
+            print(-1, file=output_stream)
+            return
+    print(total_cost, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 10000
+10000 40000 30000 30000 20000
+10000
+5 2 8 3 6
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

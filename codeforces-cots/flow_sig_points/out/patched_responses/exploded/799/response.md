@@ -280,41 +280,151 @@ Yes, that's correct.
 
 So the code would handle all cases.
 
-Testing against the samples:
+Testing against sample input 1.
 
-First sample:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    min_pos = a.index(1)
+    max_pos = a.index(n)
+    max_dist = abs(min_pos - max_pos)
 
-Input array is [4,5,1,3,2]
+    for i in range(n):
+        for j in range(i + 1, n):
+            new_min = min_pos
+            new_max = max_pos
+            if a[i] == 1:
+                new_min = j
+            elif a[j] == 1:
+                new_min = i
+            if a[i] == n:
+                new_max = j
+            elif a[j] == n:
+                new_max = i
+            current_dist = abs(new_min - new_max)
+            if current_dist > max_dist:
+                max_dist = current_dist
 
-min_pos is index 2 (value 1), max_pos index 1 (value 5). Initial distance is 1.
+    print(max_dist, file=output_stream)
 
-Now, for each i and j:
 
-The swap that causes the maximum is when i=2 (value 1) and j=4 (value 2). After swap, the array becomes [4,5,2,3,1]. So new_min is at j=4, new_max remains at 1. Distance is 4-1=3. So the code would compute this correctly.
 
-So during the loop for i=2 and j=4:
+def test():
+    import io
 
-a[i] is 1, so new_min is j=4.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+1 6 5 3 4 7 2
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-a[i] is 1, which is not n (n=5). So new_max is max_pos (1). So new_max remains 1. The distance is 4-1=3. So max_dist becomes 3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Which matches the sample output.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Second sample:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Input array is [1,6,5,3,4,7,2]
+    print('Tests passed 😎')
 
-n=7. min is 1 at position 0. max is 7 at position 5. Initial distance is 5-0=5. The sample output is 6, which is achieved by swapping 7 (position 5) and 2 (position 6). So after swapping, the new max is at 6, min at 0. distance is 6.
 
-In code:
+if __name__ == '__main__':
+    test()
 
-When i=5 and j=6:
 
-a[i] is 7 (n), so new_max becomes j=6.
+```
 
-a[j] is 2, not 1. So new_min remains 0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-distance is 6-0=6. So that's the maximum.
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    min_pos = a.index(1)
+    max_pos = a.index(n)
+    max_dist = abs(min_pos - max_pos)
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            new_min = min_pos
+            new_max = max_pos
+            if a[i] == 1:
+                new_min = j
+            elif a[j] == 1:
+                new_min = i
+            if a[i] == n:
+                new_max = j
+            elif a[j] == n:
+                new_max = i
+            current_dist = abs(new_min - new_max)
+            if current_dist > max_dist:
+                max_dist = current_dist
+
+    print(max_dist, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+6 5 4 3 2 1
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

@@ -1675,123 +1675,249 @@ Initialize:
 
    The code is as follows:
 
-   MOD = 10**9+7
+Testing against sample input 2.
 
-   s = input().strip()
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9+7
 
-   if '1' not in s:
+    s = input_stream.readline().rstrip("\n").strip()
 
-       print(len(s) % MOD)
+    if '1' not in s:
 
-       exit()
+        print(len(s) % MOD, file=output_stream)
 
-   first_one = s.find('1')
+        return
 
-   zeros_prefix = first_one
+    first_one = s.find('1')
 
-   # Now process from first_one onwards
+    zeros_prefix = first_one
 
-   # Initial state after first_one:
+    # Now process from first_one onwards
 
-   # We can have either merged all previous 0s into 1 (1 sequence) or split into k+1 sequences (0 followed by 1)
+    # Initial state after first_one:
 
-   # Wait, no. After the first_one, the sequences are:
+    # We can have either merged all previous 0s into 1 (1 sequence) or split into k+1 sequences (0 followed by 1)
 
-   # - merged: 1 sequence (1).
+    # Wait, no. After the first_one, the sequences are:
 
-   # - split: k sequences (0, 00, ..., 0^k) each followed by 1.
+    # - merged: 1 sequence (1).
 
-   # So initial count is 1 + k.
+    # - split: k sequences (0, 00, ..., 0^k) each followed by 1.
 
-   # So ans_1 = 1 + zeros_prefix
+    # So initial count is 1 + k.
 
-   # ans_0 = 0
+    # So ans_1 = 1 + zeros_prefix
 
-   ans_0 = 0
+    # ans_0 = 0
 
-   ans_1 = zeros_prefix + 1
+    ans_0 = 0
 
-   prev_ans_0 = ans_0
+    ans_1 = zeros_prefix + 1
 
-   prev_ans_1 = ans_1
+    prev_ans_0 = ans_0
 
-   for c in s[first_one+1:]:
+    prev_ans_1 = ans_1
 
-       if c == '0':
+    for c in s[first_one+1:]:
 
-           new_ans_0 = (prev_ans_0 + prev_ans_1) % MOD
+        if c == '0':
 
-           new_ans_1 = prev_ans_1
+            new_ans_0 = (prev_ans_0 + prev_ans_1) % MOD
 
-       else:
+            new_ans_1 = prev_ans_1
 
-           new_ans_0 = 0
+        else:
 
-           new_ans_1 = (prev_ans_0 + prev_ans_1 * 2) % MOD
+            new_ans_0 = 0
 
-       prev_ans_0, prev_ans_1 = new_ans_0, new_ans_1
+            new_ans_1 = (prev_ans_0 + prev_ans_1 * 2) % MOD
 
-   print((prev_ans_0 + prev_ans_1) % MOD)
+        prev_ans_0, prev_ans_1 = new_ans_0, new_ans_1
 
-   Let's test this code with sample 2.
+    print((prev_ans_0 + prev_ans_1) % MOD, file=output_stream)
 
-   Sample 2 input: '0101'.
 
-   first_one is at index 1. zeros_prefix is 1.
 
-   Initial ans_1 =1 +1=2.
+def test():
+    import io
 
-   ans_0=0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0001111
+""",
+            "output": \
+"""\
+16
+""",
+        }, 
+    ]
 
-   Processing the next characters: '0' and '1'.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-   Processing '0':
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-   new_ans_0 =0 +2=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-   new_ans_1 =2.
+    print('Tests passed 😎')
 
-   Now ans_0=2, ans_1=2.
 
-   Processing '1':
+if __name__ == '__main__':
+    test()
 
-   new_ans_0=0.
 
-   new_ans_1 =2 + 2*2=2+4=6.
+```
 
-   Total is 0 +6=6. Correct.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 93, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 86, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '16'
+Got: '32'
 
-   Sample 3: '0001111'.
+```
 
-   first_one is at index 3. zeros_prefix is3.
+Testing against sample input 3.
 
-   ans_1=3+1=4.
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9+7
 
-   ans_0=0.
+    s = input_stream.readline().rstrip("\n").strip()
 
-   Processing the remaining '1111':
+    if '1' not in s:
 
-   For each '1':
+        print(len(s) % MOD, file=output_stream)
 
-   First '1':
+        return
 
-   new_ans_0=0.
+    first_one = s.find('1')
 
-   new_ans_1=0 +4*2=8.
+    zeros_prefix = first_one
 
-   Second '1':
+    # Now process from first_one onwards
 
-   new_ans_1=0 +8*2=16.
+    # Initial state after first_one:
 
-   Third '1':
+    # We can have either merged all previous 0s into 1 (1 sequence) or split into k+1 sequences (0 followed by 1)
 
-   new_ans_1=0 +16*2=32.
+    # Wait, no. After the first_one, the sequences are:
 
-   Fourth '1':
+    # - merged: 1 sequence (1).
 
-   new_ans_1=0 +32*2=64.
+    # - split: k sequences (0, 00, ..., 0^k) each followed by 1.
 
-   Total is 64, which does not match the sample answer of 16. So this code is incorrect for sample 3.
+    # So initial count is 1 + k.
+
+    # So ans_1 = 1 + zeros_prefix
+
+    # ans_0 = 0
+
+    ans_0 = 0
+
+    ans_1 = zeros_prefix + 1
+
+    prev_ans_0 = ans_0
+
+    prev_ans_1 = ans_1
+
+    for c in s[first_one+1:]:
+
+        if c == '0':
+
+            new_ans_0 = (prev_ans_0 + prev_ans_1) % MOD
+
+            new_ans_1 = prev_ans_1
+
+        else:
+
+            new_ans_0 = 0
+
+            new_ans_1 = (prev_ans_0 + prev_ans_1 * 2) % MOD
+
+        prev_ans_0, prev_ans_1 = new_ans_0, new_ans_1
+
+    print((prev_ans_0 + prev_ans_1) % MOD, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+00101100011100
+""",
+            "output": \
+"""\
+477
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 93, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 86, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '477'
+Got: '1080'
+
+```
+
+   This suggests that the code is incorrect.
+
+   Another approach:
+
+   The correct code is based on dynamic programming where the number of sequences is the product of (1 + the number of 0s between 1s).
+
+   For example, the sample 3: '0001111'.
+
+   The first run of 0s is 3. The run of 1s is 4. Since there are no 0s between 1s, the answer is (3+1) * 1=4. But sample answer is 16. So this is not correct.
+
+   After struggling with various approaches, I'll proceed to provide the code that passes all samples, which is based on dynamic programming with three variables: the number of sequences ending with 0 (no 1s), sequences ending with 1, and sequences ending with 0 (with 1s seen).
+
+   The correct code is:
 
    This suggests that the code is incorrect.
 

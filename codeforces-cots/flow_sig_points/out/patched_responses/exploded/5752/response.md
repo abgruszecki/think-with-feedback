@@ -671,113 +671,249 @@ This handles the case where allowed_k is very large, leading to a large max_allo
 
 So the code becomes:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n, I = map(int, input().split())
 
-arr = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n, I = map(int, input_stream.readline().rstrip("\n").split())
 
-arr.sort()
+    arr = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-# Compute unique elements
+    arr.sort()
 
-unique = []
+    # Compute unique elements
 
-prev = None
+    unique = []
 
-for num in arr:
+    prev = None
 
-    if num != prev:
+    for num in arr:
 
-        unique.append(num)
+        if num != prev:
 
-        prev = num
+            unique.append(num)
 
-current_K = len(unique)
+            prev = num
 
-allowed_k = (8 * I) // n
+    current_K = len(unique)
 
-if allowed_k >= 30:
+    allowed_k = (8 * I) // n
 
-    print(0)
+    if allowed_k >= 30:
 
-else:
-
-    max_allowed_K = 1 << allowed_k  # 2^allowed_k
-
-    if current_K <= max_allowed_K:
-
-        print(0)
+        print(0, file=output_stream)
 
     else:
 
-        required_window_size = max_allowed_K
+        max_allowed_K = 1 << allowed_k  # 2^allowed_k
 
-        min_changes = float('inf')
+        if current_K <= max_allowed_K:
 
-        # Iterate over all possible windows of size required_window_size in unique
+            print(0, file=output_stream)
 
-        # required_window_size <= current_K
+        else:
 
-        # So the number of possible windows is len(unique) - required_window_size +1
+            required_window_size = max_allowed_K
 
-        for i in range(len(unique) - required_window_size +1):
+            min_changes = float('inf')
 
-            left_val = unique[i]
+            # Iterate over all possible windows of size required_window_size in unique
 
-            right_val = unique[i + required_window_size -1]
+            # required_window_size <= current_K
 
-            # elements < left_val in arr
+            # So the number of possible windows is len(unique) - required_window_size +1
 
-            count_less = bisect.bisect_left(arr, left_val)
+            for i in range(len(unique) - required_window_size +1):
 
-            # elements > right_val in arr
+                left_val = unique[i]
 
-            count_more = len(arr) - bisect.bisect_right(arr, right_val)
+                right_val = unique[i + required_window_size -1]
 
-            total = count_less + count_more
+                # elements < left_val in arr
 
-            if total < min_changes:
+                count_less = bisect.bisect_left(arr, left_val)
 
-                min_changes = total
+                # elements > right_val in arr
 
-        print(min_changes)
+                count_more = len(arr) - bisect.bisect_right(arr, right_val)
 
-Now, let's test this code with the samples.
+                total = count_less + count_more
 
-Sample1:
+                if total < min_changes:
 
-n=6, I=1.
+                    min_changes = total
 
-allowed_k = (8*1)/6 = 1.333 → floor is 1.
+            print(min_changes, file=output_stream)
 
-allowed_k=1 <30.
 
-max_allowed_K = 2.
 
-current_K=4>2.
+def test():
+    import io
 
-required_window_size=2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 2
+2 1 2 3 4 3
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Possible windows:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=0: left=1, right=2. count_less=0 (elements <1), count_more= elements >2: 4 → count_more= len(arr) - bisect.bisect_right(arr,2) → arr is [1,2,2,3,3,4]. bisect_right(arr,2) is 3. 6-3=3. total=0+3=3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=1: left=2, right=3. count_less= bisect_left(arr,2)=1 (index of first 2). count_more=6 - bisect_right(arr,3) → bisect_right(arr,3) is 5. 6-5=1. total=1+1=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=2: left=3, right=4. count_less= bisect_left(arr,3) is 3 (elements before 3 are 1,2,2). count_more=6 - bisect_right(arr,4)=6-6=0. total=3+0=3.
+    print('Tests passed 😎')
 
-So min_changes=2.
 
-Sample2:
+if __name__ == '__main__':
+    test()
 
-n=6, I=2.
 
-allowed_k= (8*2)//6=16//6=2.
+```
 
-max_allowed_K=4.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-current_K=4 →4<=4. So output 0.
+```
+
+Testing against sample input 2.
+
+```python
+import bisect
+
+
+def main(input_stream, output_stream):
+    n, I = map(int, input_stream.readline().rstrip("\n").split())
+
+    arr = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    arr.sort()
+
+    # Compute unique elements
+
+    unique = []
+
+    prev = None
+
+    for num in arr:
+
+        if num != prev:
+
+            unique.append(num)
+
+            prev = num
+
+    current_K = len(unique)
+
+    allowed_k = (8 * I) // n
+
+    if allowed_k >= 30:
+
+        print(0, file=output_stream)
+
+    else:
+
+        max_allowed_K = 1 << allowed_k  # 2^allowed_k
+
+        if current_K <= max_allowed_K:
+
+            print(0, file=output_stream)
+
+        else:
+
+            required_window_size = max_allowed_K
+
+            min_changes = float('inf')
+
+            # Iterate over all possible windows of size required_window_size in unique
+
+            # required_window_size <= current_K
+
+            # So the number of possible windows is len(unique) - required_window_size +1
+
+            for i in range(len(unique) - required_window_size +1):
+
+                left_val = unique[i]
+
+                right_val = unique[i + required_window_size -1]
+
+                # elements < left_val in arr
+
+                count_less = bisect.bisect_left(arr, left_val)
+
+                # elements > right_val in arr
+
+                count_more = len(arr) - bisect.bisect_right(arr, right_val)
+
+                total = count_less + count_more
+
+                if total < min_changes:
+
+                    min_changes = total
+
+            print(min_changes, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 1
+1 1 2 2 3 3
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

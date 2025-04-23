@@ -155,115 +155,213 @@ Let's code this.
 
 Sample code:
 
-n, m = map(int, input().split())
-degrees = [0]*(n+1)
-for _ in range(m):
-    x, y = map(int, input().split())
-    degrees[x] += 1
-    degrees[y] += 1
+Testing against sample input 3.
 
-if m == n:
-    # check if all degrees are 2
-    valid = True
-    for i in range(1, n+1):
-        if degrees[i] != 2:
-            valid = False
-            break
-    if valid:
-        print("ring topology")
-    else:
-        print("unknown topology")
-elif m == n-1:
-    # check for bus or star
-    count1 = 0
-    count2 = 0
-    count_other = 0
-    max_degree = 0
-    for i in range(1, n+1):
-        if degrees[i] == 1:
-            count1 += 1
-        elif degrees[i] == 2:
-            count2 += 1
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    degrees = [0]*(n+1)
+    for _ in range(m):
+        x, y = map(int, input_stream.readline().rstrip("\n").split())
+        degrees[x] += 1
+        degrees[y] += 1
+
+    if m == n:
+        # check if all degrees are 2
+        valid = True
+        for i in range(1, n+1):
+            if degrees[i] != 2:
+                valid = False
+                break
+        if valid:
+            print("ring topology", file=output_stream)
         else:
-            count_other += 1
-        if degrees[i] > max_degree:
-            max_degree = degrees[i]
-    # bus condition: exactly two 1's, and the rest 2's. So count1=2, count_other=0.
-    if count1 == 2 and count_other == 0:
-        print("bus topology")
-    # star condition: one node has degree n-1, others 1. So count1 = n-1, count_other=0 (since the star node's degree is n-1 which is >=3, since n >=4. So for n=4, n-1=3. So the other nodes have 1, so count1 would be 3, and the star node is in count_other (since 3 !=1 or 2).
-    # Wait, no. For star topology, the central node has degree n-1, which for n >=4 would be >=3. So in the code, count_other would be 1 (the central node), and count1 = n-1.
+            print("unknown topology", file=output_stream)
+    elif m == n-1:
+        # check for bus or star
+        count1 = 0
+        count2 = 0
+        count_other = 0
+        max_degree = 0
+        for i in range(1, n+1):
+            if degrees[i] == 1:
+                count1 += 1
+            elif degrees[i] == 2:
+                count2 += 1
+            else:
+                count_other += 1
+            if degrees[i] > max_degree:
+                max_degree = degrees[i]
+        # bus condition: exactly two 1's, and the rest 2's. So count1=2, count_other=0.
+        if count1 == 2 and count_other == 0:
+            print("bus topology", file=output_stream)
+        # star condition: one node has degree n-1, others 1. So count1 = n-1, count_other=0 (since the star node's degree is n-1 which is >=3, since n >=4. So for n=4, n-1=3. So the other nodes have 1, so count1 would be 3, and the star node is in count_other (since 3 !=1 or 2).
+        # Wait, no. For star topology, the central node has degree n-1, which for n >=4 would be >=3. So in the code, count_other would be 1 (the central node), and count1 = n-1.
 
-    # So the code's current approach for star would have count_other ==1, and the max_degree is n-1.
+        # So the code's current approach for star would have count_other ==1, and the max_degree is n-1.
 
-    # So in this case, we can check if there is exactly one node with degree n-1, and all others have degree 1.
+        # So in this case, we can check if there is exactly one node with degree n-1, and all others have degree 1.
 
-    # So code for star:
+        # So code for star:
 
-    elif max_degree == n-1 and count_other ==1 and count1 == n-1:
-        print("star topology")
+        elif max_degree == n-1 and count_other ==1 and count1 == n-1:
+            print("star topology", file=output_stream)
+        else:
+            print("unknown topology", file=output_stream)
     else:
-        print("unknown topology")
-else:
-    print("unknown topology")
+        print("unknown topology", file=output_stream)
 
-Wait, let's test the star case.
 
-For example, in sample input 3:
 
-n=4, m=3.
+def test():
+    import io
 
-Degrees are:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4
+1 2
+2 3
+3 1
+1 4
+""",
+            "output": \
+"""\
+unknown topology
+""",
+        }, 
+    ]
 
-node 1: 3 (connected to 2,3,4)
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-nodes 2,3,4: 1 each.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So count1 is 3, count_other is 1 (node 1's degree is 3, which is not 1 or 2).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So in code:
+    print('Tests passed 😎')
 
-count1 =3, count_other=1.
 
-max_degree is 3.
+if __name__ == '__main__':
+    test()
 
-So the code checks if max_degree == n-1 (3 ==4-1 → yes), count_other==1 (yes), and count1 ==n-1 (3==3 → yes). So condition is met.
 
-So code would print star topology.
+```
 
-But in the code, after checking the bus condition (which would have count1=2 and count_other=0), else it checks for star.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So that's correct.
+```
 
-Another test case: bus.
+Testing against sample input 1.
 
-Sample input 1:
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    degrees = [0]*(n+1)
+    for _ in range(m):
+        x, y = map(int, input_stream.readline().rstrip("\n").split())
+        degrees[x] += 1
+        degrees[y] += 1
 
-n=4, m=3.
+    if m == n:
+        # check if all degrees are 2
+        valid = True
+        for i in range(1, n+1):
+            if degrees[i] != 2:
+                valid = False
+                break
+        if valid:
+            print("ring topology", file=output_stream)
+        else:
+            print("unknown topology", file=output_stream)
+    elif m == n-1:
+        # check for bus or star
+        count1 = 0
+        count2 = 0
+        count_other = 0
+        max_degree = 0
+        for i in range(1, n+1):
+            if degrees[i] == 1:
+                count1 += 1
+            elif degrees[i] == 2:
+                count2 += 1
+            else:
+                count_other += 1
+            if degrees[i] > max_degree:
+                max_degree = degrees[i]
+        # bus condition: exactly two 1's, and the rest 2's. So count1=2, count_other=0.
+        if count1 == 2 and count_other == 0:
+            print("bus topology", file=output_stream)
+        # star condition: one node has degree n-1, others 1. So count1 = n-1, count_other=0 (since the star node's degree is n-1 which is >=3, since n >=4. So for n=4, n-1=3. So the other nodes have 1, so count1 would be 3, and the star node is in count_other (since 3 !=1 or 2).
+        # Wait, no. For star topology, the central node has degree n-1, which for n >=4 would be >=3. So in the code, count_other would be 1 (the central node), and count1 = n-1.
 
-Degrees are 1,2,2,1.
+        # So the code's current approach for star would have count_other ==1, and the max_degree is n-1.
 
-count1=2, count2=2, count_other=0.
+        # So in this case, we can check if there is exactly one node with degree n-1, and all others have degree 1.
 
-So code's first condition (bus) is met.
+        # So code for star:
 
-So code prints bus.
+        elif max_degree == n-1 and count_other ==1 and count1 == n-1:
+            print("star topology", file=output_stream)
+        else:
+            print("unknown topology", file=output_stream)
+    else:
+        print("unknown topology", file=output_stream)
 
-Another case where it's neither bus nor star: for example, n=5, m=4 (n-1=4). Suppose degrees are 1,1,3,1,1.
 
-count1=4, count_other=1 (the node with degree 3).
 
-max_degree=3. n-1 is 4. So 3 !=4-1=4. So condition for star not met. So code returns unknown.
+def test():
+    import io
 
-So the code's logic for checking star is:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4
+1 2
+2 3
+3 4
+4 1
+""",
+            "output": \
+"""\
+ring topology
+""",
+        }, 
+    ]
 
-max_degree must be exactly n-1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-count_other must be 1 (only the central node has degree different from 1 and 2).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-count1 must be n-1 (since all other nodes have degree 1).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So this seems correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So the code should handle all cases.
 

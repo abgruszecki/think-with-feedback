@@ -1565,217 +1565,135 @@ Thus, the code must handle this.
 
 Thus, the code:
 
+Testing against sample input 1.
+
+```python
 import math
 
-s = list(input().strip())
 
-n = len(s)
+def main(input_stream, output_stream):
+    s = list(input_stream.readline().rstrip("\n").strip())
 
-k = math.floor(math.log(n, 2)) if n > 0 else 0
+    n = len(s)
 
-for op in range(1, k + 1):
+    k = math.floor(math.log(n, 2)) if n > 0 else 0
 
-   L = 2 ** op - 1
+    for op in range(1, k + 1):
 
-   len_s = len(s)
+       L = 2 ** op - 1
 
-   if L > len_s:
+       len_s = len(s)
 
-       break
-
-   len_conc = len_s - L
-
-   candidates = list(range(len_s - L + 1))
-
-   for k_pos in range(len_conc):
-
-       min_char = 'z'
-
-       # find the minimal character at position k_pos among candidates
-
-       for i in candidates:
-
-           if k_pos < i:
-
-               char = s[k_pos]
-
-           else:
-
-               char = s[k_pos + L]
-
-           if char < min_char:
-
-               min_char = char
-
-       # filter candidates to those that have min_char at k_pos
-
-       new_candidates = []
-
-       for i in candidates:
-
-           if k_pos < i:
-
-               c = s[k_pos]
-
-           else:
-
-               c = s[k_pos + L]
-
-           if c == min_char:
-
-               new_candidates.append(i)
-
-       candidates = new_candidates
-
-       if len(candidates) == 1:
+       if L > len_s:
 
            break
 
-   best_i = candidates[0]
+       len_conc = len_s - L
 
-   s = s[:best_i] + s[best_i + L:]
+       candidates = list(range(len_s - L + 1))
 
-print(''.join(s))
+       for k_pos in range(len_conc):
 
-But this code is O(k * n^2), which for n=5000 is 12 * 5000^2 = 3e8 operations, which is way too slow.
+           min_char = 'z'
 
-But in practice, the inner loops may break early when candidates are filtered down to one.
+           # find the minimal character at position k_pos among candidates
 
-For example, if after the first character (k_pos=0), all candidates except one are filtered out, then the loop breaks.
+           for i in candidates:
 
-Thus, the average case may be much faster.
+               if k_pos < i:
 
-Let's test this code on the first example.
+                   char = s[k_pos]
 
-Sample Input 1: adcbca → len 6.
+               else:
 
-k = floor(log2(6)) = 2.
+                   char = s[k_pos + L]
 
-Operation 1: op=1 → L=2^1 -1=1.
+               if char < min_char:
 
-len_s=6.
+                   min_char = char
 
-len_conc=5.
+           # filter candidates to those that have min_char at k_pos
 
-candidates = 0,1,2,3,4,5.
+           new_candidates = []
 
-k_pos=0:
+           for i in candidates:
 
-   for each candidate i:
+               if k_pos < i:
 
-       if 0 < i: c = s[0] ('a').
+                   c = s[k_pos]
 
-       else: c = s[0 +1] ('d').
+               else:
 
-   So, for i=0: c = 'd'.
+                   c = s[k_pos + L]
 
-   for i=1-5: c = 'a'.
+               if c == min_char:
 
-   Thus, the minimal_char is 'a'.
+                   new_candidates.append(i)
 
-   new_candidates are i=1,2,3,4,5.
+           candidates = new_candidates
 
-k_pos=1:
+           if len(candidates) == 1:
 
-   for each candidate i (1-5):
+               break
 
-       if 1 <i → c = s[1] ('d').
+       best_i = candidates[0]
 
-       else: c = s[1+1] (s[2] 'c').
+       s = s[:best_i] + s[best_i + L:]
 
-   i=1: c = s[1+1] → 'c'.
+    print(''.join(s), file=output_stream)
 
-   i=2: c = s[1] → 'd'.
 
-   i=3: c = s[1] → 'd'.
 
-   i=4: c = s[1] → 'd'.
+def test():
+    import io
 
-   i=5: c = s[1] → 'd'.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+abacabadabacaba
+""",
+            "output": \
+"""\
+aabacaba
+""",
+        }, 
+    ]
 
-   The characters are 'c', 'd', 'd', 'd', 'd'.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-   min_char is 'c'.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-   new_candidates is i=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-   break.
+    print('Tests passed 😎')
 
-best_i=1.
 
-s becomes s[:1] + s[2:] → ['a'] + ['c', 'b', 'c', 'a'] → ['a', 'c', 'b', 'c', 'a'] → 'acbca'.
+if __name__ == '__main__':
+    test()
 
-Operation 2: op=2 → L=3.
 
-len_s=5.
+```
 
-L=3. len_conc=2.
-
-candidates = 0,1,2.
-
-k_pos=0:
-
-   for each i in 0,1,2:
-
-       if 0 <i → c = s[0] ('a').
-
-       else: c = s[0+3] → s[3] ('c' for i=0: s[0+3]=s[3] 'c'? original s is 'acbca'.
-
-Wait, let's see:
-
-current_s after operation 1 is ['a', 'c', 'b', 'c', 'a'].
-
-L=3.
-
-len_s=5. len_conc=2.
-
-candidates are 0, 1, 2.
-
-k_pos=0:
-
-   for each i in 0,1,2:
-
-       if 0 <i → i>0. For i=0: k_pos <i is 0 <0: False. So c = s[0+3] = s[3] → 'c'.
-
-       i=0: c = s[0+3] = s[3] → 'c'.
-
-       i=1: k_pos=0 <1 → True. c = s[0] → 'a'.
-
-       i=2: k_pos=0 <2 → True. c = s[0] → 'a'.
-
-   So, the characters are 'c', 'a', 'a'. min_char is 'a'.
-
-   new_candidates are i=1,2.
-
-k_pos=1:
-
-   for each i in 1,2:
-
-       k_pos=1.
-
-       if 1 <i → for i=1: 1 <1 is False. So i=1: c = s[1+3] = s[4] → 'a'.
-
-       i=2: k_pos=1 <2 → True. c = s[1] → 'c'.
-
-   So, characters are 'a' (i=1) and 'c' (i=2). min_char is 'a'.
-
-   new_candidates is i=1.
-
-Thus, best_i=1.
-
-s becomes s[:1] + s[1+3:] → ['a'] + s[4:] → ['a', 'a'].
-
-Wait, but the example's output is 'aba'.
-
-Thus, there's a mistake in the code.
-
-Ah, wait, after operation 1, the string is 'acbca' (length 5). Operation 2 is deleting a substring of length 3.
-
-The best_i is 1. So the substring is positions 1-3 (c, b, c). Deleting this gives 'a' + 'a' → 'aa'.
-
-But the example's output is 'aba'.
-
-Thus, the code is not correct.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 108, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 101, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: 'aabacaba'
+Got: 'aaaa'
+
+```
 
 Thus, the code's approach is not handling the examples correctly.
 

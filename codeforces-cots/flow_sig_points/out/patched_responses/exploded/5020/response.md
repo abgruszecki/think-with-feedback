@@ -801,50 +801,71 @@ So for j=1 in 1-based: 0-based 0.
 
 So, the code would be:
 
-n = int(input())
-a = list(map(int, input().split()))
-m = (n + 1) // 2
-res = [0]*n
+Testing against sample input 1.
 
-for j in range(1, n+1):
-    if j <= m:
-        cnt = j
-    else:
-        cnt = n - j + 1
-    if cnt % 2 == 1:
-        res[j-1] = a[n - j]
-    else:
-        res[j-1] = a[j-1]
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    m = (n + 1) // 2
+    res = [0]*n
 
-print(' '.join(map(str, res)))
+    for j in range(1, n+1):
+        if j <= m:
+            cnt = j
+        else:
+            cnt = n - j + 1
+        if cnt % 2 == 1:
+            res[j-1] = a[n - j]
+        else:
+            res[j-1] = a[j-1]
 
-But wait, let's test this code against the sample input.
+    print(' '.join(map(str, res)), file=output_stream)
 
-First sample input:
 
-7
 
-4 3 7 6 9 1 2
+def test():
+    import io
 
-m =4.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+6 1 4 2 5 6 9 2
+""",
+            "output": \
+"""\
+2 1 6 2 5 4 9 6
+""",
+        }, 
+    ]
 
-For j=1: cnt=1 (odd). So res[0] = a[7-1 -0? Wait, wait, for j=1 in 1-based, the 0-based index is 0. n-j is 7-1=6. So a[6] is 2. Which matches the sample output's first element.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-j=2: cnt=2 even. res[1] = a[1] =3. Which matches sample output.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-j=3: cnt=3 (odd). res[2] = a[7-3=4] which is 9. Which matches.
+    print('Tests passed 😎')
 
-j=4: cnt=4 even. res[3] =a[3] =6.
 
-j=5: cnt =7-5+1=3 (odd). res[4] =a[7-5=2] → a[2]=7.
+if __name__ == '__main__':
+    test()
 
-But in the sample output, the fifth element is 7. Yes.
 
-Wait, the sample output is [2,3,9,6,7,1,4].
+```
 
-Original array's fifth position (j=5) is 7. According to the code, j=5> m=4. So cnt=7-5+1=3 (odd). So res[4] (0-based) is a[7-5=2] → a[2] is 7. Which is correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Yes.
 

@@ -361,33 +361,112 @@ But in Python, list comprehensions are faster than for loops. So perhaps using l
 
 But for j=34, each level would require 3 * 1e5 operations, which for 34 levels would be 1.02e7 operations. Which in Python should be manageable in 2 seconds.
 
-But let's test with an example.
+Testing against sample input 1.
 
-Wait, the first sample input:
+```python
+import sys
 
-max_level for k=3 is 1 (since 2^1=2 <=3, and 2^2=4>3). So j=1 is the highest. So the tables are built for j=0 and j=1.
 
-For j=1, each entry is computed as follows: for node i, jump 2 steps.
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
+    f = list(map(int, input_stream.readline().split()))
+    w = list(map(int, input_stream.readline().split()))
+    
+    if k == 0:
+        for _ in range(n):
+            print(0, 0, file=output_stream)
+        return
+    
+    max_level = 0
+    if k > 0:
+        max_level = k.bit_length() - 1
+        while (1 << max_level) > k:
+            max_level -= 1
+    
+    # Initialize tables for binary lifting
+    up = [f.copy()]
+    sum_table = [w.copy()]
+    min_table = [w.copy()]
+    
+    for j in range(1, max_level + 1):
+        prev_up = up[j-1]
+        prev_sum = sum_table[j-1]
+        prev_min = min_table[j-1]
+        current_up = []
+        current_sum = []
+        current_min = []
+        for i in range(n):
+            mid = prev_up[i]
+            current_up.append(prev_up[mid])
+            current_sum.append(prev_sum[i] + prev_sum[mid])
+            current_min.append(min(prev_min[i], prev_min[mid]))
+        up.append(current_up)
+        sum_table.append(current_sum)
+        min_table.append(current_min)
+    
+    # Process each node
+    for i in range(n):
+        current = i
+        total_sum = 0
+        min_val = float('inf')
+        remaining = k
+        for j in range(max_level, -1, -1):
+            if remaining >= (1 << j):
+                total_sum += sum_table[j][current]
+                if min_table[j][current] < min_val:
+                    min_val = min_table[j][current]
+                current = up[j][current]
+                remaining -= (1 << j)
+        print(total_sum, min_val, file=output_stream)
 
-For example, node 0:
 
-j=0: up[0][0] is 1. sum is 6, min is6.
 
-j=1: up[1][0] is up[0][up[0][0]] = up[0][1] =2. sum is 6+3=9. min is min(6,3)=3.
+def test():
+    import io
 
-But in the code, for each j, the up, sum, min are built correctly.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4
+0 1 2 3
+0 1 2 3
+""",
+            "output": \
+"""\
+0 0
+4 1
+8 2
+12 3
+""",
+        }, 
+    ]
 
-Now, when processing k=3 (binary 11), the code would process j=1 (2 steps) and j=0 (1 step). For each node, sum and min are added.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So the code should work.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Another possible edge case is when k=1. Then max_level is 0, and for each node, we take j=0 once.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Another case is when k is 2^j -1, like 3=2^2-1, but the code would process the bits 2^1 (2 steps) and 2^0 (1 step) for a total of 3 steps.
+    print('Tests passed 😎')
 
-So the code should handle that.
 
-Thus, the code seems correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So the final code is as follows:
 </think>

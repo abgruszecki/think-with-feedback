@@ -11,9 +11,67 @@ Wait, but the sum of the others is (total sum - max_element). So the condition i
 
 Yes. Because the sum being even ensures that the total can be divided into pairs, and the max_element condition ensures that the largest element can be "balanced" with the others.
 
-Let's test this against the examples.
+Testing against sample input 1.
 
-First example: 1,1,2,2. Sum is 6, which is even. Max element is 2. Sum of others is 1+1+2=4. 2 <=4. So yes.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    total = sum(a)
+    if total % 2 != 0:
+        print("NO", file=output_stream)
+    else:
+        max_val = max(a)
+        remaining = total - max_val
+        if max_val > remaining:
+            print("NO", file=output_stream)
+        else:
+            print("YES", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+1 2 3 4 5 6
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: sum is 1+2+3+4+5+6=21, which is odd. So even before checking the max element, it's impossible. So output is no.
 
@@ -89,13 +147,67 @@ That's all.
 
 Let's code this.
 
-Test the first example:
+Testing against sample input 1.
 
-sum is 1+1+2+2=6 even.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    total = sum(a)
+    if total % 2 != 0:
+        print("NO", file=output_stream)
+    else:
+        max_val = max(a)
+        remaining = total - max_val
+        if max_val > remaining:
+            print("NO", file=output_stream)
+        else:
+            print("YES", file=output_stream)
 
-max is 2.
 
-sum_rest=6-2=4. 2 <=4: yes.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+1 2 3 4 5 6
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example sum 21: odd. So no.
 

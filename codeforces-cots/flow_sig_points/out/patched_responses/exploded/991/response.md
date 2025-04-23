@@ -319,17 +319,61 @@ Thus, the maximum over all k of (k+1)*(N -k) is the answer.
 
 So the problem reduces to computing the maximum value of (k+1)*(N-k) for k in 0 ≤k ≤N-1.
 
-Let's test this for the sample inputs.
+Testing against sample input 2.
 
-Sample Input 2 (N=2):
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    max_layers = 0
+    for k in range(n):
+        current = (k + 1) * (n - k)
+        if current > max_layers:
+            max_layers = current
+    print(max_layers, file=output_stream)
 
-k ranges from 0 to 1.
 
-k=0: (0+1)*(2-0) =1*2=2.
 
-k=1: (1+1)*(2-1) =2*1=2.
+def test():
+    import io
 
-Maximum is 2. Which matches the sample output.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample Input 3 (N=3):
 

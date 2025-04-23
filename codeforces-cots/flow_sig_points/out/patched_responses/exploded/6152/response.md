@@ -313,189 +313,117 @@ But for each step, we can have prev_dp and current_dp as 2 lists (for color 0 an
 
 So the code:
 
-INF = float('inf')
+Testing against sample input 1.
 
-n, m, x, y = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    INF = float('inf')
 
-# Precompute cost_black and cost_white for each column.
+    n, m, x, y = map(int, input_stream.readline().rstrip("\n").split())
 
-cost_black = []
-cost_white = []
+    # Precompute cost_black and cost_white for each column.
 
-for _ in range(n):
-    row = input().strip()
-    for j in range(m):
-        if len(cost_black) <= j:
-            cost_black.append(0)
-            cost_white.append(0)
-        if row[j] == '.':
-            cost_black[j] += 1  # '.' needs to change to '#', so cost is +1
-        else:
-            cost_white[j] += 1  # '#' needs to change to '.', so cost is +1
+    cost_black = []
+    cost_white = []
 
-# Now, for each column j, cost_black[j] is the cost to make column j black.
+    for _ in range(n):
+        row = input_stream.readline().rstrip("\n").strip()
+        for j in range(m):
+            if len(cost_black) <= j:
+                cost_black.append(0)
+                cost_white.append(0)
+            if row[j] == '.':
+                cost_black[j] += 1  # '.' needs to change to '#', so cost is +1
+            else:
+                cost_white[j] += 1  # '#' needs to change to '.', so cost is +1
 
-# Initialize DP.
+    # Now, for each column j, cost_black[j] is the cost to make column j black.
 
-prev_dp = [[INF]*(y+2) for _ in range(2)]  # 0: black, 1: white
+    # Initialize DP.
 
-# first column (j=0):
+    prev_dp = [[INF]*(y+2) for _ in range(2)]  # 0: black, 1: white
 
-prev_dp[0][1] = cost_black[0]
-prev_dp[1][1] = cost_white[0]
+    # first column (j=0):
 
-for j in range(1, m):
-    current_dp = [[INF]*(y+2) for _ in range(2)]
+    prev_dp[0][1] = cost_black[0]
+    prev_dp[1][1] = cost_white[0]
+
+    for j in range(1, m):
+        current_dp = [[INF]*(y+2) for _ in range(2)]
+        for c in [0, 1]:
+            for l in range(1, y+1):
+                if prev_dp[c][l] == INF:
+                    continue
+                # Option 1: continue the same color, if possible (l < y)
+                if l < y:
+                    new_l = l + 1
+                    cost = prev_dp[c][l] + (cost_black[j] if c ==0 else cost_white[j])
+                    if cost < current_dp[c][new_l]:
+                        current_dp[c][new_l] = cost
+                # Option 2: switch to new color, if current run is >=x and <=y
+                if x <= l <= y:
+                    new_c = 1 - c
+                    new_l = 1
+                    cost = prev_dp[c][l] + (cost_black[j] if new_c ==0 else cost_white[j])
+                    if cost < current_dp[new_c][new_l]:
+                        current_dp[new_c][new_l] = cost
+        prev_dp = current_dp
+
+    # Now, after processing all columns, the answer is the minimum of prev_dp[c][l] where l >=x and <= y.
+
+    min_cost = INF
     for c in [0, 1]:
-        for l in range(1, y+1):
-            if prev_dp[c][l] == INF:
-                continue
-            # Option 1: continue the same color, if possible (l < y)
-            if l < y:
-                new_l = l + 1
-                cost = prev_dp[c][l] + (cost_black[j] if c ==0 else cost_white[j])
-                if cost < current_dp[c][new_l]:
-                    current_dp[c][new_l] = cost
-            # Option 2: switch to new color, if current run is >=x and <=y
-            if x <= l <= y:
-                new_c = 1 - c
-                new_l = 1
-                cost = prev_dp[c][l] + (cost_black[j] if new_c ==0 else cost_white[j])
-                if cost < current_dp[new_c][new_l]:
-                    current_dp[new_c][new_l] = cost
-    prev_dp = current_dp
+        for l in range(x, y+1):
+            if prev_dp[c][l] < min_cost:
+                min_cost = prev_dp[c][l]
 
-# Now, after processing all columns, the answer is the minimum of prev_dp[c][l] where l >=x and <= y.
+    print(min_cost, file=output_stream)
 
-min_cost = INF
-for c in [0, 1]:
-    for l in range(x, y+1):
-        if prev_dp[c][l] < min_cost:
-            min_cost = prev_dp[c][l]
 
-print(min_cost)
 
-Wait, but this code has a problem. For example, in the first sample input:
+def test():
+    import io
 
-Sample Input 1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 5 1 1
+#####
+.....
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-6 5 1 2
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-##.#.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-.###.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-###..
+    print('Tests passed 😎')
 
-#...#
 
-.##.#
+if __name__ == '__main__':
+    test()
 
-###..
 
-The columns are 5 in total. So m=5.
+```
 
-The code processes j from 0 to 4 (since m=5).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-After processing j=4 (the last column), the prev_dp contains the states for the last column. Then, the code checks all c (0 and 1) and l between x=1 and y=2. So in this case, the l can be 1 or 2. But the last group's run length must be between 1 and 2. So any state in prev_dp[c][l] where l is in [1, 2] is considered. Because the group can have a run length of 1 (allowed by x=1) or 2 (allowed by y=2). So even if the run is of length 1 (since x=1), that's acceptable.
-
-But wait, the group must have a run length between x and y. So when the code is processing the last column, the group's run length can be l, which must be >=x and <= y.
-
-But in the code, the final step's prev_dp contains all possible run lengths up to y. So when we look for the minimum, we check all l between x and y, inclusive. That's correct.
-
-Now, let's test the first sample input.
-
-In the first sample input, the code should output 11.
-
-The code should compute the cost correctly. Let's see:
-
-Each column's cost_black and cost_white:
-
-For each of the 5 columns:
-
-Column 0 (0-based):
-
-n=6 rows.
-
-Original pixels:
-
-Row 0: '#'
-
-Row 1: '#'
-
-Row 2: '#'
-
-Row 3: '#'
-
-Row 4: '.' 
-
-Row 5: '#'
-
-So in column 0, the number of '.' is 1 (row 4), and '#' is 5.
-
-So cost_black[0] is 1 (number of '.' to change), cost_white[0] is 5 (number of '#' to change).
-
-Similarly, for the other columns.
-
-But how is the code handling the cost_black and cost_white for each column?
-
-In the code:
-
-for _ in range(n):
-
-    row = input().strip()
-
-    for j in range(m):
-
-        if len(cost_black) <= j:
-
-            cost_black.append(0)
-
-            cost_white.append(0)
-
-        if row[j] == '.':
-
-            cost_black[j] += 1  # '.' → black needs to change, so cost_black is +=1
-
-        else:
-
-            cost_white[j] += 1  # '#' → white, cost_white is +=1.
-
-Wait, no. Wait, cost_black[j] is the number of pixels that need to be changed to make column j all black. So for each '.' in the column, we need to change it to '#', which counts as 1 per '.', and '#' stay as is. So cost_black[j] is the number of '.' in column j.
-
-Similarly, cost_white[j] is the number of '#' in column j.
-
-So the code is correct.
-
-In the first column (j=0):
-
-As per the first sample, the first column of the input is:
-
-Each row's first character:
-
-Row 0: '#'
-
-Row 1: '#'
-
-Row 2: '#'
-
-Row 3: '#'
-
-Row 4: '.' 
-
-Row 5: '#'
-
-So, in this column, there are 5 '#' and 1 '.', so cost_black[0] is 1 (changing '.' to '#'), cost_white[0] is 5 (changing all '#' to '.').
-
-So for the first column, the initial DP is:
-
-prev_dp[0][1] = 1 (cost_black[0])
-
-prev_dp[1][1] = 5 (cost_white[0])
-
-Then, processing each subsequent column.
-
-But how does this lead to the correct answer of 11?
+```
 
 Hmm. Let's see.
 

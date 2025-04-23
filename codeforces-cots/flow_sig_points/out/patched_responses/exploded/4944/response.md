@@ -568,73 +568,76 @@ Thus, when pushing to the stack, the current_max_death for the new element is de
 
 Thus, the code:
 
-n = int(input())
-a = list(map(int, input().split()))
-death_step = [0]*n
-stack = []
-for i in range(n):
-    current_max_death =0
-    while stack and a[stack[-1][0]] < a[i]:
-        idx, md = stack.pop()
-        if md > current_max_death:
-            current_max_death = md
-    if not stack:
-        nl = -1
-    else:
-        nl = stack[-1][0]
-    if nl == -1:
-        ds =0
-    else:
-        ds = current_max_death +1
-    death_step[i] = ds
-    stack.append( (i, ds) )
-print(max(death_step))
+Testing against sample input 1.
 
-Wait, let's test this code with the first sample.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    death_step = [0]*n
+    stack = []
+    for i in range(n):
+        current_max_death =0
+        while stack and a[stack[-1][0]] < a[i]:
+            idx, md = stack.pop()
+            if md > current_max_death:
+                current_max_death = md
+        if not stack:
+            nl = -1
+        else:
+            nl = stack[-1][0]
+        if nl == -1:
+            ds =0
+        else:
+            ds = current_max_death +1
+        death_step[i] = ds
+        stack.append( (i, ds) )
+    print(max(death_step), file=output_stream)
 
-Sample input 1:
 
-10
 
-10 9 7 8 6 5 3 4 2 1
+def test():
+    import io
 
-Processing i=0: stack is empty. nl=-1. ds=0. stack becomes [(0,0)].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+1 2 3 4 5 6
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-i=1 (9):
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-pop nothing. stack is [(0,0)]. a[0]=10>9. So nl=0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-ds=0 (current_max_death=0) +1=1. death_step[1] =1. stack becomes [(0,0), (1,1)].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=2 (7):
+    print('Tests passed 😎')
 
-stack top (1,1) a=9>7. So nl=1. current_max_death is0. ds=0+1=1. stack becomes [(0,0), (1,1), (2,1)].
 
-i=3 (8):
+if __name__ == '__main__':
+    test()
 
-pop (2,1) (a=7<8). current_max_death=1.
 
-a[1] (9) >8. So nl=1. ds=1+1=2. death_step[3]=2. stack becomes [(0,0), (1,1), (3,2)].
+```
 
-i=4 (6):
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-stack top is3, a=8>6. nl=3. current_max_death is0. ds=0+1=1. stack appends (4,1).
-
-i=5 (5): stack top is4, a=6>5. nl=4. ds=0+1=1. stack appends (5,1).
-
-i=6 (3): stack top is5, a=5>3. nl=5. ds=0+1=1. stack appends (6,1).
-
-i=7 (4):
-
-pop (6,1) (a=3<4). current_max_death=1. next top is5 (a=5>4). nl=5. ds=1+1=2. stack appends (7,2).
-
-i=8 (2): stack top is7 (a=4>2). nl=7. ds=0+1=1. append (8,1).
-
-i=9 (1): stack top is8 (a=2>1). nl=8. ds=0+1=1. append (9,1).
-
-death_step array is:
-
-[0,1,1,2,1,1,1,2,1,1]. The maximum is2. Correct.
+```
 
 Sample input2:
 

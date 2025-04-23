@@ -1121,87 +1121,135 @@ We can use a dictionary to store them.
 
 So:
 
+Testing against sample input 1.
+
+```python
 from collections import defaultdict
 
-s = input().strip()
 
-n = len(s)
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-# Precompute next and prev arrays for each character.
+    n = len(s)
 
-next_arrays = defaultdict(list)
+    # Precompute next and prev arrays for each character.
 
-prev_arrays = defaultdict(list)
+    next_arrays = defaultdict(list)
 
-chars = set(s)
+    prev_arrays = defaultdict(list)
 
-for c in chars:
+    chars = set(s)
 
-    next_c = [n] * n
+    for c in chars:
 
-    last = n
+        next_c = [n] * n
 
-    for j in range(n-1, -1, -1):
+        last = n
 
-        next_c[j] = last
+        for j in range(n-1, -1, -1):
 
-        if s[j] == c:
+            next_c[j] = last
 
-            last = j
+            if s[j] == c:
 
-    next_arrays[c] = next_c
+                last = j
 
-    prev_c = [-1] * n
+        next_arrays[c] = next_c
 
-    last = -1
+        prev_c = [-1] * n
+
+        last = -1
+
+        for j in range(n):
+
+            prev_c[j] = last
+
+            if s[j] == c:
+
+                last = j
+
+        prev_arrays[c] = prev_c
+
+    C = 0
 
     for j in range(n):
 
-        prev_c[j] = last
+        c = s[j]
 
-        if s[j] == c:
+        next_c_j = next_arrays[c][j]
 
-            last = j
+        prev_c_j = prev_arrays[c][j]
 
-    prev_arrays[c] = prev_c
+        left_count = next_c_j - j -1
 
-C = 0
+        if left_count <0:
 
-for j in range(n):
+            left_count =0
 
-    c = s[j]
+        right_count = j - prev_c_j -1
 
-    next_c_j = next_arrays[c][j]
+        if right_count <0:
 
-    prev_c_j = prev_arrays[c][j]
+            right_count =0
 
-    left_count = next_c_j - j -1
+        C += left_count + right_count
 
-    if left_count <0:
+    answer = 2 * n * (n-1) - C
 
-        left_count =0
+    print(answer, file=output_stream)
 
-    right_count = j - prev_c_j -1
 
-    if right_count <0:
 
-        right_count =0
+def test():
+    import io
 
-    C += left_count + right_count
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+abacaba
+""",
+            "output": \
+"""\
+58
+""",
+        }, 
+    ]
 
-answer = 2 * n * (n-1) - C
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-print(answer)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-This should work.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Testing the first sample:
+    print('Tests passed 😎')
 
-Input: abcde.
 
-Output: 20.
+if __name__ == '__main__':
+    test()
 
-The code correctly computes C=20, answer=20.
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 108, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 101, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '58'
+Got: '64'
+
+```
 
 Another sample: abacaba.
 

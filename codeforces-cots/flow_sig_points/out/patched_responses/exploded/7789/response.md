@@ -739,82 +739,107 @@ Also, note that the answer must be an integer. All computations are integer-base
 
 So code:
 
-n = int(input())
+Testing against sample input 1.
 
-points = []
-for _ in range(n):
-    x, y = map(int, input().split())
-    points.append( (x, y) )
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-# All X case
-xs = [x for x, y in points]
-max_x = max(xs)
-min_x = min(xs)
-all_x_spread = (max_x - min_x) ** 2
+    points = []
+    for _ in range(n):
+        x, y = map(int, input_stream.readline().rstrip("\n").split())
+        points.append( (x, y) )
 
-# All Y case
-ys = [y for x, y in points]
-max_y = max(ys)
-min_y = min(ys)
-all_y_spread = (max_y - min_y) ** 2
+    # All X case
+    xs = [x for x, y in points]
+    max_x = max(xs)
+    min_x = min(xs)
+    all_x_spread = (max_x - min_x) ** 2
 
-# Split case
-x_group = []
-y_group = []
-for x, y in points:
-    if x * x <= y * y:
-        x_group.append(x)
-    else:
-        y_group.append(y)
+    # All Y case
+    ys = [y for x, y in points]
+    max_y = max(ys)
+    min_y = min(ys)
+    all_y_spread = (max_y - min_y) ** 2
 
-spread_x_split = 0
-max_x_sq = 0
-if x_group:
-    max_x_x = max(x_group)
-    min_x_x = min(x_group)
-    spread_x_split = (max_x_x - min_x_x) ** 2
-    max_x_sq = max(x*x for x in x_group)
+    # Split case
+    x_group = []
+    y_group = []
+    for x, y in points:
+        if x * x <= y * y:
+            x_group.append(x)
+        else:
+            y_group.append(y)
 
-spread_y_split = 0
-max_y_sq = 0
-if y_group:
-    max_y_y = max(y_group)
-    min_y_y = min(y_group)
-    spread_y_split = (max_y_y - min_y_y) ** 2
-    max_y_sq = max(y*y for y in y_group)
+    spread_x_split = 0
+    max_x_sq = 0
+    if x_group:
+        max_x_x = max(x_group)
+        min_x_x = min(x_group)
+        spread_x_split = (max_x_x - min_x_x) ** 2
+        max_x_sq = max(x*x for x in x_group)
 
-cross_term_split = max_x_sq + max_y_sq
+    spread_y_split = 0
+    max_y_sq = 0
+    if y_group:
+        max_y_y = max(y_group)
+        min_y_y = min(y_group)
+        spread_y_split = (max_y_y - min_y_y) ** 2
+        max_y_sq = max(y*y for y in y_group)
 
-current_max_split = max(spread_x_split, spread_y_split, cross_term_split)
+    cross_term_split = max_x_sq + max_y_sq
 
-answer = min(all_x_spread, all_y_spread, current_max_split)
+    current_max_split = max(spread_x_split, spread_y_split, cross_term_split)
 
-print(answer)
+    answer = min(all_x_spread, all_y_spread, current_max_split)
 
-Testing this code against the sample inputs.
+    print(answer, file=output_stream)
 
-Sample 1:
 
-3
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
 1 10
-1 20
-1 30
+10 1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-x_group contains all three x's (1) since x²=1 <= y² (100, 400, 900).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-split case:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-spread_x_split is 0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-y_group is empty.
+    print('Tests passed 😎')
 
-cross_term_split = 1^2 +0=1.
 
-current_max_split is max(0,0,1) →1.
+if __name__ == '__main__':
+    test()
 
-all_x_spread is 0.
 
-answer is min(0, 400, 1) →0. Correct.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

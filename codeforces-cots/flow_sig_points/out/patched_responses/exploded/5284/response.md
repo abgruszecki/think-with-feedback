@@ -271,82 +271,72 @@ So yes, positive_count accumulates the sum of even_subarrays (same parity) and n
 
 So the code in Python would look something like:
 
-n = int(input())
-a = list(map(int, input().split()))
+Testing against sample input 1.
 
-counts = [1, 0]  # counts[0] is the initial S[0] parity 0
-current_neg = 0
-positive = 0
-negative = 0
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for num in a:
-    if num <0:
-        current_neg +=1
-    current_parity = current_neg %2
-    positive += counts[current_parity]
-    negative += counts[1 - current_parity]
-    counts[current_parity] +=1
+    counts = [1, 0]  # counts[0] is the initial S[0] parity 0
+    current_neg = 0
+    positive = 0
+    negative = 0
 
-print(negative, positive)
+    for num in a:
+        if num <0:
+            current_neg +=1
+        current_parity = current_neg %2
+        positive += counts[current_parity]
+        negative += counts[1 - current_parity]
+        counts[current_parity] +=1
 
-Wait, let's test this code with the first sample input.
+    print(negative, positive, file=output_stream)
 
-Sample 1:
 
-5
-5 -3 3 -1 1
 
-Processing each element:
+def test():
+    import io
 
-Element 5: positive. current_neg remains 0. current_parity 0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10
+4 2 -4 3 1 2 -4 3 2 3
+""",
+            "output": \
+"""\
+28 27
+""",
+        }, 
+    ]
 
-positive += counts[0] (1). So positive=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-negative += counts[1-0=1] (0). So negative=0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-counts[0] becomes 2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-counts is [2,0]
+    print('Tests passed 😎')
 
-Element -3: current_neg=1. parity 1.
 
-positive += counts[1] (0) →1+0=1.
+if __name__ == '__main__':
+    test()
 
-negative += counts[0] (2) →0+2=2.
 
-counts[1] becomes 1.
+```
 
-counts [2,1]
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Element 3: current_neg remains 1. parity 1.
-
-positive += counts[1] (1) →1+1=2.
-
-negative += counts[0] (2) →2+2=4.
-
-counts[1] becomes 2.
-
-counts [2,2]
-
-Element -1: current_neg=2. parity 0.
-
-positive += counts[0] (2) →2+2=4.
-
-negative += counts[1] (2) →4+2=6.
-
-counts[0] becomes 3.
-
-counts [3,2]
-
-Element 1: current_neg remains 2. parity 0.
-
-positive += counts[0] (3) →4+3=7.
-
-negative += counts[1] (2) →6+2=8.
-
-counts[0] becomes 4.
-
-So the code outputs 8 7, which is correct.
+```
 
 Third sample:
 

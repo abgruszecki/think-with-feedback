@@ -1199,289 +1199,98 @@ Thus, the code can be implemented as follows:
 
 Read n, k, l.
 
-s = input().strip()
-
-initial_lower = sum(1 for c in s if c.islower())
-
-initial_upper = n - initial_lower
-
-def compute_max_gain(s, target_case):
-
-    # target_case is 'lower' or 'upper'
-
-    # S[i] is 1 if s[i] is not in target_case
-
-    n = len(s)
-
-    S = [0] * n
-
-    for i in range(n):
-
-        if target_case == 'lower' and s[i].isupper():
-
-            S[i] = 1
-
-        elif target_case == 'upper' and s[i].islower():
-
-            S[i] = 1
-
-    # compute prefix sums
-
-    prefix = [0] * (n + 1)
-
-    for i in range(n):
-
-        prefix[i+1] = prefix[i] + S[i]
-
-    total_ones = prefix[n]
-
-    if total_ones == 0:
-
-        return 0
-
-    # compute all possible interval sums
-
-    intervals = []
-
-    max_possible_intervals = n - l + 1
-
-    for i in range(max_possible_intervals):
-
-        end = i + l
-
-        sum_val = prefix[end] - prefix[i]
-
-        intervals.append(sum_val)
-
-    # sort intervals in descending order
-
-    intervals.sort(reverse=True)
-
-    # sum the top k intervals
-
-    sum_top = sum(intervals[:k])
-
-    gain = min(sum_top, total_ones)
-
-    return gain
-
-gain_lower = compute_max_gain(s, 'lower')
-
-gain_upper = compute_max_gain(s, 'upper')
-
-new_lower = initial_lower + gain_upper
-
-new_upper = initial_upper + gain_lower
-
-option1 = min(new_lower, n - new_lower)
-
-option2 = min(new_upper, n - new_upper)
-
-result = min(option1, option2)
-
-print(result)
-
-Wait, no. Wait, the compute_max_gain function for target_case 'lower' returns the number of uppercase letters that can be covered by flipping to lower. So for the 'lower' target, the gain is the number of uppercase letters covered. Thus, the new_lower_count is initial_lower + gain_lower.
-
-Wait, no.
-
-Wait, the compute_max_gain function for target_case 'lower' is:
-
-S[i] is 1 when the character is uppercase. So flipping a segment to lower will convert all uppercase letters in that segment to lower. So the gain is the number of uppercase letters covered by the selected segments.
-
-Thus, when target_case is 'lower', the gain is the number of uppercase letters covered, which is added to the initial_lower count.
-
-Thus, the code for the new_lower is initial_lower + gain_lower.
-
-Similarly, when target_case is 'upper', the gain_upper is the number of lowercase letters covered, added to initial_upper.
-
-Thus, the new_lower_count = initial_lower + gain_lower.
-
- new_upper_count = initial_upper + gain_upper.
-
-But then, the option1 is min(new_lower_count, n - new_lower_count).
-
- option2 is min(new_upper_count, n - new_upper_count).
-
-The result is the minimum between option1 and option2.
-
-But the code above computes gain_lower as compute_max_gain(s, 'lower') → which computes the number of uppercase letters that can be covered by flipping to lower.
-
-Thus, new_lower_count = initial_lower + gain_lower.
-
-But in the code, the code computes:
-
-gain_lower = compute_max_gain(s, 'lower') → which is the number of uppercase letters covered.
-
-gain_upper = compute_max_gain(s, 'upper') → which is the number of lowercase letters covered.
-
-new_lower = initial_lower + gain_upper → no, that's incorrect.
-
-Wait, no. Let's re-express:
-
-When targeting 'lower' (flipping to lowercase):
-
-The gain is the number of uppercase letters covered by the flips.
-
-So new_lower_count = initial_lower (original lowercase letters) + gain_lower (uppercase letters flipped to lowercase).
-
-Similarly, when targeting 'upper' (flipping to uppercase):
-
-The gain is the number of lowercase letters covered by the flips.
-
-new_upper_count = initial_upper + gain_upper.
-
-Thus, the code should compute:
-
-For the lower target:
-
-new_lower_count = initial_lower + gain_lower.
-
-For the upper target:
-
-new_upper_count = initial_upper + gain_upper.
-
-Then, compute the min for each.
-
-Thus, the code currently has a bug in how new_lower and new_upper are computed.
-
-The code currently computes:
-
-gain_lower = compute_max_gain(s, 'lower') → which is the number of uppercase letters covered.
-
-gain_upper = compute_max_gain(s, 'upper') → the number of lowercase letters covered.
-
-new_lower = initial_lower + gain_upper → this is incorrect.
-
-The correct new_lower should be initial_lower + gain_lower.
-
-Similarly, new_upper = initial_upper + gain_upper.
-
-Thus, the code should be:
-
-option1 is for the lower target: new_lower = initial_lower + gain_lower.
-
- option1's min is min(new_lower, n - new_lower).
-
-option2 is for the upper target: new_upper = initial_upper + gain_upper.
-
- option2's min is min(new_upper, n - new_upper).
-
-The result is min(option1, option2).
-
-Thus, the code has a bug. Let's fix it.
-
-Thus, the correct code is:
-
-gain_lower = compute_max_gain(s, 'lower')
-
-gain_upper = compute_max_gain(s, 'upper')
-
-new_lower = initial_lower + gain_lower
-
-new_upper = initial_upper + gain_upper
-
-option1 = min(new_lower, n - new_lower)
-
-option2 = min(new_upper, n - new_upper)
-
-result = min(option1, option2)
-
-print(result)
-
-But in the code I wrote earlier, it was:
-
-gain_lower = compute_max_gain(s, 'lower')
-
-gain_upper = compute_max_gain(s, 'upper')
-
-new_lower = initial_lower + gain_upper
-
-new_upper = initial_upper + gain_lower
-
-option1 = min(new_lower, n - new_lower)
-
-option2 = min(new_upper, n - new_upper)
-
-result = min(option1, option2)
-
-Which is incorrect. The mistake is swapping the gains.
-
-Thus, the code is wrong.
-
-Thus, the correct code should have:
-
-For the lower target:
-
-The gain_lower is the number of uppercase letters converted to lowercase.
-
-Thus, new_lower = initial_lower + gain_lower.
-
-Similarly for the upper target.
-
-Thus, the code must be corrected.
-
-Thus, the correct code is:
-
-gain_lower = compute_max_gain(s, 'lower')  # converts uppercase to lowercase.
-
-new_lower_count = initial_lower + gain_lower
-
-option1 = min(new_lower_count, n - new_lower_count)
-
-gain_upper = compute_max_gain(s, 'upper')  # converts lowercase to uppercase.
-
-new_upper_count = initial_upper + gain_upper
-
-option2 = min(new_upper_count, n - new_upper_count)
-
-result = min(option1, option2)
-
-print(result)
-
-This is the correct code.
-
-Thus, the previous code's mistake was swapping the gains.
-
-Let's test this with the first example.
-
-First example:
-
-initial_lower =5, initial_upper=2.
-
-gain_lower = compute_max_gain(s, 'lower') → target is lower, so S is 1 where uppercase. For the first example, the two uppercase letters are positions 0 and 3.
-
-The maximum gain is 2 (covered by one interval of length 4).
-
-new_lower_count =5 +2 =7. min(7,0) is 0.
-
-gain_upper = compute_max_gain(s, 'upper') → target is upper, S is 1 where lowercase. There are 5 lowercase letters. The maximum gain with one interval is 4 (interval positions 0-3 covers two lowercase letters? Wait, no. Let's recheck.
-
-The string is 'PikMike' → lowercase letters are positions 1,2,4,5,6.
-
-For l=4, the possible intervals:
-
-0-3: covers positions 1,2 → sum 2.
-
-1-4: covers 1,2,4 → sum 3.
-
-2-5: covers 2,4,5 → sum 3.
-
-3-6: covers 4,5,6 → sum3.
-
-4-7: invalid.
-
-So the top interval is sum3.
-
-Thus, gain_upper =3.
-
-new_upper_count=2+3=5. min(5, 7-5=2) → 2.
-
-Thus, option1 is 0, option2 is 2. The result is 0.
-
-Which matches the example.
-
-Thus, the code's mistake was swapping the gains. Now, with the correct code, it works.
+Testing against sample input 1.
+
+```python
+def main(input_stream, output_stream):
+    n, k, l = map(int, input_stream.readline().rstrip("\n").split())
+    s = input_stream.readline().rstrip("\n").strip()
+
+    initial_lower = sum(1 for c in s if c.islower())
+    initial_upper = n - initial_lower
+
+    def compute_max_gain(s, target_case):
+        n = len(s)
+        S = []
+        if target_case == 'lower':
+            S = [1 if c.isupper() else 0 for c in s]
+        else:  # 'upper'
+            S = [1 if c.islower() else 0 for c in s]
+        
+        prefix = [0] * (n + 1)
+        for i in range(n):
+            prefix[i+1] = prefix[i] + S[i]
+        total_ones = prefix[n]
+        if total_ones == 0:
+            return 0
+        
+        max_intervals = n - l + 1
+        intervals = []
+        for i in range(max_intervals):
+            end = i + l
+            if end > n:
+                break
+            intervals.append(prefix[end] - prefix[i])
+        
+        intervals.sort(reverse=True)
+        sum_top = sum(intervals[:k])
+        return min(sum_top, total_ones)
+
+    gain_lower = compute_max_gain(s, 'lower')
+    gain_upper = compute_max_gain(s, 'upper')
+
+    new_lower = initial_lower + gain_lower
+    new_upper = initial_upper + gain_upper
+
+    option1 = min(new_lower, n - new_lower)
+    option2 = min(new_upper, n - new_upper)
+
+    print(min(option1, option2), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+15 2 2
+AaAaAAaaAAAAaaA
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, the correct code is as follows.
 </think>

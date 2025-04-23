@@ -746,67 +746,102 @@ But for m up to 1e9, the function has_valid_divisor must be efficient.
 
 Implementing the code as follows:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n, m, k = map(int, input().split())
 
-if m < 2 * k:
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
 
-    print("Marsel")
+    if m < 2 * k:
 
-else:
-
-    # Check for any divisor of m >=k and <= m//2
-
-    found = False
-
-    sqrt_m = int(math.isqrt(m))
-
-    for d in range(1, sqrt_m + 1):
-
-        if m % d == 0:
-
-            if d >= k and d <= m//2:
-
-                found = True
-
-                break
-
-            comp = m // d
-
-            if comp >=k and comp <= m//2:
-
-                found = True
-
-                break
-
-    if found:
-
-        if n % 2 ==1:
-
-            print("Timur")
-
-        else:
-
-            print("Marsel")
+        print("Marsel", file=output_stream)
 
     else:
 
-        print("Marsel")
+        # Check for any divisor of m >=k and <= m//2
 
-But wait, what if m is a square. For example, m=16, d=4. comp=4. So both d and comp are 4, so we check if 4 >=k and <=8. So it's checked once, not twice.
+        found = False
 
-So the code is correct.
+        sqrt_m = int(math.isqrt(m))
 
-Testing sample input 1:
+        for d in range(1, sqrt_m + 1):
 
-1 15 4 → m=15, k=4. 15 >=8 → yes.
+            if m % d == 0:
 
-Loop d from 1 to 3.
+                if d >= k and d <= m//2:
 
-d=1 → 15%1=0. d=1 <4 → no. comp=15 → check 15 >=4 → yes, but 15 <=7 (15//2=7) → 15>7 → no.
+                    found = True
 
-d=3 → 15%3=0. 3 <4 → no. comp=5. 5 >=4 → 5 <=7 → yes. So found is True. So n is 1 (odd) → Timur.
+                    break
+
+                comp = m // d
+
+                if comp >=k and comp <= m//2:
+
+                    found = True
+
+                    break
+
+        if found:
+
+            if n % 2 ==1:
+
+                print("Timur", file=output_stream)
+
+            else:
+
+                print("Marsel", file=output_stream)
+
+        else:
+
+            print("Marsel", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 9 5
+""",
+            "output": \
+"""\
+Marsel
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2: 4 9 5 → 9 < 10 → Marsel.
 

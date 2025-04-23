@@ -277,46 +277,73 @@ So the code would be:
 
 In Python:
 
-n = int(input())
-a = list(map(int, input().split()))
+Testing against sample input 1.
 
-count = 0
-current_sum = 0
-seen = {0}
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for num in a:
-    current_sum += num
-    if current_sum in seen or current_sum == 0:
-        count +=1
-        seen = {0}
-        current_sum = num
-        seen.add(current_sum)
-    else:
-        seen.add(current_sum)
+    count = 0
+    current_sum = 0
+    seen = {0}
 
-print(count)
+    for num in a:
+        current_sum += num
+        if current_sum in seen or current_sum == 0:
+            count +=1
+            seen = {0}
+            current_sum = num
+            seen.add(current_sum)
+        else:
+            seen.add(current_sum)
 
-Wait, but in the case of splitting, after setting current_sum to num, we add it to the seen. Because after the split, the new segment starts with this num, and we need to track the prefix sum of the new segment.
+    print(count, file=output_stream)
 
-Yes. For example, after splitting, the new segment starts with current_sum = num. The seen set is {0} (the initial sum), then adding num to the sum (since the initial sum is 0, the new sum is num). We check if num is in the seen (0), which it's not (since num is non-zero). So we add it to the seen. The next elements in the new segment will be processed with this seen set.
 
-So this code should work.
 
-Testing this code on the first example:
+def test():
+    import io
 
-Processing the elements:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+4 -2 3 -9 2
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Initial seen is {0}, current_sum 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-First num: 1. current_sum +=1 → 1. Check if 1 is in seen (no) and not zero. So add to seen. seen becomes {0,1}.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Second num: -5. current_sum becomes -4. Check: not in seen, not zero. Add to seen.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Third num:3. sum becomes -1. Add.
+    print('Tests passed 😎')
 
-Fourth num:2. sum becomes 1. Check if in seen (yes, 1 is in seen). So count increments to 1. Reset seen to {0}, current_sum is 2. Add 2 to seen. Now seen is {0,2}.
 
-No more elements. The code outputs 1. Correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case: when the array starts with a zero sum. Wait, but the original array has no zeros. So sum can't be zero unless it's a subarray.
 

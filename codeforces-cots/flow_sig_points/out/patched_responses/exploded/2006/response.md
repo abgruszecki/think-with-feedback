@@ -145,24 +145,66 @@ Then compute the product as per the steps.
 
 So the code:
 
-input_num = int(input())
-n = input_num // 1000
-mod = input_num % 1000
+Testing against sample input 3.
 
-product = 1
-current = n
-while current >= 1:
-    product = (product * current) % mod
-    current -= 2
-    if product == 0:
-        break
-print(product % mod)
+```python
+def main(input_stream, output_stream):
+    input_num = int(input_stream.readline().rstrip("\n"))
+    n = input_num // 1000
+    mod = input_num % 1000
 
-Wait, but after the loop, product is already modded by mod each time. So product % mod is redundant. For example, if mod is 100, and product is 48, then 48 mod 100 is 48, which is the same. So perhaps just print(product).
+    product = 1
+    current = n
+    while current >= 1:
+        product = (product * current) % mod
+        current -= 2
+        if product == 0:
+            break
+    print(product % mod, file=output_stream)
 
-But what if mod is 0? But mod is input mod 1000, which is guaranteed to be non-zero. So mod is at least 1. So product is between 0 and mod-1, inclusive. So yes, product % mod is redundant. So the final print can be product.
 
-But let's test the third sample: product is 0. mod is 2. So product is 0. print(product) gives 0. Correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+123456
+""",
+            "output": \
+"""\
+171
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So the code can be written as:
 

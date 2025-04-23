@@ -165,95 +165,136 @@ After processing all, sum the positive values in balances[1..n].
 
 So code:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-balances = [0] * (n+1)
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-for _ in range(m):
+    balances = [0] * (n+1)
 
-    a, b, c = map(int, input().split())
+    for _ in range(m):
 
-    balances[a] -= c
+        a, b, c = map(int, input_stream.readline().rstrip("\n").split())
 
-    balances[b] += c
+        balances[a] -= c
 
-total = sum(x for x in balances[1:] if x > 0)
+        balances[b] += c
 
-print(total)
+    total = sum(x for x in balances[1:] if x > 0)
 
-Wait, let's test this code against the samples.
+    print(total, file=output_stream)
 
-Sample 1:
 
-Input:
 
-5 3
+def test():
+    import io
 
-1 2 10
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 0
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-2 3 1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-2 4 1
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-balances[1] starts at 0. Subtract 10 → -10.
+    print('Tests passed 😎')
 
-balances[2] adds 10 → 10.
 
-Then second line: a=2, b=3, c=1.
+if __name__ == '__main__':
+    test()
 
-balances[2] becomes 10-1=9.
 
-balances[3] becomes 0+1=1.
+```
 
-Third line: a=2, b=4, c=1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-balances[2] becomes 9-1=8.
+```
 
-balances[4] becomes 0+1=1.
+Testing against sample input 2.
 
-So balances for 1-5:
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-1: -10
+    balances = [0] * (n+1)
 
-2: 8
+    for _ in range(m):
 
-3: 1
+        a, b, c = map(int, input_stream.readline().rstrip("\n").split())
 
-4:1
+        balances[a] -= c
 
-5:0.
+        balances[b] += c
 
-Sum of positive is 8+1+1=10. Correct.
+    total = sum(x for x in balances[1:] if x > 0)
 
-Sample 3:
+    print(total, file=output_stream)
 
-Input:
 
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4 3
-
 1 2 1
-
 2 3 1
-
 3 1 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Wait, the third line is 3 1 1. So:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Line 1: balances[1] -=1 → -1. balances[2] +=1 →1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Line 2: balances[2] -=1 →0. balances[3] +=1 →1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Line3: balances[3] -=1 →0. balances[1] +=1 → -1 +1=0.
+    print('Tests passed 😎')
 
-So balances are all zero. Sum is 0. Correct.
 
-Sample 2: 3 0. No transactions. All balances are zero. Sum is zero. Correct.
+if __name__ == '__main__':
+    test()
 
-So the code works for all samples.
 
-What about a case where a person's balance is negative? For example, if a person has a balance of -5. Then in the sum of positives, that's not counted. Which is correct.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So the code is correct.
 

@@ -947,161 +947,134 @@ But in the code, the 'if k==0' part can be removed.
 
 So the final code is:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-n, k = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-w = list(map(int, input().split()))
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-sum_w = sum(w) % MOD
+    w = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-max_fact = 2 * 10**5
+    sum_w = sum(w) % MOD
 
-fact = [1] * (max_fact +1)
+    max_fact = 2 * 10**5
 
-for i in range(1, max_fact+1):
+    fact = [1] * (max_fact +1)
 
-    fact[i] = fact[i-1] * i % MOD
+    for i in range(1, max_fact+1):
 
-inv_fact = [1]*(max_fact +1)
+        fact[i] = fact[i-1] * i % MOD
 
-inv_fact[max_fact] = pow(fact[max_fact], MOD-2, MOD)
+    inv_fact = [1]*(max_fact +1)
 
-for i in range(max_fact-1, -1, -1):
+    inv_fact[max_fact] = pow(fact[max_fact], MOD-2, MOD)
 
-    inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
+    for i in range(max_fact-1, -1, -1):
 
-def compute_S_both(k_val):
+        inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
 
-    sum_terms_m =0
+    def compute_S_both(k_val):
 
-    sum_terms_m_minus1 =0
+        sum_terms_m =0
 
-    for j in range(k_val+1):
+        sum_terms_m_minus1 =0
 
-        c = fact[k_val] * inv_fact[j] % MOD
+        for j in range(k_val+1):
 
-        c = c * inv_fact[k_val -j] % MOD
+            c = fact[k_val] * inv_fact[j] % MOD
 
-        sign = 1 if j %2 ==0 else MOD-1
+            c = c * inv_fact[k_val -j] % MOD
 
-        base = k_val -j
+            sign = 1 if j %2 ==0 else MOD-1
 
-        if base ==0:
+            base = k_val -j
 
-            pow_n =0
+            if base ==0:
 
-            pow_nm1 =0
+                pow_n =0
 
-        else:
+                pow_nm1 =0
 
-            pow_n = pow(base, n, MOD)
+            else:
 
-            pow_nm1 = pow(base, n-1, MOD)
+                pow_n = pow(base, n, MOD)
 
-        term_n = (sign * c) % MOD
+                pow_nm1 = pow(base, n-1, MOD)
 
-        term_n = term_n * pow_n % MOD
+            term_n = (sign * c) % MOD
 
-        sum_terms_m = (sum_terms_m + term_n) % MOD
+            term_n = term_n * pow_n % MOD
 
-        term_nm1 = (sign * c) % MOD
+            sum_terms_m = (sum_terms_m + term_n) % MOD
 
-        term_nm1 = term_nm1 * pow_nm1 % MOD
+            term_nm1 = (sign * c) % MOD
 
-        sum_terms_m_minus1 = (sum_terms_m_minus1 + term_nm1) % MOD
+            term_nm1 = term_nm1 * pow_nm1 % MOD
 
-    inv_k_fact = inv_fact[k_val]
+            sum_terms_m_minus1 = (sum_terms_m_minus1 + term_nm1) % MOD
 
-    res_m = sum_terms_m * inv_k_fact % MOD
+        inv_k_fact = inv_fact[k_val]
 
-    res_m_minus1 = sum_terms_m_minus1 * inv_k_fact % MOD
+        res_m = sum_terms_m * inv_k_fact % MOD
 
-    return res_m, res_m_minus1
+        res_m_minus1 = sum_terms_m_minus1 * inv_k_fact % MOD
 
-S_n_k, S_nm1_k = compute_S_both(k)
+        return res_m, res_m_minus1
 
-C = (S_n_k + (n-1) * S_nm1_k) % MOD
+    S_n_k, S_nm1_k = compute_S_both(k)
 
-ans = sum_w * C % MOD
+    C = (S_n_k + (n-1) * S_nm1_k) % MOD
 
-print(ans)
+    ans = sum_w * C % MOD
 
-This should handle all cases correctly.
+    print(ans, file=output_stream)
 
-Now, let's test the sample inputs.
 
-First sample input:
 
-4 2
+def test():
+    import io
 
-2 3 2 3 → sum_w is 10.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 2
+1 2 3 4 5
+""",
+            "output": \
+"""\
+645
+""",
+        }, 
+    ]
 
-In code, compute_S_both(2):
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-loop j=0,1,2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-j=0:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-c = 2! * inv_fact[0] * inv_fact[2-0} → 2 * 1 * 1/2! → 2! is 2, inv_fact[0] is 1, inv_fact[2] is 500000004 (since 2! =2, inv 2 mod 1e9+7 is 500000004).
+    print('Tests passed 😎')
 
-Wait, no: inv_fact[2] is 500000004.
 
-So C(2,0) = fact[2] * inv_fact[0] * inv_fact[2] → 2 *1 * 500000004 = 2 * 500000004 mod MOD → 1.
+if __name__ == '__main__':
+    test()
 
-sign is 1.
 
-base=2.
+```
 
-pow_n = 2^4 =16 mod MOD.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-pow_nm1=2^3=8.
-
-term_n = 1 * 1 *16 =16.
-
-term_nm1 = 1*1*8=8.
-
-sum_terms_m =16.
-
-sum_terms_m_minus1=8.
-
-j=1:
-
-c= C(2,1) = 2 choose 1 → 2.
-
-sign is MOD-1 → -1 mod MOD.
-
-base=2-1=1.
-
-pow_n =1^4=1.
-
-term_n = (-1) * 2 *1 → -2 mod MOD → 1e9+6 -1 = 1e9+6-1= 1e9+5.
-
-sum_terms_m = 16 + (MOD-2) =14.
-
-sum_terms_m_minus1: term_nm1 is (-1)*2 *1^3= -2. sum is 8-2=6.
-
-j=2:
-
-base=0 → pow_n =0, pow_nm1=0.
-
-terms are zero.
-
-sum_terms_m is 14.
-
-sum_terms_m_minus1 is6.
-
-Then multiply by inv_fact[2] → 500000004.
-
-So S(n,k) =14 * 500000004 mod MOD → 14/2=7.
-
-S(n-1, k) is 6 * 500000004 → 6/2=3.
-
-C=7 +3*(4-1)=7+9=16.
-
-sum_w *16 =10*16=160.
-
-Which matches the first sample.
+```
 
 Second sample:
 

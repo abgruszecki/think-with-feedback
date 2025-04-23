@@ -346,31 +346,91 @@ Yes.
 
 So the code should handle that.
 
-Testing the first sample:
+Testing against sample input 1.
 
-Sample input 1:
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    grid = [list(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n)]
+    a, b = map(int, input_stream.readline().rstrip("\n").split())
 
-2 2
+    # Compute prefix sum matrix
+    prefix = [[0]*(m+1) for _ in range(n+1)]
+    for i in range(1, n+1):
+        for j in range(1, m+1):
+            prefix[i][j] = grid[i-1][j-1] + prefix[i-1][j] + prefix[i][j-1] - prefix[i-1][j-1]
 
-1 0
+    possible = set()
+    if a <= n and b <= m:
+        possible.add((a, b))
+    if b <= n and a <= m:
+        possible.add((b, a))
 
-1 1
+    min_trees = float('inf')
 
-1 1
+    for h, w in possible:
+        max_i = n - h
+        max_j = m - w
+        if max_i < 0 or max_j < 0:
+            continue
+        for i in range(max_i + 1):
+            for j in range(max_j + 1):
+                x1, y1 = i, j
+                x2, y2 = i + h - 1, j + w - 1
+                total = prefix[x2+1][y2+1] - prefix[x1][y2+1] - prefix[x2+1][y1] + prefix[x1][y1]
+                if total < min_trees:
+                    min_trees = total
 
-Possible orientations are (1,1). So h=1, w=1.
+    print(min_trees, file=output_stream)
 
-n=2, m=2.
 
-For i in 0 to 2-1 =1:
 
-j in 0 to 2-1=1.
+def test():
+    import io
 
-Each cell is 1x1. The sum for cell (0,0) is 1. (0,1) is 0. (1,0) is 1. (1,1) is 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 5
+0 0 1 0 1
+0 1 1 1 0
+1 0 1 0 1
+1 1 1 1 1
+2 3
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-So the minimum is 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Which matches the sample.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

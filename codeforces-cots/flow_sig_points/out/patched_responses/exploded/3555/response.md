@@ -151,19 +151,70 @@ This approach ensures that the counts are strictly decreasing and each is as lar
 
 This should handle all cases.
 
-Let's test the first sample input:
+Testing against sample input 1.
 
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a.sort(reverse=True)
+    if not a:
+        print(0, file=output_stream)
+    else:
+        total = a[0]
+        prev = a[0]
+        for i in range(1, n):
+            current = min(a[i], prev - 1)
+            if current <= 0:
+                break
+            total += current
+            prev = current
+        print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
+1 1 2
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-2 5 5 → sorted as 5,5,2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum =5.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=1: current = min(5,5-1=4) →4. sum=5+4=9. prev=4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=2: current = min(2,4-1=3) →2. sum=11. prev=2.
+    print('Tests passed 😎')
 
-Loop ends. Output 11. Correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample input:
 

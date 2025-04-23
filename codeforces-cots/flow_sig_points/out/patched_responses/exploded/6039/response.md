@@ -286,64 +286,71 @@ Return ans.
 
 So the code would look like:
 
-n = int(input())
-p = list(map(int, input().split()))
-visited = set()
-ans = 0
-for i in range(1, n+1):
-    if i not in visited:
-        if p[i-1] == i:
-            ans +=1
-            visited.add(i)
-        else:
-            j = p[i-1]
-            if j not in visited and p[j-1] == i and i < j:
+Testing against sample input 1.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
+    visited = set()
+    ans = 0
+    for i in range(1, n+1):
+        if i not in visited:
+            if p[i-1] == i:
                 ans +=1
                 visited.add(i)
-                visited.add(j)
-print(ans)
+            else:
+                j = p[i-1]
+                if j not in visited and p[j-1] == i and i < j:
+                    ans +=1
+                    visited.add(i)
+                    visited.add(j)
+    print(ans, file=output_stream)
 
-Let's test this code against the samples.
 
-Sample 1:
 
-Input:
+def test():
+    import io
 
-5
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-2 1 5 3 3
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=1: not visited.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-p[0] is2. So j=2.
+    print('Tests passed 😎')
 
-Check if j is in visited? No.
 
-p[1] is1. So p[j-1] =1 ==i=1. So yes. i=1 <j=2.
+if __name__ == '__main__':
+    test()
 
-Add 1 and2 to visited. ans becomes1.
 
-i=2: already visited.
+```
 
-i=3: not visited.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-p[2] is5. j=5.
-
-Check if j is in visited? No.
-
-p[4] is3. So p[j-1] ==3. i=3 <5. So yes.
-
-Add 3 and5 to visited. ans becomes2.
-
-i=4: not visited.
-
-p[3] is3. So j=3. Check if j is in visited (yes). So code proceeds to else clause. Then j is3, which is in visited. So code does nothing.
-
-i=5: in visited.
-
-Thus, output is2. Correct.
+```
 
 Sample2:
 

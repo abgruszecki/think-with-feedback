@@ -178,21 +178,80 @@ else:
 
 Yes.
 
-Testing this code with the samples.
+Testing against sample input 1.
 
-First sample:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    total_xor = 0
 
-n=2.
+    def compute_f(x):
+        mod = x % 4
+        if mod == 0:
+            return x
+        elif mod == 1:
+            return 1
+        elif mod == 2:
+            return x + 1
+        else:
+            return 0
 
-First line: 2 1 → a=2, b=2.
+    for _ in range(n):
+        xi, mi = map(int, input_stream.readline().rstrip("\n").split())
+        a = xi
+        b = xi + mi - 1
+        xor = compute_f(b) ^ compute_f(a - 1)
+        total_xor ^= xor
 
-compute_f(2) is 3, compute_f(1) is 1. 3^1=2.
+    print("tolik" if total_xor != 0 else "bolik", file=output_stream)
 
-Second line:3 2 → a=3, mi=2 → b=3+2-1=4.
 
-compute_f(4)=4, compute_f(2)=3. 4^3=7.
 
-total_xor is 2^7=5 → non-zero → tolik.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 1
+1 1
+1 1
+1 1
+""",
+            "output": \
+"""\
+bolik
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

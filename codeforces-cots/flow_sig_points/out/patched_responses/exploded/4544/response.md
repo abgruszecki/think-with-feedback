@@ -263,145 +263,136 @@ But since Python's heapq doesn't support efficient decrease-key operations, we m
 
 So, in code:
 
+Testing against sample input 1.
+
+```python
 import heapq
 
-n = int(input())
-cards = []
-for _ in range(n):
-    c, r, b = input().split()
-    r = int(r)
-    b = int(b)
-    cards.append( (c, r, b) )
 
-# DP is a dictionary: key is (mask, A, B), value is (maxR, maxB, steps)
-dp = {}
-heap = []
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    cards = []
+    for _ in range(n):
+        c, r, b = input_stream.readline().rstrip("\n").split()
+        r = int(r)
+        b = int(b)
+        cards.append( (c, r, b) )
 
-# Initialize
-initial_state = (0, 0, 0)
-dp[initial_state] = (0, 0, 0)
-heapq.heappush(heap, (0, 0, 0, 0, 0, 0))
+    # DP is a dictionary: key is (mask, A, B), value is (maxR, maxB, steps)
+    dp = {}
+    heap = []
 
-found = False
-answer = 0
+    # Initialize
+    initial_state = (0, 0, 0)
+    dp[initial_state] = (0, 0, 0)
+    heapq.heappush(heap, (0, 0, 0, 0, 0, 0))
 
-while heap:
-    steps, mask, A, B, curr_R, curr_B = heapq.heappop(heap)
-    
-    # Check if this is the best state for (mask, A, B)
-    current_key = (mask, A, B)
-    if current_key not in dp:
-        continue
-    existing_R, existing_B, existing_steps = dp[current_key]
-    if steps > existing_steps or (steps == existing_steps and (curr_R < existing_R or curr_B < existing_B)):
-        continue
-    
-    # If all cards are bought, return steps
-    if mask == (1 << n) - 1:
-        print(steps)
-        found = True
-        break
-    
-    # For each possible next card to buy
-    for i in range(n):
-        if not (mask & (1 << i)):
-            # This card is not yet bought
-            c, r, b = cards[i]
-            req_r = max(r - A, 0)
-            req_b = max(b - B, 0)
-            
-            # Required collect steps k
-            delta_r = max(req_r - curr_R, 0)
-            delta_b = max(req_b - curr_B, 0)
-            k = max(delta_r, delta_b)
-            
-            new_R = curr_R + k - req_r
-            new_B = curr_B + k - req_b
-            new_steps = steps + k + 1
-            
-            new_A = A + (1 if c == 'R' else 0)
-            new_B_count = B + (1 if c == 'B' else 0)
-            new_mask = mask | (1 << i)
-            
-            new_key = (new_mask, new_A, new_B_count)
-            
-            # Check if this new state is better than existing entries
-            if new_key in dp:
-                existing_R_new, existing_B_new, existing_steps_new = dp[new_key]
-                if new_steps > existing_steps_new:
-                    continue
-                if new_steps == existing_steps_new and new_R <= existing_R_new and new_B <= existing_B_new:
-                    continue
-            # Update the DP if necessary
-            # If the new state is better
-            if new_key not in dp or new_steps < existing_steps_new or (new_steps == existing_steps_new and (new_R > existing_R_new or new_B > existing_B_new)):
-                dp[new_key] = (new_R, new_B, new_steps)
-                heapq.heappush(heap, (new_steps, new_mask, new_A, new_B_count, new_R, new_B))
-    
-if not found:
-    # This shouldn't happen as per the problem statement
-    print(-1)
+    found = False
+    answer = 0
 
-Wait, but there's a mistake here. In the code, the new_B_count is a variable name, but the state uses B as the variable. Also, in the initial state, the variables are named B, but in the code, the new_B_count is for the count of blue cards. So in the code:
+    while heap:
+        steps, mask, A, B, curr_R, curr_B = heapq.heappop(heap)
+        
+        # Check if this is the best state for (mask, A, B)
+        current_key = (mask, A, B)
+        if current_key not in dp:
+            continue
+        existing_R, existing_B, existing_steps = dp[current_key]
+        if steps > existing_steps or (steps == existing_steps and (curr_R < existing_R or curr_B < existing_B)):
+            continue
+        
+        # If all cards are bought, return steps
+        if mask == (1 << n) - 1:
+            print(steps, file=output_stream)
+            found = True
+            break
+        
+        # For each possible next card to buy
+        for i in range(n):
+            if not (mask & (1 << i)):
+                # This card is not yet bought
+                c, r, b = cards[i]
+                req_r = max(r - A, 0)
+                req_b = max(b - B, 0)
+                
+                # Required collect steps k
+                delta_r = max(req_r - curr_R, 0)
+                delta_b = max(req_b - curr_B, 0)
+                k = max(delta_r, delta_b)
+                
+                new_R = curr_R + k - req_r
+                new_B = curr_B + k - req_b
+                new_steps = steps + k + 1
+                
+                new_A = A + (1 if c == 'R' else 0)
+                new_B_count = B + (1 if c == 'B' else 0)
+                new_mask = mask | (1 << i)
+                
+                new_key = (new_mask, new_A, new_B_count)
+                
+                # Check if this new state is better than existing entries
+                if new_key in dp:
+                    existing_R_new, existing_B_new, existing_steps_new = dp[new_key]
+                    if new_steps > existing_steps_new:
+                        continue
+                    if new_steps == existing_steps_new and new_R <= existing_R_new and new_B <= existing_B_new:
+                        continue
+                # Update the DP if necessary
+                # If the new state is better
+                if new_key not in dp or new_steps < existing_steps_new or (new_steps == existing_steps_new and (new_R > existing_R_new or new_B > existing_B_new)):
+                    dp[new_key] = (new_R, new_B, new_steps)
+                    heapq.heappush(heap, (new_steps, new_mask, new_A, new_B_count, new_R, new_B))
+        
+    if not found:
+        # This shouldn't happen as per the problem statement
+        print(-1, file=output_stream)
 
-The variables in the state are:
 
-mask, A (number of red cards), B (number of blue cards), curr_R (current red tokens), curr_B (current blue tokens).
 
-So when adding to the heap, the new state variables are new_mask, new_A (A + ...), new_B_count (B + ...), new_R, new_B.
+def test():
+    import io
 
-Yes.
-
-But in the code, when pushing to the heap, the tuple is (new_steps, new_mask, new_A, new_B_count, new_R, new_B). So the variables are correct.
-
-Now, let's test this code against the first sample input.
-
-Sample 1:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
-R 0 1
-B 1 0
-R 1 1
+R 3 0
+R 2 0
+R 1 0
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-The optimal steps are 4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The initial state is steps 0, mask 0, A=0, B=0, R=0, B=0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing this state:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For each card not in mask (all 3 cards).
+    print('Tests passed 😎')
 
-For card 0 (R 0 1):
 
-req_r = max(0 - 0, 0) = 0
+if __name__ == '__main__':
+    test()
 
-req_b = max(1 - 0, 0) = 1.
 
-current R is 0, current B is 0.
+```
 
-delta_r = 0 - 0 = 0. delta_b = 1 - 0 = 1. So k = max(0, 1) = 1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-new_R = 0 +1 -0 =1. new_B =0 +1 -1=0.
-
-new_steps=0 +1 +1=2.
-
-new_A=0+1=1, new_B_count=0+0=0 (since the card is R).
-
-new_mask= 1<<0 =1.
-
-Push (2, 1, 1,0,1,0) into the heap.
-
-Similarly for other cards.
-
-But in the sample, the optimal is to buy card 1 first, then card 2, etc.
-
-Wait, perhaps the code will explore all possible paths and find the minimal steps.
-
-But let's see. Let's walk through the code steps.
-
-But since the code uses a priority queue ordered by steps, the first time a state with mask all 1s is encountered, it's the minimal steps.
-
-But perhaps in the first sample, the code will process the initial steps and find the correct path.
+```
 
 But the code may work, but let's check.
 

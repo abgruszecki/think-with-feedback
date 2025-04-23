@@ -1141,273 +1141,168 @@ An alternative is to represent components using a visited array or a bitmask. Bu
 
 Thus, the code outline is:
 
+Testing against sample input 1.
+
+```python
 import sys
+from collections import defaultdict, deque
 
-from collections import defaultdict
 
-def main():
-
-    n = int(sys.stdin.readline())
-
+def main(input_stream, output_stream):
+    sys.setrecursionlimit(1 << 25)
+    n = int(input_stream.readline())
     adj = defaultdict(list)
-
-    edges = []
-
     for _ in range(n-1):
-
-        u, v = map(int, sys.stdin.readline().split())
-
+        u, v = map(int, input_stream.readline().split())
         adj[u].append(v)
-
         adj[v].append(u)
 
     total = 0
+    q = deque()
+    q.append((frozenset(range(1, n+1)),))
 
-    from queue import Queue
-
-    q = Queue()
-
-    initial_component = set(range(1, n+1))  # all nodes
-
-    q.put(initial_component)
-
-    while not q.empty():
-
-        component = q.get()
-
+    while q:
+        component = q.popleft()
         m = len(component)
-
-        if m == 1:
-
+        if m <= 1:
             continue
 
-        # Compute best edge and max_product
-
-        # Build adjacency list for the component
-
-        component_adj = defaultdict(list)
-
-        for node in component:
-
-            for neighbor in adj[node]:
-
-                if neighbor in component:
-
-                    component_adj[node].append(neighbor)
-
-        # Post-order traversal to compute subtree sizes
-
-        root = next(iter(component))
-
-        subtree_sizes = {}
-
-        stack = [(root, None, False)]
+        component_nodes = list(component)
+        root = component_nodes[0]
+        parent = {}
+        visited = set()
+        stack = [(root, -1)]
+        subtree_size = {}
 
         while stack:
+            node, p = stack.pop()
+            if node in visited:
+                continue
+            visited.add(node)
+            parent[node] = p
+            for neighbor in adj[node]:
+                if neighbor != p and neighbor in component:
+                    stack.append((neighbor, node))
 
-            node, parent, processed = stack.pop()
-
+        post_order = []
+        visited_p = set()
+        stack = [(root, False)]
+        while stack:
+            node, processed = stack.pop()
             if processed:
+                post_order.append(node)
+                continue
+            if node in visited_p:
+                continue
+            visited_p.add(node)
+            stack.append((node, True))
+            for child in adj[node]:
+                if child in component and child != parent[node]:
+                    stack.append((child, False))
 
-                size = 1
+        subtree_size = {}
+        for node in post_order:
+            cnt = 1
+            for child in adj[node]:
+                if child in component and child != parent.get(node, -1) and child in subtree_size:
+                    cnt += subtree_size[child]
+            subtree_size[node] = cnt
 
-                for child in component_adj[node]:
-
-                    if child != parent:
-
-                        size += subtree_sizes[child]
-
-                subtree_sizes[node] = size
-
-            else:
-
-                stack.append( (node, parent, True) )
-
-                for child in reversed(component_adj[node]):
-
-                    if child != parent:
-
-                        stack.append( (child, node, False) )
-
-        # Find the best edge
-
-        max_product = 0
-
+        max_p = 0
         best_edge = None
-
-        component_size = m
-
         for node in component:
-
-            for child in component_adj[node]:
-
-                if subtree_sizes[child] < subtree_sizes[node]:
-
-                    s = subtree_sizes[child]
-
-                    product = s * (component_size - s)
-
-                    if product > max_product:
-
-                        max_product = product
-
+            for child in adj[node]:
+                if child in component and parent.get(child, -1) == node:
+                    s = subtree_size[child]
+                    p = s * (m - s)
+                    if p > max_p:
+                        max_p = p
                         best_edge = (node, child)
 
         if best_edge is None:
-
             continue
 
-        total += max_product
-
-        # Split the component
-
+        total += max_p
         u, v = best_edge
 
         part1 = set()
-
-        visited = {u}
-
         stack = [v]
-
         part1.add(v)
-
+        visited_split = {u}
         while stack:
-
             node = stack.pop()
-
             for neighbor in adj[node]:
-
-                if neighbor not in visited and neighbor in component and neighbor != u:
-
-                    visited.add(neighbor)
-
+                if neighbor not in visited_split and neighbor in component and neighbor != u:
+                    visited_split.add(neighbor)
                     part1.add(neighbor)
-
                     stack.append(neighbor)
 
-        part2 = component - part1
+        part1_frozen = frozenset(part1)
+        part2_frozen = frozenset(component - part1)
 
-        if len(part1) >= 2:
+        if len(part1_frozen) >= 2:
+            q.append(part1_frozen)
+        if len(part2_frozen) >= 2:
+            q.append(part2_frozen)
 
-            q.put(part1)
+    print(total, file=output_stream)
 
-        if len(part2) >= 2:
 
-            q.put(part2)
 
-    print(total)
+def test():
+    import io
 
-if __name__ == "__main__":
-
-    main()
-
-But this code may have performance issues for n=3000 due to the multiple BFS/DFS traversals and the use of sets for components. For example, the split_component function uses a set for part1 and part2. For large components, this can be slow.
-
-To optimize, we can represent components using a list and a visited array. Alternatively, during the split, we can mark nodes in part1 using a boolean array.
-
-But for the sake of time, the above code may pass for n=3000, but in practice, it may be too slow. To optimize, we can use bitmask or other representations, but in Python, this is challenging.
-
-Alternative approach: Represent each component as a list of nodes, and during the split, perform a BFS to find the part1 nodes.
-
-But even this may be slow for Python.
-
-Another optimization is to precompute the adjacency list and avoid rebuilding it for each component.
-
-But in the code above, the component_adj is built each time by iterating over the component's nodes and their neighbors. This is O(m) for each component, which is acceptable.
-
-Another optimization is to use a visited array for the BFS during the split.
-
-Thus, the code can be modified as follows:
-
-During the split:
-
-def split_component(component, best_edge, component_nodes_set):
-
-    u, v = best_edge
-
-    part1 = []
-
-    visited = set()
-
-    visited.add(u)
-
-    stack = [v]
-
-    part1.append(v)
-
-    visited.add(v)
-
-    while stack:
-
-        node = stack.pop()
-
-        for neighbor in adj[node]:
-
-            if neighbor not in visited and neighbor in component_nodes_set and neighbor != u:
-
-                visited.add(neighbor)
-
-                part1.append(neighbor)
-
-                stack.append(neighbor)
-
-    part1_set = set(part1)
-
-    part2 = [node for node in component if node not in part1_set]
-
-    return part1, part2
-
-But this requires component to be a list for efficient iteration.
-
-But since the component is represented as a set, converting it to a list each time may be time-consuming.
-
-Thus, in the code, the component is stored as a set. But iterating over a set is manageable.
-
-But for large components, the list comprehensions can be slow.
-
-Thus, the code may need further optimization.
-
-However, given the time constraints, the code may be accepted for n=3000.
-
-Let's test the code with the sample inputs.
-
-Sample Input 1:
-
-3
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
 1 2
+1 3
+1 4
+3 5
+""",
+            "output": \
+"""\
+10
+""",
+        }, 
+    ]
 
-2 3
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The code should compute:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Initial component {1,2,3}.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Best edge is 1-2 or 2-3. Let's see:
+    print('Tests passed 😎')
 
-For root=1:
 
-post-order traversal.
+if __name__ == '__main__':
+    test()
 
-subtree_sizes[1] = 1 (assuming it's the root).
 
-But for node 2, children are 1 and 3. So during traversal:
+```
 
-root=2.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 141, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 134, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '10'
+Got: '0'
 
-But the code selects the root as the first node in the component, which may vary.
-
-But assuming the best edge is the one with product 2*1=2.
-
-Sum +=2.
-
-Split into {2,3} and {1}.
-
-Process {2,3}:
-
-Best edge is 2-3, product 1*1=1. Sum +=1. Total 3.
-
-Sample Output: 3.
+```
 
 Sample Input 2:
 

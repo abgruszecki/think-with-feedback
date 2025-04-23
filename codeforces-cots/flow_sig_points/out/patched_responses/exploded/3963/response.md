@@ -525,295 +525,239 @@ Yes.
 
 So code outline:
 
+Testing against sample input 1.
+
+```python
 import sys, bisect
 
-data = sys.stdin.read().split()
 
-ptr =0
+def main(input_stream, output_stream):
+    data = input_stream.read().split()
 
-n = int(data[ptr]); ptr +=1
+    ptr =0
 
-m = int(data[ptr]); ptr +=1
+    n = int(data[ptr]); ptr +=1
 
-k = int(data[ptr]); ptr +=1
+    m = int(data[ptr]); ptr +=1
 
-garlands = []
+    k = int(data[ptr]); ptr +=1
 
-for _ in range(k):
+    garlands = []
 
-    length = int(data[ptr]); ptr +=1
+    for _ in range(k):
 
-    bulbs = []
+        length = int(data[ptr]); ptr +=1
 
-    for _ in range(length):
+        bulbs = []
 
-        i = int(data[ptr])
+        for _ in range(length):
 
-        j = int(data[ptr+1])
+            i = int(data[ptr])
 
-        w = int(data[ptr+2])
+            j = int(data[ptr+1])
 
-        ptr +=3
+            w = int(data[ptr+2])
 
-        bulbs.append( (i, j, w) )
+            ptr +=3
 
-    # Sort the bulbs by i, then j.
+            bulbs.append( (i, j, w) )
 
-    bulbs.sort(key=lambda x: (x[0], x[1]))
+        # Sort the bulbs by i, then j.
 
-    # Compute prefix sum.
+        bulbs.sort(key=lambda x: (x[0], x[1]))
 
-    prefix = [0]*(len(bulbs)+1)
+        # Compute prefix sum.
 
-    for i in range(len(bulbs)):
+        prefix = [0]*(len(bulbs)+1)
 
-        prefix[i+1] = prefix[i] + bulbs[i][2]
+        for i in range(len(bulbs)):
 
-    garlands.append( (bulbs, prefix) )
+            prefix[i+1] = prefix[i] + bulbs[i][2]
 
-active = [True]*k  # initially all active
+        garlands.append( (bulbs, prefix) )
 
-q = int(data[ptr]); ptr +=1
+    active = [True]*k  # initially all active
 
-output = []
+    q = int(data[ptr]); ptr +=1
 
-for _ in range(q):
+    output = []
 
-    event = data[ptr]
+    for _ in range(q):
 
-    if event == 'SWITCH':
+        event = data[ptr]
 
-        idx = int(data[ptr+1]) -1  # convert to 0-based.
+        if event == 'SWITCH':
 
-        ptr +=2
+            idx = int(data[ptr+1]) -1  # convert to 0-based.
 
-        active[idx] = not active[idx]
+            ptr +=2
 
-    elif event == 'ASK':
+            active[idx] = not active[idx]
 
-        x1 = int(data[ptr+1])
+        elif event == 'ASK':
 
-        y1 = int(data[ptr+2])
+            x1 = int(data[ptr+1])
 
-        x2 = int(data[ptr+3])
+            y1 = int(data[ptr+2])
 
-        y2 = int(data[ptr+4])
+            x2 = int(data[ptr+3])
 
-        ptr +=5
+            y2 = int(data[ptr+4])
 
-        total =0
+            ptr +=5
 
-        for garland_idx in range(k):
+            total =0
 
-            if not active[garland_idx]:
+            for garland_idx in range(k):
 
-                continue
+                if not active[garland_idx]:
 
-            bulbs, prefix = garlands[garland_idx]
+                    continue
 
-            # Find start and end indices in bulbs for i in [x1, x2]
+                bulbs, prefix = garlands[garland_idx]
 
-            # Using bisect to find left and right.
+                # Find start and end indices in bulbs for i in [x1, x2]
 
-            # start_idx is first i >=x1
+                # Using bisect to find left and right.
 
-            start_idx = bisect.bisect_left(bulbs, (x1, 0, 0))
+                # start_idx is first i >=x1
 
-            # end_idx is first i >x2
+                start_idx = bisect.bisect_left(bulbs, (x1, 0, 0))
 
-            end_idx = bisect.bisect_right(bulbs, (x2, m+1, 0))
+                # end_idx is first i >x2
 
-            # slice is bulbs[start_idx:end_idx]
+                end_idx = bisect.bisect_right(bulbs, (x2, m+1, 0))
 
-            slice_len = end_idx - start_idx
+                # slice is bulbs[start_idx:end_idx]
 
-            if slice_len ==0:
+                slice_len = end_idx - start_idx
 
-                continue
+                if slice_len ==0:
 
-            # Now find left_j and right_j in slice where j is between y1 and y2.
+                    continue
 
-            # Binary search for left_j:
+                # Now find left_j and right_j in slice where j is between y1 and y2.
 
-            left_j = 0
+                # Binary search for left_j:
 
-            high = slice_len
+                left_j = 0
 
-            while left_j < high:
+                high = slice_len
 
-                mid = (left_j + high) //2
+                while left_j < high:
 
-                if bulbs[start_idx + mid][1] >= y1:
+                    mid = (left_j + high) //2
 
-                    high = mid
+                    if bulbs[start_idx + mid][1] >= y1:
 
-                else:
+                        high = mid
 
-                    left_j = mid +1
+                    else:
 
-            # Binary search for right_j:
+                        left_j = mid +1
 
-            right_j = slice_len
+                # Binary search for right_j:
 
-            low =0
+                right_j = slice_len
 
-            while low < right_j:
+                low =0
 
-                mid = (low + right_j) //2
+                while low < right_j:
 
-                if bulbs[start_idx + mid][1] > y2:
+                    mid = (low + right_j) //2
 
-                    right_j = mid
+                    if bulbs[start_idx + mid][1] > y2:
 
-                else:
+                        right_j = mid
 
-                    low = mid +1
+                    else:
 
-            # Sum from start_idx + left_j to start_idx + right_j -1.
+                        low = mid +1
 
-            # The sum is prefix[start_idx + right_j] - prefix[start_idx + left_j]
+                # Sum from start_idx + left_j to start_idx + right_j -1.
 
-            sum_garland = prefix[start_idx + right_j] - prefix[start_idx + left_j]
+                # The sum is prefix[start_idx + right_j] - prefix[start_idx + left_j]
 
-            total += sum_garland
+                sum_garland = prefix[start_idx + right_j] - prefix[start_idx + left_j]
 
-        output.append( str(total) )
+                total += sum_garland
 
-    else:
+            output.append( str(total) )
 
-        # invalid event, but problem says input is valid.
+        else:
 
-        pass
+            # invalid event, but problem says input is valid.
 
-print('\n'.join(output))
+            pass
 
-Now, let's test this code against the sample inputs.
+    print('\n'.join(output), file=output_stream)
 
-First sample input:
 
-4 4 3
 
-Garland 1: 5 bulbs.
+def test():
+    import io
 
-Bulbs:
-
-1 1 2
-
-1 2 3
-
-2 2 1
-
-2 1 4
-
-3 1 7
-
-Sorted by i and j:
-
-i=1, j=1 → (1,1,2)
-
-i=1, j=2 → (1,2,3)
-
-i=2, j=1 → (2,1,4)
-
-i=2, j=2 → (2,2,1)
-
-i=3, j=1 → (3,1,7)
-
-prefix sum: 0, 2, 5, 9, 10, 17.
-
-Wait, len(bulbs) is 5. So prefix has 6 elements.
-
-Garland 2:4 bulbs.
-
-Bulbs:
-
-1 3 1
-
-2 3 3
-
-2 4 3
-
-1 4 1
-
-Sorted by i and j:
-
-i=1, j=3 → (1,3,1)
-
-i=1, j=4 → (1,4,1)
-
-i=2, j=3 → (2,3,3)
-
-i=2, j=4 → (2,4,3)
-
-prefix sum: 0, 1, 2, 5, 8.
-
-Garland3:7 bulbs.
-
-Bulbs:
-
-4 1 1
-
-4 2 9
-
-3 2 8
-
-3 3 3
-
-4 3 4
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4 4 1
+8
+4 1 1
+3 1 2
+2 1 1
+1 1 7
+1 2 5
+2 2 4
+2 3 1
+1 3 1
+3
+ASK 1 1 3 2
+SWITCH 1
+ASK 1 1 3 2
+""",
+            "output": \
+"""\
+19
+0
+""",
+        }, 
+    ]
 
-3 4 1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sorted by i and j:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=3, j=2 → (3,2,8)
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=3, j=3 → (3,3,3)
+    print('Tests passed 😎')
 
-i=3, j=4 → (3,4,1)
 
-i=4, j=1 → (4,1,1)
+if __name__ == '__main__':
+    test()
 
-i=4, j=2 → (4,2,9)
 
-i=4, j=3 → (4,3,4)
+```
 
-i=4, j=4 → (4,4,1)
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 212, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 205, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '19\n0'
+Got: '18\n0'
 
-prefix sum: 0, 8, 11, 12, 13, 22, 26, 27.
-
-Now, the events are two ASK events.
-
-First ASK: 2 2 3 3 → x1=2, y1=2, x2=3, y2=3.
-
-So for each active garland (initially all active):
-
-Garland 1:
-
-start_idx = bisect_left( [(1,1,2), (1,2,3), (2,1,4), (2,2,1), (3,1,7)], (2,0,0) )
-
-The first bulb with i >=2 is (2,1,4) → index 2.
-
-end_idx = bisect_right( bulbs, (3, m+1=5,0) → (3,5,0). The bulbs with i <=3 are up to index 5 (since i=3 is allowed). So end_idx is 5.
-
-The slice is bulbs[2:5] → [(2,1,4), (2,2,1), (3,1,7)].
-
-Within this slice, j's are 1, 2, 1. Wait, no. The sorted list is sorted by i then j. So the slice for i >=2 and i <=3:
-
-i=2: j=1, j=2.
-
-i=3: j=1.
-
-So the slice is:
-
-[(2,1,4), (2,2,1), (3,1,7)]
-
-But the j's in this slice are 1, 2, 1. So they are not sorted. So the previous approach of treating j's as sorted is invalid.
-
-Oh no! This is a problem.
-
-Wait, this indicates that the previous approach is incorrect. Because in the garland's sorted list, the bulbs are sorted by i and j. But in this case, the garland's path may have bulbs that are not in order of j. For example, the garland could be a snake-like path. So the j's in the same i may not be sorted.
+```
 
 Wait, but how? The garland's bulbs are placed in a chain where consecutive bulbs are adjacent. So the path can go up, down, left, right, but for a given i, the j's can increase or decrease. So when sorted by i and j, the list would have j in order for the same i. Wait, no. The sorted list is sorted by i first, then j. So for bulbs in the same i, their j's are in ascending order. So in the sorted list, for a given i, the j's are sorted in ascending order. So within the slice for i in [x1, x2], the j's are sorted.
 

@@ -525,23 +525,117 @@ Now, code:
 
 But in Python, list slicing is straightforward.
 
-Testing the code.
+Testing against sample input 1.
 
-For the first sample input:
+```python
+def main(input_stream, output_stream):
+    def compute_optimal_subsequence(a, k):
+        n = len(a)
+        selected = []
+        start = 0
+        remaining = k
+        
+        for _ in range(k):
+            max_sum = -float('inf')
+            best_j = -1
+            best_val = None
+            end_j = n - remaining
+            
+            for j in range(start, end_j + 1):
+                if remaining - 1 == 0:
+                    current_sum = a[j]
+                else:
+                    sub = a[j+1:]
+                    sub_sorted = sorted(sub, reverse=True)
+                    sum_rest = sum(sub_sorted[:remaining-1]) if remaining-1 <= len(sub) else sum(sub_sorted)
+                    current_sum = a[j] + sum_rest
+                
+                if current_sum > max_sum:
+                    max_sum = current_sum
+                    best_j = j
+                    best_val = a[j]
+                elif current_sum == max_sum:
+                    if a[j] < best_val or (a[j] == best_val and j < best_j):
+                        best_j = j
+                        best_val = a[j]
+            
+            selected.append(a[best_j])
+            start = best_j + 1
+            remaining -= 1
+        
+        return selected
 
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    m = int(input_stream.readline().rstrip("\n"))
+    queries = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(m)]
+
+    for k, pos in queries:
+        subsequence = compute_optimal_subsequence(a, k)
+        print(subsequence[pos-1], file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+1 2 1 3 1 2 1
+9
+2 1
+2 2
+3 1
+3 2
+3 3
+1 1
+7 1
+7 7
+7 4
+""",
+            "output": \
+"""\
+2
 3
+2
+3
+2
+3
+1
+1
+3
+""",
+        }, 
+    ]
 
-10 20 10
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-6 queries.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The first query is k=1, pos=1. The optimal subsequence is [20], so output 20.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Another query: k=2, pos=1 →10.
+    print('Tests passed 😎')
 
-Which the code would select.
 
-So code seems correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Now, let's code.
 </think>

@@ -1961,13 +1961,80 @@ term2= (2-1)*2=2.
 
 ans=6. Correct.
 
-Sample1:5 3 2.
+Testing against sample input 1.
 
-t_max=3.
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 + 9
 
-m=3 <=3*1 → doublings=0.
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
 
-ans=3. Correct.
+    if m == 0:
+        print(0, file=output_stream)
+    else:
+        max_groups = (n - m) + 1
+        t_max = min(m, max_groups)
+        
+        if m <= t_max * (k - 1):
+            doublings = 0
+        else:
+            excess = m - t_max * (k - 1)
+            doublings = excess // k
+            if excess % k != 0:
+                doublings += 1
+        
+        if doublings == 0:
+            print(m % MOD, file=output_stream)
+        else:
+            pow2 = pow(2, doublings, MOD)
+            term1 = ((m - doublings * k) % MOD) * pow2 % MOD
+            term2 = (pow2 - 1) * k % MOD
+            ans = (term1 + term2) % MOD
+            print(ans, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 4 2
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 For the case where m=5, k=2, n=5:
 

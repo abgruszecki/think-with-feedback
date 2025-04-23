@@ -370,64 +370,93 @@ then total += sign * count.
 
 So the code would be:
 
+Testing against sample input 1.
+
+```python
 from math import gcd
 
-k = int(input())
-l = int(input())
-m = int(input())
-n = int(input())
-d = int(input())
 
-divisors = [k, l, m, n]
+def main(input_stream, output_stream):
+    k = int(input_stream.readline().rstrip("\n"))
+    l = int(input_stream.readline().rstrip("\n"))
+    m = int(input_stream.readline().rstrip("\n"))
+    n = int(input_stream.readline().rstrip("\n"))
+    d = int(input_stream.readline().rstrip("\n"))
 
-total = 0
+    divisors = [k, l, m, n]
 
-def lcm(a, b):
-    return a * b // gcd(a, b)
+    total = 0
 
-for mask in range(1, 1 << 4):  # 1 to 15 inclusive
-    elements = []
-    for i in range(4):
-        if mask & (1 << i):
-            elements.append(divisors[i])
-    # Compute LCM of elements
-    current_lcm = 1
-    for num in elements:
-        current_lcm = lcm(current_lcm, num)
+    def lcm(a, b):
+        return a * b // gcd(a, b)
+
+    for mask in range(1, 1 << 4):  # 1 to 15 inclusive
+        elements = []
+        for i in range(4):
+            if mask & (1 << i):
+                elements.append(divisors[i])
+        # Compute LCM of elements
+        current_lcm = 1
+        for num in elements:
+            current_lcm = lcm(current_lcm, num)
+            if current_lcm > d:
+                break
         if current_lcm > d:
-            break
-    if current_lcm > d:
-        continue
-    count = d // current_lcm
-    subset_size = len(elements)
-    sign = (-1) ** (subset_size - 1)
-    total += sign * count
+            continue
+        count = d // current_lcm
+        subset_size = len(elements)
+        sign = (-1) ** (subset_size - 1)
+        total += sign * count
 
-print(total)
+    print(total, file=output_stream)
 
-Wait, but wait. Let's test the code against the sample input.
 
-First sample input:
 
-1
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2
-
 3
-
 4
+5
+24
+""",
+            "output": \
+"""\
+17
+""",
+        }, 
+    ]
 
-12
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-divisors are [1,2,3,4]
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-All subsets:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-We need to generate all non-empty subsets. For each subset, compute LCM and apply inclusion-exclusion.
+    print('Tests passed 😎')
 
-But let's see.
 
-The correct answer is 12. Because every number from 1 to 12 is divisible by 1. So all 12 dragons are damaged.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 But according to inclusion-exclusion:
 

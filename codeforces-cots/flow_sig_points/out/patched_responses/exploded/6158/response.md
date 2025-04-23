@@ -1071,111 +1071,100 @@ But in code, perhaps we can safely assume that required_k is correct.
 
 Thus, the code can be written as:
 
-h1, h2 = map(int, input().split())
+Testing against sample input 1.
 
-a, b = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    h1, h2 = map(int, input_stream.readline().rstrip("\n").split())
 
-current = h1 + 8 * a
+    a, b = map(int, input_stream.readline().rstrip("\n").split())
 
-if current >= h2:
+    current = h1 + 8 * a
 
-    print(0)
+    if current >= h2:
 
-else:
-
-    if a <= b:
-
-        # Check if after first night and day's climb, reach h2
-
-        current = current - 12 * b + 12 * a
-
-        if current >= h2:
-
-            print(1)
-
-        else:
-
-            print(-1)
+        print(0, file=output_stream)
 
     else:
 
-        # Compute required_k
+        if a <= b:
 
-        numerator = h2 - h1 - 8 * a
+            # Check if after first night and day's climb, reach h2
 
-        denominator = 12 * (a - b)
+            current = current - 12 * b + 12 * a
 
-        required_k = (numerator + denominator - 1) // denominator
+            if current >= h2:
 
-        # current_climb = h1 +8a + required_k *12*(a -b)
+                print(1, file=output_stream)
 
-        # current_climb >= h2 ?
+            else:
 
-        # required_k is the minimal k that satisfies this.
+                print(-1, file=output_stream)
 
-        # So print required_k
+        else:
 
-        print(required_k)
+            # Compute required_k
 
-Wait, but denominator can't be zero because a >b.
+            numerator = h2 - h1 - 8 * a
 
-Yes.
+            denominator = 12 * (a - b)
 
-But what if the required_k is such that current_climb is still less than h2?
+            required_k = (numerator + denominator - 1) // denominator
 
-Let's test:
+            # current_climb = h1 +8a + required_k *12*(a -b)
 
-Take a case where required_k is 1, but current_climb is less than h2.
+            # current_climb >= h2 ?
 
-But according to the formula, required_k is the minimal k where current_climb >=h2.
+            # required_k is the minimal k that satisfies this.
 
-Because required_k is computed as ceiling of (numerator / denominator).
+            # So print required_k
 
-So for example:
+            print(required_k, file=output_stream)
 
-numerator=14, denominator=12.
 
-14/12=1.166... → required_k=2.
 
-current_climb=8a +h1 + 2*12*(a-b) = h1+8a + 24(a-b).
+def test():
+    import io
 
-But 24(a-b) = 2*12(a-b) = 2*denominator.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 13
+1 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-But numerator=14, denominator=12 → 14 = 12*1 + 2 → required_k=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-current_climb = h1+8a +24(a-b).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But 24(a-b) =2*12(a-b) =2*denominator.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But numerator=14=12*(a-b)* required_k.
+    print('Tests passed 😎')
 
-Wait, this is not adding up. Wait, numerator is h2 -h1 -8a =14.
 
-denominator=12*(a-b).
+if __name__ == '__main__':
+    test()
 
-But required_k is ceil(14/denominator).
 
-So for example, denominator=12 → required_k=2.
+```
 
-current_climb = h1+8a + 2*12*(a-b).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-But h1+8a + required_k * denominator = h1+8a +14 → h1+8a +14 = h2.
-
-Which is h2 -h1 -8a =14 → h1+8a +14 =h2. So current_climb =h2.
-
-Which is correct.
-
-So the formula works.
-
-Thus, the code for a> b case can directly print required_k.
-
-Thus, the code is correct.
-
-Testing sample input 1:
-
-required_k= (4 +12*1 -1) //12 → (4+11)=15 →15//12=1.
-
-current_climb=26 +1*12*(1)=38 >=30 → correct.
+```
 
 So code prints 1.
 

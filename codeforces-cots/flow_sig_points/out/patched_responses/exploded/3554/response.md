@@ -80,35 +80,64 @@ But in Python, the second line can be read as a list via list(map(int, input().s
 
 So the code:
 
-n, k = map(int, input().split())
-a = list(map(int, input().split()))
-s = k -1  # 0-based start index
+Testing against sample input 1.
 
-for i in range(n):
-    pos = (s + i) % n
-    if a[pos] == 1:
-        print(pos +1)
-        exit()
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    s = k -1  # 0-based start index
 
-But since the problem says the answer exists, we don't need to handle the case where nothing is found.
+    for i in range(n):
+        pos = (s + i) % n
+        if a[pos] == 1:
+            print(pos +1, file=output_stream)
+            return
 
-Testing first sample:
 
-Sample 1:
 
-n=5, k=5 → s=4.
+def test():
+    import io
 
-a = [0,1,0,1,0]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 1
+1 1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-Loop i from 0 to 4:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=0: pos=4 → a[4] is 0 → no.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=1: pos=5 mod5=0 → a[0] is 0 → no.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=2: 4+2=6 mod5=1 → a[1] is 1 → output 2.
+    print('Tests passed 😎')
 
-Which matches the sample.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

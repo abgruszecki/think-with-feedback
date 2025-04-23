@@ -115,17 +115,75 @@ sum_steps = sum(abs(k - median) for k in sorted_k)
 
 print(sum_steps)
 
-That's the code. Let's test the sample.
+Testing against sample input 1.
 
-First sample:
+```python
+def main(input_stream, output_stream):
+    n, m, d = map(int, input_stream.readline().rstrip("\n").split())
+    elements = []
+    for _ in range(n):
+        elements.extend(map(int, input_stream.readline().rstrip("\n").split()))
 
-elements are 2,4,6,8. All mod 2 are 0. r is 0.
+    # Check if all elements have the same remainder modulo d
+    remainder = elements[0] % d
+    for num in elements:
+        if num % d != remainder:
+            print(-1, file=output_stream)
+            return
 
-k_list is (2-0)/2=1, (4-0)/2=2, (6-0)/2=3, (8-0)/2=4 → [1,2,3,4]. Sorted as [1,2,3,4]. len is 4, len//2 is 2. sorted_k[2] is 3. sum is |1-3| + |2-3| + |3-3| + |4-3| = 2+1+0+1=4. Which matches the sample.
+    # Convert elements to their adjusted values
+    adjusted = [(num - remainder) // d for num in elements]
+    adjusted.sort()
 
-Wait but earlier calculation for median 2 gave the same sum. So why in code we get 3 here?
+    # Find the median and calculate total moves
+    median = adjusted[len(adjusted) // 2]
+    total = sum(abs(x - median) for x in adjusted)
+    print(total, file=output_stream)
 
-Because in code, for even length, len(sorted_k) is 4. 4//2 is 2. So sorted_k[2] is 3. So sum is 2+1+0+1=4. Which is correct.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 2 7
+6 7
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Wait but earlier example where median is 2 gives sum 4. So regardless of which median is chosen, the sum is the same. So in code, choosing the element at len//2 is correct.
 

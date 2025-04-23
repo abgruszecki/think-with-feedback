@@ -849,65 +849,142 @@ Update the global maximum.
 
 Finally, the answer is max(global_max, 0)
 
-Now, let's test this code with the first example.
+Testing against sample input 1.
 
-Example 1:
+```python
+import sys
 
-n=5
 
-a = [5, -2, 10, -1,4]
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    a = list(map(int, input_stream.readline().split()))
+    if n == 0:
+        print(0, file=output_stream)
+        return
+    
+    # Compute left and right boundaries
+    left = [-1] * n
+    stack = []
+    for i in range(n):
+        while stack and a[stack[-1]] < a[i]:
+            stack.pop()
+        if stack:
+            left[i] = stack[-1]
+        stack.append(i)
+    
+    right = [n] * n
+    stack = []
+    for i in range(n-1, -1, -1):
+        while stack and a[stack[-1]] <= a[i]:
+            stack.pop()
+        if stack:
+            right[i] = stack[-1]
+        stack.append(i)
+    
+    # Compute prefix sums
+    prefix_sum = [0] * (n + 1)
+    for i in range(n):
+        prefix_sum[i+1] = prefix_sum[i] + a[i]
+    
+    # Build sparse tables for range min and max
+    max_log = 17
+    log_table = [0] * (n + 2)
+    for i in range(2, n + 2):
+        log_table[i] = log_table[i // 2] + 1
+    
+    st_min = [[0] * (n + 1) for _ in range(max_log)]
+    st_max = [[0] * (n + 1) for _ in range(max_log)]
+    for i in range(n + 1):
+        st_min[0][i] = prefix_sum[i]
+        st_max[0][i] = prefix_sum[i]
+    
+    for j in range(1, max_log):
+        for i in range(n + 1 - (1 << j) + 1):
+            st_min[j][i] = min(st_min[j-1][i], st_min[j-1][i + (1 << (j-1))])
+            st_max[j][i] = max(st_max[j-1][i], st_max[j-1][i + (1 << (j-1))])
+    
+    def get_min(l, r):
+        if l > r:
+            return float('inf')
+        length = r - l + 1
+        k = log_table[length]
+        return min(st_min[k][l], st_min[k][r - (1 << k) + 1])
+    
+    def get_max(l, r):
+        if l > r:
+            return -float('inf')
+        length = r - l + 1
+        k = log_table[length]
+        return max(st_max[k][l], st_max[k][r - (1 << k) + 1])
+    
+    max_value = -float('inf')
+    for i in range(n):
+        # Compute left_max[i]
+        L = left[i] + 1
+        R = i
+        min_val = get_min(L, R)
+        left_max = prefix_sum[i+1] - min_val
+        
+        # Compute right_max[i]
+        start = i + 1
+        end = right[i]
+        max_val = get_max(start, end)
+        right_max = max_val - prefix_sum[i]
+        
+        # Calculate possible max subarray sum
+        combine = left_max + right_max - a[i]
+        current_max = max(left_max, right_max, combine)
+        current_value = current_max - a[i]
+        
+        if current_value > max_value:
+            max_value = current_value
+    
+    print(max(max_value, 0), file=output_stream)
 
-prefix_sum = [0,5,3,13,12,16]
 
-left array:
 
-i=0: stack is empty. left[0]=-1. stack becomes [0]
+def test():
+    import io
 
-i=1: a[1] =-2. stack has 0. a[0]=5 < -2? No. So pop. Stack empty. left[1]=-1. stack [1].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+5 2 5 3 -30 -30 6 9
+""",
+            "output": \
+"""\
+10
+""",
+        }, 
+    ]
 
-i=2: a[2]=10. stack has 1. a[1]=-2 <10 → pop. stack empty. left[2] =-1. stack [2].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=3: a[3] =-1. stack has 2. a[2] =10 >=-1. So left[3] =2. stack becomes [2,3].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=4: a[4]=4. stack has 3,2. a[3] =-1 <4 → pop. stack becomes [2]. a[2]=10 >=4. So left[4]=2. stack [2,4].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-right array:
+    print('Tests passed 😎')
 
-Processing from 4 down to 0.
 
-i=4: stack is empty. right[4]=5 (n=5). stack [4]
+if __name__ == '__main__':
+    test()
 
-i=3: a[3]=-1. stack has4. a[4]=4 >-1 → right[3] =4. stack [3,4]
 
-i=2: a[2]=10. stack has3 (a= -1) and4 (4). a[3] =-1 <=10 → pop. a[4] =4 <=10 → pop. stack empty. right[2] =5. stack [2]
+```
 
-i=1: a[1]=-2. stack has2. a[2]=10 >-2 → right[1] =2. stack [1,2]
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=0: a[0]=5. stack has1 (a=-2) and 2 (a=10). a[1]=-2 <=5 → pop. a[2]=10 >5 → right[0] =2. stack [0,2]
-
-So the right array is:
-
-right = [2,2,5,4,5]
-
-For i=2:
-
-left[i]=-1, right[i]=5.
-
-left_part =0, right_part=2.
-
-get_min(0,2): prefix_sum[0],1,2 are 0,5,3. min is0.
-
-left_max_i=13-0=13.
-
-right_max_i: start=3, end=5.
-
-prefix_sum[3]=12, prefix_sum[4]=12, prefix_sum[5]=16.
-
-get_max(3,5) is16. right_max_i=16 -13 (prefix_sum[2]=3) →16-3=13.
-
-max_sub_sum = max(13,13, 13+13-10 →16) →16. value=16-10=6.
-
-Which is correct.
+```
 
 Now, let's code this.
 

@@ -980,15 +980,86 @@ Which is exactly the standard Kadane's algorithm for the modified array a[i]-k.
 
 Yes.
 
-Testing the code with the first sample:
+Testing against sample input 1.
 
-Sample input 1:
+```python
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read
+    data = input().split()
+    n = int(data[0])
+    m = int(data[1])
+    k = int(data[2])
+    a = list(map(int, data[3:3+n]))
+    
+    dp = [-float('inf')] * m
+    max_result = 0
+    
+    for num in a:
+        new_dp = [-float('inf')] * m
+        for new_r in range(m):
+            candidates = []
+            for r_prev in range(m):
+                if (r_prev + 1) % m == new_r:
+                    val = dp[r_prev] + num
+                    if new_r == 0:
+                        val -= k
+                    candidates.append(val)
+            if new_r == 0:
+                candidates.append(num - k)
+            if candidates:
+                new_dp[new_r] = max(candidates)
+        dp = new_dp
+        current_max = max(max(dp), 0)
+        if current_max > max_result:
+            max_result = current_max
+    
+    print(max_result, file=output_stream)
 
-7 3 10
 
-2 -4 15 -3 4 8 3
 
-The code would process each element as before, and the final max_result is 7.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 2 1000
+-13 -4 -9 -20 -11
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2:
 

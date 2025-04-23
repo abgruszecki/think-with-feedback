@@ -126,11 +126,85 @@ else:
 
 Yes.
 
-Testing the samples:
+Testing against sample inputs 1, 2.
 
-Sample1: cross is (0*0 -1*1) = -1 → right. Correct.
+```python
+def main(input_stream, output_stream):
+    xa, ya = map(int, input_stream.readline().rstrip("\n").split())
+    xb, yb = map(int, input_stream.readline().rstrip("\n").split())
+    xc, yc = map(int, input_stream.readline().rstrip("\n").split())
 
-Sample2: AB is (-3 - (-1), -3 - (-1)) → (-2, -2). BC is (-4 - (-3), -4 - (-3)) → (-1, -1). cross is (-2)(-1) - (-2)(-1) → 2 -2=0. Correct.
+    abx = xb - xa
+    aby = yb - ya
+    bcx = xc - xb
+    bcy = yc - yb
+
+    cross = abx * bcy - aby * bcx
+
+    if cross == 0:
+        print("TOWARDS", file=output_stream)
+    elif cross > 0:
+        print("LEFT", file=output_stream)
+    else:
+        print("RIGHT", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+-1 -1
+-3 -3
+-4 -4
+""",
+            "output": \
+"""\
+TOWARDS
+""",
+        }, 
+        {
+            "input": \
+"""\
+-4 -6
+-3 -7
+-2 -6
+""",
+            "output": \
+"""\
+LEFT
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3: AB is (-3 - (-4), -7 - (-6)) → (1, -1). BC is (-2 - (-3), -6 - (-7)) → (1,1). cross is 1*1 - (-1)*1 → 1 +1=2>0 → left. Correct.
 

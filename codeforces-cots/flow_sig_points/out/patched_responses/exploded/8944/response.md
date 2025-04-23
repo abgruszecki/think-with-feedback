@@ -589,75 +589,187 @@ Initialize min_two_ap to a very large value (like 1e18). Then, if n >=3, loop th
 
 So code:
 
-n = int(input())
+Testing against sample input 2.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-min_adj = float('inf')
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for i in range(n-1):
+    min_adj = float('inf')
 
-    s = a[i] + a[i+1]
+    for i in range(n-1):
 
-    current = (s + 2) // 3
+        s = a[i] + a[i+1]
 
-    if current < min_adj:
+        current = (s + 2) // 3
 
-        min_adj = current
+        if current < min_adj:
 
-min_two_ap = float('inf')
+            min_adj = current
 
-if n >=3:
+    min_two_ap = float('inf')
 
-    for i in range(n-2):
+    if n >=3:
 
-        current = max(a[i], a[i+2])
+        for i in range(n-2):
 
-        if current < min_two_ap:
+            current = max(a[i], a[i+2])
 
-            min_two_ap = current
+            if current < min_two_ap:
 
-# compute min_singles
+                min_two_ap = current
 
-singles = [(x +1) //2 for x in a]
+    # compute min_singles
 
-# find the two smallest
+    singles = [(x +1) //2 for x in a]
 
-singles.sort()
+    # find the two smallest
 
-min_singles = singles[0] + singles[1]
+    singles.sort()
 
-ans = min(min_adj, min_two_ap, min_singles)
+    min_singles = singles[0] + singles[1]
 
-print(ans)
+    ans = min(min_adj, min_two_ap, min_singles)
 
-Wait, but the code for singles is to sort the list and take the first two. Yes.
+    print(ans, file=output_stream)
 
-Testing this code against the sample inputs.
 
-Sample 2:
 
-Input:
+def test():
+    import io
 
-3
-
-1 8 1
-
-min_adj is min( (1+8+2)//3=11//3=3, (8+1+2)//3=11//3=3) →3.
-
-min_two_ap is max(1,1) →1.
-
-min_singles is ceil(1/2)=1, ceil(8/2)=4, ceil(1/2)=1 → sorted [1,1,4]. sum 2. So the answer is min(3,1,2) →1. Correct.
-
-Sample 5:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+7 6 6 8 5 8
+""",
+            "output": \
+"""\
 4
+""",
+        }, 
+    ]
 
-1 100 100 1 → min_adj is (1+100+2)/3=103//3=34, (100+100+2)/3=202//3=67, (100+1+2)/3=103//3=34 → min_adj is34.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-min_two_ap is max(1,100) =100, max(100,1)=100 → min_two_ap is100.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-singles: [1,50,50,1] → sorted [1,1,50,50]. sum 2. So ans is min(34,100,2) →2. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 5.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    min_adj = float('inf')
+
+    for i in range(n-1):
+
+        s = a[i] + a[i+1]
+
+        current = (s + 2) // 3
+
+        if current < min_adj:
+
+            min_adj = current
+
+    min_two_ap = float('inf')
+
+    if n >=3:
+
+        for i in range(n-2):
+
+            current = max(a[i], a[i+2])
+
+            if current < min_two_ap:
+
+                min_two_ap = current
+
+    # compute min_singles
+
+    singles = [(x +1) //2 for x in a]
+
+    # find the two smallest
+
+    singles.sort()
+
+    min_singles = singles[0] + singles[1]
+
+    ans = min(min_adj, min_two_ap, min_singles)
+
+    print(ans, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+40 10 10
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case: n=2, a=[1,1].
 

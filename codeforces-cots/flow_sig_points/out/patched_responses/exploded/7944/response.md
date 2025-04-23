@@ -1353,91 +1353,106 @@ Thus, the selected positions form a valid covering set.
 
 Thus, the code should work.
 
-Testing sample 2:
+Testing against sample input 2.
 
-s=abcab, m=2.
+```python
+import sys
 
-Precompute last_occurrence for each character:
 
-For 'a':
+def main(input_stream, output_stream):
+    m = int(input_stream.readline())
+    s = input_stream.readline().strip()
+    n = len(s)
+    if m > n:
+        print('', file=output_stream)
+        return
 
-i=0: a → last_occurrence[0] =0.
+    last_occurrence = [[-1]*n for _ in range(26)]
 
-i=1: no → 0.
+    for c in range(26):
+        current_last = -1
+        for i in range(n):
+            if ord(s[i]) - ord('a') == c:
+                current_last = i
+            last_occurrence[c][i] = current_last
 
-i=2: no →0.
+    rightmost_min = [0] * (n - m + 1)
 
-i=3: a →3.
+    for i in range(n - m + 1):
+        r = i + m - 1
+        for c in range(26):
+            pos = last_occurrence[c][r]
+            if pos >= i:
+                rightmost_min[i] = pos
+                break
 
-i=4: no →3.
+    selected = []
+    earliest = 0
 
-For 'b':
+    while earliest <= n - m:
+        win_start = earliest
+        pos = rightmost_min[win_start]
+        selected.append(pos)
+        earliest = pos + 1
 
-i=0: no →-1.
+    # Now, collect the characters and sort them
+    result = ''.join(sorted([s[i] for i in selected]))
+    print(result, file=output_stream)
 
-i=1: b →1.
 
-i=2: no →1.
 
-i=3: no →1.
+def test():
+    import io
 
-i=4: b →4.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+bcabcbaccba
+""",
+            "output": \
+"""\
+aaabb
+""",
+        }, 
+    ]
 
-For 'c':
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=2: c →2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-...
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Now, for each window:
+    print('Tests passed 😎')
 
-window 0:
 
-i=0, r=1.
+if __name__ == '__main__':
+    test()
 
-Check 'a' → last_pos =0 >=0 → yes. rightmost_min[0]=0.
 
-window1:
+```
 
-i=1, r=2.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 78, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 71, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: 'aaabb'
+Got: 'aabb'
 
-Check 'a' → last_occurrence[1] =0 <1 → no.
+```
 
-Check 'b' → last_occurrence[1] =1 >=1 → yes. rightmost_min[1] =1.
-
-window2:
-
-i=2, r=3.
-
-Check 'a' → last_occurrence[3] =3 >=2 → yes. rightmost_min[2]=3.
-
-window3:
-
-i=3, r=4.
-
-Check 'a' → last_occurrence[4]=3 >=3 → yes. rightmost_min[3]=3.
-
-Thus, rightmost_min = [0,1,3,3].
-
-But len(s)-m =5-2=3. So the windows are 0,1,2,3.
-
-The algorithm:
-
-earliest=0 → select 0 → earliest=1.
-
-earliest=1 → select1 → earliest=2.
-
-earliest=2 → select3 → earliest=4.
-
-Now, earliest=4 > len(s)-m=3 → loop ends.
-
-Selected positions are0,1,3. characters a, b, a → sorted aab.
-
-Which matches the sample.
-
-Thus, the algorithm works.
-
-Thus, the code can be implemented as follows.
 </think>
 
 ```python

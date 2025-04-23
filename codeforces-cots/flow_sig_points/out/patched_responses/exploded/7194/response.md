@@ -569,74 +569,109 @@ But in Python, for BFS, we can use deque.
 
 The code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import deque
 
-m, k, p = map(int, sys.stdin.readline().split())
 
-adj = [[] for _ in range(m+1)]
-for _ in range(m-1):
-    a, b = map(int, sys.stdin.readline().split())
-    adj[a].append(b)
-    adj[b].append(a)
+def main(input_stream, output_stream):
+    m, k, p = map(int, input_stream.readline().split())
 
-# Compute depths via BFS
-depth = [ -1 ] * (m+1)
-q = deque()
-q.append(1)
-depth[1] =0
-while q:
-    u = q.popleft()
-    for v in adj[u]:
-        if depth[v] == -1:
-            depth[v] = depth[u] +1
-            q.append(v)
+    adj = [[] for _ in range(m+1)]
+    for _ in range(m-1):
+        a, b = map(int, input_stream.readline().split())
+        adj[a].append(b)
+        adj[b].append(a)
 
-# Collect non-root nodes' depths
-depths = []
-for i in range(2, m+1):
-    if depth[i] != -1:
-        depths.append(depth[i])
+    # Compute depths via BFS
+    depth = [ -1 ] * (m+1)
+    q = deque()
+    q.append(1)
+    depth[1] =0
+    while q:
+        u = q.popleft()
+        for v in adj[u]:
+            if depth[v] == -1:
+                depth[v] = depth[u] +1
+                q.append(v)
 
-depths.sort()
+    # Collect non-root nodes' depths
+    depths = []
+    for i in range(2, m+1):
+        if depth[i] != -1:
+            depths.append(depth[i])
 
-prefix = [0]
-for d in depths:
-    prefix.append(prefix[-1] + d)
+    depths.sort()
 
-n = len(depths)
-max_x =0
-max_possible_x = min(k, n)
+    prefix = [0]
+    for d in depths:
+        prefix.append(prefix[-1] + d)
 
-for x in range(0, max_possible_x +1):
-    if x ==0:
-        cost =0
-    else:
-        current_d = depths[x-1]
-        cost = x * current_d - prefix[x]
-    if cost <= p and x <=k:
-        if x > max_x:
-            max_x =x
+    n = len(depths)
+    max_x =0
+    max_possible_x = min(k, n)
 
-print(max_x)
+    for x in range(0, max_possible_x +1):
+        if x ==0:
+            cost =0
+        else:
+            current_d = depths[x-1]
+            cost = x * current_d - prefix[x]
+        if cost <= p and x <=k:
+            if x > max_x:
+                max_x =x
 
-Testing this against the sample inputs:
+    print(max_x, file=output_stream)
 
-Sample 1:
 
-depths after sorting are [1,1,2,2,2,3,3,4,4].
 
-prefix sum: [0,1,2,4,6,9,12,16,20,24]
+def test():
+    import io
 
-max_possible_x is min(2,9) =2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 1000 1000
+1 2
+1 3
+3 4
+3 5
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-x=0: cost 0, allowed. max_x=0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-x=1: cost 1*1 -1 =0 <=1. x=1 is allowed. max_x=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-x=2: cost 2*1 -2=0 <=1. allowed. max_x=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So output is 2.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

@@ -248,93 +248,129 @@ After processing all elements, the answer is the maximum of max1 and max2.
 
 Yes.
 
-Testing this approach against the sample inputs:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    h1 = list(map(int, input_stream.readline().rstrip("\n").split()))
+    h2 = list(map(int, input_stream.readline().rstrip("\n").split()))
+    max1, max2 = 0, 0
+    for a, b in zip(h1, h2):
+        current1 = a + max2
+        current2 = b + max1
+        new_max1 = max(max1, current1)
+        new_max2 = max(max2, current2)
+        max1, max2 = new_max1, new_max2
+    print(max(max1, max2), file=output_stream)
 
-h1 = [9,3,5,7,3]
 
-h2 = [5,8,1,4,5]
 
-Processing step by step:
+def test():
+    import io
 
-Initially max1=0, max2=0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 2 9
+10 1 1
+""",
+            "output": \
+"""\
+19
+""",
+        }, 
+    ]
 
-i=0:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-current1 =9 +0=9
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-current2=5 +0=5
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-new_max1=9, new_max2=5.
+    print('Tests passed 😎')
 
-max1=9, max2=5.
 
-i=1:
+if __name__ == '__main__':
+    test()
 
-current1=3 +5=8 → new_max1 = max(9,8)=9.
 
-current2=8 +9=17 → new_max2 = max(5,17)=17.
+```
 
-Now max1=9, max2=17.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=2:
+```
 
-current1=5 +17=22 → new_max1 max(9,22)=22.
+Testing against sample input 2.
 
-current2=1+9=10 → new_max2 is 17.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    h1 = list(map(int, input_stream.readline().rstrip("\n").split()))
+    h2 = list(map(int, input_stream.readline().rstrip("\n").split()))
+    max1, max2 = 0, 0
+    for a, b in zip(h1, h2):
+        current1 = a + max2
+        current2 = b + max1
+        new_max1 = max(max1, current1)
+        new_max2 = max(max2, current2)
+        max1, max2 = new_max1, new_max2
+    print(max(max1, max2), file=output_stream)
 
-max1=22, max2=17.
 
-i=3:
 
-current1=7 +17=24 → new_max1 is max(22,24)=24.
+def test():
+    import io
 
-current2=4 +22=26 → new_max2 is max(17,26)=26.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+7
+4
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
 
-max1=24, max2=26.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=4:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-current1=3+26=29 → new_max1 is max(24,29)=29.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-current2=5 +24=29 → new_max2 is max(26,29)=29.
+    print('Tests passed 😎')
 
-Final max1 and max2 are both 29. Answer is 29. Correct.
 
-Sample 2:
+if __name__ == '__main__':
+    test()
 
-n=3
 
-h1 = [1, 2,9]
+```
 
-h2 = [10,1,1]
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Processing:
-
-max1=0, max2=0.
-
-i=0:
-
-current1=1 +0=1 → max1=1
-
-current2=10+0=10 → max2=10.
-
-i=1:
-
-current1=2 +10=12 → new_max1 is max(1,12)=12.
-
-current2=1 +1=2 → new_max2 is max(10,2)=10.
-
-max1=12, max2=10.
-
-i=2:
-
-current1=9 +10=19 → new_max1 is max(12,19)=19.
-
-current2=1 +12=13 → new_max2 is max(10,13)=13.
-
-Final answer is max(19,13) =19. Correct.
+```
 
 Sample 3:
 

@@ -383,77 +383,106 @@ Print n - sum.
 
 So here's the code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n = int(sys.stdin.readline())
 
-L = list(map(int, sys.stdin.readline().split()))
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
-intervals = []
+    L = list(map(int, input_stream.readline().split()))
 
-for i in range(n):
+    intervals = []
 
-    a = max(0, i - L[i])
+    for i in range(n):
 
-    b = i - 1
+        a = max(0, i - L[i])
 
-    if a <= b:
+        b = i - 1
 
-        intervals.append( (a, b) )
+        if a <= b:
 
-if not intervals:
+            intervals.append( (a, b) )
 
-    print(n)
+    if not intervals:
 
-    sys.exit()
+        print(n, file=output_stream)
 
-# sort intervals by start
+        sys.exit()
 
-intervals.sort()
+    # sort intervals by start
 
-merged = [intervals[0]]
+    intervals.sort()
 
-for a, b in intervals[1:]:
+    merged = [intervals[0]]
 
-    last_a, last_b = merged[-1]
+    for a, b in intervals[1:]:
 
-    if a > last_b + 1:
+        last_a, last_b = merged[-1]
 
-        merged.append( (a, b) )
+        if a > last_b + 1:
 
-    else:
+            merged.append( (a, b) )
 
-        new_b = max(last_b, b)
+        else:
 
-        merged[-1] = (last_a, new_b)
+            new_b = max(last_b, b)
 
-total = 0
+            merged[-1] = (last_a, new_b)
 
-for a, b in merged:
+    total = 0
 
-    total += (b - a + 1)
+    for a, b in merged:
 
-print(n - total)
+        total += (b - a + 1)
 
-Testing this code on the samples.
+    print(n - total, file=output_stream)
 
-Sample 1:
 
-n=4, L=[0,1,0,10]
 
-intervals after processing:
+def test():
+    import io
 
-i=0: a=0, b=-1 → invalid.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+0 0
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-i=1: a=0, b=0 → added.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=2: a=2-0=2, b=1 → invalid.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=3: a=0, b=2 → added.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So intervals are [(0,0), (0,2)]. Sorted.
+    print('Tests passed 😎')
 
-merged starts with (0,0). Next (0,2) is a=0 <= 0+1 (1). So merged becomes (0,2). Total is 3. n=4. 4-3=1.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+
+```
 
 Sample 2:
 

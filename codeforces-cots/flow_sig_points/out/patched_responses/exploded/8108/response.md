@@ -398,49 +398,80 @@ Compute the sum as per the iterative approach.
 
 So the code in Python would be:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n = int(input())
 
-def find_spf(x):
-    if x % 2 == 0:
-        return 2
-    max_divisor = int(math.sqrt(x)) + 1
-    for i in range(3, max_divisor, 2):
-        if x % i == 0:
-            return i
-    return x  # x is prime
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-sum_total = n
-current = n
-while current != 1:
-    spf = find_spf(current)
-    if spf == current:  # current is prime
-        sum_total += 1
-        break
-    else:
-        current = current // spf
-        sum_total += current
+    def find_spf(x):
+        if x % 2 == 0:
+            return 2
+        max_divisor = int(math.sqrt(x)) + 1
+        for i in range(3, max_divisor, 2):
+            if x % i == 0:
+                return i
+        return x  # x is prime
 
-print(sum_total)
+    sum_total = n
+    current = n
+    while current != 1:
+        spf = find_spf(current)
+        if spf == current:  # current is prime
+            sum_total += 1
+            break
+        else:
+            current = current // spf
+            sum_total += current
 
-Testing this code with the sample inputs.
+    print(sum_total, file=output_stream)
 
-Sample 1:
 
-n=10.
 
-current=10, sum=10.
+def test():
+    import io
 
-loop:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+""",
+            "output": \
+"""\
+15
+""",
+        }, 
+    ]
 
-spf of 10 is 2. not equal to current. current becomes 5. sum is 15.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-loop:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-current=5. spf=5. sum becomes 16. break.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-output 16. Correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

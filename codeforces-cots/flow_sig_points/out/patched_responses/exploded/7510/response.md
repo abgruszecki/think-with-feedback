@@ -615,23 +615,74 @@ So the code seems to handle all the cases correctly.
 
 So this is the solution.
 
-Now, let's test it against the examples.
+Testing against sample input 1.
 
-Example 1:
+```python
+def main(input_stream, output_stream):
+    a = input_stream.readline().rstrip("\n").strip()
+    b = input_stream.readline().rstrip("\n").strip()
 
-Input:
+    if len(a) != len(b):
+        print("NO", file=output_stream)
+    else:
+        n = len(a)
+        if n == 1:
+            print("YES" if a == b else "NO", file=output_stream)
+        else:
+            sum_a = a.count('1')
+            sum_b = b.count('1')
+            if sum_a == 0:
+                if sum_b == 0 and b == '0' * n:
+                    print("YES", file=output_stream)
+                else:
+                    print("NO", file=output_stream)
+            else:
+                print("YES" if sum_b != 0 else "NO", file=output_stream)
 
-11
 
-10
 
-len is 2.
+def test():
+    import io
 
-sum_a = 2. sum_b =1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+01
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-sum_a is non-zero, sum_b >=1 → YES.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Output: YES. Correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Example 2:
 

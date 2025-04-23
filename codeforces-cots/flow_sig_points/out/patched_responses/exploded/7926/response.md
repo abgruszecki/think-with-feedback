@@ -1025,31 +1025,85 @@ print(res)
 
 This should work.
 
-Testing sample 1:
+Testing against sample input 1.
 
-prev for i=0: -1
+```python
+def main(input_stream, output_stream):
+    mod = 10**9 + 7
 
-i=1: -1
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-i=2: -1
+    prev = [-1] * n
+    last_occurrence = {}
+    for i in range(n):
+        if a[i] in last_occurrence:
+            prev[i] = last_occurrence[a[i]]
+        else:
+            prev[i] = -1
+        last_occurrence[a[i]] = i
 
-next for i=0:3
+    next_occurrence = [n] * n
+    last_occurrence = {}
+    for i in range(n-1, -1, -1):
+        if a[i] in last_occurrence:
+            next_occurrence[i] = last_occurrence[a[i]]
+        else:
+            next_occurrence[i] = n
+        last_occurrence[a[i]] = i
 
-i=1:3
+    result = 0
+    for i in range(n):
+        left = i - prev[i] - 1
+        right = next_occurrence[i] - i - 1
+        result = (result + left * right) % mod
 
-i=2:3.
+    print(result, file=output_stream)
 
-left for i=0:0 - (-1) -1=0.
 
-right:3-0-1=2.
 
-contribution 0*2=0.
+def test():
+    import io
 
-i=1:1 - (-1) -1=1. right=3-1-1=1. contribution 1*1=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 2 1 2 3
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-i=2:2 - (-1) -1=2. right=3-2-1=0. contribution 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Total 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2: as before.
 

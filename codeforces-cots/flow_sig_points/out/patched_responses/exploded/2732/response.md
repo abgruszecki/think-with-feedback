@@ -831,11 +831,15 @@ But the candidates should have at least 2.
 
 Now, the code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-def main():
-    n, x, y = map(int, sys.stdin.readline().split())
-    a = list(map(int, sys.stdin.readline().split()))
+
+def main(input_stream, output_stream):
+    n, x, y = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
     
     # Collect all numbers: a_j, a_j+1, a_j-1
     candidates = set()
@@ -848,7 +852,7 @@ def main():
     if not candidates:
         # All elements are 1, then the candidates would include 2
         # So this case is not possible
-        print(0)
+        print(0, file=output_stream)
         return
     
     max_num = max(candidates)
@@ -878,7 +882,7 @@ def main():
     
     if not candidate_primes:
         # All candidates are 1, which is impossible
-        print(0)
+        print(0, file=output_stream)
         return
     
     min_total = float('inf')
@@ -911,78 +915,52 @@ def main():
         if total < min_total:
             min_total = total
     
-    print(min_total)
+    print(min_total, file=output_stream)
 
-if __name__ == "__main__":
-    main()
 
-Wait, in the code where all_deleted is True, the total is adjusted by adding min_extra. Because sum_cost was n*x. Then, subtract x for one element and add x + min_extra. So the new total is n*x -x + x + min_extra = (n-1)*x + x + min_extra = n*x + min_extra.
 
-But no:
+def test():
+    import io
 
-Original total is sum of x for all elements → n*x.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 6 2
+100 49 71 73 66 96 8 60 41 63
+""",
+            "output": \
+"""\
+10
+""",
+        }, 
+    ]
 
-If all_deleted is True, then we need to replace one x with cost_mod. cost_mod is x + min_extra.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So the new total is (n-1)*x + (x + min_extra) = n*x + min_extra.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Yes.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But in the code, the total is computed as:
+    print('Tests passed 😎')
 
-total = sum of min(x, cost_mod) for all.
 
-If all_deleted is True, then each element's min was x, so sum is n*x.
+if __name__ == '__main__':
+    test()
 
-Then, total = total -x + (x + min_extra) = n*x -x +x + min_extra = n*x + min_extra.
 
-But the code does total += min_extra. Which is equivalent to (n*x) + min_extra.
+```
 
-But min_extra can be negative?
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-No. Because if all elements are deleted (all cost_mod >=x), then min_extra is the minimal (cost_mod -x), which is >=0.
-
-So adding min_extra is correct.
-
-But wait, in code:
-
-total += min_extra
-
-But when all_deleted is True, the initial total is n*x. Then, adding min_extra gives n*x + min_extra, which is the correct value.
-
-Yes.
-
-Thus, the code is correct.
-
-Now, let's test sample input 1.
-
-Sample input 1:
-
-4 23 17
-
-1 17 17 16
-
-candidates include 1+1=2, 17-1=16, 17, 17+1=18, 16-1=15, 16+1=17.
-
-The primes collected are for 2 (primes 2), 16 (primes 2), 17 (17), 18 (2,3), 15 (3,5). So candidate_primes are {2,3,5,17}.
-
-For d=17:
-
-For each a_j:
-
-aj=1:
-
-rem=1%17=1 → k=16 → cost_mod=17*16=272. min(23, 272) is 23. So add 23. min_extra is 272-23=249.
-
-aj=17: cost_mod 0. add 0. all_deleted becomes False.
-
-Same for next 17s.
-
-aj=16: rem=16%17=16 →k=1. cost_mod 17*1=17 <23. add 17. all_deleted is False.
-
-Total is 23+0+0+17=40. all_deleted is False. So no adjustment. So total is 40.
-
-Other primes may have higher totals. Thus, the minimal is 40.
+```
 
 Sample input 2:
 

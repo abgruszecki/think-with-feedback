@@ -241,167 +241,165 @@ But wait, the root's gcd_list is [(x[1], 1)].
 
 So, the code structure would be:
 
+Testing against sample input 1.
+
+```python
 import sys
-
 from math import gcd
-
 from collections import defaultdict, deque
 
-n = int(sys.stdin.readline())
 
-x = list(map(int, sys.stdin.readline().split()))
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
-x = [0] + x  # x[1] is the root's value.
+    x = list(map(int, input_stream.readline().split()))
 
-adj = [[] for _ in range(n+1)]
+    x = [0] + x  # x[1] is the root's value.
 
-for _ in range(n-1):
+    adj = [[] for _ in range(n+1)]
 
-    a, b = map(int, sys.stdin.readline().split())
+    for _ in range(n-1):
 
-    adj[a].append(b)
+        a, b = map(int, input_stream.readline().split())
 
-    adj[b].append(a)
+        adj[a].append(b)
 
-# Build the tree structure (parent and children)
+        adj[b].append(a)
 
-parent = [0]*(n+1)
+    # Build the tree structure (parent and children)
 
-children = [[] for _ in range(n+1)]
+    parent = [0]*(n+1)
 
-visited = [False]*(n+1)
+    children = [[] for _ in range(n+1)]
 
-q = deque([1])
+    visited = [False]*(n+1)
 
-visited[1] = True
+    q = deque([1])
 
-while q:
+    visited[1] = True
 
-    u = q.popleft()
+    while q:
 
-    for v in adj[u]:
+        u = q.popleft()
 
-        if not visited[v]:
+        for v in adj[u]:
 
-            visited[v] = True
+            if not visited[v]:
 
-            parent[v] = u
+                visited[v] = True
 
-            children[u].append(v)
+                parent[v] = u
 
-            q.append(v)
+                children[u].append(v)
 
-# Now, process nodes in BFS order (parents before children)
+                q.append(v)
 
-total_sum = 0
+    # Now, process nodes in BFS order (parents before children)
 
-gcd_lists = [[] for _ in range(n+1)]  # gcd_lists[u] is the list for node u
+    total_sum = 0
 
-queue = deque([1])
+    gcd_lists = [[] for _ in range(n+1)]  # gcd_lists[u] is the list for node u
 
-# Process the root
+    queue = deque([1])
 
-root_gcd = x[1]
+    # Process the root
 
-gcd_lists[1] = [(root_gcd, 1)]
+    root_gcd = x[1]
 
-total_sum += root_gcd
+    gcd_lists[1] = [(root_gcd, 1)]
 
-while queue:
+    total_sum += root_gcd
 
-    u = queue.popleft()
+    while queue:
 
-    for child in children[u]:
+        u = queue.popleft()
 
-        # compute child's gcd list
+        for child in children[u]:
 
-        temp = defaultdict(int)
+            # compute child's gcd list
 
-        # parent's gcd list is gcd_lists[u]
+            temp = defaultdict(int)
 
-        for g, cnt in gcd_lists[u]:
+            # parent's gcd list is gcd_lists[u]
 
-            new_g = gcd(g, x[child])
+            for g, cnt in gcd_lists[u]:
 
-            temp[new_g] += cnt
+                new_g = gcd(g, x[child])
 
-        # add the new path (child to child)
+                temp[new_g] += cnt
 
-        temp[x[child]] += 1
+            # add the new path (child to child)
 
-        # convert to list and assign to child's gcd list
+            temp[x[child]] += 1
 
-        gcd_list_child = list(temp.items())
+            # convert to list and assign to child's gcd list
 
-        # compute sum for child
+            gcd_list_child = list(temp.items())
 
-        sum_child = sum(g * c for g, c in gcd_list_child)
+            # compute sum for child
 
-        total_sum += sum_child
+            sum_child = sum(g * c for g, c in gcd_list_child)
 
-        gcd_lists[child] = gcd_list_child
+            total_sum += sum_child
 
-        # add child to the queue
+            gcd_lists[child] = gcd_list_child
 
-        queue.append(child)
+            # add child to the queue
 
-print(total_sum % (10**9 +7))
+            queue.append(child)
 
-Wait, but for large n, storing the entire list for each node could be memory-intensive. For example, if each node's list has up to 20 entries, then 1e5 nodes would require 2e6 entries, which is manageable.
+    print(total_sum % (10**9 +7), file=output_stream)
 
-But in Python, using a list of tuples for each node's GCDs is acceptable. However, the way the code is written, for each child, when processing the parent's list, it loops through all entries and accumulates into a defaultdict, which is O(k) per child, where k is the number of entries in the parent's list.
 
-But according to the earlier analysis, this is O(n log x) time, which is acceptable.
 
-Testing the first example:
+def test():
+    import io
 
-Sample Input 1:
-
-5
-
-4 5 6 0 8
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+0 2 3 0 0 0 0
 1 2
-
 1 3
+2 4
+2 5
+3 6
+3 7
+""",
+            "output": \
+"""\
+30
+""",
+        }, 
+    ]
 
-1 4
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-4 5
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The tree structure is root 1 with children 2,3,4. 4 has child 5.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Processing:
+    print('Tests passed 😎')
 
-Root (1) has x=4. Its sum is 4. gcd_lists[1] = [(4,1)].
 
-Then process children 2,3,4.
+if __name__ == '__main__':
+    test()
 
-For child 2:
 
-parent's list is [(4,1)]. new_gcd is gcd(4,5) = 1. temp[1] += 1. Then add x[2]=5. So temp is {1:1,5:1}. Sum is 1*1 +5*1=6. total_sum becomes 4+6=10.
+```
 
-For child 3: parent's list is [(4,1)]. new_gcd is gcd(4,6)=2. temp[2:1, add x[3]=6. sum is 2*1 +6*1=8. total is 18.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For child 4: parent's list is [(4,1)]. new_gcd is gcd(4,0). Because 0's GCD with 4 is 4. So new_gcd is 4. Then temp[4] +=1. Add x[4]=0. So temp[4:1, 0:1]. sum is 4*1 +0*1=4. total is 22.
-
-Then processing child 4's children (5):
-
-When processing child 5:
-
-parent's list is [(4,1), (0,1)].
-
-For each (g, cnt):
-
-First (4,1): new_gcd is gcd(4,8)=4. temp[4] +=1.
-
-Then (0,1): new_gcd is gcd(0,8)=8. temp[8] +=1.
-
-Add x[5]=8: temp[8] +=1.
-
-So temp becomes {4:1,8:2} (since 8 from the two entries). sum is 4*1 +8*2=4+16=20. total_sum becomes 22+20=42. Which matches the sample.
-
-So the code works for the first sample.
+```
 
 The second sample:
 

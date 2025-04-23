@@ -161,45 +161,68 @@ print(ans)
 
 Yes. That's the code.
 
-Testing the first example:
+Testing against sample input 1.
 
-Input:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    arr = list(map(int, input_stream.readline().rstrip("\n").split()))
+    prefix = [0] * (n + 1)
+    for i in range(n):
+        prefix[i+1] = prefix[i] + arr[i]
+    max_gain = float('-inf')
+    for i in range(n):
+        for j in range(i, n):
+            ones = prefix[j+1] - prefix[i]
+            gain = (j - i + 1) - 2 * ones
+            if gain > max_gain:
+                max_gain = gain
+    print(sum(arr) + max_gain, file=output_stream)
 
-5
 
-1 0 0 1 0
 
-sum(arr) is 1+0+0+1+0=2.
+def test():
+    import io
 
-max_gain is 2 (from the interval [1,4]).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 0 0 1
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-In code, the code loops i from 0 to 4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For i=1, j=4:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-prefix[5] - prefix[1] = (1+0+0+1+0) - (1) → 2-1=1? Wait, wait, let's compute the prefix array for this input.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The array is [1,0,0,1,0].
+    print('Tests passed 😎')
 
-prefix[0] =0.
 
-prefix[1] =1.
+if __name__ == '__main__':
+    test()
 
-prefix[2] =1+0=1.
 
-prefix[3] =1+0=1.
+```
 
-prefix[4] =1+0+0+1=2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-prefix[5] =2+0=2.
-
-So for i=1, j=4:
-
-prefix[5] - prefix[1] = 2 -1=1.
-
-Which is the sum of the elements from index 1 to 4 (0,0,1,0), sum is 1. So the ones_in_interval is 1.
-
-gain = (4) (since j-i+1 is 4 (j=4, i=1 → 4-1+1=4) → 4 - 2*1 =2. So gain is 2. Which is correct.
+```
 
 So the code would correctly capture that.
 

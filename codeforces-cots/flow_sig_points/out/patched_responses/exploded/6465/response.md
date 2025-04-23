@@ -255,10 +255,14 @@ But even this might be challenging. Let's think of using a dictionary to track t
 
 The code can be structured as follows:
 
+Testing against sample input 1.
+
+```python
 from collections import defaultdict
 
-def main():
-    n, m = input().split()
+
+def main(input_stream, output_stream):
+    n, m = input_stream.readline().rstrip("\n").split()
     m = int(m)
     digits = list(n)
     freq = [0]*10
@@ -309,154 +313,60 @@ def main():
         remainder, counts, started = state
         if started and all(c == 0 for c in counts) and remainder % m == 0:
             result += dp[state]
-    print(result)
+    print(result, file=output_stream)
 
-But wait, the code above processes the digits step by step, each time choosing one digit. However, the way it's structured, for each iteration (for _ in range(total_digits)), it processes the next digit. But that's not correct because the number of steps required is exactly the number of digits in n (since all permutations use all digits). So the code loops len(digits) times, each time processing one digit. But this approach will not work correctly. Because in each iteration, the code is processing all possible ways to add one digit to the current states, but after len(digits) steps, all digits are used.
 
-Wait, perhaps the code is correct. Let's think:
 
-Initially, the state is (0, original_counts, False). After processing one digit, the new states have used one digit (counts are original_counts minus 1 for the chosen digit). The loop runs for len(digits) steps. So after each step, the code processes all possible ways to add one more digit, and after len(digits) steps, all possible permutations (using all digits) are considered.
+def test():
+    import io
 
-Yes. Because each iteration corresponds to adding one more digit. So for len(digits) steps, each state after step i has used i digits. So after len(digits) steps, all possible states that have used all digits are present in dp. Then, the code checks all states in dp where counts are all zero (i.e., all digits used), started is True (so leading zero is not allowed), and the remainder is zero mod m. The sum of the counts for these states is the answer.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+223 4
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-But in the code, the counts are checked with all(c ==0 for c in counts). Because counts is a tuple where each element is the remaining count of each digit. So after all digits are used, counts is all zeros.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-This seems correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But let's test with the first example.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sample Input 1:
-104 2
+    print('Tests passed 😎')
 
-Digits are ['1','0','4'], counts are [1,1,0,0,1,0,0,0,0,0]. So counts = (1,1,0,0,1, 0,0,0,0,0). len(digits) is 3.
 
-Initial state: (0, counts, False) with 1 way.
+if __name__ == '__main__':
+    test()
 
-First iteration (processing the first digit):
 
-In the initial state, started is False. So for d in 1-9. The available digits are 1, 4 (since counts[1] is 1, counts[4] is 1).
+```
 
-For d=1:
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 91, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 84, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '1'
+Got: '2'
 
-new_remainder = 1 %2=1.
-
-new_counts is (1-0 for 0, 1-1 for 1, ... 4's count is 1-0. So the new_counts is [1,0,0,0,1, ...]. Wait, no. The new_counts after subtracting 1 from d=1 is:
-
-Original counts are [1,1,0,0,1,0,0,0,0,0]. So for d=1 (index 1), subtract 1. So new_counts[1] becomes 0. So counts becomes [1,0,0,0,1, ...].
-
-So new_counts is (1,0,0,0,1, 0,0,0,0,0).
-
-new_state is (1, new_counts, True), and the ways added are 1 * 1 (current_ways is 1, and current_counts[d] is 1).
-
-Similarly for d=4:
-
-new_remainder =4%2=0.
-
-new_counts after subtracting 4's count by 1: original counts are [1,1,0,0,1, ...] => after subtracting 1 from index4, counts[4] becomes 0.
-
-So new_counts is (1,1,0,0,0, ...).
-
-The new_state is (0, new_counts, True), with ways 1*1=1.
-
-So after first iteration, the new_dp has two states: (1, [1,0,0,0,1, ...], True) with 1 way, and (0, [1,1,0,0,0, ...], True) with 1 way.
-
-Second iteration (processing the second digit):
-
-Now, states are in the new_dp. Each state is processed for the next digit.
-
-For the state (1, [1,0,0,0,1, ...], True):
-
-Available digits are 0 and 4 (since counts[0] is 1, counts[4] is 1).
-
-Processing d=0:
-
-new_remainder = (1 *10 +0) mod2= 10 mod2=0.
-
-new_counts: subtract 0's count by 1. counts becomes [0,0,0,0,1, ...].
-
-ways added: 1 *1 (current_ways is 1, counts[0] is 1).
-
-new_state is (0, [0,0,0,0,1, ...], True) with 1 way.
-
-Processing d=4:
-
-new_remainder = (1*10 +4) mod2=14 mod2=0.
-
-new_counts: subtract 4's count by 1 (was 1, now 0).
-
-new_state is (0, [1,0,0,0,0, ...], True) with 1 way.
-
-For the state (0, [1,1,0,0,0, ...], True):
-
-Available digits are 0 and 1 (counts[0]=1, counts[1]=1).
-
-Processing d=0:
-
-new_remainder = (0*10 +0) mod2=0.
-
-new_counts: subtract 0's count to 0.
-
-ways added: 1*1=1. new_state is (0, [0,1,0,0,0, ...], True).
-
-Processing d=1:
-
-new_remainder = (0*10 +1) mod2=1.
-
-new_counts: subtract 1's count to 0. new_state is (1, [1,0,0,0,0, ...], True), ways added 1*1=1.
-
-So after second iteration, new_dp has 4 states:
-
-(0, [0,0,0,0,1, ...], True) → 1 way.
-
-(0, [1,0,0,0,0, ...], True) → 1 way.
-
-(0, [0,1,0,0,0, ...], True) → 1 way.
-
-(1, [1,0,0,0,0, ...], True) → 1 way.
-
-Third iteration (processing third digit):
-
-For each of these states, process the third digit.
-
-Take state (0, [0,0,0,0,1, ...], True):
-
-Available digits: 4 (counts[4] is 1).
-
-Processing d=4:
-
-new_remainder = (0 *10 +4) mod2=4 mod2=0.
-
-new_counts: subtract 4's count to 0. new_state is (0, all zeros, True). The ways added are 1 *1=1.
-
-So this contributes to the result.
-
-Another state: (0, [1,0,0,0,0, ...], True). Available digits: 0 (counts[0] is 1).
-
-Processing d=0:
-
-new_remainder = (0 *10 +0) mod2=0.
-
-new_counts: subtract 0 to 0. new_state (0, all zeros, True). ways added 1*1=1.
-
-State (0, [0,1,0,0,0, ...], True): available digits are 1 (counts[1] is 1).
-
-Processing d=1:
-
-new_remainder = (0 *10 +1) mod2=1. So remainder is 1 mod2=1. Not zero.
-
-State (1, [1,0,0,0,0, ...], True): available digits are 0 (counts[0] is 1).
-
-Processing d=0:
-
-new_remainder = (1*10 +0) mod2=10 mod2=0.
-
-new_state is (0, all zeros, True). ways added 1*1=1.
-
-So after third iteration, the states that reach (0, all zeros, True) are three states, each contributing 1 way. So the sum is 3, which matches the first sample.
-
-So the code works for the first sample.
-
-But in the code above, when the loop runs for len(digits) steps, all possible permutations are considered, and the final sum of all states with counts all zero, started True, and remainder zero mod m is the answer.
+```
 
 But what about the second sample:
 
@@ -682,11 +592,15 @@ So adding this to the code.
 
 Now, the code:
 
+Testing against sample input 2.
+
+```python
 import math
 from collections import defaultdict
 
-def main():
-    n, m = input().split()
+
+def main(input_stream, output_stream):
+    n, m = input_stream.readline().rstrip("\n").split()
     m = int(m)
     digits = list(n)
     freq = [0]*10
@@ -741,21 +655,51 @@ def main():
             result += dp[state]
     # Divide by the product of factorials of the original frequencies.
     result //= factorial_product
-    print(result)
+    print(result, file=output_stream)
 
-Wait, but in the code's current approach, the DP counts all possible permutations (including those with swapped identical digits). So the division by the product of the factorials gives the number of distinct permutations.
 
-Let's test the second sample with this code.
 
-Sample Input 223 4:
+def test():
+    import io
 
-The original frequencies are [0,0,2,1,0,0,0,0,0,0].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7067678 8
+""",
+            "output": \
+"""\
+47
+""",
+        }, 
+    ]
 
-The product of factorials is 2! * 1! = 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The code's DP result (before division) is 2 (from earlier steps), so 2 /2 = 1, which matches the sample output.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Yes. So this modification is correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: third sample input 7067678 8 → output 47.
 

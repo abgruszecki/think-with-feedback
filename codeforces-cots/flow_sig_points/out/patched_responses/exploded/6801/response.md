@@ -251,73 +251,85 @@ Then, for each car in a, get exit_pos[car].
 
 So in code:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-b = list(map(int, input().split()))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-exit_pos = [0]*(n+1)
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for idx, car in enumerate(b):
+    exit_pos = [0]*(n+1)
 
-    exit_pos[car] = idx
+    for idx, car in enumerate(b):
 
-max_so_far = -1
+        exit_pos[car] = idx
 
-count =0
+    max_so_far = -1
 
-for car in a:
+    count =0
 
-    pos = exit_pos[car]
+    for car in a:
 
-    if pos < max_so_far:
+        pos = exit_pos[car]
 
-        count +=1
+        if pos < max_so_far:
 
-    else:
+            count +=1
 
-        max_so_far = pos
+        else:
 
-print(count)
+            max_so_far = pos
 
-Yes, this should work.
+    print(count, file=output_stream)
 
-Testing this code:
 
-Sample 1:
 
-n=5, a is [3,5,2,1,4], b is [4,3,2,5,1]
+def test():
+    import io
 
-exit_pos will be:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+5 2 3 6 7 1 4
+2 3 6 7 1 4 5
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-car 4 → 0
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-3 →1
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-2→2
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-5→3
+    print('Tests passed 😎')
 
-1→4
 
-So for a list of size 5+1=6, exit_pos[3] is 1, etc.
+if __name__ == '__main__':
+    test()
 
-Processing each car in a:
 
-3 → pos 1. max_so_far is -1. 1 >-1 → set max_so_far to 1. count remains 0.
+```
 
-5 → pos3. 3>1 → set max to3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-2 → pos2 <3 → count becomes1.
-
-1 → pos4>3 → set max to4.
-
-4 → pos0 <4 → count becomes2.
-
-Output 2.
-
-Which is correct.
+```
 
 So the code works.
 

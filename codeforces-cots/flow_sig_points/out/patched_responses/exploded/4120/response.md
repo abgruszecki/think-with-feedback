@@ -1241,27 +1241,112 @@ Here's the correct approach:
 
 This approach is similar to Prim's algorithm and has a time complexity of O(n * 30), which is feasible for n=2e5.
 
-Let's test this approach with the first sample:
+Testing against sample input 1.
 
-Sample input 1:
+```python
+import sys
 
-[1,2,3,4,5].
 
-Sort the array: [1,2,3,4,5].
+sys.setrecursionlimit(1 << 25)
 
-Insert 1 into trie.
+def main(input_stream, output_stream):
+    import sys
+    n, *rest = map(int, input_stream.read().split())
+    a = rest[:n]
+    a.sort()
 
-For 2: query trie. Minimal XOR is 1^2=3. Add 3. Insert 2.
+    def mst_group(arr, bit):
+        if len(arr) <= 1:
+            return 0
+        # Find the highest bit where there's a split
+        current_bit = bit
+        while current_bit >= 0 and all( (x >> current_bit) & 1 == (arr[0] >> current_bit) &1 for x in arr):
+            current_bit -=1
+        if current_bit <0:
+            return 0
+        mask = 1 << current_bit
+        left = []
+        right = []
+        for x in arr:
+            if x & mask:
+                right.append(x)
+            else:
+                left.append(x)
+        sum_mst = mst_group(left, current_bit-1) + mst_group(right, current_bit-1)
+        if not left or not right:
+            return sum_mst
+        # Build trie for right
+        trie = {}
+        for x in right:
+            node = trie
+            for b in reversed(range(current_bit+1)):
+                bit_val = (x >> b) &1
+                if bit_val not in node:
+                    node[bit_val] = {}
+                node = node[bit_val]
+        # Find minimal xor between left and right
+        min_xor = float('inf')
+        for x in left:
+            node = trie
+            current_xor = 0
+            for b in reversed(range(current_bit+1)):
+                desired = (x >> b) &1
+                if desired in node:
+                    node = node[desired]
+                else:
+                    current_xor |= (1 << b)
+                    node = node[1 - desired]
+            if current_xor < min_xor:
+                min_xor = current_xor
+        sum_mst += min_xor
+        return sum_mst
 
-For 3: query trie. Minimal XOR is 3^2=1. Add 1. Insert 3.
+    print(mst_group(a, 30), file=output_stream)
 
-For 4: query trie. Minimal XOR is 4^3=7. Add 7. Insert 4.
 
-For 5: query trie. Minimal XOR is 5^4=1. Add 1. Insert 5.
 
-Sum is 3+1+7+1=12. Which does not match the sample output of 8.
+def test():
+    import io
 
-So this approach is also incorrect.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 2 3 4
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 But sample output is 8. So where is the mistake?
 

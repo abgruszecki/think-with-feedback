@@ -1215,117 +1215,118 @@ For each pen i:
 
       So code:
 
-      n = int(input())
+Testing against sample input 1.
 
-      a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-      min_day = float('inf')
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-      res = -1
+    min_day = float('inf')
 
-      s = n %7
+    res = -1
 
-      for idx in range(n):
+    s = n %7
 
-          i = idx +1
+    for idx in range(n):
 
-          ai = a[idx]
+        i = idx +1
 
-          ri = (i-1) %7
+        ai = a[idx]
 
-          if s ==0:
+        ri = (i-1) %7
 
-              # all steps are working days if ri !=6.
+        if s ==0:
 
-              # since the problem says answer exists, ri !=6.
+            # all steps are working days if ri !=6.
 
-              days = i + (ai-1)*n
+            # since the problem says answer exists, ri !=6.
 
-          else:
+            days = i + (ai-1)*n
 
-              # compute working_in_cycle
+        else:
 
-              working = []
+            # compute working_in_cycle
 
-              for k in range(7):
+            working = []
 
-                  mod_val = (ri + k * s) %7
+            for k in range(7):
 
-                  if mod_val <6:
+                mod_val = (ri + k * s) %7
 
-                      working.append(k)
+                if mod_val <6:
 
-              # calculate q and r.
+                    working.append(k)
 
-              q = (ai-1) //6
+            # calculate q and r.
 
-              r = ai - q*6
+            q = (ai-1) //6
 
-              if r ==0:
+            r = ai - q*6
 
-                  q -=1
+            if r ==0:
 
-                  r =6
+                q -=1
 
-              steps = q *7 + working[r-1]
+                r =6
 
-              days = i + steps * n
+            steps = q *7 + working[r-1]
 
-          if days < min_day or (days == min_day and i < res):
+            days = i + steps * n
 
-              min_day = days
+        if days < min_day or (days == min_day and i < res):
 
-              res = i
+            min_day = days
 
-      print(res)
+            res = i
 
-      Let's test this code on the first example.
+    print(res, file=output_stream)
 
-      First example input:
 
-      3
 
-      3 3 3
+def test():
+    import io
 
-      For pen 2 (i=2, ai=3):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+5 4 5 4 4
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-          s=3 mod7=3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-          ri= (2-1) mod7=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-          working_in_cycle:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-          for k in 0-6:
+    print('Tests passed 😎')
 
-              (1 +3k) mod7.
 
-              k=0:1 → yes.
+if __name__ == '__main__':
+    test()
 
-              k=1:4 → yes.
 
-              k=2:7 mod7=0 → yes.
+```
 
-              k=3:10 mod7=3 → yes.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-              k=4:13 mod7=6 → no.
-
-              k=5:16 mod7=2 → yes.
-
-              k=6:19 mod7=5 → yes.
-
-          So working_in_cycle is [0,1,2,3,5,6].
-
-          ai=3.
-
-          q=(3-1)//6=0 → q=0.
-
-          r=3-0=3.
-
-          steps=0*7 + working_in_cycle[2] =2.
-
-          days=2 +2*3=8.
-
-      So code would correctly return 2.
+```
 
       Second example:
 

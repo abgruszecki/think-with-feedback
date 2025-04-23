@@ -139,41 +139,73 @@ the answer is min(candidate1, candidate2).
 
 So code:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
-b = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-set_a = set(a)
-set_b = set(b)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-common = set_a & set_b
-if common:
-    print(min(common))
-else:
-    min_a = min(a)
-    min_b = min(b)
-    candidate1 = min_a * 10 + min_b
-    candidate2 = min_b * 10 + min_a
-    print(min(candidate1, candidate2))
+    set_a = set(a)
+    set_b = set(b)
 
-But wait, what if the two-digit numbers have a leading zero? But according to the problem statement, all digits are non-zero, so that's not possible. Because the input lists contain non-zero digits. So min_a and min_b are at least 1. So the two-digit numbers can't have leading zeros.
+    common = set_a & set_b
+    if common:
+        print(min(common), file=output_stream)
+    else:
+        min_a = min(a)
+        min_b = min(b)
+        candidate1 = min_a * 10 + min_b
+        candidate2 = min_b * 10 + min_a
+        print(min(candidate1, candidate2), file=output_stream)
 
-Yes, because in the input, all digits are from 1 to 9.
 
-So this code should work.
 
-Testing the first example:
+def test():
+    import io
 
-Input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 8
+1 2 3 4 5 6 7 8
+8 7 6 5 4 3 2 1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-2 3
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-4 2
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-5 7 6
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-common is empty. min_a is 2, min_b is5. candidate1=25, candidate2=52. min is 25. Correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

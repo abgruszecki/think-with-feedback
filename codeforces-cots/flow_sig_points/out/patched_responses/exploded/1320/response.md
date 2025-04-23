@@ -167,102 +167,179 @@ But perhaps a better approach is to use a defaultdict(int), and each time a char
 
 So, in code:
 
+Testing against sample input 1.
+
+```python
 from collections import defaultdict
 
-n = int(input())
-s = input().strip()
 
-unique = set(s)
-unique_count = len(unique)
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-if unique_count == 0:
-    print(0)
-else:
-    min_len = n
-    left = 0
-    freq = defaultdict(int)
-    current_unique = 0
+    unique = set(s)
+    unique_count = len(unique)
 
-    for right in range(n):
-        char = s[right]
-        freq[char] +=1
-        if freq[char] ==1:
-            current_unique +=1
+    if unique_count == 0:
+        print(0, file=output_stream)
+    else:
+        min_len = n
+        left = 0
+        freq = defaultdict(int)
+        current_unique = 0
 
-        # Now try to minimize the window
-        while current_unique == unique_count:
-            window_size = right - left +1
-            if window_size < min_len:
-                min_len = window_size
+        for right in range(n):
+            char = s[right]
+            freq[char] +=1
+            if freq[char] ==1:
+                current_unique +=1
 
-            # Move left pointer
-            left_char = s[left]
-            freq[left_char] -=1
-            if freq[left_char] ==0:
-                current_unique -=1
-            left +=1
+            # Now try to minimize the window
+            while current_unique == unique_count:
+                window_size = right - left +1
+                if window_size < min_len:
+                    min_len = window_size
 
-    print(min_len)
+                # Move left pointer
+                left_char = s[left]
+                freq[left_char] -=1
+                if freq[left_char] ==0:
+                    current_unique -=1
+                left +=1
 
-Yes, this code should handle all cases.
+        print(min_len, file=output_stream)
 
-Testing the first example:
 
-Input:
 
-3
+def test():
+    import io
 
-AaA
-
-unique_count is 2 (A and a).
-
-The loop:
-
-right=0: char is 'A', freq becomes 1. current_unique=1. Not equal to 2, loop continues.
-
-right=1: char 'a', freq becomes 1. current_unique=2. Now enter the while loop.
-
-window_size is 2. min_len is set to 2.
-
-Then, subtract left_char (A), freq[A] becomes 0. current_unique reduces to 1. left becomes 1. exit loop.
-
-right=2: char 'A'. freq[A] was 0, so adding 1. current_unique becomes 2 again. enter loop.
-
-window_size is 2 (right=2, left=1: 2-1+1=2). min_len remains 2.
-
-Then, subtract left_char (a) → freq[a] is 0. current_unique becomes 1. left=2. exit loop.
-
-Loop ends. print 2. Correct.
-
-Second example:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 7
-
 bcAAcbc
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-unique_count is 3 (b, c, A).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Looking for the minimal window. Let's see:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-At some point, the window from index 3 (A) to 5 (c) would have all three?
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Wait the string is 'bcAAcbc'.
+    print('Tests passed 😎')
 
-Indices 0-based: 0: b, 1:c, 2:A, 3:A, 4:c, 5:b, 6:c.
 
-The unique characters are b, c, A. The code's sliding window would find the minimal window. Let's see when right=2 (A), current_unique becomes 3. Then the window is 0-2 (b, c, A). size 3. Then, left moves to 1 (c), but the window now is 1-2 (c, A), which lacks 'b'. So current_unique becomes 2. Then the code proceeds.
+if __name__ == '__main__':
+    test()
 
-But perhaps in another iteration, when right is 4 (c), the current_unique is 3 again. Let's see.
 
-But perhaps the code finds the window from index 3 to 5. Let's see:
+```
 
-For example, when right=5 (b):
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-At this point, the code would have added the b. The current_unique would be 3 (A, c, b). The left pointer would start moving from 0 to find the minimal window.
+```
 
-But perhaps the code's logic would capture the window of size 3.
+Testing against sample input 2.
 
-Well, the code would correctly find the minimal window.
+```python
+from collections import defaultdict
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+
+    unique = set(s)
+    unique_count = len(unique)
+
+    if unique_count == 0:
+        print(0, file=output_stream)
+    else:
+        min_len = n
+        left = 0
+        freq = defaultdict(int)
+        current_unique = 0
+
+        for right in range(n):
+            char = s[right]
+            freq[char] +=1
+            if freq[char] ==1:
+                current_unique +=1
+
+            # Now try to minimize the window
+            while current_unique == unique_count:
+                window_size = right - left +1
+                if window_size < min_len:
+                    min_len = window_size
+
+                # Move left pointer
+                left_char = s[left]
+                freq[left_char] -=1
+                if freq[left_char] ==0:
+                    current_unique -=1
+                left +=1
+
+        print(min_len, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+aaBCCe
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

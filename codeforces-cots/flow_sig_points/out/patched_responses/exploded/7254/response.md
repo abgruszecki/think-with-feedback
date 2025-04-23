@@ -120,43 +120,67 @@ Alternatively, precompute a set of integers and use that for lookups.
 
 So, the code could look like:
 
-n = int(input())
-x = list(map(int, input().split()))
-y = list(map(int, input().split()))
-s = set(x) | set(y)
-count = 0
-for a in x:
-    ax = a
-    for b in y:
-        if (ax ^ b) in s:
-            count += 1
-print("Karen" if count % 2 == 0 else "Koyomi")
+Testing against sample input 1.
 
-But again, for n=2000, this is 4e6 loops. Let's see how long this would take in Python.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    x = list(map(int, input_stream.readline().rstrip("\n").split()))
+    y = list(map(int, input_stream.readline().rstrip("\n").split()))
+    s = set(x) | set(y)
+    count = 0
+    for a in x:
+        ax = a
+        for b in y:
+            if (ax ^ b) in s:
+                count += 1
+    print("Karen" if count % 2 == 0 else "Koyomi", file=output_stream)
 
-Let's test with some example.
 
-The first example input:
 
-3
+def test():
+    import io
 
-1 2 3
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+2 4 6 8 10
+9 7 5 3 1
+""",
+            "output": \
+"""\
+Karen
+""",
+        }, 
+    ]
 
-4 5 6
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The code should compute 6 pairs. So in this case, the code would generate 3*3=9 pairs. For each pair, compute XOR. For example, 1^4=5 (which is in the set?), 1^5=4 (which is in the set?), etc.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Wait, the combined set is {1,2,3,4,5,6}. So 1^4 is 5 (which is in the set). So (1,4) is a valid pair. Similarly, 1^5 is 4 (in the set). So (1,5) is valid. So for the first example, the code would count 6 pairs.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So the code works.
+    print('Tests passed 😎')
 
-But what about the time for n=2000? Let's see.
 
-In Python, each iteration is a loop. Let's think about the time.
+if __name__ == '__main__':
+    test()
 
-Another possible optimization is to precompute the set once, and use local variables for the loops. Because in Python, looking up variables in the global scope can be slower than in local scope.
 
-So, modifying the code to make the set a local variable. For example:
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 def main():
     n = int(input())

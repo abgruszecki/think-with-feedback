@@ -291,17 +291,73 @@ result = min(option1, option2, option3, option4).
 
 Print result.
 
-Yes. Let's test the first example:
+Testing against sample input 1.
 
-option1: (8-6) +103 = 2+103=105.
+```python
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    m, n = map(int, input[:2])
+    a = list(map(int, input[2:2+m]))
+    b = list(map(int, input[2+m:2+m+n]))
+    
+    sum_a = sum(a)
+    sum_b = sum(b)
+    max_a = max(a)
+    max_b = max(b)
+    
+    option1 = (sum_a - max_a) + sum_b
+    option2 = sum_a + (sum_b - max_b)
+    option3 = sum_b * m
+    option4 = sum_a * n
+    
+    print(min(option1, option2, option3, option4), file=output_stream)
 
-option2:8 + (103-100) = 11.
 
-option3:103*2=206.
 
-option4:8*2=16.
+def test():
+    import io
 
-min is 11. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 3
+10 10
+1 1 1
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

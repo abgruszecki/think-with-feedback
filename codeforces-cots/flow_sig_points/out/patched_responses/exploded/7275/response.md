@@ -827,45 +827,81 @@ Thus, the code must handle N=1 as a special case.
 
 Thus, the code should be:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-n = int(input())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-if n ==1:
+    n = int(input_stream.readline().rstrip("\n"))
 
-    print(1)
+    if n ==1:
 
-else:
+        print(1, file=output_stream)
 
-    degree = [0]*(n+1)
+    else:
 
-    for _ in range(n-1):
+        degree = [0]*(n+1)
 
-        a, b = map(int, input().split())
+        for _ in range(n-1):
 
-        degree[a] +=1
+            a, b = map(int, input_stream.readline().rstrip("\n").split())
 
-        degree[b] +=1
+            degree[a] +=1
 
-    m = sum(1 for i in range(1, n+1) if degree[i]==1)
+            degree[b] +=1
 
-    ans = (n + m) * pow(2, n -m, MOD) % MOD
+        m = sum(1 for i in range(1, n+1) if degree[i]==1)
 
-    print(ans)
+        ans = (n + m) * pow(2, n -m, MOD) % MOD
 
-But wait, for N=1, the code prints 1. Which is correct.
+        print(ans, file=output_stream)
 
-Thus, this code should handle all cases.
 
-Testing with the sample inputs:
 
-Sample 1:
+def test():
+    import io
 
-n=2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 2
+2 3
+""",
+            "output": \
+"""\
+10
+""",
+        }, 
+    ]
 
-degrees of 1 and 2 are 1 each. m=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-ans = (2+2)*2^(0)=4*1=4.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

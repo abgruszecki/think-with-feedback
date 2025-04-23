@@ -530,197 +530,271 @@ Let's proceed.
 
 In code:
 
-mod = 998244353
+Testing against sample input 1.
 
-n, k = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    mod = 998244353
 
-if n ==0:
-   print(0)
-   exit()
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-# Compute f_row(a) for a in 0..n
+    if n ==0:
+       print(0, file=output_stream)
+       return
 
-# Initialize DP for rows
-# dp[i][cnt][s] = number of ways after i row_flips to have cnt zeros and current state s
-# But since i ranges from 0 to n-1 (since there are n-1 row_flips)
-# But in code, perhaps using a list of dictionaries or a 3D array.
+    # Compute f_row(a) for a in 0..n
 
-max_n = n
+    # Initialize DP for rows
+    # dp[i][cnt][s] = number of ways after i row_flips to have cnt zeros and current state s
+    # But since i ranges from 0 to n-1 (since there are n-1 row_flips)
+    # But in code, perhaps using a list of dictionaries or a 3D array.
 
-# For rows, the maximum number of row_flips is n-1.
+    max_n = n
 
-# Initialize DP for rows:
+    # For rows, the maximum number of row_flips is n-1.
 
-prev_dp = [ [0]*2 for _ in range(n+2) ]  # prev_dp[cnt][s]
-prev_dp[1][0] = 1  # after 0 row_flips (i=0), cnt=1 (R_0 is 0), state is 0.
+    # Initialize DP for rows:
 
-for i in range(1, n):
-    curr_dp = [ [0]*2 for _ in range(n+2) ]
-    # current row_flips is i (1-based?), but in code, i starts from 0 to n-2?
-    # Wait, for n rows, there are n-1 row_flips. So i runs from 1 to n-1 steps (each step is a row_flip)
-    # So for i in range(1, n): which is 1 <=i <=n-1 (since for n-1 steps)
-    for cnt in range(1, i+1 +1):  # after i steps, the number of R entries is i+1 (R_0 to R_i)
-        # possible cnt ranges up to i+1 (if all R entries are 0)
-        for s in [0, 1]:
-            if prev_dp[cnt][s] ==0:
-                continue
-            # try r_i =0 and 1
-            # r_i =0:
-            new_s = s
-            new_cnt = cnt + (1 if new_s ==0 else 0)
-            if new_cnt <= (i+1 +1):  # after i steps, the next cnt is for i+1 steps (R_0 to R_i)
+    prev_dp = [ [0]*2 for _ in range(n+2) ]  # prev_dp[cnt][s]
+    prev_dp[1][0] = 1  # after 0 row_flips (i=0), cnt=1 (R_0 is 0), state is 0.
+
+    for i in range(1, n):
+        curr_dp = [ [0]*2 for _ in range(n+2) ]
+        # current row_flips is i (1-based?), but in code, i starts from 0 to n-2?
+        # Wait, for n rows, there are n-1 row_flips. So i runs from 1 to n-1 steps (each step is a row_flip)
+        # So for i in range(1, n): which is 1 <=i <=n-1 (since for n-1 steps)
+        for cnt in range(1, i+1 +1):  # after i steps, the number of R entries is i+1 (R_0 to R_i)
+            # possible cnt ranges up to i+1 (if all R entries are 0)
+            for s in [0, 1]:
+                if prev_dp[cnt][s] ==0:
+                    continue
+                # try r_i =0 and 1
+                # r_i =0:
+                new_s = s
+                new_cnt = cnt + (1 if new_s ==0 else 0)
+                if new_cnt <= (i+1 +1):  # after i steps, the next cnt is for i+1 steps (R_0 to R_i)
+                    curr_dp[new_cnt][new_s] = (curr_dp[new_cnt][new_s] + prev_dp[cnt][s]) % mod
+                # r_i =1:
+                new_s = 1 - s
+                new_cnt = cnt + (1 if new_s ==0 else 0)
                 curr_dp[new_cnt][new_s] = (curr_dp[new_cnt][new_s] + prev_dp[cnt][s]) % mod
-            # r_i =1:
-            new_s = 1 - s
-            new_cnt = cnt + (1 if new_s ==0 else 0)
-            curr_dp[new_cnt][new_s] = (curr_dp[new_cnt][new_s] + prev_dp[cnt][s]) % mod
-    prev_dp = curr_dp
+        prev_dp = curr_dp
 
-# After processing all row_flips (n-1 steps), the total R entries are n (0-based up to n-1)
-# So the maximum cnt is n.
+    # After processing all row_flips (n-1 steps), the total R entries are n (0-based up to n-1)
+    # So the maximum cnt is n.
 
-row_counts = [0]*(n+1)
-for cnt in range(n+1):
-    for s in [0,1]:
-        row_counts[cnt] = (row_counts[cnt] + prev_dp[cnt][s]) % mod
+    row_counts = [0]*(n+1)
+    for cnt in range(n+1):
+        for s in [0,1]:
+            row_counts[cnt] = (row_counts[cnt] + prev_dp[cnt][s]) % mod
 
-# Similarly for columns. Since it's the same, column_counts is the same as row_counts.
+    # Similarly for columns. Since it's the same, column_counts is the same as row_counts.
 
-col_counts = row_counts.copy()
+    col_counts = row_counts.copy()
 
-total =0
+    total =0
 
-for a in range(n+1):
-    if row_counts[a] ==0:
-        continue
-    for c in range(n+1):
-        if col_counts[c] ==0:
+    for a in range(n+1):
+        if row_counts[a] ==0:
             continue
-        # compute max of a*c, a*(n -c), (n -a)*c, (n -a)*(n -c)
-        max_prod = max(
-            a * c,
-            a * (n - c),
-            (n -a) * c,
-            (n -a) * (n -c)
-        )
-        if max_prod <k:
-            total = (total + row_counts[a] * col_counts[c]) % mod
+        for c in range(n+1):
+            if col_counts[c] ==0:
+                continue
+            # compute max of a*c, a*(n -c), (n -a)*c, (n -a)*(n -c)
+            max_prod = max(
+                a * c,
+                a * (n - c),
+                (n -a) * c,
+                (n -a) * (n -c)
+            )
+            if max_prod <k:
+                total = (total + row_counts[a] * col_counts[c]) % mod
 
-total = (total * 2) % mod
+    total = (total * 2) % mod
 
-print(total)
+    print(total, file=output_stream)
 
-Wait, but what if n=0? The problem states n >=1. Because the input constraints are 1<=n<=500.
 
-So the code can assume n >=1.
 
-Testing with sample input 1:
+def test():
+    import io
 
-Sample input 1: 1 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 3
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-n=1, k=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For rows, the row_flips is 0 steps (since n-1=0). So the row sequence is [0]. So a=1 (only R_0=0).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-For columns, same: c=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Compute max_prod:
+    print('Tests passed 😎')
 
-a=1, c=1.
 
-max(1*1, 1*0, 0*1, 0*0) =1.
+if __name__ == '__main__':
+    test()
 
-Which is not <k=1. So this pair (a,c) is invalid. So the total is zero. Multiply by 2: 0.
 
-Sample input 2: n=2, k=3.
+```
 
-n=2, so rows have 1 row_flip (n-1=1). The row sequences can be:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-- row_flips is 0: R is [0,0]. a=2.
+```
 
-- row_flips is 1: R is [0,1]. a=1 (R_0=0, R_1=1: one zero).
+Testing against sample input 2.
 
-So row_counts[2] =1 (only one way for a=2: row_flips is 0).
+```python
+def main(input_stream, output_stream):
+    mod = 998244353
 
-row_counts[1] =1 (row_flips is 1).
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-Similarly for columns.
+    if n ==0:
+       print(0, file=output_stream)
+       return
 
-So possible a and c:
+    # Compute f_row(a) for a in 0..n
 
-Possible a: 1, 2.
+    # Initialize DP for rows
+    # dp[i][cnt][s] = number of ways after i row_flips to have cnt zeros and current state s
+    # But since i ranges from 0 to n-1 (since there are n-1 row_flips)
+    # But in code, perhaps using a list of dictionaries or a 3D array.
 
-Possible c: 1, 2.
+    max_n = n
 
-For each pair (a,c), compute max_prod.
+    # For rows, the maximum number of row_flips is n-1.
 
-For example, a=2, c=2:
+    # Initialize DP for rows:
 
-max_prod = 2*2=4. If k=3, 4 >=3 → invalid.
+    prev_dp = [ [0]*2 for _ in range(n+2) ]  # prev_dp[cnt][s]
+    prev_dp[1][0] = 1  # after 0 row_flips (i=0), cnt=1 (R_0 is 0), state is 0.
 
-a=2, c=1:
+    for i in range(1, n):
+        curr_dp = [ [0]*2 for _ in range(n+2) ]
+        # current row_flips is i (1-based?), but in code, i starts from 0 to n-2?
+        # Wait, for n rows, there are n-1 row_flips. So i runs from 1 to n-1 steps (each step is a row_flip)
+        # So for i in range(1, n): which is 1 <=i <=n-1 (since for n-1 steps)
+        for cnt in range(1, i+1 +1):  # after i steps, the number of R entries is i+1 (R_0 to R_i)
+            # possible cnt ranges up to i+1 (if all R entries are 0)
+            for s in [0, 1]:
+                if prev_dp[cnt][s] ==0:
+                    continue
+                # try r_i =0 and 1
+                # r_i =0:
+                new_s = s
+                new_cnt = cnt + (1 if new_s ==0 else 0)
+                if new_cnt <= (i+1 +1):  # after i steps, the next cnt is for i+1 steps (R_0 to R_i)
+                    curr_dp[new_cnt][new_s] = (curr_dp[new_cnt][new_s] + prev_dp[cnt][s]) % mod
+                # r_i =1:
+                new_s = 1 - s
+                new_cnt = cnt + (1 if new_s ==0 else 0)
+                curr_dp[new_cnt][new_s] = (curr_dp[new_cnt][new_s] + prev_dp[cnt][s]) % mod
+        prev_dp = curr_dp
 
-products are 2*1, 2*(2-1)=2, (0)*1=0, (0)*(1)=0 → max is 2. 2 <3 → valid.
+    # After processing all row_flips (n-1 steps), the total R entries are n (0-based up to n-1)
+    # So the maximum cnt is n.
 
-So row_counts[2] * col_counts[1] =1*1=1.
+    row_counts = [0]*(n+1)
+    for cnt in range(n+1):
+        for s in [0,1]:
+            row_counts[cnt] = (row_counts[cnt] + prev_dp[cnt][s]) % mod
 
-Similarly for a=1, c=2 → same as a=2, c=1 → valid, contributes 1*1=1.
+    # Similarly for columns. Since it's the same, column_counts is the same as row_counts.
 
-a=1, c=1:
+    col_counts = row_counts.copy()
 
-max_prod is 1*1=1, 1*(2-1)=1, (2-1)*1=1, (1)*(1)=1. max is 1 <3. So valid. Contributes 1*1=1.
+    total =0
 
-a=1, c=2: max_prod is (1*2) =2 <3. valid.
+    for a in range(n+1):
+        if row_counts[a] ==0:
+            continue
+        for c in range(n+1):
+            if col_counts[c] ==0:
+                continue
+            # compute max of a*c, a*(n -c), (n -a)*c, (n -a)*(n -c)
+            max_prod = max(
+                a * c,
+                a * (n - c),
+                (n -a) * c,
+                (n -a) * (n -c)
+            )
+            if max_prod <k:
+                total = (total + row_counts[a] * col_counts[c]) % mod
 
-Wait, wait:
+    total = (total * 2) % mod
 
-a=1, c=2:
+    print(total, file=output_stream)
 
-a=1 (rows have 1 zero), c=2 (columns have 2 zeros).
 
-Products:
 
-a*c=1*2=2.
+def test():
+    import io
 
-a*(n-c) =1*0=0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+49 1808
+""",
+            "output": \
+"""\
+359087121
+""",
+        }, 
+    ]
 
-(n-a)*c=1*2=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-(n-a)*(n-c) =1*0=0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-max is 2 <3 → valid. So this contributes 1*1=1 (row_counts[1] =1, col_counts[2] =1).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So total valid (a,c) pairs:
+    print('Tests passed 😎')
 
-a=2, c=1 → 1*1=1.
 
-a=1, c=2 →1*1=1.
+if __name__ == '__main__':
+    test()
 
-a=1, c=1 →1*1=1.
 
-a=1, c=0? No, c ranges from 1 to 2.
+```
 
-Wait columns are computed in the same way as rows, so for n=2, the possible c is 1 or 2.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 115, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 108, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '359087121'
+Got: '251919192'
 
-So, the four possible pairs are (2,2), (2,1), (1,2), (1,1).
+```
 
-Only (2,1), (1,2), (1,1) are valid.
-
-So their contributions:
-
-(2,1): 1*1=1.
-
-(1,2): 1*1=1.
-
-(1,1):1*1=1.
-
-So sum is 3. Multiply by 2 gives 6, which matches the sample input 2.
-
-So the code works for this case.
-
-Another sample input is 49 1808. The output is 359087121, which is handled by the code's modulo operations.
-
-Thus, the code should be correct.
 </think>
 
 ```python

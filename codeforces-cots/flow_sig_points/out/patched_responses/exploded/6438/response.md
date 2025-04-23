@@ -957,107 +957,144 @@ Now, putting it all together:
 
 The code:
 
+Testing against sample input 1.
+
+```python
 import sys
-
 import math
-
 from math import gcd
 
-n = int(sys.stdin.readline())
 
-a = list(map(int, sys.stdin.readline().split()))
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
-if 1 in a:
+    a = list(map(int, input_stream.readline().split()))
 
-    print(1)
+    if 1 in a:
 
-    sys.exit()
-
-current_gcd = a[0]
-
-for x in a[1:]:
-
-    current_gcd = math.gcd(current_gcd, x)
-
-    if current_gcd == 1:
-
-        break
-
-if current_gcd != 1:
-
-    print(-1)
-
-    sys.exit()
-
-# Now, find the minimal subset size with GCD 1
-
-dp = dict()
-
-minimal = float('inf')
-
-for x in a:
-
-    new_gcds = {}
-
-    # Add the current x as a subset of size 1
-
-    new_gcds[x] = 1
-
-    # Process existing GCDs in the current dp
-
-    # Iterate over a copy of the current dp to avoid modifying it during iteration
-
-    for g in list(dp.keys()):
-
-        new_g = math.gcd(g, x)
-
-        new_count = dp[g] + 1
-
-        if new_g in new_gcds:
-
-            if new_count < new_gcds[new_g]:
-
-                new_gcds[new_g] = new_count
-
-        else:
-
-            new_gcds[new_g] = new_count
-
-    # Merge new_gcds into the main dp
-
-    for g in new_gcds:
-
-        if g in dp:
-
-            if new_gcds[g] < dp[g]:
-
-                dp[g] = new_gcds[g]
-
-        else:
-
-            dp[g] = new_gcds[g]
-
-    # Check if we have found the answer
-
-    if 1 in dp:
-
-        print(dp[1])
+        print(1, file=output_stream)
 
         sys.exit()
 
-# If after processing all elements, 1 is in dp, but in case of error
+    current_gcd = a[0]
 
-print(-1)
+    for x in a[1:]:
 
-But wait, after the code checks the overall GCD and proceeds, the dynamic programming approach will find the minimal subset.
+        current_gcd = math.gcd(current_gcd, x)
 
-But let's test this code with the first example.
+        if current_gcd == 1:
 
-But in the code, after the overall GCD is 1, the code proceeds to process all elements.
+            break
 
-But in the first example, after processing the third element, the code finds 1:3 and prints it.
+    if current_gcd != 1:
 
-Thus, the code is correct.
+        print(-1, file=output_stream)
+
+        sys.exit()
+
+    # Now, find the minimal subset size with GCD 1
+
+    dp = dict()
+
+    minimal = float('inf')
+
+    for x in a:
+
+        new_gcds = {}
+
+        # Add the current x as a subset of size 1
+
+        new_gcds[x] = 1
+
+        # Process existing GCDs in the current dp
+
+        # Iterate over a copy of the current dp to avoid modifying it during iteration
+
+        for g in list(dp.keys()):
+
+            new_g = math.gcd(g, x)
+
+            new_count = dp[g] + 1
+
+            if new_g in new_gcds:
+
+                if new_count < new_gcds[new_g]:
+
+                    new_gcds[new_g] = new_count
+
+            else:
+
+                new_gcds[new_g] = new_count
+
+        # Merge new_gcds into the main dp
+
+        for g in new_gcds:
+
+            if g in dp:
+
+                if new_gcds[g] < dp[g]:
+
+                    dp[g] = new_gcds[g]
+
+            else:
+
+                dp[g] = new_gcds[g]
+
+        # Check if we have found the answer
+
+        if 1 in dp:
+
+            print(dp[1], file=output_stream)
+
+            sys.exit()
+
+    # If after processing all elements, 1 is in dp, but in case of error
+
+    print(-1, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+2 4 6
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+
+```
 
 Now, in Python, dictionaries are handled as such. But for large n=3e5, the code may be slow.
 

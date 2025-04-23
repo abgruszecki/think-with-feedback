@@ -834,158 +834,190 @@ But for large N (1e5), Python's recursion depth is limited, so we need to use it
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import deque
 
-def input():
-    return sys.stdin.read()
 
-data = sys.stdin.read().split()
-n = int(data[0])
-adj = [[] for _ in range(n+1)]
-ptr =1
-for _ in range(n-1):
-    u = int(data[ptr])
-    v = int(data[ptr+1])
-    adj[u].append(v)
-    adj[v].append(u)
-    ptr +=2
+def main(input_stream, output_stream):
+    def input():
+        return input_stream.read()
 
-# Function to perform BFS and return the farthest node and parent array
-def bfs(start):
-    parent = [-1]*(n+1)
-    distance = [-1]*(n+1)
-    q = deque()
-    q.append(start)
-    distance[start] =0
-    while q:
-        u = q.popleft()
-        for v in adj[u]:
-            if distance[v] == -1:
-                distance[v] = distance[u] +1
-                parent[v] = u
-                q.append(v)
-    max_dist = max(distance[1:n+1]) # assuming nodes are 1-based
-    far_node = distance.index(max_dist)
-    return far_node, parent
+    data = input_stream.read().split()
+    n = int(data[0])
+    adj = [[] for _ in range(n+1)]
+    ptr =1
+    for _ in range(n-1):
+        u = int(data[ptr])
+        v = int(data[ptr+1])
+        adj[u].append(v)
+        adj[v].append(u)
+        ptr +=2
 
-# Find the diameter path
-u, _ = bfs(1)
-v, parent = bfs(u)
-# Reconstruct path
-path = []
-current = v
-while current != -1:
-    path.append(current)
-    current = parent[current]
-path.reverse()
-diam_len = len(path)
-diam_set = set(path)
+    # Function to perform BFS and return the farthest node and parent array
+    def bfs(start):
+        parent = [-1]*(n+1)
+        distance = [-1]*(n+1)
+        q = deque()
+        q.append(start)
+        distance[start] =0
+        while q:
+            u = q.popleft()
+            for v in adj[u]:
+                if distance[v] == -1:
+                    distance[v] = distance[u] +1
+                    parent[v] = u
+                    q.append(v)
+        max_dist = max(distance[1:n+1]) # assuming nodes are 1-based
+        far_node = distance.index(max_dist)
+        return far_node, parent
 
-depths = []
+    # Find the diameter path
+    u, _ = bfs(1)
+    v, parent = bfs(u)
+    # Reconstruct path
+    path = []
+    current = v
+    while current != -1:
+        path.append(current)
+        current = parent[current]
+    path.reverse()
+    diam_len = len(path)
+    diam_set = set(path)
 
-# Create a dictionary to map each node in diam to its index
-diam_nodes = {node: idx for idx, node in enumerate(path)}
+    depths = []
 
-for node in path:
-    idx = diam_nodes[node]
-    prev_node = path[idx-1] if idx >0 else None
-    next_node = path[idx+1] if idx < len(path)-1 else None
-    for neighbor in adj[node]:
-        if neighbor == prev_node or neighbor == next_node:
-            continue
-        if neighbor in diam_set:
-            # this can happen if the neighbor is in diam but not prev or next (unlikely)
-            # but perhaps possible in some cases?
-            # in a tree, the path is a simple path, so neighbor in diam implies it's either prev or next.
-            # so this case shouldn't happen.
-            continue
-        # Compute the depth of this branch
-        max_depth =0
-        stack = [(neighbor, node, 1)] # (current_node, parent, depth)
-        while stack:
-            u_current, u_parent, current_depth = stack.pop()
-            if current_depth > max_depth:
-                max_depth = current_depth
-            for v_neighbor in adj[u_current]:
-                if v_neighbor != u_parent:
-                    stack.append( (v_neighbor, u_current, current_depth +1) )
-        depths.append(max_depth)
+    # Create a dictionary to map each node in diam to its index
+    diam_nodes = {node: idx for idx, node in enumerate(path)}
 
-# Sort depths in descending order
-depths.sort(reverse=True)
-prefix = []
-current_sum =0
-for d in depths:
-    current_sum += d
-    prefix.append(current_sum)
+    for node in path:
+        idx = diam_nodes[node]
+        prev_node = path[idx-1] if idx >0 else None
+        next_node = path[idx+1] if idx < len(path)-1 else None
+        for neighbor in adj[node]:
+            if neighbor == prev_node or neighbor == next_node:
+                continue
+            if neighbor in diam_set:
+                # this can happen if the neighbor is in diam but not prev or next (unlikely)
+                # but perhaps possible in some cases?
+                # in a tree, the path is a simple path, so neighbor in diam implies it's either prev or next.
+                # so this case shouldn't happen.
+                continue
+            # Compute the depth of this branch
+            max_depth =0
+            stack = [(neighbor, node, 1)] # (current_node, parent, depth)
+            while stack:
+                u_current, u_parent, current_depth = stack.pop()
+                if current_depth > max_depth:
+                    max_depth = current_depth
+                for v_neighbor in adj[u_current]:
+                    if v_neighbor != u_parent:
+                        stack.append( (v_neighbor, u_current, current_depth +1) )
+            depths.append(max_depth)
 
-ans = [0]*(n+1) # ans[K] for K=0 to N, but we'll ignore K=0.
+    # Sort depths in descending order
+    depths.sort(reverse=True)
+    prefix = []
+    current_sum =0
+    for d in depths:
+        current_sum += d
+        prefix.append(current_sum)
 
-ans[1] =1
-ans[2] = diam_len
+    ans = [0]*(n+1) # ans[K] for K=0 to N, but we'll ignore K=0.
 
-for K in range(3, n+1):
-    if K-2 <= len(prefix):
-        if K-2 ==0:
-            total = diam_len
+    ans[1] =1
+    ans[2] = diam_len
+
+    for K in range(3, n+1):
+        if K-2 <= len(prefix):
+            if K-2 ==0:
+                total = diam_len
+            else:
+                total = diam_len + prefix[K-3]
         else:
-            total = diam_len + prefix[K-3]
-    else:
-        total = diam_len + (prefix[-1] if prefix else 0)
-    ans[K] = min(total, n)
+            total = diam_len + (prefix[-1] if prefix else 0)
+        ans[K] = min(total, n)
 
-# Now, handle K=2 and higher
-# Also, after processing all K, we need to output the maximum between the computed value and the previous ones.
+    # Now, handle K=2 and higher
+    # Also, after processing all K, we need to output the maximum between the computed value and the previous ones.
 
-# Wait, no. The current approach computes for each K the maximum possible.
+    # Wait, no. The current approach computes for each K the maximum possible.
 
-# However, there's a case where for K=4, the sum could be less than N, but adding another ship would include more nodes.
+    # However, there's a case where for K=4, the sum could be less than N, but adding another ship would include more nodes.
 
-# Wait, no. Because according to our earlier reasoning, the sum of diam_len and all depths is N.
+    # Wait, no. Because according to our earlier reasoning, the sum of diam_len and all depths is N.
 
-# So for K >=2 + len(depths), ans[K] = N.
+    # So for K >=2 + len(depths), ans[K] = N.
 
-# So the code should handle this.
+    # So the code should handle this.
 
-# But how?
+    # But how?
 
-# Because after K exceeds 2 + len(depths), the sum is diam_len + sum(depths) = N.
+    # Because after K exceeds 2 + len(depths), the sum is diam_len + sum(depths) = N.
 
-# So the code computes total = diam_len + sum(depths) (if K-2 >= len(depths)), and then ans[K] is min(total, N), which is N.
+    # So the code computes total = diam_len + sum(depths) (if K-2 >= len(depths)), and then ans[K] is min(total, N), which is N.
 
-# So it's correct.
+    # So it's correct.
 
-# Now, build the output list.
+    # Now, build the output list.
 
-output = []
-for K in range(1, n+1):
-    if K ==1:
-        output.append(str(1))
-    else:
-        output.append(str(ans[K]))
+    output = []
+    for K in range(1, n+1):
+        if K ==1:
+            output.append(str(1))
+        else:
+            output.append(str(ans[K]))
 
-print(' '.join(output))
+    print(' '.join(output), file=output_stream)
 
-Wait, but let's test the first sample input:
 
-Sample 1:
 
-3
+def test():
+    import io
 
-Edges:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 2
+3 2
+4 2
+""",
+            "output": \
+"""\
+1 3 4 4
+""",
+        }, 
+    ]
 
-1-2, 2-3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The diam path is [1,2,3]. diam_len=3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-depths list is empty.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-prefix is empty.
+    print('Tests passed 😎')
 
-For K=3:
 
-K-2 =1. But len(prefix) is 0. So else clause: total = 3 + 0 =3. min(3,3) →3. Which is correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

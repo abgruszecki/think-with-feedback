@@ -1174,39 +1174,102 @@ But wait, the code has a problem. For example, the run may be processed, and the
 
 But the code correctly tracks the maximum_length across all k's.
 
-Now, let's test this code.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    max_length = 0
 
-Input:
+    for k in reversed(range(31)):
+        current_max = 0
+        i = 0
+        while i < n:
+            if not (a[i] & (1 << k)):
+                i += 1
+                continue
+            j = i
+            while j < n and (a[j] & (1 << k)):
+                j += 1
+            run = a[i:j]
+            m = len(run)
+            prefix_xor = [0] * (m + 1)
+            for l in range(1, m + 1):
+                prefix_xor[l] = prefix_xor[l-1] ^ run[l-1]
+            even_masks = {}
+            odd_masks = {}
+            current_run_max = 0
+            for idx in range(m + 1):
+                p = prefix_xor[idx]
+                mask = p & (~((1 << k) - 1))
+                parity = idx % 2
+                if parity == 0:
+                    if mask in even_masks:
+                        candidate = idx - even_masks[mask]
+                        if candidate > current_run_max:
+                            current_run_max = candidate
+                    else:
+                        even_masks[mask] = idx
+                else:
+                    if mask in odd_masks:
+                        candidate = idx - odd_masks[mask]
+                        if candidate > current_run_max:
+                            current_run_max = candidate
+                    else:
+                        odd_masks[mask] = idx
+            if current_run_max > current_max:
+                current_max = current_run_max
+            i = j
+        if current_max > max_length:
+            max_length = current_max
 
-2
+    print(max_length if max_length >= 2 else 0, file=output_stream)
 
-5 6
 
-Processing k=2 (since 5 and 6 have bit 2 set):
 
-run is [5,6].
+def test():
+    import io
 
-prefix_xor is [0,5,3].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+2 4 3
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-For idx=0 (even):
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-mask is 0 & ~(3) =0. even_masks[0] =0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-idx=1 (odd):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-mask is 5 & ~3 =5& ~3= 5-3= 2? 5 is 101 in binary. ~3 is ...11111100 (assuming 32 bits). So 5 & ~3 is 101 & 111...1100 = 100 (4). So mask is4. added to odd_masks.
+    print('Tests passed 😎')
 
-idx=2 (even):
 
-mask is3 & ~3 =0. even_masks has 0 at 0. candidate is 2-0=2. current_run_max is 2.
+if __name__ == '__main__':
+    test()
 
-current_max for k=2 is 2.
 
-Other k's may have runs, but their current_max would be less than 2.
+```
 
-Thus, output is 2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

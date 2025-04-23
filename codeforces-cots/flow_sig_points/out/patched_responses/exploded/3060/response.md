@@ -93,19 +93,76 @@ Wait, but what if the closed set is empty? But according to the problem statemen
 
 Therefore, the code can proceed as described.
 
-Testing the first example:
+Testing against sample input 1.
 
-Input:
-4 2
-1 1 -1 1
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    tabs = list(map(int, input_stream.readline().rstrip("\n").split()))
+    count_1 = sum(1 for x in tabs if x == 1)
+    count_neg1 = n - count_1
+    max_diff = 0
 
-count_1 is 3 (positions 1,2,4), count_neg1 is 1 (position3).
+    for r in range(k):
+        closed_1 = closed_neg1 = 0
+        for i in range(n):
+            if (i + 1 - r) % k == 0:
+                if tabs[i] == 1:
+                    closed_1 += 1
+                else:
+                    closed_neg1 += 1
+        e = count_1 - closed_1
+        s = count_neg1 - closed_neg1
+        current_diff = abs(e - s)
+        if current_diff > max_diff:
+            max_diff = current_diff
 
-For r=0 (mod2), the closed positions are 2 and 4 (since (2-0) mod2=0, (4-0) mod2=0). So closed_1=2 (positions 2 and4 are 1s). closed_neg1=0. e=3-2=1, s=1-0=1. |1-1|=0.
+    print(max_diff, file=output_stream)
 
-For r=1 (mod2), closed positions are 1 and3. closed_1 is 1 (position1) and closed_neg1=1 (position3). e=3-1=2, s=1-1=0. |2-0|=2. So the maximum is 2.
 
-Which matches the first example.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+14 3
+-1 1 -1 -1 1 -1 -1 1 -1 -1 1 -1 -1 1
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

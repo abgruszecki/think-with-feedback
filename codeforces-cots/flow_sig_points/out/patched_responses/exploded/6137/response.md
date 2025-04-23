@@ -944,63 +944,102 @@ Now, the code must handle the following steps:
 
 - Compute the product for each mask in the coefficients.
 
-Now, let's test this approach with the sample input.
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+import sys
+from itertools import permutations
+from collections import defaultdict
 
-2
 
-50 50
+MOD = 10**9 + 7
 
-50 50
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    p = []
+    for _ in range(n):
+        p.append(list(map(int, input_stream.readline().split())))
+    
+    inv100 = pow(100, MOD-2, MOD)
+    edge_prob = [[(x * inv100) % MOD for x in row] for row in p]
+    
+    perms = list(permutations(range(n)))
+    coeff = defaultdict(int)
+    
+    for perm in perms:
+        mask = 0
+        for i in range(n):
+            j = perm[i]
+            bit = i * n + j
+            mask |= 1 << bit
+        
+        temp = defaultdict(int)
+        temp[mask] = (temp[mask] + 1) % MOD
+        for existing_mask in list(coeff.keys()):
+            new_mask = existing_mask | mask
+            val = (coeff[existing_mask] * (-1)) % MOD
+            temp[new_mask] = (temp[new_mask] + val) % MOD
+        
+        for m, v in temp.items():
+            coeff[m] = (coeff[m] + v) % MOD
+    
+    result = 0
+    for mask, c in coeff.items():
+        product = 1
+        for i in range(n):
+            for j in range(n):
+                if mask & (1 << (i * n + j)):
+                    product = (product * edge_prob[i][j]) % MOD
+        result = (result + c * product) % MOD
+    
+    print(result % MOD, file=output_stream)
 
-The edge_prob matrix is:
 
-edge_prob[0][0] = 50 * inv_100 mod MOD = 50 * 14_000_0005 mod MOD = 700_000_025 mod MOD = 700000025 mod 1e9+7 is 700000025.
 
-Similarly for all other edges.
+def test():
+    import io
 
-The permutations for n=2 are:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+3 1 4
+1 5 9
+2 6 5
+""",
+            "output": \
+"""\
+351284554
+""",
+        }, 
+    ]
 
-Permutation 1: (0, 1) → mask 0b11 (binary for edges (0,0) and (1,1)) → mask bits 0 and 3 (assuming i=0, j=0 is bit 0, i=0, j=1 is bit 1, i=1, j=0 is bit 2, i=1, j=1 is bit 3).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Permutation 2: (1, 0) → edges (0,1) and (1,0) → bits 1 and 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing permutation 1:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-coeff becomes {0b1001: 1}.
+    print('Tests passed 😎')
 
-Processing permutation 2:
 
-For each existing mask in coeff (0b1001):
+if __name__ == '__main__':
+    test()
 
-new_mask = 0b1001 | 0b0110 = 0b1111.
 
-temp[0b1111] -= 1 → temp[0b1111] = -1.
+```
 
-Then, temp[0b0110] += 1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So temp is {0b1111: -1, 0b0110: 1}.
-
-Merge into coeff:
-
-coeff = {0b1001: 1, 0b0110: 1, 0b1111: -1}.
-
-Now, after processing both permutations, the coefficients are:
-
-mask 0b1001 (edges (0,0) and (1,1)) → coeff 1.
-
-mask 0b0110 (edges (0,1) and (1,0)) → coeff 1.
-
-mask 0b1111 (all edges) → coeff -1.
-
-The product for mask 0b1001 is (50/100) * (50/100) = 0.25 → 700000025^2 mod MOD.
-
-The product for mask 0b0110 is (50/100)^2 → same.
-
-The product for mask 0b1111 is (50/100)^4 → 0.0625.
-
-The sum is 1*0.25 + 1*0.25 + (-1)*0.0625 = 0.4375 → 7/16, which is correct.
+```
 
 Thus, the code works for the sample input.
 

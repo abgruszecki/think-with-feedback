@@ -375,47 +375,129 @@ Yes, because the code checks current[i] and current[i+1], not new[i] and new[i+1
 
 So the code is correct.
 
-Testing the first sample:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n, t = map(int, input_stream.readline().rstrip("\n").split())
+    s = list(input_stream.readline().rstrip("\n"))
+    current = s.copy()
 
-Input:
+    for _ in range(t):
+        new = current.copy()
+        for i in range(n - 1):
+            if current[i] == 'B' and current[i+1] == 'G':
+                new[i], new[i+1] = new[i+1], new[i]
+        current = new
 
-5 1
+    print(''.join(current), file=output_stream)
 
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 2
 BGGBG
+""",
+            "output": \
+"""\
+GGBGB
+""",
+        }, 
+    ]
 
-Which is 'B','G','G','B','G'.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-After one step:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=0: B and G → swap new[0] and 1 → new becomes G B G B G.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Then i=3: B and G → swap new[3] and 4 → new becomes G B G G B.
+    print('Tests passed 😎')
 
-Which matches the sample output.
 
-Sample 2:
+if __name__ == '__main__':
+    test()
 
-After 2 steps:
 
-First step as before. Current is GBGGB.
+```
 
-Second step:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-current = ['G','B','G','G','B']
+```
 
-loop i from 0 to 3:
+Testing against sample input 2.
 
-i=0: G followed by B → no.
+```python
+def main(input_stream, output_stream):
+    n, t = map(int, input_stream.readline().rstrip("\n").split())
+    s = list(input_stream.readline().rstrip("\n"))
+    current = s.copy()
 
-i=1: B followed by G → yes. Swap new[1] and 2. new is G G B G B.
+    for _ in range(t):
+        new = current.copy()
+        for i in range(n - 1):
+            if current[i] == 'B' and current[i+1] == 'G':
+                new[i], new[i+1] = new[i+1], new[i]
+        current = new
 
-i=2: G followed by G → no.
+    print(''.join(current), file=output_stream)
 
-i=3: G followed by B → no.
 
-So the new list after step 2 is GGBGB, which matches the second sample.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 1
+GGGB
+""",
+            "output": \
+"""\
+GGGB
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

@@ -261,43 +261,87 @@ Yes.
 
 Now, code:
 
-n, P1, P2, P3, T1, T2 = map(int, input().split())
+Testing against sample input 1.
 
-intervals = [tuple(map(int, input().split())) for _ in range(n)]
+```python
+def main(input_stream, output_stream):
+    n, P1, P2, P3, T1, T2 = map(int, input_stream.readline().rstrip("\n").split())
 
-total = 0
+    intervals = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n)]
 
-for l, r in intervals:
+    total = 0
 
-    total += (r - l) * P1
+    for l, r in intervals:
 
-for i in range(n-1):
+        total += (r - l) * P1
 
-    current_r = intervals[i][1]
+    for i in range(n-1):
 
-    next_l = intervals[i+1][0]
+        current_r = intervals[i][1]
 
-    t = next_l - current_r
+        next_l = intervals[i+1][0]
 
-    phase1 = min(t, T1)
+        t = next_l - current_r
 
-    remaining = t - phase1
+        phase1 = min(t, T1)
 
-    phase2 = min(remaining, T2)
+        remaining = t - phase1
 
-    remaining -= phase2
+        phase2 = min(remaining, T2)
 
-    phase3 = remaining
+        remaining -= phase2
 
-    total += phase1 * P1 + phase2 * P2 + phase3 * P3
+        phase3 = remaining
 
-print(total)
+        total += phase1 * P1 + phase2 * P2 + phase3 * P3
 
-Yes. That's the code.
+    print(total, file=output_stream)
 
-Testing sample input 1:
 
-n=1. So no gaps. The loop for i in 0 to 0-1= -1, which doesn't run. So code adds 10*3=30. Correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 8 4 2 5 10
+20 30
+50 100
+""",
+            "output": \
+"""\
+570
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2: correct.
 

@@ -147,43 +147,71 @@ Wait, let's see. For example, n=21. The start is 21-100= -79, but max with 1. So
 
 So the code can be written as:
 
-n = int(input())
+Testing against sample input 1.
 
-result = []
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-start = max(1, n - 100)
+    result = []
 
-for x in range(start, n):
+    start = max(1, n - 100)
 
-    if x + sum(int(d) for d in str(x)) == n:
+    for x in range(start, n):
 
-        result.append(x)
+        if x + sum(int(d) for d in str(x)) == n:
 
-print(len(result))
+            result.append(x)
 
-for x in result:
+    print(len(result), file=output_stream)
 
-    print(x)
+    for x in result:
 
-This should work.
+        print(x, file=output_stream)
 
-Now, let's test the code against the examples.
 
-First example:
 
-Input 21.
+def test():
+    import io
 
-start is 21-100= -79 → max(1, -79) is 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+20
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Loop from 1 to 20.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For x=15:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sum_digits(15) is 1+5=6. 15+6=21. So added.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Other x's don't sum to 21.
+    print('Tests passed 😎')
 
-So output is 1 and 15.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: input 20.
 

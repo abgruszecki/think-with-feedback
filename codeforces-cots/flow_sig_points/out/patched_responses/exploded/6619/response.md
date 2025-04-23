@@ -481,25 +481,82 @@ for i in range(1, n+1):
 
 Yes.
 
-Testing with sample input 1:
+Testing against sample input 1.
 
-Sample 1's prefix after 10 books is 149.
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-But during the check for candidate mask 24, the code would compute the dp table.
+    prefix = [0] * (n + 1)
+    for i in range(1, n + 1):
+        prefix[i] = prefix[i - 1] + a[i - 1]
 
-At i=5 (prefix[5] is 59), j=1:
+    result = 0
 
-j=1, so j-1=0. l must be 0 (since dp[0][0] is True). Sum is 59-0=59. 59 & 24 is 24. So dp[5][1] is True.
+    for bit in reversed(range(60)):
+        candidate = result | (1 << bit)
+        dp = [[False] * (k + 1) for _ in range(n + 1)]
+        dp[0][0] = True
+        
+        for i in range(1, n + 1):
+            for j in range(1, k + 1):
+                for l in range(i):
+                    if dp[l][j - 1]:
+                        s = prefix[i] - prefix[l]
+                        if (s & candidate) == candidate:
+                            dp[i][j] = True
+                            break
+        
+        if dp[n][k]:
+            result = candidate
 
-But in the problem, the first shelf is 5 books, but the split requires 4 shelves. So the code needs to split into 4 shelves.
+    print(result, file=output_stream)
 
-The DP must track for j=4 shelves. So for the final i=10, j=4.
 
-But during the mask check for 24, the code would compute whether there's a split into 4 shelves, each sum & 24 ==24.
 
-The code's DP would find this and thus set the candidate to 24.
+def test():
+    import io
 
-So the code should work.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 3
+3 14 15 92 65 35 89
+""",
+            "output": \
+"""\
+64
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample: second input.
 

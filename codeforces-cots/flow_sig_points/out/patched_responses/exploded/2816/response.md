@@ -316,89 +316,107 @@ But wait, the code for the else part.
 
 But in code:
 
-m = 1013
+Testing against sample input 1.
 
-f = int(input())
+```python
+def main(input_stream, output_stream):
+    m = 1013
 
-if f == 0:
+    f = int(input_stream.readline().rstrip("\n"))
 
-    print(0)
+    if f == 0:
 
-elif f ==1:
+        print(0, file=output_stream)
 
-    print(1)
+    elif f ==1:
 
-else:
-
-    first_occurrence = {0: 0, 1:1}
-
-    a, b = 0, 1
-
-    index = 2
-
-    found = False
-
-    while True:
-
-        next_term = (a + b) % m
-
-        if next_term == f and next_term not in first_occurrence:
-
-            first_occurrence[next_term] = index
-
-        # Check if next_term is new, add to dict
-
-        if next_term not in first_occurrence:
-
-            first_occurrence[next_term] = index
-
-        # Check if the new pair is (0,1)
-
-        if b ==0 and next_term ==1:
-
-            break
-
-        a, b = b, next_term
-
-        index +=1
-
-    if f in first_occurrence:
-
-        print(first_occurrence[f])
+        print(1, file=output_stream)
 
     else:
 
-        print(-1)
+        first_occurrence = {0: 0, 1:1}
 
-Wait, no. The code adds next_term to the first_occurrence only once. So when next_term is generated, if it's not in first_occurrence, it is added with the current index.
+        a, b = 0, 1
 
-But the code as written would, in each iteration, check if next_term is in first_occurrence. If not, add it. Then check if (b, next_term) is (0,1). Then update a and b.
+        index = 2
 
-Yes.
+        found = False
 
-Wait, for example, for index 2:
+        while True:
 
-next_term is (0 +1) mod 1013 =1. It's already in the dict. So not added. Then check if (b, next_term) is (1,1) which is not (0,1). So proceed. a becomes 1, b becomes1. index becomes3.
+            next_term = (a + b) % m
 
-Then next_term is (1 +1) mod 1013=2. Not in dict, add 2:3. Check if (1,2) is (0,1). No. Proceed.
+            if next_term == f and next_term not in first_occurrence:
 
-So yes, the code correctly adds new terms to first_occurrence.
+                first_occurrence[next_term] = index
 
-But in the code, when the next_term is calculated, the code checks if it's in first_occurrence. If not, adds it with the current index.
+            # Check if next_term is new, add to dict
 
-Yes.
+            if next_term not in first_occurrence:
 
-So, this code should work.
+                first_occurrence[next_term] = index
 
-Testing the first sample input:
+            # Check if the new pair is (0,1)
 
-Input:13.
+            if b ==0 and next_term ==1:
 
-The code will generate terms until (b, next_term) is (0,1). Let's see when 13 appears.
+                break
 
-But 13 mod 1013 is 13. Let's see:
+            a, b = b, next_term
 
-After 0,1,1,2,3,5,8,13. The next term is 8+13=21 mod 1013. So 13 occurs at index7. So first_occurrence[13] =7. So the code would output 7, which is correct.
+            index +=1
+
+        if f in first_occurrence:
+
+            print(first_occurrence[f], file=output_stream)
+
+        else:
+
+            print(-1, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+377
+""",
+            "output": \
+"""\
+14
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample:377 mod 1013 is 377. Let's see when 377 occurs. The 14th position is correct.
 

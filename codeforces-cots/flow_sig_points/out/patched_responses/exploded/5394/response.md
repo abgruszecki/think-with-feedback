@@ -633,53 +633,112 @@ For example, the code uses the deque and for each new_pos, updates the distance 
 
 Thus, the code is correct.
 
-Testing the first example:
+Testing against sample input 1.
 
-Input:
+```python
+import sys
+from collections import deque
 
-3
 
-a
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    strings = [input_stream.readline().strip() for _ in range(n)]
+    s = input_stream.readline().strip()
+    
+    # Check if all characters in s are present in the set
+    set_chars = set()
+    for t in strings:
+        set_chars.update(t)
+    for c in s:
+        if c not in set_chars:
+            print(-1, file=output_stream)
+            return
+    
+    len_s = len(s)
+    if len_s == 0:
+        print(0, file=output_stream)
+        return
+    
+    # Precompute advancements for each string and pos
+    advancements = []
+    for t in strings:
+        t_adv = [0] * (len_s + 1)
+        for pos in range(len_s + 1):
+            current = pos
+            for c in t:
+                if current < len_s and c == s[current]:
+                    current += 1
+            t_adv[pos] = current - pos
+        advancements.append(t_adv)
+    
+    # BFS to find the minimal steps
+    distance = [-1] * (len_s + 1)
+    distance[0] = 0
+    queue = deque([0])
+    
+    while queue:
+        pos = queue.popleft()
+        for i in range(len(strings)):
+            adv = advancements[i][pos]
+            new_pos = pos + adv
+            if new_pos >= len_s:
+                print(distance[pos] + 1, file=output_stream)
+                return
+            if new_pos > pos:
+                if distance[new_pos] == -1 or distance[new_pos] > distance[pos] + 1:
+                    distance[new_pos] = distance[pos] + 1
+                    queue.append(new_pos)
+    
+    print(-1, file=output_stream)
 
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+ab
+aab
 aa
+bb
+baaab
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-a
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-aaa
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-s is "aaa".
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The code checks that all 'a's are present.
+    print('Tests passed 😎')
 
-Then, for each string:
 
-First string is "a": for pos 0, advancement is 1. For pos 1, advancement is 1. For pos 2, advancement is 1. For pos3, 0.
+if __name__ == '__main__':
+    test()
 
-Second string is "aa": for pos0, advancement is 2. pos0: 'aa' can match s[0] and s[1], so advancement is 2. pos1: 'aa' starts at s[1], which is 'a' (second character), so processing "aa" would match s[1], s[2], advancement is 2. pos2: processing "aa" would match s[2], then next 'a' is s[3], which is beyond. So advancement is 1.
 
-Third string is "a" again, same as first.
+```
 
-The BFS starts with pos0. Steps:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-queue: [0]
-
-Process pos0. For each string:
-
-First string (index 0) gives adv=1. new_pos=1. Not >=3. If distance[1] is -1, set to 1. Add to queue.
-
-Second string (index 1) gives adv=2. new_pos=2. distance[2] set to 1. Add to queue.
-
-Third string (index2) same as first.
-
-So queue now has 1,2.
-
-Now process pos1 (distance 1):
-
-For each string:
-
-string 0: adv=1. new_pos=2. check if distance[2] is 1. But new steps would be 2. Since distance[2] is already 1 (from before), no update.
-
-string1: adv for pos1 is 2. new_pos=1+2=3. >=3. So return 1+1=2. Which is the correct answer.
+```
 
 Thus, code returns 2.
 

@@ -831,29 +831,65 @@ Let's see.
 
 So code steps:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-K = 200
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-minimal_x = None
+    K = 200
 
-minimal_d = 1
+    minimal_x = None
 
-# Compute m1 part.
+    minimal_d = 1
 
-for d in range(1, K+1):
+    # Compute m1 part.
 
-    if d >=n:
+    for d in range(1, K+1):
 
-        break
+        if d >=n:
 
-    for i in range(n -d):
+            break
 
-        x = min(a[i], a[i+d])
+        for i in range(n -d):
 
-        current_d = d
+            x = min(a[i], a[i+d])
+
+            current_d = d
+
+            if minimal_x is None:
+
+                minimal_x =x
+
+                minimal_d = current_d
+
+            else:
+
+                # Compare x/current_d with minimal_x/minimal_d
+
+                # x * minimal_d < minimal_x * current_d → x/current_d is smaller.
+
+                if x * minimal_d < minimal_x * current_d:
+
+                    minimal_x =x
+
+                    minimal_d = current_d
+
+    # Compute m2 part.
+
+    for i in range(n):
+
+        max_d_i = max(i, (n-1) -i)
+
+        x = a[i]
+
+        current_d = max_d_i
+
+        if current_d ==0:
+
+            continue
 
         if minimal_x is None:
 
@@ -863,9 +899,130 @@ for d in range(1, K+1):
 
         else:
 
-            # Compare x/current_d with minimal_x/minimal_d
+            if x * minimal_d < minimal_x * current_d:
 
-            # x * minimal_d < minimal_x * current_d → x/current_d is smaller.
+                minimal_x =x
+
+                minimal_d = current_d
+
+    # Now compute answer: minimal_x // minimal_d.
+
+    answer = minimal_x // minimal_d
+
+    print(answer, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+0 1 2
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    K = 200
+
+    minimal_x = None
+
+    minimal_d = 1
+
+    # Compute m1 part.
+
+    for d in range(1, K+1):
+
+        if d >=n:
+
+            break
+
+        for i in range(n -d):
+
+            x = min(a[i], a[i+d])
+
+            current_d = d
+
+            if minimal_x is None:
+
+                minimal_x =x
+
+                minimal_d = current_d
+
+            else:
+
+                # Compare x/current_d with minimal_x/minimal_d
+
+                # x * minimal_d < minimal_x * current_d → x/current_d is smaller.
+
+                if x * minimal_d < minimal_x * current_d:
+
+                    minimal_x =x
+
+                    minimal_d = current_d
+
+    # Compute m2 part.
+
+    for i in range(n):
+
+        max_d_i = max(i, (n-1) -i)
+
+        x = a[i]
+
+        current_d = max_d_i
+
+        if current_d ==0:
+
+            continue
+
+        if minimal_x is None:
+
+            minimal_x =x
+
+            minimal_d = current_d
+
+        else:
 
             if x * minimal_d < minimal_x * current_d:
 
@@ -873,133 +1030,56 @@ for d in range(1, K+1):
 
                 minimal_d = current_d
 
-# Compute m2 part.
+    # Now compute answer: minimal_x // minimal_d.
 
-for i in range(n):
+    answer = minimal_x // minimal_d
 
-    max_d_i = max(i, (n-1) -i)
+    print(answer, file=output_stream)
 
-    x = a[i]
 
-    current_d = max_d_i
 
-    if current_d ==0:
+def test():
+    import io
 
-        continue
-
-    if minimal_x is None:
-
-        minimal_x =x
-
-        minimal_d = current_d
-
-    else:
-
-        if x * minimal_d < minimal_x * current_d:
-
-            minimal_x =x
-
-            minimal_d = current_d
-
-# Now compute answer: minimal_x // minimal_d.
-
-answer = minimal_x // minimal_d
-
-print(answer)
-
-This code uses integers and tracks the minimal fraction correctly.
-
-Let's test this code with the sample inputs.
-
-Sample 1:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
+821 500 479 717
+""",
+            "output": \
+"""\
+239
+""",
+        }, 
+    ]
 
-6 4 5 5
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-m1 part:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-d ranges from 1 to 3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-d=1:
+    print('Tests passed 😎')
 
-i=0: min(6,4)=4 →4/1.
 
-i=1: min(4,5)=4 →4/1.
+if __name__ == '__main__':
+    test()
 
-i=2: min(5,5)=5 →5/1.
 
-Compare each to current minimal.
+```
 
-Initially minimal_x=4, minimal_d=1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-d=2:
-
-i=0: min(6,5)=5 →5/2.
-
-Compare 5*1 <4*2 →5 <8 →yes. So minimal_x=5, minimal_d=2.
-
-i=1: min(4,5)=4 →4/2=2.
-
-Compare 4*2=8, 5*2=10 →4*2 <5*2 →8<10. So 4/2 <5/2. So minimal_x=4, minimal_d=2.
-
-d=3:
-
-i=0: min(6,5)=5 →5/3.
-
-Compare 5*2=10,4*3=12 →10<12. So 5/3 <4/2 →5/3=1.666, 4/2=2. So update to 5 and 3.
-
-Now, m1's minimal is 5/3.
-
-m2 part:
-
-i=0:
-
-max_d_i =3. x=6. 6/3=2.
-
-Compare with current (5,3): 6*3=18 vs5*3=15 →6/3 is 2, which is larger than 5/3. So no change.
-
-i=1: max_d_i=2. x=4. 4/2=2. Compare with (5,3). 4*3=12 vs5*2=10 →12>10. No change.
-
-i=2: max_d_i=2. x=5/2=2.5. Compare 5*3=15 vs5*2=10. No change.
-
-i=3: max_d_i=3. x=5. 5/3=1.666. Compare 5*3=15 vs5*3=15. Equal. So no change.
-
-So m2's minimal is 5/3.
-
-The overall minimal is 5/3. So answer is 5//3=1.
-
-Which is correct.
-
-Sample 2:
-
-3
-
-0 1 2
-
-m1 part:
-
-d=1:
-
-i=0: min(0,1)=0 →0/1=0.
-
-i=1: min(1,2)=1 →1/1=1.
-
-d=2:
-
-i=0: min(0,2)=0 →0/2=0.
-
-So after m1 part, the minimal is 0/1.
-
-m2 part:
-
-i=0: max_d_i=2. 0/2=0. Which is same as current minimal.
-
-i=1: max_d_i=1. 1/1=1.
-
-i=2: max_d_i=2. 2/2=1.
-
-So the overall minimal is 0/1. Answer is 0.
+```
 
 Sample 3:
 

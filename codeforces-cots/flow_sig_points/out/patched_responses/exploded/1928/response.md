@@ -207,49 +207,197 @@ But in Python, the input() function reads the entire line except the trailing ne
 
 Thus, the code steps are:
 
-s = input()
+Testing against sample input 1.
 
-question_part = s[:-1]
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n")
 
-for c in reversed(question_part):
+    question_part = s[:-1]
 
-    if c.isalpha():
+    for c in reversed(question_part):
 
-        last_char = c.upper()
+        if c.isalpha():
 
-        break
+            last_char = c.upper()
 
-vowels = {'A', 'E', 'I', 'O', 'U', 'Y'}
+            break
 
-print("YES" if last_char in vowels else "NO")
+    vowels = {'A', 'E', 'I', 'O', 'U', 'Y'}
 
-Wait, but what if the question_part is empty? But the problem says that the input contains at least one letter. So question_part will have at least one letter.
+    print("YES" if last_char in vowels else "NO", file=output_stream)
 
-Yes, because the input is guaranteed to have at least one letter. So the code will find at least one alpha character in question_part.
 
-Testing with the sample inputs.
 
-Sample 1:
+def test():
+    import io
 
-Input: "Is it a melon?"
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+Is it an apple?
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
 
-question_part is "Is it a melon"
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-reversed: 'nolem a ti sI' — the first alpha is 'n' (since the original question_part ends with 'n').
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-n is a consonant → output NO.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sample 2:
+    print('Tests passed 😎')
 
-Input: "Is it an apple?"
 
-question_part is "Is it an apple"
+if __name__ == '__main__':
+    test()
 
-reversed: 'elppa na tI sI' — first alpha is 'e' → vowel → YES.
 
-Sample 3:
+```
 
-Input: "Is     it a banana ?" — question_part is "Is     it a banana " (ends with space). Reversed, the first alpha is 'a' (from 'banana') → YES.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n")
+
+    question_part = s[:-1]
+
+    for c in reversed(question_part):
+
+        if c.isalpha():
+
+            last_char = c.upper()
+
+            break
+
+    vowels = {'A', 'E', 'I', 'O', 'U', 'Y'}
+
+    print("YES" if last_char in vowels else "NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+Is     it a banana ?
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n")
+
+    question_part = s[:-1]
+
+    for c in reversed(question_part):
+
+        if c.isalpha():
+
+            last_char = c.upper()
+
+            break
+
+    vowels = {'A', 'E', 'I', 'O', 'U', 'Y'}
+
+    print("YES" if last_char in vowels else "NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+Is   it an apple  and a  banana   simultaneouSLY?
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 4:
 

@@ -110,44 +110,72 @@ Compare len(current_ai) and len(bi). If len(current_ai) <= len(bi): choose curre
 
 So the code would be something like:
 
-n, m = map(int, input().split())
-word_map = {}
-for _ in range(m):
-    a, b = input().split()
-    word_map[a] = b
-lecture = input().split()
-result = []
-for word in lecture:
-    b = word_map[word]
-    if len(word) <= len(b):
-        result.append(word)
-    else:
-        result.append(b)
-print(' '.join(result))
+Testing against sample input 1.
 
-Wait, but what if the input lines for the words have leading or trailing spaces? Probably, the input is properly formatted. The problem states that each line has two words, so splitting by whitespace should work.
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    word_map = {}
+    for _ in range(m):
+        a, b = input_stream.readline().rstrip("\n").split()
+        word_map[a] = b
+    lecture = input_stream.readline().rstrip("\n").split()
+    result = []
+    for word in lecture:
+        b = word_map[word]
+        if len(word) <= len(b):
+            result.append(word)
+        else:
+            result.append(b)
+    print(' '.join(result), file=output_stream)
 
-Testing the first example:
 
-The word_map after processing the 3 pairs would be:
 
-codeforces: codesecrof
+def test():
+    import io
 
-contest: round
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 3
+joll wuqrd
+euzf un
+hbnyiyc rsoqqveh
+hbnyiyc joll joll euzf joll
+""",
+            "output": \
+"""\
+hbnyiyc joll joll un joll
+""",
+        }, 
+    ]
 
-letter: message
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Then the lecture words are codeforces, contest, letter, contest. Processing each:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-codeforces: len(10) vs 10: append codeforces.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-contest: len(7) vs 5 (round). 7>5, append round.
+    print('Tests passed 😎')
 
-letter: len(6) vs 7. 6 <7: append letter.
 
-contest again: same as before.
+if __name__ == '__main__':
+    test()
 
-So the output is correct.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 The code seems straightforward and efficient. The time is O(m + n) for processing, which is acceptable for m and n up to 3000. The space is O(m) for the dictionary, which is also acceptable.
 

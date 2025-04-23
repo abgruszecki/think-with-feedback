@@ -253,31 +253,73 @@ Yes.
 
 This code should handle all cases correctly.
 
-Testing the examples.
+Testing against sample input 1.
 
-First example:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+    d = list(map(int, input_stream.readline().rstrip("\n").split()))
+    visited = [False] * (n + 1)
+    current = 1
 
-Input:
+    while True:
+        if current < 1 or current > n:
+            print("FINITE", file=output_stream)
+            break
+        if visited[current]:
+            print("INFINITE", file=output_stream)
+            break
+        visited[current] = True
+        dir_char = s[current - 1]
+        step = d[current - 1]
+        current += step if dir_char == '>' else -step
 
-2
 
-><
 
-1 2
+def test():
+    import io
 
-Process:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+>><
+2 1 1
+""",
+            "output": \
+"""\
+INFINITE
+""",
+        }, 
+    ]
 
-current = 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Check 1 is between 1 and 2. Not visited. Mark as True.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-s[0] is '>', step is 1. current becomes 1+1=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Check 2: not visited. Mark True.
+    print('Tests passed 😎')
 
-s[1] is '<', step is 2. current becomes 2-2=0. Now, 0 is out of range. Output FINITE.
 
-Which matches the sample.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

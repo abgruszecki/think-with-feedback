@@ -1076,103 +1076,255 @@ We can use a list of dictionaries for the DP.
 
 In Python:
 
+Testing against sample input 1.
+
+```python
 from collections import defaultdict
 
-n = int(input())
 
-a = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-b = list(map(int, input().split()))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-S = sum(a)
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-sorted_b = sorted(b, reverse=True)
+    S = sum(a)
 
-sum_b = 0
+    sorted_b = sorted(b, reverse=True)
 
-k = 0
+    sum_b = 0
 
-for i in range(n):
+    k = 0
 
-    sum_b += sorted_b[i]
+    for i in range(n):
 
-    k += 1
+        sum_b += sorted_b[i]
 
-    if sum_b >= S:
+        k += 1
 
-        break
+        if sum_b >= S:
 
-# Now, find maximum sum_a for exactly k bottles with sum_b >= S.
+            break
 
-dp = [defaultdict(lambda: -float('inf')) for _ in range(k+1)]
+    # Now, find maximum sum_a for exactly k bottles with sum_b >= S.
 
-dp[0][0] = 0
+    dp = [defaultdict(lambda: -float('inf')) for _ in range(k+1)]
 
-for i in range(n):
+    dp[0][0] = 0
 
-    ai = a[i]
+    for i in range(n):
 
-    bi = b[i]
+        ai = a[i]
 
-    # Iterate in reverse to avoid overwriting current state.
+        bi = b[i]
 
-    for j in range(k-1, -1, -1):
+        # Iterate in reverse to avoid overwriting current state.
 
-        current_sumb = list(dp[j].keys())
+        for j in range(k-1, -1, -1):
 
-        for sumb in current_sumb:
+            current_sumb = list(dp[j].keys())
 
-            suma = dp[j][sumb]
+            for sumb in current_sumb:
 
-            new_j = j +1
+                suma = dp[j][sumb]
 
-            new_sumb = sumb + bi
+                new_j = j +1
 
-            new_suma = suma + ai
+                new_sumb = sumb + bi
 
-            if new_j > k:
+                new_suma = suma + ai
 
-                continue
+                if new_j > k:
 
-            if new_suma > dp[new_j][new_sumb]:
+                    continue
 
-                dp[new_j][new_sumb] = new_suma
+                if new_suma > dp[new_j][new_sumb]:
 
-max_suma = -float('inf')
+                    dp[new_j][new_sumb] = new_suma
 
-for sumb in dp[k]:
+    max_suma = -float('inf')
 
-    if sumb >= S and dp[k][sumb] > max_suma:
+    for sumb in dp[k]:
 
-        max_suma = dp[k][sumb]
+        if sumb >= S and dp[k][sumb] > max_suma:
 
-t = S - max_suma
+            max_suma = dp[k][sumb]
 
-print(k, t)
+    t = S - max_suma
 
-This should work.
+    print(k, t, file=output_stream)
 
-Testing this code against the samples:
 
-Sample input1:
 
-4
+def test():
+    import io
 
-3 3 4 3
-
-4 7 6 5
-
-k=2. dp[2] will have sum_b=7+6=13, sum_a=3+4=7. So t=13-7=6. Correct.
-
-Sample input2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2
-
 1 1
-
 100 100
+""",
+            "output": \
+"""\
+1 1
+""",
+        }, 
+    ]
 
-k=1. dp[1] will have entries for sum_b=100 and sum_a=1. So t=2-1=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+from collections import defaultdict
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    S = sum(a)
+
+    sorted_b = sorted(b, reverse=True)
+
+    sum_b = 0
+
+    k = 0
+
+    for i in range(n):
+
+        sum_b += sorted_b[i]
+
+        k += 1
+
+        if sum_b >= S:
+
+            break
+
+    # Now, find maximum sum_a for exactly k bottles with sum_b >= S.
+
+    dp = [defaultdict(lambda: -float('inf')) for _ in range(k+1)]
+
+    dp[0][0] = 0
+
+    for i in range(n):
+
+        ai = a[i]
+
+        bi = b[i]
+
+        # Iterate in reverse to avoid overwriting current state.
+
+        for j in range(k-1, -1, -1):
+
+            current_sumb = list(dp[j].keys())
+
+            for sumb in current_sumb:
+
+                suma = dp[j][sumb]
+
+                new_j = j +1
+
+                new_sumb = sumb + bi
+
+                new_suma = suma + ai
+
+                if new_j > k:
+
+                    continue
+
+                if new_suma > dp[new_j][new_sumb]:
+
+                    dp[new_j][new_sumb] = new_suma
+
+    max_suma = -float('inf')
+
+    for sumb in dp[k]:
+
+        if sumb >= S and dp[k][sumb] > max_suma:
+
+            max_suma = dp[k][sumb]
+
+    t = S - max_suma
+
+    print(k, t, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+10 30 5 6 24
+10 41 7 8 24
+""",
+            "output": \
+"""\
+3 11
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input3:
 

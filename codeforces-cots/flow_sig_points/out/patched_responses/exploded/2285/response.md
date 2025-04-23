@@ -1249,11 +1249,150 @@ Yes. Because the algorithm processes pairs in a way that ensures that the root's
 
 Thus, the code is correct.
 
-Testing this code on the samples.
+Testing against sample input 1.
 
-Sample1:
+```python
+import sys
+from collections import deque
 
-After processing, inc[1] and dec[1] are zero. Total cost 4. Correct.
+
+def main(input_stream, output_stream):
+    sys.setrecursionlimit(1 << 25)
+    n = int(input_stream.readline())
+    a = []
+    b = []
+    c = []
+    for _ in range(n):
+        ai, bi, ci = map(int, input_stream.readline().split())
+        a.append(ai)
+        b.append(bi)
+        c.append(ci)
+    
+    # Build adjacency list
+    adj = [[] for _ in range(n + 1)]
+    for _ in range(n - 1):
+        u, v = map(int, input_stream.readline().split())
+        adj[u].append(v)
+        adj[v].append(u)
+    
+    # Build tree structure and compute min_a using BFS
+    children = [[] for _ in range(n + 1)]
+    visited = [False] * (n + 1)
+    parent = [0] * (n + 1)
+    min_a = [0] * (n + 1)
+    
+    q = deque([1])
+    visited[1] = True
+    min_a[1] = a[0]
+    
+    while q:
+        u = q.popleft()
+        for v in adj[u]:
+            if not visited[v]:
+                visited[v] = True
+                parent[v] = u
+                children[u].append(v)
+                min_a[v] = min(a[v - 1], min_a[u])
+                q.append(v)
+    
+    # Compute own_inc and own_dec
+    own_inc = [0] * (n + 1)
+    own_dec = [0] * (n + 1)
+    for i in range(1, n + 1):
+        bi = b[i - 1]
+        ci = c[i - 1]
+        if bi != ci:
+            if bi == 0:
+                own_inc[i] = 1
+            else:
+                own_dec[i] = 1
+    
+    # Iterative post-order traversal
+    total_cost = 0
+    inc = [0] * (n + 1)
+    dec = [0] * (n + 1)
+    stack = [(1, None, False)]
+    
+    while stack:
+        node, parent_node, visited_flag = stack.pop()
+        if not visited_flag:
+            stack.append((node, parent_node, True))
+            # Push children in reverse order to process in correct order
+            for child in reversed(children[node]):
+                if child != parent_node:
+                    stack.append((child, node, False))
+        else:
+            current_inc = own_inc[node]
+            current_dec = own_dec[node]
+            # Sum inc and dec from children
+            for child in children[node]:
+                if child != parent_node:
+                    current_inc += inc[child]
+                    current_dec += dec[child]
+            pairs = min(current_inc, current_dec)
+            total_cost += pairs * 2 * min_a[node]
+            current_inc -= pairs
+            current_dec -= pairs
+            inc[node] = current_inc
+            dec[node] = current_dec
+    
+    if inc[1] == 0 and dec[1] == 0:
+        print(total_cost, file=output_stream)
+    else:
+        print(-1, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+10000 0 1
+2000 1 0
+300 0 1
+40 0 0
+1 1 0
+1 2
+2 3
+2 4
+1 5
+""",
+            "output": \
+"""\
+24000
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample2: inc[1] and dec[1] are zero. Cost 24000. Correct.
 

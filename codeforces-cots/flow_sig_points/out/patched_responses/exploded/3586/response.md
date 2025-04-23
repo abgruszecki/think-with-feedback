@@ -508,70 +508,162 @@ But wait, for x in 2..n-1, and the same for y. For example, for n=3, 2..n-1 is 2
 
 So code can be written in Python as:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-row_banned = [False] * (n + 1)
-col_banned = [False] * (n + 1)
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-for _ in range(m):
-    x, y = map(int, input().split())
-    if 2 <= x <= n-1:
-        row_banned[x] = True
-    if 2 <= y <= n-1:
-        col_banned[y] = True
+    row_banned = [False] * (n + 1)
+    col_banned = [False] * (n + 1)
 
-R = 0
-for x in range(2, n):
-    if not row_banned[x]:
-        R += 1
+    for _ in range(m):
+        x, y = map(int, input_stream.readline().rstrip("\n").split())
+        if 2 <= x <= n-1:
+            row_banned[x] = True
+        if 2 <= y <= n-1:
+            col_banned[y] = True
 
-C = 0
-for y in range(2, n):
-    if not col_banned[y]:
-        C += 1
+    R = 0
+    for x in range(2, n):
+        if not row_banned[x]:
+            R += 1
 
-overlap = 0
-for x in range(2, n):
-    if not row_banned[x] and not col_banned[x]:
-        overlap += 1
+    C = 0
+    for y in range(2, n):
+        if not col_banned[y]:
+            C += 1
 
-print(R + C - overlap)
+    overlap = 0
+    for x in range(2, n):
+        if not row_banned[x] and not col_banned[x]:
+            overlap += 1
 
-Wait, but in the code, the range for x and y is 2 <= x <= n-1. So in Python, for x in range(2, n), because range is up to but not including the end. So for example, if n=3, range(2,3) is 2. Which is correct.
+    print(R + C - overlap, file=output_stream)
 
-Yes.
 
-Testing this code with the examples.
 
-First example:
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 0
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+
+    row_banned = [False] * (n + 1)
+    col_banned = [False] * (n + 1)
+
+    for _ in range(m):
+        x, y = map(int, input_stream.readline().rstrip("\n").split())
+        if 2 <= x <= n-1:
+            row_banned[x] = True
+        if 2 <= y <= n-1:
+            col_banned[y] = True
+
+    R = 0
+    for x in range(2, n):
+        if not row_banned[x]:
+            R += 1
+
+    C = 0
+    for y in range(2, n):
+        if not col_banned[y]:
+            C += 1
+
+    overlap = 0
+    for x in range(2, n):
+        if not row_banned[x] and not col_banned[x]:
+            overlap += 1
+
+    print(R + C - overlap, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 3
 3 1
+3 2
+3 3
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-2 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-x=2 is between 2 and 2 (n-1=2). So row_banned[2] = True.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-y=2 is between 2 and 2. So col_banned[2] = True.
+    print('Tests passed 😎')
 
-R = sum of x=2. row_banned[2] is True, so R is 0.
 
-C= sum of y=2. col_banned[2] is True → 0.
+if __name__ == '__main__':
+    test()
 
-overlap is 0. So 0+0-0=0.
 
-Second example:
+```
 
-3 0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-No banned cells. So row_banned and col_banned all False.
-
-R = x=2 → 1.
-
-C = y=2 → 1.
-
-overlap = x=2 → 1. So 1+1-1=1.
+```
 
 Third example:
 

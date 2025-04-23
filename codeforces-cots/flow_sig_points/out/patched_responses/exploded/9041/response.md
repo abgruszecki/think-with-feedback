@@ -849,63 +849,185 @@ For example, if the result is '0.123', it's correct.
 
 Now, code:
 
-s = input().strip()
+Testing against sample input 1.
 
-left_part, b_part = s.split('e')
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-a_part, d_part = left_part.split('.')
+    left_part, b_part = s.split('e')
 
-B = int(b_part)
+    a_part, d_part = left_part.split('.')
 
-S = a_part + d_part
+    B = int(b_part)
 
-decimal_pos = 1 + B
+    S = a_part + d_part
 
-len_S = len(S)
+    decimal_pos = 1 + B
 
-if decimal_pos <= len_S:
+    len_S = len(S)
 
-    integer_part_str = S[:decimal_pos]
+    if decimal_pos <= len_S:
 
-    fractional_part_str = S[decimal_pos:]
+        integer_part_str = S[:decimal_pos]
 
-else:
+        fractional_part_str = S[decimal_pos:]
 
-    integer_part_str = S + '0' * (decimal_pos - len_S)
+    else:
 
-    fractional_part_str = ''
+        integer_part_str = S + '0' * (decimal_pos - len_S)
 
-# Process integer_part_str
+        fractional_part_str = ''
 
-integer_stripped = integer_part_str.lstrip('0') or '0'
+    # Process integer_part_str
 
-# Process fractional_part_str
+    integer_stripped = integer_part_str.lstrip('0') or '0'
 
-fractional_stripped = fractional_part_str.rstrip('0')
+    # Process fractional_part_str
 
-if fractional_stripped:
+    fractional_stripped = fractional_part_str.rstrip('0')
 
-    print(f"{integer_stripped}.{fractional_stripped}")
+    if fractional_stripped:
 
-else:
+        print(f"{integer_stripped}.{fractional_stripped}", file=output_stream)
 
-    print(integer_stripped)
+    else:
 
-Let's test this code with the examples.
+        print(integer_stripped, file=output_stream)
 
-Example 1: input 8.549e2 → a='8', d='549', B=2.
 
-S = '8549', len_S=4. decimal_pos=3.
 
-integer_part_str = '854', fractional_part_str='9'.
+def test():
+    import io
 
-integer_stripped → '854' (no leading zeros).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8.549e3
+""",
+            "output": \
+"""\
+8549
+""",
+        }, 
+    ]
 
-fractional_stripped → '9' → not empty. Output '854.9'.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Example 2: input 8.549e3 → B=3. decimal_pos=4. len_S=4.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-integer_part_str = '8549', fractional_part_str is ''. fractional_stripped is ''. Output '8549'.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    left_part, b_part = s.split('e')
+
+    a_part, d_part = left_part.split('.')
+
+    B = int(b_part)
+
+    S = a_part + d_part
+
+    decimal_pos = 1 + B
+
+    len_S = len(S)
+
+    if decimal_pos <= len_S:
+
+        integer_part_str = S[:decimal_pos]
+
+        fractional_part_str = S[decimal_pos:]
+
+    else:
+
+        integer_part_str = S + '0' * (decimal_pos - len_S)
+
+        fractional_part_str = ''
+
+    # Process integer_part_str
+
+    integer_stripped = integer_part_str.lstrip('0') or '0'
+
+    # Process fractional_part_str
+
+    fractional_stripped = fractional_part_str.rstrip('0')
+
+    if fractional_stripped:
+
+        print(f"{integer_stripped}.{fractional_stripped}", file=output_stream)
+
+    else:
+
+        print(integer_stripped, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0.33e0
+""",
+            "output": \
+"""\
+0.33
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Example 3: input 0.33e0 → a='0', d='33', B=0.
 

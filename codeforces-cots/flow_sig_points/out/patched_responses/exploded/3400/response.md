@@ -331,133 +331,167 @@ if v ==0: check if any a_i <=0? No, because the problem says the second line con
 
 So code:
 
-v = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    v = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-min_a = min(a)
-
-if min_a > v:
-
-    print(-1)
-
-else:
-
-    max_len = v // min_a
-
-    rem = v % min_a  # Wait, no. Because rem = v - (max_len * min_a). Because max_len = v // min_a. So rem = v - (max_len * min_a). For example, v=5, min_a=2. max_len=2, 2*2=4, rem=1.
-
-    # So rem is correctly v - max_len * min_a.
-
-    rem = v - (max_len * min_a)
-
-    # Find d, the largest digit with cost min_a.
-
-    d = 0
-
-    for i in range(8, -1, -1):  # digits 9 (index 8) down to 1 (index 0)
-
-        if a[i] == min_a:
-
-            d = i + 1  # since the index is 0-based, digit is i+1
-
-            break
-
-    digits = [d] * max_len
-
-    # Now try to upgrade digits
-
-    for i in range(max_len):
-
-        # current digit is d. Try to find the largest possible digit that can be placed here.
-
-        # candidate digits are from 9 down to d+1.
-
-        # for each candidate in 9 down to (d+1):
-
-        for candidate in range(9, d, -1):
-
-            cost_diff = a[candidate-1] - min_a
-
-            if cost_diff <= rem and cost_diff >=0:  # since a[candidate-1] could be less than min_a if other digits are upgraded first, but that's impossible because min_a is the minimal. So cost_diff can't be negative.
-
-                # replace current digit with candidate.
-
-                digits[i] = candidate
-
-                rem -= cost_diff
-
+    min_a = min(a)
+    if min_a > v:
+        print(-1, file=output_stream)
+    else:
+        max_len = v // min_a
+        rem = v - max_len * min_a
+        
+        # Find the largest digit with minimal cost
+        d = 0
+        for i in range(8, -1, -1):
+            if a[i] == min_a:
+                d = i + 1
                 break
+        
+        digits = [d] * max_len
+        
+        for i in range(max_len):
+            if rem == 0:
+                break
+            # Try to find a higher digit than d
+            for candidate in range(9, d, -1):
+                cost_diff = a[candidate - 1] - min_a
+                if cost_diff <= rem:
+                    digits[i] = candidate
+                    rem -= cost_diff
+                    break
+        
+        print(''.join(map(str, digits)), file=output_stream)
 
-        if rem ==0:
 
-            break
 
-    print(''.join(map(str, digits)))
+def test():
+    import io
 
-Wait, but in the loop, for candidate in range(9, d, -1):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+9 11 1 12 5 8 9 10 6
+""",
+            "output": \
+"""\
+33
+""",
+        }, 
+    ]
 
-Because d is the initial digit, which is the largest possible with cost min_a. So any candidate must be higher than d. So for example, if d is 5, then we look for 9,8,7,6,5+1=6? Wait, range(9, d, -1) would be 9,8,7,6 if d is 5. Because range is exclusive on the upper end. So 9 down to d+1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Wait, the range in Python is start, stop, step. So range(9, d, -1) would start at 9, and decrement until the next step would be <=d.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Wait, for example, if d is 5, then range(9, 5, -1) gives 9,8,7,6. Because 5 is the stop and it's exclusive. So that's correct. So the candidates are 9 down to d+1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But in the code, the loop is:
+    print('Tests passed 😎')
 
-for candidate in range(9, d, -1):
 
-    if a[candidate-1] - min_a <= rem:
+if __name__ == '__main__':
+    test()
 
-        replace, etc.
 
-Wait, but a[candidate-1] is the cost of the candidate digit. But since min_a is the minimal, a[candidate-1] is >= min_a. So cost_diff is >=0.
+```
 
-So that's correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Testing this code with the first sample:
+```
 
-Sample1:
+Testing against sample input 2.
 
-v=5
+```python
+def main(input_stream, output_stream):
+    v = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-a =5 4 3 2 1 2 3 4 5
+    min_a = min(a)
+    if min_a > v:
+        print(-1, file=output_stream)
+    else:
+        max_len = v // min_a
+        rem = v - max_len * min_a
+        
+        # Find the largest digit with minimal cost
+        d = 0
+        for i in range(8, -1, -1):
+            if a[i] == min_a:
+                d = i + 1
+                break
+        
+        digits = [d] * max_len
+        
+        for i in range(max_len):
+            if rem == 0:
+                break
+            # Try to find a higher digit than d
+            for candidate in range(9, d, -1):
+                cost_diff = a[candidate - 1] - min_a
+                if cost_diff <= rem:
+                    digits[i] = candidate
+                    rem -= cost_diff
+                    break
+        
+        print(''.join(map(str, digits)), file=output_stream)
 
-So a list is [5,4,3,2,1,2,3,4,5]. The min_a is 1 (digit5, index4). So d is 5.
 
-max_len=5, rem=5 -5*1=0.
 
-So digits is [5,5,5,5,5]. rem is 0. So no changes. output 55555.
+def test():
+    import io
 
-Sample2:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0
+1 1 1 1 1 1 1 1 1
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-v=2
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-a =9 11 1 12 5 8 9 10 6.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-a list is [9,11,1,12,5,8,9,10,6]. min_a is 1 (digit3, index2). So d=3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-max_len=2, rem=2 -2*1=0. So digits [3,3]. Output 33.
+    print('Tests passed 😎')
 
-Another test case where rem is non-zero:
 
-v=5, min_a=2. a = [2,2,3,3,3,3,3,3,3]. Then, d=2 (since a1 and a2 are 2, but d is the largest digit with min_a, which is 2. So initial digits are [2,2] (since 5//2=2, rem=1).
+if __name__ == '__main__':
+    test()
 
-Then, for each position:
 
-First position:
+```
 
-Check candidates 9 down to 3 (d=2, so candidates are 9-3).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For each, compute a[candidate-1] -2.
-
-If a[candidate-1] -2 <= rem (which is 1).
-
-But a for digits3 to 9 are 3,3,3,3,3,3,3. So for candidate 3, cost_diff is 3-2=1. Which is <=1. So replace the first digit with 3. rem becomes 0. So digits become [3,2]. Output is 32.
-
-Wait, but the second digit could also be replaced. But rem is zero after the first replacement.
-
-Yes. So the output is 32.
+```
 
 Another example: v=6, min_a=2 (digit 2). a array: for digits 1 is 3, 2 is 2, others are higher. So max_len=3 (6//2=3), rem=0. So output is 222. But if a for digit3 is 3, then no rem.
 

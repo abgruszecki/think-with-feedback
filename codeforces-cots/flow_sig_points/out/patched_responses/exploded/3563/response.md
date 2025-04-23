@@ -673,142 +673,187 @@ But we need to initialize min_ops to something larger than possible. Since the m
 
 So code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import defaultdict
 
-n, x = map(int, sys.stdin.readline().split())
-a = list(map(int, sys.stdin.readline().split()))
 
-counts = defaultdict(lambda: (0, 0))
+def main(input_stream, output_stream):
+    n, x = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
 
-for ai in a:
-    original = ai
-    modified = ai & x
+    counts = defaultdict(lambda: (0, 0))
 
-    # Update original's count0
-    cnt0, cnt1 = counts[original]
-    counts[original] = (cnt0 + 1, cnt1)
+    for ai in a:
+        original = ai
+        modified = ai & x
 
-    # Update modified's count1 if different
-    if modified != original:
-        cnt0_m, cnt1_m = counts[modified]
-        counts[modified] = (cnt0_m, cnt1_m + 1)
+        # Update original's count0
+        cnt0, cnt1 = counts[original]
+        counts[original] = (cnt0 + 1, cnt1)
 
-min_ops = float('inf')
+        # Update modified's count1 if different
+        if modified != original:
+            cnt0_m, cnt1_m = counts[modified]
+            counts[modified] = (cnt0_m, cnt1_m + 1)
 
-for key in counts:
-    cnt0, cnt1 = counts[key]
-    current_min = float('inf')
-    if cnt0 >= 2:
-        current_min = 0
-    elif cnt0 >= 1 and cnt1 >= 1:
-        current_min = 1
-    elif cnt1 >= 2:
-        current_min = 2
+    min_ops = float('inf')
 
-    if current_min < min_ops:
-        min_ops = current_min
+    for key in counts:
+        cnt0, cnt1 = counts[key]
+        current_min = float('inf')
+        if cnt0 >= 2:
+            current_min = 0
+        elif cnt0 >= 1 and cnt1 >= 1:
+            current_min = 1
+        elif cnt1 >= 2:
+            current_min = 2
 
-if min_ops != float('inf'):
-    print(min_ops)
-else:
-    print(-1)
+        if current_min < min_ops:
+            min_ops = current_min
 
-Testing this against the examples.
+    if min_ops != float('inf'):
+        print(min_ops, file=output_stream)
+    else:
+        print(-1, file=output_stream)
 
-First example:
 
-Input:
 
-4 3
+def test():
+    import io
 
-1 2 3 7
-
-Processing the elements:
-
-For ai=1:
-
-original =1, modified=1 → same. So counts[1] becomes (1,0). The modified is same, so no update.
-
-ai=2:
-
-original=2, modified=2 → same. counts[2] (1,0).
-
-ai=3:
-
-original=3 → counts[3] becomes (1,0).
-
-modified=3 → same. No update.
-
-ai=7:
-
-original=7 → counts[7] (1,0).
-
-modified=7&3=3 → different from 7. So counts[3] (0, 0 +1) → counts[3] was (1,0) → now (0,1) ?
-
-Wait, no. Let's track step by step.
-
-Original processing for ai=7:
-
-original is 7 → counts[7] is (0,0) initially. Then, after update, counts[7] becomes (1,0).
-
-modified is 7 &3=3.
-
-Since modified (3) != original (7), we need to update counts[3].
-
-counts[3] was for previous steps: when ai=3, original is 3 → counts[3] is (1, 0).
-
-Then, when processing ai=7's modified (3), we check counts[3] which is (1,0). Then, since modified is 3 !=7, we add to count1. So counts[3] becomes (1, 0 +1) → (1,1).
-
-So in counts, for key=3: (1,1).
-
-Thus, when processing the counts, for key=3:
-
-cnt0=1, cnt1=1 → sum is 1.
-
-Other values have counts that don't meet the criteria.
-
-Thus, the minimal sum is 1.
-
-Which matches the first example.
-
-Second example:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2 228
-
 1 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Processing:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For each ai=1:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-original=1. counts[1] starts as (0,0). After processing first ai=1 → counts[1] (1,0).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-modified=1&228 = 0. So 0 !=1 → counts[0] (0,0) → becomes (0,1).
+    print('Tests passed 😎')
 
-Second ai=1:
 
-original=1 → counts[1] becomes (2,0).
+if __name__ == '__main__':
+    test()
 
-modified=0 again → counts[0] becomes (0,2).
 
-So in counts:
+```
 
-key=1 → (2,0)
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-key=0 → (0,2)
+```
 
-So for key=1:
+Testing against sample input 2.
 
-cnt0=2 → sum 0.
+```python
+import sys
+from collections import defaultdict
 
-for key=0: cnt1=2 → sum 2.
 
-Thus, minimal sum is 0.
+def main(input_stream, output_stream):
+    n, x = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
 
-Which matches the second example.
+    counts = defaultdict(lambda: (0, 0))
+
+    for ai in a:
+        original = ai
+        modified = ai & x
+
+        # Update original's count0
+        cnt0, cnt1 = counts[original]
+        counts[original] = (cnt0 + 1, cnt1)
+
+        # Update modified's count1 if different
+        if modified != original:
+            cnt0_m, cnt1_m = counts[modified]
+            counts[modified] = (cnt0_m, cnt1_m + 1)
+
+    min_ops = float('inf')
+
+    for key in counts:
+        cnt0, cnt1 = counts[key]
+        current_min = float('inf')
+        if cnt0 >= 2:
+            current_min = 0
+        elif cnt0 >= 1 and cnt1 >= 1:
+            current_min = 1
+        elif cnt1 >= 2:
+            current_min = 2
+
+        if current_min < min_ops:
+            min_ops = current_min
+
+    if min_ops != float('inf'):
+        print(min_ops, file=output_stream)
+    else:
+        print(-1, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 7
+1 2 3
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

@@ -19,14 +19,58 @@ Therefore, the approach is to split the input string using 'WUB' as the delimite
 
 Now, the code would look something like:
 
-s = input().strip()
-parts = s.split('WUB')
-words = [part for part in parts if part]
-print(' '.join(words))
+Testing against sample input 1.
 
-Wait, but let's test this against the examples.
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    parts = s.split('WUB')
+    words = [part for part in parts if part]
+    print(' '.join(words), file=output_stream)
 
-First example: input is 'WUBWUBABCWUB'. Split into ['', '', 'ABC', '']. Filter gives ['ABC'], joined gives 'ABC' which is correct.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+WUBWEWUBAREWUBWUBTHEWUBCHAMPIONSWUBMYWUBFRIENDWUB
+""",
+            "output": \
+"""\
+WE ARE THE CHAMPIONS MY FRIEND
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: the input after split is parts like ['', 'WE', 'ARE', '', 'THE', 'CHAMPIONS', 'MY', 'FRIEND', ''], then filtering gives ['WE', 'ARE', 'THE', 'CHAMPIONS', 'MY', 'FRIEND'], which is the correct output.
 

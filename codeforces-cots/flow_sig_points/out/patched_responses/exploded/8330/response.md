@@ -1294,203 +1294,515 @@ For each x_val:
 
 So, the code:
 
-possible_pairs = ['00', '25', '50', '75']
+Testing against sample input 1.
 
-original_s = input().strip()
+```python
+def main(input_stream, output_stream):
+    possible_pairs = ['00', '25', '50', '75']
 
-has_x = 'X' in original_s
+    original_s = input_stream.readline().rstrip("\n").strip()
 
-total = 0
+    has_x = 'X' in original_s
 
-x_values = range(10) if has_x else [None]
+    total = 0
 
-for x_val in x_values:
+    x_values = range(10) if has_x else [None]
 
-    if has_x:
+    for x_val in x_values:
 
-        s_prime = original_s.replace('X', str(x_val))
+        if has_x:
 
-    else:
-
-        s_prime = original_s
-
-    n = len(s_prime)
-
-    if n == 1:
-
-        # must be 0
-
-        if s_prime == '_':
-
-            total += 1
-
-        elif s_prime == '0':
-
-            total += 1
-
-        continue
-
-    # else, process pairs
-
-    for pair in possible_pairs:
-
-        a, b = pair[0], pair[1]
-
-        # Check last two can be a and b
-
-        valid = True
-
-        if len(s_prime) < 2:
-
-            valid = False
+            s_prime = original_s.replace('X', str(x_val))
 
         else:
 
-            c1 = s_prime[-2]
+            s_prime = original_s
 
-            c2 = s_prime[-1]
+        n = len(s_prime)
 
-            if c1 not in (a, '_'):
+        if n == 1:
 
-                valid = False
+            # must be 0
 
-            if c2 not in (b, '_'):
+            if s_prime == '_':
 
-                valid = False
+                total += 1
 
-        if not valid:
+            elif s_prime == '0':
+
+                total += 1
 
             continue
 
-        # Check if len is 2
+        # else, process pairs
 
-        if len(s_prime) == 2:
+        for pair in possible_pairs:
 
-            if a == '0':
+            a, b = pair[0], pair[1]
+
+            # Check last two can be a and b
+
+            valid = True
+
+            if len(s_prime) < 2:
+
+                valid = False
+
+            else:
+
+                c1 = s_prime[-2]
+
+                c2 = s_prime[-1]
+
+                if c1 not in (a, '_'):
+
+                    valid = False
+
+                if c2 not in (b, '_'):
+
+                    valid = False
+
+            if not valid:
 
                 continue
 
-            # else, remaining_part is empty
+            # Check if len is 2
 
-            possibilities_rest = 1
+            if len(s_prime) == 2:
 
-        else:
+                if a == '0':
 
-            remaining_part = s_prime[:-2]
+                    continue
 
-            # process remaining_part
-
-            if not remaining_part:
+                # else, remaining_part is empty
 
                 possibilities_rest = 1
 
             else:
 
-                first_char = remaining_part[0]
+                remaining_part = s_prime[:-2]
 
-                if first_char == '_':
+                # process remaining_part
 
-                    # can be 1-9: 9 options
+                if not remaining_part:
 
-                    underscores_rest = remaining_part[1:].count('_')
-
-                    possibilities_rest = 9 * (10 ** underscores_rest)
-
-                elif first_char == '0':
-
-                    # leading zero, invalid
-
-                    possibilities_rest = 0
+                    possibilities_rest = 1
 
                 else:
 
-                    # first_char is non-zero digit
+                    first_char = remaining_part[0]
 
-                    underscores_rest = remaining_part[1:].count('_')
+                    if first_char == '_':
 
-                    possibilities_rest = 10 ** underscores_rest
+                        # can be 1-9: 9 options
 
-        # add to total
+                        underscores_rest = remaining_part[1:].count('_')
 
-        total += possibilities_rest
+                        possibilities_rest = 9 * (10 ** underscores_rest)
 
-print(total)
+                    elif first_char == '0':
 
-Now, let's test this code against the examples.
+                        # leading zero, invalid
 
-Example 1: input '25'. Output 1.
+                        possibilities_rest = 0
 
-s_prime is '25' (no Xs). len is 2.
+                    else:
 
-Processing pair 25:
+                        # first_char is non-zero digit
 
-a = '2', b='5'.
+                        underscores_rest = remaining_part[1:].count('_')
 
-last two are '2' and '5' → valid.
+                        possibilities_rest = 10 ** underscores_rest
 
-len is 2, so a != '0' → valid.
+            # add to total
 
-possibilities_rest is 1.
+            total += possibilities_rest
 
-Other pairs are not valid.
+    print(total, file=output_stream)
 
-So total is 1.
 
-Correct.
 
-Example 2: input '_00'. Output 9.
+def test():
+    import io
 
-No Xs. s_prime is '_00'.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+_00
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
 
-n=3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing pair '00':
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-last two are '0' and '0' → valid.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-remaining_part is '_'.
+    print('Tests passed 😎')
 
-first_char is '_' → 9 options.
 
-underscores_rest is 0.
+if __name__ == '__main__':
+    test()
 
-possibilities_rest =9 * 1 →9.
 
-Other pairs invalid.
+```
 
-Total 9.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Correct.
+```
 
-Example3: input '_XX'. Output 9.
+Testing against sample input 2.
 
-X present.
+```python
+def main(input_stream, output_stream):
+    possible_pairs = ['00', '25', '50', '75']
 
-x_val loops 0-9.
+    original_s = input_stream.readline().rstrip("\n").strip()
 
-For x_val=0:
+    has_x = 'X' in original_s
 
-s_prime becomes '_00'.
+    total = 0
 
-Processing pair '00':
+    x_values = range(10) if has_x else [None]
 
-last two are 0 and 0 → valid.
+    for x_val in x_values:
 
-remaining_part is '_'.
+        if has_x:
 
-possibilities_rest is 9.
+            s_prime = original_s.replace('X', str(x_val))
 
-For other x_vals:
+        else:
 
-pair 00 will have s_prime's last two as x_val x_val. So only x_val=0 would allow pair 00.
+            s_prime = original_s
 
-So code adds 9 for x_val=0.
+        n = len(s_prime)
 
-Other x_vals can't form any valid pairs.
+        if n == 1:
 
-Total 9.
+            # must be 0
 
-Correct.
+            if s_prime == '_':
+
+                total += 1
+
+            elif s_prime == '0':
+
+                total += 1
+
+            continue
+
+        # else, process pairs
+
+        for pair in possible_pairs:
+
+            a, b = pair[0], pair[1]
+
+            # Check last two can be a and b
+
+            valid = True
+
+            if len(s_prime) < 2:
+
+                valid = False
+
+            else:
+
+                c1 = s_prime[-2]
+
+                c2 = s_prime[-1]
+
+                if c1 not in (a, '_'):
+
+                    valid = False
+
+                if c2 not in (b, '_'):
+
+                    valid = False
+
+            if not valid:
+
+                continue
+
+            # Check if len is 2
+
+            if len(s_prime) == 2:
+
+                if a == '0':
+
+                    continue
+
+                # else, remaining_part is empty
+
+                possibilities_rest = 1
+
+            else:
+
+                remaining_part = s_prime[:-2]
+
+                # process remaining_part
+
+                if not remaining_part:
+
+                    possibilities_rest = 1
+
+                else:
+
+                    first_char = remaining_part[0]
+
+                    if first_char == '_':
+
+                        # can be 1-9: 9 options
+
+                        underscores_rest = remaining_part[1:].count('_')
+
+                        possibilities_rest = 9 * (10 ** underscores_rest)
+
+                    elif first_char == '0':
+
+                        # leading zero, invalid
+
+                        possibilities_rest = 0
+
+                    else:
+
+                        # first_char is non-zero digit
+
+                        underscores_rest = remaining_part[1:].count('_')
+
+                        possibilities_rest = 10 ** underscores_rest
+
+            # add to total
+
+            total += possibilities_rest
+
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+_XX
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    possible_pairs = ['00', '25', '50', '75']
+
+    original_s = input_stream.readline().rstrip("\n").strip()
+
+    has_x = 'X' in original_s
+
+    total = 0
+
+    x_values = range(10) if has_x else [None]
+
+    for x_val in x_values:
+
+        if has_x:
+
+            s_prime = original_s.replace('X', str(x_val))
+
+        else:
+
+            s_prime = original_s
+
+        n = len(s_prime)
+
+        if n == 1:
+
+            # must be 0
+
+            if s_prime == '_':
+
+                total += 1
+
+            elif s_prime == '0':
+
+                total += 1
+
+            continue
+
+        # else, process pairs
+
+        for pair in possible_pairs:
+
+            a, b = pair[0], pair[1]
+
+            # Check last two can be a and b
+
+            valid = True
+
+            if len(s_prime) < 2:
+
+                valid = False
+
+            else:
+
+                c1 = s_prime[-2]
+
+                c2 = s_prime[-1]
+
+                if c1 not in (a, '_'):
+
+                    valid = False
+
+                if c2 not in (b, '_'):
+
+                    valid = False
+
+            if not valid:
+
+                continue
+
+            # Check if len is 2
+
+            if len(s_prime) == 2:
+
+                if a == '0':
+
+                    continue
+
+                # else, remaining_part is empty
+
+                possibilities_rest = 1
+
+            else:
+
+                remaining_part = s_prime[:-2]
+
+                # process remaining_part
+
+                if not remaining_part:
+
+                    possibilities_rest = 1
+
+                else:
+
+                    first_char = remaining_part[0]
+
+                    if first_char == '_':
+
+                        # can be 1-9: 9 options
+
+                        underscores_rest = remaining_part[1:].count('_')
+
+                        possibilities_rest = 9 * (10 ** underscores_rest)
+
+                    elif first_char == '0':
+
+                        # leading zero, invalid
+
+                        possibilities_rest = 0
+
+                    else:
+
+                        # first_char is non-zero digit
+
+                        underscores_rest = remaining_part[1:].count('_')
+
+                        possibilities_rest = 10 ** underscores_rest
+
+            # add to total
+
+            total += possibilities_rest
+
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Example4: input '0'. Output 1.
 

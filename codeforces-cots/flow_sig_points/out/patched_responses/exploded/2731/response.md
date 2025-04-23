@@ -298,48 +298,76 @@ Once both sets are generated, check if any pair sums to x.
 
 So code:
 
-x, t, a, b, da, db = map(int, input().split())
+Testing against sample input 1.
 
-# Generate possible s1 values
-s1 = set()
-s1.add(0)
-for i in range(t):
-    s1.add(a - da * i)
+```python
+def main(input_stream, output_stream):
+    x, t, a, b, da, db = map(int, input_stream.readline().rstrip("\n").split())
 
-# Generate possible s2 values
-s2 = set()
-s2.add(0)
-for j in range(t):
-    s2.add(b - db * j)
+    # Generate possible s1 values
+    s1 = set()
+    s1.add(0)
+    for i in range(t):
+        s1.add(a - da * i)
 
-# Check if any combination sums to x
-found = False
-for val1 in s1:
-    if (x - val1) in s2:
-        found = True
-        break
+    # Generate possible s2 values
+    s2 = set()
+    s2.add(0)
+    for j in range(t):
+        s2.add(b - db * j)
 
-print("YES" if found else "NO")
+    # Check if any combination sums to x
+    found = False
+    for val1 in s1:
+        if (x - val1) in s2:
+            found = True
+            break
 
-Wait, but this code will have O(n + m) time, where n is the size of s1 and m is the size of s2. Since n and m are up to 300 +1 each, the code is very efficient. For each val1 in s1, check if (x - val1) is in s2. So total iterations are up to 301 per loop. So even for the maximum input, it's manageable.
+    print("YES" if found else "NO", file=output_stream)
 
-But what about the case when x is larger than the sum of the maximum possible s1 and s2?
 
-For example, x=1000. The code would check all possible s1 and see if x - s1 is in s2. Since s2 has a maximum of b (when j=0) plus 0. So if b is 300, then the maximum possible sum is (a + b) when both are solved at time 0. So if a + b is less than x, then code would return NO. Which is correct.
 
-So this code should handle all cases correctly.
+def test():
+    import io
 
-Testing the sample inputs:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 4 100 5 5 1
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-Sample 1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-x=30, t=5, a=20, b=20, da=3, db=5.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-s1: 0,20,17,14,11,8.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-s2: 0,20,15,10,5,0.
+    print('Tests passed 😎')
 
-Check for s1=20 (from i=0), s2=10 (j=2). 20+10=30 → yes.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

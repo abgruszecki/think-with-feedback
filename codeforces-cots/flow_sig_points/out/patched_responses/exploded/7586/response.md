@@ -948,124 +948,148 @@ We need to:
 
 Now, code:
 
-MOD = 998244353
+Testing against sample input 2.
 
-n, c = map(int, input().split())
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-from collections import defaultdict
+    n, c = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-m_x = defaultdict(int)
-for num in a:
-    m_x[num] +=1
+    from collections import defaultdict
 
-# Check if all elements 1..c are present
-missing = False
-for x in range(1, c+1):
-    if m_x.get(x, 0) ==0:
-        missing = True
-        break
+    m_x = defaultdict(int)
+    for num in a:
+        m_x[num] +=1
 
-if missing:
-    total = (pow(2, n, MOD) -1) % MOD
-    output = [0]*(n+1)
-    output[0] = total
-    print(' '.join(map(str, output)))
-else:
-    # Precompute factorial and inverse factorial up to max(m_x)
-    max_m = max(m_x.values())
-    max_fact = max_m
-
-    fact = [1]*(max_fact+1)
-    for i in range(1, max_fact+1):
-        fact[i] = fact[i-1] * i % MOD
-
-    inv_fact = [1]*(max_fact+1)
-    inv_fact[max_fact] = pow(fact[max_fact], MOD-2, MOD)
-    for i in range(max_fact-1, -1, -1):
-        inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
-
-    def comb(n, k):
-        if k <0 or k >n:
-            return 0
-        return fact[n] * inv_fact[k] % MOD * inv_fact[n -k] % MOD
-
-    # Precompute s_p[x] for each x
-    s_p = dict()  # x: list of s_p[x] from 0 to m_x[x]
-
+    # Check if all elements 1..c are present
+    missing = False
     for x in range(1, c+1):
-        m = m_x[x]
-        s_p[x] = [0]*(m+2)  # 0..m+1
-        suffix =0
-        for p in range(m, -1, -1):
-            suffix += comb(m, p)
-            suffix %= MOD
-            s_p[x][p] = suffix
+        if m_x.get(x, 0) ==0:
+            missing = True
+            break
 
-    min_m = min(m_x.values())
+    if missing:
+        total = (pow(2, n, MOD) -1) % MOD
+        output = [0]*(n+1)
+        output[0] = total
+        print(' '.join(map(str, output)), file=output_stream)
+    else:
+        # Precompute factorial and inverse factorial up to max(m_x)
+        max_m = max(m_x.values())
+        max_fact = max_m
 
-    s = [0]*(n+2)  # up to n+1
+        fact = [1]*(max_fact+1)
+        for i in range(1, max_fact+1):
+            fact[i] = fact[i-1] * i % MOD
 
-    for p in range(1, min_m +1):
-        product_p =1
+        inv_fact = [1]*(max_fact+1)
+        inv_fact[max_fact] = pow(fact[max_fact], MOD-2, MOD)
+        for i in range(max_fact-1, -1, -1):
+            inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
+
+        def comb(n, k):
+            if k <0 or k >n:
+                return 0
+            return fact[n] * inv_fact[k] % MOD * inv_fact[n -k] % MOD
+
+        # Precompute s_p[x] for each x
+        s_p = dict()  # x: list of s_p[x] from 0 to m_x[x]
+
         for x in range(1, c+1):
-            product_p = product_p * s_p[x][p] % MOD
+            m = m_x[x]
+            s_p[x] = [0]*(m+2)  # 0..m+1
+            suffix =0
+            for p in range(m, -1, -1):
+                suffix += comb(m, p)
+                suffix %= MOD
+                s_p[x][p] = suffix
 
-        # compute product_p1 for p+1
-        product_p1 =1
-        for x in range(1, c+1):
-            if (p+1) > m_x[x]:
-                product_p1 =0
-                break
-            product_p1 = product_p1 * s_p[x][p+1] % MOD
+        min_m = min(m_x.values())
 
-        sum_p = (product_p - product_p1) % MOD
-        if sum_p <0:
-            sum_p += MOD
-        s[p] = sum_p
+        s = [0]*(n+2)  # up to n+1
 
-    total_A =0
-    for p in range(1, min_m +1):
-        total_A = (total_A + s[p]) % MOD
+        for p in range(1, min_m +1):
+            product_p =1
+            for x in range(1, c+1):
+                product_p = product_p * s_p[x][p] % MOD
 
-    s0 = (pow(2, n, MOD) -1 - total_A) % MOD
-    if s0 <0:
-        s0 += MOD
+            # compute product_p1 for p+1
+            product_p1 =1
+            for x in range(1, c+1):
+                if (p+1) > m_x[x]:
+                    product_p1 =0
+                    break
+                product_p1 = product_p1 * s_p[x][p+1] % MOD
 
-    output = [0]*(n+1)
-    output[0] = s0
-    for p in range(1, min_m +1):
-        output[p] = s[p]
-    for p in range(min_m +1, n+1):
-        output[p] =0
+            sum_p = (product_p - product_p1) % MOD
+            if sum_p <0:
+                sum_p += MOD
+            s[p] = sum_p
 
-    print(' '.join(map(str, output)))
+        total_A =0
+        for p in range(1, min_m +1):
+            total_A = (total_A + s[p]) % MOD
 
-This code should handle all cases correctly.
+        s0 = (pow(2, n, MOD) -1 - total_A) % MOD
+        if s0 <0:
+            s0 += MOD
 
-Let's test for the second sample:
+        output = [0]*(n+1)
+        output[0] = s0
+        for p in range(1, min_m +1):
+            output[p] = s[p]
+        for p in range(min_m +1, n+1):
+            output[p] =0
 
-Input: 3 3
+        print(' '.join(map(str, output)), file=output_stream)
 
-1 2 3
 
-m_x for 1, 2,3 are 1,1,1. min_m=1.
 
-For p=1:
+def test():
+    import io
 
-product_p = (sum_{k=1}^1 C(1,1))^3 = (1)^3 =1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 2
+1 2 1 2 1
+""",
+            "output": \
+"""\
+10 17 4 0 0 0
+""",
+        }, 
+    ]
 
-product_p1 = sum_{k=2}^1 C(1, k) for all x →0. So product_p1=0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum_p=1-0=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So s[1] =1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-s0= (2^3-1 -1) =7-1=6.
+    print('Tests passed 😎')
 
-Which matches the sample.
 
-Thus, the code should work.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

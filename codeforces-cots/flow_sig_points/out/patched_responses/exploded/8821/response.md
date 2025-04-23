@@ -367,167 +367,478 @@ For each level from n-1 down to 0:
 
 So, the code would look like:
 
-MOD = 998244353
+Testing against sample input 2.
 
-n = int(input())
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-s = input().strip()
+    n = int(input_stream.readline().rstrip("\n"))
 
-total_nodes = (1 << n) -1
+    s = input_stream.readline().rstrip("\n").strip()
 
-hash_map = dict()
+    total_nodes = (1 << n) -1
 
-hash_val = [0]*(total_nodes +1)
+    hash_map = dict()
 
-count = [0]*(total_nodes +1)
+    hash_val = [0]*(total_nodes +1)
 
-for level in range(n-1, -1, -1):
+    count = [0]*(total_nodes +1)
 
-    start = 1 << level
+    for level in range(n-1, -1, -1):
 
-    end = (1 << (level +1)) -1
+        start = 1 << level
 
-    for x in range(start, end+1):
+        end = (1 << (level +1)) -1
 
-        if x > total_nodes:
+        for x in range(start, end+1):
 
-            continue
+            if x > total_nodes:
 
-        if level == n-1:  # leaf node
+                continue
 
-            # handle leaf
+            if level == n-1:  # leaf node
 
-            char = s[x-1]
+                # handle leaf
 
-            key = (char, )
+                char = s[x-1]
 
-            if key not in hash_map:
+                key = (char, )
 
-                hash_map[key] = len(hash_map)
+                if key not in hash_map:
 
-            hash_val[x] = hash_map[key]
+                    hash_map[key] = len(hash_map)
 
-            count[x] = 1
+                hash_val[x] = hash_map[key]
 
-        else:
-
-            left = 2 * x
-
-            right = 2 *x +1
-
-            a = hash_val[left]
-
-            b = hash_val[right]
-
-            if a > b:
-
-                a, b = b, a
-
-            char = s[x-1]
-
-            key = (char, a, b)
-
-            if key not in hash_map:
-
-                hash_map[key] = len(hash_map)
-
-            hash_val[x] = hash_map[key]
-
-            if a == b:
-
-                cnt = (count[left] * count[right]) % MOD
+                count[x] = 1
 
             else:
 
-                cnt = (count[left] * count[right] * 2) % MOD
+                left = 2 * x
 
-            count[x] = cnt
+                right = 2 *x +1
 
-print(count[1] % MOD)
+                a = hash_val[left]
 
-But wait, the nodes that are not leaves have left and right children. But in the code, when processing non-leaves, we are assuming that left and right are <= total_nodes. However, in a perfect binary tree, all non-leaf nodes have exactly two children. So for level < n-1, 2x and 2x+1 are <= total_nodes. So no need to check if left and right are valid.
+                b = hash_val[right]
 
-Testing this code with the sample inputs:
+                if a > b:
 
-Sample input 2:
+                    a, b = b, a
 
-n=2
+                char = s[x-1]
 
-input is BAA (so nodes 1: B, 2: A, 3: A).
+                key = (char, a, b)
 
-Processing leaves (level 1, nodes 2 and 3):
+                if key not in hash_map:
 
-For x=2: key ('A') → hash_map has it as 0. count=1.
+                    hash_map[key] = len(hash_map)
 
-x=3: key ('A') → same as x=2. hash_val[3]=0. count=1.
+                hash_val[x] = hash_map[key]
 
-Then level 0 (x=1):
+                if a == b:
 
-left is 2 (hash 0), right is3 (hash 0). a=0, b=0.
+                    cnt = (count[left] * count[right]) % MOD
 
-key (B, 0,0) → added to hash_map. hash_val[1] = 2.
+                else:
 
-count is (1*1) *1 (since a==b) → 1. So output is 1.
+                    cnt = (count[left] * count[right] * 2) % MOD
 
-Which matches sample 2.
+                count[x] = cnt
 
-Sample input 3:
+    print(count[1] % MOD, file=output_stream)
 
-n=2, input ABA → nodes 1:A, 2:B, 3:A.
 
-Processing leaves:
 
-x=2: key 'B' → hash_map assigns 0. count=1.
+def test():
+    import io
 
-x=3: key 'A' → hash_map assigns 1. count=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+ABA
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-Level 0, x=1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-left hash is 0 (B), right hash is 1 (A). a=0, b=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-key (A, 0,1). hash_val[1] = 2 (since hash_map has 0: ('B', ), 1: ('A', ), 2: ('A', 0,1).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-count is (1 *1 *2) → 2. Which matches sample 3.
+    print('Tests passed 😎')
 
-Sample input 4:
 
-n=2, input AAB.
+if __name__ == '__main__':
+    test()
 
-Nodes: 1:A, 2:A, 3:B.
 
-Leaves:
+```
 
-x=2: 'A' → hash 0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-x=3: 'B' → hash 1.
+```
 
-x=1's left and right are 0 and1. a=0, b=1.
+Testing against sample input 3.
 
-key (A, 0,1). So count is 1*1*2=2. Which matches sample 4.
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-Sample input 5:
+    n = int(input_stream.readline().rstrip("\n"))
 
-n=2, input AAA.
+    s = input_stream.readline().rstrip("\n").strip()
 
-Leaves are 2:A, 3:A. hash 0 for both.
+    total_nodes = (1 << n) -1
 
-x=1's a and b are 0. So count is 1*1=1.
+    hash_map = dict()
 
-Which matches sample5.
+    hash_val = [0]*(total_nodes +1)
 
-So the code seems to handle these cases correctly.
+    count = [0]*(total_nodes +1)
 
-Now, the main concern is handling the hash_map efficiently. For large n, the number of unique hash keys (char, a, b) could be large, but in practice, the number is limited by the structure of the tree and the number of possible combinations. Since the hash keys are built in a way that merges equivalent structures, the number of unique hash values could be much less than the number of nodes. However, for n=18, this could still be very large, but Python's dictionaries can handle it.
+    for level in range(n-1, -1, -1):
 
-Testing with the first sample input:
+        start = 1 << level
 
-Sample 1:
+        end = (1 << (level +1)) -1
 
-n=4, input BAAAAAAAABBABAB.
+        for x in range(start, end+1):
 
-The output is 16.
+            if x > total_nodes:
 
-But since the code is correct for the other samples, it's likely correct for this as well.
+                continue
+
+            if level == n-1:  # leaf node
+
+                # handle leaf
+
+                char = s[x-1]
+
+                key = (char, )
+
+                if key not in hash_map:
+
+                    hash_map[key] = len(hash_map)
+
+                hash_val[x] = hash_map[key]
+
+                count[x] = 1
+
+            else:
+
+                left = 2 * x
+
+                right = 2 *x +1
+
+                a = hash_val[left]
+
+                b = hash_val[right]
+
+                if a > b:
+
+                    a, b = b, a
+
+                char = s[x-1]
+
+                key = (char, a, b)
+
+                if key not in hash_map:
+
+                    hash_map[key] = len(hash_map)
+
+                hash_val[x] = hash_map[key]
+
+                if a == b:
+
+                    cnt = (count[left] * count[right]) % MOD
+
+                else:
+
+                    cnt = (count[left] * count[right] * 2) % MOD
+
+                count[x] = cnt
+
+    print(count[1] % MOD, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+AAB
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 4.
+
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
+
+    n = int(input_stream.readline().rstrip("\n"))
+
+    s = input_stream.readline().rstrip("\n").strip()
+
+    total_nodes = (1 << n) -1
+
+    hash_map = dict()
+
+    hash_val = [0]*(total_nodes +1)
+
+    count = [0]*(total_nodes +1)
+
+    for level in range(n-1, -1, -1):
+
+        start = 1 << level
+
+        end = (1 << (level +1)) -1
+
+        for x in range(start, end+1):
+
+            if x > total_nodes:
+
+                continue
+
+            if level == n-1:  # leaf node
+
+                # handle leaf
+
+                char = s[x-1]
+
+                key = (char, )
+
+                if key not in hash_map:
+
+                    hash_map[key] = len(hash_map)
+
+                hash_val[x] = hash_map[key]
+
+                count[x] = 1
+
+            else:
+
+                left = 2 * x
+
+                right = 2 *x +1
+
+                a = hash_val[left]
+
+                b = hash_val[right]
+
+                if a > b:
+
+                    a, b = b, a
+
+                char = s[x-1]
+
+                key = (char, a, b)
+
+                if key not in hash_map:
+
+                    hash_map[key] = len(hash_map)
+
+                hash_val[x] = hash_map[key]
+
+                if a == b:
+
+                    cnt = (count[left] * count[right]) % MOD
+
+                else:
+
+                    cnt = (count[left] * count[right] * 2) % MOD
+
+                count[x] = cnt
+
+    print(count[1] % MOD, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+AAA
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 1.
+
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
+
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+
+    total_nodes = (1 << n) - 1
+    hash_val = [0] * (total_nodes + 1)
+    count = [0] * (total_nodes + 1)
+    hash_map = {}
+
+    for level in range(n-1, -1, -1):
+        start = 1 << level
+        end = (1 << (level + 1)) - 1
+        for x in range(start, end + 1):
+            if x > total_nodes:
+                continue
+            if level == n - 1:
+                char = s[x-1]
+                key = (char,)
+                if key not in hash_map:
+                    hash_map[key] = len(hash_map)
+                hash_val[x] = hash_map[key]
+                count[x] = 1
+            else:
+                left = 2 * x
+                right = 2 * x + 1
+                a = hash_val[left]
+                b = hash_val[right]
+                if a > b:
+                    a, b = b, a
+                char = s[x-1]
+                key = (char, a, b)
+                if key not in hash_map:
+                    hash_map[key] = len(hash_map)
+                hash_val[x] = hash_map[key]
+                if a == b:
+                    cnt = (count[left] * count[right]) % MOD
+                else:
+                    cnt = (count[left] * count[right] * 2) % MOD
+                count[x] = cnt
+
+    print(count[1] % MOD, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+BAA
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So the code should be correct.
 </think>

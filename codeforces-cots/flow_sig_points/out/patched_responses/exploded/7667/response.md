@@ -927,15 +927,85 @@ Another optimization: precompute all m where S_m <=n, then process them in order
 
 But the code as written should work.
 
-Testing the code with the samples.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-n=8, k=1.
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-The code should output 1 1 2 2 3 4 5 6.
+    answer = [0] * (n + 1)
+    dp = [0] * (n + 1)
+    dp[0] = 1
 
-Which matches the sample.
+    current_m = 0
+
+    while True:
+        current_m += 1
+        d = k + current_m - 1
+        S_m = current_m * (2 * k + current_m - 1) // 2
+        if S_m > n:
+            break
+        
+        # Update DP array for the new divisor d
+        for j in range(d, n + 1):
+            dp[j] = (dp[j] + dp[j - d]) % MOD
+        
+        # Compute contributions to answer
+        max_D = n - S_m
+        if max_D < 0:
+            continue
+        for D in range(max_D + 1):
+            x = S_m + D
+            answer[x] = (answer[x] + dp[D]) % MOD
+
+    # Output the results for x from 1 to n
+    print(' '.join(map(str, answer[1:n+1])), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 2
+""",
+            "output": \
+"""\
+0 1 0 1 1 1 1 2 2 2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

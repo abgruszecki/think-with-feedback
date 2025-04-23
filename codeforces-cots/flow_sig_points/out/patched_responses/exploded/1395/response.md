@@ -499,51 +499,163 @@ Then print 'Alice' if count is odd else 'Bob'.
 
 So the code:
 
-n = int(input())
-a = list(map(int, input().split()))
-left = 0
-right = n - 1
-last = -float('inf')
-count = 0
+Testing against sample input 1.
 
-while left <= right:
-    if a[left] > last and a[right] > last:
-        if a[left] < a[right]:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    left = 0
+    right = n - 1
+    last = -float('inf')
+    count = 0
+
+    while left <= right:
+        if a[left] > last and a[right] > last:
+            if a[left] < a[right]:
+                last = a[left]
+                left += 1
+                count += 1
+            else:
+                last = a[right]
+                right -= 1
+                count +=1
+        elif a[left] > last:
             last = a[left]
-            left += 1
-            count += 1
-        else:
-            last = a[right]
-            right -= 1
+            left +=1
             count +=1
-    elif a[left] > last:
-        last = a[left]
-        left +=1
-        count +=1
-    elif a[right] > last:
-        last = a[right]
-        right -=1
-        count +=1
-    else:
-        break
+        elif a[right] > last:
+            last = a[right]
+            right -=1
+            count +=1
+        else:
+            break
 
-print("Alice" if count % 2 else "Bob")
+    print("Alice" if count % 2 else "Bob", file=output_stream)
 
-This should work.
 
-Testing the first sample:
 
-n=1, a=[5]. left=0, right=0. Both ends are5> -inf. left is5, right is5. Choose left (same, but code picks left. count becomes1. Alice.
+def test():
+    import io
 
-Sample2:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+5 4 5
+""",
+            "output": \
+"""\
+Alice
+""",
+        }, 
+    ]
 
-n=3, array [5,4,5]. left=0, right=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Both 5 and5 are> -inf. choose left. count1. left=1. next, left is4, right is5. both are>5. 4 <5. take left. count2. last=4. but then next element must be>4. 4 <5? The code would check:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Now, left=1, right=2. a[1]=4, a[2]=5. last is4. a[left] is4 is not>4, a[right] is5>4. So take right. count3. last=5. right=1. Now, left=1 and right=1. a[left]=4<5. No options. count3, which is odd. Alice wins. But sample2's output is Alice.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Wait but according to the sample input2, the output is Alice. But according to the code, the count is3, which is odd. So why?
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    left = 0
+    right = n - 1
+    last = -float('inf')
+    count = 0
+
+    while left <= right:
+        if a[left] > last and a[right] > last:
+            if a[left] < a[right]:
+                last = a[left]
+                left += 1
+                count += 1
+            else:
+                last = a[right]
+                right -= 1
+                count +=1
+        elif a[left] > last:
+            last = a[left]
+            left +=1
+            count +=1
+        elif a[right] > last:
+            last = a[right]
+            right -=1
+            count +=1
+        else:
+            break
+
+    print("Alice" if count % 2 else "Bob", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+5 8 2 1 10 9
+""",
+            "output": \
+"""\
+Bob
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Wait wait, the sample input2 is:
 

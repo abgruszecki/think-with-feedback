@@ -189,15 +189,66 @@ Thus, the code is simple.
 
 Now, let's code this.
 
-Test case 1:
+Testing against sample input 1.
 
-Input:
+```python
+from collections import Counter
 
-5
 
-20 30 10 50 40
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    if n <= 1:
+        print(0, file=output_stream)
+    else:
+        freq = Counter(a)
+        max_freq = max(freq.values())
+        print(n - max_freq, file=output_stream)
 
-The frequencies are all 1. Max is 1. 5-1=4. Correct.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+200 100 100 200
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Test case 2:
 

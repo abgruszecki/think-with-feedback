@@ -983,41 +983,83 @@ else:
 
 Yes.
 
-Now, let's test the second sample:
+Testing against sample input 2.
 
-Sample 2:
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    s = input_stream.readline().rstrip("\n").strip()
+    t = input_stream.readline().rstrip("\n").strip()
 
-n=3, k=3.
+    prefix_s = [0] * (n + 1)
+    prefix_t = [0] * (n + 1)
 
-s= aba → 'a','b','a' → binary 0,1,0 → 0*4 +1*2 +0*1 = 2.
+    for i in range(n):
+        prefix_s[i+1] = prefix_s[i] * 2 + (1 if s[i] == 'b' else 0)
+        prefix_t[i+1] = prefix_t[i] * 2 + (1 if t[i] == 'b' else 0)
 
-t= bba → 1,1,0 → 1*4 +1*2 +0=6.
+    vs = prefix_s[n]
+    vt = prefix_t[n]
+    m = vt - vs + 1
 
-m=6-2 +1=5.
+    sum_cl = 0
+    for l in range(1, n+1):
+        s_val = prefix_s[l]
+        t_val = prefix_t[l]
+        if s_val <= t_val:
+            sum_cl += t_val - s_val + 1
 
-sum_cl:
+    if k >= m:
+        print(sum_cl, file=output_stream)
+    else:
+        print(sum_cl - (m - k), file=output_stream)
 
-l=1:
 
-s_val=0, t_val=1 → 2.
 
-l=2:
+def test():
+    import io
 
-s_val=0*2+1=1, t_val=1*2+1=3 → 3-1+1=3 → sum 5.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 5
+abbb
+baaa
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
 
-l=3:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-s_val=2, t_val=6 →6-2+1=5 → sum 5+5=10.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sum_cl=10.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-k=3 <5 → answer is 10 - (5-3)=8.
+    print('Tests passed 😎')
 
-Which matches the sample.
 
-Yes.
+if __name__ == '__main__':
+    test()
 
-So the code should work.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

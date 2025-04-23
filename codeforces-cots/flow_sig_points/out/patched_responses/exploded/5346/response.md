@@ -1787,29 +1787,85 @@ else:
 
 But this code may not work for some cases.
 
-Let's test it against the sample inputs.
+Testing against sample input 1.
 
-Sample input 1 1 1:
+```python
+def main(input_stream, output_stream):
+    a, b, c = map(int, input_stream.readline().rstrip("\n").split())
 
-For target a=1:
+    def compute_min_steps(a, b, c):
+        min_steps = float('inf')
+        possible = False
 
-other1 =1, other2=1.
+        # Check for each target color
+        targets = [(a, b, c), (b, a, c), (c, a, b)]
+        for target, other1, other2 in targets:
+            sum_other = other1 + other2
+            if sum_other == 0:
+                if target > 0:
+                    return 0
+                else:
+                    continue  # All zeros except target which is zero, but sum is zero, which is invalid
+            if (sum_other % 2) != 0:
+                continue
+            diff = abs(other1 - other2)
+            if (diff % 2) != 0:
+                continue
+            steps = max(other1, other2)
+            possible = True
+            if steps < min_steps:
+                min_steps = steps
 
-sum_other=2 even.
+        if possible:
+            return min_steps
+        else:
+            return -1
 
-diff=0 even.
+    print(compute_min_steps(a, b, c), file=output_stream)
 
-steps=1.
 
-For target b=1:
 
-steps=1.
+def test():
+    import io
 
-For target c=1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 1 0
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-steps=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Thus, minimal steps is 1. Correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 3 1 0:
 

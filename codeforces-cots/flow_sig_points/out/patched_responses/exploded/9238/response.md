@@ -351,15 +351,64 @@ While a !=0 and b !=0:
 
 Print(count).
 
-Wait, but let's test the first sample input 1 1:
+Testing against sample input 1.
 
-a=1, b=1.
+```python
+def main(input_stream, output_stream):
+    a, b = map(int, input_stream.readline().rstrip("\n").split())
+    count = 0
+    while a != 0 and b != 0:
+        if a >= b:
+            count += a // b
+            a %= b
+        else:
+            count += b // a
+            b %= a
+    print(count, file=output_stream)
 
-Loop runs since a and b are not zero.
 
-a >=b: count +=1//1=1 → count=1. a becomes 0.
 
-Loop ends. Print 1. Correct.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: a=3, b=2.
 

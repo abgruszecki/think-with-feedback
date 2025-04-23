@@ -1203,189 +1203,128 @@ But for the problem, the input is read via input(). But for large n, it's better
 
 So, in code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n, k = map(int, sys.stdin.readline().split())
 
-a = list(map(int, sys.stdin.readline().split()))
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
 
-a_sorted = sorted(a)
+    a = list(map(int, input_stream.readline().split()))
 
-low =0
+    a_sorted = sorted(a)
 
-high = n-1
+    low =0
 
-ans =-1
+    high = n-1
 
-def is_possible(x, a, k):
+    ans =-1
 
-    n = len(a)
+    def is_possible(x, a, k):
 
-    prefix = [0]*(n+1)
+        n = len(a)
 
-    for i in range(1, n+1):
+        prefix = [0]*(n+1)
 
-        if a[i-1] >=x:
+        for i in range(1, n+1):
 
-            prefix[i] = prefix[i-1]+1
+            if a[i-1] >=x:
+
+                prefix[i] = prefix[i-1]+1
+
+            else:
+
+                prefix[i] = prefix[i-1]-1
+
+        min_p = float('inf')
+
+        found = False
+
+        for i in range(n+1):
+
+            if i >=k:
+
+                j = i -k
+
+                if j >=0:
+
+                    if prefix[j] < min_p:
+
+                        min_p = prefix[j]
+
+                if prefix[i] - min_p >=1:
+
+                    found = True
+
+                    break
+
+        return found
+
+    while low <= high:
+
+        mid = (low + high) //2
+
+        x = a_sorted[mid]
+
+        if is_possible(x, a, k):
+
+            ans =x
+
+            low = mid +1
 
         else:
 
-            prefix[i] = prefix[i-1]-1
+            high = mid -1
 
-    min_p = float('inf')
+    print(ans, file=output_stream)
 
-    found = False
 
-    for i in range(n+1):
 
-        if i >=k:
+def test():
+    import io
 
-            j = i -k
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 2
+1 2 3 4
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-            if j >=0:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-                if prefix[j] < min_p:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-                    min_p = prefix[j]
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-            if prefix[i] - min_p >=1:
+    print('Tests passed 😎')
 
-                found = True
 
-                break
+if __name__ == '__main__':
+    test()
 
-    return found
 
-while low <= high:
+```
 
-    mid = (low + high) //2
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-    x = a_sorted[mid]
+```
 
-    if is_possible(x, a, k):
-
-        ans =x
-
-        low = mid +1
-
-    else:
-
-        high = mid -1
-
-print(ans)
-
-But wait, in the is_possible function, the code loops through i from 0 to n (since range(n+1) is from 0 to n), but in the loop, for i in range(n+1), but the code in the for loop uses i >=k.
-
-For example, when i is 0, which is <k, then j=0 -k which is negative, so j >=0 is False.
-
-But in the code, the for loop starts from i=0 to i=n.
-
-But in the original code, the loop is for i in range(1, n+1), but in the code above, the loop is for i in range(n+1). This is a mistake.
-
-Wait, the code for the prefix array in the is_possible function:
-
-prefix = [0]*(n+1)
-
-for i in range(1, n+1):
-
-    prefix[i] = prefix[i-1] + T[i-1]
-
-Which is correct.
-
-But in the code above, the code for checking is:
-
-for i in range(n+1):
-
-    if i >=k:
-
-        j =i -k.
-
-        etc.
-
-But i ranges from 0 to n.
-
-But in the prefix array, the sum up to i elements is prefix[i].
-
-So, when i is the prefix index (from 0 to n), the code should process all i in 0 to n.
-
-But the code for checking is:
-
-for i in range(n+1):
-
-    if i >=k:
-
-        j = i -k
-
-        if j >=0:
-
-            min_p = min(min_p, prefix[j])
-
-        if prefix[i] - min_p >=1:
-
-            found = True
-
-            break.
-
-So, for example, when i is k, j =0.
-
-Which is correct.
-
-Thus, the code in the for loop of is_possible is correct.
-
-Thus, the code is correct.
-
-Testing the first example:
-
-n=5, k=3.
-
-a_sorted is [1,1,2,2,3].
-
-Binary search steps:
-
-low=0, high=4.
-
-mid=2 → x=2.
-
-is_possible(x=2, a, 3):
-
-prefix:
-
-i=1: a[0]=1 >=2 → -1. prefix[1] =-1.
-
-i=2: a[1]=1 >=2 →-1. prefix[2]=-2.
-
-i=3: a[2]=3 >=2 →1. prefix[3] =-1.
-
-i=4: a[3]=2 >=2 →1. prefix[4]=0.
-
-i=5: a[4]=1 >=2 →-1. prefix[5]=-1.
-
-So, prefix = [0, -1, -2, -1, 0, -1].
-
-Then, for i in 0..5:
-
-i=3:
-
-i >=3 (k=3). j=0. min_p = prefix[0] =0.
-
-prefix[i] =prefix[3] =-1.
-
--1 -0 =-1 <1. So not found.
-
-i=4:
-
-j=4-3=1. prefix[1]=-1. min_p is min(0, -1) →-1.
-
-prefix[4] - (-1) =0 +1=1 >=1. → found =True. Break.
-
-Thus, returns True.
-
-Thus, x=2 is possible.
-
-Thus, code works.
-
-Thus, the code should pass the test cases.
 </think>
 
 ```python

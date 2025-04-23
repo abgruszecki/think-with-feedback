@@ -958,23 +958,131 @@ But in the code, for d in range(1, k+2), which in Python includes 1, 2,..., k+1.
 
 Yes.
 
-Testing this code on sample input 1:
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+import sys
+from sys import stdin
 
-5 1
 
-1 2 3 4 5
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
+    adj = [[] for _ in range(n+1)]
+    for _ in range(n-1):
+        u, v = map(int, input_stream.readline().split())
+        adj[u].append(v)
+        adj[v].append(u)
+    
+    root = 1
+    parent = [0] * (n + 1)
+    children = [[] for _ in range(n + 1)]
+    visited = [False] * (n + 1)
+    stack = [root]
+    visited[root] = True
+    parent[root] = -1
+    while stack:
+        u = stack.pop()
+        for v in adj[u]:
+            if not visited[v] and v != parent[u]:
+                parent[v] = u
+                children[u].append(v)
+                visited[v] = True
+                stack.append(v)
+    
+    post_order = []
+    stack = [(root, False)]
+    while stack:
+        node, processed = stack.pop()
+        if processed:
+            post_order.append(node)
+            continue
+        stack.append((node, True))
+        for child in reversed(children[node]):
+            stack.append((child, False))
+    
+    max_d = k + 1
+    dp = [[0] * (max_d + 2) for _ in range(n + 1)]
+    
+    for u in post_order:
+        for d in range(1, k + 2):
+            if d <= k:
+                new_d = min(d + 1, max_d)
+                total = 0
+                for v in children[u]:
+                    total += dp[v][new_d]
+                dp[u][d] = total
+            else:
+                total1 = a[u - 1]
+                for v in children[u]:
+                    total1 += dp[v][1]
+                total2 = 0
+                new_d = max_d
+                for v in children[u]:
+                    total2 += dp[v][new_d]
+                dp[u][d] = max(total1, total2)
+    
+    print(dp[root][max_d], file=output_stream)
 
-1 2
 
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 2
+2 1 2 1 2 1 1
+6 4
+1 5
+3 1
 2 3
+7 5
+7 4
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-3 4
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-3 5
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The code should output 11, which is correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 104, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 97, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '4'
+Got: '5'
+
+```
 
 Sample input 2:
 

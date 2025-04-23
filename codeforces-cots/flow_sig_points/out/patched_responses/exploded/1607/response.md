@@ -91,73 +91,76 @@ This approach is O(n), which is acceptable since n is up to 100. Even for n=1e5,
 
 So the code in Python would be:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-buses = 0
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-current_index =0
+    buses = 0
 
-while current_index <n:
+    current_index =0
 
-    buses +=1
+    while current_index <n:
 
-    current_bus =0
+        buses +=1
 
-    while current_index <n and current_bus + a[current_index] <=m:
+        current_bus =0
 
-        current_bus += a[current_index]
+        while current_index <n and current_bus + a[current_index] <=m:
 
-        current_index +=1
+            current_bus += a[current_index]
 
-print(buses)
+            current_index +=1
 
-Wait, yes. Let's test with the first sample.
+    print(buses, file=output_stream)
 
-Sample 1:
 
-n=4, m=3
 
-a = [2,3,2,1]
+def test():
+    import io
 
-Loop:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 4
+1 2 1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-current_index starts at 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-buses becomes 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-current_bus starts at 0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Check if 0+2 <=3: yes. Add to current_bus (0+2=2), current_index becomes 1.
+    print('Tests passed 😎')
 
-Check if 2+3 <=3? 5>3: no. So inner loop ends.
 
-current_index is 1.
+if __name__ == '__main__':
+    test()
 
-Next iteration:
 
-buses becomes 2.
+```
 
-current_bus starts at 0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Check a[1] (3) +0 <=3: yes. Add, current_bus=3, current_index=2.
-
-Check next a[2] is 2. 3+2=5>3: no. So inner loop ends.
-
-current_index is 2.
-
-Next iteration:
-
-buses becomes 3.
-
-current_bus starts at 0.
-
-Add a[2] (2). current_bus=2, current_index=3.
-
-Check a[3] (1). 2+1=3 <=3. Add. current_bus=3, current_index=4. Exit inner loop.
-
-current_index is now 4, loop ends. Total buses is 3. Correct.
+```
 
 Second sample:
 

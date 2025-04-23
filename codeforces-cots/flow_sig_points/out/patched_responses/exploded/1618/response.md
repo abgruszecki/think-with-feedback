@@ -957,47 +957,151 @@ print(base + res)
 
 Yes.
 
-Testing the code.
+Testing against sample input 1.
 
-Sample input 1:
+```python
+def main(input_stream, output_stream):
+    n, a, b, k = map(int, input_stream.readline().rstrip("\n").split())
+    h = list(map(int, input_stream.readline().rstrip("\n").split()))
+    sum_ab = a + b
+    base = 0
+    required = []
+    for hp in h:
+        m = (hp - 1) // sum_ab
+        rem = hp - m * sum_ab
+        if rem <= a:
+            base += 1
+        else:
+            s = (rem - 1) // a
+            required.append(s)
+    required.sort()
+    count = 0
+    current = 0
+    for s in required:
+        if current + s <= k:
+            current += s
+            count += 1
+        else:
+            break
+    print(base + count, file=output_stream)
 
-6 2 3 3
 
-7 10 50 12 1 8
 
-sum_ab=5.
+def test():
+    import io
 
-Processing:
-
-h=7: m=(7-1)//5=1. R=2. <=2. base=1.
-
-h=10: R=5. 5>2. required_s=(5-1)/2=2. lst [2]
-
-h=50: R=5. same. lst [2,2]
-
-h=12: R=2 → base=2.
-
-h=1: base=3.
-
-h=8: R=3 → required_s= (3-1)/2=1. lst [2,2,1]
-
-sorted lst is [1,2,2]
-
-summing 1 (3 >=1? current_sum=0+1=1 <=3 → res=1.
-
-then 2: sum 3. current_sum=3 → res=2.
-
-then 2: sum+2=5>3. break.
-
-total res=2. base=3+2=5. Correct.
-
-Sample input 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 1 1 100 99
+100
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-sum_ab=101.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-h=100: m=(99)//101=0. R=100. >1 → required_s=99. lst [99]. sorted. sum=99 <=99 → res=1. base=0. total 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, a, b, k = map(int, input_stream.readline().rstrip("\n").split())
+    h = list(map(int, input_stream.readline().rstrip("\n").split()))
+    sum_ab = a + b
+    base = 0
+    required = []
+    for hp in h:
+        m = (hp - 1) // sum_ab
+        rem = hp - m * sum_ab
+        if rem <= a:
+            base += 1
+        else:
+            s = (rem - 1) // a
+            required.append(s)
+    required.sort()
+    count = 0
+    current = 0
+    for s in required:
+        if current + s <= k:
+            current += s
+            count += 1
+        else:
+            break
+    print(base + count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 4 2 1
+1 3 5 4 2 7 6
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

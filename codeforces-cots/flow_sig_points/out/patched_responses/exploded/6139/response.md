@@ -1632,19 +1632,22 @@ Once sorted, for each x, we process it and choose the best array.
 
 Thus, the code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-def main():
 
+def main(input_stream, output_stream):
     import sys
 
-    n = int(sys.stdin.readline())
+    n = int(input_stream.readline())
 
-    a = list(map(int, sys.stdin.readline().split()))
+    a = list(map(int, input_stream.readline().split()))
 
-    b = list(map(int, sys.stdin.readline().split()))
+    b = list(map(int, input_stream.readline().split()))
 
-    c = list(map(int, sys.stdin.readline().split()))
+    c = list(map(int, input_stream.readline().split()))
 
     def build_first_pos(arr):
 
@@ -1764,77 +1767,55 @@ def main():
 
     total = current_a_max + current_b_max + current_c_max
 
-    print(total)
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 1 2 2 3
+2 2 4 3 3
+3 3 1 1 1
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
 
 if __name__ == '__main__':
+    test()
 
-    main()
 
-This code should handle the problem correctly.
+```
 
-Let's test the first sample:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Sample 1:
+```
 
-After processing element 3 (x=3, a_p=inf, b_p=inf, c_p=1):
-
-Options are to assign to c. new_c_max=1. sum is 1.
-
-Then x=1, a_p=1, b_p=1, c_p=3.
-
-Options:
-
-assign to a: new_a_max=1. sum 1+0+0=1.
-
-assign to b: new_sum 0+1+0=1.
-
-assign to c: sum 0+0+3=3.
-
-Choose a or b. The code chooses the first option (sorted by sum, then by the array name). For example, if two options have the same sum, the code will pick 'a' because 'a' comes before 'b' in the options list. In this case, the code will assign x=1 to a, and the sum becomes 1.
-
-Then x=2 (a_p=inf, b_p=2, c_p=2).
-
-Options:
-
-assign to b: sum 1+2+0=3.
-
-assign to c: sum 1+0+2=3.
-
-The code will choose the first option (b), but according to the sample, assigning to c gives a better sum.
-
-Wait, no. In the sample's optimal solution, x=2 is assigned to c. But according to the code's processing, x=2 is processed after x=3 and x=1.
-
-Let's see:
-
-current_a_max=1, current_b_max=0, current_c_max=1.
-
-x=2's a_p is inf, so options are b and c.
-
-For b:
-
-new_b_max=2. sum 1+2+1=4.
-
-For c:
-
-new_c_max=2. sum 1+0+2=3.
-
-Thus, options are (4, 'b'), (3, 'c').
-
-The code will choose c, since 3 is less than 4.
-
-Thus, current_c_max becomes 2.
-
-Then, processing x=101 (a_p=3, b_p=inf, c_p=inf). Only option is a.
-
-new_a_max=3. sum 3+0+2=5.
-
-Thus, the final sum is 5.
-
-Thus, the code works for the first sample.
-
-The code will also work for the second sample.
-
-Thus, this approach should be correct.
 </think>
 
 ```python

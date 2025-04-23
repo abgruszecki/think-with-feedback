@@ -185,19 +185,64 @@ So the code is correct.
 
 Now, implementing this in Python. The code is straightforward. Read s and n. Read the dragons. Sort by xi. Then loop through each, check if s > xi. If yes, add yi. Else, print NO and exit. If all passed, print YES.
 
-Testing this code against the examples:
+Testing against sample input 1.
 
-First example:
+```python
+def main(input_stream, output_stream):
+    s, n = map(int, input_stream.readline().rstrip("\n").split())
+    dragons = sorted([tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n)], key=lambda x: x[0])
+    for xi, yi in dragons:
+        if s > xi:
+            s += yi
+        else:
+            print("NO", file=output_stream)
+            return
+    print("YES", file=output_stream)
 
-Input:
 
-2 2
 
-1 99
+def test():
+    import io
 
-100 0
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 1
+100 100
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-After sorting, the dragons are [(1,99), (100,0)]. The loop checks 2>1: add 99, s=101. Then 101>100: add 0. Output YES.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: 10 1, (100,100). Sorted list has (100,100). 10>100? No. Output NO.
 

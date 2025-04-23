@@ -228,11 +228,85 @@ else:
 
 This should handle all cases.
 
-Testing against the examples:
+Testing against sample inputs 1, 2.
 
-First example: all same x → print 1.
+```python
+def main(input_stream, output_stream):
+    points = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(3)]
+    
+    # Check if all points are colinear (same x or same y)
+    same_x = all(p[0] == points[0][0] for p in points)
+    same_y = all(p[1] == points[0][1] for p in points)
+    if same_x or same_y:
+        print(1, file=output_stream)
+        return
+    
+    # Check all permutations for possible 2-segment path
+    from itertools import permutations
+    for a, b, c in permutations(points):
+        if (a[0] == b[0] and b[1] == c[1]) or (a[1] == b[1] and b[0] == c[0]):
+            print(2, file=output_stream)
+            return
+    
+    print(3, file=output_stream)
 
-Second example: permutations check finds a valid order (A,B,C) as per the code, returns 2.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+-1 -1
+-1 3
+4 3
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+        {
+            "input": \
+"""\
+1 1
+2 3
+3 2
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: permutations check returns False, so 3.
 

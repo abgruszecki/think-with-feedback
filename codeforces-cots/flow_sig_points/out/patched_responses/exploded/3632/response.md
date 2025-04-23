@@ -274,43 +274,68 @@ The code needs to read n, then the list, sort it, then track visited elements.
 
 In Python, the code would look like this:
 
-n = int(input())
-a = list(map(int, input().split()))
-a.sort()
-visited = [False] * n
-count = 0
-for i in range(n):
-    if not visited[i]:
-        count += 1
-        current = a[i]
-        for j in range(i, n):
-            if a[j] % current == 0:
-                visited[j] = True
-print(count)
+Testing against sample input 1.
 
-This should work.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a.sort()
+    visited = [False] * n
+    count = 0
+    for i in range(n):
+        if not visited[i]:
+            count += 1
+            current = a[i]
+            for j in range(i, n):
+                if a[j] % current == 0:
+                    visited[j] = True
+    print(count, file=output_stream)
 
-Testing against the samples:
 
-First sample input:
 
-6
+def test():
+    import io
 
-10 2 3 5 4 2 → sorted [2,2,3,4,5,10]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+100 100 100 100
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-Processing i=0 (2), mark all multiples. So 0,1,3,5.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=1 is marked. i=2 (3), mark 2 and j=2 (3). i=3 marked. i=4 (5), mark 4 and 5 (which is 10, but 10 is at index 5 which is already marked. Wait, no. Wait, in the code, when i=4 (a[i] =5):
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-j starts from 4. So j=4: 5%5=0 → mark. j=5: 10%5=0 → mark. So visited[4] and visited[5] are marked. But in the first pass, 5 is the element at index 4. So in the code:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-count increments to 3 when i=4. Then, for j in 4 to 5:
+    print('Tests passed 😎')
 
-j=4:5 → 5%5=0 → mark as visited.
 
-j=5:10 →10%5=0 → mark as visited.
+if __name__ == '__main__':
+    test()
 
-So after this step, all elements are marked. So total count is 3. Which is correct.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Yes, the code works.
 

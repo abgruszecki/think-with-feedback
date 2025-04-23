@@ -368,56 +368,98 @@ But in Python, looping through 512 elements for each a_i (which is 1e5 elements)
 
 So in code:
 
-max_xor = 512  # since 500 is 0b111110100 (9 bits), maximum possible XOR is 511.
+Testing against sample input 1.
 
-n = int(input())
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    max_xor = 512  # since 500 is 0b111110100 (9 bits), maximum possible XOR is 511.
 
-dp = [float('inf')] * (max_xor)
-dp[0] = -1  # x=0 has last element -1.
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for num in a:
-    tmp = {}
-    for x in range(max_xor):
-        if dp[x] < num:
-            new_x = x ^ num
-            new_last = num
-            if new_x in tmp:
-                if new_last < tmp[new_x]:
+    dp = [float('inf')] * (max_xor)
+    dp[0] = -1  # x=0 has last element -1.
+
+    for num in a:
+        tmp = {}
+        for x in range(max_xor):
+            if dp[x] < num:
+                new_x = x ^ num
+                new_last = num
+                if new_x in tmp:
+                    if new_last < tmp[new_x]:
+                        tmp[new_x] = new_last
+                else:
                     tmp[new_x] = new_last
-            else:
-                tmp[new_x] = new_last
-    # merge tmp into dp
-    for new_x, new_last in tmp.items():
-        if new_last < dp[new_x]:
-            dp[new_x] = new_last
+        # merge tmp into dp
+        for new_x, new_last in tmp.items():
+            if new_last < dp[new_x]:
+                dp[new_x] = new_last
 
-# collect all x where dp[x] is not infinity, or x=0.
+    # collect all x where dp[x] is not infinity, or x=0.
 
-result = []
-for x in range(max_xor):
-    if dp[x] != float('inf') or x ==0:
-        # wait, x=0's dp[0] is -1, which is not infinity. So the x=0 is always included.
+    result = []
+    for x in range(max_xor):
+        if dp[x] != float('inf') or x ==0:
+            # wait, x=0's dp[0] is -1, which is not infinity. So the x=0 is always included.
 
-        # Wait, the initial dp[0] is -1. So after processing, if any x is possible, including x=0, which is included.
+            # Wait, the initial dp[0] is -1. So after processing, if any x is possible, including x=0, which is included.
 
-        # So collect all x where dp[x] is not infinity.
+            # So collect all x where dp[x] is not infinity.
 
-        if dp[x] != float('inf'):
-            result.append(x)
+            if dp[x] != float('inf'):
+                result.append(x)
 
-result.sort()
+    result.sort()
 
-print(len(result))
-print(' '.join(map(str, result)))
+    print(len(result), file=output_stream)
+    print(' '.join(map(str, result)), file=output_stream)
 
-Wait, but in the code, after processing, the x=0 has dp[0] = -1, which is not infinity. So it will be included in the result. All other x's that are possible have dp[x] not infinity. So the code correctly collects all possible x's.
 
-Testing this code with the first sample input:
 
-After processing the elements, the dp for x=0 is -1, x=2 is 2, x=4 is4, x=6 is4. So in the code, these x's are added to the result. Then sorted, which gives 0,2,4,6.
+def test():
+    import io
 
-Yes.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+1 0 1 7 12 5 3 2
+""",
+            "output": \
+"""\
+12
+0 1 2 3 4 5 6 7 10 11 12 13
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case: sample input 2.
 

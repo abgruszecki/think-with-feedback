@@ -301,45 +301,82 @@ Yes. Because the first iteration (for the last action in original order) compute
 
 So in code:
 
-n, p = map(int, input().split())
+Testing against sample input 1.
 
-actions = [input().strip() for _ in range(n)]
+```python
+def main(input_stream, output_stream):
+    n, p = map(int, input_stream.readline().rstrip("\n").split())
 
-actions_reversed = reversed(actions)
+    actions = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
 
-total =0
+    actions_reversed = reversed(actions)
 
-x =0
+    total =0
 
-for action in actions_reversed:
+    x =0
 
-    if action == 'halfplus':
+    for action in actions_reversed:
 
-        x_before = 2 * x +1
+        if action == 'halfplus':
 
-    else:
+            x_before = 2 * x +1
 
-        x_before = 2 *x
+        else:
 
-    total += (x_before * p) //2
+            x_before = 2 *x
 
-    x = x_before
+        total += (x_before * p) //2
 
-print(total)
+        x = x_before
 
-This should work. Let's test the first sample:
+    print(total, file=output_stream)
 
-Sample 1:
 
-Reversed actions are ['halfplus', 'half'].
 
-First iteration (action 'halfplus'):
+def test():
+    import io
 
-x is 0 → x_before = 2*0 +1 =1. total becomes (1 *10)/2=5. x becomes 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 10
+halfplus
+halfplus
+halfplus
+""",
+            "output": \
+"""\
+55
+""",
+        }, 
+    ]
 
-Second iteration (action 'half'):
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-x is 1 → x_before=2*1=2. total += (2*10)/2=10 → total 15. x becomes 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

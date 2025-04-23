@@ -933,13 +933,14 @@ Yes.
 
 So the code:
 
+Testing against sample input 1.
+
+```python
 import sys
-
 import math
-
 from functools import reduce
-
 from collections import defaultdict
+
 
 def compute_gcd(arr):
 
@@ -981,9 +982,8 @@ def get_primes(x, spf):
 
     return primes
 
-def main():
-
-    input = sys.stdin.read().split()
+def main(input_stream, output_stream):
+    input = input_stream.read().split()
 
     n = int(input[0])
 
@@ -991,7 +991,7 @@ def main():
 
     if n ==0:
 
-        print(-1)
+        print(-1, file=output_stream)
 
         return
 
@@ -1003,7 +1003,7 @@ def main():
 
     if max_b ==1:
 
-        print(-1)
+        print(-1, file=output_stream)
 
         return
 
@@ -1025,57 +1025,203 @@ def main():
 
     if not freq:
 
-        print(-1)
+        print(-1, file=output_stream)
 
     else:
 
         max_freq = max(freq.values())
 
-        print(n - max_freq)
+        print(n - max_freq, file=output_stream)
 
-if __name__ == "__main__":
 
-    main()
 
-But let's test this code with the examples.
+def test():
+    import io
 
-First example:
-
-Input:
-
-3
-
-1 2 4
-
-original_gcd is 1. b is [1,2,4]. max_b is 4.
-
-sieve(4) creates spf array.
-
-Processing elements:
-
-1: skipped.
-
-2: primes {2}.
-
-4: primes {2}.
-
-freq[2] is 2.
-
-max_freq is 2. answer 3-2=1.
-
-Correct.
-
-Second example:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
-
 6 9 15 30
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-original_gcd is 3. b is [2,3,5,10].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-max_b=10. sieve(10).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-spf for 10 is correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import sys
+import math
+from functools import reduce
+from collections import defaultdict
+
+
+def compute_gcd(arr):
+
+    return reduce(math.gcd, arr)
+
+def sieve(max_num):
+
+    if max_num < 2:
+
+        return []
+
+    spf = list(range(max_num+1))
+
+    for i in range(2, int(math.isqrt(max_num)) +1):
+
+        if spf[i] ==i:
+
+            for j in range(i*i, max_num+1, i):
+
+                if spf[j] ==j:
+
+                    spf[j] =i
+
+    return spf
+
+def get_primes(x, spf):
+
+    primes = set()
+
+    if x ==1:
+
+        return primes
+
+    while x !=1:
+
+        primes.add(spf[x])
+
+        x = x // spf[x]
+
+    return primes
+
+def main(input_stream, output_stream):
+    input = input_stream.read().split()
+
+    n = int(input[0])
+
+    a = list(map(int, input[1:n+1]))
+
+    if n ==0:
+
+        print(-1, file=output_stream)
+
+        return
+
+    original_gcd = compute_gcd(a)
+
+    b = [x // original_gcd for x in a]
+
+    max_b = max(b)
+
+    if max_b ==1:
+
+        print(-1, file=output_stream)
+
+        return
+
+    spf = sieve(max_b)
+
+    freq = defaultdict(int)
+
+    for num in b:
+
+        if num ==1:
+
+            continue
+
+        primes = get_primes(num, spf)
+
+        for p in primes:
+
+            freq[p] +=1
+
+    if not freq:
+
+        print(-1, file=output_stream)
+
+    else:
+
+        max_freq = max(freq.values())
+
+        print(n - max_freq, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 1 1
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Processing:
 

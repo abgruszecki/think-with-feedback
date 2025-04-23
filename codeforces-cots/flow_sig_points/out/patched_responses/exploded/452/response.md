@@ -319,21 +319,73 @@ Output the sum.
 
 Yes! That's the solution.
 
-Let's test this with the given examples.
+Testing against sample input 1.
 
-First example input:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    degrees = [0] * (n + 1)
+    for _ in range(n - 1):
+        u, v = map(int, input_stream.readline().rstrip("\n").split())
+        degrees[u] += 1
+        degrees[v] += 1
 
-4 nodes.
+    total = 0
+    for d in degrees:
+        if d >= 2:
+            total += d * (d - 1) // 2
 
-Edges:
+    print(total, file=output_stream)
 
-1-2, 1-3, 1-4.
 
-Degrees:
 
-1:3, others:1.
+def test():
+    import io
 
-Sum is 3*(3-1)/2 =3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+2 1
+3 2
+4 3
+5 3
+6 4
+7 4
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

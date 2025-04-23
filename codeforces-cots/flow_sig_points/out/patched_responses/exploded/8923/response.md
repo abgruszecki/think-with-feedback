@@ -288,89 +288,114 @@ Now, code:
 
 In Python:
 
-s1 = input().strip()
+Testing against sample input 1.
 
-s2 = input().strip()
+```python
+def main(input_stream, output_stream):
+    s1 = input_stream.readline().rstrip("\n").strip()
 
-if len(s1) != len(s2):
+    s2 = input_stream.readline().rstrip("\n").strip()
 
-    print("NO")
+    if len(s1) != len(s2):
 
-else:
-
-    # Check character counts
-
-    count1 = [0] * 26
-
-    count2 = [0] * 26
-
-    for c in s1:
-
-        count1[ord(c) - ord('a')] += 1
-
-    for c in s2:
-
-        count2[ord(c) - ord('a')] += 1
-
-    if count1 != count2:
-
-        print("NO")
+        print("NO", file=output_stream)
 
     else:
 
-        # Collect differing positions
+        # Check character counts
 
-        diff = []
+        count1 = [0] * 26
 
-        for i in range(len(s1)):
+        count2 = [0] * 26
 
-            if s1[i] != s2[i]:
+        for c in s1:
 
-                diff.append(i)
+            count1[ord(c) - ord('a')] += 1
 
-                if len(diff) > 2:
+        for c in s2:
 
-                    break
+            count2[ord(c) - ord('a')] += 1
 
-        if len(diff) != 2:
+        if count1 != count2:
 
-            print("NO")
+            print("NO", file=output_stream)
 
         else:
 
-            i, j = diff
+            # Collect differing positions
 
-            if s1[i] == s2[j] and s1[j] == s2[i]:
+            diff = []
 
-                print("YES")
+            for i in range(len(s1)):
+
+                if s1[i] != s2[i]:
+
+                    diff.append(i)
+
+                    if len(diff) > 2:
+
+                        break
+
+            if len(diff) != 2:
+
+                print("NO", file=output_stream)
 
             else:
 
-                print("NO")
+                i, j = diff
 
-This should work.
+                if s1[i] == s2[j] and s1[j] == s2[i]:
 
-Now, let's test the code against the sample inputs.
+                    print("YES", file=output_stream)
 
-Sample 1:
+                else:
 
-Input:
+                    print("NO", file=output_stream)
 
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+aa
 ab
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-ba
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-s1 and s2 length 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-count1: a:1, b:1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-count2: same.
+    print('Tests passed 😎')
 
-Differing positions: 0 and 1.
 
-Check s1[0] (a) == s2[1] (a) → yes.
+if __name__ == '__main__':
+    test()
 
-s1[1] (b) == s2[0] (b) → yes. Output YES.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

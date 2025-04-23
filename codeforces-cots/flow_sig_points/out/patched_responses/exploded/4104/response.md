@@ -110,21 +110,65 @@ Wait, but in Python, even if k is 0, 10**0 is 1, so t is 1, which works.
 
 So code can be written as:
 
-n, k = map(int, input().split())
+Testing against sample input 2.
 
-t = 10 ** k
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-from math import gcd
+    t = 10 ** k
 
-g = gcd(n, t)
+    from math import gcd
 
-result = (n * t) // g
+    g = gcd(n, t)
 
-print(result)
+    result = (n * t) // g
 
-But wait, let's test the second sample input:
+    print(result, file=output_stream)
 
-Input 10000 1. t=10. gcd(10000, 10) is 10. Then (10000 *10)/10 =10000. Correct.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+38101 0
+""",
+            "output": \
+"""\
+38101
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: input 123456789 8. t is 1e8. Let's compute gcd(123456789, 1e8). Let's see:
 

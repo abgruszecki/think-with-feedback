@@ -1317,15 +1317,83 @@ But wait, when k exceeds len(big), which can't happen since max_possible_k is mi
 
 Thus, the code is correct.
 
-Testing the sample1:
+Testing against sample input 1.
 
-For k=2, available_small_days is 1.
+```python
+def main(input_stream, output_stream):
+    n, d, m = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-sum_small is pre_small[1] =10.
+    big = sorted([x for x in a if x > m], reverse=True)
+    small = sorted([x for x in a if x <= m], reverse=True)
 
-sum_big is 23+15=38.
+    # Compute prefix sums for big and small
+    prefix_big = [0]
+    for num in big:
+        prefix_big.append(prefix_big[-1] + num)
 
-Total 48.
+    prefix_small = [0]
+    for num in small:
+        prefix_small.append(prefix_small[-1] + num)
+
+    max_possible_k = min((n - 1) // (d + 1) + 1, len(big))
+    max_total = 0
+
+    for k in range(0, max_possible_k + 1):
+        available_raw = n - k - (k - 1) * d
+        available = max(0, min(n - k, available_raw))
+        sum_big = prefix_big[k] if k <= len(big) else 0
+        sum_small = prefix_small[min(available, len(small))]
+        current_total = sum_big + sum_small
+        if current_total > max_total:
+            max_total = current_total
+
+    print(max_total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+20 2 16
+20 5 8 2 18 16 2 16 16 1 5 16 2 13 6 16 4 17 21 7
+""",
+            "output": \
+"""\
+195
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample2:
 

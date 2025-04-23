@@ -962,63 +962,94 @@ Now, implementing this.
 
 The code will be:
 
-n = int(input())
-c = list(map(int, input().split()))
-if not c:
-    print(0)
-    exit()
-n = len(c)
-dp = [[0]*n for _ in range(n)]
+Testing against sample inputs 2, 1.
 
-for i in range(n-1, -1, -1):
-    for j in range(i, n):
-        if i == j:
-            dp[i][j] = 1
-        else:
-            # Base cases: remove first or last
-            option1 = dp[i+1][j] + 1 if (i+1 < n) else 1
-            option2 = dp[i][j-1] + 1 if (j-1 >=0) else 1
-            dp[i][j] = min(option1, option2)
-            if c[i] == c[j]:
-                if j == i + 1:
-                    dp[i][j] = 1
-                else:
-                    dp[i][j] = min(dp[i][j], dp[i+1][j-1])
-            # Check all possible splits
-            for k in range(i, j):
-                dp[i][j] = min(dp[i][j], dp[i][k] + dp[k+1][j])
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
+    if not c:
+        print(0, file=output_stream)
+        return
+    n = len(c)
+    dp = [[0]*n for _ in range(n)]
 
-print(dp[0][n-1])
+    for i in range(n-1, -1, -1):
+        for j in range(i, n):
+            if i == j:
+                dp[i][j] = 1
+            else:
+                # Base cases: remove first or last
+                option1 = dp[i+1][j] + 1 if (i+1 < n) else 1
+                option2 = dp[i][j-1] + 1 if (j-1 >=0) else 1
+                dp[i][j] = min(option1, option2)
+                if c[i] == c[j]:
+                    if j == i + 1:
+                        dp[i][j] = 1
+                    else:
+                        dp[i][j] = min(dp[i][j], dp[i+1][j-1])
+                # Check all possible splits
+                for k in range(i, j):
+                    dp[i][j] = min(dp[i][j], dp[i][k] + dp[k+1][j])
 
-Testing this code with the third sample:
+    print(dp[0][n-1], file=output_stream)
 
-Input:
 
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 7
-
 1 4 4 2 3 2 1
-
-Output is 2, which is correct.
-
-Second sample:
-
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+        {
+            "input": \
+"""\
 3
-
-1 2 3 → output 3.
-
-First sample:
-
+1 2 3
+""",
+            "output": \
+"""\
 3
+""",
+        }, 
+    ]
 
-1 2 1 → output 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Thus, the code should work.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But to handle the case when n=0 (though according to constraints, n >=1), the code checks if not c, but the problem states n ≥1.
+    print('Tests passed 😎')
 
-Thus, the code should be correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

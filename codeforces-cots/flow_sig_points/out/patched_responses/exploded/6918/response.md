@@ -249,51 +249,161 @@ Now, code:
 
 Read the input.
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-b = list(map(int, input().split()))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-sorted_b = sorted(b)
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-x_candidates = set()
+    sorted_b = sorted(b)
 
-first_a = a[0]
+    x_candidates = set()
 
-for bj in b:
+    first_a = a[0]
 
-    x = (bj - first_a) % m
+    for bj in b:
 
-    x_candidates.add(x)
+        x = (bj - first_a) % m
 
-for x in sorted(x_candidates):
+        x_candidates.add(x)
 
-    transformed = [(ai + x) % m for ai in a]
+    for x in sorted(x_candidates):
 
-    if sorted(transformed) == sorted_b:
+        transformed = [(ai + x) % m for ai in a]
 
-        print(x)
+        if sorted(transformed) == sorted_b:
 
-        exit()
+            print(x, file=output_stream)
 
-Wait, but according to the problem statement, there's a solution, so the code will always find one. So no need to handle the case where no x is found.
+            return
 
-This code should work.
 
-Testing the first sample:
 
-Sample 1:
+def test():
+    import io
 
-a = [0,0,2,1], first_a is 0. For each bj in [2,0,1,1], x candidates are (2-0) mod3=2, (0-0) mod3=0, (1-0) mod3=1, (1-0) mod3=1. So x_candidates are {0,1,2}. Sorted as 0,1,2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2
+0 0 0
+1 1 1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-Check x=0: transformed a is [0,0,2,1]. sorted [0,0,1,2] vs sorted_b [0,1,1,2] → no.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-x=1: transformed [1,1,0,2] → sorted [0,1,1,2] → yes. So output 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sample 2:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-n=3, m=2. a = [0,0,0], first_a=0. b is [1,1,1]. x_candidates are (1-0) mod2=1, 1,1. So x_candidates {1}. sorted is [1]. Check x=1: transformed is [1,1,1] → sorted matches.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    sorted_b = sorted(b)
+
+    x_candidates = set()
+
+    first_a = a[0]
+
+    for bj in b:
+
+        x = (bj - first_a) % m
+
+        x_candidates.add(x)
+
+    for x in sorted(x_candidates):
+
+        transformed = [(ai + x) % m for ai in a]
+
+        if sorted(transformed) == sorted_b:
+
+            print(x, file=output_stream)
+
+            return
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 10
+0 0 0 1 2
+2 1 0 0 0
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

@@ -1717,105 +1717,146 @@ So, the corrected code:
 
 Here's the corrected Python code:
 
+Testing against sample input 1.
+
+```python
 import bisect
 import heapq
 
-w, h, n = map(int, input().split())
 
-# Vertical cuts
-cuts_v = []
-heap_v = []
-gaps_v = {}
-initial_gap_v = w
-gaps_v[initial_gap_v] = 1
-heapq.heappush(heap_v, -initial_gap_v)
-max_v = initial_gap_v
+def main(input_stream, output_stream):
+    w, h, n = map(int, input_stream.readline().rstrip("\n").split())
 
-# Horizontal cuts
-cuts_h = []
-heap_h = []
-gaps_h = {}
-initial_gap_h = h
-gaps_h[initial_gap_h] = 1
-heapq.heappush(heap_h, -initial_gap_h)
-max_h = initial_gap_h
+    # Vertical cuts
+    cuts_v = []
+    heap_v = []
+    gaps_v = {}
+    initial_gap_v = w
+    gaps_v[initial_gap_v] = 1
+    heapq.heappush(heap_v, -initial_gap_v)
+    max_v = initial_gap_v
 
-for _ in range(n):
-    direction, pos = input().split()
-    pos = int(pos)
-    if direction == 'V':
-        idx = bisect.bisect_left(cuts_v, pos)
-        predecessor = cuts_v[idx-1] if idx > 0 else 0
-        successor = cuts_v[idx] if idx < len(cuts_v) else w
-        original_gap = successor - predecessor
-        bisect.insort(cuts_v, pos)
-        # Update gaps_v
-        gaps_v[original_gap] -= 1
-        if gaps_v[original_gap] == 0:
-            del gaps_v[original_gap]
-        a = pos - predecessor
-        b = successor - pos
-        gaps_v[a] = gaps_v.get(a, 0) + 1
-        gaps_v[b] = gaps_v.get(b, 0) + 1
-        heapq.heappush(heap_v, -a)
-        heapq.heappush(heap_v, -b)
-        # Find new max_v
-        while True:
-            if not heap_v:
-                max_v = 0
-                break
-            current_candidate = -heap_v[0]
-            if current_candidate in gaps_v:
-                max_v = current_candidate
-                break
-            else:
-                heapq.heappop(heap_v)
-    else:
-        idx = bisect.bisect_left(cuts_h, pos)
-        predecessor = cuts_h[idx-1] if idx > 0 else 0
-        successor = cuts_h[idx] if idx < len(cuts_h) else h
-        original_gap = successor - predecessor
-        bisect.insort(cuts_h, pos)
-        # Update gaps_h
-        gaps_h[original_gap] -= 1
-        if gaps_h[original_gap] == 0:
-            del gaps_h[original_gap]
-        a = pos - predecessor
-        b = successor - pos
-        gaps_h[a] = gaps_h.get(a, 0) + 1
-        gaps_h[b] = gaps_h.get(b, 0) + 1
-        heapq.heappush(heap_h, -a)
-        heapq.heappush(heap_h, -b)
-        # Find new max_h
-        while True:
-            if not heap_h:
-                max_h = 0
-                break
-            current_candidate = -heap_h[0]
-            if current_candidate in gaps_h:
-                max_h = current_candidate
-                break
-            else:
-                heapq.heappop(heap_h)
-    print(max_v * max_h)
+    # Horizontal cuts
+    cuts_h = []
+    heap_h = []
+    gaps_h = {}
+    initial_gap_h = h
+    gaps_h[initial_gap_h] = 1
+    heapq.heappush(heap_h, -initial_gap_h)
+    max_h = initial_gap_h
 
-This code should now correctly handle the predecessor and successor computation, and the max_gap update using the heap and counter.
+    for _ in range(n):
+        direction, pos = input_stream.readline().rstrip("\n").split()
+        pos = int(pos)
+        if direction == 'V':
+            idx = bisect.bisect_left(cuts_v, pos)
+            predecessor = cuts_v[idx-1] if idx > 0 else 0
+            successor = cuts_v[idx] if idx < len(cuts_v) else w
+            original_gap = successor - predecessor
+            bisect.insort(cuts_v, pos)
+            # Update gaps_v
+            gaps_v[original_gap] -= 1
+            if gaps_v[original_gap] == 0:
+                del gaps_v[original_gap]
+            a = pos - predecessor
+            b = successor - pos
+            gaps_v[a] = gaps_v.get(a, 0) + 1
+            gaps_v[b] = gaps_v.get(b, 0) + 1
+            heapq.heappush(heap_v, -a)
+            heapq.heappush(heap_v, -b)
+            # Find new max_v
+            while True:
+                if not heap_v:
+                    max_v = 0
+                    break
+                current_candidate = -heap_v[0]
+                if current_candidate in gaps_v:
+                    max_v = current_candidate
+                    break
+                else:
+                    heapq.heappop(heap_v)
+        else:
+            idx = bisect.bisect_left(cuts_h, pos)
+            predecessor = cuts_h[idx-1] if idx > 0 else 0
+            successor = cuts_h[idx] if idx < len(cuts_h) else h
+            original_gap = successor - predecessor
+            bisect.insort(cuts_h, pos)
+            # Update gaps_h
+            gaps_h[original_gap] -= 1
+            if gaps_h[original_gap] == 0:
+                del gaps_h[original_gap]
+            a = pos - predecessor
+            b = successor - pos
+            gaps_h[a] = gaps_h.get(a, 0) + 1
+            gaps_h[b] = gaps_h.get(b, 0) + 1
+            heapq.heappush(heap_h, -a)
+            heapq.heappush(heap_h, -b)
+            # Find new max_h
+            while True:
+                if not heap_h:
+                    max_h = 0
+                    break
+                current_candidate = -heap_h[0]
+                if current_candidate in gaps_h:
+                    max_h = current_candidate
+                    break
+                else:
+                    heapq.heappop(heap_h)
+        print(max_v * max_h, file=output_stream)
 
-Testing this code with the first sample input:
 
-After H2:
 
-max_h is 2, max_v is4 → area 8.
+def test():
+    import io
 
-After V2: max_v is 2, max_h is 2 → area4.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 6 5
+H 4
+V 3
+V 5
+H 2
+V 1
+""",
+            "output": \
+"""\
+28
+16
+12
+6
+4
+""",
+        }, 
+    ]
 
-After V3: max_v is 2, max_h is 2 → area4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-After V1: max_v is 1, max_h is 2 → area2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Which matches the sample output.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Thus, this code should work.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

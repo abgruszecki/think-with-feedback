@@ -103,39 +103,77 @@ So the code works for that.
 
 Now, in Python, the code would be:
 
-k = int(input())
+Testing against sample input 1.
 
-d = 1
+```python
+def main(input_stream, output_stream):
+    k = int(input_stream.readline().rstrip("\n"))
 
-while True:
+    d = 1
 
-    current_count = 9 * 10**(d-1) * d
+    while True:
 
-    if k > current_count:
+        current_count = 9 * 10**(d-1) * d
 
-        k -= current_count
+        if k > current_count:
 
-        d +=1
+            k -= current_count
 
-    else:
+            d +=1
 
-        break
+        else:
 
-number = 10**(d-1) + (k-1) // d
+            break
 
-digit_index = (k-1) % d
+    number = 10**(d-1) + (k-1) // d
 
-print(str(number)[digit_index])
+    digit_index = (k-1) % d
 
-Wait, but wait, the calculation of number. Let's see:
+    print(str(number)[digit_index], file=output_stream)
 
-Yes, 10^(d-1) is the first number with d digits. Then, how many numbers are we adding? (k-1) // d. Because each number contributes d digits. So for example, if k is 3, d=1: (3-1)/1=2. So 1 +2=3. Which is correct.
 
-So this code should handle all cases.
 
-Testing the first sample:
+def test():
+    import io
 
-k=7 → code enters d=1, current_count=9. 7<=9. So number is 1^0 (1) + (7-1)//1=6 → 7. digit index 0 → '7'.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+21
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

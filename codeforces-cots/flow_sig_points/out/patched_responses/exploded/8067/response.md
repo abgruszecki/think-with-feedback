@@ -451,35 +451,70 @@ else: valid.
 
 So the code is:
 
-n = int(input())
-counts = {}
-for _ in range(n):
-    x, k = map(int, input().split())
-    current = counts.get(k, 0)
-    if x > current:
-        print("NO")
-        exit()
-    elif x == current:
-        counts[k] = current + 1
-print("YES")
+Testing against sample input 1.
 
-Yes, this should work.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    counts = {}
+    for _ in range(n):
+        x, k = map(int, input_stream.readline().rstrip("\n").split())
+        current = counts.get(k, 0)
+        if x > current:
+            print("NO", file=output_stream)
+            return
+        elif x == current:
+            counts[k] = current + 1
+    print("YES", file=output_stream)
 
-Testing the third example's third submission (x=0, k=1, current is 2 → 0 < 2 → allowed).
 
-Yes.
 
-Sample input 2's second submission (x=1, k=2, current is 0. 1>0 → invalid. Output NO.
+def test():
+    import io
 
-Yes.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+0 1
+1 2
+1 1
+0 2
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-Sample input 1: valid → YES.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Another test case where a submission is x=3 for k=5, but current is 3 → increments to 4. Then a duplicate with x=3, which is allowed (3 <4). So valid.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Yes.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Thus, the correct approach is to track the current count for each k, and check if x is <= current count. If x is exactly current, increment count. If x is greater, invalid.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

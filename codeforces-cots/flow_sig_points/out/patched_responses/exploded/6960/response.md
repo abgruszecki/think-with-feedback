@@ -757,71 +757,106 @@ So steps:
 
    So, the code would look like:
 
-   import bisect
+Testing against sample input 1.
 
-   n, k = map(int, input().split())
-   s = input().strip()
+```python
+import bisect
 
-   zeros = [i for i, c in enumerate(s) if c == '0']
 
-   m = min(k, len(zeros))
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    s = input_stream.readline().rstrip("\n").strip()
 
-   if m == len(zeros):
-       max_gap = 0
-       for i in range(1, len(zeros)):
-           gap = zeros[i] - zeros[i-1] -1
-           if gap > max_gap:
-               max_gap = gap
-       print(max_gap)
-       exit()
+    zeros = [i for i, c in enumerate(s) if c == '0']
 
-   # Binary search
-   left = 0
-   right = zeros[-1] - zeros[0] -1  # max possible gap
+    m = min(k, len(zeros))
 
-   answer = right
+    if m == len(zeros):
+        max_gap = 0
+        for i in range(1, len(zeros)):
+            gap = zeros[i] - zeros[i-1] -1
+            if gap > max_gap:
+                max_gap = gap
+        print(max_gap, file=output_stream)
+        return
 
-   while left <= right:
-       mid = (left + right) // 2
-       # Check if possible with mid
-       count =1
-       prev = zeros[0]
-       i=1
-       possible = True
-       while i < len(zeros):
-           max_pos = prev + mid +1
-           j = bisect.bisect_right(zeros, max_pos) -1
-           if j <i:
-               possible = False
-               break
-           prev = zeros[j]
-           count +=1
-           i =j +1
-       # Check if we reached the end
-       if prev != zeros[-1]:
-           possible = False
-       if possible and count <=m:
-           answer = mid
-           right = mid -1
-       else:
-           left = mid +1
+    # Binary search
+    left = 0
+    right = zeros[-1] - zeros[0] -1  # max possible gap
 
-   print(answer)
+    answer = right
 
-   Let's test this code against the first sample.
+    while left <= right:
+        mid = (left + right) // 2
+        # Check if possible with mid
+        count =1
+        prev = zeros[0]
+        i=1
+        possible = True
+        while i < len(zeros):
+            max_pos = prev + mid +1
+            j = bisect.bisect_right(zeros, max_pos) -1
+            if j <i:
+                possible = False
+                break
+            prev = zeros[j]
+            count +=1
+            i =j +1
+        # Check if we reached the end
+        if prev != zeros[-1]:
+            possible = False
+        if possible and count <=m:
+            answer = mid
+            right = mid -1
+        else:
+            left = mid +1
 
-   First sample input:
+    print(answer, file=output_stream)
 
-   3 3
-   010
 
-   zeros = [0,2]
 
-   m = min(3, 2) =2.
+def test():
+    import io
 
-   So, m == len(zeros). Compute maximum gap between consecutive zeros:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 3
+01010110
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-   2-0-1=1. So print1. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
    Second sample:
 

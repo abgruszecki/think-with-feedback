@@ -1142,171 +1142,158 @@ At this point, I'm stuck. I think the correct approach is to proceed with the tr
 
 Thus, the code would look like:
 
+Testing against sample input 1.
+
+```python
 import sys
 import random
-sys.setrecursionlimit(1 << 25)
 
-class FenwickTree:
-    def __init__(self, size):
-        self.n = size
-        self.tree = [0] * (self.n + 1)
-    
-    def update(self, idx, delta=1):
-        while idx <= self.n:
-            self.tree[idx] += delta
-            idx += idx & -idx
-    
-    def query(self, idx):
-        res = 0
-        while idx > 0:
-            res += self.tree[idx]
-            idx -= idx & -idx
-        return res
 
-class Node:
-    __slots__ = ['left', 'right', 'size', 'sum', 'priority']
-    def __init__(self):
-        self.left = None
-        self.right = None
-        self.size = 1
-        self.sum = 1
-        self.priority = random.random()
-    
-    def update(self):
-        self.size = 1
-        self.sum = self.size
-        if self.left:
-            self.size += self.left.size
-            self.sum += self.left.sum
-        if self.right:
-            self.size += self.right.size
-            self.sum += self.right.sum
-        self.sum += (self.left.size if self.left else 0) + (self.right.size if self.right else 0)
+def main(input_stream, output_stream):
+    sys.setrecursionlimit(1 << 25)
 
-def split(node, k):
-    if not node:
-        return (None, None)
-    left_size = node.left.size if node.left else 0
-    if k <= left_size:
-        l, r = split(node.left, k)
-        node.left = r
-        node.update()
-        return (l, node)
-    else:
-        l, r = split(node.right, k - left_size - 1)
-        node.right = l
-        node.update()
-        return (node, r)
+    class FenwickTree:
+        def __init__(self, size):
+            self.n = size
+            self.tree = [0] * (self.n + 1)
+        
+        def update(self, idx, delta=1):
+            while idx <= self.n:
+                self.tree[idx] += delta
+                idx += idx & -idx
+        
+        def query(self, idx):
+            res = 0
+            while idx > 0:
+                res += self.tree[idx]
+                idx -= idx & -idx
+            return res
 
-def merge(a, b):
-    if not a:
-        return b
-    if not b:
-        return a
-    if a.priority > b.priority:
-        a.right = merge(a.right, b)
-        a.update()
-        return a
-    else:
-        b.left = merge(a, b.left)
-        b.update()
-        return b
+    class Node:
+        __slots__ = ['left', 'right', 'size', 'sum', 'priority']
+        def __init__(self):
+            self.left = None
+            self.right = None
+            self.size = 1
+            self.sum = 1
+            self.priority = random.random()
+        
+        def update(self):
+            self.size = 1
+            self.sum = self.size
+            if self.left:
+                self.size += self.left.size
+                self.sum += self.left.sum
+            if self.right:
+                self.size += self.right.size
+                self.sum += self.right.sum
+            self.sum += (self.left.size if self.left else 0) + (self.right.size if self.right else 0)
 
-n = int(sys.stdin.readline())
-a = list(map(int, sys.stdin.readline().split()))
-pos = {x: i for i, x in enumerate(a)}
+    def split(node, k):
+        if not node:
+            return (None, None)
+        left_size = node.left.size if node.left else 0
+        if k <= left_size:
+            l, r = split(node.left, k)
+            node.left = r
+            node.update()
+            return (l, node)
+        else:
+            l, r = split(node.right, k - left_size - 1)
+            node.right = l
+            node.update()
+            return (node, r)
 
-ft = FenwickTree(n)
-p = [0] * (n + 1)
-for i in range(n):
-    x = a[i]
-    count = ft.query(x - 1)
-    p[x] = count
-    ft.update(x)
+    def merge(a, b):
+        if not a:
+            return b
+        if not b:
+            return a
+        if a.priority > b.priority:
+            a.right = merge(a.right, b)
+            a.update()
+            return a
+        else:
+            b.left = merge(a, b.left)
+            b.update()
+            return b
 
-current = None
-output = []
-for x in range(1, n + 1):
-    k = p[x]
-    left, right = split(current, k)
-    new_node = Node()
-    new_node.left = left
-    new_node.right = right
-    new_node.update()
-    current = new_node
-    output.append(current.sum)
+    n = int(input_stream.readline())
+    a = list(map(int, input_stream.readline().split()))
+    pos = {x: i for i, x in enumerate(a)}
 
-for sum_val in output:
-    print(sum_val)
+    ft = FenwickTree(n)
+    p = [0] * (n + 1)
+    for i in range(n):
+        x = a[i]
+        count = ft.query(x - 1)
+        p[x] = count
+        ft.update(x)
 
-But this code may not work correctly due to the update method in the Node class. Let's re-examine the sum calculation.
+    current = None
+    output = []
+    for x in range(1, n + 1):
+        k = p[x]
+        left, right = split(current, k)
+        new_node = Node()
+        new_node.left = left
+        new_node.right = right
+        new_node.update()
+        current = new_node
+        output.append(current.sum)
 
-The sum of a node's subtree is the size of the node's subtree plus the sum of the left and right subtrees' sums.
+    for sum_val in output:
+        print(sum_val, file=output_stream)
 
-So, the correct update function is:
 
-self.sum = self.size + (self.left.sum if self.left else 0) + (self.right.sum if self.right else 0)
 
-But in the current code, the sum is computed as:
+def test():
+    import io
 
-self.sum = self.size
-if self.left:
-    self.sum += self.left.sum
-if self.right:
-    self.sum += self.right.sum
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+1 2 4 5 6 3
+""",
+            "output": \
+"""\
+1
+3
+6
+8
+12
+17
+""",
+        }, 
+    ]
 
-Which is correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But the initial sum for a new node is 1, which is correct (size is 1, no children, sum is 1).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Thus, this code should work.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But with n=150,000 and recursive split and merge functions, Python's recursion limit may be exceeded.
+    print('Tests passed 😎')
 
-However, the recursion depth for split is O(log n) for a balanced treap, which is manageable if the tree is approximately balanced. Since the insertion positions are arbitrary, the treap may not be balanced, leading to deeper recursion.
 
-Thus, this code may not pass for large inputs due to recursion depth errors.
+if __name__ == '__main__':
+    test()
 
-To mitigate this, the split and merge functions need to be implemented iteratively.
 
-But implementing iterative split and merge is time-consuming and complex. For the purposes of this problem, perhaps this code will pass within the given time and memory constraints.
+```
 
-Testing this code with the sample inputs:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Sample Input 1:
-
-5
-2 4 1 5 3
-
-Precomputed p[x]:
-
-For x=2, p[x]=0.
-
-For x=4, p[x]=1.
-
-For x=1, p[x]=0.
-
-For x=5, p[x]=3.
-
-For x=3, p[x]=2.
-
-Processing insertions in order x=1, 2, 3, 4,5.
-
-For x=1, p=0:
-
-split current (None) into left (None) and right (None). Create new node with left and right None. sum is 1.
-
-Output: 1.
-
-For x=2, p=0:
-
-split current (None) into left (None) and right (None). Create new node with left and right None. sum is 1 + 0 + 0 + 1 = 2 + 1 =3? Wait, new node's size is 1. sum is 1 + 0 + 0 + 0 (left and right size) =1 + 0 +0 =1. Wait, no.
-
-Wait, the sum for the new node when x=2 is:
-
-sum = (size_left (0) + size_right (0) + 1) + sum_left (0) + sum_right (0) =1 +0 +0 =1.
-
-But the sample output after inserting 2 is 3. So this code is not correct.
+```
 
 Ah, the mistake is in the update function. The sum is computed as the size of the node's subtree plus the sum of the left and right sums. But the sum of the subtree sizes includes all nodes in the subtree, which for the root is the size of the subtree (1 + left_size + right_size) plus the sum of the left and right sums.
 

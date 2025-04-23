@@ -366,54 +366,96 @@ But the problem says n >=3.
 
 So code:
 
-n, t = map(int, input().split())
+Testing against sample input 1.
 
-from collections import defaultdict
+```python
+def main(input_stream, output_stream):
+    n, t = map(int, input_stream.readline().rstrip("\n").split())
 
-if t ==0:
-    print(0)
-    exit()
+    from collections import defaultdict
 
-prev_dp = defaultdict(int)
+    if t ==0:
+        print(0, file=output_stream)
+        return
 
-# Initialize for i=2
-for a in range(1,5):
-    for b in range(1,5):
-        if a != b:
-            prev_dp[ (a, b, 0, 0) ] +=1
+    prev_dp = defaultdict(int)
 
-for i in range(3, n+1):
-    current_dp = defaultdict(int)
-    for (a_prev, b_prev, h, d), cnt in prev_dp.items():
-        for c in range(1,5):
-            if c == b_prev:
-                continue
-            is_hump = (a_prev < b_prev) and (b_prev > c)
-            is_dip = (a_prev > b_prev) and (b_prev < c)
-            new_h = h + (1 if is_hump else 0)
-            new_d = d + (1 if is_dip else 0)
-            if new_h > t or new_d > (t-1):
-                continue
-            # Update the new state: (b_prev, c, new_h, new_d)
-            current_dp[ (b_prev, c, new_h, new_d) ] += cnt
-    prev_dp = current_dp
-    # If prev_dp becomes empty, no need to proceed
-    if not prev_dp:
-        break
+    # Initialize for i=2
+    for a in range(1,5):
+        for b in range(1,5):
+            if a != b:
+                prev_dp[ (a, b, 0, 0) ] +=1
 
-# Now sum all states where h == t and d == t-1
-result =0
-for (a, b, h, d), cnt in prev_dp.items():
-    if h == t and d == t-1:
-        result += cnt
+    for i in range(3, n+1):
+        current_dp = defaultdict(int)
+        for (a_prev, b_prev, h, d), cnt in prev_dp.items():
+            for c in range(1,5):
+                if c == b_prev:
+                    continue
+                is_hump = (a_prev < b_prev) and (b_prev > c)
+                is_dip = (a_prev > b_prev) and (b_prev < c)
+                new_h = h + (1 if is_hump else 0)
+                new_d = d + (1 if is_dip else 0)
+                if new_h > t or new_d > (t-1):
+                    continue
+                # Update the new state: (b_prev, c, new_h, new_d)
+                current_dp[ (b_prev, c, new_h, new_d) ] += cnt
+        prev_dp = current_dp
+        # If prev_dp becomes empty, no need to proceed
+        if not prev_dp:
+            break
 
-print(result)
+    # Now sum all states where h == t and d == t-1
+    result =0
+    for (a, b, h, d), cnt in prev_dp.items():
+        if h == t and d == t-1:
+            result += cnt
 
-This should work. Let's test the first sample input:
+    print(result, file=output_stream)
 
-Sample 1: n=6, t=1.
 
-The code's result would be 6.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 2
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2: n=4, t=2 → output 0.
 

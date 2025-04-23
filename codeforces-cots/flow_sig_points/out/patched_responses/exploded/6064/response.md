@@ -767,64 +767,96 @@ This covers all cases.
 
 So the code can be written as:
 
+Testing against sample input 3.
+
+```python
 import sys
 from collections import Counter
 
-def is_subsequence(s, t):
-    ptr = 0
-    for c in t:
-        found = False
-        while ptr < len(s):
-            if s[ptr] == c:
-                ptr += 1
-                found = True
-                break
-            ptr += 1
-        if not found:
-            return False
-    return True
 
-s = input().strip()
-t = input().strip()
-
-if len(t) > len(s):
-    print("need tree")
-else:
-    if is_subsequence(s, t) and (len(t) < len(s)):
-        print("automaton")
-    else:
-        if len(s) == len(t):
-            if Counter(s) == Counter(t):
-                print("array")
-            else:
-                print("need tree")
-        else:
-            count_s = Counter(s)
-            count_t = Counter(t)
-            valid = True
-            for c in count_t:
-                if count_t[c] > count_s.get(c, 0):
-                    valid = False
+def main(input_stream, output_stream):
+    def is_subsequence(s, t):
+        ptr = 0
+        for c in t:
+            found = False
+            while ptr < len(s):
+                if s[ptr] == c:
+                    ptr += 1
+                    found = True
                     break
-            print("both" if valid else "need tree")
+                ptr += 1
+            if not found:
+                return False
+        return True
 
-But wait, in the case where len(t) is less than len(s), and counts are subset but t is not a subsequence, then output is both.
+    s = input_stream.readline().rstrip("\n").strip()
+    t = input_stream.readline().rstrip("\n").strip()
 
-Yes.
+    if len(t) > len(s):
+        print("need tree", file=output_stream)
+    else:
+        if is_subsequence(s, t) and (len(t) < len(s)):
+            print("automaton", file=output_stream)
+        else:
+            if len(s) == len(t):
+                if Counter(s) == Counter(t):
+                    print("array", file=output_stream)
+                else:
+                    print("need tree", file=output_stream)
+            else:
+                count_s = Counter(s)
+                count_t = Counter(t)
+                valid = True
+                for c in count_t:
+                    if count_t[c] > count_s.get(c, 0):
+                        valid = False
+                        break
+                print("both" if valid else "need tree", file=output_stream)
 
-Testing third example:
 
-s is 'both', t is 'hot'.
 
-automaton case is false.
+def test():
+    import io
 
-len(s) is 4, len(t) 3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+need
+tree
+""",
+            "output": \
+"""\
+need tree
+""",
+        }, 
+    ]
 
-count_s: b, o, t, h → each 1. count_t: h, o, t → each 1. So valid is true. So output both.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Another example where s is 'aab', t is 'abb' (len(t) < s). len(s) 3, len(t) 3. So len(s) is not equal to len(t) (wait, no, len is 3 for both). Wait, if s is 'aab' (3 letters), t is 'abb' (3 letters). Then len(s) == len(t), so code would check array case. But counts are different. So output need tree.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: s is 'ab', t is 'ba'. len same, counts same. So output array.
 

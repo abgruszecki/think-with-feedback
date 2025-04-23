@@ -229,115 +229,118 @@ Then, for each root, collect the color counts.
 
 So code outline:
 
-n, m, k = map(int, input().split())
+Testing against sample input 1.
 
-c = list(map(int, input().split()))
-
-dsu = DSU(n)
-
-for _ in range(m):
-
-    l, r = map(int, input().split())
-
-    li = l-1
-
-    ri = r-1
-
-    dsu.union(li, ri)
-
+```python
+import sys
+from sys import stdin
 from collections import defaultdict
 
-color_counts = defaultdict(lambda: defaultdict(int))
 
-# For each sock, find its root and record its color
+class DSU:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.size = [1] * n
 
-for i in range(n):
+    def find(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
 
-    root = dsu.find(i)
+    def union(self, x, y):
+        x_root = self.find(x)
+        y_root = self.find(y)
+        if x_root == y_root:
+            return
+        if self.size[x_root] < self.size[y_root]:
+            x_root, y_root = y_root, x_root
+        self.parent[y_root] = x_root
+        self.size[x_root] += self.size[y_root]
 
-    color = c[i]
+def main(input_stream, output_stream):
+    input = input_stream.read().split()
+    ptr = 0
+    n = int(input[ptr])
+    ptr += 1
+    m = int(input[ptr])
+    ptr += 1
+    k = int(input[ptr])
+    ptr += 1
 
-    color_counts[root][color] += 1
+    c = list(map(int, input[ptr:ptr + n]))
+    ptr += n
 
-answer = 0
+    dsu = DSU(n)
+    for _ in range(m):
+        l = int(input[ptr]) - 1
+        ptr += 1
+        r = int(input[ptr]) - 1
+        ptr += 1
+        dsu.union(l, r)
 
-# Now process each component
+    color_counts = defaultdict(lambda: defaultdict(int))
+    for i in range(n):
+        root = dsu.find(i)
+        color = c[i]
+        color_counts[root][color] += 1
 
-for root in color_counts:
+    answer = 0
+    for root in color_counts:
+        component_size = dsu.size[root]
+        if component_size == 1:
+            continue
+        counts = color_counts[root]
+        max_freq = max(counts.values())
+        answer += (component_size - max_freq)
 
-    component_size = dsu.size[root]
+    print(answer, file=output_stream)
 
-    if component_size == 1:
 
-        continue
 
-    counts = color_counts[root]
+def test():
+    import io
 
-    max_freq = max(counts.values())
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2 2
+1 1 2
+1 2
+2 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-    answer += (component_size - max_freq)
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-print(answer)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Wait, but what about the component_size?
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Because in the DSU, the size of the root is the component size. So when we find the root for a sock, the size of the component is dsu.size[root]. But in the code above, when we loop over all i in 0..n-1, and for each i, we get its root. Then, the component_size is dsu.size[root], which is correct.
+    print('Tests passed 😎')
 
-Yes.
 
-But in the code, for each root in color_counts, we check the component_size. But when the component has multiple nodes, the root's size is the component size.
+if __name__ == '__main__':
+    test()
 
-But what if two different roots (but same component) are present? No, because for each i, find returns the canonical root, so all nodes in the same component have the same root. So the color_counts will have one entry per root. So the code is correct.
 
-Now, let's test for m=0. Then, each sock is its own component. So for each root (each sock), component_size is 1, so the code skips adding anything. So answer is 0. Correct.
+```
 
-Another test case: a component of size 2 where both socks have the same color. Then max_freq is 2, so 2-2=0. So adds 0. Correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Another test case: component of size 2, colors 1 and 2. Max freq is 1. So adds 1. So answer is 1.
-
-Now, the code seems correct.
-
-But what about the DSU size? Suppose a component of size 3. For each node in the component, the root is the same, so the color_counts for that root will have all three colors. Then component_size is 3.
-
-Now, time constraints.
-
-n is 2e5. The DSU operations are O(m) unions and 2e5 find operations for each sock. Each union is O(alpha(n)), and each find is O(alpha(n)).
-
-Then, collecting color counts: O(n) time.
-
-Processing each root: O(k) for each component, but k is the number of different colors in the component. However, the total across all components is O(n), since each sock's color is counted exactly once.
-
-So overall, the code is O(n + m * alpha(n)), which is acceptable for 2e5 constraints.
-
-Now, memory. The DSU has two arrays of size n. The color_counts is a dictionary where each entry is a defaultdict(int). But for each sock, we add to the color count once. So total memory is O(n) for the color counts, as each sock's color is stored once.
-
-So this should be acceptable.
-
-Now, possible optimizations. For example, in Python, using a list of dictionaries may be more efficient, but with defaultdict, it's manageable.
-
-Another possible optimization: for components of size 1, we can skip processing them. But the code already checks component_size and skips them.
-
-So the code should be correct.
-
-Now, implement this in Python.
-
-But need to be careful with the DSU. Let's code the DSU correctly.
-
-Also, note that in Python, the DSU's size array is stored as a list, and find uses path compression.
-
-The code as outlined should work.
-
-Testing the first sample:
-
-Sample 1:
-
-n=3, m=2, k=3
-
-c = [1,2,3]
-
-pairs: 1-2 (0 and 1), 2-3 (1 and 2). So after unions, all three are connected. So component size is 3.
-
-color_counts for the root (say, 0's root is 0, but after unions, depends on the DSU's union order). Regardless, the component's colors are 1,2,3. So max frequency is 1. So 3-1=2. So answer is 2. Correct.
+```
 
 Sample 2:
 

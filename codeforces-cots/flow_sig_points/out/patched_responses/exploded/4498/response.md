@@ -470,15 +470,73 @@ print(count)
 
 This should give the correct count.
 
-Testing this code with the first sample:
+Testing against sample input 1.
 
-heavy = [0,12], metal = [5,17]
+```python
+import bisect
 
-For h=0, pos is bisect_left(metal,0) → 0. len(metal) -0 = 2.
 
-For h=12, bisect_left(metal,12) finds the first element >=12. metal is [5,17], so 17 is the first. pos=1. len(metal) -1=1. So total 2+1=3.
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    heavy = []
+    metal = []
+    n = len(s)
+    for i in range(n - 4):
+        if s[i] == 'h' and s[i+1] == 'e' and s[i+2] == 'a' and s[i+3] == 'v' and s[i+4] == 'y':
+            heavy.append(i)
+        elif s[i] == 'm' and s[i+1] == 'e' and s[i+2] == 't' and s[i+3] == 'a' and s[i+4] == 'l':
+            metal.append(i)
 
-Which is correct.
+    count = 0
+    for h in heavy:
+        pos = bisect.bisect_left(metal, h)
+        count += len(metal) - pos
+
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+heavymetalismetal
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So this code should work.
 

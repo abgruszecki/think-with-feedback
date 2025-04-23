@@ -275,105 +275,122 @@ This is faster than reading line by line for large inputs.
 
 So the code would be:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-data = list(map(int, sys.stdin.read().split()))
 
-pointer =0
+def main(input_stream, output_stream):
+    data = list(map(int, input_stream.read().split()))
 
-n = data[pointer]
+    pointer =0
 
-pointer +=1
+    n = data[pointer]
 
-max_l1 = -float('inf')
+    pointer +=1
 
-min_r1 = float('inf')
+    max_l1 = -float('inf')
 
-for _ in range(n):
+    min_r1 = float('inf')
 
-    l = data[pointer]
+    for _ in range(n):
 
-    r = data[pointer+1]
+        l = data[pointer]
 
-    pointer +=2
+        r = data[pointer+1]
 
-    if l > max_l1:
+        pointer +=2
 
-        max_l1 = l
+        if l > max_l1:
 
-    if r < min_r1:
+            max_l1 = l
 
-        min_r1 = r
+        if r < min_r1:
 
-m = data[pointer]
+            min_r1 = r
 
-pointer +=1
+    m = data[pointer]
 
-max_l2 = -float('inf')
+    pointer +=1
 
-min_r2 = float('inf')
+    max_l2 = -float('inf')
 
-for _ in range(m):
+    min_r2 = float('inf')
 
-    l = data[pointer]
+    for _ in range(m):
 
-    r = data[pointer+1]
+        l = data[pointer]
 
-    pointer +=2
+        r = data[pointer+1]
 
-    if l > max_l2:
+        pointer +=2
 
-        max_l2 = l
+        if l > max_l2:
 
-    if r < min_r2:
+            max_l2 = l
 
-        min_r2 = r
+        if r < min_r2:
 
-candidate1 = max(0, max_l2 - min_r1)
+            min_r2 = r
 
-candidate2 = max(0, max_l1 - min_r2)
+    candidate1 = max(0, max_l2 - min_r1)
 
-ans = max(candidate1, candidate2)
+    candidate2 = max(0, max_l1 - min_r2)
 
-print(ans)
+    ans = max(candidate1, candidate2)
 
-Yes. That should work.
+    print(ans, file=output_stream)
 
-Let's test the first example:
 
-Input:
 
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
-
 1 5
-
 2 6
-
-2 3
-
+3 7
 2
-
 2 4
+1 4
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-6 8
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-n=3. The first three intervals:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-(1,5): max_l1 is 1. Then 2 comes in, max becomes 2. Then another 2. So max_l1 is 2.
+    print('Tests passed 😎')
 
-min_r1: 5, then 6 (no change), then 3. So min_r1 is 3.
 
-Then m=2. Programming intervals:
+if __name__ == '__main__':
+    test()
 
-(2,4): l is 2. Then (6,8) l is6. So max_l2 is6.
 
-r is4 and 8. min_r2 is4.
+```
 
-candidate1:6-3=3. candidate2:2-4= -2 →0. Ans 3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Which matches.
+```
 
 Second example:
 

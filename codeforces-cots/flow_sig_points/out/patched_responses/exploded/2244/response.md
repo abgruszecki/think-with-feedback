@@ -333,107 +333,93 @@ Wait, but the code is for i in 0..n-1. For each j in 0..i.
 
 Yes. So in Python:
 
-n, t = map(int, input().split())
+Testing against sample input 1.
 
-# Initialize the dp array.
+```python
+def main(input_stream, output_stream):
+    n, t = map(int, input_stream.readline().rstrip("\n").split())
 
-dp = [[0.0 for _ in range(r+1)] for r in range(n)]
+    # Initialize the dp array.
 
-if n >=1:
+    dp = [[0.0 for _ in range(r+1)] for r in range(n)]
 
-    dp[0][0] = t
+    if n >=1:
 
-for i in range(n):
+        dp[0][0] = t
 
-    for j in range(i+1):
+    for i in range(n):
 
-        if dp[i][j] > 1:
+        for j in range(i+1):
 
-            overflow = dp[i][j] -1
+            if dp[i][j] > 1:
 
-            dp[i][j] = 1.0
+                overflow = dp[i][j] -1
 
-            if i +1 <n:
+                dp[i][j] = 1.0
 
-                dp[i+1][j] += overflow *0.5
+                if i +1 <n:
 
-                dp[i+1][j+1] += overflow *0.5
+                    dp[i+1][j] += overflow *0.5
 
-# Now count the number of glasses with >=1.
+                    dp[i+1][j+1] += overflow *0.5
 
-count =0
+    # Now count the number of glasses with >=1.
 
-for i in range(n):
+    count =0
 
-    for j in range(i+1):
+    for i in range(n):
 
-        if dp[i][j] >=1.0:
+        for j in range(i+1):
 
-            count +=1
+            if dp[i][j] >=1.0:
 
-print(int(count))
+                count +=1
 
-Wait, but in the code, when processing each level i, for each j in 0..i, we check if the current dp[i][j] is >1. If yes, subtract the overflow and set to 1. Then add the overflow parts to the next level.
+    print(int(count), file=output_stream)
 
-But in Python, the code loops for i in range(n), and for each j in 0..i. So for example, when i=0, j can be 0. Then, when i=1, j can be 0 and 1. And so on.
 
-Let's test the first example:
 
-n=3, t=5.
+def test():
+    import io
 
-Initialize dp as 3 levels (0,1,2). dp[0][0] =5.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 8
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-Processing i=0:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-j=0: dp[0][0] is 5>1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-overflow=4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-dp[0][0] is set to 1.
+    print('Tests passed 😎')
 
-i+1=1 <3: add 2 to dp[1][0] and 2 to dp[1][1].
 
-So after i=0 processing:
+if __name__ == '__main__':
+    test()
 
-dp[1][0] is 2, dp[1][1] is 2.
 
-Processing i=1:
+```
 
-j=0: dp[1][0] is 2>1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-overflow=1.
-
-set to 1.
-
-add 0.5 to dp[2][0] and 0.5 to dp[2][1].
-
-j=1: dp[1][1] is 2>1.
-
-overflow=1. set to 1.
-
-add 0.5 to dp[2][1] and 0.5 to dp[2][2].
-
-After this, dp[2] has:
-
-0.5, 1.0 (from 0.5+0.5?), 0.5.
-
-Then processing i=2:
-
-j=0: 0.5 <=1: no action.
-
-j=1: 1.0, which is not >1. So no action.
-
-j=2: 0.5, no action.
-
-So after all processing, the dp array is:
-
-level 0: [1.0]
-
-level 1: [1.0, 1.0]
-
-level 2: [0.5, 1.0, 0.5]
-
-So the count is 1 +2 +1 =4. Correct.
+```
 
 Another test case: input 4 8.
 

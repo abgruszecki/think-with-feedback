@@ -309,139 +309,153 @@ But let's proceed with code.
 
 Implementing the formula:
 
+Testing against sample input 1.
+
+```python
 import math
 
-p = int(input())
 
-if p ==0:
+def main(input_stream, output_stream):
+    p = int(input_stream.readline().rstrip("\n"))
+
+    if p == 0:
+        print(0, 0, file=output_stream)
+    else:
+        sum_nodes = 0
+        sum_sq = 0
+        remaining_p = p
+        while remaining_p > 0:
+            sqrt_val = math.sqrt(1 + 8 * remaining_p)
+            k = int((1 + sqrt_val) // 2)
+            # Adjust k upwards if necessary
+            while (k + 1) * k // 2 <= remaining_p:
+                k += 1
+            # Adjust k downwards if necessary
+            while k * (k - 1) // 2 > remaining_p:
+                k -= 1
+            sum_nodes += k
+            sum_sq += k * k
+            remaining_p -= k * (k - 1) // 2
+        max_uni = (sum_nodes * sum_nodes - sum_sq) // 2
+        print(sum_nodes, max_uni, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+""",
+            "output": \
+"""\
+5 6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import math
+
+
+def main(input_stream, output_stream):
+    p = int(input_stream.readline().rstrip("\n"))
+
+    if p == 0:
+        print(0, 0, file=output_stream)
+    else:
+        sum_nodes = 0
+        sum_sq = 0
+        remaining_p = p
+        while remaining_p > 0:
+            sqrt_val = math.sqrt(1 + 8 * remaining_p)
+            k = int((1 + sqrt_val) // 2)
+            # Adjust k upwards if necessary
+            while (k + 1) * k // 2 <= remaining_p:
+                k += 1
+            # Adjust k downwards if necessary
+            while k * (k - 1) // 2 > remaining_p:
+                k -= 1
+            sum_nodes += k
+            sum_sq += k * k
+            remaining_p -= k * (k - 1) // 2
+        max_uni = (sum_nodes * sum_nodes - sum_sq) // 2
+        print(sum_nodes, max_uni, file=output_stream)
+
+
+
+def test():
+    import io
 
-    print(0, 0)
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0
+""",
+            "output": \
+"""\
+0 0
+""",
+        }, 
+    ]
 
-else:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-    sum_nodes =0
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-    sum_sq=0
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-    remaining_p = p
+    print('Tests passed 😎')
 
-    while remaining_p >0:
 
-        # compute k
+if __name__ == '__main__':
+    test()
 
-        sqrt_val = math.sqrt(1 + 8 * remaining_p)
 
-        k = int( (1 + sqrt_val ) //2 )
+```
 
-        # check if (k+1) choose 2 is <= remaining_p
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-        while (k+1)*k //2 <= remaining_p:
-
-            k +=1
-
-        # check if k is too big.
-
-        while k*(k-1)//2 > remaining_p:
-
-            k -=1
-
-        # now, k is the maximum possible.
-
-        sum_nodes +=k
-
-        sum_sq +=k*k
-
-        remaining_p -= k*(k-1)//2
-
-    max_uni = (sum_nodes * sum_nodes - sum_sq) // 2
-
-    print(sum_nodes, max_uni)
-
-Wait, but the code after the formula may have to adjust k. For example, after computing k via the formula, perhaps (k+1) choose 2 is <= remaining_p. So we need to check and increment k until (k+1) choose 2 exceeds remaining_p.
-
-Wait, for example, let's say remaining_p=3. Formula gives k=3. (3+1)*3//2=6>3. So the code after the formula doesn't increment k. So k remains 3. Correct.
-
-Another example: remaining_p=4.
-
-Formula gives k=(1+sqrt(33))/2 ≈3.372 →k=3. Check (3+1)*3//2=6>4. So no increment. Then check 3*2//2=3 <=4. So subtract 3, remaining_p=1.
-
-Next step, remaining_p=1. Formula gives k=(1+sqrt(9))/2= (4)/2=2. Then check (2+1)*2//2=3>1. So no increment. Then subtract 1, remaining_p=0.
-
-So code works.
-
-Another test case: p=1. remaining_p=1.
-
-sqrt(9)=3 → (1+3)/2=2 →k=2. Check (2+1)*2//2=3>1 → no increment. Check 2*(2-1)/2=1 <=1. Subtract 1. sum_nodes=2, sum_sq=4. max_uni=(4-4)/2=0. So output 2 0.
-
-Which is correct.
-
-But let's see when the formula might have precision issues.
-
-For example, when remaining_p is large, and 1+8*remaining_p is a perfect square.
-
-For example, remaining_p= 6. 1+8*6=49. sqrt(49)=7. (1+7)/2=4. So k=4. 4*3/2=6. correct.
-
-If remaining_p=6. Then code subtracts 6, remaining_p=0. sum_nodes=4. sum_sq=16. max_uni (4²-16)/2=0. So output 4 0.
-
-Which is correct, because all nodes are in the same component. So no unidirectional pairs.
-
-Another example: p=5.
-
-First step: remaining_p=5.
-
-formula: sqrt(1+8*5)=sqrt(41)=~6.4. (1+6.4)/2≈3.7 →k=3. (3*2/2=3 <=5). check (4*3/2)=6>5. So k=3.
-
-remaining_p becomes 5-3=2.
-
-Next step: remaining_p=2.
-
-formula: sqrt(1+8*2)=sqrt(17)≈4.123 →(1+4.123)/2≈2.56 →k=2. Check (3*2/2=3>2 →k=2. 2*1/2=1 <=2. subtract 1, remaining_p=1.
-
-Next step: remaining_p=1. k=2. 2*1/2=1. subtract, remaining_p=0.
-
-sum_nodes=3+2+2=7?
-
-Wait, no. Wait, after first step: sum_nodes +=3 (sum_nodes=3), sum_sq=9.
-
-Second step: remaining_p=2. k is 2. subtract 1, remaining_p=1. sum_nodes +=2 (sum_nodes=5), sum_sq +=4 (sum_sq=13).
-
-Third step: remaining_p=1. k=2. subtract 1, sum_nodes +=2 (sum_nodes=7), sum_sq +=4 (sum_sq=17). remaining_p=0.
-
-sum_nodes=7. sum_sq=17. max_uni= (7^2-17)/2= (49-17)/2=32/2=16.
-
-But wait, but p=5. The decomposition is 3+2+2, but 3C2 is 3, 2C2 is 1, another 2C2 is 1. Sum 3+1+1=5. sum_nodes=3+2+2=7. sum_sq=9+4+4=17. max_uni=16.
-
-But is there a better decomposition? For example, 4C2 is 6>5. So not possible. So the code's decomposition is correct.
-
-Yes. So the code works.
-
-So the code should handle all cases correctly.
-
-Testing the code on the samples:
-
-Sample 1:
-
-input 3.
-
-remaining_p=3.
-
-sqrt(25)=5. (1+5)/2=3. k=3. remaining_p=0.
-
-sum_nodes=3. sum_sq=9.
-
-max_uni= (9-9)/2=0. Output 3 0. Correct.
-
-Sample 2:
-
-input 4.
-
-remaining_p=4.
-
-k=3. sum_nodes=3, sum_sq=9. remaining_p=1.
-
-k=2. sum_nodes=5, sum_sq=13. remaining_p=0.
-
-max_uni=(25-13)/2=6. Output 5 6. Correct.
+```
 
 Sample 3:
 

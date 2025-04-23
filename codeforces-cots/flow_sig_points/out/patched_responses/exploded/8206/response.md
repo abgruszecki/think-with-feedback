@@ -169,85 +169,127 @@ So proceed.
 
 Now, code:
 
-n = int(input())
+Testing against sample inputs 1, 2.
 
-bills = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-count_25 = 0
+    bills = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-count_50 = 0
+    count_25 = 0
 
-for bill in bills:
+    count_50 = 0
 
-    if bill == 25:
+    for bill in bills:
 
-        count_25 +=1
+        if bill == 25:
 
-    elif bill ==50:
+            count_25 +=1
 
-        if count_25 >=1:
+        elif bill ==50:
 
-            count_25 -=1
+            if count_25 >=1:
 
-            count_50 +=1
+                count_25 -=1
 
-        else:
-
-            print("NO")
-
-            exit()
-
-    elif bill ==100:
-
-        # check for 50 and 25 first
-
-        if count_50 >=1 and count_25 >=1:
-
-            count_50 -=1
-
-            count_25 -=1
-
-        else:
-
-            if count_25 >=3:
-
-                count_25 -=3
+                count_50 +=1
 
             else:
 
-                print("NO")
+                print("NO", file=output_stream)
 
-                exit()
+                return
 
-    else:
+        elif bill ==100:
 
-        # invalid bill? According to problem statement, it's 25,50,100.
+            # check for 50 and 25 first
 
-        # So this case shouldn't occur. But perhaps, in code, we can ignore.
+            if count_50 >=1 and count_25 >=1:
 
-        # But the input is constrained to those values.
+                count_50 -=1
 
-        pass
+                count_25 -=1
 
-print("YES")
+            else:
 
-Wait, but what if the bill is not 25,50,100? According to the problem statement, the input is correct, so no need to handle that.
+                if count_25 >=3:
 
-Testing this code against the examples:
+                    count_25 -=3
 
-First example:
+                else:
 
-4
+                    print("NO", file=output_stream)
 
-25 25 50 50 → YES.
+                    return
 
-Yes.
+        else:
 
-Second example:
+            # invalid bill? According to problem statement, it's 25,50,100.
 
+            # So this case shouldn't occur. But perhaps, in code, we can ignore.
+
+            # But the input is constrained to those values.
+
+            pass
+
+    print("YES", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2
+25 100
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+        {
+            "input": \
+"""\
+4
+50 50 25 25
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-25 100 → first 25, count_25=1. Then 100: check if 50 and 25. count_50 is 0. So proceed to check 25s. 1 >=3? No. So print NO.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

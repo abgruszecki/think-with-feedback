@@ -701,101 +701,143 @@ But for n=18, 2^18 masks is 262,144. So the DP will be a list of 262,144 element
 
 But initializing this in Python can be done as:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-INF = float('-inf')
 
-n, m, k = map(int, sys.stdin.readline().split())
+def main(input_stream, output_stream):
+    INF = float('-inf')
 
-a = list(map(int, sys.stdin.readline().split()))
+    n, m, k = map(int, input_stream.readline().split())
 
-adj = [[0]*(n+1) for _ in range(n+1)]
+    a = list(map(int, input_stream.readline().split()))
 
-for _ in range(k):
+    adj = [[0]*(n+1) for _ in range(n+1)]
 
-    x, y, c = map(int, sys.stdin.readline().split())
+    for _ in range(k):
 
-    adj[x][y] = c
+        x, y, c = map(int, input_stream.readline().split())
 
-max_mask = 1 << n
+        adj[x][y] = c
 
-dp = [ [INF]*(n+1) for _ in range(max_mask) ]
+    max_mask = 1 << n
 
-# Initialize masks with one dish.
+    dp = [ [INF]*(n+1) for _ in range(max_mask) ]
 
-for x in range(1, n+1):
-
-    mask = 1 << (x-1)
-
-    dp[mask][x] = a[x-1]
-
-# Process all masks in order.
-
-for mask in range(1, max_mask):
-
-    s = bin(mask).count('1')
-
-    if s >= m:
-
-        continue
+    # Initialize masks with one dish.
 
     for x in range(1, n+1):
 
-        if not (mask & (1 << (x-1))):
+        mask = 1 << (x-1)
+
+        dp[mask][x] = a[x-1]
+
+    # Process all masks in order.
+
+    for mask in range(1, max_mask):
+
+        s = bin(mask).count('1')
+
+        if s >= m:
 
             continue
 
-        current_val = dp[mask][x]
+        for x in range(1, n+1):
 
-        if current_val == INF:
-
-            continue
-
-        # Iterate all possible y not in mask.
-
-        for y in range(1, n+1):
-
-            if mask & (1 << (y-1)):
+            if not (mask & (1 << (x-1))):
 
                 continue
 
-            new_mask = mask | (1 << (y-1))
+            current_val = dp[mask][x]
 
-            new_val = current_val + a[y-1] + adj[x][y]
+            if current_val == INF:
 
-            if new_val > dp[new_mask][y]:
+                continue
 
-                dp[new_mask][y] = new_val
+            # Iterate all possible y not in mask.
 
-# Find the maximum value among masks with m dishes.
+            for y in range(1, n+1):
 
-max_result = INF
+                if mask & (1 << (y-1)):
 
-for mask in range(max_mask):
+                    continue
 
-    if bin(mask).count('1') != m:
+                new_mask = mask | (1 << (y-1))
 
-        continue
+                new_val = current_val + a[y-1] + adj[x][y]
 
-    for x in range(1, n+1):
+                if new_val > dp[new_mask][y]:
 
-        if mask & (1 << (x-1)):
+                    dp[new_mask][y] = new_val
 
-            if dp[mask][x] > max_result:
+    # Find the maximum value among masks with m dishes.
 
-                max_result = dp[mask][x]
+    max_result = INF
 
-print(max_result)
+    for mask in range(max_mask):
 
-But in the code, the initial max_result is set to -inf. Then, for each mask with m bits, check all x in the mask and update max_result.
+        if bin(mask).count('1') != m:
 
-This should work.
+            continue
 
-Testing the first sample:
+        for x in range(1, n+1):
 
-After processing, for mask 0b11 (3 in decimal), the x can be 1 or 2. dp[3][1] is 3 (from 2 followed by 1 with rule). dp[3][2] is 2 (from 1 followed by 2, no rule). So the maximum is 3.
+            if mask & (1 << (x-1)):
 
-Sample Output is 3.
+                if dp[mask][x] > max_result:
+
+                    max_result = dp[mask][x]
+
+    print(max_result, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 3 2
+1 2 3 4
+2 1 5
+3 4 2
+""",
+            "output": \
+"""\
+12
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

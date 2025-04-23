@@ -1089,69 +1089,77 @@ So the code should compute option1, option2, option3 (if x>=1), option4, and the
 
 Thus, the code in Python would be:
 
-d, k, a, b, t = map(int, input().split())
+Testing against sample input 1.
 
-option1 = d * b
+```python
+def main(input_stream, output_stream):
+    d, k, a, b, t = map(int, input_stream.readline().rstrip("\n").split())
 
-option2 = min(k, d)*a + (d - min(k, d))*b
+    option1 = d * b
 
-x = d // k
+    option2 = min(k, d)*a + (d - min(k, d))*b
 
-option3 = float('inf')
+    x = d // k
 
-if x >= 1:
+    option3 = float('inf')
 
-    option3 = x * k * a + (x-1)*t + (d - x*k)*b
+    if x >= 1:
 
-m4 = min( (x +1)*k, d )
+        option3 = x * k * a + (x-1)*t + (d - x*k)*b
 
-repairs4 = (m4 -1) // k
+    m4 = min( (x +1)*k, d )
 
-option4 = m4 * a + repairs4 * t + (d - m4)*b
+    repairs4 = (m4 -1) // k
 
-minimal_time = min( option1, option2, option3, option4 )
+    option4 = m4 * a + repairs4 * t + (d - m4)*b
 
-print( minimal_time )
+    minimal_time = min( option1, option2, option3, option4 )
 
-Testing this code with the second example:
+    print( minimal_time , file=output_stream)
 
-Input 5 2 1 4 5.
 
-x=5//2=2.
 
-option3 = 2*2*1 + (2-1)*5 + (5-4)*4 →4 +5 +4=13.
+def test():
+    import io
 
-option4: m4= min(3*2=6,5) →5. repairs4=(5-1)//2=4//2=2 →5*1 +2*5 +0=5+10=15.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 2 1 4 5
+""",
+            "output": \
+"""\
+13
+""",
+        }, 
+    ]
 
-So the options are:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-option1=5*4=20.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-option2=2*1+3*4=2+12=14.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-option3=13.
+    print('Tests passed 😎')
 
-option4=15.
 
-So the minimal is 13.
+if __name__ == '__main__':
+    test()
 
-Which is correct.
 
-For the first example:
+```
 
-Input 5 2 1 4 10.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-option1=5*4=20.
-
-option2=2*1 +3*4=14.
-
-option3=4*1 +1*10 +1*4=4+10+4=18.
-
-option4= min(3*2=6,5) →5. repairs4= (5-1)//2=2. time4=5*1 +2*10 +0=5+20=25.
-
-So the options are 20,14,18,25. Minimal is 14.
-
-Which is correct.
+```
 
 Another test case: d=2, k=2, a=1, b=4, t=5.
 

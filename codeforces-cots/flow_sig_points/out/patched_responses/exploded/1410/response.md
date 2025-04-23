@@ -36,54 +36,111 @@ print(''.join(result))
 
 Yes, that should do it.
 
-Testing the examples:
+Testing against sample input 1.
 
-First example input:
-1010100
-0100101
+```python
+def main(input_stream, output_stream):
+    a = input_stream.readline().rstrip("\n").strip()
+    b = input_stream.readline().rstrip("\n").strip()
+    print(''.join('1' if a[i] != b[i] else '0' for i in range(len(a))), file=output_stream)
 
-Comparing each position:
 
-1 vs 0 → 1
-0 vs 1 → 1
-1 vs 0 → 1
-0 vs 1 → 1
-1 vs 0 → 1
-0 vs 0 → 0
-0 vs 1 → 1 → Wait, wait. Let's see:
 
-Wait, the first input is 1010100 (7 digits). Let's index each:
+def test():
+    import io
 
-Indices 0-6:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+000
+111
+""",
+            "output": \
+"""\
+111
+""",
+        }, 
+    ]
 
-0:1,1:0,2:1,3:0,4:1,5:0,6:0
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Second input 0100101:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-0:0,1:1,2:0,3:0,4:1,5:0,6:1
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Compare each:
+    print('Tests passed 😎')
 
-0:1 vs 0 → 1
-1:0 vs 1 →1
-2:1 vs 0 →1
-3:0 vs0 →0
-4:1 vs1 →0
-5:0 vs0 →0
-6:0 vs1 →1
 
-So the result is 1110001, which matches the first example.
+if __name__ == '__main__':
+    test()
 
-Another example: input 000 and 111 → output 111. Correct.
 
-Third example: input 1110 and 1010:
+```
 
-Compare each:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-1 vs1 →0
-1 vs0 →1
-1 vs1 →0
-0 vs0 →0 → so output 0100. Which matches.
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    a = input_stream.readline().rstrip("\n").strip()
+    b = input_stream.readline().rstrip("\n").strip()
+    print(''.join('1' if a[i] != b[i] else '0' for i in range(len(a))), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+01110
+01100
+""",
+            "output": \
+"""\
+00010
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Fourth example: 01110 and 01100:
 

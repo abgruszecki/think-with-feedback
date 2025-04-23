@@ -982,203 +982,343 @@ If not, proceed to the adjustment steps.
 
 Thus, the code outline is:
 
-k = int(input())
+Testing against sample input 2.
 
-s = input().strip()
+```python
+def main(input_stream, output_stream):
+    k = int(input_stream.readline().rstrip("\n"))
 
-n = len(s)
+    s = input_stream.readline().rstrip("\n").strip()
 
-s_list = list(s)
+    n = len(s)
 
-possible = True
+    s_list = list(s)
 
-for i in range( (n+1)//2 ):
+    possible = True
 
-    mirror_i = n-1 -i
-
-    a = s_list[i]
-
-    b = s_list[mirror_i]
-
-    if a == '?' and b == '?':
-
-        s_list[i] = 'a'
-
-        s_list[mirror_i] = 'a'
-
-    elif a == '?':
-
-        s_list[i] = b
-
-    elif b == '?':
-
-        s_list[mirror_i] = a
-
-    else:
-
-        if a != b:
-
-            possible = False
-
-            break
-
-if not possible:
-
-    print("IMPOSSIBLE")
-
-else:
-
-    # Now, check if all k letters are present.
-
-    present = set()
-
-    for c in s_list:
-
-        present.add(c)
-
-    required = set( [ chr(ord('a') + i) for i in range(k) ] )
-
-    if present.issuperset(required):
-
-        print(''.join(s_list))
-
-        exit()
-
-    # Else, try to adjust.
-
-    # Iterate pairs in reverse order.
-
-    # Find all pairs (i, mirror_i) that can be increased.
-
-    for i in range( (n//2)-1, -1, -1 ):
+    for i in range( (n+1)//2 ):
 
         mirror_i = n-1 -i
 
-        current_char = s_list[i]
+        a = s_list[i]
 
-        # Allowed characters are 'a' to 'a' + k-1.
+        b = s_list[mirror_i]
 
-        max_char = ord('a') + k -1
+        if a == '?' and b == '?':
 
-        if ord(current_char) >= max_char:
+            s_list[i] = 'a'
 
-            continue  # can't increase.
+            s_list[mirror_i] = 'a'
 
-        for c_ord in range(ord(current_char)+1, max_char +1):
+        elif a == '?':
 
-            c = chr(c_ord)
+            s_list[i] = b
 
-            new_s = s_list.copy()
+        elif b == '?':
 
-            new_s[i] = c
+            s_list[mirror_i] = a
 
-            new_s[mirror_i] = c
+        else:
 
-            # Replace all pairs to the right (j > i) with 'a's.
+            if a != b:
 
-            # j ranges from i+1 to (n//2 -1)
+                possible = False
 
-            for j in range(i+1, (n//2) ):
+                break
 
-                j_mirror = n-1 -j
+    if not possible:
 
-                new_s[j] = 'a'
+        print("IMPOSSIBLE", file=output_stream)
 
-                new_s[j_mirror] = 'a'
+    else:
 
-            # Check if all k letters are present.
+        # Now, check if all k letters are present.
 
-            new_present = set(new_s)
+        present = set()
 
-            if new_present.issuperset(required):
+        for c in s_list:
 
-                # Check if it's a palindrome.
+            present.add(c)
 
-                # Since we replaced pairs, it should be.
+        required = set( [ chr(ord('a') + i) for i in range(k) ] )
 
-                print(''.join(new_s))
+        if present.issuperset(required):
 
-                exit()
+            print(''.join(s_list), file=output_stream)
 
-    print("IMPOSSIBLE")
+            return
 
-Wait, but in the code above, after replacing the current pair and the pairs to the right (j > i) with 'a's, what about the pairs that are not in the initial processing? For example, pairs that were not '?' and were set to some other character.
+        # Else, try to adjust.
 
-But no, because in the initial processing, the code replaces all '?'s into characters, ensuring that the string is a palindrome. So when the code tries to adjust pairs, the new_s is a copy of the initial processed string. So all pairs are already set to valid characters, and replacing them with 'a's or other letters is allowed, as long as the new string remains a palindrome.
+        # Iterate pairs in reverse order.
 
-Wait, but when we replace pair j (i+1 <= j < (n//2)), and their mirrors, with 'a's, this maintains the palindrome property.
+        # Find all pairs (i, mirror_i) that can be increased.
 
-Yes.
+        for i in range( (n//2)-1, -1, -1 ):
 
-Thus, the code should work.
+            mirror_i = n-1 -i
 
-Testing the sample inputs.
+            current_char = s_list[i]
 
-Sample input 2:
+            # Allowed characters are 'a' to 'a' + k-1.
 
+            max_char = ord('a') + k -1
+
+            if ord(current_char) >= max_char:
+
+                continue  # can't increase.
+
+            for c_ord in range(ord(current_char)+1, max_char +1):
+
+                c = chr(c_ord)
+
+                new_s = s_list.copy()
+
+                new_s[i] = c
+
+                new_s[mirror_i] = c
+
+                # Replace all pairs to the right (j > i) with 'a's.
+
+                # j ranges from i+1 to (n//2 -1)
+
+                for j in range(i+1, (n//2) ):
+
+                    j_mirror = n-1 -j
+
+                    new_s[j] = 'a'
+
+                    new_s[j_mirror] = 'a'
+
+                # Check if all k letters are present.
+
+                new_present = set(new_s)
+
+                if new_present.issuperset(required):
+
+                    # Check if it's a palindrome.
+
+                    # Since we replaced pairs, it should be.
+
+                    print(''.join(new_s), file=output_stream)
+
+                    return
+
+        print("IMPOSSIBLE", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2
-
-a??a
-
-Initial processing:
-
-The string is "a??a".
-
-Processing pair 0 and 3:
-
-s_list[0] is 'a', s_list[3] is 'a' → OK.
-
-Pair 1 and 2: both '?', so set to 'a's.
-
-Resulting string: "aaaa".
-
-Check if all 2 letters are present: no, missing 'b'.
-
-Then, iterate pairs in reverse order (pair 1 and 2).
-
-Current_char is 'a'.
-
-Possible c_ord is 98 ('b').
-
-Replace pair 1 and 2 with 'b's. Then, pairs to the right (j > 1) are none. So new_s becomes "abba".
-
-Check if all letters are present: 'a' and 'b' → yes. So output "abba".
-
-Sample input 3:
-
-2
-
 ?b?a
+""",
+            "output": \
+"""\
+abba
+""",
+        }, 
+    ]
 
-Initial processing:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Original string is "?b?a".
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Pair 0 and 3: '?' and 'a'.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So s_list[0] is set to 'a', s_list[3] is 'a'.
+    print('Tests passed 😎')
 
-Pair 1 and 2: 'b' and '?'.
 
-So s_list[2] is set to 'b'.
+if __name__ == '__main__':
+    test()
 
-Resulting string is "abba".
 
-Check if all letters are present: yes. So output "abba".
+```
 
-Sample input 1:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-3
+```
 
-a?c.
+Testing against sample input 1.
 
-Processing:
+```python
+def main(input_stream, output_stream):
+    k = int(input_stream.readline().rstrip("\n"))
 
-The string is "a?c".
+    s = input_stream.readline().rstrip("\n").strip()
 
-Mirror positions: 0 and 2.
+    n = len(s)
 
-s[0] is 'a', s[2] is 'c' → they are different. So output IMPOSSIBLE.
+    s_list = list(s)
+
+    possible = True
+
+    for i in range( (n+1)//2 ):
+
+        mirror_i = n-1 -i
+
+        a = s_list[i]
+
+        b = s_list[mirror_i]
+
+        if a == '?' and b == '?':
+
+            s_list[i] = 'a'
+
+            s_list[mirror_i] = 'a'
+
+        elif a == '?':
+
+            s_list[i] = b
+
+        elif b == '?':
+
+            s_list[mirror_i] = a
+
+        else:
+
+            if a != b:
+
+                possible = False
+
+                break
+
+    if not possible:
+
+        print("IMPOSSIBLE", file=output_stream)
+
+    else:
+
+        # Now, check if all k letters are present.
+
+        present = set()
+
+        for c in s_list:
+
+            present.add(c)
+
+        required = set( [ chr(ord('a') + i) for i in range(k) ] )
+
+        if present.issuperset(required):
+
+            print(''.join(s_list), file=output_stream)
+
+            return
+
+        # Else, try to adjust.
+
+        # Iterate pairs in reverse order.
+
+        # Find all pairs (i, mirror_i) that can be increased.
+
+        for i in range( (n//2)-1, -1, -1 ):
+
+            mirror_i = n-1 -i
+
+            current_char = s_list[i]
+
+            # Allowed characters are 'a' to 'a' + k-1.
+
+            max_char = ord('a') + k -1
+
+            if ord(current_char) >= max_char:
+
+                continue  # can't increase.
+
+            for c_ord in range(ord(current_char)+1, max_char +1):
+
+                c = chr(c_ord)
+
+                new_s = s_list.copy()
+
+                new_s[i] = c
+
+                new_s[mirror_i] = c
+
+                # Replace all pairs to the right (j > i) with 'a's.
+
+                # j ranges from i+1 to (n//2 -1)
+
+                for j in range(i+1, (n//2) ):
+
+                    j_mirror = n-1 -j
+
+                    new_s[j] = 'a'
+
+                    new_s[j_mirror] = 'a'
+
+                # Check if all k letters are present.
+
+                new_present = set(new_s)
+
+                if new_present.issuperset(required):
+
+                    # Check if it's a palindrome.
+
+                    # Since we replaced pairs, it should be.
+
+                    print(''.join(new_s), file=output_stream)
+
+                    return
+
+        print("IMPOSSIBLE", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+a??a
+""",
+            "output": \
+"""\
+abba
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case:
 

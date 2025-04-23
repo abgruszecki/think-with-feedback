@@ -418,231 +418,306 @@ Output sum mod 1e9+7.
 
 So code:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-n, m, k = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-if n ==0:
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
 
-    print(0)
+    if n ==0:
 
-elif n ==1:
+        print(0, file=output_stream)
 
-    print(m % MOD)
+    elif n ==1:
 
-else:
+        print(m % MOD, file=output_stream)
 
-    # build transition matrix
+    else:
 
-    matrix = [[1]*m for _ in range(m)]
+        # build transition matrix
 
-    for _ in range(k):
+        matrix = [[1]*m for _ in range(m)]
 
-        s = input().strip()
+        for _ in range(k):
 
-        a_char = s[0]
+            s = input_stream.readline().rstrip("\n").strip()
 
-        b_char = s[1]
+            a_char = s[0]
 
-        # convert to indices
+            b_char = s[1]
 
-        if a_char.islower():
+            # convert to indices
 
-            a = ord(a_char) - ord('a')
+            if a_char.islower():
 
-        else:
+                a = ord(a_char) - ord('a')
 
-            a = 26 + ord(a_char) - ord('A')
+            else:
 
-        if b_char.islower():
+                a = 26 + ord(a_char) - ord('A')
 
-            b = ord(b_char) - ord('a')
+            if b_char.islower():
 
-        else:
+                b = ord(b_char) - ord('a')
 
-            b = 26 + ord(b_char) - ord('A')
+            else:
 
-        # check if a and b are within 0 to m-1 (but input is guaranteed)
+                b = 26 + ord(b_char) - ord('A')
 
-        if a < m and b <m:
+            # check if a and b are within 0 to m-1 (but input is guaranteed)
 
-            matrix[a][b] =0
+            if a < m and b <m:
 
-    # Compute matrix^(n-1)
+                matrix[a][b] =0
 
-    def multiply(A, B, m, mod):
+        # Compute matrix^(n-1)
 
-        res = [[0]*m for _ in range(m)]
+        def multiply(A, B, m, mod):
 
-        for i in range(m):
+            res = [[0]*m for _ in range(m)]
 
-            for k in range(m):
+            for i in range(m):
 
-                if A[i][k] ==0:
+                for k in range(m):
 
-                    continue
+                    if A[i][k] ==0:
 
-                for j in range(m):
+                        continue
 
-                    res[i][j] = (res[i][j] + A[i][k] * B[k][j]) % mod
+                    for j in range(m):
 
-        return res
+                        res[i][j] = (res[i][j] + A[i][k] * B[k][j]) % mod
 
-    def matrix_pow(mat, power, m, mod):
+            return res
 
-        result = [[0]*m for _ in range(m)]
+        def matrix_pow(mat, power, m, mod):
 
-        for i in range(m):
+            result = [[0]*m for _ in range(m)]
 
-            result[i][i] =1
+            for i in range(m):
 
-        while power >0:
+                result[i][i] =1
 
-            if power %2 ==1:
+            while power >0:
 
-                result = multiply(result, mat, m, mod)
+                if power %2 ==1:
 
-            mat = multiply(mat, mat, m, mod)
+                    result = multiply(result, mat, m, mod)
 
-            power = power //2
+                mat = multiply(mat, mat, m, mod)
 
-        return result
+                power = power //2
 
-    power = n-1
+            return result
 
-    mat_power = matrix_pow(matrix, power, m, MOD)
+        power = n-1
 
-    total =0
+        mat_power = matrix_pow(matrix, power, m, MOD)
 
-    for row in mat_power:
+        total =0
 
-        total = (total + sum(row)) % MOD
+        for row in mat_power:
 
-    print(total % MOD)
+            total = (total + sum(row)) % MOD
 
-Wait, but in the code for converting a_char and b_char to indices, there's a mistake. Because the problem says that the nucleotides are numbered from 1 to m. So 'a' is 1, 'b' is 2, etc. So the code for converting a_char to the index is:
+        print(total % MOD, file=output_stream)
 
-For a lowercase c:
 
-number = ord(c) - ord('a') +1
 
-But the code currently does:
+def test():
+    import io
 
-if a_char.islower():
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 3 0
+""",
+            "output": \
+"""\
+27
+""",
+        }, 
+    ]
 
-    a = ord(a_char) - ord('a') → which is 0-based, but corresponds to 0 for 'a', which is 1 in the problem.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Wait, this is wrong. For example, 'a' in the problem is nucleotide 1. So to convert to 0-based index, subtract 1. So the code should be:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-For a lowercase character c:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-number = ord(c) - ord('a') +1 → 'a' →1, then subtract 1 to get 0.
+    print('Tests passed 😎')
 
-But the current code for a_char:
 
-if a_char.islower():
+if __name__ == '__main__':
+    test()
 
-    a = ord(a_char) - ord('a') → which is 0-based. But this would give 0 for 'a' (correct), 1 for 'b', etc. Which is correct. Because 'a' is 1 in the problem, which becomes 0-based index 0. So the code is correct.
 
-Wait, no. Let's see:
+```
 
-In the problem, 'a' represents 1, 'b' represents 2, ..., 'z' represents 26.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So for 'a', the code's code does ord('a') - ord('a') →0. Then the index is 0. Which is correct (since 1-1=0).
+```
 
-Yes. So the code's current conversion is correct. Similarly, for uppercase: 'A' is 27 in the problem, which is 26 when 0-based. So code:
+Testing against sample input 2.
 
-ord(c) - ord('A') →0 for 'A', add 26 to get 26, which is correct.
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-Yes. So the code's conversion is correct.
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
 
-So, that's correct.
+    if n ==0:
 
-Testing the sample input 1:
+        print(0, file=output_stream)
 
-n=3, m=3, k=2.
+    elif n ==1:
 
-Forbidden pairs are 'ab' and 'ba'.
+        print(m % MOD, file=output_stream)
 
-After conversion:
+    else:
 
-a_char is 'a' →0.
+        # build transition matrix
 
-b_char is 'b' →1.
+        matrix = [[1]*m for _ in range(m)]
 
-So matrix[0][1] =0.
+        for _ in range(k):
 
-Next forbidden pair is 'ba' → a_char 'b' is 1, b_char 'a' is 0. So matrix[1][0] =0.
+            s = input_stream.readline().rstrip("\n").strip()
 
-So matrix is:
+            a_char = s[0]
 
-row 0: [1,0,1]
+            b_char = s[1]
 
-row 1: [0,1,1]
+            # convert to indices
 
-row 2: [1,1,1]
+            if a_char.islower():
 
-n-1=2. So matrix squared.
+                a = ord(a_char) - ord('a')
 
-As before, the code computes matrix_power as matrix^2.
+            else:
 
-Summing all entries gives 17, which matches the sample.
+                a = 26 + ord(a_char) - ord('A')
 
-Sample 3:
+            if b_char.islower():
 
-input:
+                b = ord(b_char) - ord('a')
 
+            else:
+
+                b = 26 + ord(b_char) - ord('A')
+
+            # check if a and b are within 0 to m-1 (but input is guaranteed)
+
+            if a < m and b <m:
+
+                matrix[a][b] =0
+
+        # Compute matrix^(n-1)
+
+        def multiply(A, B, m, mod):
+
+            res = [[0]*m for _ in range(m)]
+
+            for i in range(m):
+
+                for k in range(m):
+
+                    if A[i][k] ==0:
+
+                        continue
+
+                    for j in range(m):
+
+                        res[i][j] = (res[i][j] + A[i][k] * B[k][j]) % mod
+
+            return res
+
+        def matrix_pow(mat, power, m, mod):
+
+            result = [[0]*m for _ in range(m)]
+
+            for i in range(m):
+
+                result[i][i] =1
+
+            while power >0:
+
+                if power %2 ==1:
+
+                    result = multiply(result, mat, m, mod)
+
+                mat = multiply(mat, mat, m, mod)
+
+                power = power //2
+
+            return result
+
+        power = n-1
+
+        mat_power = matrix_pow(matrix, power, m, MOD)
+
+        total =0
+
+        for row in mat_power:
+
+            total = (total + sum(row)) % MOD
+
+        print(total % MOD, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2 1 1
-
 aa
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-n=2, m=1. Forbidden pair is 'aa' →0-based indices (0,0). So matrix[0][0] =0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-matrix is [[0]].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-n-1=1. matrix^1 is [[0]].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-sum is 0.
+    print('Tests passed 😎')
 
-Sample 3's output is 0. Correct.
 
-Sample 2:
+if __name__ == '__main__':
+    test()
 
-n=3, m=3, k=0. All transitions allowed.
 
-matrix is all 1s.
+```
 
-matrix^2 (since n-1=2) is:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-each entry (i,j) is sum_{k} T[i][k] * T[k][j}. T[i][k] is 1 for all i,k. So for each i,j, sum is 3. So each entry is 3. The matrix is 3x3, sum is 3*3*3=27.
-
-Which matches the sample.
-
-So the code should work.
-
-Now, the code needs to be optimized for speed. The current code uses triple loops, which for m=52 is 140k per multiply. But in Python, even that may be acceptable. However, there's a possible optimization.
-
-Alternative approach: Represent the matrices as lists of rows, and for each row in the result, precompute the sum for each cell. But perhaps using a more optimized way.
-
-Another optimization is to precompute the transpose of B when multiplying A and B. Because matrix multiplication can be optimized by switching the order of j and k loops to improve cache performance, but in Python, this may not have a significant effect. Alternatively, using list comprehensions and avoiding loops as much as possible.
-
-But given the time constraints, perhaps the code as written is sufficient.
-
-Another possible optimization is to use bitmask representations for the matrix. But with m up to 52, that's not feasible.
-
-Alternatively, note that the matrix is a square matrix, and when raising it to the power, the code can represent the matrix in a way that's more efficient. However, given the time, proceed with the code as written.
-
-Another possible optimization is to precompute all the matrix multiplications modulo 1e9+7 at each step.
-
-Yes, the current code does that.
-
-So, the code should pass all test cases.
-
-Now, code:
-
-Make sure that when converting the characters, the code correctly handles lowercase and uppercase.
-
-The code reads the forbidden pairs and sets matrix[a][b] =0.
+```
 
 Test case 3: m=1, forbidden pair is 'aa' → a and b are 0 and 0. So matrix[0][0] becomes 0. For n=2, matrix is [[0]]. The sum is 0.
 

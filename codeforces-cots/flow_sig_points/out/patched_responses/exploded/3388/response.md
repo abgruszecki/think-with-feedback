@@ -706,148 +706,145 @@ But we also need to precompute the initial number_runs.
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n, m = map(int, sys.stdin.readline().split())
 
-s = list(sys.stdin.readline().strip())
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
 
-count_dots = sum(1 for c in s if c == '.')
+    s = list(input_stream.readline().strip())
 
-# compute initial number_runs
+    count_dots = sum(1 for c in s if c == '.')
 
-number_runs = 0
+    # compute initial number_runs
 
-prev = False
+    number_runs = 0
 
-for c in s:
+    prev = False
 
-    if c == '.' and not prev:
+    for c in s:
 
-        number_runs +=1
+        if c == '.' and not prev:
 
-        prev = True
+            number_runs +=1
 
-    elif c != '.':
+            prev = True
 
-        prev = False
+        elif c != '.':
 
-# process each query
+            prev = False
 
-for _ in range(m):
+    # process each query
 
-    line = sys.stdin.readline().split()
+    for _ in range(m):
 
-    xi = int(line[0])
+        line = input_stream.readline().split()
 
-    ci = line[1]
+        xi = int(line[0])
 
-    x = xi -1  # 0-based
+        ci = line[1]
 
-    old_char = s[x]
+        x = xi -1  # 0-based
 
-    new_char = ci
+        old_char = s[x]
 
-    if old_char == new_char:
+        new_char = ci
 
-        print(count_dots - number_runs)
+        if old_char == new_char:
 
-        continue
+            print(count_dots - number_runs, file=output_stream)
 
-    # process the change
+            continue
 
-    if old_char == '.':
+        # process the change
 
-        # case 1: remove '.' → count_dots decreases by 1
+        if old_char == '.':
 
-        count_dots -=1
+            # case 1: remove '.' → count_dots decreases by 1
 
-        # check left and right in the current state (before change)
+            count_dots -=1
 
-        left_has = x > 0 and s[x-1] == '.'
-        right_has = x < n-1 and s[x+1] == '.'
-        delta = (left_has + right_has) -1
-        number_runs += delta
+            # check left and right in the current state (before change)
 
-    else:
-        # case 2: add '.' → count_dots +=1
+            left_has = x > 0 and s[x-1] == '.'
+            right_has = x < n-1 and s[x+1] == '.'
+            delta = (left_has + right_has) -1
+            number_runs += delta
 
-        count_dots +=1
+        else:
+            # case 2: add '.' → count_dots +=1
 
-        # check left and right in current state (before change)
+            count_dots +=1
 
-        left_has = x > 0 and s[x-1] == '.'
-        right_has = x < n-1 and s[x+1] == '.'
-        delta = 1 - (left_has + right_has)
-        number_runs += delta
+            # check left and right in current state (before change)
 
-    # update the character
+            left_has = x > 0 and s[x-1] == '.'
+            right_has = x < n-1 and s[x+1] == '.'
+            delta = 1 - (left_has + right_has)
+            number_runs += delta
 
-    s[x] = new_char
+        # update the character
 
-    # compute f(s)
+        s[x] = new_char
 
-    print(count_dots - number_runs)
+        # compute f(s)
 
-But in Python, for large m (3e5), using sys.stdin.readline() in a loop may be slow. So perhaps reading all the input at once. 
+        print(count_dots - number_runs, file=output_stream)
 
-But the code as written should handle it. 
 
-Testing the sample inputs:
 
-Sample 1:
+def test():
+    import io
 
-Original s = '.b..bz....' → 7 dots. 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4
+.cc.
+2 .
+3 .
+2 a
+1 a
+""",
+            "output": \
+"""\
+1
+3
+1
+1
+""",
+        }, 
+    ]
 
-number_runs: 
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-positions 0: '.', new run → 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-pos1: 'b' → prev becomes False.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-pos2: '.' → new run → 2.
+    print('Tests passed 😎')
 
-pos3: '.' → same.
 
-pos4: 'b' → prev False.
+if __name__ == '__main__':
+    test()
 
-pos5: 'z' → prev False.
 
-pos6: '.' → new run →3.
+```
 
-pos7-9: '.' → same.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So initial number_runs is 3. 
-
-So initial f(s) is 7-3=4. 
-
-After the first query (x=0 to 'h'):
-
-count_dots 6. 
-
-left_has is False (x=0, left is -1). right_has is s[1] is 'b' → False. delta (0+0-1)=-1. number_runs 3-1=2. So f=6-2=4. 
-
-Second query: x=2 (0-based) to 'c'. 
-
-old_char is '.' → case1. count_dots 5. 
-
-left_has: x-1=1 → 'b' → False. right_has: x+1=3 → '.' (before change, yes). 
-
-delta (0+1-1) =0. number_runs remains 2. 
-
-f=5-2=3. 
-
-Third query: x=8 (0-based) to 'f'. old_char is '.', case1. 
-
-count_dots 4. 
-
-left_has: x-1=7 → '.' → yes. right_has x+1=9 → '.' (original s[9] is '.' before change). 
-
-delta (1 +1) -1=1. number_runs 2+1=3. 
-
-f=4-3=1. 
-
-Which matches the sample. 
+```
 
 Sample 2:
 

@@ -903,103 +903,101 @@ Finally, the answer is max_answer.
 
 So the code should look like this.
 
-Now, let's test this against the first example:
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a = [0] + a  # 1-based indexing
 
-4
+    prefix_ones = [0] * (n + 1)
+    for i in range(1, n + 1):
+        prefix_ones[i] = prefix_ones[i-1] + (a[i] == 1)
 
-1 2 1 2
+    suffix_twos = [0] * (n + 2)
+    for i in range(n, 0, -1):
+        suffix_twos[i] = suffix_twos[i+1] + (a[i] == 2)
 
-After padding, a is [0,1,2,1,2].
+    max_original = 0
+    for i in range(0, n + 1):
+        current = prefix_ones[i] + suffix_twos[i+1]
+        if current > max_original:
+            max_original = current
 
-prefix_ones:
+    max_answer = max_original
 
-prefix_ones[0] =0.
+    for l in range(1, n + 1):
+        sum_1 = 0
+        sum_2 = 0
+        best = 0
+        for r in range(l, n + 1):
+            x = a[r]
+            if x == 1:
+                new_sum_1 = sum_1 + 1
+                new_sum_2 = sum_2
+                candidate1 = best + 1
+                candidate2 = 1 + sum_2
+                candidate3 = sum_2
+                new_best = max(candidate1, candidate2, candidate3)
+            else:
+                new_sum_1 = sum_1
+                new_sum_2 = sum_2 + 1
+                candidate1 = sum_2 + 1
+                candidate2 = best
+                new_best = max(candidate1, candidate2)
+            sum_1, sum_2 = new_sum_1, new_sum_2
+            best = new_best
+            current_total = prefix_ones[l-1] + best + suffix_twos[r+1]
+            if current_total > max_answer:
+                max_answer = current_total
 
-prefix_ones[1] =1.
+    print(max_answer, file=output_stream)
 
-prefix_ones[2] =1 (since a[2] is 2).
 
-prefix_ones[3] =2 (a[3] is 1).
 
-prefix_ones[4] =2 (a[4] is 2).
+def test():
+    import io
 
-suffix_twos:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10
+1 1 2 2 2 1 1 2 2 1
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
 
-suffix_twos[5] =0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-a[4] is 2 → suffix_twos[4] =1 + 0=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-a[3] is 1 → suffix_twos[3] =0 +1=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-a[2] is 2 → suffix_twos[2] =1 +1=2.
+    print('Tests passed 😎')
 
-a[1] is 1 → suffix_twos[1] =2 +0=2.
 
-max_original is 3.
+if __name__ == '__main__':
+    test()
 
-In the loop for l=2:
 
-sum_1=0, sum_2=0, best=0.
+```
 
-r=2 (a[2]=2):
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-x=2.
-
-new_sum_1=0.
-
-new_sum_2=0+1=1.
-
-candidate1=0+1=1.
-
-candidate2=0.
-
-new_best=1.
-
-current_total = prefix_ones[1] (1) +1 + suffix_twos[3] (1) →1+1+1=3.
-
-max_answer is still 3.
-
-Then r=3 (a[3]=1):
-
-x=1.
-
-new_sum_1=0+1=1.
-
-new_sum_2=1.
-
-candidate1 =1 (previous best) +1=2.
-
-candidate2=1 +1=2.
-
-candidate3=1.
-
-new_best=2.
-
-current_total= prefix_ones[1] (1) +2 + suffix_twos[4] (1) →1+2+1=4 → max_answer becomes 4.
-
-Then r=4 (a[4]=2):
-
-x=2.
-
-new_sum_1=1.
-
-new_sum_2=1+1=2.
-
-candidate1=1 +1=2 (sum_2_prev is 1, sum_2_prev +1=2).
-
-candidate2=2 (best_prev is 2).
-
-new_best= max(2, 2) →2.
-
-current_total= prefix_ones[1] (1) +2 + suffix_twos[5] (0) →1+2+0=3.
-
-So after processing l=2, the maximum is 4.
-
-Which matches the sample.
-
-So the code works.
+```
 
 The second sample input:
 

@@ -133,39 +133,74 @@ So the code is straightforward.
 
 In Python, using input().split() for the second line can read all the elements. So for example:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-sum_total = sum(a)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-required = (sum_total +1) // 2
+    sum_total = sum(a)
 
-current = 0
+    required = (sum_total +1) // 2
 
-for i in range(n):
+    current = 0
 
-    current += a[i]
+    for i in range(n):
 
-    if current >= required:
+        current += a[i]
 
-        print(i+1)
+        if current >= required:
 
-        break
+            print(i+1, file=output_stream)
 
-Yes. This code should work.
+            break
 
-Testing with the first example:
 
-sum is 7 → required 4.
 
-Loop:
+def test():
+    import io
 
-i=0: current becomes 1. Not >=4.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+2 2 2 2 2 2
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-i=1: add 3 → current 4 → meets condition. print 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: sum 12 → required 6.
 

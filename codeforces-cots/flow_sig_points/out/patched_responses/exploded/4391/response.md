@@ -910,13 +910,15 @@ The steps for the code are:
 
 Thus, the code outline is:
 
-import sys
+Testing against sample input 1.
 
+```python
+import sys
 from sys import stdin
 
-def main():
 
-    n, m = map(int, stdin.readline().split())
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
 
     edges = []
 
@@ -924,7 +926,7 @@ def main():
 
     for i in range(1, m+1):
 
-        u, v = map(int, stdin.readline().split())
+        u, v = map(int, input_stream.readline().split())
 
         edges.append( (u, v) )
 
@@ -1102,85 +1104,738 @@ def main():
 
     sorted_edges = sorted( answer_edges )
 
-    print( len(sorted_edges) )
+    print( len(sorted_edges) , file=output_stream)
 
     if sorted_edges:
 
-        print( ' '.join( map(str, sorted_edges) ) )
+        print( ' '.join( map(str, sorted_edges) ) , file=output_stream)
 
     else:
 
-        print()
+        print(file=output_stream)
 
-if __name__ == "__main__":
 
-    main()
 
-Wait, but this code has several issues. For example, during the backtracking phase, the code processes each edge again, which may not be correct. Also, the way the low values are updated may be incorrect.
+def test():
+    import io
 
-Another potential issue is the way the edge_stack and tree_edge_stack are handled. For example, when processing back edges, the code adds them to the edge_stack, but the tree_edge_stack only contains tree edges. So, when popping edges during articulation point processing, the code may not find the tree edge index in the edge_stack, leading to an infinite loop.
-
-Another problem is that the code for the root node may leave edges in the edge_stack, which are then added to components after the loop. But the root node may have multiple components.
-
-But this is getting quite complex. To ensure correctness, perhaps it's better to refer to an existing implementation or to test the code against the sample inputs.
-
-Let's test the first sample input:
-
-Sample Input 1:
-
-3 3
-
-1 2
-
-2 3
-
-3 1
-
-The graph is a cycle of 3 nodes, so all edges are part of a single component.
-
-The code should collect this component. The component has V=3 and E=3, so all edges are included in the answer.
-
-The output should be 3 edges, which is correct.
-
-Sample Input 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 6 7
-
 2 3
-
 3 4
-
 4 2
-
 1 2
-
 1 5
+5 6
+6 1
+""",
+            "output": \
+"""\
+6
+1 2 3 5 6 7
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 243, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 236, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '6\n1 2 3 5 6 7'
+Got: '0'
+
+```
+
+Testing against sample input 2.
+
+```python
+import sys
+from sys import stdin
+
+
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+
+    edges = []
+
+    adj = [[] for _ in range(n+1)]
+
+    for i in range(1, m+1):
+
+        u, v = map(int, input_stream.readline().split())
+
+        edges.append( (u, v) )
+
+        adj[u].append( (v, i) )
+
+        adj[v].append( (u, i) )
+
+    disc = [0]*(n+1)
+
+    low = [0]*(n+1)
+
+    time_stamp = 1
+
+    visited = [False]*(n+1)
+
+    edge_stack = []
+
+    tree_edge_stack = []
+
+    components = []
+
+    def dfs(u):
+
+        nonlocal time_stamp
+
+        stack = [ (u, -1, 0, False) ]  # (node, parent, edge_idx, visited)
+
+        while stack:
+
+            u, parent, edge_idx, visited_flag = stack.pop()
+
+            if not visited_flag:
+
+                if visited[u]:
+
+                    continue
+
+                visited[u] = True
+
+                disc[u] = low[u] = time_stamp
+
+                time_stamp += 1
+
+                # Push back into the stack with visited_flag=True
+
+                stack.append( (u, parent, edge_idx, True) )
+
+                # Process all edges
+
+                edge_list = adj[u]
+
+                # Iterate over edges, skipping the parent
+
+                children = []
+
+                for (v, i) in edge_list:
+
+                    if v == parent:
+
+                        continue
+
+                    children.append( (v, i) )
+
+                # Push children in reverse order to process them in order
+
+                for idx in reversed( range(len(children)) ):
+
+                    v, i = children[idx]
+
+                    if not visited[v]:
+
+                        # Tree edge
+
+                        tree_edge_stack.append(i)
+
+                        edge_stack.append(i)
+
+                        stack.append( (v, u, i, False) )
+
+                    else:
+
+                        # Back edge
+
+                        if disc[v] < disc[u]:
+
+                            edge_stack.append(i)
+
+                            low[u] = min(low[u], disc[v])
+
+            else:
+
+                # After processing all children, update low[u]
+
+                for (v, i) in adj[u]:
+
+                    if v == parent:
+
+                        continue
+
+                    if visited[v] and disc[v] < disc[u]:  # back edge
+
+                        low[u] = min(low[u], low[v])
+
+                    elif visited[v] and disc[v] > disc[u]:  # tree edge
+
+                        low[u] = min(low[u], low[v])
+
+                # Check if u is an articulation point
+
+                if parent != -1 and low[u] >= disc[parent]:
+
+                    component = []
+
+                    while True:
+
+                        j = edge_stack.pop()
+
+                        component.append(j)
+
+                        if j == tree_edge_stack[-1]:
+
+                            break
+
+                    tree_edge_stack.pop()
+
+                    components.append(component)
+
+        # After processing root node, check if any edges are left in edge_stack
+
+    for u in range(1, n+1):
+
+        if not visited[u]:
+
+            dfs(u)
+
+    # Check if there are any edges left in edge_stack
+
+    if edge_stack:
+
+        components.append( edge_stack.copy() )
+
+        edge_stack.clear()
+
+    # Now, process each component to see if it's a cycle.
+
+    answer_edges = set()
+
+    for component in components:
+
+        # Get all edges in the component.
+
+        edge_indices = component
+
+        # Get all vertices involved in these edges.
+
+        vertices = set()
+
+        for idx in edge_indices:
+
+            u, v = edges[idx-1]  # since edges are 0-based in the list.
+
+            vertices.add(u)
+
+            vertices.add(v)
+
+        V = len(vertices)
+
+        E = len(edge_indices)
+
+        if V == E:
+
+            answer_edges.update( edge_indices )
+
+    # Collect the answer edges in sorted order.
+
+    sorted_edges = sorted( answer_edges )
+
+    print( len(sorted_edges) , file=output_stream)
+
+    if sorted_edges:
+
+        print( ' '.join( map(str, sorted_edges) ) , file=output_stream)
+
+    else:
+
+        print(file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 6
+1 2
+2 3
+2 4
+4 3
+2 5
+5 3
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Sample Input 3:
 
 5 6
 
-6 1
+1 2
 
-The components would be:
+2 3
 
-- The cycle 2-3-4-2 (edges 1, 2, 3)
+2 4
 
-- The cycle 1-2 (edge 4 is a bridge? No. Wait, the sample input includes edges 1-2, which connects the cycle 2-3-4 to the rest. But how are the components structured.
+4 3
 
-Wait, the sample input's output is 6 edges. The edges are 1, 2, 3 (the cycle 2-3-4), 5, 6, 7 (edges 1-5, 5-6, 6-1). These form two cycles. So each of these two cycles is a component with E=V.
+2 5
 
-Thus, each of these two cycles contribute their edges to the answer.
+5 3
 
-But the edge 4 (1-2) is a bridge, because removing it disconnects the two cycles. So it's not part of any cycle, and thus not included.
+The edges form a more complex structure. The output is 0.
 
-Thus, the code should capture these two cycles.
+The code's components may have E > V, so no edges are included.
 
-The code should detect that each of these two components has E=V.
+Thus, the code should output 0.
 
-So, the code's components should include the edges 1,2,3 as one component and 5,6,7 as another. Each has 3 edges and 3 vertices. So they are included in the answer.
+But the code needs to correctly process these cases.
 
-The fourth edge is a bridge, so it's part of a component with V=2 (nodes 1 and 2), E=1. Thus, E != V, so it's not included.
+Thus, the code's logic seems correct. However, the implementation may have bugs.
 
-Thus, the code should output 6 edges, which matches the sample.
+Now, considering the code's iterative DFS approach and the way components are collected.
+
+But given time constraints, it's best to proceed with writing the code, then test it against the samples.
+
+In the code, during the backtracking phase, after processing all children, the code checks if the current node is an articulation point by comparing low[u] >= disc[parent]. If so, it pops edges from edge_stack until the tree edge's index is found.
+
+The tree_edge_stack is used to track the indices of tree edges. Each time a tree edge is processed (child is unvisited), the index is pushed to tree_edge_stack and edge_stack. When backtracking, after processing the child, the index is popped from tree_edge_stack.
+
+When an articulation point is found, the code pops edges from edge_stack until it reaches the current tree edge's index, which is at the top of tree_edge_stack.
+
+But in the code provided, during the backtracking phase, after the for loop over adj[u], the code checks if parent != -1 and low[u] >= disc[parent]. If so, it pops components.
+
+But perhaps the code isn't correctly handling the low values.
+
+The code for updating low[u] is:
+
+for (v, i) in adj[u]:
+
+    if v == parent:
+
+        continue
+
+    if visited[v] and disc[v] < disc[u]:  # back edge
+
+        low[u] = min(low[u], low[v])
+
+    elif visited[v] and disc[v] > disc[u]:  # tree edge
+
+        low[u] = min(low[u], low[v])
+
+But this may not be correct. The standard way to update low[u] is:
+
+for each child v of u:
+
+    low[u] = min(low[u], low[v])
+
+for each back edge (u, v):
+
+    low[u] = min(low[u], disc[v])
+
+Thus, the code's approach to updating low[u] may be incorrect.
+
+In the code's current implementation, during the backtracking phase (visited_flag is True), the code iterates over all edges in adj[u], including back edges. For tree edges (disc[v] > disc[u]), it updates low[u] to min(low[u], low[v]). For back edges (disc[v] < disc[u]), it updates low[u] to min(low[u], disc[v]).
+
+But this may not be correct, because during the backtracking phase, the code is processing the children of u. For each tree edge (u, v), after v has been processed, we can update low[u] based on low[v].
+
+But the code's approach to iterate over all edges in adj[u] during the backtracking phase may be incorrect.
+
+Thus, the code may be incorrectly computing the low values, leading to incorrect component identification.
+
+Thus, the code needs to be modified to correctly compute the low[u] values.
+
+The correct way to compute low[u] is:
+
+When processing a tree edge (u, v), after v has been processed, low[u] is the minimum of its current value and low[v].
+
+When processing a back edge (u, v), low[u] is the minimum of its current value and disc[v].
+
+Thus, during the forward processing of edges (when visited_flag is False), when a back edge is found, we push the edge to the edge_stack and update low[u] with disc[v].
+
+Then, during the backtracking phase (visited_flag is True), for each tree edge (u, v), we update low[u] with low[v].
+
+But how to track which edges are tree edges.
+
+This suggests that during the forward processing, the code should track which edges are tree edges and which are back edges.
+
+Thus, modifying the code:
+
+During the forward processing (visited_flag is False):
+
+   for each (v, i) in adj[u], if v is not parent:
+
+       if not visited[v]:
+
+           it's a tree edge. Process it.
+
+       else:
+
+           if disc[v] < disc[u], it's a back edge. Process it.
+
+Thus, during the backtracking phase, the code can process only the tree edges.
+
+But in the current code's backtracking phase, it's processing all edges again.
+
+Thus, the code may be incorrect in updating the low values.
+
+To fix this, perhaps during the backtracking phase, the code should iterate over the tree edges (children) of u and update low[u] accordingly.
+
+But how to track which edges are tree edges.
+
+Thus, during the forward processing, when a tree edge is processed, the code can store the children and their edge indices.
+
+Thus, during the forward processing:
+
+   when processing a tree edge (u, v), add v to a list of children.
+
+Then, during backtracking, iterate over these children to update low[u].
+
+Thus, modifying the code:
+
+In the stack entry, store the children of u.
+
+Thus, the code can be modified as follows:
+
+During the forward processing (visited_flag is False):
+
+   when u is first visited:
+
+       disc[u] = low[u] = time_stamp
+
+       time_stamp += 1
+
+       stack.append( (u, parent, children, 0, True) )
+
+       children = []
+
+       for (v, i) in adj[u]:
+
+           if v == parent:
+
+               continue
+
+           if not visited[v]:
+
+               children.append( (v, i) )
+
+           else:
+
+               if disc[v] < disc[u]:
+
+                   # back edge
+
+                   edge_stack.append(i)
+
+                   low[u] = min(low[u], disc[v])
+
+       # Push tree edges in reverse order
+
+       for (v, i) in reversed(children):
+
+           edge_stack.append(i)
+
+           tree_edge_stack.append(i)
+
+           stack.append( (v, u, [], 0, False) )
+
+       stack.append( (u, parent, children, len(children), True) )
+
+But this is getting quite complex.
+
+Alternatively, perhaps the code should track for each node u its children, and during backtracking, update low[u] based on the children's low values.
+
+But this requires storing the children of each node.
+
+Thus, modifying the code to track children during the forward phase:
+
+In the stack entries, store the children list.
+
+Thus, during the forward processing:
+
+   when u is first visited:
+
+       collect all children (tree edges) and back edges.
+
+       process back edges.
+
+       push the children to the stack in reverse order.
+
+       store the children list in the stack entry.
+
+During backtracking:
+
+   for each child in children:
+
+       low[u] = min(low[u], low[child])
+
+Thus, the code can be rewritten as follows:
+
+Sample Input 3:
+
+5 6
+
+1 2
+
+2 3
+
+2 4
+
+4 3
+
+2 5
+
+5 3
+
+The edges form a more complex structure. The output is 0.
+
+The code's components may have E > V, so no edges are included.
+
+Thus, the code should output 0.
+
+But the code needs to correctly process these cases.
+
+Thus, the code's logic seems correct. However, the implementation may have bugs.
+
+Now, considering the code's iterative DFS approach and the way components are collected.
+
+But given time constraints, it's best to proceed with writing the code, then test it against the samples.
+
+In the code, during the backtracking phase, after processing all children, the code checks if the current node is an articulation point by comparing low[u] >= disc[parent]. If so, it pops edges from edge_stack until the tree edge's index is found.
+
+The tree_edge_stack is used to track the indices of tree edges. Each time a tree edge is processed (child is unvisited), the index is pushed to tree_edge_stack and edge_stack. When backtracking, after processing the child, the index is popped from tree_edge_stack.
+
+When an articulation point is found, the code pops edges from edge_stack until it reaches the current tree edge's index, which is at the top of tree_edge_stack.
+
+But in the code provided, during the backtracking phase, after the for loop over adj[u], the code checks if parent != -1 and low[u] >= disc[parent]. If so, it pops components.
+
+But perhaps the code isn't correctly handling the low values.
+
+The code for updating low[u] is:
+
+for (v, i) in adj[u]:
+
+    if v == parent:
+
+        continue
+
+    if visited[v] and disc[v] < disc[u]:  # back edge
+
+        low[u] = min(low[u], low[v])
+
+    elif visited[v] and disc[v] > disc[u]:  # tree edge
+
+        low[u] = min(low[u], low[v])
+
+But this may not be correct. The standard way to update low[u] is:
+
+for each child v of u:
+
+    low[u] = min(low[u], low[v])
+
+for each back edge (u, v):
+
+    low[u] = min(low[u], disc[v])
+
+Thus, the code's approach to updating low[u] may be incorrect.
+
+In the code's current implementation, during the backtracking phase (visited_flag is True), the code iterates over all edges in adj[u], including back edges. For tree edges (disc[v] > disc[u]), it updates low[u] to min(low[u], low[v]). For back edges (disc[v] < disc[u]), it updates low[u] to min(low[u], disc[v]).
+
+But this may not be correct, because during the backtracking phase, the code is processing the children of u. For each tree edge (u, v), after v has been processed, we can update low[u] based on low[v].
+
+But the code's approach to iterate over all edges in adj[u] during the backtracking phase may be incorrect.
+
+Thus, the code may be incorrectly computing the low values, leading to incorrect component identification.
+
+Thus, the code needs to be modified to correctly compute the low[u] values.
+
+The correct way to compute low[u] is:
+
+When processing a tree edge (u, v), after v has been processed, low[u] is the minimum of its current value and low[v].
+
+When processing a back edge (u, v), low[u] is the minimum of its current value and disc[v].
+
+Thus, during the forward processing of edges (when visited_flag is False), when a back edge is found, we push the edge to the edge_stack and update low[u] with disc[v].
+
+Then, during the backtracking phase (visited_flag is True), for each tree edge (u, v), we update low[u] with low[v].
+
+But how to track which edges are tree edges.
+
+This suggests that during the forward processing, the code should track which edges are tree edges and which are back edges.
+
+Thus, modifying the code:
+
+During the forward processing (visited_flag is False):
+
+   for each (v, i) in adj[u], if v is not parent:
+
+       if not visited[v]:
+
+           it's a tree edge. Process it.
+
+       else:
+
+           if disc[v] < disc[u], it's a back edge. Process it.
+
+Thus, during the backtracking phase, the code can process only the tree edges.
+
+But in the current code's backtracking phase, it's processing all edges again.
+
+Thus, the code may be incorrect in updating the low values.
+
+To fix this, perhaps during the backtracking phase, the code should iterate over the tree edges (children) of u and update low[u] accordingly.
+
+But how to track which edges are tree edges.
+
+Thus, during the forward processing, when a tree edge is processed, the code can store the children and their edge indices.
+
+Thus, during the forward processing:
+
+   when processing a tree edge (u, v), add v to a list of children.
+
+Then, during backtracking, iterate over these children to update low[u].
+
+Thus, modifying the code:
+
+In the stack entry, store the children of u.
+
+Thus, the code can be modified as follows:
+
+During the forward processing (visited_flag is False):
+
+   when u is first visited:
+
+       disc[u] = low[u] = time_stamp
+
+       time_stamp += 1
+
+       stack.append( (u, parent, children, 0, True) )
+
+       children = []
+
+       for (v, i) in adj[u]:
+
+           if v == parent:
+
+               continue
+
+           if not visited[v]:
+
+               children.append( (v, i) )
+
+           else:
+
+               if disc[v] < disc[u]:
+
+                   # back edge
+
+                   edge_stack.append(i)
+
+                   low[u] = min(low[u], disc[v])
+
+       # Push tree edges in reverse order
+
+       for (v, i) in reversed(children):
+
+           edge_stack.append(i)
+
+           tree_edge_stack.append(i)
+
+           stack.append( (v, u, [], 0, False) )
+
+       stack.append( (u, parent, children, len(children), True) )
+
+But this is getting quite complex.
+
+Alternatively, perhaps the code should track for each node u its children, and during backtracking, update low[u] based on the children's low values.
+
+But this requires storing the children of each node.
+
+Thus, modifying the code to track children during the forward phase:
+
+In the stack entries, store the children list.
+
+Thus, during the forward processing:
+
+   when u is first visited:
+
+       collect all children (tree edges) and back edges.
+
+       process back edges.
+
+       push the children to the stack in reverse order.
+
+       store the children list in the stack entry.
+
+During backtracking:
+
+   for each child in children:
+
+       low[u] = min(low[u], low[child])
+
+Thus, the code can be rewritten as follows:
 
 Sample Input 3:
 

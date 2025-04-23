@@ -1185,106 +1185,335 @@ Iterate each i, and for j in i+1 to i+20, check if masks are disjoint.
 
 Thus, the code would be:
 
-s = input().strip()
-n = len(s)
+Testing against sample input 1.
 
-if n == 0:
-    print(0)
-    exit()
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    n = len(s)
 
-# Compute left_end and left_bitmask
-left_end = [0]*n
-left_bitmask = [0]*n
-last_occurrence = dict()
-current_start = 0
+    if n == 0:
+        print(0, file=output_stream)
+        return
 
-for i in range(n):
-    c = s[i]
-    if c in last_occurrence:
-        current_start = max(current_start, last_occurrence[c] + 1)
-    left_end[i] = i - current_start + 1
-    # Compute the bitmask for s[current_start..i]
-    mask = 0
-    for j in range(current_start, i+1):
-        mask |= (1 << (ord(s[j]) - ord('a')))
-    left_bitmask[i] = mask
-    last_occurrence[c] = i
+    # Compute left_end and left_bitmask
+    left_end = [0]*n
+    left_bitmask = [0]*n
+    last_occurrence = dict()
+    current_start = 0
 
-# Compute right_start and right_bitmask
-right_start = [0]*n
-right_bitmask = [0]*n
-last_occurrence = dict()
-current_end = n-1
+    for i in range(n):
+        c = s[i]
+        if c in last_occurrence:
+            current_start = max(current_start, last_occurrence[c] + 1)
+        left_end[i] = i - current_start + 1
+        # Compute the bitmask for s[current_start..i]
+        mask = 0
+        for j in range(current_start, i+1):
+            mask |= (1 << (ord(s[j]) - ord('a')))
+        left_bitmask[i] = mask
+        last_occurrence[c] = i
 
-for j in range(n-1, -1, -1):
-    c = s[j]
-    if c in last_occurrence:
-        current_end = min(current_end, last_occurrence[c] - 1)
-    right_start[j] = current_end - j + 1
-    # Compute the bitmask for s[j..current_end]
-    mask = 0
-    for k in range(j, current_end+1):
-        mask |= (1 << (ord(s[k]) - ord('a')))
-    right_bitmask[j] = mask
-    last_occurrence[c] = j
+    # Compute right_start and right_bitmask
+    right_start = [0]*n
+    right_bitmask = [0]*n
+    last_occurrence = dict()
+    current_end = n-1
 
-original_max = max(left_end)
-additional_max = 0
+    for j in range(n-1, -1, -1):
+        c = s[j]
+        if c in last_occurrence:
+            current_end = min(current_end, last_occurrence[c] - 1)
+        right_start[j] = current_end - j + 1
+        # Compute the bitmask for s[j..current_end]
+        mask = 0
+        for k in range(j, current_end+1):
+            mask |= (1 << (ord(s[k]) - ord('a')))
+        right_bitmask[j] = mask
+        last_occurrence[c] = j
 
-for i in range(n):
-    # Check j from i+1 to i+20
-    for j in range(i+1, min(n, i+20)):
-        if j >= n:
-            continue
-        if (left_bitmask[i] & right_bitmask[j]) == 0:
-            current_sum = left_end[i] + right_start[j]
-            if current_sum > additional_max:
-                additional_max = current_sum
+    original_max = max(left_end)
+    additional_max = 0
 
-answer = max(original_max, additional_max)
-print(answer)
+    for i in range(n):
+        # Check j from i+1 to i+20
+        for j in range(i+1, min(n, i+20)):
+            if j >= n:
+                continue
+            if (left_bitmask[i] & right_bitmask[j]) == 0:
+                current_sum = left_end[i] + right_start[j]
+                if current_sum > additional_max:
+                    additional_max = current_sum
 
-But the code for computing the bitmask for left and right is O(n*20), which for n=1e6 is 2e7 operations. This should be manageable.
+    answer = max(original_max, additional_max)
+    print(answer, file=output_stream)
 
-Testing this code on the sample inputs:
 
-Sample 1: "abacaba" → output 3.
 
-The original_max is 3. The code would check j up to i+20, but no pairs with disjoint masks. So the answer is 3.
+def test():
+    import io
 
-Sample 2: "abcdecdf" → output 6.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+abcdecdf
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-The code would find a pair where left_end[i] is 4 and right_start[j] is 2, with disjoint masks. For example, left_end[i] could be "abcd" (mask 0b1111), and right_start[j] could be "f" (mask 0x10), giving sum 5. Or perhaps there's a longer sum.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But the code may find a sum of 5+1=6. Not sure. But the sample output is 6.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sample 3: "aabbcc" → output 3. The code's original_max is 2, but the code would check pairs and find no valid sums. So the answer is 3?
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Wait, no. The original_max for "aabbcc" would be 2. But the sample output is 3. How?
+    print('Tests passed 😎')
 
-Ah, no. Wait, in the string "aabbcc", the maximum unique substring is 2 ("aa" is invalid, "ab" is possible). But the sample output is 3. So why?
 
-Wait, the third sample input's output is 3. Wait, the sample input is "aabbcc". The maximum unique substring is 2 (like "ab" or "bc"). But the output is 3. How is this possible?
+if __name__ == '__main__':
+    test()
 
-Ah, no. Wait, the sample input's output is 3. So perhaps by reversing a substring, you can get a longer unique substring.
 
-For example, the string is "a a b b c c". If you reverse the entire string, it's "ccbbaa". The maximum unique substring is 2. Hmm. But how to get 3.
+```
 
-Wait, perhaps the code's original_max is 2, but after reversing a substring, you can get 3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For example, the original string is "aabbcc".
+```
 
-If we reverse the substring "abba" (positions 0-3), the string becomes "abba cc". Then, the substring "abbac" has duplicate 'a' and 'b'. Not helpful.
+Testing against sample input 2.
 
-Alternatively, reverse the substring "abbc" to "cbba". The string becomes "acbba c c". The longest unique substring is "acb" (3 characters).
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    n = len(s)
 
-Thus, the code's original_max is 2, but after reversal, the answer is 3.
+    if n == 0:
+        print(0, file=output_stream)
+        return
 
-But in this case, the code's approach would not find this because it's not merging two existing windows but creating a new window through the reversal.
+    # Compute left_end and left_bitmask
+    left_end = [0]*n
+    left_bitmask = [0]*n
+    last_occurrence = dict()
+    current_start = 0
 
-Thus, the code's approach is not sufficient to handle cases where the reversal creates a new unique substring that is not the sum of two existing ones.
+    for i in range(n):
+        c = s[i]
+        if c in last_occurrence:
+            current_start = max(current_start, last_occurrence[c] + 1)
+        left_end[i] = i - current_start + 1
+        # Compute the bitmask for s[current_start..i]
+        mask = 0
+        for j in range(current_start, i+1):
+            mask |= (1 << (ord(s[j]) - ord('a')))
+        left_bitmask[i] = mask
+        last_occurrence[c] = i
 
-Thus, the code would fail the third sample input.
+    # Compute right_start and right_bitmask
+    right_start = [0]*n
+    right_bitmask = [0]*n
+    last_occurrence = dict()
+    current_end = n-1
+
+    for j in range(n-1, -1, -1):
+        c = s[j]
+        if c in last_occurrence:
+            current_end = min(current_end, last_occurrence[c] - 1)
+        right_start[j] = current_end - j + 1
+        # Compute the bitmask for s[j..current_end]
+        mask = 0
+        for k in range(j, current_end+1):
+            mask |= (1 << (ord(s[k]) - ord('a')))
+        right_bitmask[j] = mask
+        last_occurrence[c] = j
+
+    original_max = max(left_end)
+    additional_max = 0
+
+    for i in range(n):
+        # Check j from i+1 to i+20
+        for j in range(i+1, min(n, i+20)):
+            if j >= n:
+                continue
+            if (left_bitmask[i] & right_bitmask[j]) == 0:
+                current_sum = left_end[i] + right_start[j]
+                if current_sum > additional_max:
+                    additional_max = current_sum
+
+    answer = max(original_max, additional_max)
+    print(answer, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+aabbcc
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    n = len(s)
+
+    if n == 0:
+        print(0, file=output_stream)
+        return
+
+    # Compute left_end and left_bitmask
+    left_end = [0]*n
+    left_bitmask = [0]*n
+    last_occurrence = dict()
+    current_start = 0
+
+    for i in range(n):
+        c = s[i]
+        if c in last_occurrence:
+            current_start = max(current_start, last_occurrence[c] + 1)
+        left_end[i] = i - current_start + 1
+        # Compute the bitmask for s[current_start..i]
+        mask = 0
+        for j in range(current_start, i+1):
+            mask |= (1 << (ord(s[j]) - ord('a')))
+        left_bitmask[i] = mask
+        last_occurrence[c] = i
+
+    # Compute right_start and right_bitmask
+    right_start = [0]*n
+    right_bitmask = [0]*n
+    last_occurrence = dict()
+    current_end = n-1
+
+    for j in range(n-1, -1, -1):
+        c = s[j]
+        if c in last_occurrence:
+            current_end = min(current_end, last_occurrence[c] - 1)
+        right_start[j] = current_end - j + 1
+        # Compute the bitmask for s[j..current_end]
+        mask = 0
+        for k in range(j, current_end+1):
+            mask |= (1 << (ord(s[k]) - ord('a')))
+        right_bitmask[j] = mask
+        last_occurrence[c] = j
+
+    original_max = max(left_end)
+    additional_max = 0
+
+    for i in range(n):
+        # Check j from i+1 to i+20
+        for j in range(i+1, min(n, i+20)):
+            if j >= n:
+                continue
+            if (left_bitmask[i] & right_bitmask[j]) == 0:
+                current_sum = left_end[i] + right_start[j]
+                if current_sum > additional_max:
+                    additional_max = current_sum
+
+    answer = max(original_max, additional_max)
+    print(answer, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+abcdeefc
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 94, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 87, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '6'
+Got: '5'
+
+```
 
 Thus, the approach is incorrect.
 

@@ -350,57 +350,141 @@ for i in range(n):
 
 print(''.join(result))
 
-But let's test this with the samples.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    t = input_stream.readline().rstrip("\n").strip()
+    n = len(s)
 
-s = 'tinkoff' → sorted is ['f', 'f', 'i', 'k', 'n', 'o', 't']
+    oleg = sorted(s)[:(n + 1) // 2]
+    igor = sorted(t, reverse=True)[:n // 2]
 
-n is 7 → (7+1)//2 =4. oleg_chars is first 4: ['f', 'f', 'i', 'k']
+    result = []
+    o_idx = i_idx = 0
+    for i in range(n):
+        if i % 2 == 0:
+            result.append(oleg[o_idx])
+            o_idx += 1
+        else:
+            result.append(igor[i_idx])
+            i_idx += 1
 
-igor_chars: sorted(t, reverse=True) → t is 'zscoder' → letters z, s, c, o, d, e, r → sorted in reverse is z, s, r, o, e, d, c. n//2=3, so first 3: z, s, r.
+    print(''.join(result), file=output_stream)
 
-Merge:
 
-i=0 → even → oleg[0] → 'f'
 
-i=1 → odd → igor[0] → z
+def test():
+    import io
 
-i=2 → even → oleg[1] → f
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+xxxxxx
+xxxxxx
+""",
+            "output": \
+"""\
+xxxxxx
+""",
+        }, 
+    ]
 
-i=3 → odd → igor[1] → s
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=4 → even → oleg[2] → i
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=5 → odd → igor[2] → r
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=6 → even → oleg[3] → k
+    print('Tests passed 😎')
 
-Result: f z f s i r k → which is 'fzf sirk' → no, the sample output is 'fzfsirk'. Wait, but how?
 
-Wait sample1's output is 'fzfsirk':
+if __name__ == '__main__':
+    test()
 
-Looking at the code's output:
 
-Oleg's characters are ['f','f','i','k'], Igor's are ['z','s','r'].
+```
 
-Merged as:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-0: f
+```
 
-1: z
+Testing against sample input 1.
 
-2: f
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    t = input_stream.readline().rstrip("\n").strip()
+    n = len(s)
 
-3: s
+    oleg = sorted(s)[:(n + 1) // 2]
+    igor = sorted(t, reverse=True)[:n // 2]
 
-4: i
+    result = []
+    o_idx = i_idx = 0
+    for i in range(n):
+        if i % 2 == 0:
+            result.append(oleg[o_idx])
+            o_idx += 1
+        else:
+            result.append(igor[i_idx])
+            i_idx += 1
 
-5: r
+    print(''.join(result), file=output_stream)
 
-6: k
 
-So the merged string is fzfsirk, which matches the sample. So the code works.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+xxxxxx
+xxxxxx
+""",
+            "output": \
+"""\
+xxxxxx
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

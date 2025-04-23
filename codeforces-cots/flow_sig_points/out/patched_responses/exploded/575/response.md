@@ -383,87 +383,185 @@ So to fix this, the code should use sys.exit().
 
 So the code should be:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-a, b, c = map(int, input().split())
 
-if a > b:
+def main(input_stream, output_stream):
+    a, b, c = map(int, input_stream.readline().rstrip("\n").split())
 
-    max_x = c // a
+    if a > b:
 
-    for x in range(max_x +1):
+        max_x = c // a
 
-        rem = c - a * x
+        for x in range(max_x +1):
 
-        if rem <0:
+            rem = c - a * x
 
-            continue
+            if rem <0:
 
-        if rem % b ==0:
+                continue
 
-            print("Yes")
+            if rem % b ==0:
 
-            sys.exit()
+                print("Yes", file=output_stream)
 
-else:
+                sys.exit()
 
-    max_y = c // b
+    else:
 
-    for y in range(max_y +1):
+        max_y = c // b
 
-        rem = c - b * y
+        for y in range(max_y +1):
 
-        if rem <0:
+            rem = c - b * y
 
-            continue
+            if rem <0:
 
-        if rem % a ==0:
+                continue
 
-            print("Yes")
+            if rem % a ==0:
 
-            sys.exit()
+                print("Yes", file=output_stream)
 
-print("No")
+                sys.exit()
 
-Yes. This code is correct.
+    print("No", file=output_stream)
 
-But another approach is to use a flag variable, and break out of the loops once found. Then after checking all possibilities, print no.
 
-But using sys.exit is more efficient here.
 
-But in code submission, using sys is allowed.
+def test():
+    import io
 
-So the code is correct.
-
-Testing the sample inputs:
-
-Sample 1:
-
-Input: 4 6 15
-
-a=4, b=6. Since a <b, loop y.
-
-max_y =15//6=2.
-
-y=0: rem=15. 15%4=3. No.
-
-y=1: rem=15-6=9. 9%4=1. No.
-
-y=2: rem=15-12=3. 3%4=3. No.
-
-So output No.
-
-Sample 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3 2 7
+""",
+            "output": \
+"""\
+Yes
+""",
+        }, 
+    ]
 
-a=3>2. So loop x.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-max_x=7//3=2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-x=0: rem=7. 7%2=1. No.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-x=1: rem=7-3=4. 4%2=0. Yes. So output yes.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+
+```
+
+Testing against sample input 2.
+
+```python
+import sys
+
+
+def main(input_stream, output_stream):
+    a, b, c = map(int, input_stream.readline().rstrip("\n").split())
+
+    if a > b:
+
+        max_x = c // a
+
+        for x in range(max_x +1):
+
+            rem = c - a * x
+
+            if rem <0:
+
+                continue
+
+            if rem % b ==0:
+
+                print("Yes", file=output_stream)
+
+                sys.exit()
+
+    else:
+
+        max_y = c // b
+
+        for y in range(max_y +1):
+
+            rem = c - b * y
+
+            if rem <0:
+
+                continue
+
+            if rem % a ==0:
+
+                print("Yes", file=output_stream)
+
+                sys.exit()
+
+    print("No", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 11 6
+""",
+            "output": \
+"""\
+Yes
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+
+```
 
 Sample3:
 

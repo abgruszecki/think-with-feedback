@@ -366,57 +366,78 @@ But to print the message and exit, perhaps:
 
 But in the code, after checking, when a pair fails, the code needs to print "NOT FRIENDS" and terminate. So the code would be:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n = int(input())
 
-if n == 1:
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-    print("FRIENDS")
+    if n == 1:
 
-    sys.exit()
+        print("FRIENDS", file=output_stream)
 
-elements = list(map(int, input().split(',')))
+        sys.exit()
 
-for j in range(1, n):
+    elements = list(map(int, input_stream.readline().rstrip("\n").split(',')))
 
-    for i in range(j):
+    for j in range(1, n):
 
-        if elements[j] % elements[i] != 0:
+        for i in range(j):
 
-            print("NOT FRIENDS")
+            if elements[j] % elements[i] != 0:
 
-            sys.exit()
+                print("NOT FRIENDS", file=output_stream)
 
-print("FRIENDS")
+                sys.exit()
 
-Wait, but what if the list has n elements not equal to the input n? The problem statement says that the next line has exactly n elements, but perhaps code should not check that, as per the problem's input constraints. So assuming that the input is correct.
+    print("FRIENDS", file=output_stream)
 
-Testing this code on the samples:
 
-Sample 1:
 
-4
+def test():
+    import io
 
-1,3,6,12 → code checks j=1 (3):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1,2,9
+""",
+            "output": \
+"""\
+NOT FRIENDS
+""",
+        }, 
+    ]
 
-i=0 →3%1=0 → ok.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-j=2 (6):
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=0 →6%1=0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=1 →6%3=0.
+    print('Tests passed 😎')
 
-j=3 (12):
 
-i=0 →12%1=0.
+if __name__ == '__main__':
+    test()
 
-i=1 →12%3=0.
 
-i=2 →12%6=0.
+```
 
-All pass → FRIENDS.
+<RUN_SNIPPET>
+```output
+
+```
 
 Sample 2:
 

@@ -66,23 +66,63 @@ Yes, that should work. Let me code that.
 
 The code would look like:
 
-s = input().strip()
-target = 'hello'
-current = 0
+Testing against sample input 1.
 
-for c in s:
-    if current < len(target) and c == target[current]:
-        current +=1
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    target = 'hello'
+    current = 0
 
-print("YES" if current == len(target) else "NO")
+    for c in s:
+        if current < len(target) and c == target[current]:
+            current +=1
 
-That's the code.
+    print("YES" if current == len(target) else "NO", file=output_stream)
 
-Testing with the examples.
 
-First example:
 
-Input 'ahhellllloou' → the code should check each character. The 'h' is found (current becomes 1), then 'e' (current 2), then 'l' (current 3), then another 'l' (current4), then 'o' (current5). So output YES.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+hlelo
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: 'hlelo'. The 'h' is found (current1). Then look for 'e' after index0. The next characters are 'l' (no), then 'e' at index2. So current becomes2. Then look for 'l' after index2. The next character is index3 'l' → current3. Then look for another 'l' → next character is 'o' (no). So current remains 3. So output NO.
 

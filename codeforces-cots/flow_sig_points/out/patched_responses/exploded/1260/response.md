@@ -417,72 +417,77 @@ Then, compute initial_total using the standard parity counting.
 
 Now, code outline:
 
-n = int(input())
-a = list(map(int, input().split()))
-c = [bin(x).count('1') for x in a]
+Testing against sample input 1.
 
-even_count = 0
-zero_count = 0
-for cnt in c:
-    if cnt % 2 == 0:
-        even_count +=1
-    if cnt ==0:
-        zero_count +=1
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    c = [bin(x).count('1') for x in a]
 
-current_parity = 0
-parity_counts = {0: 1}
-initial_total =0
-for num in c:
-    current_parity = (current_parity + num) %2
-    initial_total += parity_counts.get(current_parity,0)
-    parity_counts[current_parity] = parity_counts.get(current_parity,0) +1
+    even_count = 0
+    zero_count = 0
+    for cnt in c:
+        if cnt % 2 == 0:
+            even_count +=1
+        if cnt ==0:
+            zero_count +=1
 
-result = initial_total - even_count + zero_count
-print(result)
+    current_parity = 0
+    parity_counts = {0: 1}
+    initial_total =0
+    for num in c:
+        current_parity = (current_parity + num) %2
+        initial_total += parity_counts.get(current_parity,0)
+        parity_counts[current_parity] = parity_counts.get(current_parity,0) +1
 
-Let's test this with the first example:
+    result = initial_total - even_count + zero_count
+    print(result, file=output_stream)
 
-Sample input 1:
 
-3
 
-6 7 14
+def test():
+    import io
 
-c = [2,3,3]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 2 1 16
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-even_count: 2 is even → even_count=1. zero_count=0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-initial_total is computed as follows:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-current_parity starts at 0, parity_counts {0:1}.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Processing 2 (even):
+    print('Tests passed 😎')
 
-current_parity (0+2) mod2 →0.
 
-initial_total += parity_counts[0] →1.
+if __name__ == '__main__':
+    test()
 
-parity_counts[0] becomes 2.
 
-Processing 3 (odd):
+```
 
-current_parity (0+3) mod2 →1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-initial_total += parity_counts.get(1,0) →0. Total remains 1.
-
-parity_counts[1] becomes 1.
-
-Processing 3 (odd):
-
-current_parity (1+3) mod2 →0.
-
-initial_total += parity_counts[0] →2. Total is 1+2=3.
-
-parity_counts[0] becomes3.
-
-initial_total is 3.
-
-result=3-1+0=2. Correct.
+```
 
 Sample 2:
 

@@ -1207,85 +1207,126 @@ Thus, the correct approach is to count the number of times the 'remove' command'
 
 Thus, the code would be:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n = int(sys.stdin.readline())
 
-reorders =0
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
-next_expected =1
+    reorders =0
 
-stack = []
+    next_expected =1
 
-elements = set()
+    stack = []
 
-for _ in range(2*n):
+    elements = set()
 
-    cmd = sys.stdin.readline().split()
+    for _ in range(2*n):
 
-    if cmd[0] == 'add':
+        cmd = input_stream.readline().split()
 
-        x = int(cmd[1])
+        if cmd[0] == 'add':
 
-        stack.append(x)
+            x = int(cmd[1])
 
-        elements.add(x)
+            stack.append(x)
 
-    else:
-
-        if next_expected in elements:
-
-            if stack[-1] != next_expected:
-
-                reorders +=1
-
-                # After reorder, the stack is arranged in order.
-
-                # So all elements in the stack are removed in order.
-
-                # So next_expected is increased by the number of elements.
-
-                # But this is not needed; the elements are processed.
-
-                elements = set()
-
-                stack = []
-
-            else:
-
-                stack.pop()
-
-                elements.remove(next_expected)
-
-            next_expected +=1
+            elements.add(x)
 
         else:
 
-            next_expected +=1
+            if next_expected in elements:
 
-print(reorders)
+                if stack[-1] != next_expected:
 
-But this code may have issues. Let's test sample input1.
+                    reorders +=1
 
-Sample input1:
+                    # After reorder, the stack is arranged in order.
 
-Commands:
+                    # So all elements in the stack are removed in order.
 
-add 1 → stack [1], elements {1}
+                    # So next_expected is increased by the number of elements.
 
-remove → next_expected=1. In elements. stack[-1] is1. So pop. elements remove 1. next_expected=2.
+                    # But this is not needed; the elements are processed.
 
-add 2 → stack [2], elements {2}
+                    elements = set()
 
-add3 → stack [2,3], elements {2,3}
+                    stack = []
 
-remove → next_expected=2. In elements. stack[-1] is3. So reorders +=1. elements and stack cleared. next_expected=3.
+                else:
 
-remove → next_expected=3. elements is empty. So next_expected becomes4.
+                    stack.pop()
 
-remove → next_expected=4. elements empty. next_expected becomes5.
+                    elements.remove(next_expected)
 
-Thus, reorders=1. Which matches the sample.
+                next_expected +=1
+
+            else:
+
+                next_expected +=1
+
+    print(reorders, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+add 3
+add 2
+add 1
+remove
+add 4
+remove
+remove
+remove
+add 6
+add 7
+add 5
+remove
+remove
+remove
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input2:
 

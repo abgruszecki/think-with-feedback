@@ -417,138 +417,115 @@ So, given that, perhaps using regular dicts is better. Let's adjust the code acc
 
 So, the code would look like:
 
+Testing against sample input 1.
+
+```python
 import sys
 import math
 
-n = int(sys.stdin.readline())
-a = list(map(int, sys.stdin.readline().split()))
-q = int(sys.stdin.readline())
-queries = [int(sys.stdin.readline()) for _ in range(q)]
 
-global_freq = {}
-prev_gcds = {}
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    a = list(map(int, input_stream.readline().split()))
+    q = int(input_stream.readline())
+    queries = [int(input_stream.readline()) for _ in range(q)]
 
-for num in a:
-    curr_gcds = {}
-    # Process previous GCDs
-    for g in list(prev_gcds.keys()):
-        cnt = prev_gcds[g]
-        new_g = math.gcd(g, num)
-        if new_g in curr_gcds:
-            curr_gcds[new_g] += cnt
+    global_freq = {}
+    prev_gcds = {}
+
+    for num in a:
+        curr_gcds = {}
+        # Process previous GCDs
+        for g in list(prev_gcds.keys()):
+            cnt = prev_gcds[g]
+            new_g = math.gcd(g, num)
+            if new_g in curr_gcds:
+                curr_gcds[new_g] += cnt
+            else:
+                curr_gcds[new_g] = cnt
+        # Add current number as a subarray of length 1
+        if num in curr_gcds:
+            curr_gcds[num] += 1
         else:
-            curr_gcds[new_g] = cnt
-    # Add current number as a subarray of length 1
-    if num in curr_gcds:
-        curr_gcds[num] += 1
-    else:
-        curr_gcds[num] = 1
-    # Update global frequency
-    for g, cnt in curr_gcds.items():
-        if g in global_freq:
-            global_freq[g] += cnt
-        else:
-            global_freq[g] = cnt
-    # Update prev_gcds
-    prev_gcds = curr_gcds
+            curr_gcds[num] = 1
+        # Update global frequency
+        for g, cnt in curr_gcds.items():
+            if g in global_freq:
+                global_freq[g] += cnt
+            else:
+                global_freq[g] = cnt
+        # Update prev_gcds
+        prev_gcds = curr_gcds
 
-# Answer queries
-for x in queries:
-    print(global_freq.get(x, 0))
+    # Answer queries
+    for x in queries:
+        print(global_freq.get(x, 0), file=output_stream)
 
-Wait, but in the code above, for the first iteration (num is the first element), prev_gcds is empty. So the loop for g in list(prev_gcds.keys()) does nothing. Then, the code adds the current number to curr_gcds. So curr_gcds becomes {num:1}, and this is added to global_freq.
 
-Yes.
 
-This code uses regular dictionaries, which may be more efficient in Python. Additionally, the use of list(prev_gcds.keys()) in the for loop is to avoid modifying the dictionary while iterating, but in this case, since prev_gcds is from the previous iteration and not modified during this loop, it's safe.
+def test():
+    import io
 
-Testing this code against the first sample input:
-
-Sample Input 1:
-
-3
-
-2 6 3
-
-5
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+10 20 3 15 1000 60 16
+10
 1
-
 2
-
 3
-
 4
-
+5
 6
+10
+20
+60
+1000
+""",
+            "output": \
+"""\
+14
+0
+2
+2
+2
+0
+2
+2
+1
+1
+""",
+        }, 
+    ]
 
-The code's global_freq after processing:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-After first element (2):
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-curr_gcds is {2:1}, global_freq is {2:1}.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-After second element (6):
+    print('Tests passed 😎')
 
-prev_gcds is {2:1}.
 
-Process g=2:
+if __name__ == '__main__':
+    test()
 
-new_g is gcd(2,6)=2. curr_gcds becomes {2:1}.
 
-Then add 6: curr_gcds[6] =1. So curr_gcds is {2:1, 6:1}.
+```
 
-global_freq becomes {2:1+1=2, 6:1}.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-After third element (3):
+```
 
-prev_gcds is {2:1,6:1}.
-
-Processing g=2:
-
-cnt=1. new_g = gcd(2,3)=1. curr_gcds[1] =1.
-
-Processing g=6: cnt=1. new_g =3. curr_gcds[3] =1.
-
-Add 3: curr_gcds[3] becomes 2.
-
-global_freq now:
-
-1:1
-
-3:2
-
-plus previous entries:
-
-2:2, 6:1.
-
-So global_freq is {2:2,6:1,1:1,3:2}.
-
-Queries:
-
-1 →1
-
-2 →2
-
-3 →2
-
-4 →0
-
-6 →1.
-
-Which matches the first sample's output.
-
-So the code works.
-
-Another optimization: using math.gcd. Note that math.gcd in Python returns the absolute value of the GCD, but since the inputs are all positive, there's no problem.
-
-Now, considering the memory constraints. For n=1e5, and each curr_gcds having up to O(log a) entries, the total memory used by prev_gcds and curr_gcds is O(n log a) in total. But since each step's prev_gcds is replaced by the curr_gcds, the memory is O(log a) per step, which is acceptable.
-
-Thus, the code should work within the memory limits.
-
-Another thing: in Python, using sys.stdin.readline() is faster than input(), especially for large inputs. The code uses sys.stdin for reading.
-
-Thus, the code should handle all test cases efficiently.
 </think>
 
 ```python

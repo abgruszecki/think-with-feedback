@@ -749,45 +749,163 @@ print(-1)
 
 So combining all steps:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-S = sum(a)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-m = int(input())
+    S = sum(a)
 
-intervals = [tuple(map(int, input().split())) for _ in range(m)]
+    m = int(input_stream.readline().rstrip("\n"))
 
-for l, r in intervals:
+    intervals = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(m)]
 
-    if l <= S <= r:
+    for l, r in intervals:
 
-        print(S)
+        if l <= S <= r:
 
-        exit()
+            print(S, file=output_stream)
 
-for l, r in intervals:
+            return
 
-    if l > S:
+    for l, r in intervals:
 
-        print(l)
+        if l > S:
 
-        exit()
+            print(l, file=output_stream)
 
-print(-1)
+            return
 
-Wait, but in the first loop, we check all intervals for containing S. If none, then in the second loop, we look for the first interval with l > S, which is the earliest possible.
+    print(-1, file=output_stream)
 
-This code should work.
 
-Testing the first sample:
 
-sum 7.
+def test():
+    import io
 
-First loop checks intervals [1,4]: 7 is not in. Then [7,9]: 7 <=7 <=9. So print 7.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+5
+1
+1 4
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-Second sample: sum 5. intervals [1,4]. No in first loop. Then check for l>5. None. Print -1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    S = sum(a)
+
+    m = int(input_stream.readline().rstrip("\n"))
+
+    intervals = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(m)]
+
+    for l, r in intervals:
+
+        if l <= S <= r:
+
+            print(S, file=output_stream)
+
+            return
+
+    for l, r in intervals:
+
+        if l > S:
+
+            print(l, file=output_stream)
+
+            return
+
+    print(-1, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+5
+1
+1 5
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample: sum 5, interval [1,5]. Check first loop: 5 is in. Print 5.
 

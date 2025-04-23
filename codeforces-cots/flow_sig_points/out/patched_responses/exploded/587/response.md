@@ -127,12 +127,6 @@ But according to the first sample, 5 are valid.
 
 The code should count correctly. Let's see:
 
-Sample 1's valid pairs are (1,2), (1,4), (1,5), (3,4), (4,5). Wait, the note says (1,2) which are the first two monitors. So their code would check:
-
-monitor 0 (3,2) and 1 (2,2):
-
-Check h_i=3 vs h_j=2 → no. h_i=3 vs w_j=2 → no. w_i=2 vs h_j=2 → yes. So condition is met. So this pair is counted. So correct.
-
 So the code works for that pair.
 
 Similarly, all other pairs would be checked. So the code should correctly compute the count.
@@ -184,135 +178,71 @@ Because s_j is {h_j, w_j}, so checking if h_i is in s_j is equivalent to h_i == 
 
 Therefore, the code can be written as:
 
-monitors = [tuple(map(int, input().split())) for _ in range(n)]
+Testing against sample input 1.
 
-sets = [ {h, w} for h, w in monitors ]
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    monitors = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n)]
+    count = 0
+    for i in range(n):
+        h_i, w_i = monitors[i]
+        for j in range(i + 1, n):
+            h_j, w_j = monitors[j]
+            if h_i == h_j or h_i == w_j or w_i == h_j or w_i == w_j:
+                count += 1
+    print(count, file=output_stream)
 
-count = 0
 
-for i in range(n):
-    for j in range(i+1, n):
-        if (monitors[i][0] in sets[j]) or (monitors[i][1] in sets[j]):
-            count +=1
 
-print(count)
+def test():
+    import io
 
-Alternatively, precompute sets as sets. Because in the set-based approach, for each j, sets[j] is {h_j, w_j}. So for monitor i, the elements to check are h_i and w_i. For each j > i, check if either of these two elements is in the set of j.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+10 10
+10 20
+20 10
+10 20
+10 20
+10 10
+20 10
+""",
+            "output": \
+"""\
+21
+""",
+        }, 
+    ]
 
-Wait, no. Because for pair i,j, both can rotate. So the possible heights for i and j are their own h and w. So the condition is whether there exists a value that is present in both {h_i, w_i} and {h_j, w_j}.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So the set-based approach checks for the intersection. So the code can be written as:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-if sets[i].intersection(sets[j]):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Which is equivalent to the original condition.
+    print('Tests passed 😎')
 
-So the code can be:
 
-sets = [ {h, w} for h, w in monitors ]
+if __name__ == '__main__':
+    test()
 
-count = 0
 
-for i in range(n):
-    for j in range(i+1, n):
-        if sets[i] & sets[j]:
-            count +=1
+```
 
-This code is more concise and perhaps more readable. But what is the performance difference?
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-In Python, set intersection for two small sets (size 2) is O(1). So for each pair, the code checks if the intersection is non-empty. This is equivalent to the four condition checks. But which is faster?
-
-Probably, the four explicit checks are faster, as they avoid the overhead of set operations. Because in Python, creating a new set (even temporarily) for the intersection may have some overhead. Whereas checking each of four conditions is straightforward.
-
-But in our code, for the set-based approach, sets are precomputed. So for each pair, the check is whether the intersection is non-empty. The code for that is simply len(sets[i] & sets[j]) > 0. But in Python, the '&' operator returns the intersection, and then checking if it's non-empty can be done by checking if the set is truthy.
-
-So for each pair, the code does:
-
-if sets[i] & sets[j]:
-
-Which is O(1) for small sets.
-
-But which approach is faster? It's possible that for n=1e3, the code with explicit checks is faster. Let's see.
-
-In the first approach, each pair requires four comparisons. Each comparison is a simple integer equality check.
-
-In the set approach, for each pair, we compute the intersection of two 2-element sets. For each element in the first set, check if it's in the second set. So for the first element (h_i) in set i, check if it's in set j. If yes, return True. Otherwise, check the second element (w_i). So in the worst case, two lookups. For each pair, the set-based approach would have up to two lookups (each O(1)), but perhaps the code is more optimized.
-
-But the explicit approach is four checks. So perhaps the explicit approach is more expensive.
-
-Wait, for each pair, the four checks are:
-
-h_i == h_j → check
-
-h_i == w_j → check
-
-w_i == h_j → check
-
-w_i == w_j → check
-
-If any of these is true, then the pair is counted.
-
-But in the set-based approach, we check if h_i is in set_j (which is two checks: h_i == h_j or h_i == w_j), then if not, check if w_i is in set_j (which is two checks: w_i == h_j or w_i == w_j). So in total, the same four checks, but in a different order. However, in the set-based approach, if h_i is found in set_j, the code returns early.
-
-So for performance, both approaches should be similar. But perhaps the explicit checks are faster because they avoid the set lookups, which in Python may involve hash table lookups. But for two elements, the hash lookups are fast.
-
-In any case, for n=1e3, both approaches would be fast enough.
-
-But perhaps the explicit approach is better.
-
-But let's look at the sample input 2, where all pairs are valid. For each pair, the code would check the four conditions and find at least one true. So for all pairs, the code would have to do all four checks. But in the set-based approach, for each pair, the first check (h_i in set_j) may be true, so it can return early.
-
-In the case where most pairs are valid, the set-based approach could save some checks. But for the worst case where all pairs are invalid, the code would have to check all four conditions.
-
-In any case, for n=1e3, the code should run within the time constraints.
-
-So the code can be written either way. Let's choose the first approach (explicit checks) as it's straightforward and perhaps has less overhead.
-
-Therefore, the code will be:
-
-Read all monitors as tuples.
-
-Initialize count to 0.
-
-Loop over all i < j:
-
-Check if any of h_i, w_i is equal to h_j or w_j.
-
-Increment count if so.
-
-So the code is as follows.
-
-Testing the first sample input:
-
-Sample input 1:
-
-5
-
-3 2 → h=3, w=2
-
-2 2 → h=2, w=2
-
-5 5 → h=5, w=5
-
-3 5 → h=3, w=5
-
-4 3 → h=4, w=3
-
-Pairs:
-
-(0,1):
-
-h_i=3, w_i=2. Check against j=1 (h_j=2, w_j=2). Check 3 ==2? No. 3==2? No. 2 ==2? Yes. So condition met. Count 1.
-
-(0,2): h_i=3, w_i=2. j=2: h=5, w=5. 3 vs 5, 5? No. 2 vs 5,5? No. No. Not counted.
-
-(0,3): h_i=3, w=2. j=3: h=3, w=5. Check 3 ==3 → yes. So count +=1.
-
-(0,4): h_i=3, w=2. j=4: h=4, w=3. Check 3 ==4? No. 3==3 → yes. So count +=1.
-
-So after these, the code counts three pairs (0,1), (0,3), (0,4). 
-
-Then, (1,2): h=2, w=2. j=2: h=5, w=5. 2 vs 5 or 5 → no. 2 vs same → no. No. So not counted.
+```
 
 Wait, but according to the sample note, pair (1,2) is not in the valid pairs. Wait sample note says the valid pairs are (1,2), (1,4), (1,5), (3,4), (4,5). Wait, perhaps the sample numbering is 1-based. So the first pair in the note is (1,2), which in 0-based indices would be (0,1). So in the sample note's first example, the pairs are:
 

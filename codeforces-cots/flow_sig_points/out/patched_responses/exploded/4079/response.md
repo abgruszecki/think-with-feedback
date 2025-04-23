@@ -1415,39 +1415,147 @@ Then seat_time = seat_to_pos[seat]
 
 print(sum_prev + seat_time)
 
-Testing sample3:
+Testing against sample input 3.
 
-n=4, seat a.
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    n = int(s[:-1])
+    seat = s[-1]
 
-mod=0.
+    mod = n % 4
+    if mod == 1:
+        i = 2 * ((n - 1) // 4)
+    elif mod == 2:
+        i = 2 * ((n - 2) // 4) + 1
+    elif mod == 3:
+        att1_row = n - 2
+        i = 2 * ((att1_row - 1) // 4)
+    else:
+        att1_row = n - 2
+        i = 2 * ((att1_row - 2) // 4) + 1
 
-att1_row=4-2=2.
+    even_count = (i + 1) // 2
+    odd_count = i // 2
+    sum_prev = 6 * i + even_count * 1 + odd_count * 3
 
-mod of 2 is2 mod4=2.
+    seat_order = {'f': 1, 'e': 2, 'd': 3, 'a': 4, 'b': 5, 'c': 6}
+    print(sum_prev + seat_order[seat], file=output_stream)
 
-so i=2*((2-2)//4)+1 → (0//4)=0 →i=1.
 
-sum_prev_groups=6*1 + ( (1+1)//2 ) *1 + (1//2)*3 →6 + 1*1 +0*3=7.
 
-seat_time a is4.
+def test():
+    import io
 
-7+4=11.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5e
+""",
+            "output": \
+"""\
+18
+""",
+        }, 
+    ]
 
-Yes.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample2: row2d.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-mod=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=2*((2-2)/4)+1=0+1=1.
+    print('Tests passed 😎')
 
-sum_prev_groups=7.
 
-seat d is3.
+if __name__ == '__main__':
+    test()
 
-7+3=10.
 
-Yes.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    n = int(s[:-1])
+    seat = s[-1]
+
+    mod = n % 4
+    if mod == 1:
+        i = 2 * ((n - 1) // 4)
+    elif mod == 2:
+        i = 2 * ((n - 2) // 4) + 1
+    elif mod == 3:
+        att1_row = n - 2
+        i = 2 * ((att1_row - 1) // 4)
+    else:
+        att1_row = n - 2
+        i = 2 * ((att1_row - 2) // 4) + 1
+
+    even_count = (i + 1) // 2
+    odd_count = i // 2
+    sum_prev = 6 * i + even_count * 1 + odd_count * 3
+
+    seat_order = {'f': 1, 'e': 2, 'd': 3, 'a': 4, 'b': 5, 'c': 6}
+    print(sum_prev + seat_order[seat], file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4a
+""",
+            "output": \
+"""\
+11
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample4: row5e.
 
@@ -1459,23 +1567,76 @@ sum_prev_groups=6*2 + (3//2)*1 + (2//2)*3 →12 +1*1 +1*3=12+1+3=16.
 
 seat e is2. 16+2=18. Yes.
 
-Sample1: row1f.
+Testing against sample input 1.
 
-mod1.
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    n = int(s[:-1])
+    seat = s[-1]
 
-i=0.
+    mod = n % 4
+    if mod == 1:
+        i = 2 * ((n - 1) // 4)
+    elif mod == 2:
+        i = 2 * ((n - 2) // 4) + 1
+    elif mod == 3:
+        att1_row = n - 2
+        i = 2 * ((att1_row - 1) // 4)
+    else:
+        att1_row = n - 2
+        i = 2 * ((att1_row - 2) // 4) + 1
 
-sum_prev_groups=0 + ((0+1)//2)*1 + (0//2)*3 →0 +1*1 +0=1.
+    even_count = (i + 1) // 2
+    odd_count = i // 2
+    sum_prev = 6 * i + even_count * 1 + odd_count * 3
 
-Wait wait for i=0:
+    seat_order = {'f': 1, 'e': 2, 'd': 3, 'a': 4, 'b': 5, 'c': 6}
+    print(sum_prev + seat_order[seat], file=output_stream)
 
-sum_prev_groups =6*0 + ((0+1)//2)*1 + (0//2)*3 →0 + (1//2=0)*1 +0=0.
 
-So sum_prev_groups=0.
 
-seat f is1.
+def test():
+    import io
 
-total_time 0+1=1. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2d
+""",
+            "output": \
+"""\
+10
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So code works.
 

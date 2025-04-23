@@ -87,200 +87,165 @@ So the plan is:
 
 So in Python, the code would look like:
 
+Testing against sample input 1.
+
+```python
 from collections import defaultdict
 import sys
 
-n, k = map(int, sys.stdin.readline().split())
-a = list(map(int, sys.stdin.readline().split()))
 
-counts = defaultdict(list)
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
 
-for num in a:
-    current = num
-    steps = 0
-    while True:
-        counts[current].append(steps)
-        if current == 0:
-            break
-        current = current // 2
-        steps += 1
+    counts = defaultdict(list)
 
-min_ops = float('inf')
+    for num in a:
+        current = num
+        steps = 0
+        while True:
+            counts[current].append(steps)
+            if current == 0:
+                break
+            current = current // 2
+            steps += 1
 
-for key in counts:
-    lst = counts[key]
-    if len(lst) >= k:
-        lst.sort()
-        sum_ops = sum(lst[:k])
-        if sum_ops < min_ops:
-            min_ops = sum_ops
+    min_ops = float('inf')
 
-print(min_ops)
+    for key in counts:
+        lst = counts[key]
+        if len(lst) >= k:
+            lst.sort()
+            sum_ops = sum(lst[:k])
+            if sum_ops < min_ops:
+                min_ops = sum_ops
 
-But wait, let's test this code against the examples.
+    print(min_ops, file=output_stream)
 
-First example:
 
-Input:
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5 3
-1 2 2 4 5
-
-Processing each number:
-
-1:
-
-current=1, steps=0 → add to 1: 0 steps. Then current becomes 0, steps=1 → add to 0: 1 step.
-
-Wait no. Let's re-examine the code:
-
-For num=1:
-
-current starts at 1.
-
-Loop:
-
-add (1, 0) → counts[1].append(0)
-
-current is 1, not zero. So current = 0 (1//2=0), steps becomes 1.
-
-Next iteration:
-
-add (0, 1) to counts[0], then check if current is 0 → break.
-
-So for 1, the counts entries are 1: [0], 0: [1].
-
-Similarly, let's process all numbers.
-
-But perhaps the code is correct.
-
-In the first example, the answer is 1.
-
-Looking for the key that has at least 3 elements.
-
-In the first example:
-
-Looking for 2. Let's see:
-
-The elements that can reach 2:
-
-Original 2's can reach 2 in 0 steps. The 4 can reach 2 in one step (4 → 2). The 5 can reach 2 via 5 →2 (steps=1). Wait, 5//2 is 2, but steps would be 1. So the elements 2,2,4,5 would generate 2 with steps 0,0,1,1.
-
-But how?
-
-For the first two 2's in the array, each contributes steps 0 when generating 2. The 4 is divided once (4→2, steps=1). The 5 is divided once (5→2, steps=1). So counts[2] would have [0, 0, 1, 1]. Then when k=3, the sum of the first three (sorted) is 0+0+1=1. Hence the answer.
-
-But in the code, when processing 2 in the array, current is 2, steps 0. Then 2//2=1, steps 1. Then 1//2=0, steps 2. So for the first 2:
-
-counts[2].append(0)
-current becomes 1, steps 1 → counts[1].append(1)
-current becomes 0, steps 2 → counts[0].append(2)
-then break.
-
-Wait, no. The code for processing each number:
-
-For example, num=2:
-
-Loop:
-
-current = 2, steps=0 → add to counts[2] → [0]
-
-current is not 0, so divide by 2 → 1, steps becomes 1.
-
-Next loop: add 1 with steps 1 to counts[1].
-
-current is 1, divide by 2 → 0, steps 2.
-
-Add 0 with steps 2 → counts[0].append(2).
-
-Then break.
-
-So for the two 2s in the input, each would generate 2 in 0 steps, but also 1 in 1 step, and 0 in 2 steps.
-
-So the counts for 2 would have entries from the two 2s. Each 2 contributes to counts[2] as 0 steps. So counts[2] would have two 0 steps from the two 2s. The 4 in the input would be processed as:
-
-4 → steps 0 (counts[4].append(0)), then 2 (steps 1 → counts[2].append(1)), then 1 (steps 2 → counts[1].append(2)), then 0 (steps 3 → counts[0].append(3)).
-
-The 5 would be processed as:
-
-5 → steps 0 (counts[5].append(0)), then 2 (steps 1 → counts[2].append(1)), then 1 (steps 2 → counts[1].append(2)), then 0 (steps 3 → counts[0].append(3)).
-
-So for the key 2 in the counts, the steps list would be [0 (from first 2), 0 (from second 2), 1 (from 4), 1 (from 5)]. So len(lst) is 4 >=3. Sorting gives [0,0,1,1]. Sum first 3: 0+0+1=1. Which matches the first example's output.
-
-So the code works here.
-
-Another example:
-
-Second input:
-
-5 3
-
 1 2 3 4 5
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-Looking for which numbers can have at least 3 elements contributing steps.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Looking at the counts:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Let's see for 1:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Each element can reach 1 through division.
+    print('Tests passed 😎')
 
-For 1 → steps 0.
 
-2 → steps 1 (2→1).
+if __name__ == '__main__':
+    test()
 
-3 → steps 1 (3→1).
 
-4 → steps 2 (4→2→1).
+```
 
-5 → steps 2 (5→2→1).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So steps list for 1 is [0,1,1,2,2]. Sum of first 3 is 0+1+1=2. Which is the answer.
+```
 
-So in the code, the sum for key 1 is 2, which is the correct answer.
+Testing against sample input 2.
 
-So the code works for this case.
+```python
+import sys
+from collections import defaultdict
 
-Third example:
 
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
+    
+    counts = defaultdict(list)
+    
+    for num in a:
+        current = num
+        steps = 0
+        while True:
+            counts[current].append(steps)
+            if current == 0:
+                break
+            current //= 2
+            steps += 1
+    
+    min_ops = float('inf')
+    
+    for key in counts:
+        lst = counts[key]
+        if len(lst) >= k:
+            lst.sort()
+            current_sum = sum(lst[:k])
+            if current_sum < min_ops:
+                min_ops = current_sum
+    
+    print(min_ops, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5 3
-
 1 2 3 3 3
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-The answer is 0, because there are three 3s already. So counts[3] would have three 0 steps. Sum is 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So the code works.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Now, considering the constraints. For n=2e5, and each element generating up to 18 entries in the counts dictionary, the total number of entries is about 3.6e6. Then, for each of these entries, when processing, we may have to sort the list. The worst case is for a key that has 2e5 entries (like 0), which would take O(m log m) time. For m=2e5, this is 2e5 * 18 ≈ 3.6e6 operations, which is acceptable.
+    print('Tests passed 😎')
 
-But in Python, sorting a list of 2e5 elements can take some time, but given that in practice, the per-test-case time is acceptable.
 
-Now, for the code, using a defaultdict(list) is the right approach.
+if __name__ == '__main__':
+    test()
 
-But in Python, appending to the list is O(1) (amortized), so the initial processing is manageable.
 
-But for the lists, perhaps pre-sorting is better. But in the code, we sort the list each time when we check for a key. But for a key that's processed multiple times, like 0, we may process it once. So the code is correct.
+```
 
-Potential optimizations:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-- When building the counts, for each element, generate all possible values and steps. Then, for each key in counts, sort the list once and then compute the sum.
-
-Yes. For example, when building the counts, for each key, the steps list is unsorted. Then, when processing each key, we check if the list's length is >=k. If so, sort it, take the first k elements' sum.
-
-But this can be optimized by pre-sorting each list once. However, since for a given key, the list is built by appending steps from multiple elements, which may not be in order. So we need to sort each list once.
-
-In Python, the code as written is correct. But to handle large inputs efficiently, perhaps we can pre-sort each list as we build them. But that's not feasible, because steps are added for each element in the order of processing.
-
-Another possible optimization is to keep the lists sorted as we insert elements. For example, using a priority queue or inserting in the right position. But for each insertion, that would be O(n) time, which is not feasible. So it's better to collect all steps and then sort once.
-
-So the code as written is correct and efficient.
-
-Testing edge cases.
-
-Edge case 1: n=1, k=1. The answer is 0. The code would process the element, generate all possible steps, then for the key (the element itself) the sum is 0.
-
-Edge case 2: All elements are 1. Then, counts[1] has n entries, all 0 steps. Sum is 0.
+```
 
 Edge case 3: k=3, elements 8, 8, 8. So steps for 8 is 0, so sum is 0.
 

@@ -581,166 +581,172 @@ for v in freq:
 
 Then, process each query:
 
-for _ in range(q):
-    query = list(map(int, input().split()))
-    t = query[0]
-    if t in {1, 2, 3}:
-        l, r, x = query[1], query[2], query[3]
-        # Process all values in [l, r]
-        current_v = find_first(bit, l)
-        while current_v is not None and current_v <= r:
-            cnt = freq[current_v]
-            del freq[current_v]
-            bit.update(current_v, -1)
-            # Apply operation
-            if t == 1:
-                new_v = current_v & x
-            elif t == 2:
-                new_v = current_v | x
-            else:
-                new_v = current_v ^ x
-            # Update new_v
-            if new_v in freq:
-                freq[new_v] += cnt
-            else:
-                freq[new_v] = cnt
-                bit.update(new_v, 1)
-            # Find next current_v
-            current_v = find_first(bit, current_v + 1)
-    else:
-        l, r = query[1], query[2]
-        # Query the number of distinct values in [l, r]
-        if l == 0:
-            res = bit.query(r)
+Testing against sample input 1.
+
+```python
+from collections import defaultdict
+
+
+class BIT:
+    def __init__(self, size):
+        self.size = size
+        self.tree = [0] * (self.size + 2)  # 1-based indexing
+
+    def update(self, idx, delta):
+        idx += 1  # convert to 1-based
+        while idx <= self.size + 1:
+            self.tree[idx] += delta
+            idx += idx & -idx
+
+    def query(self, idx):
+        idx += 1  # convert to 1-based
+        res = 0
+        while idx > 0:
+            res += self.tree[idx]
+            idx -= idx & -idx
+        return res
+
+def find_first(bit, l):
+    max_val = (1 << 20) - 1
+    if l > max_val:
+        return None
+    sum_l_minus_1 = bit.query(l - 1) if l > 0 else 0
+    low = l
+    high = max_val
+    res = None
+    while low <= high:
+        mid = (low + high) // 2
+        current_sum = bit.query(mid)
+        if current_sum > sum_l_minus_1:
+            res = mid
+            high = mid - 1
         else:
-            res = bit.query(r) - bit.query(l-1)
-        print(res)
+            low = mid + 1
+    if res is not None and res <= max_val:
+        # Check if res is actually present
+        check = bit.query(res) - (bit.query(res - 1) if res > 0 else 0)
+        if check > 0:
+            return res
+    return None
 
-But wait, the find_first function is supposed to find the smallest value >= l. So during the processing of the query, current_v is the first value >= l. Then, after processing current_v, the next value is found by searching from current_v + 1.
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read
+    data = input().split()
+    ptr = 0
+    n = int(data[ptr])
+    ptr += 1
+    q = int(data[ptr])
+    ptr += 1
 
-This way, even if new_v is added to the BIT during processing, it won't be processed again in this query, since current_v is processed once.
+    a = list(map(int, data[ptr:ptr + n]))
+    ptr += n
 
-This should handle all values in the initial [l, r] range.
+    freq = defaultdict(int)
+    for num in a:
+        freq[num] += 1
 
-Now, testing this code.
+    max_val = (1 << 20) - 1
+    bit = BIT(max_val)
+    for v in freq:
+        bit.update(v, 1)
 
-Let's see the first example:
+    for _ in range(q):
+        t = int(data[ptr])
+        ptr += 1
+        if t in {1, 2, 3}:
+            l = int(data[ptr])
+            ptr += 1
+            r = int(data[ptr])
+            ptr += 1
+            x = int(data[ptr])
+            ptr += 1
 
-Input:
-5 6
-5 4 3 2 1
-1 2 3 2
-4 2 5
+            current_v = find_first(bit, l)
+            while current_v is not None and current_v <= r:
+                cnt = freq[current_v]
+                del freq[current_v]
+                bit.update(current_v, -1)
+
+                if t == 1:
+                    new_v = current_v & x
+                elif t == 2:
+                    new_v = current_v | x
+                else:
+                    new_v = current_v ^ x
+
+                if new_v in freq:
+                    freq[new_v] += cnt
+                else:
+                    freq[new_v] = cnt
+                    bit.update(new_v, 1)
+
+                current_v = find_first(bit, current_v + 1)
+        else:
+            l = int(data[ptr])
+            ptr += 1
+            r = int(data[ptr])
+            ptr += 1
+
+            if l == 0:
+                total = bit.query(r)
+            else:
+                total = bit.query(r) - bit.query(l - 1)
+            print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 7
+6 0 2 3 2 7
+1 0 4 3
+2 6 8 4
+4 0 7
 3 2 5 3
-4 1 6
-2 1 1 8
-4 8 10
+1 0 1 2
+4 0 3
+4 2 7
+""",
+            "output": \
+"""\
+5
+1
+2
+""",
+        }, 
+    ]
 
-Initial a = [5,4,3,2,1]. So freq is {5:1,4:1,3:1,2:1,1:1}. BIT has 1s at 1,2,3,4,5.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-First query: type 1, l=2, r=3, x=2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing all values in [2,3].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-find_first(bit, 2) returns 2.
+    print('Tests passed 😎')
 
-Process 2:
 
-cnt = 1. del freq[2]. bit.update(2, -1).
+if __name__ == '__main__':
+    test()
 
-new_v = 2 & 2 = 2. So new_v is 2. So add back to freq: freq[2] = 1. bit.update(2, 1) (since it was removed and now added back).
 
-But wait, original processing:
+```
 
-current_v is 2. After processing, new_v is 2. So, freq[2] is set to 1 again, and bit is updated to 1. So the net effect is no change. So why is this?
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Wait, in the first example's note, after the first query, the numbers are {5,4,2,2,1} -> {1,2,4,5}. So the first query applies AND 2 to values in 2-3. So 2 and 3.
-
-But according to this code:
-
-The values in [2,3] are 2 and 3.
-
-Processing 2:
-
-new_v is 2 & 2 = 2. So no change. So freq[2] is set back to 1, and the BIT is updated (removed and added back), but no net change.
-
-Processing 3:
-
-current_v is 3.
-
-cnt = 1. del freq[3]. bit.update(3, -1).
-
-new_v = 3 & 2 = 2. So add to freq[2] (which becomes 2). So the code checks if new_v is in freq. After processing 2, new_v is 2 which is added. So when processing 3, new_v is 2.
-
-So after processing 3, freq[2] is 1 (from 2's processing) + 1 (from 3's processing) = 2. And the BIT for 2 is already set to 1 (from processing 2's new_v). So when adding new_v=2 again, since it's already in freq, the BIT is not updated.
-
-Thus, after processing 3, the BIT for 2 is still 1.
-
-So after this query, the freq dict is {5:1,4:1,2:2,1:1}. The BIT has 1s at 1,2,4,5.
-
-So when the next query (type 4, l=2, r=5) is processed, the BIT's query from 2 to 5 returns 3 (values 2,4,5).
-
-But according to the sample output, the answer is 3.
-
-So the code should work.
-
-But the code as written may have a problem with the find_first function. Let's see.
-
-Another possible issue is that after processing a value, the BIT is updated, and subsequent find_first calls may not find the next value correctly.
-
-But in the code, after processing a value v, the next current_v is found by find_first(current_v + 1). So even if new values are inserted in between, the loop will process the original values in the range.
-
-But during processing, the new values are added, which may be in the [l, r] range, but since the loop is processing the original values, these new values are not processed again in the same query. This is correct.
-
-Thus, the code should correctly process the query.
-
-Now, the code may have issues with the BIT's query function and the find_first function. Let's verify.
-
-In the find_first function, the binary search is supposed to find the first value >= l. For example, in the initial BIT state, the values are 1,2,3,4,5. For l=2, find_first returns 2.
-
-After processing 2, the BIT is updated (removed and added back), so 2 is still present. But then processing 3 is next.
-
-But in the first example's first query, the value 3 is in the range. So after processing 2, current_v becomes find_first(2 + 1) = find_first(3) → returns 3.
-
-Processing 3: as described.
-
-Thus, the code should handle this.
-
-But what about when new values are added that are in the [l, r] range? For example, in a query that XORs a value in the range, creating a new value that is also in the range. These new values are not processed in the same query, which is correct.
-
-Thus, the code should work.
-
-Now, let's implement this code.
-
-But there are some possible bugs:
-
-1. The BIT's size is 2^20 (max_val = 2^20 -1). So the BIT's size should be initialized to max_val.
-
-But in the code, the BIT is initialized as BIT(max_val), which is (1 << 20) - 1. The BIT's size is then (1 << 20) -1 +1 (due to 1-based indexing). The BIT's tree array is size max_val + 2.
-
-But in Python, for a max_val of 1e6, the BIT's tree is manageable.
-
-Another possible issue is that when new_v is 0, which is allowed. The code should handle that.
-
-Another possible issue is the find_first function's binary search.
-
-Also, when the sum_l_minus_1 is the same as the current_sum, but there's a value in between.
-
-But the binary search in find_first should find the correct position.
-
-Testing the find_first function.
-
-Case 1: BIT contains values 2,3.
-
-Looking for l=2.
-
-sum_l_minus_1 = query(1) = 0.
-
-The code checks mid = (2+3) //2 = 2. query(2) is 1 (sum up to 2 is 1). Since 1>0, set res=2 and high=1.
-
-Loop ends. res is 2. Check if res is present.
-
-Yes.
+```
 
 Case 2: BIT contains 3.
 

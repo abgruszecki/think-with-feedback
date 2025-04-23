@@ -101,54 +101,77 @@ Once the maximum possible k is found, we need to compute the sum again to get th
 
 So, the code structure would be:
 
-n, S = map(int, input().split())
-a = list(map(int, input().split()))
+Testing against sample input 1.
 
-low = 0
-high = n
-best_k = 0
-best_sum = 0
+```python
+def main(input_stream, output_stream):
+    n, S = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-while low <= high:
-    mid = (low + high) // 2
-    # Compute sum for k=mid
-    costs = [a[i] + (i+1)*mid for i in range(n)]  # since the indices are 1-based
-    costs.sort()
-    total = sum(costs[:mid])
-    if total <= S:
-        best_k = mid
-        best_sum = total
-        low = mid + 1
-    else:
-        high = mid -1
+    low = 0
+    high = n
+    best_k = 0
+    best_sum = 0
 
-print(best_k, best_sum)
+    while low <= high:
+        mid = (low + high) // 2
+        # Compute sum for k=mid
+        costs = [a[i] + (i+1)*mid for i in range(n)]  # since the indices are 1-based
+        costs.sort()
+        total = sum(costs[:mid])
+        if total <= S:
+            best_k = mid
+            best_sum = total
+            low = mid + 1
+        else:
+            high = mid -1
 
-But wait, the indices are 1-based. So for the i-th element in the array (0-based in Python), the index is (i+1). So when creating the cost array, each a[i] is the base cost, and the index is i+1. 
+    print(best_k, best_sum, file=output_stream)
 
-Yes. So that part is correct. 
 
-But for n=1e5, each sort would take O(n log n) time. And 20 steps would be O(20 * n log n). For n=1e5, that's 20 * 1e5 * 17 ≈ 34 million operations, but in Python, even that might be too slow, as each sort is O(n log n). 
 
-For example, sorting a list of 1e5 elements in Python takes about 0.01 seconds (but this is a rough estimate). So 20 steps would be 0.2 seconds, which is acceptable. But maybe for n=1e5 and 20 steps, it's 20 * 1e5 log(1e5) operations, which is about 20 * 1e5 * 17 = 34 million operations. Hmm. But in practice, Python's sort is optimized, so perhaps this is manageable. 
+def test():
+    import io
 
-Let's test the sample inputs. 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 100
+1 2 5 6
+""",
+            "output": \
+"""\
+4 54
+""",
+        }, 
+    ]
 
-Sample Input 1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-3 11
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-2 3 5
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sample Output 2 11.
+    print('Tests passed 😎')
 
-In the code, when mid=2:
 
-costs = [2+1*2=4, 3+2*2=7, 5+3*2=11]
+if __name__ == '__main__':
+    test()
 
-sorted costs: [4,7,11]. sum first 2: 11.
 
-Which is correct. 
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample:
 

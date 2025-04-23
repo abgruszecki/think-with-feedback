@@ -533,86 +533,91 @@ But in the code, group_start_R and group_start_C can be built as follows.
 
 Sample code:
 
-n, q = map(int, input().split())
-R = list(map(int, input().split()))
-C = list(map(int, input().split()))
+Testing against sample input 1.
 
-# Compute group_start_R
-group_start_R = [0]*n
-current_start = 0
-for i in range(1, n):
-    if (R[i] %2) != (R[i-1] %2):
-        current_start = i
-    group_start_R[i] = current_start
+```python
+def main(input_stream, output_stream):
+    n, q = map(int, input_stream.readline().rstrip("\n").split())
+    R = list(map(int, input_stream.readline().rstrip("\n").split()))
+    C = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-# Compute group_start_C
-group_start_C = [0]*n
-current_start =0
-for i in range(1, n):
-    if (C[i] %2) != (C[i-1] %2):
-        current_start = i
-    group_start_C[i] = current_start
+    # Compute group_start_R
+    group_start_R = [0]*n
+    current_start = 0
+    for i in range(1, n):
+        if (R[i] %2) != (R[i-1] %2):
+            current_start = i
+        group_start_R[i] = current_start
 
-# Process queries
-for _ in range(q):
-    ra, ca, rb, cb = map(int, input().split())
-    # Convert to 0-based
-    ra -=1
-    ca -=1
-    rb -=1
-    cb -=1
-    if group_start_R[ra] == group_start_R[rb] and group_start_C[ca] == group_start_C[cb]:
-        print("YES")
-    else:
-        print("NO")
+    # Compute group_start_C
+    group_start_C = [0]*n
+    current_start =0
+    for i in range(1, n):
+        if (C[i] %2) != (C[i-1] %2):
+            current_start = i
+        group_start_C[i] = current_start
 
-This code should handle all test cases.
+    # Process queries
+    for _ in range(q):
+        ra, ca, rb, cb = map(int, input_stream.readline().rstrip("\n").split())
+        # Convert to 0-based
+        ra -=1
+        ca -=1
+        rb -=1
+        cb -=1
+        if group_start_R[ra] == group_start_R[rb] and group_start_C[ca] == group_start_C[cb]:
+            print("YES", file=output_stream)
+        else:
+            print("NO", file=output_stream)
 
-Testing sample input 1:
 
-Sample Input 1:
 
-5 3
+def test():
+    import io
 
-6 2 7 8 3 → R parities [0,0,1,0,1]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2
+30 40 49
+15 20 25
+2 2 3 3
+1 2 2 2
+""",
+            "output": \
+"""\
+NO
+YES
+""",
+        }, 
+    ]
 
-group_start_R:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=0:0
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=1: same as 0 → group_start[1] =0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=2: 1 != 0 → group_start[2]=2.
+    print('Tests passed 😎')
 
-i=3: 0 != 1 → group_start[3]=3.
 
-i=4:1 !=0 → group_start[4]=4.
+if __name__ == '__main__':
+    test()
 
-C array:
 
-3 4 8 5 1 → parities [1,0,0,1,1]
+```
 
-group_start_C:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=0:0.
-
-i=1:0 !=1 → group_start[1]=1.
-
-i=2:0 ==0 → group_start[2] =1.
-
-i=3:1 !=0 → group_start[3]=3.
-
-i=4:1 ==1 → group_start[4]=3.
-
-So group_start_C is [0,1,1,3,3].
-
-For query 2 2 1 3 → 0-based (1,1) → group_start_R[1] =0; (0,2) → group_start_R[0] =0. So row groups same.
-
-group_start_C[1] =1 and group_start_C[2] =1. Same column group. YES.
-
-Second query: 4 2 → (3,1). group_start_R[3] =3. rb is 3 (4-1=3). So same row group. group_start_C[1] =1. cb is 4,3 → (3,2). ca is 1 (2-1=1), cb is 3-1=2. group_start_C[1] is 1, group_start_C[2] is 1. So YES.
-
-Third query: (5,1) → (4,0). group_start_R[4] =4. (3,4) → (2,3). group_start_R[2] =2. So different. No.
+```
 
 Sample 2:
 

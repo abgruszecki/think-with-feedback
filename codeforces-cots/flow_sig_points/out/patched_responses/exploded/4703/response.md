@@ -655,68 +655,91 @@ But how to read the input? Since n can be up to 1e5, using input().split() may b
 
 Sample code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import defaultdict
 
-n = int(sys.stdin.readline())
-u = list(map(int, sys.stdin.readline().split()))
 
-freq = defaultdict(int)
-count_freq = defaultdict(int)
-max_x = 0
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    u = list(map(int, input_stream.readline().split()))
 
-for idx in range(n):
-    color = u[idx]
-    old = freq[color]
-    if old > 0:
-        count_freq[old] -=1
-        if count_freq[old] == 0:
-            del count_freq[old]
-    new = old +1
-    freq[color] = new
-    count_freq[new] +=1
-    
-    # check conditions
-    valid = False
-    if len(count_freq) ==1:
-        m = next(iter(count_freq.keys()))
-        if m ==1 or (count_freq[m] ==1):
-            valid = True
-    elif len(count_freq) ==2:
-        a, b = sorted(count_freq.keys())
-        if (a ==1 and count_freq[a] ==1) or (b == a +1 and count_freq[b] ==1):
-            valid = True
-    if valid:
-        max_x = idx +1
+    freq = defaultdict(int)
+    count_freq = defaultdict(int)
+    max_x = 0
 
-print(max_x)
+    for idx in range(n):
+        color = u[idx]
+        old = freq[color]
+        if old > 0:
+            count_freq[old] -=1
+            if count_freq[old] == 0:
+                del count_freq[old]
+        new = old +1
+        freq[color] = new
+        count_freq[new] +=1
+        
+        # check conditions
+        valid = False
+        if len(count_freq) ==1:
+            m = next(iter(count_freq.keys()))
+            if m ==1 or (count_freq[m] ==1):
+                valid = True
+        elif len(count_freq) ==2:
+            a, b = sorted(count_freq.keys())
+            if (a ==1 and count_freq[a] ==1) or (b == a +1 and count_freq[b] ==1):
+                valid = True
+        if valid:
+            max_x = idx +1
 
-Testing this code with the sample inputs.
+    print(max_x, file=output_stream)
 
-Sample 1:
 
-13
-1 1 1 2 2 2 3 3 3 4 4 4 5
 
-After 13 days:
+def test():
+    import io
 
-The count for color5 is 1. Others have 3 counts. So count_freq is {3:4, 1:1}.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+10 2 5 4 1
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-Wait, let's see:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Colors 1,2,3,4 each appear 3 times. Color5 appears once.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So count_freq is:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-3 occurs 4 times (colors 1,2,3,4), and 1 occurs once (color5).
+    print('Tests passed 😎')
 
-So len(count_freq) is 2.
 
-a=1, b=3.
+if __name__ == '__main__':
+    test()
 
-Check if (a=1 and count_freq[a] ==1) → yes. So valid. So x=13 is valid.
 
-Which is the sample's correct output.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case:
 

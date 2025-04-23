@@ -481,91 +481,211 @@ Now, code:
 
 Read s and t:
 
-s = input().strip()
+Testing against sample input 1.
 
-t = input().strip()
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-m = len(t)
+    t = input_stream.readline().rstrip("\n").strip()
 
-n = len(s)
+    m = len(t)
 
-left = [-1]*(m+1)
+    n = len(s)
 
-current =0
+    left = [-1]*(m+1)
 
-for i in range(n):
+    current =0
 
-    if current < m and s[i] == t[current]:
+    for i in range(n):
 
-        current +=1
+        if current < m and s[i] == t[current]:
 
-        left[current] = i
+            current +=1
 
-right = [n]*(m+1)
+            left[current] = i
 
-current = m-1
+    right = [n]*(m+1)
 
-for i in reversed(range(n)):
+    current = m-1
 
-    if current >=0 and s[i] == t[current]:
+    for i in reversed(range(n)):
 
-        # the number of characters matched from the end is (m - current)
+        if current >=0 and s[i] == t[current]:
 
-        right[m - current] = i
+            # the number of characters matched from the end is (m - current)
 
-        current -=1
+            right[m - current] = i
 
-max_len =0
+            current -=1
 
-for k in range(m+1):
+    max_len =0
 
-    # t is split into first k and last m-k characters
+    for k in range(m+1):
 
-    # right part is m-k characters from the end
+        # t is split into first k and last m-k characters
 
-    # right[m-k] is the earliest index for the suffix part
+        # right part is m-k characters from the end
 
-    # left[k] is the latest index for the prefix part
+        # right[m-k] is the earliest index for the suffix part
 
-    # if left[k] < right[m-k], then the removable region is between them
+        # left[k] is the latest index for the prefix part
 
-    if left[k] < right[m -k]:
+        # if left[k] < right[m-k], then the removable region is between them
 
-        max_len = max(max_len, right[m -k] - left[k] -1)
+        if left[k] < right[m -k]:
 
-print(max_len)
+            max_len = max(max_len, right[m -k] - left[k] -1)
 
-Yes, this should handle all cases.
+    print(max_len, file=output_stream)
 
-Testing sample input1:
 
-s = 'bbaba', t='bb'
 
-left[0] =-1, left[1]=0, left[2]=1.
+def test():
+    import io
 
-right[0]=5, right[1]=3, right[2]=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+baaba
+ab
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-For k=2:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-m -k =0. right[0] =5. left[2] =1. 5-1-1=3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Which is correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sample 2: s=baaba, t=ab.
+    print('Tests passed 😎')
 
-left array:
 
-left[0]=-1, left[1] =1 (the first 'a' in s), left[2] =3 (the 'b' in s[3]).
+if __name__ == '__main__':
+    test()
 
-right array:
 
-right[0] =5, right[1]=3 (the 'b' at 3), right[2] =2 (the 'a' at 2).
+```
 
-For k=0:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-m-k =2: right[2] =2. left[0] =-1. 2 - (-1) -1 =2.
+```
 
-Which is correct.
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    t = input_stream.readline().rstrip("\n").strip()
+
+    m = len(t)
+
+    n = len(s)
+
+    left = [-1]*(m+1)
+
+    current =0
+
+    for i in range(n):
+
+        if current < m and s[i] == t[current]:
+
+            current +=1
+
+            left[current] = i
+
+    right = [n]*(m+1)
+
+    current = m-1
+
+    for i in reversed(range(n)):
+
+        if current >=0 and s[i] == t[current]:
+
+            # the number of characters matched from the end is (m - current)
+
+            right[m - current] = i
+
+            current -=1
+
+    max_len =0
+
+    for k in range(m+1):
+
+        # t is split into first k and last m-k characters
+
+        # right part is m-k characters from the end
+
+        # right[m-k] is the earliest index for the suffix part
+
+        # left[k] is the latest index for the prefix part
+
+        # if left[k] < right[m-k], then the removable region is between them
+
+        if left[k] < right[m -k]:
+
+            max_len = max(max_len, right[m -k] - left[k] -1)
+
+    print(max_len, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+abcde
+abcde
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So the code works.
 

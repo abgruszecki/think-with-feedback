@@ -67,45 +67,67 @@ Yes.
 
 So code:
 
-n, m, k = map(int, input().split())
+Testing against sample input 1.
 
-total_seats_per_lane = 2 * m
+```python
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
 
-lane = (k-1) // total_seats_per_lane +1
+    total_seats_per_lane = 2 * m
 
-pos = (k-1) % total_seats_per_lane +1
+    lane = (k-1) // total_seats_per_lane +1
 
-desk = (pos -1) //2 +1
+    pos = (k-1) % total_seats_per_lane +1
 
-side = 'L' if pos %2 ==1 else 'R'
+    desk = (pos -1) //2 +1
 
-print(lane, desk, side)
+    side = 'L' if pos %2 ==1 else 'R'
 
-Wait, but need to check if the lane is possible. Because the input constraints say k can be up to 2nm. So for example, if n=4, m=3, 2nm=24. So k=24 is allowed, and in lane4.
+    print(lane, desk, side, file=output_stream)
 
-But the code will compute lane as (23) //6 → 23//6 is 3 → 3+1=4. Correct.
 
-Yes, the code handles that.
 
-So this should work. Let's test the examples.
+def test():
+    import io
 
-First example:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 3 24
+""",
+            "output": \
+"""\
+4 3 R
+""",
+        }, 
+    ]
 
-4 3 9.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-k=9.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-total_seats_per_lane=6.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-lane = (8)//6=1 → 1+1=2.
+    print('Tests passed 😎')
 
-pos=8%6=2 → +1=3.
 
-desk=(3-1)//2 +1 →1 +1=2.
+if __name__ == '__main__':
+    test()
 
-side:3 is odd → L.
 
-Output 2 2 L. Correct.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

@@ -457,128 +457,99 @@ So, the code can safely compute math.comb(a, k-1) when a >=k-1, else 0.
 
 So the code can proceed as:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n, k = map(int, input().split())
 
-edges = []
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-neighbors = [[] for _ in range(n+1)]  # 1-based nodes
+    edges = []
 
-for i in range(1, n):
-    c_ij_list = list(map(int, input().split()))
-    for idx, c in enumerate(c_ij_list):
-        j = i + 1 + idx
-        if c != -1:
-            neighbors[i].append(j)
-            neighbors[j].append(i)
-            edges.append( (i, j, c) )
+    neighbors = [[] for _ in range(n+1)]  # 1-based nodes
 
-# Compute m for each node
-m = [0]*(n+1)
-for u in range(1, n+1):
-    m[u] = len(neighbors[u])
+    for i in range(1, n):
+        c_ij_list = list(map(int, input_stream.readline().rstrip("\n").split()))
+        for idx, c in enumerate(c_ij_list):
+            j = i + 1 + idx
+            if c != -1:
+                neighbors[i].append(j)
+                neighbors[j].append(i)
+                edges.append( (i, j, c) )
 
-total = 0
-for (u, v, c) in edges:
-    # compute term1: C(m[u]-1, k-1) if m[u]-1 >=k-1 else 0
-    a = m[u] -1
-    if a >= k-1:
-        term1 = math.comb(a, k-1)
-    else:
-        term1 = 0
-    b = m[v] -1
-    if b >=k-1:
-        term2 = math.comb(b, k-1)
-    else:
-        term2 = 0
-    total += c * (term1 + term2)
+    # Compute m for each node
+    m = [0]*(n+1)
+    for u in range(1, n+1):
+        m[u] = len(neighbors[u])
 
-denominator = math.comb(n, k)
+    total = 0
+    for (u, v, c) in edges:
+        # compute term1: C(m[u]-1, k-1) if m[u]-1 >=k-1 else 0
+        a = m[u] -1
+        if a >= k-1:
+            term1 = math.comb(a, k-1)
+        else:
+            term1 = 0
+        b = m[v] -1
+        if b >=k-1:
+            term2 = math.comb(b, k-1)
+        else:
+            term2 = 0
+        total += c * (term1 + term2)
 
-average = total // denominator
+    denominator = math.comb(n, k)
 
-print(average)
+    average = total // denominator
 
-But let's test this code against the sample inputs.
+    print(average, file=output_stream)
 
-First sample input:
 
-6 1
 
--1 -1 -1 8 -1 → line for i=1.
+def test():
+    import io
 
-This line has 5 elements (n=6, i=1 → 6-1=5 elements). The elements are for j=2,3,4,5,6. So the first line is [-1, -1, -1, 8, -1]. The code processes i=1, and for each idx in 0-4 (since len is5):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2
+10 0
+11
+""",
+            "output": \
+"""\
+14
+""",
+        }, 
+    ]
 
-idx=0 → j=2 → c=-1 → no.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-idx=1 → j=3 → c=-1 → no.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-idx=2 → j=4 → c=-1 → no.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-idx=3 → j=5 → c=8 → yes. Add to edges (1,5,8).
+    print('Tests passed 😎')
 
-idx=4 → j=6 → c=-1 → no.
 
-Second line (i=2) for j=3,4,5,6 (4 elements): -1 5 -1 -1.
+if __name__ == '__main__':
+    test()
 
-Processing:
 
-idx=0 → j=3 → c=-1 → no.
+```
 
-idx=1 → j=4 → c=5 → add edge (2,4,5).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Third line (i=3) for j=4,5,6 → 3 elements. Input is -1 -1 3.
-
-Processing:
-
-idx=0 → j=4 → c=-1 → no.
-
-idx=1 → j=5 → c=-1 → no.
-
-idx=2 → j=6 → c=3 → add edge (3,6,3).
-
-Fourth line (i=4) for j=5,6 → 2 elements: -1 -1. No edges.
-
-Fifth line (i=5) for j=6 → one element: -1. No edge.
-
-So edges are [(1,5,8), (2,4,5), (3,6,3)].
-
-m for each node:
-
-1: neighbors [5] → len=1.
-
-2: neighbors [4] → len=1.
-
-3: neighbors [6] → len=1.
-
-4: neighbors [2] → len=1.
-
-5: neighbors [1] → len=1.
-
-6: neighbors [3] → len=1.
-
-So for each edge:
-
-1-5, 8:
-
-term1: m[u=1]-1=0. k-1=0. comb(0,0)=1.
-
-term2: m[v=5]-1=0. comb(0,0)=1. contribution 8*2=16.
-
-2-4,5:
-
-u=2, m=1 → term1=1.
-
-v=4, m=1 → term2=1. 5*(2)=10.
-
-3-6,3:
-
-u=3, m=1 → term1=1.
-
-v=6, m=1 → term2=1. 3*2=6.
-
-Total sum 16+10+6=32. Denominator comb(6,1)=6. 32//6=5. Correct.
+```
 
 Second sample:
 

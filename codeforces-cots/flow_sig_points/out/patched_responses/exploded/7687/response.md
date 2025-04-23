@@ -306,37 +306,76 @@ But since n can be up to 2e5, and each d_i can be up to 1e9, but Python can hand
 
 Then, the code proceeds with the algorithm.
 
-Test case 1:
+Testing against sample input 1.
 
-input:
+```python
+import sys
 
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    d = list(map(int, input_stream.readline().split()))
+    left = 0
+    right = n - 1
+    sum1 = 0
+    sum3 = 0
+    max_sum = 0
+    while left <= right:
+        if sum1 < sum3:
+            sum1 += d[left]
+            left += 1
+        else:
+            sum3 += d[right]
+            right -= 1
+        if sum1 == sum3:
+            if left <= right + 1:
+                max_sum = sum1
+    print(max_sum, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
+1 3 2 1 4
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-1 3 1 1 4
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum1 and sum3 steps:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sum1=0, sum3=0 → check left (0) <= 4 +1 → yes. max_sum=0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-sum3 +=4 → sum3=4. right=3.
+    print('Tests passed 😎')
 
-sum1=0 <4 → sum1 +=1 → sum1=1. left=1.
 
-sum1=1 <4 → sum1 +=3 → sum1=4. left=2.
+if __name__ == '__main__':
+    test()
 
-sum1=4 == sum3=4. check left=2 <=3+1 →2<=4 → yes. max_sum=4.
 
-sum3 +=1 → sum3=5. right=2.
+```
 
-sum1=4 <5 → sum1 +=1 → sum1=5. left=3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-sum1=5 == sum3=5. check left=3 <=2+1 →3<=3 → yes. max_sum=5.
-
-sum3 += (d[right=2] is 1 → sum3=6. right=1.
-
-loop ends.
-
-output 5. Correct.
+```
 
 Thus, the code works.
 

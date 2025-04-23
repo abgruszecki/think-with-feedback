@@ -33,42 +33,133 @@ That's straightforward. Now, code-wise:
 
 In Python, the code would be something like:
 
-s = input().strip()
-n = int(input())
-addresses = [input().strip() for _ in range(n)]
+Testing against sample input 1.
 
-candidates = [addr for addr in addresses if addr.startswith(s)]
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    n = int(input_stream.readline().rstrip("\n"))
+    addresses = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
 
-if not candidates:
-    print(s)
-else:
-    print(min(candidates))
+    candidates = [addr for addr in addresses if addr.startswith(s)]
 
-Wait, but wait: what if the s itself is not present, but longer addresses that start with s are present. For example, in the first example, s is 'next', and the addresses are 'nextpermutation' and 'nextelement'. The lex smallest is 'nextelement'. So min would pick that correctly.
+    if not candidates:
+        print(s, file=output_stream)
+    else:
+        print(min(candidates), file=output_stream)
 
-Yes. So the code as written should work.
 
-Testing the examples:
 
-First example input:
+def test():
+    import io
 
-next
-2
-nextpermutation
-nextelement
-
-The candidates are both. min of them is 'nextelement' which is correct.
-
-Second example:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 find
 4
 find
 findfirstof
 findit
 fand
+""",
+            "output": \
+"""\
+find
+""",
+        }, 
+    ]
 
-Candidates are 'find', 'findfirstof', 'findit'. The min is 'find', which is correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    n = int(input_stream.readline().rstrip("\n"))
+    addresses = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
+
+    candidates = [addr for addr in addresses if addr.startswith(s)]
+
+    if not candidates:
+        print(s, file=output_stream)
+    else:
+        print(min(candidates), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+find
+4
+fondfind
+fondfirstof
+fondit
+fand
+""",
+            "output": \
+"""\
+find
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

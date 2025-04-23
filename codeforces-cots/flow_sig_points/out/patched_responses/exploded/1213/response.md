@@ -283,9 +283,76 @@ But wait, in the code, for the sum_queen, which is part of the queens (other tha
 
 Yes.
 
-Testing sample 2:
+Testing against sample input 2.
 
-n=20 →k=10. sum_ +=4 (for 10s) +8 (jacks and kings) →sum_ becomes 12. sum_queen=3. sum_ace=0. total=15. Correct.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    k = n - 10
+
+    count = 0
+
+    # Handle 2-10
+    if 2 <= k <= 10:
+        count += 4
+
+    # Handle Jack and King (each contribute 10)
+    if k == 10:
+        count += 8  # 4 Jacks + 4 Kings
+
+    # Handle other Queens (3 remaining)
+    if k == 10:
+        count += 3
+
+    # Handle Aces (1 or 11)
+    if n == 11 or n == 21:
+        count += 4
+
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3: n=10 →k=0. sum_=0. sum_queen=0. sum_ace=0. total=0.
 

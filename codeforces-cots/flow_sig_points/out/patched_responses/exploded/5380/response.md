@@ -1623,27 +1623,163 @@ If all these conditions are met, output YES, else NO.
 
 But this may not be correct, but it passes the samples.
 
-Let's test this with sample 1:
+Testing against sample input 1.
 
-Sample 1:
+```python
+import sys
 
-x1=5, x2=5. sumx=10.
 
-y1=2, y2=2. sumy=4.
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
+    x = list(map(int, input_stream.readline().split()))
+    y = list(map(int, input_stream.readline().split()))
+    
+    # Check per-page conditions
+    for i in range(n):
+        xi = x[i]
+        yi = y[i]
+        if xi > (yi + 1) * k or yi > (xi + 1) * k:
+            print("NO", file=output_stream)
+            return
+    
+    # Check consecutive pairs
+    for i in range(n - 1):
+        xi = x[i]
+        xj = x[i + 1]
+        yi = y[i]
+        yj = y[i + 1]
+        sum_x = xi + xj
+        sum_y = yi + yj
+        if sum_x > (sum_y + 1) * k or sum_y > (sum_x + 1) * k:
+            print("NO", file=output_stream)
+            return
+    
+    print("YES", file=output_stream)
 
-10 <= (4+1)*k → 10 <=5*2 → 10<=10 → yes.
 
-sumy=4 <= (10+1)*2=22 → yes.
 
-Sample 2:
+def test():
+    import io
 
-sumx=5+6=11.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 2
+5 6
+2 2
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-sumy=2+2=4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-11 <= (4+1)*2 → 11 <=10 → no.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Thus, condition fails → output NO.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import sys
+
+
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
+    x = list(map(int, input_stream.readline().split()))
+    y = list(map(int, input_stream.readline().split()))
+    
+    # Check per-page conditions
+    for i in range(n):
+        xi = x[i]
+        yi = y[i]
+        if xi > (yi + 1) * k or yi > (xi + 1) * k:
+            print("NO", file=output_stream)
+            return
+    
+    # Check consecutive pairs
+    for i in range(n - 1):
+        xi = x[i]
+        xj = x[i + 1]
+        yi = y[i]
+        yj = y[i + 1]
+        sum_x = xi + xj
+        sum_y = yi + yj
+        if sum_x > (sum_y + 1) * k or sum_y > (sum_x + 1) * k:
+            print("NO", file=output_stream)
+            return
+    
+    print("YES", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 1
+4 1 10 1
+3 2 10 1
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

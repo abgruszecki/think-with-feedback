@@ -13,14 +13,56 @@ But comparing the two methods: the built-in bin() is definitely going to be fast
 
 So the code would be:
 
-n = int(input())
-print(bin(n)[2:])
+Testing against sample input 1.
 
-That's all. Because the problem says to output the binary without leading zeros, which bin() does by default. For example, bin(1) is '0b1', so [2:] gives '1', which is correct.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    print(bin(n)[2:], file=output_stream)
 
-Testing the examples:
 
-First example input 5, bin(5)[2:] is '101' which matches. Second example 126, bin(126) is '0b1111110', [2:] gives '1111110', correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+126
+""",
+            "output": \
+"""\
+1111110
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So this approach is correct and efficient. There's no need for any additional steps. The code is concise and uses minimal memory since it's just converting and slicing a string.
 

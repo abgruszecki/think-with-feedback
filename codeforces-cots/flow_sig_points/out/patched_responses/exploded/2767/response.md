@@ -381,235 +381,233 @@ Then, among all candidates, select the one with maximum area, then max h, then m
 
 So, in code:
 
-h, w = map(int, input().split())
+Testing against sample input 1.
 
-candidates = []
+```python
+def main(input_stream, output_stream):
+    h, w = map(int, input_stream.readline().rstrip("\n").split())
 
-h_pows = []
-current = 1
-while current <= h:
-    h_pows.append(current)
-    current *=2
+    candidates = []
 
-w_pows = []
-current =1
-while current <=w:
-    w_pows.append(current)
-    current *=2
+    h_pows = []
+    current = 1
+    while current <= h:
+        h_pows.append(current)
+        current *=2
 
-# Process h_pows
-for hp in h_pows:
-    # Compute lower_w: ceil(4*hp /5)
-    numerator = 4 * hp
-    denominator =5
-    lower_w = (numerator + denominator -1) // denominator  # ceiling division
-    upper_w = (5 * hp) //4  # floor division
-    valid_lower_w = max(lower_w, 1)
-    valid_upper_w = min(upper_w, w)
-    if valid_lower_w > valid_upper_w:
-        continue
-    candidate_w = valid_upper_w
-    candidates.append( (hp, candidate_w) )
+    w_pows = []
+    current =1
+    while current <=w:
+        w_pows.append(current)
+        current *=2
 
-# Process w_pows
-for wp in w_pows:
-    # Compute lower_h: ceil(4 * wp /5)
-    numerator =4 * wp
-    denominator =5
-    lower_h = (numerator + denominator -1) // denominator
-    upper_h = (5 * wp) //4
-    valid_lower_h = max(lower_h, 1)
-    valid_upper_h = min(upper_h, h)
-    if valid_lower_h > valid_upper_h:
-        continue
-    candidate_h = valid_upper_h
-    candidates.append( (candidate_h, wp) )
+    # Process h_pows
+    for hp in h_pows:
+        # Compute lower_w: ceil(4*hp /5)
+        numerator = 4 * hp
+        denominator =5
+        lower_w = (numerator + denominator -1) // denominator  # ceiling division
+        upper_w = (5 * hp) //4  # floor division
+        valid_lower_w = max(lower_w, 1)
+        valid_upper_w = min(upper_w, w)
+        if valid_lower_w > valid_upper_w:
+            continue
+        candidate_w = valid_upper_w
+        candidates.append( (hp, candidate_w) )
 
-# Now, among the candidates, select the best one.
-best_area = -1
-best_h = -1
-best_w =-1
+    # Process w_pows
+    for wp in w_pows:
+        # Compute lower_h: ceil(4 * wp /5)
+        numerator =4 * wp
+        denominator =5
+        lower_h = (numerator + denominator -1) // denominator
+        upper_h = (5 * wp) //4
+        valid_lower_h = max(lower_h, 1)
+        valid_upper_h = min(upper_h, h)
+        if valid_lower_h > valid_upper_h:
+            continue
+        candidate_h = valid_upper_h
+        candidates.append( (candidate_h, wp) )
 
-for h_cand, w_cand in candidates:
-    area = h_cand * w_cand
-    if area > best_area or (area == best_area and h_cand > best_h) or (area == best_area and h_cand == best_h and w_cand > best_w):
-        # Check if this is better
-        if area > best_area:
-            best_area = area
-            best_h = h_cand
-            best_w = w_cand
-        elif area == best_area:
-            if h_cand > best_h:
+    # Now, among the candidates, select the best one.
+    best_area = -1
+    best_h = -1
+    best_w =-1
+
+    for h_cand, w_cand in candidates:
+        area = h_cand * w_cand
+        if area > best_area or (area == best_area and h_cand > best_h) or (area == best_area and h_cand == best_h and w_cand > best_w):
+            # Check if this is better
+            if area > best_area:
+                best_area = area
                 best_h = h_cand
                 best_w = w_cand
-            elif h_cand == best_h and w_cand > best_w:
+            elif area == best_area:
+                if h_cand > best_h:
+                    best_h = h_cand
+                    best_w = w_cand
+                elif h_cand == best_h and w_cand > best_w:
+                    best_w = w_cand
+
+    print(best_h, best_w, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 2
+""",
+            "output": \
+"""\
+2 2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    h, w = map(int, input_stream.readline().rstrip("\n").split())
+
+    candidates = []
+
+    h_pows = []
+    current = 1
+    while current <= h:
+        h_pows.append(current)
+        current *=2
+
+    w_pows = []
+    current =1
+    while current <=w:
+        w_pows.append(current)
+        current *=2
+
+    # Process h_pows
+    for hp in h_pows:
+        # Compute lower_w: ceil(4*hp /5)
+        numerator = 4 * hp
+        denominator =5
+        lower_w = (numerator + denominator -1) // denominator  # ceiling division
+        upper_w = (5 * hp) //4  # floor division
+        valid_lower_w = max(lower_w, 1)
+        valid_upper_w = min(upper_w, w)
+        if valid_lower_w > valid_upper_w:
+            continue
+        candidate_w = valid_upper_w
+        candidates.append( (hp, candidate_w) )
+
+    # Process w_pows
+    for wp in w_pows:
+        # Compute lower_h: ceil(4 * wp /5)
+        numerator =4 * wp
+        denominator =5
+        lower_h = (numerator + denominator -1) // denominator
+        upper_h = (5 * wp) //4
+        valid_lower_h = max(lower_h, 1)
+        valid_upper_h = min(upper_h, h)
+        if valid_lower_h > valid_upper_h:
+            continue
+        candidate_h = valid_upper_h
+        candidates.append( (candidate_h, wp) )
+
+    # Now, among the candidates, select the best one.
+    best_area = -1
+    best_h = -1
+    best_w =-1
+
+    for h_cand, w_cand in candidates:
+        area = h_cand * w_cand
+        if area > best_area or (area == best_area and h_cand > best_h) or (area == best_area and h_cand == best_h and w_cand > best_w):
+            # Check if this is better
+            if area > best_area:
+                best_area = area
+                best_h = h_cand
                 best_w = w_cand
+            elif area == best_area:
+                if h_cand > best_h:
+                    best_h = h_cand
+                    best_w = w_cand
+                elif h_cand == best_h and w_cand > best_w:
+                    best_w = w_cand
 
-print(best_h, best_w)
+    print(best_h, best_w, file=output_stream)
 
-Wait, but in the code above, when comparing candidates, the order of checks is a bit tricky. The code as written may not handle all cases correctly.
 
-Alternatively, we can compare each candidate in the loop and update the best if the candidate is better.
 
-So, for each candidate:
+def test():
+    import io
 
-current_area = h_cand * w_cand.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5
+""",
+            "output": \
+"""\
+5 4
+""",
+        }, 
+    ]
 
-if current_area > best_area:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-   update best.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-elif current_area == best_area:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-   if h_cand > best_h:
+    print('Tests passed 😎')
 
-       update.
 
-   elif h_cand == best_h and w_cand > best_w:
+if __name__ == '__main__':
+    test()
 
-       update.
 
-So, the code would be:
+```
 
-best_area = 0
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-best_h = 0
-
-best_w =0
-
-for h_cand, w_cand in candidates:
-
-    area = h_cand * w_cand
-
-    if area > best_area:
-
-        best_area = area
-
-        best_h = h_cand
-
-        best_w = w_cand
-
-    elif area == best_area:
-
-        if h_cand > best_h:
-
-            best_h = h_cand
-
-            best_w = w_cand
-
-        elif h_cand == best_h:
-
-            if w_cand > best_w:
-
-                best_w = w_cand
-
-So, for each candidate, if area is same, check h first, then w.
-
-Now, let's test this code against the examples.
-
-First example:
-
-Input 2 1.
-
-The code:
-
-h_pows for h=2 are [1,2].
-
-w_pows for w=1 are [1].
-
-Process h_pows:
-
-For hp=1:
-
-lower_w = (4*1)/5=0.8 → ceil is 1.
-
-upper_w = 5*1/4=1.25 → floor is1.
-
-valid_upper_w is min(1,1) →1.
-
-So candidate (1,1). Area 1.
-
-For hp=2:
-
-lower_w = (4*2)/5=1.6 → ceil to 2.
-
-upper_w =5*2/4=2.5 → floor 2.
-
-valid_lower_w is max(2,1) →2.
-
-valid_upper_w is min(2,1) →1. So since 2>1, skip.
-
-So candidate (2, ...) is not added.
-
-Process w_pows:
-
-wp=1.
-
-lower_h = ceil(4*1/5) = ceil(0.8)=1.
-
-upper_h=5*1/4=1.25 → floor 1.
-
-valid_upper_h is min(1,2)=1.
-
-So candidate (1,1). Area 1.
-
-So the candidates are (1,1) (from h_pow=1 and w_pow=1) and (1,1) from wp=1.
-
-So best_area is 1. The best_h is 1, best_w is1.
-
-Which matches the first example.
-
-Second example:
-
-Input 2 2.
-
-h_pows are [1,2].
-
-Process h_pows:
-
-hp=1:
-
-lower_w = ceil(4*1/5) =1.
-
-upper_w=5*1/4=1.25 →1.
-
-valid_upper_w is min(1,2)=1. So candidate (1,1).
-
-hp=2:
-
-lower_w= (4*2)/5=1.6 →ceil 2.
-
-upper_w=5*2/4=2.5 →2.
-
-valid_lower_w=2.
-
-valid_upper_w=2.
-
-candidate (2,2).
-
-Processing w_pows:
-
-w=2, so w_pows are [1,2].
-
-For wp=1:
-
-lower_h=ceil(4*1/5)=1.
-
-upper_h=5*1/4=1.25 →1.
-
-valid_upper_h=1. candidate (1,1).
-
-For wp=2:
-
-lower_h=ceil(4*2/5)=ceil(1.6) →2.
-
-upper_h=5*2/4=2.5 →2.
-
-valid_upper_h=2. candidate (2,2).
-
-So the candidates are (1,1), (2,2), (1,1), (2,2).
-
-The best area is 4 (from 2*2). So output is 2 2.
+```
 
 Third example:
 

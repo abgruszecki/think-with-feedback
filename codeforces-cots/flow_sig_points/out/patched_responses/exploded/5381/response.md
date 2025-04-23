@@ -543,163 +543,216 @@ But for letters that have positions, but shifts are empty, min_dist is not compu
 
 So code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import defaultdict
 
-n, m, x = map(int, sys.stdin.readline().split())
-keyboard = [sys.stdin.readline().strip() for _ in range(n)]
-letters = defaultdict(list)
-shifts = []
-for i in range(n):
-    for j in range(m):
-        c = keyboard[i][j]
-        if c == 'S':
-            shifts.append((i, j))
+
+def main(input_stream, output_stream):
+    n, m, x = map(int, input_stream.readline().split())
+    keyboard = [input_stream.readline().strip() for _ in range(n)]
+    letters = defaultdict(list)
+    shifts = []
+    for i in range(n):
+        for j in range(m):
+            c = keyboard[i][j]
+            if c == 'S':
+                shifts.append((i, j))
+            else:
+                letters[c].append((i, j))
+
+    x_sq = x * x
+    min_dist = {}
+    has_shift = len(shifts) > 0
+
+    if has_shift:
+        for c in letters:
+            min_sq = float('inf')
+            for li, lj in letters[c]:
+                for si, sj in shifts:
+                    dx = li - si
+                    dy = lj - sj
+                    sq = dx * dx + dy * dy
+                    if sq < min_sq:
+                        min_sq = sq
+            min_dist[c] = min_sq
+
+    q = int(input_stream.readline())
+    text = input_stream.readline().strip()
+
+    count = 0
+
+    for char in text:
+        if char.islower():
+            if char not in letters:
+                print(-1, file=output_stream)
+                return
         else:
-            letters[c].append((i, j))
+            lower_char = char.lower()
+            if not has_shift or lower_char not in letters:
+                print(-1, file=output_stream)
+                return
+            required_sq = min_dist[lower_char]
+            if required_sq > x_sq:
+                count += 1
 
-x_sq = x * x
+    print(count, file=output_stream)
 
-min_dist = {}
-has_shift = len(shifts) > 0
 
-if has_shift:
-    for c in letters:
-        min_sq = float('inf')
-        for li, lj in letters[c]:
-            for si, sj in shifts:
-                dx = li - si
-                dy = lj - sj
-                sq = dx * dx + dy * dy
-                if sq < min_sq:
-                    min_sq = sq
-        if min_sq != float('inf'):
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 2 1
+ab
+cd
+1
+e
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+import sys
+from collections import defaultdict
+
+
+def main(input_stream, output_stream):
+    n, m, x = map(int, input_stream.readline().split())
+    keyboard = [input_stream.readline().strip() for _ in range(n)]
+    letters = defaultdict(list)
+    shifts = []
+    for i in range(n):
+        for j in range(m):
+            c = keyboard[i][j]
+            if c == 'S':
+                shifts.append((i, j))
+            else:
+                letters[c].append((i, j))
+
+    x_sq = x * x
+    min_dist = {}
+    has_shift = len(shifts) > 0
+
+    if has_shift:
+        for c in letters:
+            min_sq = float('inf')
+            for li, lj in letters[c]:
+                for si, sj in shifts:
+                    dx = li - si
+                    dy = lj - sj
+                    sq = dx * dx + dy * dy
+                    if sq < min_sq:
+                        min_sq = sq
             min_dist[c] = min_sq
 
-q = int(sys.stdin.readline())
-text = sys.stdin.readline().strip()
+    q = int(input_stream.readline())
+    text = input_stream.readline().strip()
 
-count = 0
+    count = 0
 
-for char in text:
-    if char.islower():
-        if char not in letters:
-            print(-1)
-            exit()
-    else:
-        lower_char = char.lower()
-        if not has_shift or lower_char not in letters:
-            print(-1)
-            exit()
-        required_sq = min_dist.get(lower_char, float('inf'))
-        if required_sq > x_sq:
-            count +=1
+    for char in text:
+        if char.islower():
+            if char not in letters:
+                print(-1, file=output_stream)
+                return
+        else:
+            lower_char = char.lower()
+            if not has_shift or lower_char not in letters:
+                print(-1, file=output_stream)
+                return
+            required_sq = min_dist[lower_char]
+            if required_sq > x_sq:
+                count += 1
 
-print(count)
+    print(count, file=output_stream)
 
-Wait, but in the code, for letters that have positions but no shifts (but since has_shift is True, because shifts is not empty), then in min_dist, for each c in letters, we have computed min_sq.
 
-But when processing an uppercase character, lower_char is in letters (since checked), and shifts exist. So min_dist[lower_char] is present.
 
-Wait, during preprocessing, for each c in letters, even if shifts are present, but for a c in letters, if there are no shifts (but shifts can't be empty here, because has_shift is True), but in the code, if shifts are present, then for each c in letters, the code loops over shifts. So min_sq will be the minimal distance between any of the c's positions and any shift's positions.
+def test():
+    import io
 
-So min_dist[c] is set only if shifts are present.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 9 4
+qwertyuio
+asdfghjkl
+SzxcvbnmS
+35
+TheQuIcKbRoWnFOXjummsovertHeLazYDOG
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-But when processing uppercase, has_shift is True, so shifts exist. So for the uppercase character, lower_char must be in letters (since checked), and min_dist[lower_char] must exist.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So the code is correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But in the code, when processing an uppercase character, after checking that has_shift is True and lower_char is in letters, the code uses min_dist.get(lower_char, float('inf')). But since has_shift is True, and lower_char is in letters, then min_dist[lower_char] must have been computed.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But why? Because during the preprocessing phase, for all c in letters, when shifts are present (has_shift is True), the code computes min_sq for c and adds it to min_dist.
+    print('Tests passed 😎')
 
-So in that case, lower_char is in letters, so min_dist has it. So the 'get' with default is unnecessary, but it's there to handle cases where for some reason lower_char is in letters but not in min_dist, which should not happen.
 
-But perhaps it's better to access min_dist directly. But since we have checked that lower_char is in letters (so letters has the key), and during preprocessing, for each c in letters, min_dist[c] is added. So when shifts are present, min_dist will have all c in letters.
+if __name__ == '__main__':
+    test()
 
-So the code can safely do:
 
-required_sq = min_dist[lower_char]
+```
 
-Thus, the code can be adjusted for efficiency.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So changing:
-
-        required_sq = min_dist.get(lower_char, float('inf'))
-
-to:
-
-        required_sq = min_dist[lower_char]
-
-But if the code has been written correctly, this will not throw a KeyError.
-
-But in the code, during preprocessing, for each c in letters, min_dist[c] is added. Because:
-
-if has_shift:
-
-    for c in letters:
-
-        compute min_sq...
-
-        if min_sq is not infinity (which it will be if shifts is non-empty):
-
-            min_dist[c] = min_sq
-
-But wait, if shifts is non-empty, but a certain c in letters has no positions where a shift exists (but shifts is non-empty), then during the computation for c, min_sq would be infinity, and thus min_dist[c] is not added. But how?
-
-No, shifts is non-empty. For example, if a c is in letters, but all shifts are far away. For each (li, lj) in letters[c], for each shift (si, sj), compute dx and dy, compute sq. So even if all shifts are far away, the minimal sq would be the minimal among those.
-
-But if shifts is non-empty, then for each c in letters, the code loops through all shifts. So min_sq is the minimal of all possible pairs. So if shifts is non-empty, then min_sq will be some finite value.
-
-Wait, for example, shifts is non-empty (say, one shift), and c has positions. Then for each (li, lj) in letters[c], compute the distance to the shift. The minimal of these would be the minimal for c. So min_sq is set to that. So in this case, min_sq is finite, and thus min_dist[c] is added.
-
-Thus, when shifts are present (has_shift is True), min_dist[c] exists for all c in letters.
-
-Thus, in the code, for uppercase characters, after checking that lower_char is in letters, we can safely access min_dist[lower_char].
-
-So the code can be optimized by changing that line to required_sq = min_dist[lower_char], which is faster than using get().
-
-Thus, the code would be:
-
-for char in text:
-
-    if char.islower():
-
-        if char not in letters:
-
-            print(-1)
-
-            exit()
-
-    else:
-
-        lower_char = char.lower()
-
-        if not has_shift or lower_char not in letters:
-
-            print(-1)
-
-            exit()
-
-        required_sq = min_dist[lower_char]
-
-        if required_sq > x_sq:
-
-            count +=1
-
-This is safer and faster.
-
-Testing this code with sample 1:
-
-Sample 1: shifts is empty. So has_shift is False. For uppercase 'A', code checks has_shift (False) → exit with -1.
-
-Sample 3: after processing, for 'B' → 'b' is in letters. shifts is present. So required_sq is the minimal squared distance for 'b'.
-
-In code, 'b' is at (0,1). shifts is (1,1). dx is 0-1 = -1, dy is 1-1 =0. Squared distance is 1. x_sq is 1. required_sq is 1 ≤ x_sq → no count.
-
-For 'A' → 'a' is at (0,0). shifts are (1,1). dx 0-1=-1, dy 0-1=-1. Squared distance 2. x_sq is 1. 2>1 → count +=1.
-
-Thus, code returns 1.
+```
 
 Sample 4: the code correctly counts the required.
 

@@ -550,9 +550,11 @@ But for x//2, since we are passing it recursively, the get_len function can be c
 
 So, the code would look something like this:
 
-def main():
+Testing against sample input 1.
 
-    n, l, r = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    n, l, r = map(int, input_stream.readline().rstrip("\n").split())
 
     def get_len(x):
 
@@ -612,101 +614,51 @@ def main():
 
     result = count(n, 1, total_len, l, r)
 
-    print(result)
+    print(result, file=output_stream)
 
-But wait, for x=0, the list is [0], so in the count function, when x is 0, we return 0. 
 
-For x=1, the list is [1], so if the current segment's start and end are within [L, R], return 1. 
 
-But in the count function, for x=1, the a and b are the same (since len(x) is 1). So the condition is a >= L and a <= R. 
+def test():
+    import io
 
-This should work. 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 3 10
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-Let's test the first example:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Input:7 2 5. 
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The final list for 7 is 7 elements: [1,1,1,1,1,1,1]. 
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The positions 2-5 are [1,1,1,1], count is 4. 
+    print('Tests passed 😎')
 
-Let's see what the code returns. 
 
-Call count(7, 1,7, 2,5). 
+if __name__ == '__main__':
+    test()
 
-x=7: get_len(7) is 3 bits → 2^3-1=7. 
 
-len_half = (7-1)//2 =3. 
+```
 
-Left part is positions 1-3. 
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Middle is position 4. 
-
-Right part is 5-7. 
-
-The query is 2-5. 
-
-So left part (1-3) overlaps with 2-3. 
-
-Left contribution: count(3,1,3,2,5). 
-
-Now x=3: get_len(3) is 3 (bit_length 2, 2^2-1=3). 
-
-len_half = (3-1)/2=1. 
-
-Left part 1-1. 
-
-Middle is 2. 
-
-Right part 3-3. 
-
-Query is 2-5. 
-
-For left part (1-1): a=1, b=1. Since 1 <2, returns 0. 
-
-Middle is position 2. 2 is within 2-5 → add x%2 =3%2=1. 
-
-Right part (3-3) is 3, which is within 2-5 → count(3//2=1,3,3,2,5). 
-
-x=1, a=3, b=3. 
-
-Check if 3 is between 2-5 → yes. So return 1. 
-
-So count(3,1,3,2,5) returns 0 +1 +1=2. 
-
-Middle of x=7 is position4 → 7%2=1. 
-
-Right part of x=7 is positions5-7. The query includes 5. 
-
-So count(3,5,7,2,5) → a=5, b=7. The query is 2-5. So a=5 is >= L=2 and <= R=5. 
-
-So x=3 again. 
-
-x=3: len is 3. 
-
-len_half=1. 
-
-Left part 5-5. 
-
-Middle 6. 
-
-Right part 7-7. 
-
-But R is 5. So left part is 5-5. 
-
-Call count(3//2=1,5,5,2,5). 
-
-x=1, a=5, b=5. 5 is within 2-5 → returns 1. 
-
-Middle of x=3's right part is position6, which is outside R=5. 
-
-So right part's contribution is 0. 
-
-So count(3,5,7,2,5) returns 1 (left) +0 (middle) +0 (right) =1. 
-
-So total for x=7's right part is 1. 
-
-So overall count is 2 (left part) +1 (middle) +1 (right part) =4. Which matches the example. 
+```
 
 Another test case: second example. 
 

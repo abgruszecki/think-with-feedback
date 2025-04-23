@@ -88,61 +88,70 @@ But for n=1e5 and each step with 20 elements, it's manageable.
 
 So the code would be something like:
 
-n = int(input())
-a = list(map(int, input().split()))
+Testing against sample input 1.
 
-global_set = set()
-prev_set = set()
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for num in a:
-    current_set = set()
-    current_set.add(num)
-    for x in prev_set:
-        current_set.add(x | num)
-    prev_set = current_set
-    global_set.update(prev_set)
+    global_set = set()
+    prev_set = set()
 
-print(len(global_set))
+    for num in a:
+        current_set = set()
+        current_set.add(num)
+        for x in prev_set:
+            current_set.add(x | num)
+        prev_set = current_set
+        global_set.update(prev_set)
 
-Wait, but in Python, sets can have O(1) membership checks. So this approach is correct.
+    print(len(global_set), file=output_stream)
 
-But wait, what about the initial prev_set? For the first element, prev_set is empty. So current_set will have just a[0]. Then, prev_set becomes current_set. Then, for the next element, we take prev_set (which is {a[0]}, OR with a[1}, etc. That's correct.
 
-Yes.
 
-Testing this code with the first sample:
+def test():
+    import io
 
-Sample 1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10
+1 2 3 4 5 6 1 2 9 10
+""",
+            "output": \
+"""\
+11
+""",
+        }, 
+    ]
 
-n=3, a = [1,2,0]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-First iteration (num=1):
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-current_set = {1}
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-prev_set becomes {1}
+    print('Tests passed 😎')
 
-global_set adds {1}
 
-Second iteration (num=2):
+if __name__ == '__main__':
+    test()
 
-current_set starts with 2.
 
-Then, take each element in prev_set (1), OR with 2 → 3.
+```
 
-current_set is {2,3}
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-global_set adds these → {1,2,3}
-
-Third iteration (num=0):
-
-current_set starts with 0.
-
-OR each element in prev_set (2 and 3) with 0 → 2,3. So current_set is {0, 2,3}.
-
-global_set adds these → {0,1,2,3}, total 4.
-
-Yes, correct.
+```
 
 Another test case:
 

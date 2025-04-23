@@ -104,75 +104,77 @@ So the steps in code:
 
 So the code would look something like:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n, d = map(int, input().split())
 
-a = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n, d = map(int, input_stream.readline().rstrip("\n").split())
 
-a.sort()
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-total =0
+    a.sort()
 
-for num in a:
+    total =0
 
-    left = bisect.bisect_left(a, num -d)
+    for num in a:
 
-    right = bisect.bisect_right(a, num +d)
+        left = bisect.bisect_left(a, num -d)
 
-    count = right - left
+        right = bisect.bisect_right(a, num +d)
 
-    total += count -1
+        count = right - left
 
-print(total)
+        total += count -1
 
-Yes, this should work.
+    print(total, file=output_stream)
 
-Now, let's check the time complexity. Sorting the array is O(n log n). For each of the n elements, we perform two binary searches, each O(log n). So total time is O(n log n) + O(n log n) = O(n log n), which is acceptable for n=1e3. Even with n=1e5, this would work, but since n is up to 1e3, this is definitely acceptable.
 
-So the code is efficient and correct.
 
-Testing the first sample:
+def test():
+    import io
 
-Input 5 10, sorted array is [10,20,50,60,65]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 1
+55 30 29 31 55
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-For 10:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-left = bisect_left(a, 0) → index 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-right = bisect_right(a, 20) → 2. So count is 2. 2-1=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For 20:
+    print('Tests passed 😎')
 
-left of 10: a_i -d is 10. bisect_left finds first element >=10. which is index 0.
 
-bisect_right for 30: elements in array up to 30. 20 is at index 1, next is 50 which is 30+.
+if __name__ == '__main__':
+    test()
 
-bisect_right returns 2. count is 2. 2-1=1.
 
-For 50:
+```
 
-left is 50-10=40. bisect_left finds the first element >=40. The array elements are 10,20,50,... So the first >=40 is index 2. bisect_left returns 2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-bisect_right for 60 (50+10=60). The elements are 50,60,65. bisect_right returns 3 (since 60 is at index 2, and the next element is 60 (wait, no, sorted array is 10,20,50,60,65. So for 50+10=60. bisect_right(60) in the array is 3, since the elements up to index 3 (exclusive) are <=60. So count is 3-2=1. Wait, no. Let me recheck.
-
-Wait, 50's allowed range is 40 to 60.
-
-In the array, the elements >=40 and <=60 are 50,60.
-
-So left is index 2 (50), right is bisect_right for 60. The array has 60 at index 3, and 65 after. bisect_right(a,60) returns 4? Wait no. Wait, in the array [10,20,50,60,65], the bisect_right for 60 would be 4? Let me check.
-
-Wait, bisect_right returns the insertion point which comes after (to the right of) any existing entries of the search value. So for example, in the array [1,2,2,3], bisect_right(2) returns 3. So in the sample array, 60 is at index 3, and the next element is 65. So bisect_right(a,60) would return 4.
-
-So for 50's case, left is 2, right is 4. So count is 4-2=2. So count-1 is 1. So the 50 contributes 1.
-
-Similarly for 60:
-
-allowed range is 50 to 70. So elements are 50,60,65. Wait, 50 is in the array? Wait, the array is [10,20,50,60,65]. So 60's allowed range is 60-10=50 to 60+10=70. The elements >=50 and <=70 are 50,60,65. So left is bisect_left(50) → index 2. bisect_right(70) → 5 (since all elements up to 65 are <=70). So count is 5-2 =3. 3-1=2.
-
-Yes, which matches the earlier analysis.
-
-So the code works.
+```
 
 Another test case: the second sample input:
 

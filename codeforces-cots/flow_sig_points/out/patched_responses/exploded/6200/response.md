@@ -515,53 +515,85 @@ So in code, the code can proceed without checking for zero terms in the GP check
 
 Thus, code can be written as:
 
-a, b, c, d = map(int, input().split())
+Testing against sample input 1.
 
-# Check AP
+```python
+def main(input_stream, output_stream):
+    a, b, c, d = map(int, input_stream.readline().rstrip("\n").split())
 
-diff = b - a
+    # Check AP
 
-if (c - b) == diff and (d - c) == diff:
+    diff = b - a
 
-    print(d + diff)
+    if (c - b) == diff and (d - c) == diff:
 
-else:
-
-    # Check GP
-
-    if (b*b == a * c) and (c*c == b * d) and (a != b):
-
-        numerator = d * b
-
-        denominator = a
-
-        if numerator % denominator == 0:
-
-            print(numerator // denominator)
-
-        else:
-
-            print(42)
+        print(d + diff, file=output_stream)
 
     else:
 
-        print(42)
+        # Check GP
 
-But wait, in the GP check, the code has to check that the ratio is not 1. The code checks that a !=b. Because if a ==b, then the ratio is 1, which is invalid. But in that case, since the code is in the else block (AP check failed), if a ==b, then the first two terms are same, but if the AP check failed, then the next terms must not be same. For example:
+        if (b*b == a * c) and (c*c == b * d) and (a != b):
 
-If the four terms are 5,5,5,6. Then AP check would fail (differences 0,0,1). Then GP check: (5^2 ==5*5 → yes), (5^2 ==5*6 →25=30? No. So GP check fails. So code outputs 42.
+            numerator = d * b
 
-But if a ==b, and the GP conditions are met, then a ==b implies ratio is 1. So the code checks (a !=b) in the GP condition. So the code is correct.
+            denominator = a
 
-So with this code, all cases are handled.
+            if numerator % denominator == 0:
 
-Testing the first sample input:
+                print(numerator // denominator, file=output_stream)
 
-836 624 412 200 → AP check:
+            else:
 
-diff = 624-836 = -212.
+                print(42, file=output_stream)
 
-Check c -b: 412-624= -212. d-c=200-412= -212. All same. So output 200-212= -12.
+        else:
+
+            print(42, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 334 667 1000
+""",
+            "output": \
+"""\
+1333
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample input:
 

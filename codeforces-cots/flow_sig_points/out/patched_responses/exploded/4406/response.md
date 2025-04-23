@@ -1563,35 +1563,106 @@ print(count)
 
 Yes, this should work.
 
-Testing this code with the first sample:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
+    if n == 0:
+        print(0, file=output_stream)
+        return
 
-n=5.
+    # Compute left_decrease and right_decrease for Qingshan's paths
+    left_decrease = [1] * n
+    for i in range(1, n):
+        if p[i] > p[i-1]:
+            left_decrease[i] = left_decrease[i-1] + 1
+        else:
+            left_decrease[i] = 1
 
-p=[1,2,5,4,3].
+    right_decrease = [1] * n
+    for i in range(n-2, -1, -1):
+        if p[i] > p[i+1]:
+            right_decrease[i] = right_decrease[i+1] + 1
+        else:
+            right_decrease[i] = 1
 
-left_decrease: [1,2,3,1,1].
+    # Compute left_increase and right_increase for Daniel's paths
+    left_increase = [1] * n
+    for i in range(1, n):
+        if p[i] < p[i-1]:
+            left_increase[i] = left_increase[i-1] + 1
+        else:
+            left_increase[i] = 1
 
-right_decrease: [1,1,3,2,1].
+    right_increase = [1] * n
+    for i in range(n-2, -1, -1):
+        if p[i] < p[i+1]:
+            right_increase[i] = right_increase[i+1] + 1
+        else:
+            right_increase[i] = 1
 
-left_ok and right_ok for i=2 (5):
+    # Determine the maximum Daniel's increase length
+    max_increase = [max(left_increase[i], right_increase[i]) for i in range(n)]
+    global_max = max(max_increase)
 
-left_ok: i=2, p[1]=2 <5.
+    # Check each position to see if it's a valid peak
+    count = 0
+    for i in range(n):
+        left_ok = (i == 0) or (p[i] > p[i-1])
+        right_ok = (i == n-1) or (p[i] > p[i+1])
+        if left_ok and right_ok:
+            k = min(left_decrease[i], right_decrease[i])
+            if k >= global_max:
+                count += 1
 
-right_ok: p[3]=4 <5.
+    print(count, file=output_stream)
 
-Thus, peak.
 
-left_decrease[2] is3.
 
-right_decrease[2] is3.
+def test():
+    import io
 
-k=3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+1 2 4 6 5 3 7
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-global_max is3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-3 >=3 → count=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

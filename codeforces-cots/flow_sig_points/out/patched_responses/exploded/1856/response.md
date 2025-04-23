@@ -819,85 +819,119 @@ But for code simplicity, using lru_cache is easier.
 
 Thus, the code would look like:
 
+Testing against sample input 3.
+
+```python
 import sys
 from functools import lru_cache
 
-n = int(sys.stdin.readline())
-grid = [sys.stdin.readline().strip() for _ in range(n)]
 
-prefix = [[0]*(n+1) for _ in range(n+1)]
-for i in range(n):
-    for j in range(n):
-        prefix[i+1][j+1] = prefix[i+1][j] + prefix[i][j+1] - prefix[i][j] + (1 if grid[i][j] == '#' else 0)
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    grid = [input_stream.readline().strip() for _ in range(n)]
 
-@lru_cache(maxsize=None)
-def dp(t, b, l, r):
-    if t > b or l > r:
-        return 0
-    # Check if there are any black cells in the current rectangle
-    sum_black = prefix[b+1][r+1] - prefix[t][r+1] - prefix[b+1][l] + prefix[t][l]
-    if sum_black == 0:
-        return 0
-    # Current cost is max(h, w)
-    current_h = b - t + 1
-    current_w = r - l + 1
-    cost = max(current_h, current_w)
-    # Try all vertical splits
-    for k in range(l, r):
-        cost_candidate = dp(t, b, l, k) + dp(t, b, k+1, r)
-        if cost_candidate < cost:
-            cost = cost_candidate
-    # Try all horizontal splits
-    for k in range(t, b):
-        cost_candidate = dp(t, k, l, r) + dp(k+1, b, l, r)
-        if cost_candidate < cost:
-            cost = cost_candidate
-    return cost
+    prefix = [[0]*(n+1) for _ in range(n+1)]
+    for i in range(n):
+        for j in range(n):
+            prefix[i+1][j+1] = prefix[i+1][j] + prefix[i][j+1] - prefix[i][j] + (1 if grid[i][j] == '#' else 0)
 
-# Find the minimal bounding box of all black cells
-min_row = n
-max_row = -1
-min_col = n
-max_col = -1
-for i in range(n):
-    for j in range(n):
-        if grid[i][j] == '#':
-            if i < min_row:
-                min_row = i
-            if i > max_row:
-                max_row = i
-            if j < min_col:
-                min_col = j
-            if j > max_col:
-                max_col = j
+    @lru_cache(maxsize=None)
+    def dp(t, b, l, r):
+        if t > b or l > r:
+            return 0
+        # Check if there are any black cells in the current rectangle
+        sum_black = prefix[b+1][r+1] - prefix[t][r+1] - prefix[b+1][l] + prefix[t][l]
+        if sum_black == 0:
+            return 0
+        # Current cost is max(h, w)
+        current_h = b - t + 1
+        current_w = r - l + 1
+        cost = max(current_h, current_w)
+        # Try all vertical splits
+        for k in range(l, r):
+            cost_candidate = dp(t, b, l, k) + dp(t, b, k+1, r)
+            if cost_candidate < cost:
+                cost = cost_candidate
+        # Try all horizontal splits
+        for k in range(t, b):
+            cost_candidate = dp(t, k, l, r) + dp(k+1, b, l, r)
+            if cost_candidate < cost:
+                cost = cost_candidate
+        return cost
 
-# If there are no black cells, output 0
-if min_row > max_row:
-    print(0)
-else:
-    # Compute the minimal cost for the bounding box of all black cells
-    total_cost = dp(min_row, max_row, min_col, max_col)
-    print(total_cost)
+    # Find the minimal bounding box of all black cells
+    min_row = n
+    max_row = -1
+    min_col = n
+    max_col = -1
+    for i in range(n):
+        for j in range(n):
+            if grid[i][j] == '#':
+                if i < min_row:
+                    min_row = i
+                if i > max_row:
+                    max_row = i
+                if j < min_col:
+                    min_col = j
+                if j > max_col:
+                    max_col = j
 
-But wait, this code only considers the minimal bounding box of all black cells. But what if there are black cells outside this bounding box?
+    # If there are no black cells, output 0
+    if min_row > max_row:
+        print(0, file=output_stream)
+    else:
+        # Compute the minimal cost for the bounding box of all black cells
+        total_cost = dp(min_row, max_row, min_col, max_col)
+        print(total_cost, file=output_stream)
 
-No, the code first computes the minimal bounding box of all black cells. If there are no black cells, it returns 0. Otherwise, the DP is computed for the bounding box of all black cells.
 
-This is correct because any rectangle that covers black cells outside of this bounding box is impossible. The bounding box is the minimal rectangle that contains all black cells. Thus, covering this bounding box will cover all black cells. Any rectangle outside of this box does not contain any black cells.
 
-Thus, the code is correct.
+def test():
+    import io
 
-Testing this code against the samples:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+#...#
+.#.#.
+.....
+.#...
+#....
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-Sample 3:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-4
-#...
-....
-....
-#...
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The minimal bounding box is rows 0 to 3, columns 0 to 0. The DP will split into two horizontal parts, each with a single row. The cost is 1+1=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 1: The bounding box is 0-2, 0-2. The DP will return 3.
 

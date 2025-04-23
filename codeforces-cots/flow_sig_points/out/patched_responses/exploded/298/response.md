@@ -158,70 +158,99 @@ Now, code structure.
 
 In Python:
 
-n = int(input())
-participants = []
-for _ in range(n):
-    name, score = input().split()
-    participants.append( (name, int(score)) )
+Testing against sample input 1.
 
-sorted_people = sorted(participants, key=lambda x: (-x[1], x[0]))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    participants = []
+    for _ in range(n):
+        name, score = input_stream.readline().rstrip("\n").split()
+        participants.append( (name, int(score)) )
 
-groups = []
-current_group = []
-current_score = None
+    sorted_people = sorted(participants, key=lambda x: (-x[1], x[0]))
 
-for p in sorted_people:
-    score = p[1]
-    if current_score is None:
-        current_group.append(p)
-        current_score = score
-    else:
-        if score == current_score:
+    groups = []
+    current_group = []
+    current_score = None
+
+    for p in sorted_people:
+        score = p[1]
+        if current_score is None:
             current_group.append(p)
-        else:
-            groups.append(current_group)
-            current_group = [p]
             current_score = score
-# add the last group
-groups.append(current_group)
-
-current_pos = 1
-
-for group in groups:
-    group_size = len(group)
-    start = current_pos
-    end = current_pos + group_size -1
-    for p in group:
-        if group_size ==1:
-            place_str = str(start)
         else:
-            place_str = f"{start}-{end}"
-        print(f"{place_str} {p[0]}")
-    current_pos += group_size
+            if score == current_score:
+                current_group.append(p)
+            else:
+                groups.append(current_group)
+                current_group = [p]
+                current_score = score
+    # add the last group
+    groups.append(current_group)
 
-Wait, but the group is a list of tuples. Each tuple is (name, score). So p[0] is the name.
+    current_pos = 1
 
-Yes.
+    for group in groups:
+        group_size = len(group)
+        start = current_pos
+        end = current_pos + group_size -1
+        for p in group:
+            if group_size ==1:
+                place_str = str(start)
+            else:
+                place_str = f"{start}-{end}"
+            print(f"{place_str} {p[0]}", file=output_stream)
+        current_pos += group_size
 
-Testing this code with sample inputs.
 
-First sample:
 
-After sorting:
+def test():
+    import io
 
-mike 44, katya 33, ted 11, petya 10, vasya 10.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+a 1
+b 13
+c 1
+""",
+            "output": \
+"""\
+1 b
+2-3 a
+2-3 c
+""",
+        }, 
+    ]
 
-Groups:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Group1: [('mike',44)] → start 1, end 1. Output "1 mike".
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Group2: [('katya',33)] → start 2. Output "2 katya".
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Group3: [('ted',11)] → start 3. Output "3 ted".
+    print('Tests passed 😎')
 
-Group4: [('petya',10), ('vasya',10)] → start 4, end 5. So for each, 4-5 name.
 
-Which matches the sample output.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

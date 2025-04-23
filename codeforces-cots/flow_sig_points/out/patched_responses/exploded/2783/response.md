@@ -556,77 +556,106 @@ But note that in Python, for 2000x2000 grid, the BFS can be slow if not optimize
 
 So code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import deque
 
-n, m = map(int, sys.stdin.readline().split())
-r, c = map(int, sys.stdin.readline().split())
-original_c = c
-r -=1
-c -=1
-x, y = map(int, sys.stdin.readline().split())
 
-maze = []
-for _ in range(n):
-    row = sys.stdin.readline().strip()
-    maze.append(row)
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    r, c = map(int, input_stream.readline().split())
+    original_c = c
+    r -=1
+    c -=1
+    x, y = map(int, input_stream.readline().split())
 
-visited = [[False for _ in range(m)] for __ in range(n)]
+    maze = []
+    for _ in range(n):
+        row = input_stream.readline().strip()
+        maze.append(row)
 
-q = deque()
-if maze[r][c] == '.':
-    visited[r][c] = True
-    q.append((r, c))
+    visited = [[False for _ in range(m)] for __ in range(n)]
 
-directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    q = deque()
+    if maze[r][c] == '.':
+        visited[r][c] = True
+        q.append((r, c))
 
-while q:
-    i, j = q.popleft()
-    for dx, dy in directions:
-        ni = i + dx
-        nj = j + dy
-        if 0 <= ni < n and 0 <= nj < m and not visited[ni][nj] and maze[ni][nj] == '.':
-            visited[ni][nj] = True
-            q.append((ni, nj))
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 
-count =0
-left_bound = original_c -x
-right_bound = original_c + y
+    while q:
+        i, j = q.popleft()
+        for dx, dy in directions:
+            ni = i + dx
+            nj = j + dy
+            if 0 <= ni < n and 0 <= nj < m and not visited[ni][nj] and maze[ni][nj] == '.':
+                visited[ni][nj] = True
+                q.append((ni, nj))
 
-for i in range(n):
-    for j in range(m):
-        if visited[i][j]:
-            col = j +1
-            if left_bound <= col <= right_bound:
-                count +=1
+    count =0
+    left_bound = original_c -x
+    right_bound = original_c + y
 
-print(count)
+    for i in range(n):
+        for j in range(m):
+            if visited[i][j]:
+                col = j +1
+                if left_bound <= col <= right_bound:
+                    count +=1
 
-But wait, what if original_c -x is negative? For example, x is larger than original_c. Then left_bound is negative. But col (j+1) is >=1. So the condition left_bound <=col will be true, but the code counts it. But in reality, j+1 must be >= max(1, original_c -x). But in the code, the condition is checking if col >= left_bound, which could be negative. But col is >=1. So for example, if left_bound is 0, and col is 1, then it's counted. Which is correct.
+    print(count, file=output_stream)
 
-Yes. Because when x is larger than original_c -1, then left_bound could be negative, but j+1 is >=1, so all reachable cells in columns >=1 are counted, provided j+1 <= original_c +y.
 
-For example, if original_c is 2, x is 3. Then left_bound is 2-3 =-1. So any column j+1 >=-1 (which is always true) and <= original_c +y. So for any cell in the BFS, if j+1 <= original_c +y, it's counted.
 
-Which is correct. Because x=3 allows up to 3 left steps, so the leftmost column j+1 is 2-3 =-1, but since columns are 1-based, the actual leftmost column is 1. So all columns >=1 and <= original_c +y are allowed.
+def test():
+    import io
 
-So the code correctly counts these.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4
+2 2
+0 1
+....
+..*.
+....
+....
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
 
-Testing this code against the first example:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample input 1:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-4 5
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-3 2 → original_c is 2.
+    print('Tests passed 😎')
 
-x=1, y=2.
 
-allowed columns: 2-1=1 to 2+2=4.
+if __name__ == '__main__':
+    test()
 
-The BFS reaches some cells, and those in columns 1-4 are counted. The output is 10.
 
-Which is correct.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2:
 

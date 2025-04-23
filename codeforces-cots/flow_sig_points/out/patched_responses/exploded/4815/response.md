@@ -326,11 +326,14 @@ Process the tokens.
 
 But code for that:
 
+Testing against sample input 1.
+
+```python
 import sys, heapq
 
-def main():
 
-    data = sys.stdin.read().split()
+def main(input_stream, output_stream):
+    data = input_stream.read().split()
 
     ptr = 0
 
@@ -370,7 +373,7 @@ def main():
 
     if k ==0 or len(storage) ==n:
 
-        print(-1)
+        print(-1, file=output_stream)
 
         return
 
@@ -420,27 +423,57 @@ def main():
 
     if min_rubles == INF:
 
-        print(-1)
+        print(-1, file=output_stream)
 
     else:
 
-        print(min_rubles)
+        print(min_rubles, file=output_stream)
 
-if __name__ == "__main__":
 
-    main()
 
-This code should handle all cases.
+def test():
+    import io
 
-But wait, in the case where k is 0, the code prints -1 immediately. Also, when storage is all cities.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 1 1
+1 2 3
+3
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-Yes.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Testing sample 1:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Storages are 1 and 5. After processing, non-storage cities are 2,3,4. Their distances:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-2 has 3, 3 has 7, 4 has 10. So min is 3. Output 3.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

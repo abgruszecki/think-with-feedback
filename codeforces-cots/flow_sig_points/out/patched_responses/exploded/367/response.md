@@ -821,55 +821,85 @@ for elem in combined:
 
 print(a_score - b_score)
 
-Let's test this code on the first sample:
+Testing against sample input 1.
 
-Sample 1 input:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-2
+    combined = []
+    for x in a:
+        combined.append((-x, 0))
+    for x in b:
+        combined.append((-x, 1))
 
-1 4
+    combined.sort()
 
-5 1
+    a_score = 0
+    b_score = 0
+    turn = 0  # 0 for A's turn, 1 for B's
 
-a's list is [1,4], so tuples are (-1,0), (-4,0). But wait, no. For 1, the tuple is (-1,0), for 4 it's (-4,0). For B's list [5,1], the tuples are (-5,1), (-1,1).
+    for elem in combined:
+        val = -elem[0]
+        is_b = elem[1]
+        if turn == 0:
+            if is_b == 0:
+                a_score += val
+            turn = 1
+        else:
+            if is_b == 1:
+                b_score += val
+            turn = 0
 
-Combined list:
+    print(a_score - b_score, file=output_stream)
 
-sorted combined list will be sorted in ascending order:
 
-The elements are:
 
-(-1,0), (-4,0), (-5,1), (-1,1) → wait, no. Wait, the original elements for A are 1 and 4, so the tuples are (-1,0) and (-4,0). For B, 5 and 1: (-5,1) and (-1,1).
+def test():
+    import io
 
-When sorted, the tuples are ordered based on their first component (ascending). So:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+100 100 100
+100 100 100
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
--5 comes first (tuple (-5,1)).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Then -4 (tuple (-4,0)).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Then -1 (tuple (-1,0)).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Then -1 (tuple (-1,1)).
+    print('Tests passed 😎')
 
-So the combined list is [ (-5,1), (-4,0), (-1,0), (-1,1) ].
 
-Processing:
+if __name__ == '__main__':
+    test()
 
-turn 0 (A's):
 
-First element: val = 5, is_b=1 → not A's. So turn becomes 1.
+```
 
-Second element: B's turn. val=4, is_b=0 → B's turn, is_b=0 → not B's. turn becomes 0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Third element: A's turn. val=1, is_b=0 → add to a_score. a_score=1. turn becomes 1.
-
-Fourth element: B's turn. val=1, is_b=1 → add to b_score. b_score=1. turn becomes 0.
-
-Final difference 0.
-
-Yes.
-
-Thus, the code works.
+```
 
 Another test case:
 

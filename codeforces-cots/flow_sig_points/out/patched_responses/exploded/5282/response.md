@@ -1076,75 +1076,86 @@ But in practice, the code can compute the prefix_hash and power arrays on the fl
 
 Now, code:
 
-n = int(input())
-s = input().strip()
+Testing against sample input 1.
 
-mod = 10**18 + 3
-base = 911382629
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-prefix_hash = [0] * (n + 1)
-power = [1] * (n + 1)
+    mod = 10**18 + 3
+    base = 911382629
 
-for i in range(n):
-    prefix_hash[i+1] = (prefix_hash[i] * base + ord(s[i])) % mod
-    power[i+1] = (power[i] * base) % mod
+    prefix_hash = [0] * (n + 1)
+    power = [1] * (n + 1)
 
-stack = [-1]
-hash_set = set()
+    for i in range(n):
+        prefix_hash[i+1] = (prefix_hash[i] * base + ord(s[i])) % mod
+        power[i+1] = (power[i] * base) % mod
 
-for i in range(n):
-    if s[i] == '(':
-        stack.append(i)
-    else:
-        stack.pop()
-        if not stack:
+    stack = [-1]
+    hash_set = set()
+
+    for i in range(n):
+        if s[i] == '(':
             stack.append(i)
         else:
-            a = stack[-1] + 1
-            b = i
-            current_len = b - a + 1
-            hash_val = (prefix_hash[b+1] - prefix_hash[a] * power[current_len]) % mod
-            hash_set.add(hash_val)
+            stack.pop()
+            if not stack:
+                stack.append(i)
+            else:
+                a = stack[-1] + 1
+                b = i
+                current_len = b - a + 1
+                hash_val = (prefix_hash[b+1] - prefix_hash[a] * power[current_len]) % mod
+                hash_set.add(hash_val)
 
-print(len(hash_set))
+    print(len(hash_set), file=output_stream)
 
-But wait, in the code, for the substring [a, b], the hash is computed as (prefix_hash[b+1] - prefix_hash[a] * power[b - a + 1]) % mod.
 
-Yes.
 
-Testing this code with sample input 1:
+def test():
+    import io
 
-Input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+)(())()
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-10
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-()()()()()
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The code processes each ')', adding the following substrings:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=0: '(', pushed.
+    print('Tests passed 😎')
 
-i=1: ')', popped 0. stack is [-1]. a=0, b=1. current_len=2. hash_val is computed.
 
-Then, the substring is "()". Added to the set.
+if __name__ == '__main__':
+    test()
 
-i=2: '(', pushed.
 
-i=3: ')', popped 2. stack is [-1]. a=0, b=3. substring is "()()". hash added.
+```
 
-i=4: '(', pushed.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=5: ')', popped4. stack is [-1]. a=0, b=5. substring "()()()". hash added.
-
-i=6: '(', pushed.
-
-i=7: ')', popped6. stack is [-1]. a=0, b=7. substring "()()()()". hash added.
-
-i=8: '(', pushed.
-
-i=9: ')', popped8. stack is [-1]. a=0, b=9. substring "()()()()()". hash added.
-
-Thus, the set will have 5 elements, which matches the sample output.
+```
 
 Sample input 2:
 

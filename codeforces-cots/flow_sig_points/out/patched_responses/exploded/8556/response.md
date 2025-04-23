@@ -1158,281 +1158,275 @@ Thus, the positive group is sorted using this comparator, and the negative group
 
 Thus, the code can proceed as follows:
 
-import sys
+Testing against sample input 1.
 
+```python
+import sys
 from functools import cmp_to_key
 
-n = int(sys.stdin.readline())
 
-sequences = []
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
-for _ in range(n):
+    sequences = []
 
-    s = sys.stdin.readline().strip()
+    for _ in range(n):
 
-    delta = 0
+        s = input_stream.readline().strip()
 
-    current = 0
+        delta = 0
 
-    min_balance = 0
+        current = 0
 
-    for c in s:
+        min_balance = 0
 
-        current += 1 if c == '(' else -1
+        for c in s:
 
-        delta += 1 if c == '(' else -1
+            current += 1 if c == '(' else -1
 
-        if current < min_balance:
+            delta += 1 if c == '(' else -1
 
-            min_balance = current
+            if current < min_balance:
 
-    R = max( -min_balance, 0 )
+                min_balance = current
 
-    sequences.append( (delta, R) )
+        R = max( -min_balance, 0 )
 
-positive = [ (d, R) for d, R in sequences if d >=0 ]
+        sequences.append( (delta, R) )
 
-negative = [ (d, R) for d, R in sequences if d <0 ]
+    positive = [ (d, R) for d, R in sequences if d >=0 ]
 
-def compare(a, b):
+    negative = [ (d, R) for d, R in sequences if d <0 ]
 
-    # a and b are tuples (delta, R)
+    def compare(a, b):
 
-    val1 = max(a[1], b[1] - a[0])
+        # a and b are tuples (delta, R)
 
-    val2 = max(b[1], a[1] - b[0])
+        val1 = max(a[1], b[1] - a[0])
 
-    if val1 < val2:
+        val2 = max(b[1], a[1] - b[0])
 
-        return -1
+        if val1 < val2:
 
-    elif val1 > val2:
+            return -1
 
-        return 1
+        elif val1 > val2:
 
-    else:
+            return 1
 
-        return 0
+        else:
 
-positive_sorted = sorted(positive, key=cmp_to_key(compare))
+            return 0
 
-negative_sorted = sorted(negative, key=cmp_to_key(compare))
+    positive_sorted = sorted(positive, key=cmp_to_key(compare))
 
-ordered = positive_sorted + negative_sorted
+    negative_sorted = sorted(negative, key=cmp_to_key(compare))
 
-current_balance =0
+    ordered = positive_sorted + negative_sorted
 
-count =0
+    current_balance =0
 
-for d, R in ordered:
+    count =0
 
-    if current_balance < R:
+    for d, R in ordered:
 
-        break
+        if current_balance < R:
 
-    current_balance += d
+            break
 
-    if current_balance ==0:
+        current_balance += d
 
-        count +=1
+        if current_balance ==0:
 
-print(count)
+            count +=1
 
-But let's test this code against the first example.
+    print(count, file=output_stream)
 
-First example:
 
-Input:
 
-2
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+()()())
 (
-
+(
 )
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-The sequences are:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For '(', delta is +1, min_balance is 0 (since the sequence is '('.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Wait, no. Let's compute this:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For '(', the processing starts at 0.
+    print('Tests passed 😎')
 
-After the first character '(', current becomes 1. min_balance is 0 (initial min is 0, then 1). No, wait:
 
-Wait, initial current is 0. Then after processing '(', current is 1.
+if __name__ == '__main__':
+    test()
 
-min_balance is initialized to 0. Then after the first character, current is 1. min_balance remains 0.
 
-So for the sequence '(', the min_balance is 0. So R is max( -0, 0 ) →0.
+```
 
-But wait, no. Let's re-calculate:
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 119, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 112, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '4'
+Got: '1'
 
-The sequence is '(', which has one character.
+```
 
-Processing:
+Testing against sample input 3.
 
-current starts at 0.
+```python
+import sys
+from functools import cmp_to_key
 
-After '(', current is 1. min_balance is the minimum of 0 and 1 → 0.
 
-So min_balance is 0.
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
-So R is max( -0, 0 ) →0.
+    sequences = []
 
-For the sequence ')', which is one character.
+    for _ in range(n):
 
-Processing:
+        s = input_stream.readline().strip()
 
-current starts at 0.
+        delta = 0
 
-After ')', current is -1. min_balance is -1. R is max(1, 0) →1.
+        current = 0
 
-So the sequences are:
+        min_balance = 0
 
-For '(', delta=1, R=0.
+        for c in s:
 
-For ')', delta=-1, R=1.
+            current += 1 if c == '(' else -1
 
-The positive group includes the '(', with delta 1.
+            delta += 1 if c == '(' else -1
 
-The negative group includes ')', delta -1.
+            if current < min_balance:
 
-Sorting the positive group (only one element).
+                min_balance = current
 
-Sorting the negative group (only one element).
+        R = max( -min_balance, 0 )
 
-ordered is [ (1,0), (-1, 1) ].
+        sequences.append( (delta, R) )
 
-Simulate:
+    positive = [ (d, R) for d, R in sequences if d >=0 ]
 
-current_balance =0.
+    negative = [ (d, R) for d, R in sequences if d <0 ]
 
-Process first sequence (1,0): R is 0. current_balance >=0 → yes.
+    def compare(a, b):
 
-current_balance becomes 0+1=1. Not zero. No count.
+        # a and b are tuples (delta, R)
 
-Process next sequence (-1,1): R is 1. current_balance is 1 >=1 → yes.
+        val1 = max(a[1], b[1] - a[0])
 
-current_balance +=-1 →0. Now zero. count increments by 1.
+        val2 = max(b[1], a[1] - b[0])
 
-Total count is 1. Which matches the example.
+        if val1 < val2:
 
-Great. So the code works for the first example.
+            return -1
 
-Another example:
+        elif val1 > val2:
 
-Input:
+            return 1
 
+        else:
+
+            return 0
+
+    positive_sorted = sorted(positive, key=cmp_to_key(compare))
+
+    negative_sorted = sorted(negative, key=cmp_to_key(compare))
+
+    ordered = positive_sorted + negative_sorted
+
+    current_balance =0
+
+    count =0
+
+    for d, R in ordered:
+
+        if current_balance < R:
+
+            break
+
+        current_balance += d
+
+        if current_balance ==0:
+
+            count +=1
+
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 1
+)(()
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-(())
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The sequence is '(()'. Let's see:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-current starts at 0.
+    print('Tests passed 😎')
 
-After '(', 1. min_balance 0.
 
-After '(', 2. min_balance 0.
+if __name__ == '__main__':
+    test()
 
-After ')', 1. min_balance 0.
 
-So delta is 1 (3 '(' and 2 ')'? No, wait the sequence is '(()' → three characters: '(', '(', ')'. So delta is 1 (2-1).
+```
 
-Wait, no. Let's compute:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Original sequence is '(()' (3 characters):
-
-- '(', delta +=1 →1.
-
-- '(', delta +=1 →2.
-
-- ')', delta -=1 →1.
-
-So delta is 1.
-
-The balance steps are:
-
-current starts at 0.
-
-After '(', 1 → min is 0.
-
-After '(', 2 → min remains 0.
-
-After ')', 1 → min remains 0.
-
-So min_balance is 0. R is max( -0, 0 ) →0.
-
-So the code would process this sequence as part of the positive group.
-
-Simulate:
-
-current_balance is 0.
-
-R is 0. So it's allowed.
-
-current_balance becomes 0+1=1. Not zero. So count remains 0.
-
-Thus, output is 0. But according to the third example, the correct output is 1.
-
-Wait, this indicates a problem.
-
-The third example's input is:
-
-1
-
-(()) 
-
-The sequence is "(())", which is a valid RBS. Thus, when concatenated, the entire string is valid, so the count is 1.
-
-But according to the code, let's see:
-
-The code processes the sequence '(())':
-
-The steps are:
-
-current =0.
-
-For each character:
-
-After '(', current becomes 1. min_balance 0.
-
-After '(', current becomes 2. min_balance remains 0.
-
-After ')', current becomes 1. min_balance remains 0.
-
-After ')', current becomes 0. min_balance remains 0.
-
-So delta is 0 (2 '(' and 2 ')'). So delta is 0.
-
-min_balance is 0.
-
-R is max( -0, 0 ) →0.
-
-So the code processes this sequence.
-
-Simulate:
-
-current_balance starts at 0.
-
-Process sequence (delta 0, R 0).
-
-current_balance >=0 → yes.
-
-current_balance +=0 →0.
-
-Check if current_balance is zero → yes. Count increments by 1.
-
-Thus, the code outputs 1.
-
-But why in my previous example with '(()' (3 characters) the code gives 0.
-
-Ah, because in that case, the code is processing a sequence with delta 1. So after processing, the current balance is 1. Not zero.
-
-But the third example is handled correctly.
+```
 
 Another example: fourth input.
 

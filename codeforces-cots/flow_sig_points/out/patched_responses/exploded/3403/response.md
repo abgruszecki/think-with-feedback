@@ -363,13 +363,62 @@ z = min(candidate1, candidate2)
 
 print(z)
 
-But wait, let's test the sample input 1.
+Testing against sample input 1.
 
-Sample 1: sum=4, m=2.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    l = list(map(int, input_stream.readline().rstrip("\n").split()))
+    sum_initial = sum(l)
+    m = max(l)
+    case1 = m
+    case2 = max(2 * m - sum_initial + 1, 1)
+    print(min(case1, case2), file=output_stream)
 
-required_in_case2= (2*2-4)+1 = (4-4)+1=1 → candidate2=1.
 
-candidate1=2. min is 1.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+20 4 3 2 1
+""",
+            "output": \
+"""\
+11
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2: sum=30, m=20. required_in_case2=40-30+1=11 → candidate2=11. candidate1=20. min is 11.
 

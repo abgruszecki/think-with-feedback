@@ -1453,267 +1453,169 @@ Wait, but in Python, functions can be defined inside the code.
 
 Thus, here's the code:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-destroy_order = list(map(int, input().split()))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-reversed_order = list(reversed(destroy_order))
+    destroy_order = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-parent = [i for i in range(n)]  # initializing parent, but during processing, it's reset.
+    reversed_order = list(reversed(destroy_order))
 
-sum_ar = [0]*n
+    parent = [i for i in range(n)]  # initializing parent, but during processing, it's reset.
 
-left_ar = [0]*n
+    sum_ar = [0]*n
 
-right_ar = [0]*n
+    left_ar = [0]*n
 
-active = [False]*n
+    right_ar = [0]*n
 
-def find(u):
+    active = [False]*n
 
-    while parent[u] != u:
+    def find(u):
 
-        parent[u] = parent[parent[u]]
+        while parent[u] != u:
 
-        u = parent[u]
+            parent[u] = parent[parent[u]]
 
-    return u
+            u = parent[u]
 
-max_sum = 0
+        return u
 
-res = []
+    max_sum = 0
 
-for x in reversed_order:
+    res = []
 
-    pos = x - 1
+    for x in reversed_order:
 
-    active[pos] = True
+        pos = x - 1
 
-    # Initialize parent, sum, left, right for this node
+        active[pos] = True
 
-    parent[pos] = pos
+        # Initialize parent, sum, left, right for this node
 
-    sum_ar[pos] = a[pos]
+        parent[pos] = pos
 
-    left_ar[pos] = pos
+        sum_ar[pos] = a[pos]
 
-    right_ar[pos] = pos
+        left_ar[pos] = pos
 
-    current_sum = a[pos]
+        right_ar[pos] = pos
 
-    # Check left neighbor
+        current_sum = a[pos]
 
-    if pos > 0 and active[pos-1]:
+        # Check left neighbor
 
-        l_root = find(pos -1)
+        if pos > 0 and active[pos-1]:
 
-        # Merge pos into l_root
+            l_root = find(pos -1)
 
-        parent[pos] = l_root
+            # Merge pos into l_root
 
-        sum_ar[l_root] += sum_ar[pos]
+            parent[pos] = l_root
 
-        right_ar[l_root] = pos
+            sum_ar[l_root] += sum_ar[pos]
 
-        current_sum = sum_ar[l_root]
+            right_ar[l_root] = pos
 
-    # Check right neighbor
+            current_sum = sum_ar[l_root]
 
-    if pos < n-1 and active[pos+1]:
+        # Check right neighbor
 
-        r_root = find(pos+1)
+        if pos < n-1 and active[pos+1]:
 
-        current_root = find(pos)
+            r_root = find(pos+1)
 
-        if current_root != r_root:
+            current_root = find(pos)
 
-            parent[r_root] = current_root
+            if current_root != r_root:
 
-            sum_ar[current_root] += sum_ar[r_root]
+                parent[r_root] = current_root
 
-            left_ar[current_root] = min(left_ar[current_root], left_ar[r_root])
+                sum_ar[current_root] += sum_ar[r_root]
 
-            right_ar[current_root] = max(right_ar[current_root], right_ar[r_root])
+                left_ar[current_root] = min(left_ar[current_root], left_ar[r_root])
 
-            current_sum = sum_ar[current_root]
+                right_ar[current_root] = max(right_ar[current_root], right_ar[r_root])
 
-    if current_sum > max_sum:
+                current_sum = sum_ar[current_root]
 
-        max_sum = current_sum
+        if current_sum > max_sum:
 
-    res.append(max_sum)
+            max_sum = current_sum
 
-output = []
+        res.append(max_sum)
 
-for i in range(1, n+1):
+    output = []
 
-    idx = n - i -1
+    for i in range(1, n+1):
 
-    if idx >=0:
+        idx = n - i -1
 
-        output.append(res[idx])
+        if idx >=0:
 
-    else:
+            output.append(res[idx])
 
-        output.append(0)
+        else:
 
-for num in output:
+            output.append(0)
 
-    print(num)
+    for num in output:
 
-But wait, the initial parent is set to [0, 1, 2, ... n-1], but during processing, when we add an element, we set parent[pos] = pos. However, for elements not added yet, their parent is still their initial value. But since active[pos] is False, we never call find on them. So when processing an element, the parent is reset to pos, and for other elements, their parents are still initial.
+        print(num, file=output_stream)
 
-This should be okay, since active is checked before accessing.
 
-Testing this code with the first sample:
 
-n=4.
+def test():
+    import io
 
-a = [1,3,2,5]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 2 3 4 5
+4 2 3 5 1
+""",
+            "output": \
+"""\
+6
+5
+5
+1
+0
+""",
+        }, 
+    ]
 
-destroy_order = [3,4,1,2]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-reversed_order is [2,1,4,3].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing each x in reversed_order:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-x=2 →pos=1.
+    print('Tests passed 😎')
 
-active[1] =True.
 
-parent[1] =1.
+if __name__ == '__main__':
+    test()
 
-sum_ar[1]=3.
 
-left_ar[1]=1.
+```
 
-right_ar[1]=1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Check left (pos=0, active is False. So no.
-
-Check right (pos=2, active is False. So no.
-
-current_sum =3.
-
-max_sum=3. res=[3].
-
-Next x=1 →pos=0.
-
-active[0]=True.
-
-parent[0]=0.
-
-sum_ar[0]=1.
-
-left_ar[0]=0.
-
-right_ar[0]=0.
-
-Check left (pos-1 =-1 → no.
-
-Check right (pos+1=1, active is True.
-
-r_root = find(1) →1.
-
-current_root = find(0) →0.
-
-parent[r_root (1)] =0.
-
-sum_ar[0] +=3 →4.
-
-left_ar[0] = min(0, 1's left=1 →0.
-
-right_ar[0] = max(0, 1's right=1 →1.
-
-current_sum=4.
-
-max_sum=4. res=[3,4].
-
-Third x=4 →pos=3.
-
-active[3]=True.
-
-parent[3] =3.
-
-sum_ar[3] =5.
-
-left_ar[3] =3.
-
-right_ar[3] =3.
-
-Check left (pos-1=2, active is False. So no.
-
-Check right (pos+1=4 →invalid.
-
-current_sum=5. max_sum=5. res=[3,4,5].
-
-Fourth x=3 →pos=2.
-
-active[2] =True.
-
-parent[2] =2.
-
-sum_ar[2] =2.
-
-left_ar[2]=2.
-
-right_ar[2]=2.
-
-Check left (pos-1=1, active.
-
-find(1) → parent[1] is 0 (from previous merge).
-
-find(1):
-
-parent[1] =0.
-
-parent[0] is 0 (from step when x=1).
-
-So find(1) returns 0.
-
-So l_root =0.
-
-parent[2] =0.
-
-sum_ar[0] +=2 →4+2=6.
-
-right_ar[0] =2.
-
-current_sum=6.
-
-Check right (pos+1=3, active.
-
-find(3) is 3.
-
-current_root is find(2) →0.
-
-Merge 3 into 0.
-
-sum_ar[0] +=5 →6+5=11.
-
-left_ar[0] = min(0,3's left=3) →0.
-
-right_ar[0] = max(2,3's right=3) →3.
-
-current_sum=11. max_sum=11.
-
-res becomes [3,4,5,11].
-
-Generate output:
-
-for i from1 to4:
-
-i=1: idx=4-1-1=2 →res[2]=5.
-
-i=2: idx=4-2-1=1 →res[1]=4.
-
-i=3: idx=4-3-1=0 →res[0]=3.
-
-i=4: idx= -1 →0.
-
-So output is [5,4,3,0], which is correct.
+```
 
 Thus, the code should work.
 </think>

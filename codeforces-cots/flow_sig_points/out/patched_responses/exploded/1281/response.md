@@ -825,131 +825,158 @@ But in Python, the code for the DP steps should be carefully implemented to hand
 
 Let's code:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-n, k, q = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-a = list(map(int, input().split()))  # 0-based in Python.
+    n, k, q = map(int, input_stream.readline().rstrip("\n").split())
 
-# Precompute g[m][i} for all m from 0 to k, i from 1 to n.
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))  # 0-based in Python.
 
-g = [[0]*(n+2) for _ in range(k+1)]
+    # Precompute g[m][i} for all m from 0 to k, i from 1 to n.
 
-for i in range(1, n+1):
-
-    g[0][i] = 1
-
-for m in range(1, k+1):
+    g = [[0]*(n+2) for _ in range(k+1)]
 
     for i in range(1, n+1):
 
-        g[m][i] = 0
+        g[0][i] = 1
 
-        if i >1:
+    for m in range(1, k+1):
 
-            g[m][i] += g[m-1][i-1]
+        for i in range(1, n+1):
 
-        if i <n:
+            g[m][i] = 0
 
-            g[m][i] += g[m-1][i+1]
+            if i >1:
 
-        g[m][i] %= MOD
+                g[m][i] += g[m-1][i-1]
 
-# Compute cnt[i} using space-efficient DP for dp_f.
+            if i <n:
 
-cnt = [0]*(n+2)
+                g[m][i] += g[m-1][i+1]
 
-prev = [0]*(n+2)
+            g[m][i] %= MOD
 
-for i in range(1, n+1):
+    # Compute cnt[i} using space-efficient DP for dp_f.
 
-    prev[i] = 1
+    cnt = [0]*(n+2)
 
-for t in range(k+1):
-
-    m = k - t
+    prev = [0]*(n+2)
 
     for i in range(1, n+1):
 
-        cnt[i] = (cnt[i] + prev[i] * g[m][i]) % MOD
+        prev[i] = 1
 
-    if t == k:
+    for t in range(k+1):
 
-        break
+        m = k - t
 
-    current = [0]*(n+2)
+        for i in range(1, n+1):
+
+            cnt[i] = (cnt[i] + prev[i] * g[m][i]) % MOD
+
+        if t == k:
+
+            break
+
+        current = [0]*(n+2)
+
+        for i in range(1, n+1):
+
+            current[i] = 0
+
+            if i >1:
+
+                current[i] += prev[i-1]
+
+            if i <n:
+
+                current[i] += prev[i+1]
+
+            current[i] %= MOD
+
+        prev = current.copy()
+
+    # Compute initial sum.
+
+    initial_sum = 0
 
     for i in range(1, n+1):
 
-        current[i] = 0
+        initial_sum = (initial_sum + a[i-1] * cnt[i]) % MOD
 
-        if i >1:
+    # Process each query.
 
-            current[i] += prev[i-1]
+    for _ in range(q):
 
-        if i <n:
+        i, x = map(int, input_stream.readline().rstrip("\n").split())
 
-            current[i] += prev[i+1]
+        idx = i -1
 
-        current[i] %= MOD
+        delta = (x - a[idx]) % MOD
 
-    prev = current.copy()
+        initial_sum = (initial_sum + delta * cnt[i]) % MOD
 
-# Compute initial sum.
+        a[idx] = x
 
-initial_sum = 0
+        print(initial_sum % MOD, file=output_stream)
 
-for i in range(1, n+1):
 
-    initial_sum = (initial_sum + a[i-1] * cnt[i]) % MOD
 
-# Process each query.
+def test():
+    import io
 
-for _ in range(q):
-
-    i, x = map(int, input().split())
-
-    idx = i -1
-
-    delta = (x - a[idx]) % MOD
-
-    initial_sum = (initial_sum + delta * cnt[i]) % MOD
-
-    a[idx] = x
-
-    print(initial_sum % MOD)
-
-This code should handle all the test cases.
-
-Let's test the first sample input.
-
-Sample Input 1:
-
-5 1 5
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 2 5
 3 5 1 4 2
+1 9
+2 4
+3 6
+4 6
+5 2
+""",
+            "output": \
+"""\
+157
+147
+207
+227
+227
+""",
+        }, 
+    ]
 
-Queries:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-1 9 → output 62
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-2 4 → output 58
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-3 6 → output 78
+    print('Tests passed 😎')
 
-4 6 → output 86
 
-5 2 → output 86.
+if __name__ == '__main__':
+    test()
 
-Let's see:
 
-After first query, a[0] becomes 9. The delta is 9-3=6. cnt[1}=2. So 6*2=12. 50 +12=62.
+```
 
-Yes.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Similarly, the rest should compute correctly.
+```
 
-Thus, this code should be correct.
 </think>
 
 ```python

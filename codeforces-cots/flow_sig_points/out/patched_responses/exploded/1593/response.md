@@ -163,19 +163,66 @@ Finally, output the minimum.
 
 Yes.
 
-Testing first sample:
+Testing against sample input 1.
 
-Input 3 6
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    min_hours = float('inf')
+    for ai in a:
+        if ai > k:
+            continue
+        if k % ai == 0:
+            hours = k // ai
+            if hours < min_hours:
+                min_hours = hours
+    print(min_hours, file=output_stream)
 
-a = [2,3,5]
 
-Check 2: 6%2=0, steps=3.
 
-3:6%3=0, steps 2.
+def test():
+    import io
 
-5: 6%5=1, no.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 7
+1 2 3 4 5 6
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
 
-So the minimum is 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

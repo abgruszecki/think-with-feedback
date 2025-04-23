@@ -339,219 +339,256 @@ Then, in the DP loop.
 
 So code:
 
-n, m, k = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
 
-a_sorted = sorted(a)[:k]
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-prefix = [0]*(k+1)
+    a_sorted = sorted(a)[:k]
 
-for i in range(1, k+1):
+    prefix = [0]*(k+1)
 
-    prefix[i] = prefix[i-1] + a_sorted[i-1]
+    for i in range(1, k+1):
 
-best_offers = {}
+        prefix[i] = prefix[i-1] + a_sorted[i-1]
 
-for _ in range(m):
+    best_offers = {}
 
-    x, y = map(int, input().split())
+    for _ in range(m):
 
-    if x >k:
+        x, y = map(int, input_stream.readline().rstrip("\n").split())
 
-        continue
+        if x >k:
 
-    if x in best_offers:
+            continue
 
-        if y > best_offers[x]:
+        if x in best_offers:
+
+            if y > best_offers[x]:
+
+                best_offers[x] = y
+
+        else:
 
             best_offers[x] = y
 
-    else:
+    offers = list(best_offers.items())
 
-        best_offers[x] = y
+    dp = [float('inf')]*(k+1)
 
-offers = list(best_offers.items())
+    dp[0] =0
 
-dp = [float('inf')]*(k+1)
+    for i in range(1, k+1):
 
-dp[0] =0
+        # option 1: take one more
 
-for i in range(1, k+1):
+        dp[i] = dp[i-1] + a_sorted[i-1]
 
-    # option 1: take one more
+        # check all offers
 
-    dp[i] = dp[i-1] + a_sorted[i-1]
+        for x, y in offers:
 
-    # check all offers
+            if x >i:
 
-    for x, y in offers:
+                continue
 
-        if x >i:
+            prev = i -x
 
-            continue
+            if prev <0:
 
-        prev = i -x
+                continue
 
-        if prev <0:
+            y_max = y
 
-            continue
+            if y_max >x:
 
-        y_max = y
+                y_max =x  # just to avoid index errors. But per problem constraints, y <=x.
 
-        if y_max >x:
+            sum_saved = prefix[i] - prefix[prev + y_max]
 
-            y_max =x  # just to avoid index errors. But per problem constraints, y <=x.
+            cost = dp[prev] + sum_saved
 
-        sum_saved = prefix[i] - prefix[prev + y_max]
+            if cost < dp[i]:
 
-        cost = dp[prev] + sum_saved
+                dp[i] = cost
 
-        if cost < dp[i]:
+    print(dp[k], file=output_stream)
 
-            dp[i] = cost
 
-print(dp[k])
 
-Wait, but in the code, the offers are stored as a list of tuples (x, y) from best_offers.items(). So for each x in offers, we have the maximum y. Then, in the loop, for each x and y in offers, check if x <=i. Then, possible_prev =i -x. Then, sum_saved is prefix[i] - prefix[prev + y], which is the sum from (prev) to (i) minus the sum from (prev) to (prev + y) → sum of (prev + y to i) ?
+def test():
+    import io
 
-Wait, no. Because prefix[i] is the sum of the first i elements (the first k sorted), and prefix[prev + y] is sum up to prev + y. So prefix[i] - prefix[prev + y] is the sum from (prev + y) to (i-1). Wait, no. Let me clarify:
-
-prefix[i] is sum of a_sorted[0] to a_sorted[i-1].
-
-So if prev =i -x → x =i - prev.
-
-The group is x elements, from index prev to prev +x -1 (since x elements). But when we apply the offer (x, y), the sum saved is the sum of the first y elements in the group, which is a_sorted[prev], a_sorted[prev+1], ... a_sorted[prev + y -1]. So sum of these is prefix[prev + y] - prefix[prev].
-
-But the cost is (sum of x elements) - (sum of first y elements). The sum of x elements is prefix[prev +x] - prefix[prev]. So the cost is (prefix[prev +x] - prefix[prev]) - (prefix[prev +y] - prefix[prev]) = prefix[prev +x] - prefix[prev + y].
-
-But prev +x = i -x +x =i. So the cost is prefix[i] - prefix[prev +y].
-
-So in code, sum_saved = prefix[i] - prefix[prev + y]
-
-But in the code, when x is in offers, and y is best_offers[x], then y can't exceed x (since per problem statement y_j <=x_j). So prev + y <= prev +x =i -x +x =i.
-
-So the code is correct.
-
-Testing with the first sample:
-
-offers after processing are (2,1), (3,1).
-
-For i=5:
-
-x=2, y=1.
-
-prev =5-2=3.
-
-sum_saved =prefix[5] - prefix[3+1] →12 -8=4.
-
-cost= dp[3] (3) +4=7.
-
-Which is correct.
-
-So the code seems correct.
-
-Another test case: third sample input.
-
-Input:
-
-5 1 4
-
-2 5 7 4 6
-
-Offer is (5,4). x=5>4 (k=4), so offer is ignored. So best_offers is empty. So dp[i] is sum of first i shovels. The a_sorted is [2,4,5,6]. The sum is 2+4+5+6=17. Which is the sample output.
-
-The code would compute dp[4] as 2+4+5+6=17.
-
-Yes.
-
-So the code should handle this case correctly.
-
-Another sample:
-
-Second example:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 9 4 8
-
 6 8 5 1 8 1 1 2 1
+9 2
+8 4
+5 3
+9 7
+""",
+            "output": \
+"""\
+17
+""",
+        }, 
+    ]
 
-sorted array is [1, 1, 1, 2, 5, 6, 8, 8, ...], take first 8. So the sorted list is [1,1,1,2,5,6,8,8]. Wait, original array is [6,8,5,1,8,1,1,2,1]. When sorted, it's [1,1,1,2,5,6,8,8,8]. Take first 8: [1,1,1,2,5,6,8,8]. Then sorted again (already sorted). So prefix sums:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-prefix[0] =0
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-prefix[1] =1
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-prefix[2] =2
+    print('Tests passed 😎')
 
-prefix[3] =3
 
-prefix[4] =5
+if __name__ == '__main__':
+    test()
 
-prefix[5] =10
 
-prefix[6] =16
+```
 
-prefix[7] =24
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-prefix[8] =32.
+```
 
-The offers are:
+Testing against sample input 2.
 
-9 2 (x=9>8, ignore)
+```python
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
 
-8 4 (x=8 <=8, y=4)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-5 3 (x=5 <=8, y=3)
+    a_sorted = sorted(a)[:k]
 
-9 7 (x=9>8, ignore)
+    prefix = [0]*(k+1)
 
-So best_offers:
+    for i in range(1, k+1):
 
-x=8: y=4
+        prefix[i] = prefix[i-1] + a_sorted[i-1]
 
-x=5: y=3
+    best_offers = {}
 
-Other offers (if any) are not present.
+    for _ in range(m):
 
-So for i=8:
+        x, y = map(int, input_stream.readline().rstrip("\n").split())
 
-Check x=8 and x=5.
+        if x >k:
 
-For x=8, possible_prev =0. sum_saved =prefix[8] - prefix[0 +4] =32 -5=27. cost is dp[0] +27 =27. But dp[0] is 0. So 27.
+            continue
 
-For x=5: possible_prev=8-5=3. sum_saved=prefix[8] - prefix[3+3] =32 - (sum of first 6 elements) →6th element is 5+6=11? Let's see:
+        if x in best_offers:
 
-prefix[3] is sum of first 3 elements (3 1s) →3.
+            if y > best_offers[x]:
 
-prefix[6] is sum of first 6 elements:1+1+1+2+5+6=16.
+                best_offers[x] = y
 
-So sum_saved=32-16=16. dp[3] is sum of first 3 elements (3) →3+16=19. Which is better than 27.
+        else:
 
-So the minimal cost is 17. Wait, the sample output is 17. How?
+            best_offers[x] = y
 
-Hmm, perhaps in this case, the code may compute a different result. Let's see.
+    offers = list(best_offers.items())
 
-Wait, the sample output is 17. Let's see what's happening.
+    dp = [float('inf')]*(k+1)
 
-In the second sample, the optimal approach is to take 5 shovels using the x=5, y=3 offer. Then 3 shovels.
+    dp[0] =0
 
-Wait, the code's DP for i=8.
+    for i in range(1, k+1):
 
-But let's see:
+        # option 1: take one more
 
-At i=8, the code will check x=8 and x=5.
+        dp[i] = dp[i-1] + a_sorted[i-1]
 
-For x=8:
+        # check all offers
 
-prev =0.
+        for x, y in offers:
 
-sum_saved = prefix[8] - prefix[0+4] →32 - prefix[4] →5 (prefix[4] is 1+1+1+2 =5). So 32-5=27. Cost is 0 +27 =27. So dp[8] starts with 32 (sum of all 8) and then compare with 27.
+            if x >i:
 
-Then for x=5: prev=8-5=3.
+                continue
 
-sum_saved= prefix[8] - prefix[3+3=6] →32-16=16. dp[3] is sum of first 3 shovels:3. So cost is 3+16=19. So dp[8] becomes min(32, 27, 19) →19. But sample output is 17.
+            prev = i -x
 
-So there's a discrepancy. Which suggests that the code is incorrect.
+            if prev <0:
+
+                continue
+
+            y_max = y
+
+            if y_max >x:
+
+                y_max =x  # just to avoid index errors. But per problem constraints, y <=x.
+
+            sum_saved = prefix[i] - prefix[prev + y_max]
+
+            cost = dp[prev] + sum_saved
+
+            if cost < dp[i]:
+
+                dp[i] = cost
+
+    print(dp[k], file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 1 4
+2 5 7 4 6
+5 4
+""",
+            "output": \
+"""\
+17
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Wait, this indicates that the code isn't considering all possible offers. Let me check the sample input again.
 

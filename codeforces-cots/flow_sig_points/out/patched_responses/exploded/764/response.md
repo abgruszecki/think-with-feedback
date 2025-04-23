@@ -185,70 +185,76 @@ In Python, we can create a dictionary that maps each character in the first layo
 
 So:
 
-first = input().strip()
-second = input().strip()
-s = input().strip()
+Testing against sample input 1.
 
-mapping = {}
-for f, se in zip(first, second):
-    mapping[f] = se
+```python
+def main(input_stream, output_stream):
+    first = input_stream.readline().rstrip("\n").strip()
+    second = input_stream.readline().rstrip("\n").strip()
+    s = input_stream.readline().rstrip("\n").strip()
 
-result = []
-for c in s:
-    if c.islower():
-        result.append(mapping[c])
-    elif c.isupper():
-        lower_c = c.lower()
-        mapped = mapping[lower_c]
-        result.append(mapped.upper())
-    else:
-        result.append(c)
+    mapping = {}
+    for f, se in zip(first, second):
+        mapping[f] = se
 
-print(''.join(result))
+    result = []
+    for c in s:
+        if c.islower():
+            result.append(mapping[c])
+        elif c.isupper():
+            lower_c = c.lower()
+            mapped = mapping[lower_c]
+            result.append(mapped.upper())
+        else:
+            result.append(c)
 
-Wait, that's the code. But wait, the first and second lines are the two keyboard layouts. Each has 26 distinct letters. So for each lowercase letter in the first, we map to the corresponding one in the second.
+    print(''.join(result), file=output_stream)
 
-So for each character in s:
 
-If it's a lowercase letter, look up in mapping.
 
-If it's uppercase, convert to lowercase, look up, then uppercase the result.
+def test():
+    import io
 
-Digits are added as is.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+mnbvcxzlkjhgfdsapoiuytrewq
+asdfghjklqwertyuiopzxcvbnm
+7abaCABAABAcaba7
+""",
+            "output": \
+"""\
+7uduGUDUUDUgudu7
+""",
+        }, 
+    ]
 
-Yes. That's the code.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Let's test the first sample input.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sample input 1:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-qwertyuiopasdfghjklzxcvbnm
+    print('Tests passed 😎')
 
-veamhjsgqocnrbfxdtwkylupzi
 
-TwccpQZAvb2017
+if __name__ == '__main__':
+    test()
 
-Processing each character:
 
-T → lowercase t. In the first layout, t is at index 4. The second layout's index 4 is 'h'. So uppercase to 'H'.
+```
 
-w → in first layout is index 1. Second's index 1 is 'e' → 'e'.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-c → lowercase. First layout's c is at index 14 (assuming first layout is 'qwertyuiopasdfghjklzxcvbnm'. Let's check:
-
-Let me list the first layout:
-
-q w e r t y u i o p → positions 0-9.
-
-a s d f g h j k l → positions 10-18.
-
-z x c v b n m → positions 19-25? Wait, no. Wait the third part of the first layout is asdfghjklzxcvbnm? Wait, let's split the first layout into three parts:
-
-First part: qwertyuiop (10 letters: q w e r t y u i o p → indexes 0-9)
-
-Second part: asdfghjkl (a s d f g h j k l → indexes 10-18 (9 letters))
-
-Third part: zxcvbnm → z x c v b n m → indexes 19-25 (7 letters). Wait, z x c v b n m is 7 letters. So 10 + 9 +7=26.
+```
 
 So 'c' is in the third part. The third part starts at index 19 (z), 20 (x), 21 (c). So 'c' is at index 21. So in the second layout, index 21 is 'l' (from the second layout given in sample 1: veamhjsgqocnrbfxdtwkylupzi. Let's index that:
 

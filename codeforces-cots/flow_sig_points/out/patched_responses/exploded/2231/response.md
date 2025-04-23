@@ -448,96 +448,100 @@ Yes.
 
 So code:
 
-n, m = map(int, input().split())
-grid = []
-for _ in range(n):
-    grid.append( list(map(int, input().split())) )
+Testing against sample input 1.
 
-# Compute R for rows
-R = [sum(row) for row in grid]
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    grid = []
+    for _ in range(n):
+        grid.append( list(map(int, input_stream.readline().rstrip("\n").split())) )
 
-# Compute C for columns
-C = [0] * m
-for j in range(m):
-    for i in range(n):
-        C[j] += grid[i][j]
+    # Compute R for rows
+    R = [sum(row) for row in grid]
 
-# Find best li
-min_S = float('inf')
-best_li = 0
-for li in range(n + 1):
-    current_sum = 0
-    for i in range(1, n + 1):  # problem's i is 1-based
-        delta = li - i
-        val = 4 * delta + 2
-        current_sum += (val ** 2) * R[i - 1]
-    if current_sum < min_S or (current_sum == min_S and li < best_li):
-        min_S = current_sum
-        best_li = li
+    # Compute C for columns
+    C = [0] * m
+    for j in range(m):
+        for i in range(n):
+            C[j] += grid[i][j]
 
-# Find best lj
-min_T = float('inf')
-best_lj = 0
-for lj in range(m + 1):
-    current_sum = 0
-    for j in range(1, m + 1):  # problem's j is 1-based
-        delta = lj - j
-        val = 4 * delta + 2
-        current_sum += (val ** 2) * C[j - 1]
-    if current_sum < min_T or (current_sum == min_T and lj < best_lj):
-        min_T = current_sum
-        best_lj = lj
+    # Find best li
+    min_S = float('inf')
+    best_li = 0
+    for li in range(n + 1):
+        current_sum = 0
+        for i in range(1, n + 1):  # problem's i is 1-based
+            delta = li - i
+            val = 4 * delta + 2
+            current_sum += (val ** 2) * R[i - 1]
+        if current_sum < min_S or (current_sum == min_S and li < best_li):
+            min_S = current_sum
+            best_li = li
 
-print(min_S + min_T)
-print(best_li, best_lj)
+    # Find best lj
+    min_T = float('inf')
+    best_lj = 0
+    for lj in range(m + 1):
+        current_sum = 0
+        for j in range(1, m + 1):  # problem's j is 1-based
+            delta = lj - j
+            val = 4 * delta + 2
+            current_sum += (val ** 2) * C[j - 1]
+        if current_sum < min_T or (current_sum == min_T and lj < best_lj):
+            min_T = current_sum
+            best_lj = lj
 
-Testing this code with the first sample input:
+    print(min_S + min_T, file=output_stream)
+    print(best_li, best_lj, file=output_stream)
 
-Sample 1:
 
-Input:
 
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 4
+1 0 0 0
+0 0 3 0
+0 0 5 5
+""",
+            "output": \
+"""\
+240
 2 3
+""",
+        }, 
+    ]
 
-3 4 5
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-3 9 1
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-R will be [12, 13]
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-C will be [6,13,6]
+    print('Tests passed 😎')
 
-For li in 0,1,2:
 
-When li=1:
+if __name__ == '__main__':
+    test()
 
-i runs 1 and 2.
 
-For i=1: delta 0, val 2. 2^2 *12=4*12=48.
+```
 
-i=2: delta-1, val -2. (-2)^2 *13=4*13=52. sum 100.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For lj=1:
-
-j runs 1,2,3.
-
-j=1: delta0, val2. 4*6=24.
-
-j=2: delta-1, val-2. 4*13=52.
-
-j=3: delta-2, val-6. 36*6=216. sum 24+52+216=292.
-
-But in code, j ranges 1..3 (problem's j), and for lj=1:
-
-j=1: delta=0, val=2. 2^2 * C[0] (which is 6) =4*6=24.
-
-j=2: delta=1-2 =-1. val 4*(-1)+2 =-2. squared 4. *13=52.
-
-j=3: delta=1-3= -2. val 4*-2 +2 =-6. squared 36. *6=216. sum 24+52+216=292.
-
-Which matches the sample.
-
-So code seems to work.
+```
 
 Another test case:
 

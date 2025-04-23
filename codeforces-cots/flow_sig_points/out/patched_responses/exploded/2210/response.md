@@ -287,27 +287,60 @@ So the code would be to sort the array, then iterate from 0 to (n//2 -1), comput
 
 This approach is O(n log n) due to sorting, which is acceptable for n up to 2e5.
 
-Testing this approach against the sample inputs:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    x = list(map(int, input_stream.readline().rstrip("\n").split()))
+    x.sort()
+    result = min(x[i + n//2] - x[i] for i in range(n//2))
+    print(result, file=output_stream)
 
-6
 
-0 1 3 7 15 31
 
-Sorted: 0,1,3,7,15,31
+def test():
+    import io
 
-n//2 =3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+73 37
+""",
+            "output": \
+"""\
+36
+""",
+        }, 
+    ]
 
-i ranges from0 to2 (0,1,2).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=0:7-0=7
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=1:15-1=14
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=2:31-3=28
+    print('Tests passed 😎')
 
-Minimum is7. Correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

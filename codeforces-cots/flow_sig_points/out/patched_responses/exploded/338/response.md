@@ -467,83 +467,127 @@ But for code, perhaps ans is a list of size (n-1), but since edge indices are 1-
 
 So code:
 
-n = int(input())
+Testing against sample input 1.
 
-edges = []
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-for i in range(n-1):
+    edges = []
 
-    a, b, d = map(int, input().split())
+    for i in range(n-1):
 
-    a -= 1
+        a, b, d = map(int, input_stream.readline().rstrip("\n").split())
 
-    b -= 1
+        a -= 1
 
-    edges.append( (d, a, b, i+1) )  # idx starts from 1.
+        b -= 1
 
-edges.sort()
+        edges.append( (d, a, b, i+1) )  # idx starts from 1.
 
-parent = list(range(n))
+    edges.sort()
 
-size = [1]*n
+    parent = list(range(n))
 
-def find(u):
+    size = [1]*n
 
-    while parent[u] != u:
+    def find(u):
 
-        parent[u] = parent[parent[u]]
+        while parent[u] != u:
 
-        u = parent[u]
+            parent[u] = parent[parent[u]]
 
-    return u
+            u = parent[u]
 
-ans = [0]*(n)  # indexes 0..n, but edges are 1-based.
+        return u
 
-for d, a, b, idx in edges:
+    ans = [0]*(n)  # indexes 0..n, but edges are 1-based.
 
-    root_a = find(a)
+    for d, a, b, idx in edges:
 
-    root_b = find(b)
+        root_a = find(a)
 
-    if root_a != root_b:
+        root_b = find(b)
 
-        ans[idx] = 2 * size[root_a] * size[root_b]
+        if root_a != root_b:
 
-        # merge
+            ans[idx] = 2 * size[root_a] * size[root_b]
 
-        if size[root_a] < size[root_b]:
+            # merge
 
-            root_a, root_b = root_b, root_a
+            if size[root_a] < size[root_b]:
 
-        parent[root_b] = root_a
+                root_a, root_b = root_b, root_a
 
-        size[root_a] += size[root_b]
+            parent[root_b] = root_a
 
-# collect all ans for edges.
+            size[root_a] += size[root_b]
 
-counts = [ans[i] for i in range(1, n)]
+    # collect all ans for edges.
 
-max_count = max(counts)
+    counts = [ans[i] for i in range(1, n)]
 
-num = counts.count(max_count)
+    max_count = max(counts)
 
-indices = [i for i in range(1, n) if ans[i] == max_count]
+    num = counts.count(max_count)
 
-indices.sort()
+    indices = [i for i in range(1, n) if ans[i] == max_count]
 
-print(max_count, num)
+    indices.sort()
 
-print(' '.join(map(str, indices)))
+    print(max_count, num, file=output_stream)
 
-Wait, but for n=2, n-1 is 1, so indices are 1.
+    print(' '.join(map(str, indices)), file=output_stream)
 
-But in the code, for counts = [ans[1, 2, ..., n-1}]. Because in the code, for i in range(1, n). For n=2, range(1,2) is [1], so counts is [ans[1]].
 
-Yes.
 
-Testing the first sample:
+def test():
+    import io
 
-After processing, ans[1] =2. counts is [2]. max is 2. num=1. indices [1]. Output is 2 1 → correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+1 2 1
+1 3 5
+3 4 2
+3 5 3
+3 6 4
+""",
+            "output": \
+"""\
+16 1
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Yes.
 

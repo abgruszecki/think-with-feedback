@@ -86,33 +86,67 @@ Then loop through each character.
 
 Now code:
 
-s = input().strip()
+Testing against sample input 1.
 
-balance = 0
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-for c in s:
-    if c == '(':
-        balance +=1
-    else:
-        balance -=1
-    if balance <0:
-        print("NO")
-        exit()
-print("YES" if balance ==0 else "NO")
+    balance = 0
 
-Wait, but in Python, using exit() would terminate the program immediately, which is allowed here. So as soon as balance is negative, output NO and exit. Otherwise, after processing all characters, check balance.
+    for c in s:
+        if c == '(':
+            balance +=1
+        else:
+            balance -=1
+        if balance <0:
+            print("NO", file=output_stream)
+            return
+    print("YES" if balance ==0 else "NO", file=output_stream)
 
-Yes, this should work.
 
-Testing the code against the samples.
 
-First sample:
+def test():
+    import io
 
-Input: (()(())). Let's see:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+())()
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-After each step:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-balance increments and decrements as before. At end, balance is 0. So output YES.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample: "())()" → first ) takes balance to 0, second ) takes to -1 → print NO.
 

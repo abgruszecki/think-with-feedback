@@ -703,211 +703,158 @@ Now, code:
 
 Read input:
 
-n, m, k = map(int, input().split())
+Testing against sample input 1.
 
-rows = []
+```python
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
 
-for _ in range(n):
+    rows = []
 
-    row = list(map(int, input().split()))
+    for _ in range(n):
 
-    rows.append(row)
+        row = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-row_poss_list = []
+        rows.append(row)
 
-for row in rows:
+    row_poss_list = []
 
-    t = m // 2
+    for row in rows:
 
-    sorted_row = sorted(row, reverse=True)
+        t = m // 2
 
-    # Initialize DP for this row
+        sorted_row = sorted(row, reverse=True)
 
-    dp = [ [-float('inf')] * k for _ in range(t+1) ]
+        # Initialize DP for this row
 
-    dp[0][0] = 0
+        dp = [ [-float('inf')] * k for _ in range(t+1) ]
 
-    for a in sorted_row:
+        dp[0][0] = 0
 
-        # Iterate from t down to 0 to avoid using the same element multiple times
+        for a in sorted_row:
 
-        for c in range(t, -1, -1):
+            # Iterate from t down to 0 to avoid using the same element multiple times
 
-            for r in range(k):
+            for c in range(t, -1, -1):
 
-                if dp[c][r] == -float('inf'):
+                for r in range(k):
 
-                    continue
+                    if dp[c][r] == -float('inf'):
 
-                new_c = c + 1
+                        continue
 
-                if new_c > t:
+                    new_c = c + 1
 
-                    continue
+                    if new_c > t:
 
-                new_r = (r + a) % k
+                        continue
 
-                new_sum = dp[c][r] + a
+                    new_r = (r + a) % k
 
-                if new_sum > dp[new_c][new_r]:
+                    new_sum = dp[c][r] + a
 
-                    dp[new_c][new_r] = new_sum
+                    if new_sum > dp[new_c][new_r]:
 
-    # Now compute row_poss
+                        dp[new_c][new_r] = new_sum
 
-    row_poss = {}
+        # Now compute row_poss
 
-    for r in range(k):
+        row_poss = {}
 
-        max_sum = -float('inf')
+        for r in range(k):
 
-        for c in range(t+1):
+            max_sum = -float('inf')
 
-            if dp[c][r] > max_sum:
+            for c in range(t+1):
 
-                max_sum = dp[c][r]
+                if dp[c][r] > max_sum:
 
-        if max_sum != -float('inf'):
+                    max_sum = dp[c][r]
 
-            row_poss[r] = max_sum
+            if max_sum != -float('inf'):
 
-    row_poss_list.append(row_poss)
+                row_poss[r] = max_sum
 
-# Combine row possibilities into global DP
+        row_poss_list.append(row_poss)
 
-from collections import defaultdict
+    # Combine row possibilities into global DP
 
-global_dp = defaultdict(int)
+    from collections import defaultdict
 
-global_dp[0] = 0
+    global_dp = defaultdict(int)
 
-for row_poss in row_poss_list:
+    global_dp[0] = 0
 
-    temp_dp = defaultdict(int)
+    for row_poss in row_poss_list:
 
-    for prev_r, prev_sum in global_dp.items():
+        temp_dp = defaultdict(int)
 
-        for row_r, row_sum in row_poss.items():
+        for prev_r, prev_sum in global_dp.items():
 
-            new_r = (prev_r + row_r) % k
+            for row_r, row_sum in row_poss.items():
 
-            new_sum = prev_sum + row_sum
+                new_r = (prev_r + row_r) % k
 
-            if new_r not in temp_dp or new_sum > temp_dp[new_r]:
+                new_sum = prev_sum + row_sum
 
-                temp_dp[new_r] = new_sum
+                if new_r not in temp_dp or new_sum > temp_dp[new_r]:
 
-    global_dp = temp_dp
+                    temp_dp[new_r] = new_sum
 
-# The answer is the maximum sum for remainder 0
+        global_dp = temp_dp
 
-print(global_dp.get(0, 0))
+    # The answer is the maximum sum for remainder 0
 
-Wait, but in Python, defaultdict(int) initializes missing keys to 0. However, the initial global_dp is {0:0}, and for the first row, when combining, if the row_poss is {0:6, 1:7, 2:5}, then the new_sum for prev_r=0 and row_r=0 is 0+6=6, new_r=0. So the temp_dp will have new_r=0:6. Then for other combinations like prev_r=0 and row_r=1: new_sum=0+7=7, new_r=1. Etc.
+    print(global_dp.get(0, 0), file=output_stream)
 
-But this code uses defaultdict(int) for temp_dp, which would default missing keys to 0, but we want to track the maximum sum for each new_r. So when initializing temp_dp, it's better to use a dictionary that starts empty, and for each new_r, if the new_sum is larger than the current value (if any), it's updated.
 
-The code uses:
 
-temp_dp = defaultdict(int)
+def test():
+    import io
 
-But the initial value for any new_r is 0, but if new_sum is larger than 0, it's replaced. However, for example, if a row's row_poss has a row_r where the sum is negative (but this is impossible because all elements are positive and zero is allowed). So sum for each row's row_r is at least zero. So in the code, the new_sum is prev_sum (which starts at 0) plus row_sum (>=0), so new_sum is >=0. However, when combining, if a row_poss has a row_r with sum_row=0 (as in selecting zero elements), then new_sum can be the same as prev_sum. But this is handled.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5 4
+1 2 4 2 1
+3 5 1 2 4
+1 5 7 1 2
+3 8 7 1 2
+8 4 7 1 6
+""",
+            "output": \
+"""\
+56
+""",
+        }, 
+    ]
 
-But wait, in the code, the initial global_dp is {0:0}, and for each row, the row_poss includes at least r=0 and sum 0. So when a row has no other possibilities, the combination would add 0 to the sum. But if a row's row_poss includes multiple entries, including r=0 sum0 and others, the code will consider all possibilities.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But for the first example, after all rows are processed, the global_dp's 0 remainder should have the maximum sum of 24.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Testing this code with the first example:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Input:
+    print('Tests passed 😎')
 
-3 4 3
 
-1 2 3 4
+if __name__ == '__main__':
+    test()
 
-5 2 2 2
 
-7 1 1 4
+```
 
-Row 1 sorted: [4,3,2,1], t=2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Row 1's row_poss is {0:6, 1:7, 2:5}.
-
-Row 2 sorted: [5,2,2,2], t=2.
-
-After processing:
-
-The possible row_poss for row2:
-
-For example, the maximum sum for each remainder.
-
-Assuming that the maximum sum for r=1 is 7 (5+2), and r=0 is sum5 (5) mod3=2, or perhaps other combinations. Wait, but 5+2=7 mod3=1, 5+2+2=9 mod3=0. But since t=2, can take up to 2 elements. So the maximum sum for r=0 would be 5+2+2=9 but that's 3 elements, which is over t=2. So the maximum sum for r=0 would be 5+2=7 mod3=1 (not 0). So in row2's row_poss, for r=1 sum7, etc.
-
-So row2's row_poss would have:
-
-r=0: sum 0 (if 0 elements are taken), but what about other possibilities?
-
-Wait, no. For row2's row_poss:
-
-For each r, the maximum sum across all possible c (0,1,2).
-
-For example, for r=0:
-
-- c=0: sum0 → r=0.
-
-- c=1: any sum that mod3=0. For example, 5 mod3=2, 2 mod3=2, etc. So if any sum in c=1 has r=0. But 5 mod3=2, 2 mod3=2, etc. So perhaps there are no sums in row2 with r=0, except for c=0.
-
-So row_poss for row2's r=0 would be max(0, ...). So the row's row_poss includes r=0 sum0.
-
-So when combining the first row's possibilities with the second row:
-
-prev_r can be 0, 1, or 2, and row_r can be 0, 1, or 2 (from row1).
-
-Wait, but row1's row_poss includes r=0,1,2. The first row's possibilities are:
-
-r=0 →6, r=1 →7, r=2→5.
-
-After processing the first row, the global_dp is {0:6, 1:7, 2:5}.
-
-Then, processing the second row's row_poss (which includes r=0:0, r=1:7, etc.).
-
-So for each combination of prev_r and row_r.
-
-For example, prev_r=0 (sum6) combined with row_r=0 (sum0) gives new_r=0, sum6+0=6.
-
-prev_r=0 (sum6) combined with row_r=1 (sum7) gives new_r=1, sum13.
-
-prev_r=0 combined with row_r=2 (sum5) gives new_r=2, sum11.
-
-Similarly for prev_r=1 (sum7) and row_r=0: new_r=1, sum7+0=7.
-
-prev_r=1 and row_r=1: new_r=2, sum7+7=14.
-
-prev_r=1 and row_r=2: new_r= (1+5) mod3=0 → sum7+5=12.
-
-And so on.
-
-The code should generate all possible combinations and keep the maximum sum for each new_r.
-
-So after processing the second row, the temp_dp would have various entries, and the global_dp is updated.
-
-Then processing the third row, which is [7,4,1,1], sorted as7,4,1,1. t=2.
-
-For this row, the row_poss would include r=0 sum11 (7+4=11 mod3= 11 mod3=2, but perhaps other sums. Wait, 7+4=11 mod3= 2. But if we take 7 and4, sum11 mod3=2. Or perhaps 7 and1: sum8 mod3=2. Or 4 and1: sum5 mod3=2. But for the third row's possibilities, the maximum sum for each remainder.
-
-But in the example's note, the third row contributes 7 and4, sum11 mod3=2.
-
-But the code should find the maximum sum possible for each remainder.
-
-Assuming that the third row's row_poss includes r=2 sum11, and possibly others.
-
-So combining with the global_dp after two rows, which has some remainders and sums.
-
-But the code should correctly compute the sum.
-
-So in code, the final answer is global_dp.get(0,0). For the first example, this should be 24.
-
-But let's see.
+```
 
 The code for the first example would:
 

@@ -374,63 +374,151 @@ Yes.
 
 But wait, in Python, the input is read as a list of integers. So code:
 
-n, t, c = map(int, input().split())
+Testing against sample input 1.
 
-crimes = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, t, c = map(int, input_stream.readline().rstrip("\n").split())
 
-current_run =0
+    crimes = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-total =0
+    current_run =0
 
-for crime in crimes:
+    total =0
 
-    if crime <= t:
+    for crime in crimes:
 
-        current_run +=1
+        if crime <= t:
 
-    else:
+            current_run +=1
 
-        total += max(0, current_run - c +1)
+        else:
 
-        current_run =0
+            total += max(0, current_run - c +1)
 
-total += max(0, current_run - c +1)
+            current_run =0
 
-print(total)
+    total += max(0, current_run - c +1)
 
-Yes.
+    print(total, file=output_stream)
 
-Testing sample 1:
 
-Input:
 
-4 3 3
+def test():
+    import io
 
-2 3 1 1
-
-Processing:
-
-current_run starts at 0.
-
-Each element is <=3.
-
-current_run becomes 4.
-
-Then, after loop, add 4-3+1=2. So total is 2.
-
-Output is 2.
-
-Sample 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 1 1 1
+2
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-In loop: crime is 2>1. So current_run is 0. So adding max(0, 0-1+1)=0. Then current_run reset to 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-After loop, add max(0,0-1+1)=0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Total is 0+0=0.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, t, c = map(int, input_stream.readline().rstrip("\n").split())
+
+    crimes = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    current_run =0
+
+    total =0
+
+    for crime in crimes:
+
+        if crime <= t:
+
+            current_run +=1
+
+        else:
+
+            total += max(0, current_run - c +1)
+
+            current_run =0
+
+    total += max(0, current_run - c +1)
+
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+11 4 2
+2 2 0 7 3 2 2 4 9 1 4
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

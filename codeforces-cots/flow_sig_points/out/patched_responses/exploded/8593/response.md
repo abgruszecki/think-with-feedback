@@ -125,33 +125,72 @@ Then perform the check.
 
 So code:
 
-current_pos = int(input())
+Testing against sample input 1.
 
-for _ in range(3):
+```python
+def main(input_stream, output_stream):
+    current_pos = int(input_stream.readline().rstrip("\n"))
 
-    a, b = map(int, input().split())
+    for _ in range(3):
 
-    if current_pos == a:
+        a, b = map(int, input_stream.readline().rstrip("\n").split())
 
-        current_pos = b
+        if current_pos == a:
 
-    elif current_pos == b:
+            current_pos = b
 
-        current_pos = a
+        elif current_pos == b:
 
-print(current_pos)
+            current_pos = a
 
-Yes, this should work.
+    print(current_pos, file=output_stream)
 
-Testing the first sample input:
 
-Initial pos 1.
 
-After first swap 1 2 → current_pos becomes 2.
+def test():
+    import io
 
-Second swap 2 1 → current_pos is 2 → becomes 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+2 1
+3 1
+1 3
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-Third swap 2 1 → current_pos is 1 → becomes 2. So output 2. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

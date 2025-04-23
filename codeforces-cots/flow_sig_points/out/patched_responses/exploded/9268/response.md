@@ -163,43 +163,75 @@ Yes.
 
 So the code would be:
 
-s = input().strip()
+Testing against sample input 1.
 
-h, m = map(int, s.split(':'))
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-total = h * 60 + m
+    h, m = map(int, s.split(':'))
 
-for i in range(1, 1441):
+    total = h * 60 + m
 
-    current = (total + i) % 1440
+    for i in range(1, 1441):
 
-    hours = current // 60
+        current = (total + i) % 1440
 
-    mins = current % 60
+        hours = current // 60
 
-    time_str = f"{hours:02}:{mins:02}"
+        mins = current % 60
 
-    if time_str == time_str[::-1]:
+        time_str = f"{hours:02}:{mins:02}"
 
-        print(time_str)
+        if time_str == time_str[::-1]:
 
-        break
+            print(time_str, file=output_stream)
 
-That's the code.
+            break
 
-Testing with the examples.
 
-First example input: 12:21.
 
-Original total is 12*60 +21 = 741.
+def test():
+    import io
 
-i runs from 1 to 1440.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+23:59
+""",
+            "output": \
+"""\
+00:00
+""",
+        }, 
+    ]
 
-current = 741 +i, mod 1440.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-We need to find the first current after 741 where the time string is a palindrome.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The next possible is 13:31, which is 13*60 +31 = 811. So i = 811-741 =70. So in the loop, when i=70, current is 741+70=811 → 811 mod 1440 is 811. hours=13, mins=31 → "13:31" reversed is "13:31", which is a palindrome → correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: 23:59 → total is 23*60 +59= 1439.
 

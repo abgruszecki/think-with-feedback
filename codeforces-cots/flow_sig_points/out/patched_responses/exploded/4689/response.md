@@ -168,43 +168,82 @@ Now, in code.
 
 In Python:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-a.sort()
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-cost = 0
+    a.sort()
 
-prev = a[0]
+    cost = 0
 
-for i in range(1, n):
+    prev = a[0]
 
-    current = a[i]
+    for i in range(1, n):
 
-    if current <= prev:
+        current = a[i]
 
-        need = prev +1
+        if current <= prev:
 
-        cost += need - current
+            need = prev +1
 
-        prev = need
+            cost += need - current
 
-    else:
+            prev = need
 
-        prev = current
+        else:
 
-print(cost)
+            prev = current
 
-That's the code.
+    print(cost, file=output_stream)
 
-Testing sample input 1:
 
-4
 
-1 3 1 4 → sorted [1,1,3,4]
+def test():
+    import io
 
-After processing, cost is 1+0 (third element is 3, which is okay after first two steps) +0. So 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 2 3 2 5
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

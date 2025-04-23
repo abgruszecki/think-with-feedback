@@ -226,79 +226,147 @@ Then compute steps1 = max(x1, y1), steps2 = max(x2, y2), answer is min(steps1, s
 
 Yes. That's O(n) time and O(1) space (since we don't need to store the string if we process it on the fly, but in Python, reading it as a string is acceptable).
 
-Testing this approach with the sample inputs:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-Input: 5, 'rbbrr'
+    x1 = x2 = y1 = y2 = 0
+    for i in range(n):
+        c = s[i]
+        if i % 2 == 0:
+            if c != 'r':
+                x1 += 1
+            if c != 'b':
+                x2 += 1
+        else:
+            if c != 'b':
+                y1 += 1
+            if c != 'r':
+                y2 += 1
 
-Indices 0: 'r' (even, matches 'r' → x1 no change. x2 checks 'b', not → x2 +=0? Wait:
+    steps1 = max(x1, y1)
+    steps2 = max(x2, y2)
+    print(min(steps1, steps2), file=output_stream)
 
-Wait for pattern1, even indices must be 'r'. So for even i:
 
-if char is not 'r', x1 increases. For 'r' → no.
 
-For pattern2, even indices must be 'b'. So for even i, if char is not 'b', x2 increases.
+def test():
+    import io
 
-So for index 0:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+bbbbb
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-char is 'r' → even. For pattern1: ok. x1 remains 0. For pattern2: 'r' != 'b' → x2 +=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Index 1: odd. For pattern1: must be 'b'. 'b' → no increment to y1. For pattern2: must be 'r'. 'b' → y2 +=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Index 2: even. char is 'b'. For pattern1: 'b' != 'r' → x1 +=1. For pattern2: 'b' is ok → x2 remains 1 (from index 0).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Index3: odd. char is 'r'. For pattern1: must be 'b' → yes, so y1 +=1. For pattern2: must be 'r' → ok → y2 remains 1 (from index1).
+    print('Tests passed 😎')
 
-Index4: even. char 'r' → x1 remains 1 (since even and 'r'). For pattern2: 'r' != 'b' → x2 +=1 (now x2 is 2).
 
-So for pattern1:
+if __name__ == '__main__':
+    test()
 
-x1=1 (index2), y1=1 (index3). steps1 = max(1,1) →1.
 
-For pattern2:
+```
 
-x2=2 (index0 and 4?), let's see:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Wait, index0 is even, 'r' → x2 +=1.
-
-Index2 is even, 'b' → ok → x2 remains 1 (from index0). Wait, no. For pattern2, even indices must be 'b'. So:
-
-index0: 'r' → x2 +=1.
-
-index2: 'b' → ok. x2 is 1.
-
-index4: 'r' → x2 +=1. So x2 is 2.
-
-So for pattern2:
-
-x2=2, y2=1 (from index1 and 3? Let's check:
-
-y2 is the count of odd indices not 'r'.
-
-index1: 'b' → not 'r' → y2 +=1.
-
-index3: 'r' → ok. So y2 is 1.
-
-So steps2 is max(2,1) →2. So the minimum is 1. Correct.
+```
 
 Yes.
 
-Sample2:
+Testing against sample input 2.
 
-input 5, 'bbbbb'
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-pattern1:
+    x1 = x2 = y1 = y2 = 0
+    for i in range(n):
+        c = s[i]
+        if i % 2 == 0:
+            if c != 'r':
+                x1 += 1
+            if c != 'b':
+                x2 += 1
+        else:
+            if c != 'b':
+                y1 += 1
+            if c != 'r':
+                y2 += 1
 
-even indices (0,2,4) must be 'r' → all are 'b's → x1=3.
+    steps1 = max(x1, y1)
+    steps2 = max(x2, y2)
+    print(min(steps1, steps2), file=output_stream)
 
-odd indices (1,3) must be 'b' → all are 'b's → y1=0. steps1=3.
 
-pattern2:
 
-even indices must be 'b' → x2=0.
+def test():
+    import io
 
-odd indices must be 'r' → both are 'b's → y2=2. steps2=2. min is 2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+rbr
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

@@ -832,57 +832,93 @@ Then, after processing all characters, handle the trail.
 
 So in Python, the code would look like this:
 
-x = input().strip()
+Testing against sample input 1.
 
-reversed_x = x[::-1]
+```python
+def main(input_stream, output_stream):
+    x = input_stream.readline().rstrip("\n").strip()
 
-steps =0
+    reversed_x = x[::-1]
 
-trail =0
+    steps =0
 
-for bit in reversed_x:
+    trail =0
 
-    if bit == '1':
+    for bit in reversed_x:
 
-        trail +=1
+        if bit == '1':
 
-    else:
+            trail +=1
 
-        if trail ==0:
+        else:
 
-            steps +=1
+            if trail ==0:
+
+                steps +=1
+
+            else:
+
+                steps += trail +1
+
+                trail =1
+
+    # after loop
+
+    if trail >0:
+
+        if trail ==1:
+
+            steps +=0
 
         else:
 
             steps += trail +1
 
-            trail =1
+    print(steps, file=output_stream)
 
-# after loop
 
-if trail >0:
 
-    if trail ==1:
+def test():
+    import io
 
-        steps +=0
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1001001
+""",
+            "output": \
+"""\
+12
+""",
+        }, 
+    ]
 
-    else:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-        steps += trail +1
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-print(steps)
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Wait, let's test this code with the examples.
+    print('Tests passed 😎')
 
-Example 1: input '1'.
 
-reversed_x is '1'.
+if __name__ == '__main__':
+    test()
 
-Loop:
 
-bit is '1', trail becomes 1.
+```
 
-After loop, trail=1>0. Since trail is 1, steps +=0. So total steps 0. Correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Example 3: input '101110' → reversed is '011101'.
 

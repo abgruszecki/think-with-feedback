@@ -170,87 +170,73 @@ if current_color != parent_color, increment count.
 
 So the code can be written as:
 
-n = int(input())
+Testing against sample input 1.
 
-parents = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-colors = list(map(int, input().split()))
+    parents = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-count = 1  # root step
+    colors = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for i in range(2, n+1):
+    count = 1  # root step
 
-    parent = parents[i-2]
+    for i in range(2, n+1):
 
-    if colors[i-1] != colors[parent-1]:
+        parent = parents[i-2]
 
-        count +=1
+        if colors[i-1] != colors[parent-1]:
 
-print(count)
+            count +=1
 
-Wait, but wait: in the code, the parents list is for 2 to n. So for i in 2..n, parents[i-2] is the parent of i.
+    print(count, file=output_stream)
 
-For example, when i=2, parents[0] is the parent of 2.
 
-The color array is 0-based in the code (since colors[0] is c1, the root's color).
 
-Yes.
+def test():
+    import io
 
-So for each i from 2 to n:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+1 1 2 3 1 4
+3 3 1 1 1 2 3
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-current node is i.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-parent of i is parents[i-2] (since parents is a list of n-1 elements, 0-based for i=2 up to i=n).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Then, the color of current node is colors[i-1] (since the input is c1 to cn, so colors[0] is c1, colors[1] is c2, etc.)
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The parent's color is colors[parent-1], since parent is the parent's node number (1-based).
+    print('Tests passed 😎')
 
-So for example, if the parent is 1 (the root), then colors[0] is the root's color.
 
-Yes.
+if __name__ == '__main__':
+    test()
 
-So in code:
 
-count starts at 1 (for the root's step).
+```
 
-Then, for each node i from 2 to n:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-if colors[i-1] != colors[parent-1], then count +=1.
-
-So that's the code.
-
-Let's test it against the samples.
-
-First sample input:
-
-n=6
-
-parents input line is 1 2 2 1 5 → parents = [1,2,2,1,5]
-
-colors input line is 2 1 1 1 1 1 → colors = [2,1,1,1,1,1] (0-based index).
-
-For node 2 (i=2):
-
-parent is 1. colors[1] (node 2's color) is 1. parent's color (colors[0] = 2). 1 != 2 → count +=1.
-
-node3 (i=3):
-
-parent is 2. colors[2] is 1. parent's color is colors[1] (1). same → no.
-
-node4 (i=4):
-
-parent is 2. colors[3] is 1. parent's color is 1. same.
-
-node5 (i=5):
-
-parent is 1. colors[4] is 1. parent's color is 2 → different. count +=1.
-
-node6 (i=6):
-
-parent is 5. colors[5] is 1. parent's color is colors[4] (1). same.
-
-Total count: 1 + 2 → 3. Correct.
+```
 
 Second sample:
 

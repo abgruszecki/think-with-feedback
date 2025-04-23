@@ -1088,11 +1088,14 @@ So modifying the code to use max_k = min(1000, m-1).
 
 Thus, the code becomes:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-def main():
 
-    n, m, r = map(int, sys.stdin.readline().split())
+def main(input_stream, output_stream):
+    n, m, r = map(int, input_stream.readline().split())
 
     cars = []
 
@@ -1102,7 +1105,7 @@ def main():
 
         for _ in range(n):
 
-            row = list(map(int, sys.stdin.readline().split()))
+            row = list(map(int, input_stream.readline().split()))
 
             mat.append(row)
 
@@ -1166,7 +1169,7 @@ def main():
 
     for _ in range(r):
 
-        s, t, k = map(int, sys.stdin.readline().split())
+        s, t, k = map(int, input_stream.readline().split())
 
         s -= 1
 
@@ -1174,19 +1177,64 @@ def main():
 
         effective_k = min(k, max_k)
 
-        print(dp[effective_k][s][t])
+        print(dp[effective_k][s][t], file=output_stream)
 
-if __name__ == "__main__":
 
-    main()
 
-This code now precomputes up to max_k = min(1000, m-1) steps. For m=60, this is 59 steps, which is manageable.
+def test():
+    import io
 
-Testing this code with the first sample input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 2 3
+0 7 3 3
+8 0 10 5
+1 1 0 4
+8 9 2 0
+0 3 3 9
+7 0 4 9
+3 8 0 4
+4 8 9 0
+2 3 3
+2 1 3
+1 2 2
+""",
+            "output": \
+"""\
+4
+5
+3
+""",
+        }, 
+    ]
 
-m=2, so max_k is min(1000, 1) =1. Wait, m-1=1. So the code would compute up to k=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But in the first sample, the first query has k=2. So the effective_k is min(2, 1)=1, which would return dp[1][0][3}=4, but the correct answer is3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 But this is a problem. Thus, the optimization is incorrect.
 

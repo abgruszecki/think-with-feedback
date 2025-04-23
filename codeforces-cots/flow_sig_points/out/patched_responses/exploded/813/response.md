@@ -248,77 +248,185 @@ But wait, how to represent the houses? For each house, we can compute left and r
 
 So code steps:
 
-n, t = map(int, input().split())
+Testing against sample input 1.
 
-houses = []
+```python
+def main(input_stream, output_stream):
+    n, t = map(int, input_stream.readline().rstrip("\n").split())
 
-for _ in range(n):
+    houses = []
 
-    x, a = map(int, input().split())
+    for _ in range(n):
 
-    left = x - a/2
+        x, a = map(int, input_stream.readline().rstrip("\n").split())
 
-    right = x + a/2
+        left = x - a/2
 
-    houses.append( (left, right) )
+        right = x + a/2
 
-houses.sort()
+        houses.append( (left, right) )
 
-count = 2  # left and right possibilities
+    houses.sort()
 
-for i in range(len(houses)-1):
+    count = 2  # left and right possibilities
 
-    current_right = houses[i][1]
+    for i in range(len(houses)-1):
 
-    next_left = houses[i+1][0]
+        current_right = houses[i][1]
 
-    gap = next_left - current_right
+        next_left = houses[i+1][0]
 
-    if gap < t:
+        gap = next_left - current_right
 
-        continue
+        if gap < t:
 
-    elif gap == t:
+            continue
 
-        count +=1
+        elif gap == t:
 
-    else:
+            count +=1
 
-        count +=2
+        else:
 
-print(count)
+            count +=2
 
-Wait, but why initial count is 2? Because for the left of the first house and the right of the last house.
+    print(count, file=output_stream)
 
-Yes.
 
-Testing the first example:
 
-Input:
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2 2
+0 4
+5 2
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-0 4 → left =0-2= -2, right=0+2=2
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-6 2 → left=6-1=5, right=6+1=7
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sorted by left: [ (-2,2), (5,7) ]
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-gap between them is 5 -2=3. t=2. 3>2. So count +=2 → count becomes 4. Which matches.
+    print('Tests passed 😎')
 
-Second example:
 
-input:
+if __name__ == '__main__':
+    test()
 
-2 2
 
-0 4 → left -2, right 2
+```
 
-5 2 → left 5-1=4, right 6.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-sorted list is [ (-2,2), (4,6) ]
+```
 
-gap is4-2=2. t=2. so count +=1. initial 2+1=3.
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, t = map(int, input_stream.readline().rstrip("\n").split())
+
+    houses = []
+
+    for _ in range(n):
+
+        x, a = map(int, input_stream.readline().rstrip("\n").split())
+
+        left = x - a/2
+
+        right = x + a/2
+
+        houses.append( (left, right) )
+
+    houses.sort()
+
+    count = 2  # left and right possibilities
+
+    for i in range(len(houses)-1):
+
+        current_right = houses[i][1]
+
+        next_left = houses[i+1][0]
+
+        gap = next_left - current_right
+
+        if gap < t:
+
+            continue
+
+        elif gap == t:
+
+            count +=1
+
+        else:
+
+            count +=2
+
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 3
+0 4
+5 2
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

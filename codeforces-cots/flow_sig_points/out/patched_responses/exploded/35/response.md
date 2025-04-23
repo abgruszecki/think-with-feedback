@@ -278,13 +278,62 @@ total = max_pairs + additional
 
 print(total)
 
-This seems correct. Let's test all samples.
+Testing against sample input 2.
 
-Sample 2:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    even = sum(1 for x in a if x % 2 == 0)
+    odd = n - even
+    pairs = min(even, odd)
+    remaining_odd = odd - pairs
+    print(pairs + remaining_odd // 3, file=output_stream)
 
-Input: 6 even numbers. E=6, O=0.
 
-max_pairs =0. remaining_odds=0. total 0. Correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+11 4 10
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3: as before.
 

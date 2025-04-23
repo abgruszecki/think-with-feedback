@@ -599,16 +599,20 @@ But we need to process the components and track their GCDs.
 
 In code:
 
+Testing against sample input 1.
+
+```python
 import sys
 import math
 from sys import stdin
 from collections import deque
 
-def main():
-    n, m = map(int, stdin.readline().split())
+
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
     adj = [[] for _ in range(n+1)]
     for _ in range(m):
-        u, v = map(int, stdin.readline().split())
+        u, v = map(int, input_stream.readline().split())
         adj[u].append(v)
 
     # Compute SCCs using Kosaraju's algorithm
@@ -706,70 +710,391 @@ def main():
             else:
                 component_gcds.append(current_gcd)
     if not component_gcds:
-        print(n)
+        print(n, file=output_stream)
     else:
         overall_gcd = component_gcds[0]
         for g in component_gcds[1:]:
             overall_gcd = math.gcd(overall_gcd, g)
-        print(overall_gcd if overall_gcd !=0 else n)
-        
-if __name__ == "__main__":
-    main()
+        print(overall_gcd if overall_gcd !=0 else n, file=output_stream)
 
-Testing this code against the examples.
 
-First example:
 
-Input:
+def test():
+    import io
 
-4 4
-1 2
-2 1
-3 4
-4 3
-
-The code should output 2.
-
-The SCCs are [1,2], [3,4]. Each has component_gcd 2.
-
-Overall GCD is 2.
-
-Second example:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5 2
 1 4
 2 5
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-The SCCs are [1], [2], [3], [4], [5]. All components have size 1. Check for self-loops: none. So component_gcds is empty. Thus, output is 5.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Third example:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import sys
+import math
+from sys import stdin
+from collections import deque
+
+
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    adj = [[] for _ in range(n+1)]
+    for _ in range(m):
+        u, v = map(int, input_stream.readline().split())
+        adj[u].append(v)
+
+    # Compute SCCs using Kosaraju's algorithm
+    visited = [False] * (n +1)
+    order = []
+    for node in range(1, n+1):
+        if not visited[node]:
+            stack = [(node, False)]
+            while stack:
+                u, processed = stack.pop()
+                if processed:
+                    order.append(u)
+                    continue
+                if visited[u]:
+                    continue
+                visited[u] = True
+                stack.append( (u, True) )
+                for v in adj[u]:
+                    if not visited[v]:
+                        stack.append( (v, False) )
+
+    # Build transpose graph
+    transpose = [[] for _ in range(n+1)]
+    for u in range(1, n+1):
+        for v in adj[u]:
+            transpose[v].append(u)
+
+    visited = [False]*(n+1)
+    sccs = []
+    for node in reversed(order):
+        if not visited[node]:
+            stack = [node]
+            visited[node] = True
+            component = []
+            while stack:
+                u = stack.pop()
+                component.append(u)
+                for v in transpose[u]:
+                    if not visited[v]:
+                        visited[v] = True
+                        stack.append(v)
+            sccs.append(component)
+
+    component_gcds = []
+    for component in sccs:
+        if len(component) ==1:
+            # Check for self-loop
+            u = component[0]
+            has_self_loop = False
+            for v in adj[u]:
+                if v == u:
+                    has_self_loop = True
+                    break
+            if has_self_loop:
+                component_gcds.append(1)
+            else:
+                continue # no contribution to GCD
+        else:
+            component_set = set(component)
+            start_node = component[0]
+            d = {u: -1 for u in component}
+            d[start_node] =0
+            current_gcd =0
+            queue = deque([start_node])
+            while queue:
+                u = queue.popleft()
+                for v in adj[u]:
+                    if v not in component_set:
+                        continue
+                    if d[v] == -1:
+                        d[v] = d[u] +1
+                        queue.append(v)
+                    else:
+                        delta = (d[u] +1) - d[v]
+                        if delta !=0:
+                            current_gcd = math.gcd(current_gcd, abs(delta))
+            # After processing all edges, component's GCD is current_gcd
+            if current_gcd ==0:
+                # No cycles? Impossible for strongly connected component with size>1.
+                # So this must have at least one cycle. But how?
+                # Maybe all cycles have length 0 mod current_gcd (0), which is impossible. So this case is invalid.
+                # But current_gcd is 0 only if no discrepancies were found. But in a strongly connected component of size>1, there must be cycles.
+                # So this situation is impossible. Hence, current_gcd must be at least 1.
+                # So perhaps we should set current_gcd to some value.
+                # But how to handle this?
+                # For example, a component where all cycles have length 0 mod k. But k=0 is not possible. So this case is impossible.
+                # So perhaps this situation indicates that there's a cycle with length 0, which is impossible. So this code must not be reachable.
+                # So for safety, we can skip adding component_gcd if current_gcd is 0.
+                # But this is a problem.
+                # For example, a component of two nodes: 1 → 2 → 1. The BFS would process 1, then 2, then when processing 2 →1, delta is (d[2]+1) -d[1] = (1+1) -0 =2. So current_gcd is 2.
+                # So current_gcd can't be zero.
+                # So the case where current_gcd is zero can't happen. Hence, we can safely add current_gcd to the list.
+                # So in code, even if current_gcd is zero, add it. But this shouldn't happen.
+                pass
+            else:
+                component_gcds.append(current_gcd)
+    if not component_gcds:
+        print(n, file=output_stream)
+    else:
+        overall_gcd = component_gcds[0]
+        for g in component_gcds[1:]:
+            overall_gcd = math.gcd(overall_gcd, g)
+        print(overall_gcd if overall_gcd !=0 else n, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4 5
 1 2
 2 3
 3 1
 2 4
 4 1
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-SCC is [1,2,3,4]. Processing this component:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-During BFS:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-start_node=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-d[1]=0.
+    print('Tests passed 😎')
 
-Process edges 1→2: d[2] becomes 1.
 
-Process edges 2→3: d[3]=2.
+if __name__ == '__main__':
+    test()
 
-3→1: delta is (2+1) -0=3. current_gcd is 3.
 
-Then, 2→4: d[4] is -1, set to 2.
+```
 
-4→1: delta is (2+1) -0=3. current_gcd is gcd(3,3)=3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So component_gcd is 3. So output is 3.
+```
+
+Testing against sample input 3.
+
+```python
+import sys
+import math
+from sys import stdin
+from collections import deque
+
+
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    adj = [[] for _ in range(n+1)]
+    for _ in range(m):
+        u, v = map(int, input_stream.readline().split())
+        adj[u].append(v)
+
+    # Compute SCCs using Kosaraju's algorithm
+    visited = [False] * (n +1)
+    order = []
+    for node in range(1, n+1):
+        if not visited[node]:
+            stack = [(node, False)]
+            while stack:
+                u, processed = stack.pop()
+                if processed:
+                    order.append(u)
+                    continue
+                if visited[u]:
+                    continue
+                visited[u] = True
+                stack.append( (u, True) )
+                for v in adj[u]:
+                    if not visited[v]:
+                        stack.append( (v, False) )
+
+    # Build transpose graph
+    transpose = [[] for _ in range(n+1)]
+    for u in range(1, n+1):
+        for v in adj[u]:
+            transpose[v].append(u)
+
+    visited = [False]*(n+1)
+    sccs = []
+    for node in reversed(order):
+        if not visited[node]:
+            stack = [node]
+            visited[node] = True
+            component = []
+            while stack:
+                u = stack.pop()
+                component.append(u)
+                for v in transpose[u]:
+                    if not visited[v]:
+                        visited[v] = True
+                        stack.append(v)
+            sccs.append(component)
+
+    component_gcds = []
+    for component in sccs:
+        if len(component) ==1:
+            # Check for self-loop
+            u = component[0]
+            has_self_loop = False
+            for v in adj[u]:
+                if v == u:
+                    has_self_loop = True
+                    break
+            if has_self_loop:
+                component_gcds.append(1)
+            else:
+                continue # no contribution to GCD
+        else:
+            component_set = set(component)
+            start_node = component[0]
+            d = {u: -1 for u in component}
+            d[start_node] =0
+            current_gcd =0
+            queue = deque([start_node])
+            while queue:
+                u = queue.popleft()
+                for v in adj[u]:
+                    if v not in component_set:
+                        continue
+                    if d[v] == -1:
+                        d[v] = d[u] +1
+                        queue.append(v)
+                    else:
+                        delta = (d[u] +1) - d[v]
+                        if delta !=0:
+                            current_gcd = math.gcd(current_gcd, abs(delta))
+            # After processing all edges, component's GCD is current_gcd
+            if current_gcd ==0:
+                # No cycles? Impossible for strongly connected component with size>1.
+                # So this must have at least one cycle. But how?
+                # Maybe all cycles have length 0 mod current_gcd (0), which is impossible. So this case is invalid.
+                # But current_gcd is 0 only if no discrepancies were found. But in a strongly connected component of size>1, there must be cycles.
+                # So this situation is impossible. Hence, current_gcd must be at least 1.
+                # So perhaps we should set current_gcd to some value.
+                # But how to handle this?
+                # For example, a component where all cycles have length 0 mod k. But k=0 is not possible. So this case is impossible.
+                # So perhaps this situation indicates that there's a cycle with length 0, which is impossible. So this code must not be reachable.
+                # So for safety, we can skip adding component_gcd if current_gcd is 0.
+                # But this is a problem.
+                # For example, a component of two nodes: 1 → 2 → 1. The BFS would process 1, then 2, then when processing 2 →1, delta is (d[2]+1) -d[1] = (1+1) -0 =2. So current_gcd is 2.
+                # So current_gcd can't be zero.
+                # So the case where current_gcd is zero can't happen. Hence, we can safely add current_gcd to the list.
+                # So in code, even if current_gcd is zero, add it. But this shouldn't happen.
+                pass
+            else:
+                component_gcds.append(current_gcd)
+    if not component_gcds:
+        print(n, file=output_stream)
+    else:
+        overall_gcd = component_gcds[0]
+        for g in component_gcds[1:]:
+            overall_gcd = math.gcd(overall_gcd, g)
+        print(overall_gcd if overall_gcd !=0 else n, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4
+1 1
+1 2
+2 1
+1 2
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Fourth example:
 

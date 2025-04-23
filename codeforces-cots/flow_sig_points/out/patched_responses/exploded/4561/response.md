@@ -991,59 +991,175 @@ But wait, what if m is 1? Then everything mod 1 is zero. So for m=1, the answer 
 
 But the code handles that.
 
-Now, let's test the code against the examples.
+Testing against sample input 1.
 
-First example:
+```python
+def main(input_stream, output_stream):
+    n, k, l, m = map(int, input_stream.readline().rstrip("\n").split())
 
-Input:
+    if l == 0:
+        print(1 % m if k == 0 else 0, file=output_stream)
+        return
 
-2 1 2 10
+    max_bit = (1 << l) - 1
+    if k > max_bit:
+        print(0, file=output_stream)
+        return
 
-n=2, k=1, l=2, m=10.
+    def fast_doubling_fib(n, mod):
+        def fib_pair(n):
+            if n == 0:
+                return (0, 1)
+            a, b = fib_pair(n >> 1)
+            c = a * ((2 * b - a) % mod)
+            d = (a * a + b * b) % mod
+            if n & 1:
+                return (d, (c + d) % mod)
+            else:
+                return (c, d)
+        return fib_pair(n)[0]
 
-Check k=1 is <= 2^2-1=3 → ok.
+    count_0 = fast_doubling_fib(n + 2, m) % m
+    pow_2n = pow(2, n, m)
+    count_1 = (pow_2n - count_0) % m
 
-count_0 is fib(4) mod 10.
+    result = 1 % m
+    for b in range(l):
+        if (k >> b) & 1:
+            result = (result * count_1) % m
+        else:
+            result = (result * count_0) % m
 
-Fib(4) is 3 → 3 mod10 is 3.
+    print(result % m, file=output_stream)
 
-pow_2n=2^2=4 mod10 →4.
 
-count_1 = (4 -3) mod10 →1.
 
-Bits in k=1 are 0 (binary 01).
+def test():
+    import io
 
-Loop over b=0 and 1 (since l=2).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 1 1 3
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-For b=0: (k >>0)&1 →1 → multiply by 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For b=1: (k >>1)&1 →0 → multiply by 3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Result is 1 * 1 *3 =3 mod10 →3. Which matches the first example.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Second example:
+    print('Tests passed 😎')
 
-Input:
 
-2 1 1 3.
+if __name__ == '__main__':
+    test()
 
-l=1. max_bit is 1. k=1 is ok.
 
-count_0 = fib(4) mod3.
+```
 
-Fib(4) is 3 mod3=0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-pow_2n=4 mod3=1.
+```
 
-count_1 = 1-0 mod3=1.
+Testing against sample input 2.
 
-Loop over bits 0 (l=1).
+```python
+def main(input_stream, output_stream):
+    n, k, l, m = map(int, input_stream.readline().rstrip("\n").split())
 
-bit 0 is set. So multiply result by 1.
+    if l == 0:
+        print(1 % m if k == 0 else 0, file=output_stream)
+        return
 
-Result is 1 mod3 →1.
+    max_bit = (1 << l) - 1
+    if k > max_bit:
+        print(0, file=output_stream)
+        return
 
-Which matches the second example.
+    def fast_doubling_fib(n, mod):
+        def fib_pair(n):
+            if n == 0:
+                return (0, 1)
+            a, b = fib_pair(n >> 1)
+            c = a * ((2 * b - a) % mod)
+            d = (a * a + b * b) % mod
+            if n & 1:
+                return (d, (c + d) % mod)
+            else:
+                return (c, d)
+        return fib_pair(n)[0]
+
+    count_0 = fast_doubling_fib(n + 2, m) % m
+    pow_2n = pow(2, n, m)
+    count_1 = (pow_2n - count_0) % m
+
+    result = 1 % m
+    for b in range(l):
+        if (k >> b) & 1:
+            result = (result * count_1) % m
+        else:
+            result = (result * count_0) % m
+
+    print(result % m, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 3 2 10
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

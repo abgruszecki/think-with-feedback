@@ -1364,116 +1364,101 @@ We'll use a priority queue (heapq), and for each position i, a dictionary called
 
 The code outline:
 
+Testing against sample input 1.
+
+```python
 import heapq
 
-n, m = map(int, input().split())
-c = list(map(lambda x: int(x)-1, input().split()))
-x = list(map(int, input().split()))
-start = 0
-end = n-1
 
-# Initial mask is the first color
-initial_mask = 1 << c[start]
-initial_sum = x[c[start]]
-heap = [(initial_sum, start, initial_mask)]
-visited = [dict() for _ in range(n)]
-visited[start][initial_mask] = initial_sum
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    c = list(map(lambda x: int(x)-1, input_stream.readline().rstrip("\n").split()))
+    x = list(map(int, input_stream.readline().rstrip("\n").split()))
+    start = 0
+    end = n-1
 
-found = False
-answer = -1
+    # Initial mask is the first color
+    initial_mask = 1 << c[start]
+    initial_sum = x[c[start]]
+    heap = [(initial_sum, start, initial_mask)]
+    visited = [dict() for _ in range(n)]
+    visited[start][initial_mask] = initial_sum
 
-while heap:
-    current_sum, pos, mask = heapq.heappop(heap)
-    if pos == end:
-        answer = current_sum
-        found = True
-        break
-    # Check if current sum is higher than the one stored
-    if visited[pos].get(mask, float('inf')) < current_sum:
-        continue
-    for delta in [1, 2]:
-        next_pos = pos + delta
-        if next_pos >= n:
+    found = False
+    answer = -1
+
+    while heap:
+        current_sum, pos, mask = heapq.heappop(heap)
+        if pos == end:
+            answer = current_sum
+            found = True
+            break
+        # Check if current sum is higher than the one stored
+        if visited[pos].get(mask, float('inf')) < current_sum:
             continue
-        color = c[next_pos]
-        new_mask = mask | (1 << color)
-        added_cost = x[color] if not (mask & (1 << color)) else 0
-        new_sum = current_sum + added_cost
-        # Check if next_pos has been visited with new_mask and a lower sum
-        if new_mask in visited[next_pos]:
-            if visited[next_pos][new_mask] <= new_sum:
+        for delta in [1, 2]:
+            next_pos = pos + delta
+            if next_pos >= n:
                 continue
-        # Update the visited dict
-        visited[next_pos][new_mask] = new_sum
-        heapq.heappush(heap, (new_sum, next_pos, new_mask))
+            color = c[next_pos]
+            new_mask = mask | (1 << color)
+            added_cost = x[color] if not (mask & (1 << color)) else 0
+            new_sum = current_sum + added_cost
+            # Check if next_pos has been visited with new_mask and a lower sum
+            if new_mask in visited[next_pos]:
+                if visited[next_pos][new_mask] <= new_sum:
+                    continue
+            # Update the visited dict
+            visited[next_pos][new_mask] = new_sum
+            heapq.heappush(heap, (new_sum, next_pos, new_mask))
 
-print(answer)
+    print(answer, file=output_stream)
 
-But this code is likely to get TLE or MLE for large n and m=40.
 
-However, given the problem's constraints and the fact that m is up to 40, but the allowed steps are +1 and +2, perhaps the number of masks per position is manageable.
 
-For example, each position can be reached via a certain number of masks, and the priority queue processes the states in order of increasing sum.
+def test():
+    import io
 
-But for n=3e5 and m=40, this code is likely to be too slow.
-
-But according to the problem's examples, this is the correct approach.
-
-Let's test the code against the first example:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5 3
-
 1 3 2 3 1
+1 200 20
+""",
+            "output": \
+"""\
+21
+""",
+        }, 
+    ]
 
-1 10 100
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Converted to 0-based:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-colors: 0, 2, 1, 2, 0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-x = [1, 10, 100].
+    print('Tests passed 😎')
 
-Initial mask is 1<<0 = 1, sum=1.
 
-Processing:
+if __name__ == '__main__':
+    test()
 
-At position 0, mask 1, sum 1.
 
-Jump to 1 (delta 1):
+```
 
-color 2 (mask 1 | 4 → 5). sum 1+100=101.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Jump to 2 (delta 2):
-
-color 1 (mask 1 | 2 → 3). sum 1+10=11.
-
-Add state (11, 2, 3).
-
-Then, processing state (11, 2, 3):
-
-position 2. Jump to 3 (delta 1): color 2 (mask 3 | 4 →7). sum 11 +100=111.
-
-Jump to 4 (delta 2): color 0 (mask 3 | 1 → 3). sum 11 +0=11.
-
-Add state (11,4,3).
-
-Processing state (11,4,3):
-
-position 4 (end), sum 11. Return.
-
-This matches the first example's output.
-
-Thus, the code works for the first example.
-
-But for larger inputs, it's not feasible.
-
-But given that the problem's constraints include m up to 40 and n up to 3e5, the intended solution must be different.
-
-But I can't think of another approach. Perhaps the code above is the intended solution, but with optimizations.
-
-But given that the code is correct but may not pass for large cases, perhaps there's a way to optimize it.
+```
 
 An optimization could be to represent the mask as an integer and use a visited array for each position, which is a dictionary of masks to the minimal sum.
 

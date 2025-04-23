@@ -291,27 +291,103 @@ But what about the time? For 3e5 elements, building the prefix sum array is O(n)
 
 So this should work.
 
-Testing the first example:
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    ptr = 0
 
-5
+    n = int(input[ptr])
+    ptr += 1
+    a = list(map(int, input[ptr:ptr + n]))
+    ptr += n
 
-11 2 3 5 7
+    m = int(input[ptr])
+    ptr += 1
+    b = list(map(int, input[ptr:ptr + m]))
+    ptr += m
 
-4
+    # Compute prefix sums for A and B
+    sa = [0]
+    current = 0
+    for num in a:
+        current += num
+        sa.append(current)
 
-11 7 3 7
+    sb = [0]
+    current = 0
+    for num in b:
+        current += num
+        sb.append(current)
 
-sa is computed as:
+    if sa[-1] != sb[-1]:
+        print(-1, file=output_stream)
+        return
 
-0, 11, 13, 16, 21, 28
+    i = j = 0
+    count = 0
+    len_a = len(sa)
+    len_b = len(sb)
+    while i < len_a and j < len_b:
+        if sa[i] == sb[j]:
+            count += 1
+            i += 1
+            j += 1
+        elif sa[i] < sb[j]:
+            i += 1
+        else:
+            j += 1
 
-sb is:
+    print(count - 1, file=output_stream)
 
-0, 11, 18, 21, 28.
 
-The common elements are 0,11,21,28 → count=4 → 4-1=3 → correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+1 2
+1
+100
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample Input 2:
 

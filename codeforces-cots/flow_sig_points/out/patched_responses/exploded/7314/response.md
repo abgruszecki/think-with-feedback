@@ -511,119 +511,241 @@ But for code brevity, using the function inside the loop.
 
 But in code, perhaps the code can be written as:
 
-n, s = map(int, input().split())
+Testing against sample input 1.
 
-if s > n:
+```python
+def main(input_stream, output_stream):
+    n, s = map(int, input_stream.readline().rstrip("\n").split())
 
-    print(0)
+    if s > n:
 
-else:
-
-    def sum_digits(x):
-
-        res =0
-
-        while x>0:
-
-            res += x%10
-
-            x = x//10
-
-        return res
-
-    x_min = s + 162
-
-    found = False
-
-    for x in range(s+1, s+163):
-
-        if x > n:
-
-            continue
-
-        sd = sum_digits(x)
-
-        if x - sd >= s:
-
-            x_min = x
-
-            found = True
-
-            break
-
-    if not found:
-
-        x_min = s +162
-
-        if x_min > n:
-
-            print(0)
-
-            exit()
-
-        sd = sum_digits(x_min)
-
-        if x_min - sd >=s:
-
-            pass
-
-        else:
-
-            print(0)
-
-            exit()
-
-    if x_min >n:
-
-        print(0)
+        print(0, file=output_stream)
 
     else:
 
-        print(max(0, n -x_min +1))
+        def sum_digits(x):
 
-But this code may have an issue. Let's test the sample inputs.
+            res =0
 
-First sample input:
+            while x>0:
 
-12 1.
+                res += x%10
 
-s=1, n=12.
+                x = x//10
 
-The code loops x from 2 to 163 (but s+162 is 1+162=163, so loop is 2 to 163, but n is 12. So x ranges from 2 to 12.
+            return res
 
-For x=2: sum is 2. 2-2=0 <1. No.
+        x_min = s + 162
 
-x=3: 3-3=0 <1.
+        found = False
 
-...
+        for x in range(s+1, s+163):
 
-x=10: sum is 1. 10-1=9 >=1. So x_min=10. Break loop.
+            if x > n:
 
-Then, since x_min is 10 <=12. Answer is 12-10+1=3. Correct.
+                continue
 
-Second sample:
+            sd = sum_digits(x)
 
-25 20.
+            if x - sd >= s:
 
-s=20, n=25.
+                x_min = x
 
-Loop x from 21 to 20+162=182. But x runs up to 25.
+                found = True
 
-Check each x from 21 to 25.
+                break
 
-21: sum is 3. 21-3=18 <20.
+        if not found:
 
-22: 22-4=18 <20.
+            x_min = s +162
 
-23: 23-5=18 <20.
+            if x_min > n:
 
-24:24-6=18 <20.
+                print(0, file=output_stream)
 
-25:25-7=18 <20.
+                return
 
-So no x in 21-25 satisfies. So loop ends, found is False.
+            sd = sum_digits(x_min)
 
-Then x_min is set to 20+162=182. Which is >25. So output 0. Correct.
+            if x_min - sd >=s:
+
+                pass
+
+            else:
+
+                print(0, file=output_stream)
+
+                return
+
+        if x_min >n:
+
+            print(0, file=output_stream)
+
+        else:
+
+            print(max(0, n -x_min +1), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+25 20
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, s = map(int, input_stream.readline().rstrip("\n").split())
+
+    if s > n:
+
+        print(0, file=output_stream)
+
+    else:
+
+        def sum_digits(x):
+
+            res =0
+
+            while x>0:
+
+                res += x%10
+
+                x = x//10
+
+            return res
+
+        x_min = s + 162
+
+        found = False
+
+        for x in range(s+1, s+163):
+
+            if x > n:
+
+                continue
+
+            sd = sum_digits(x)
+
+            if x - sd >= s:
+
+                x_min = x
+
+                found = True
+
+                break
+
+        if not found:
+
+            x_min = s +162
+
+            if x_min > n:
+
+                print(0, file=output_stream)
+
+                return
+
+            sd = sum_digits(x_min)
+
+            if x_min - sd >=s:
+
+                pass
+
+            else:
+
+                print(0, file=output_stream)
+
+                return
+
+        if x_min >n:
+
+            print(0, file=output_stream)
+
+        else:
+
+            print(max(0, n -x_min +1), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 9
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

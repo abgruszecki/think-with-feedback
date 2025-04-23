@@ -313,40 +313,72 @@ Once m is found, compute pos= n - (m-1)*m//2.
 
 So the code would be:
 
-n = int(input())
+Testing against sample input 1.
 
-left, right = 1, 2 * 10**18
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-m = 0
+    left, right = 1, 2 * 10**18
 
-while left <= right:
-    mid = (left + right) // 2
-    s = mid * (mid +1) //2
-    if s >=n:
-        m = mid
-        right = mid -1
-    else:
-        left = mid +1
+    m = 0
 
-pos = n - (m-1)*m//2
+    while left <= right:
+        mid = (left + right) // 2
+        s = mid * (mid +1) //2
+        if s >=n:
+            m = mid
+            right = mid -1
+        else:
+            left = mid +1
 
-print(pos)
+    pos = n - (m-1)*m//2
 
-Let's test this with the sample inputs.
+    print(pos, file=output_stream)
 
-Sample 1:
 
-Input 3 → output 2.
 
-Compute m:
+def test():
+    import io
 
-Binary search:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-Looking for minimal m where m(m+1)/2 >=3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Possible m=2. Because 2*3/2=3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So m=2. pos=3- (1*2/2)=3-1=2. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 5:
 

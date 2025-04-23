@@ -41,26 +41,70 @@ Yes.
 
 So the code outline is:
 
-a = int(input().strip())
-b = int(input().strip())
-c = a + b
+Testing against sample input 1.
 
-def remove_zeros(n):
-    return int(str(n).replace('0', ''))
+```python
+def main(input_stream, output_stream):
+    a = int(input_stream.readline().rstrip("\n").strip())
+    b = int(input_stream.readline().rstrip("\n").strip())
+    c = a + b
 
-modified_a = remove_zeros(a)
-modified_b = remove_zeros(b)
-modified_c = remove_zeros(c)
+    def remove_zeros(n):
+        return int(str(n).replace('0', ''))
 
-if modified_a + modified_b == modified_c:
-    print("YES")
-else:
-    print("NO")
+    modified_a = remove_zeros(a)
+    modified_b = remove_zeros(b)
+    modified_c = remove_zeros(c)
 
-Wait, but wait. Let's test this with the sample input.
+    if modified_a + modified_b == modified_c:
+        print("YES", file=output_stream)
+    else:
+        print("NO", file=output_stream)
 
-Sample 1:
-Input a is 101, which becomes 11 after removing zeros. b is 102, becomes 12. Sum is 203, which becomes 23. 11 + 12 = 23: correct. Output YES.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+105
+106
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 a=105 →15, b=106→16. Sum 211. Sum is 211, which after removing zeros is 211. 15+16=31 ≠211 → NO. Correct.

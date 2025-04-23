@@ -163,33 +163,65 @@ Now, in Python, how to compute the factorial. Since n is up to 20, even with ite
 
 But Python's math module has a factorial function. So for code:
 
+Testing against sample input 2.
+
+```python
 import math
 
-n = int(input())
 
-k = n // 2
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-result = math.factorial(n) // (2 * k * k)
+    k = n // 2
 
-print(result)
+    result = math.factorial(n) // (2 * k * k)
 
-Wait, but let's test this with the sample inputs.
+    print(result, file=output_stream)
 
-Sample Input 2:
 
-n=2, k=1. 2! =2. 2/(2*1*1) =2/2=1. Correct.
 
-Sample Input 4: 24/(2*2*2)=24/8=3. Correct.
+def test():
+    import io
 
-Sample Input 8: 40320/(2*4*4) =40320/(32) =1260. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+""",
+            "output": \
+"""\
+1260
+""",
+        }, 
+    ]
 
-Sample Input 20: 20! is 2432902008176640000. Divided by (2*10*10) =200. 2432902008176640000 /200 =12164510040883200. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So this code works.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-This is a very efficient solution. It's O(1) per test case, but calculating factorial of n is O(n) time, which is acceptable for n up to 20.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So the code is straightforward and correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

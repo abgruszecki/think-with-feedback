@@ -195,89 +195,94 @@ split into parts. For 'pwd', output. For 'cd', take the path.
 
 So:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n = int(input())
 
-stack = []
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-for _ in range(n):
-    parts = input().split()
-    if parts[0] == 'pwd':
-        if not stack:
-            print('/')
+    stack = []
+
+    for _ in range(n):
+        parts = input_stream.readline().rstrip("\n").split()
+        if parts[0] == 'pwd':
+            if not stack:
+                print('/', file=output_stream)
+            else:
+                print('/' + '/'.join(stack) + '/', file=output_stream)
         else:
-            print('/' + '/'.join(stack) + '/')
-    else:
-        # cd command
-        path = parts[1]
-        if path.startswith('/'):
-            # absolute path
-            components = list(filter(None, path.split('/')))
-            stack.clear()
-            for part in components:
-                if part == '..':
-                    stack.pop()
-                else:
-                    stack.append(part)
-        else:
-            # relative path
-            components = list(filter(None, path.split('/')))
-            for part in components:
-                if part == '..':
-                    stack.pop()
-                else:
-                    stack.append(part)
+            # cd command
+            path = parts[1]
+            if path.startswith('/'):
+                # absolute path
+                components = list(filter(None, path.split('/')))
+                stack.clear()
+                for part in components:
+                    if part == '..':
+                        stack.pop()
+                    else:
+                        stack.append(part)
+            else:
+                # relative path
+                components = list(filter(None, path.split('/')))
+                for part in components:
+                    if part == '..':
+                        stack.pop()
+                    else:
+                        stack.append(part)
 
-Wait, but wait: in the case of an absolute path, the split could have parts. For example, path is '/a/../b'. Split into ['a', '..', 'b']. Then, processing each part:
 
-After stack is cleared, append 'a', then '..' → pop 'a', stack empty, then append 'b' → stack is ['b'].
 
-Thus, the absolute path is /b/ when pwd is called. Which is correct.
+def test():
+    import io
 
-Another example: cd / → path starts with '/', components is empty (split is ['', ...], filtered to empty). So stack is cleared (now empty), and processing no components. So stack remains empty. Then pwd outputs '/'.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+cd /a/b
+pwd
+cd ../a/b
+pwd
+""",
+            "output": \
+"""\
+/a/b/
+/a/a/b/
+""",
+        }, 
+    ]
 
-That's correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Another edge case: cd a → relative path. components is ['a']. stack appends 'a' → stack is ['a']. pwd outputs '/a/'.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Another edge case: cd a/b/c → components ['a', 'b', 'c']. stack appends all. pwd outputs '/a/b/c/'.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-What about a command like 'cd ../x/y' when current stack is ['a', 'b', 'c']? So components are ['..', 'x', 'y']. Process:
+    print('Tests passed 😎')
 
-pop → stack ['a', 'b'], append 'x' → ['a', 'b', 'x'], append 'y' → ['a', 'b', 'x', 'y']. So pwd would be '/a/b/x/y/'.
 
-Yes.
+if __name__ == '__main__':
+    test()
 
-So the code seems correct.
 
-Now, for the output: when stack is empty, output '/'. Otherwise, output '/' + '/'.join(stack) + '/'.
+```
 
-Yes.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Testing this with the examples.
+```
 
-First example:
-
-After first 'cd /home/vasya', stack is ['home', 'vasya'].
-
-pwd → /home/vasya/
-
-After 'cd ..', stack becomes ['home'] → pwd outputs '/home/'.
-
-After 'cd vasya/../petya', components are ['vasya', '..', 'petya']. Relative path:
-
-Process 'vasya' → stack becomes ['home', 'vasya'], then '..' → ['home'], then 'petya' → ['home', 'petya'].
-
-pwd → '/home/petya/'.
-
-So code works.
-
-So the code should handle all cases correctly.
-
-Now, some possible optimizations. Since the constraints are small (n up to 50, each command up to 200 chars), the code is efficient enough. However, using split and filter is O(k) for each path, which is acceptable.
-
-Thus, the code should be correct.
 </think>
 
 ```python

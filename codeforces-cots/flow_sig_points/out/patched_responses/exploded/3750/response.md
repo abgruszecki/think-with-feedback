@@ -599,93 +599,185 @@ But in Python, the starts list for a group can be in any order. So the code uses
 
 Thus, the code is correct.
 
-Now, let's test the sample inputs.
+Testing against sample input 1.
 
-Sample 1:
+```python
+import sys
+from collections import defaultdict
 
-Input:
 
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    words = input_stream.readline().split()
+    if n == 0:
+        print(0, file=output_stream)
+        return
+    
+    sum_len = [0] * (n + 1)
+    for i in range(n):
+        sum_len[i+1] = sum_len[i] + len(words[i])
+    original_length = sum_len[n] + (n - 1)
+    max_saving = 0
+    
+    for m in range(1, n+1):
+        groups = defaultdict(list)
+        for i in range(n - m + 1):
+            current_segment = tuple(words[i:i+m])
+            groups[current_segment].append(i)
+        
+        for seg, starts in groups.items():
+            if len(starts) < 2:
+                continue
+            sum_segment = sum_len[starts[0] + m] - sum_len[starts[0]]
+            sum_saving_per = sum_segment - 1
+            starts_sorted = sorted(starts)
+            k = 0
+            last_end = -1
+            for start in starts_sorted:
+                if start > last_end:
+                    k += 1
+                    last_end = start + m - 1
+            if k >= 2:
+                current_saving = sum_saving_per * k
+                if current_saving > max_saving:
+                    max_saving = current_saving
+    
+    print(original_length - max_saving, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10
+a ab a a b ab a a b c
+""",
+            "output": \
+"""\
+13
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import sys
+from collections import defaultdict
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    words = input_stream.readline().split()
+    if n == 0:
+        print(0, file=output_stream)
+        return
+    
+    sum_len = [0] * (n + 1)
+    for i in range(n):
+        sum_len[i+1] = sum_len[i] + len(words[i])
+    original_length = sum_len[n] + (n - 1)
+    max_saving = 0
+    
+    for m in range(1, n+1):
+        groups = defaultdict(list)
+        for i in range(n - m + 1):
+            current_segment = tuple(words[i:i+m])
+            groups[current_segment].append(i)
+        
+        for seg, starts in groups.items():
+            if len(starts) < 2:
+                continue
+            sum_segment = sum_len[starts[0] + m] - sum_len[starts[0]]
+            sum_saving_per = sum_segment - 1
+            starts_sorted = sorted(starts)
+            k = 0
+            last_end = -1
+            for start in starts_sorted:
+                if start > last_end:
+                    k += 1
+                    last_end = start + m - 1
+            if k >= 2:
+                current_saving = sum_saving_per * k
+                if current_saving > max_saving:
+                    max_saving = current_saving
+    
+    print(original_length - max_saving, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 6
+aa bb aa aa bb bb
+""",
+            "output": \
+"""\
+11
+""",
+        }, 
+    ]
 
-to be or not to be
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum_len is:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sum_len[0] =0
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-sum_len[1] =2 (to)
+    print('Tests passed 😎')
 
-sum_len[2] =4 (to + be)
 
-sum_len[3] =6 (to + be + or)
+if __name__ == '__main__':
+    test()
 
-sum_len[4] =9 (to be or not)
 
-sum_len[5] =11 (to be or not to)
+```
 
-sum_len[6] =13 (to be or not to be)
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-original_length =13 +5 (spaces) =18.
-
-For m=2:
-
-groups for the segments "to be" will have starts [0,4]. sum_segment is 2+2=4. sum_saving_per is 3.
-
-Processing starts_sorted [0,4]:
-
-k starts at 0, last_end -1.
-
-start=0: 0 >-1 → k=1, last_end=0+1=1.
-
-start=4:4>1 → k=2. So current_saving=3*2=6.
-
-Which is the maximum_saving.
-
-Thus, answer is 18-6=12.
-
-Sample 2:
-
-n=10
-
-words = ['a', 'ab', 'a', 'a', 'b', 'ab', 'a', 'a', 'b', 'c']
-
-sum_len is:
-
-sum_len[0] =0
-
-sum_len[1] =1 (a)
-
-sum_len[2] =1+2=3 (ab)
-
-sum_len[3] =3+1=4 (a)
-
-sum_len[4] =4+1=5 (a)
-
-sum_len[5] =5+1=6 (b)
-
-sum_len[6] =6+2=8 (ab)
-
-sum_len[7] =8+1=9 (a)
-
-sum_len[8] =9+1=10 (a)
-
-sum_len[9] =10+1=11 (b)
-
-sum_len[10] =11+1=12 (c)
-
-original_length is 12 (sum) +9 (spaces) =21.
-
-The code for m=4:
-
-Looking for segments of length 4. One group is [ab, a, a, b] (words[1-4] and words[5-8]).
-
-sum_segment for starts[0] (i=1) is sum_len[5] - sum_len[1] =6 -1 =5. sum_saving_per is 5-1=4.
-
-starts are [1,5]. sorted as [1,5].
-
-k=2. current_saving=4*2=8. So original_length -8=13.
-
-Which matches the sample.
+```
 
 Sample 3:
 

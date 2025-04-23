@@ -840,33 +840,122 @@ But this would require recomputing the cost[j][i] for each j and i during the DP
 
 Thus, perhaps the best way is to proceed with the code as outlined, and hope that Python can handle it within the time constraints.
 
-Now, let's test with the examples.
+Testing against sample input 1.
 
-First example: "aaaaaaaaaa" (10 a's).
+```python
+def main(input_stream, output_stream):
+    import sys
+    s = input_stream.readline().strip()
+    n = len(s)
+    if n == 0:
+        print(0, file=output_stream)
+        return
 
-The cost for j=0, i=9 (since Python is 0-based):
+    # Precompute divisors for numbers up to 8000
+    max_div = n
+    divisors = [[] for _ in range(max_div + 1)]
+    for k in range(1, max_div + 1):
+        for d in range(1, int(k ** 0.5) + 1):
+            if k % d == 0:
+                divisors[k].append(d)
+                if d != k // d:
+                    divisors[k].append(k // d)
+        divisors[k].sort()
 
-l =10.
+    # Precompute prefix functions for each j
+    prefix_funcs = []
+    for j in range(n):
+        m = n - j
+        pi = [0] * m
+        for i in range(1, m):
+            k = pi[i - 1]
+            while k > 0 and s[j + i] != s[j + k]:
+                k = pi[k - 1]
+            if s[j + i] == s[j + k]:
+                k += 1
+            pi[i] = k
+        prefix_funcs.append(pi)
 
-prefix function for j=0 is computed for the entire string. For the substring of length 10, the prefix function builds up, and the last element (pi[9]) is 9 (since each character matches the previous one). So p = 10 -9 =1. l mod p =0. k_max=10.
+    # Precompute cost[j][i] where j is start and i is end (inclusive)
+    cost = [[0] * n for _ in range(n)]
+    for j in range(n):
+        pi = prefix_funcs[j]
+        for i in range(j, n):
+            l = i - j + 1
+            if l == 0:
+                cost[j][i] = 0
+                continue
+            current_pi = pi[i - j]
+            p = l - current_pi
+            if l % p != 0:
+                current_cost = 1 + l
+            else:
+                k_max = l // p
+                if k_max == 1:
+                    current_cost = 1 + l
+                else:
+                    min_cost = float('inf')
+                    for d in divisors[k_max]:
+                        temp = len(str(d)) + (l // d)
+                        if temp < min_cost:
+                            min_cost = temp
+                    current_cost = min(1 + l, min_cost)
+            cost[j][i] = current_cost
 
-divisors of 10 are 1,2,5,10.
+    # Dynamic programming to find the minimal total cost
+    dp = [float('inf')] * (n + 1)
+    dp[0] = 0
+    for i in range(1, n + 1):
+        for j in range(i):
+            current_cost = dp[j] + cost[j][i - 1]
+            if current_cost < dp[i]:
+                dp[i] = current_cost
 
-For each d:
+    print(dp[n], file=output_stream)
 
-d=1: cost is 1 + 10/1 =11 → which is 1+10=11.
 
-d=2: len(2)=1, 10/2=5 → cost 6.
 
-d=5: len(5)=1, cost 1+2=3.
+def test():
+    import io
 
-d=10: len(10)=2, cost 2 +1=3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+abcab
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-So the minimal among the divisors is 3. Then compare with 1 +10=11. So the minimal cost is 3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So the DP for i=10 (the full string) would find that j=0, cost[0][9]=3. So dp[10] =0 +3=3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Which matches the first example.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: "abcab".
 

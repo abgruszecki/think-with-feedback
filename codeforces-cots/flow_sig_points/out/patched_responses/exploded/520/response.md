@@ -1271,31 +1271,141 @@ for S in possible_S:
 
 print(max_count)
 
-But let's test the code.
+Testing against sample input 1.
 
-In the first example:
+```python
+import bisect
 
-non_important boxes are 5 and 2. subset sums are 0,2,5,7.
 
-possible_S is these values.
+def main(input_stream, output_stream):
+    n, l, r = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-important boxes: [3,2,1].
+    important = []
+    non_important = []
+    for ai, bi in zip(a, b):
+        if bi == 1:
+            important.append(ai)
+        else:
+            non_important.append(ai)
 
-sorted_asc: [1,2,3]. prefix_asc is [0,1,3] (sum of first 0, 1, 2 boxes).
+    # Compute possible subset sums for non_important
+    sum_non = sum(non_important)
+    possible_S = set()
+    if not non_important:
+        possible_S.add(0)
+    else:
+        max_sum = sum_non
+        dp = [False] * (max_sum + 1)
+        dp[0] = True
+        for ai in non_important:
+            for s in range(max_sum, ai - 1, -1):
+                if dp[s - ai]:
+                    dp[s] = True
+        possible_S = {s for s in range(max_sum + 1) if dp[s]}
 
-sorted_desc: [3,2,1]. prefix_asc is [0,3,5].
+    # Precompute prefix sums for important boxes in both sorted orders
+    k = len(important)
+    prefix_asc = []
+    prefix_desc = []
+    if k > 0:
+        sorted_asc = sorted(important)
+        sorted_desc = sorted(important, reverse=True)
+        
+        # Compute prefix_asc (sums up to k-1 elements)
+        prefix_asc = [0]
+        current_sum = 0
+        for a in sorted_asc[:-1]:
+            current_sum += a
+            prefix_asc.append(current_sum)
+        
+        # Compute prefix_desc (sums up to k-1 elements)
+        prefix_desc = [0]
+        current_sum = 0
+        for a in sorted_desc[:-1]:
+            current_sum += a
+            prefix_desc.append(current_sum)
 
-For S=0:
+    max_count = 0
 
-L' =3, R'=6.
+    for S in possible_S:
+        if not important:
+            current_count = 0
+        else:
+            L_prime = max(l - S, 0)
+            R_prime = r - S
+            if R_prime < 0:
+                current_count = 0
+            else:
+                # Check sorted_asc
+                count_asc = 0
+                left = bisect.bisect_left(prefix_asc, L_prime)
+                if left <= len(prefix_asc) - 1:
+                    right = bisect.bisect_right(prefix_asc, R_prime) - 1
+                    if left <= right:
+                        count_asc = right - left + 1
+                
+                # Check sorted_desc
+                count_desc = 0
+                left = bisect.bisect_left(prefix_desc, L_prime)
+                if left <= len(prefix_desc) - 1:
+                    right = bisect.bisect_right(prefix_desc, R_prime) - 1
+                    if left <= right:
+                        count_desc = right - left + 1
+                
+                current_count = max(count_asc, count_desc)
+        
+        if current_count > max_count:
+            max_count = current_count
 
-prefix_asc [0,1,3]: elements in [3,6] are 3. count_asc=1.
+    print(max_count, file=output_stream)
 
-prefix_desc [0,3,5]: elements in [3,6] are 3 and5. count_desc=2.
 
-current_count is 2.
 
-Which is correct.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 2 5
+3 6
+1 1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, the code should work.
 

@@ -1357,9 +1357,11 @@ But also, when c is 0, the max_without_ab is the answer.
 
 So in code:
 
-def main():
+Testing against sample input 1.
 
-    a, b, c = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    a, b, c = map(int, input_stream.readline().rstrip("\n").split())
 
     max_total = 0
 
@@ -1485,23 +1487,51 @@ def main():
 
         max_total = current
 
-    print(max_total)
+    print(max_total, file=output_stream)
 
-But this code may not handle all cases.
 
-Testing the first example:
 
-Input: 1 1 1.
+def test():
+    import io
 
-Case 1: pre_b can be 1 (b=1), post_a can be 1 (a=1).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 1 2
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
 
-remaining_a =0, remaining_b=0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-after post_a: current is 0 (since remaining_b is 0).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So total is 1 + 2*1 +1 +0=4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Which is correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 The code would compute this.
 

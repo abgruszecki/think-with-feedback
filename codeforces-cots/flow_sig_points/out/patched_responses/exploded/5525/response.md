@@ -434,125 +434,92 @@ For each i, compute the dp[i][0] and dp[i][1].
 
 So code:
 
-n = int(input())
+Testing against sample input 1.
 
-slices = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-sum_s = sum(slices)
+    slices = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-# Initialize DP table.
+    sum_s = sum(slices)
 
-dp = [[0]*2 for _ in range(n+1)]  # dp[i][d] for i from 0 to n.
+    # Initialize DP table.
 
-for i in range(n-1, -1, -1):
+    dp = [[0]*2 for _ in range(n+1)]  # dp[i][d] for i from 0 to n.
 
-    for d in range(2):
+    for i in range(n-1, -1, -1):
 
-        other_d = 1 - d
+        for d in range(2):
 
-        # Option 1: take the slice.
+            other_d = 1 - d
 
-        # The next state is i+1, decider is other_d.
+            # Option 1: take the slice.
 
-        take = slices[i] - dp[i+1][other_d]
+            # The next state is i+1, decider is other_d.
 
-        # Option 2: give the slice to the other.
+            take = slices[i] - dp[i+1][other_d]
 
-        # The next state is i+1, decider is d.
+            # Option 2: give the slice to the other.
 
-        give = -slices[i] + dp[i+1][d]
+            # The next state is i+1, decider is d.
 
-        dp[i][d] = max(take, give)
+            give = -slices[i] + dp[i+1][d]
 
-diff = dp[0][1]
+            dp[i][d] = max(take, give)
 
-alice = (sum_s - diff) // 2
+    diff = dp[0][1]
 
-bob = (sum_s + diff) // 2
+    alice = (sum_s - diff) // 2
 
-print(alice, bob)
+    bob = (sum_s + diff) // 2
 
-Wait, but let's test this code with the first sample.
+    print(alice, bob, file=output_stream)
 
-Sample 1:
 
-i=2 (third slice, since slices are 0-based?), but in Python, the slices are [141, 592, 653]. n is 3.
 
-For i in range(2, -1, -1):
+def test():
+    import io
 
-i starts at 2 (third slice?), then 1, then 0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+10 21 10 21 10
+""",
+            "output": \
+"""\
+31 41
+""",
+        }, 
+    ]
 
-But let's see.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-n=3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-slices is [141, 592, 653].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-sum_s = 141+592+653=1386.
+    print('Tests passed 😎')
 
-The dp array is of size n+1 =4. For i=3, dp[i][0] and [1] are 0.
 
-Now, for i=2 (third slice), d in 0 and 1.
+if __name__ == '__main__':
+    test()
 
-For d=0:
 
-other_d=1.
+```
 
-take = 653 - dp[3][1] → 653 -0=653.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-give = -653 + dp[3][0] → -653 +0 =-653.
-
-So dp[2][0] = max(653, -653) → 653.
-
-For d=1:
-
-take =653 - dp[3][0] →653-0=653.
-
-give =-653 + dp[3][1] →-653+0= -653.
-
-So dp[2][1] =653.
-
-Then i=1 (second slice).
-
-For d=0:
-
-other_d=1.
-
-take =592 - dp[2][1] →592-653= -61.
-
-give =-592 + dp[2][0] →-592 +653=61.
-
-So max(-61,61) →61. dp[1][0] =61.
-
-For d=1:
-
-take=592 - dp[2][0] →592-653= -61.
-
-give= -592 + dp[2][1] →-592 +653=61.
-
-So max(-61,61) →61. dp[1][1] =61.
-
-Then i=0 (first slice).
-
-d=0:
-
-other_d=1.
-
-take=141 - dp[1][1] →141-61=80.
-
-give= -141 + dp[1][0] →-141+61= -80.
-
-max(80, -80) →80. So dp[0][0] =80.
-
-d=1:
-
-take=141 - dp[1][0] →141-61=80.
-
-give= -141 + dp[1][1] →-141+61= -80.
-
-max(80, -80) →80. So dp[0][1] =80.
-
-So diff is 80. alice = (1386-80)/2 = 1306/2=653. Bob (1386+80)/2=1466/2=733. Correct.
+```
 
 So the code works for the first sample.
 

@@ -36,21 +36,61 @@ Output that sum.
 
 So in Python:
 
-x = list(map(int, input().split()))
-x_sorted = sorted(x)
-median = x_sorted[1]
-total = 0
-for num in x:
-    total += abs(num - median)
-print(total)
+Testing against sample input 1.
 
-That's the code. It's O(1) time and space, since the input is fixed size, so no issues with constraints.
+```python
+def main(input_stream, output_stream):
+    x = list(map(int, input_stream.readline().rstrip("\n").split()))
+    x_sorted = sorted(x)
+    median = x_sorted[1]
+    total = 0
+    for num in x:
+        total += abs(num - median)
+    print(total, file=output_stream)
 
-Testing the first sample:
 
-Input 7 1 4. Sorted is [1,4,7]. Median 4.
 
-Sum: |7-4| (3) + |1-4| (3) + |4-4| (0) → 6. Correct.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+30 20 10
+""",
+            "output": \
+"""\
+20
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample: 30 20 10 sorted to 10,20,30. Median 20. Sum 10 (20-10) + 0 (20-20) + 10 (30-20) → 20. Correct.
 

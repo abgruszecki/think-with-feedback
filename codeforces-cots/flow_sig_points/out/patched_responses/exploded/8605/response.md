@@ -647,130 +647,131 @@ prefix[i+1][j+1] = prefix[i][j+1] + prefix[i+1][j] - prefix[i][j] + (1 if cell i
 
 So code for prefix sum:
 
-n, m = map(int, input().split())
-grid = []
-total_b = 0
-bs = []
-for i in range(n):
-    row = input().strip()
-    grid_row = []
-    for j, c in enumerate(row):
-        if c == 'B':
-            total_b +=1
-            bs.append( (i,j) )
-    grid.append(row)
+Testing against sample input 1.
 
-if not bs:
-    print(1)
-    exit()
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    grid = []
+    total_b = 0
+    bs = []
+    for i in range(n):
+        row = input_stream.readline().rstrip("\n").strip()
+        grid_row = []
+        for j, c in enumerate(row):
+            if c == 'B':
+                total_b +=1
+                bs.append( (i,j) )
+        grid.append(row)
 
-min_row = min( i for i,j in bs )
-max_row = max( i for i,j in bs )
-min_col = min( j for i,j in bs )
-max_col = max( j for i,j in bs )
+    if not bs:
+        print(1, file=output_stream)
+        return
 
-s_min = max( (max_row - min_row +1), (max_col - min_col +1) )
-s_max = min(n, m)
+    min_row = min( i for i,j in bs )
+    max_row = max( i for i,j in bs )
+    min_col = min( j for i,j in bs )
+    max_col = max( j for i,j in bs )
 
-if s_min > s_max:
-    print(-1)
-    exit()
+    s_min = max( (max_row - min_row +1), (max_col - min_col +1) )
+    s_max = min(n, m)
 
-# Precompute prefix sum of B's.
-prefix = [ [0]*(m+1) for _ in range(n+1) ]
+    if s_min > s_max:
+        print(-1, file=output_stream)
+        return
 
-for i in range(n):
-    row_sum = 0
-    for j in range(m):
-        # compute prefix[i+1][j+1]
-        current = 1 if grid[i][j] == 'B' else 0
-        row_sum += current
-        prefix[i+1][j+1] = prefix[i][j+1] + row_sum
+    # Precompute prefix sum of B's.
+    prefix = [ [0]*(m+1) for _ in range(n+1) ]
 
-minimal_paint = float('inf')
+    for i in range(n):
+        row_sum = 0
+        for j in range(m):
+            # compute prefix[i+1][j+1]
+            current = 1 if grid[i][j] == 'B' else 0
+            row_sum += current
+            prefix[i+1][j+1] = prefix[i][j+1] + row_sum
 
-for s in range(s_min, s_max +1):
-    # compute possible i's and j's
-    i_low = max(0, max_row - s +1)
-    i_high = min( min_row, n - s )
+    minimal_paint = float('inf')
 
-    if i_low > i_high:
-        continue
+    for s in range(s_min, s_max +1):
+        # compute possible i's and j's
+        i_low = max(0, max_row - s +1)
+        i_high = min( min_row, n - s )
 
-    j_low = max(0, max_col - s +1)
-    j_high = min( min_col, m - s )
+        if i_low > i_high:
+            continue
 
-    if j_low > j_high:
-        continue
+        j_low = max(0, max_col - s +1)
+        j_high = min( min_col, m - s )
 
-    for i in range(i_low, i_high +1):
-        for j in range(j_low, j_high +1):
-            x1, y1 = i, j
-            x2 = x1 + s -1
-            y2 = y1 + s -1
+        if j_low > j_high:
+            continue
 
-            # calculate sum_b
-            sum_b = prefix[x2+1][y2+1] - prefix[x1][y2+1] - prefix[x2+1][y1] + prefix[x1][y1]
+        for i in range(i_low, i_high +1):
+            for j in range(j_low, j_high +1):
+                x1, y1 = i, j
+                x2 = x1 + s -1
+                y2 = y1 + s -1
 
-            if sum_b != total_b:
-                continue
+                # calculate sum_b
+                sum_b = prefix[x2+1][y2+1] - prefix[x1][y2+1] - prefix[x2+1][y1] + prefix[x1][y1]
 
-            num_w = s*s - sum_b
-            if num_w < minimal_paint:
-                minimal_paint = num_w
+                if sum_b != total_b:
+                    continue
 
-if minimal_paint == float('inf'):
-    print(-1)
-else:
-    print(minimal_paint)
+                num_w = s*s - sum_b
+                if num_w < minimal_paint:
+                    minimal_paint = num_w
 
-Wait, but the code for the prefix sum is incorrect. The way the code is written:
+    if minimal_paint == float('inf'):
+        print(-1, file=output_stream)
+    else:
+        print(minimal_paint, file=output_stream)
 
-prefix[i+1][j+1] = prefix[i][j+1] + row_sum
 
-But row_sum is the sum of the current row up to column j. This is incorrect. Because the correct formula for the prefix sum is:
 
-prefix[i+1][j+1] = prefix[i][j+1] + prefix[i+1][j] - prefix[i][j] + current.
+def test():
+    import io
 
-But in the code, the row_sum is added. So perhaps the code is not correctly calculating the 2D prefix sum.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 2
+BB
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-Yes, the code for the prefix sum is wrong. Let's correct it.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The correct way to compute the prefix sum is:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-for i in range(n):
-    for j in range(m):
-        prefix[i+1][j+1] = prefix[i+1][j] + prefix[i][j+1] - prefix[i][j] + (1 if grid[i][j] == 'B' else 0)
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So each cell's prefix is the sum to the left, sum above, subtract the overlap, then add the current cell.
+    print('Tests passed 😎')
 
-So the code needs to be:
 
-prefix = [ [0]*(m+1) for _ in range(n+1) ]
-for i in range(n):
-    for j in range(m):
-        current = 1 if grid[i][j] == 'B' else 0
-        prefix[i+1][j+1] = prefix[i+1][j] + prefix[i][j+1] - prefix[i][j] + current
+if __name__ == '__main__':
+    test()
 
-Yes.
 
-So in the previous code, the code for building the prefix is incorrect. So that's a bug.
+```
 
-So the code must be adjusted to compute the prefix sum correctly.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So the corrected code for the prefix sum is as above.
-
-This is critical to get right.
-
-Testing the first sample input:
-
-After building the prefix sum, the sum_b for the square (i=1, j=1, s=3) should be 4 (since the existing B's are 4, and the square includes all of them and no others).
-
-But in the grid, there are 4 B's. So sum_b=4, which equals total_b=4. So the square is valid.
-
-Then, the number of W's is 3*3 -4=5. Which matches the sample.
-
-So the code with the corrected prefix sum should work.
+```
 
 Another example: the third test case, all W. total_b=0, so output 1.
 

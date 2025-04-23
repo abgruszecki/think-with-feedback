@@ -98,27 +98,68 @@ But converting to integer and back to string is unnecessary. Because for the pur
 
 Therefore, the code can be optimized by not converting the numbers to integers at all. Just read them as strings. So:
 
-n, k = map(int, input().split())
-nums = input().split()
+Testing against sample input 1.
 
-count = 0
-for num_str in nums:
-    cnt = 0
-    for c in num_str:
-        if c == '4' or c == '7':
-            cnt +=1
-    if cnt <=k:
-        count +=1
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    nums = input_stream.readline().rstrip("\n").split()
 
-print(count)
+    count = 0
+    for num_str in nums:
+        cnt = 0
+        for c in num_str:
+            if c == '4' or c == '7':
+                cnt +=1
+        if cnt <=k:
+            count +=1
 
-This would work. Because the input numbers are given as strings (split from the input line), and their digits are directly accessible. So this avoids converting each number to an integer and then back to a string, which could save some time. Though in Python, the split is of strings, so when you do list(map(str, ...)) when the input was split into strings, but the code above is correct.
+    print(count, file=output_stream)
 
-This approach is more efficient as it skips unnecessary conversions. So the code is correct.
 
-Testing the first sample:
 
-Input line 2: "1 2 4" → split into ["1", "2", "4"]. Each has 0,0,1 lucky digits. All counts <=4. So 3.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2
+447 44 77
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample: input line is ["447", "44", "77"]. Counts are 3, 2, 2. So two of them are <=2.
 

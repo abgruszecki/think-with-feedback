@@ -92,62 +92,141 @@ Now, in code:
 
 In Python:
 
-n = int(input())
-a = list(map(int, input().split()))
-pos = {num: idx+1 for idx, num in enumerate(a)}  # because the array is 0-based in the list, but positions are 1-based.
+Testing against sample input 1.
 
-m = int(input())
-b = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    pos = {num: idx+1 for idx, num in enumerate(a)}  # because the array is 0-based in the list, but positions are 1-based.
 
-vasya = 0
-petya = 0
+    m = int(input_stream.readline().rstrip("\n"))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for num in b:
-    p = pos[num]
-    vasya += p
-    petya += (n - p + 1)
+    vasya = 0
+    petya = 0
 
-print(vasya, petya)
+    for num in b:
+        p = pos[num]
+        vasya += p
+        petya += (n - p + 1)
 
-Wait, but this code uses a loop through all elements in b. For m=1e5, this is O(m), which is acceptable.
+    print(vasya, petya, file=output_stream)
 
-Yes.
 
-So this code should handle all cases correctly.
 
-Let's test the sample inputs.
+def test():
+    import io
 
-First sample:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2
-
-1 2
-
-1
-
-1
-
-The pos is {1:1, 2:2}.
-
-Then for query 1, p is 1. Vasya is 1, petya is 2. Output 1 2.
-
-Second sample:
-
-2
-
 2 1
-
 1
-
 1
+""",
+            "output": \
+"""\
+2 1
+""",
+        }, 
+    ]
 
-pos is {2:1, 1:2}.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Query 1 → p=2. Vasya +=2, petya += (2-2+1)=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Output 2 1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    pos = {num: idx+1 for idx, num in enumerate(a)}  # because the array is 0-based in the list, but positions are 1-based.
+
+    m = int(input_stream.readline().rstrip("\n"))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    vasya = 0
+    petya = 0
+
+    for num in b:
+        p = pos[num]
+        vasya += p
+        petya += (n - p + 1)
+
+    print(vasya, petya, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+3 1 2
+3
+1 2 3
+""",
+            "output": \
+"""\
+6 6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

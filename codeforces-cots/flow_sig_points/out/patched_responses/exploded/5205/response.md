@@ -278,127 +278,269 @@ But how to handle the original number as a candidate? For example, if n is 999, 
 
 So in code:
 
-n_str = input().strip()
+Testing against sample input 1.
 
-max_product = 0
+```python
+def main(input_stream, output_stream):
+    n_str = input_stream.readline().rstrip("\n").strip()
 
-candidates = []
+    max_product = 0
 
-length = len(n_str)
+    candidates = []
 
-for i in range(length):
+    length = len(n_str)
 
-    # first i+1 digits
+    for i in range(length):
 
-    first_part = n_str[:i+1]
+        # first i+1 digits
 
-    # subtract 1
+        first_part = n_str[:i+1]
 
-    first_num = int(first_part)
+        # subtract 1
 
-    first_num -=1
+        first_num = int(first_part)
 
-    if first_num <0:
+        first_num -=1
 
-        continue # shouldn't happen for n >=1
+        if first_num <0:
 
-    # convert to string, pad with leading zeros to i+1 digits
+            continue # shouldn't happen for n >=1
 
-    new_first_part = str(first_num).zfill(i+1)
+        # convert to string, pad with leading zeros to i+1 digits
 
-    # create the candidate
+        new_first_part = str(first_num).zfill(i+1)
 
-    candidate = new_first_part + '9'*(length - (i+1))
+        # create the candidate
 
-    # convert to integer and then back to string to avoid leading zeros
+        candidate = new_first_part + '9'*(length - (i+1))
 
-    candidate_str = str(int(candidate)) if candidate else '0'
+        # convert to integer and then back to string to avoid leading zeros
 
-    # but if the candidate is 0, then it's not considered (since n >=1)
+        candidate_str = str(int(candidate)) if candidate else '0'
 
-    # but when first_num is 0 followed by 9s, it's possible.
+        # but if the candidate is 0, then it's not considered (since n >=1)
 
-    # but in code, after converting to int and back to str, leading zeros are removed.
+        # but when first_num is 0 followed by 9s, it's possible.
 
-    # so for candidate_str, it's the number without leading zeros.
+        # but in code, after converting to int and back to str, leading zeros are removed.
 
-    # but candidate_str can't be empty. For example, when candidate is '0'.
+        # so for candidate_str, it's the number without leading zeros.
 
-    # So, add all possible candidates except those that are zero?
+        # but candidate_str can't be empty. For example, when candidate is '0'.
 
-    # But since n >=1, the original number is at least 1. So the code can process all candidates, including 0 (but the original number will have a higher product).
+        # So, add all possible candidates except those that are zero?
 
-    candidates.append(candidate)
+        # But since n >=1, the original number is at least 1. So the code can process all candidates, including 0 (but the original number will have a higher product).
 
-# add the original number as a candidate
+        candidates.append(candidate)
 
-candidates.append(n_str)
+    # add the original number as a candidate
 
-# now process all candidates:
+    candidates.append(n_str)
 
-for candidate in candidates:
+    # now process all candidates:
 
-    # convert to integer, then to string to process digits.
+    for candidate in candidates:
 
-    num = int(candidate)
+        # convert to integer, then to string to process digits.
 
-    if num ==0:
+        num = int(candidate)
 
-        product =0
+        if num ==0:
 
-    else:
+            product =0
 
-        product = 1
+        else:
 
-        s = str(num)
+            product = 1
 
-        for ch in s:
+            s = str(num)
 
-            product *= int(ch)
+            for ch in s:
 
-    if product > max_product:
+                product *= int(ch)
 
-        max_product = product
+        if product > max_product:
 
-print(max_product)
+            max_product = product
 
-Wait, but in the code above, the candidate is stored as a string (like '0999'). When converting to integer, it becomes 999, then when converting back to string, it's '999'. So the product is 9*9*9=729. Which is correct.
+    print(max_product, file=output_stream)
 
-But in the code, the code loops through all candidates (strings), converts them to integers (to remove leading zeros), then converts to string again. So even if the candidate was '0999', the code would process it as 999 → product 729.
 
-So this part is handled correctly.
 
-Another point: the code may generate duplicates. For example, in the case where two different i's generate the same candidate. But since we are adding all possible candidates, even duplicates, the code will process them multiple times. But since the maximum is tracked, it's not a problem. Processing the same candidate multiple times doesn't affect the result, but may slightly slow the code. But since the number of candidates is O(10), this is negligible.
+def test():
+    import io
 
-Testing the code against the examples.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
 
-First example:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Input: 390 → '390'
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Candidates:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=0: first_part '3' → 3-1=2 → '2' → append two 9s → '299' → 299 → product 2*9*9=162.
+    print('Tests passed 😎')
 
-i=1: first_part '39' →39-1=38 → '38' (padded to 2 digits) → append 1 9 → '389' → product 3*8*9=216.
 
-i=2: first_part '390' →390-1=389 → '389' (padded to 3 digits) → append 0 9s → '389' → product 3*8*9=216.
+if __name__ == '__main__':
+    test()
 
-Original candidate: '390' → product 3*9*0=0.
 
-So the candidates are 299, 389, 389, 390. The maximum product is 216.
+```
 
-So code would return 216. Correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Second example: input 7 → '7'.
+```
 
-Candidates:
+Testing against sample input 2.
 
-i=0: first_part '7' →7-1=6 → '6' → append 0 9s → '6'. product 6.
+```python
+def main(input_stream, output_stream):
+    n_str = input_stream.readline().rstrip("\n").strip()
 
-Original candidate: 7 → product 7.
+    max_product = 0
 
-So maximum is 7. Correct.
+    candidates = []
+
+    length = len(n_str)
+
+    for i in range(length):
+
+        # first i+1 digits
+
+        first_part = n_str[:i+1]
+
+        # subtract 1
+
+        first_num = int(first_part)
+
+        first_num -=1
+
+        if first_num <0:
+
+            continue # shouldn't happen for n >=1
+
+        # convert to string, pad with leading zeros to i+1 digits
+
+        new_first_part = str(first_num).zfill(i+1)
+
+        # create the candidate
+
+        candidate = new_first_part + '9'*(length - (i+1))
+
+        # convert to integer and then back to string to avoid leading zeros
+
+        candidate_str = str(int(candidate)) if candidate else '0'
+
+        # but if the candidate is 0, then it's not considered (since n >=1)
+
+        # but when first_num is 0 followed by 9s, it's possible.
+
+        # but in code, after converting to int and back to str, leading zeros are removed.
+
+        # so for candidate_str, it's the number without leading zeros.
+
+        # but candidate_str can't be empty. For example, when candidate is '0'.
+
+        # So, add all possible candidates except those that are zero?
+
+        # But since n >=1, the original number is at least 1. So the code can process all candidates, including 0 (but the original number will have a higher product).
+
+        candidates.append(candidate)
+
+    # add the original number as a candidate
+
+    candidates.append(n_str)
+
+    # now process all candidates:
+
+    for candidate in candidates:
+
+        # convert to integer, then to string to process digits.
+
+        num = int(candidate)
+
+        if num ==0:
+
+            product =0
+
+        else:
+
+            product = 1
+
+            s = str(num)
+
+            for ch in s:
+
+                product *= int(ch)
+
+        if product > max_product:
+
+            max_product = product
+
+    print(max_product, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1000000000
+""",
+            "output": \
+"""\
+387420489
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: input 1000000000 → '1000000000'.
 

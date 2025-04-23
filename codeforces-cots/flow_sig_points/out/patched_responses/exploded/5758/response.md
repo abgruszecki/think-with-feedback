@@ -129,39 +129,78 @@ So the code can be written as:
 
 Read n.
 
-s = input().strip()
+Testing against sample input 1.
 
-total_I = s.count('I')
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-count = 0
+    total_I = s.count('I')
 
-for c in s:
+    count = 0
 
-   if c == 'F':
+    for c in s:
 
-      continue
+       if c == 'F':
 
-   # else, check if other I's are zero.
+          continue
 
-   # required_Is is total_I minus (1 if current is I)
+       # else, check if other I's are zero.
 
-   required_Is = total_I - (1 if c == 'I' else 0)
+       # required_Is is total_I minus (1 if current is I)
 
-   if required_Is == 0:
+       required_Is = total_I - (1 if c == 'I' else 0)
 
-      count +=1
+       if required_Is == 0:
 
-print(count)
+          count +=1
 
-Yes, that's straightforward.
+    print(count, file=output_stream)
 
-Testing this code against the samples:
 
-First sample:
 
-s is 'AFFAAA' → total_I is 0.
+def test():
+    import io
 
-Each A in positions 0,3,4,5 (non-F) → for each, required_Is is 0-0=0 → count each. So 4.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+AFI
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

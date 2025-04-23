@@ -389,197 +389,310 @@ Then, initialize the min_len and dp tables.
 
 In Python:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-if n ==0:
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-    print(0)
+    if n ==0:
 
-    exit()
+        print(0, file=output_stream)
 
-# Initialize DP tables
+        return
 
-INF = float('inf')
+    # Initialize DP tables
 
-min_len = [[0]*n for _ in range(n)]
+    INF = float('inf')
 
-dp = [[0]*n for _ in range(n)]
+    min_len = [[0]*n for _ in range(n)]
 
-for i in range(n):
+    dp = [[0]*n for _ in range(n)]
 
-    min_len[i][i] =1
+    for i in range(n):
 
-    dp[i][i] = a[i]
+        min_len[i][i] =1
 
-for l in range(2, n+1):
+        dp[i][i] = a[i]
 
-    for i in range(n - l +1):
+    for l in range(2, n+1):
 
-        j = i + l -1
+        for i in range(n - l +1):
 
-        can_merge = False
+            j = i + l -1
 
-        max_val = -1
+            can_merge = False
 
-        min_sum = INF
+            max_val = -1
 
-        for k in range(i, j):
+            min_sum = INF
 
-            # Check if left and right can be merged into 1 each
+            for k in range(i, j):
 
-            if min_len[i][k] ==1 and min_len[k+1][j] ==1:
+                # Check if left and right can be merged into 1 each
 
-                left_val = dp[i][k]
+                if min_len[i][k] ==1 and min_len[k+1][j] ==1:
 
-                right_val = dp[k+1][j]
+                    left_val = dp[i][k]
 
-                if left_val == right_val:
+                    right_val = dp[k+1][j]
 
-                    can_merge = True
+                    if left_val == right_val:
 
-                    new_val = left_val +1
+                        can_merge = True
 
-                    if new_val > max_val:
+                        new_val = left_val +1
 
-                        max_val = new_val
+                        if new_val > max_val:
 
-            # Compute min_sum
+                            max_val = new_val
 
-            current_sum = min_len[i][k] + min_len[k+1][j]
+                # Compute min_sum
 
-            if current_sum < min_sum:
+                current_sum = min_len[i][k] + min_len[k+1][j]
 
-                min_sum = current_sum
+                if current_sum < min_sum:
 
-        if can_merge:
+                    min_sum = current_sum
 
-            min_len[i][j] =1
+            if can_merge:
 
-            dp[i][j] = max_val
+                min_len[i][j] =1
 
-        else:
+                dp[i][j] = max_val
 
-            min_len[i][j] = min_sum
+            else:
 
-print(min_len[0][n-1])
+                min_len[i][j] = min_sum
 
-Wait, but in the code, the 'min_sum' is the minimum sum over all splits. So even if some splits allow merging into 1, but others don't, the code first checks all splits for possible merging and tracks the max_val. Then, if can_merge is true, it sets the min_len to 1 and the dp to max_val. Else, the min_len is the min_sum.
+    print(min_len[0][n-1], file=output_stream)
 
-This should correctly model the DP approach.
 
-Testing this code against the first sample:
 
-Sample 1:
+def test():
+    import io
 
-Input:
-
-5
-
-4 3 2 2 3
-
-The code should compute min_len[0][4] as 2.
-
-Let's see how the code proceeds.
-
-Processing l=5 (i=0, j=4):
-
-Check k from 0 to 3.
-
-For each k:
-
-For example, k=3:
-
-left is [0,3], which is processed when l=4.
-
-Wait, but for the code to correctly compute min_len for all possible l, it's processed in order of increasing l.
-
-But for l=5, during the loop, when processing i=0, j=4 (l=5), the code checks all k from 0 to 3.
-
-For each k, check if left and right can be merged into 1.
-
-For example, when k=3:
-
-left is [0,3], which has l=4. So during l=4's processing, for i=0, j=3, the code would have determined whether it can be merged into 1.
-
-Assuming that for [0,3], the code determines that min_len is 1 and dp is 5.
-
-So for k=3, left is min_len 1, right is [4][4] (3), which is min_len 1. Values are 5 and 3 → not equal. So can_merge is not triggered here.
-
-Other k's:
-
-For k=0:
-
-left is [0,0] (4), right is [1,4] (3,2,2,3). The right's min_len is 2 (from previous processing). So no.
-
-k=1: left [0,1] (4,3) → min_len 2. right [2,4] (2,2,3) → min_len 1 (value 3). So no.
-
-k=2: left [0,2] (4,3,2) → min_len 3. right [3,4] (2,3) → min_len 2. So no.
-
-k=3: as before.
-
-So for all splits, can_merge is False.
-
-Then, min_sum is the minimal sum of all splits.
-
-The code checks all k from 0 to 3, and finds the minimal sum.
-
-For example, when k=3: sum is 1 (left [0,3] is 1) + 1 (right [4,4] is 1) → sum 2.
-
-Which is the minimal sum. So min_len[0][4] is 2. Which matches the sample.
-
-Thus, the code should output 2.
-
-Similarly, the other samples should be handled correctly.
-
-Now, let's think about possible optimizations.
-
-In Python, using 2D lists for min_len and dp is feasible. But to make the code as efficient as possible, pre-allocating the lists and using integers instead of any other data type is better.
-
-But the code as written should work.
-
-Another possible optimization is to precompute the min_sum during the same loop where can_merge is checked, which is already done.
-
-Thus, the code should handle all test cases within the time constraints.
-
-Let's test the second sample:
-
-Sample 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 7
-
 3 3 4 4 4 3 3
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-Expected output: 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The code should compute min_len[0][6] as 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The code's approach should find a way to merge the entire array into two elements.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But according to the code's logic, during the processing of l=7, it will check all possible splits. If any split allows merging the left and right into the same value, then the entire array can be merged into 1 element. But in this case, the sample's output is 2, which implies that the entire array cannot be merged into a single element, but can be merged into two.
+    print('Tests passed 😎')
 
-But how?
 
-Wait, perhaps the code can merge parts of the array in such a way that the entire array is split into two segments, each of which can be merged into a single element. For example, the first part is merged into 6, and the second part into 4, which can't be merged further. So the total min_len is 2.
+if __name__ == '__main__':
+    test()
 
-But according to the code's DP approach, the minimal possible length for the entire array is the min_sum of splits. If the code can find a split where the left and right parts can be merged into their own segments, leading to a sum of 1+1=2.
 
-But why would the code not merge them into a single element? Because the left and right parts have different values.
+```
 
-So, the code would find that there's a split where left and right parts can be merged into 1 each, but their values are different. Hence, the entire array can't be merged into a single value, but the sum is 2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Thus, the code should output 2.
+```
 
-So, the code should handle this correctly.
+Testing against sample input 2.
 
-The third sample:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
+    if n == 0:
+        print(0, file=output_stream)
+        return
+
+    INF = float('inf')
+    min_len = [[0] * n for _ in range(n)]
+    dp = [[0] * n for _ in range(n)]
+
+    for i in range(n):
+        min_len[i][i] = 1
+        dp[i][i] = a[i]
+
+    for l in range(2, n + 1):
+        for i in range(n - l + 1):
+            j = i + l - 1
+            can_merge = False
+            max_val = -1
+            min_sum = INF
+            for k in range(i, j):
+                if min_len[i][k] == 1 and min_len[k+1][j] == 1:
+                    left_val = dp[i][k]
+                    right_val = dp[k+1][j]
+                    if left_val == right_val:
+                        can_merge = True
+                        current_val = left_val + 1
+                        if current_val > max_val:
+                            max_val = current_val
+                current_sum = min_len[i][k] + min_len[k+1][j]
+                if current_sum < min_sum:
+                    min_sum = current_sum
+            if can_merge:
+                min_len[i][j] = 1
+                dp[i][j] = max_val
+            else:
+                min_len[i][j] = min_sum
+
+    print(min_len[0][n-1], file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
+1 3 5
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-1 3 5 → output 3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The code will check all splits. For each split (k=0 and k=1), the left and right can't be merged into same values. So the min_sum is min(1+2, 2+1) =3. So the output is 3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    if n == 0:
+        print(0, file=output_stream)
+        return
+
+    INF = float('inf')
+    min_len = [[0] * n for _ in range(n)]
+    dp = [[0] * n for _ in range(n)]
+
+    for i in range(n):
+        min_len[i][i] = 1
+        dp[i][i] = a[i]
+
+    for l in range(2, n + 1):
+        for i in range(n - l + 1):
+            j = i + l - 1
+            can_merge = False
+            max_val = -1
+            min_sum = INF
+            for k in range(i, j):
+                if min_len[i][k] == 1 and min_len[k+1][j] == 1:
+                    left_val = dp[i][k]
+                    right_val = dp[k+1][j]
+                    if left_val == right_val:
+                        can_merge = True
+                        current_val = left_val + 1
+                        if current_val > max_val:
+                            max_val = current_val
+                current_sum = min_len[i][k] + min_len[k+1][j]
+                if current_sum < min_sum:
+                    min_sum = current_sum
+            if can_merge:
+                min_len[i][j] = 1
+                dp[i][j] = max_val
+            else:
+                min_len[i][j] = min_sum
+
+    print(min_len[0][n-1], file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+1000
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Fourth sample: 1 → output 1.
 

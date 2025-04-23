@@ -447,107 +447,126 @@ Handle k=0.
 
 Now, code:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-n, k = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-a = list(map(int, input().split()))
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-if k ==0:
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-    print(' '.join(map(str, a)))
+    if k ==0:
 
-else:
+        print(' '.join(map(str, a)), file=output_stream)
 
-    max_d = 2000  # since n can be up to 2000, and d up to 1999.
+    else:
 
-    # Precompute fact and inv_fact up to max_d.
+        max_d = 2000  # since n can be up to 2000, and d up to 1999.
 
-    fact = [1]*(max_d+1)
+        # Precompute fact and inv_fact up to max_d.
 
-    for i in range(1, max_d+1):
+        fact = [1]*(max_d+1)
 
-        fact[i] = fact[i-1] * i % MOD
+        for i in range(1, max_d+1):
 
-    inv_fact = [1]*(max_d+1)
+            fact[i] = fact[i-1] * i % MOD
 
-    inv_fact[max_d] = pow(fact[max_d], MOD-2, MOD)
+        inv_fact = [1]*(max_d+1)
 
-    for i in range(max_d-1, -1, -1):
+        inv_fact[max_d] = pow(fact[max_d], MOD-2, MOD)
 
-        inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
+        for i in range(max_d-1, -1, -1):
 
-    # Precompute coeff for d from 0 to 2000.
+            inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
 
-    coeff = [0]*(max_d +1)
+        # Precompute coeff for d from 0 to 2000.
 
-    for d in range(0, max_d +1):
+        coeff = [0]*(max_d +1)
 
-        if d ==0:
+        for d in range(0, max_d +1):
 
-            coeff[d] =1
+            if d ==0:
 
-        else:
+                coeff[d] =1
 
-            product = 1
+            else:
 
-            for x in range(d):
+                product = 1
 
-                term = (k +x) % MOD
+                for x in range(d):
 
-                product = product * term % MOD
+                    term = (k +x) % MOD
 
-            coeff[d] = product * inv_fact[d] % MOD
+                    product = product * term % MOD
 
-    # Compute the result.
+                coeff[d] = product * inv_fact[d] % MOD
 
-    res = []
+        # Compute the result.
 
-    for i in range(1, n+1):
+        res = []
 
-        s =0
+        for i in range(1, n+1):
 
-        for j in range(1, i+1):
+            s =0
 
-            d = i -j
+            for j in range(1, i+1):
 
-            s += a[j-1] * coeff[d]
+                d = i -j
 
-            s %= MOD
+                s += a[j-1] * coeff[d]
 
-        res.append(s % MOD)
+                s %= MOD
 
-    print(' '.join(map(str, res)))
+            res.append(s % MOD)
 
-But wait, the max_d is set to 2000. But in the code, when n is 2000, the maximum d is i-j where i can be 2000 and j=1, so d=1999. So in the coeff array, we need to compute up to d=1999. So setting max_d to 2000 is safe, but in practice, for d=2000, we don't use it. So the code is correct.
+        print(' '.join(map(str, res)), file=output_stream)
 
-But in the code, when d runs up to max_d (2000), but for j in 1..i, the d is up to i-1. Since i can be up to 2000, the maximum d is 1999. So for d=2000, the code computes coeff[2000], but it's never used. So no problem.
 
-But perhaps in code, max_d can be set to 1999. But for n=2000, it's okay.
 
-Now, let's test the code with the sample input 1.
+def test():
+    import io
 
-Sample Input 1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 0
+3 14 15 92 6
+""",
+            "output": \
+"""\
+3 14 15 92 6
+""",
+        }, 
+    ]
 
-3 1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-1 2 3
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-In code, k=1. max_d is 2000.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Compute coeff for d=0:1.
+    print('Tests passed 😎')
 
-d=1:
 
-product is (1+0) =1. inv_fact[1] is 1. So coeff[1]=1.
+if __name__ == '__main__':
+    test()
 
-d=2:
 
-product is 1*2=2. inv_fact[2] is 500000004. 2*500000004 mod MOD is 1.
+```
 
-Similarly for d=3, product is 6, inv_fact[3] is 166666668 (since 3! is 6, inv(6) is 166666668). 6 * 166666668 mod MOD is 1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So for all d, coeff[d] is 1. So the sum for each i is sum of a_j's from j=1 to i, which gives 1, 3,6.
+```
 
 Sample 2: k=0, output is same.
 

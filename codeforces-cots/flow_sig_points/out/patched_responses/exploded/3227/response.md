@@ -182,32 +182,73 @@ But in Python, for x in range(1, x_max +1):
 
 So:
 
+Testing against sample input 1.
+
+```python
 import math
 
-r = int(input())
 
-found = False
-for x in range(1, int(math.isqrt(r)) + 1):
-    # Compute numerator
-    numerator = r - x*x - x -1
-    if numerator <=0:
-        continue
-    if numerator % (2 * x) ==0:
-        y = numerator // (2 * x)
-        if y >0:
-            print(x, y)
-            found = True
-            break
-if not found:
-    print("NO")
+def main(input_stream, output_stream):
+    r = int(input_stream.readline().rstrip("\n"))
 
-Wait, in Python 3.8+, math.isqrt is available, which returns integer square root. So for r=19, isqrt(19) returns 4. So the loop is from 1 to 4 inclusive.
+    found = False
+    for x in range(1, int(math.isqrt(r)) + 1):
+        # Compute numerator
+        numerator = r - x*x - x -1
+        if numerator <=0:
+            continue
+        if numerator % (2 * x) ==0:
+            y = numerator // (2 * x)
+            if y >0:
+                print(x, y, file=output_stream)
+                found = True
+                break
+    if not found:
+        print("NO", file=output_stream)
 
-Which is correct.
 
-Yes.
 
-Testing sample input 19: x=1 is processed. So the code works.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+16
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Testing sample input 16: x loops up to 4. All x's numerators are checked. None work. So output is NO.
 

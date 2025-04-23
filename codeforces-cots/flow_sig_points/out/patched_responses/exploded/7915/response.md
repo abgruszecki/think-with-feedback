@@ -107,43 +107,78 @@ For example, if k is 2^30 and l is (2^30)^2 = 2^60. Then in Python, the division
 
 So the code would be something like:
 
-k = int(input())
+Testing against sample input 1.
 
-l = int(input())
+```python
+def main(input_stream, output_stream):
+    k = int(input_stream.readline().rstrip("\n"))
 
-current = l
+    l = int(input_stream.readline().rstrip("\n"))
 
-m = 0
+    current = l
 
-while current % k == 0:
+    m = 0
 
-    current = current // k
+    while current % k == 0:
 
-    m +=1
+        current = current // k
 
-if current ==1 and m >=1:
+        m +=1
 
-    print("YES")
+    if current ==1 and m >=1:
 
-    print(m-1)
+        print("YES", file=output_stream)
 
-else:
+        print(m-1, file=output_stream)
 
-    print("NO")
+    else:
 
-Yes. That should handle all cases.
+        print("NO", file=output_stream)
 
-Testing the examples.
 
-First example:
 
-k=5, l=25.
+def test():
+    import io
 
-current starts as 25. 25%5=0. current becomes 5, m=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+8
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-5%5=0 → current becomes 1, m=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Loop exits. current is 1, m=2. So output YES and 1. Correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

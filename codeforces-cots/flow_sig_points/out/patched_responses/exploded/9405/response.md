@@ -782,23 +782,111 @@ So, steps:
 
 9. Output the result modulo 998244353.
 
-Testing this on example 1:
+Testing against sample input 1.
 
-After rooting at 1:
+```python
+import sys
+from sys import stdin
+from collections import deque
 
-Node 1 has children 2 and 3 → children count 2.
 
-Node 2 has child 4 → children count 1 → s +=1.
+MOD = 998244353
 
-Nodes 3,4 have 0 children.
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    if n == 1:
+        print(1, file=output_stream)
+        return
+    edges = [[] for _ in range(n+1)]
+    for _ in range(n-1):
+        u, v = map(int, input_stream.readline().split())
+        edges[u].append(v)
+        edges[v].append(u)
+    
+    # Choose root as 1, build parent and children structure
+    root = 1
+    parent = [0]*(n+1)
+    children = [[] for _ in range(n+1)]
+    visited = [False]*(n+1)
+    q = deque([root])
+    visited[root] = True
+    while q:
+        u = q.popleft()
+        for v in edges[u]:
+            if not visited[v]:
+                visited[v] = True
+                parent[v] = u
+                children[u].append(v)
+                q.append(v)
+    
+    # Calculate factorial for each possible child count
+    max_child = max(len(c) for c in children)
+    fact = [1]*(max_child+1)
+    for i in range(1, max_child+1):
+        fact[i] = fact[i-1] * i % MOD
+    
+    s = 0
+    product = 1
+    for u in range(1, n+1):
+        cnt = len(children[u])
+        product = product * fact[cnt] % MOD
+        if cnt == 1:
+            s += 1
+    
+    pow2 = [1]*(s+1)
+    for i in range(1, s+1):
+        pow2[i] = pow2[i-1] * 2 % MOD
+    
+    ans = n * product % MOD
+    ans = ans * pow2[s] % MOD
+    print(ans, file=output_stream)
 
-product is 2! *1! *0! *0! = 2*1*1*1=2.
 
-2^s =2^1=2.
 
-n=4.
+def test():
+    import io
 
-4 * 2 * 2 = 16. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 2
+1 3
+1 4
+""",
+            "output": \
+"""\
+24
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Example 2:
 

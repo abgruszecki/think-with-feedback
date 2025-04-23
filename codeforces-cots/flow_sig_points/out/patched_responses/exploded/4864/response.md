@@ -284,11 +284,76 @@ Yes.
 
 This should handle all cases.
 
-Now, let's test for possible edge cases.
+Testing against sample input 1.
 
-Edge case 1: n=0. But according to the problem statement, n >=1? The first constraint says 1 ≤n ≤1e9. So no, n can be 1.
+```python
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
+    d_list = list(map(int, input_stream.readline().rstrip("\n").split()))
+    mosquitoes = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-Another edge case: when a mosquito is on a hill x >n. Then x is not considered.
+    frog_counts = []
+    for idx in range(m):
+        d = d_list[idx]
+        count = 0
+        for x in mosquitoes:
+            if x <= n and x % d == 0:
+                count += 1
+        frog_counts.append((count, idx + 1))
+
+    min_count = min(frog_counts, key=lambda x: x[0])[0]
+    result = [frog[1] for frog in frog_counts if frog[0] == min_count]
+    result.sort()
+
+    print(len(result), file=output_stream)
+    print(' '.join(map(str, result)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1000000000 2 3
+2 5
+999999995 999999998 999999996
+""",
+            "output": \
+"""\
+1
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another case: d is larger than n. For example, n=5, d=10. Then the frog's first jump is 10, which is beyond n (5). So no mosquitoes are hit.
 

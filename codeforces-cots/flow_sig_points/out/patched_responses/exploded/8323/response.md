@@ -2064,211 +2064,271 @@ while stack:
 
         Now, the code:
 
-        import sys
+Testing against sample input 1.
 
-        import bisect
+```python
+import sys
+import bisect
 
-        sys.setrecursionlimit(1 << 25)
 
-        n, m = map(int, sys.stdin.readline().split())
+def main(input_stream, output_stream):
+    sys.setrecursionlimit(1 << 25)
 
-        adj = [[] for _ in range(n+1)]
+    n, m = map(int, input_stream.readline().split())
 
-        for _ in range(n-1):
+    adj = [[] for _ in range(n+1)]
 
-            u, v = map(int, sys.stdin.readline().split())
+    for _ in range(n-1):
 
-            adj[u].append(v)
+        u, v = map(int, input_stream.readline().split())
 
-            adj[v].append(u)
+        adj[u].append(v)
 
-        in_time = [0]*(n+1)
+        adj[v].append(u)
 
-        out_time = [0]*(n+1)
+    in_time = [0]*(n+1)
 
-        time = 1
+    out_time = [0]*(n+1)
 
-        stack = [(1, False, -1)]
+    time = 1
 
-        while stack:
+    stack = [(1, False, -1)]
 
-            node, visited, parent = stack.pop()
+    while stack:
 
-            if visited:
+        node, visited, parent = stack.pop()
 
-                out_time[node] = time
+        if visited:
 
-                time +=1
+            out_time[node] = time
 
-            else:
+            time +=1
 
-                in_time[node] = time
+        else:
 
-                time +=1
+            in_time[node] = time
 
-                stack.append( (node, True, parent) )
+            time +=1
 
-                # Push children in reverse order to process in order
+            stack.append( (node, True, parent) )
 
-                children = []
+            # Push children in reverse order to process in order
 
-                for v in adj[node]:
+            children = []
 
-                    if v != parent:
-
-                        children.append(v)
-
-                children.sort(reverse=True)
-
-                for v in children:
-
-                    stack.append( (v, False, node) )
-
-        # Precompute sorted_in list
-
-        sorted_in = sorted(in_time[1:n+1])
-
-        # Process m operations
-
-        U = [[] for _ in range(n+1)]
-
-        for _ in range(m):
-
-            a, b = map(int, sys.stdin.readline().split())
-
-            a_in = in_time[a]
-
-            a_out = out_time[a]
-
-            b_in = in_time[b]
-
-            b_out = out_time[b]
-
-            # Add to U[a]
-
-            U[a].append( (a_in, a_out) )
-
-            U[a].append( (b_in, b_out) )
-
-            # Add to U[b]
-
-            U[b].append( (a_in, a_out) )
-
-            U[b].append( (b_in, b_out) )
-
-        # Merge intervals for each x
-
-        merged_intervals = [[] for _ in range(n+1)]
-
-        for x in range(1, n+1):
-
-            intervals = U[x]
-
-            if not intervals:
-
-                merged_intervals[x] = []
-
-                continue
-
-            intervals.sort()
-
-            merged = []
-
-            current_start, current_end = intervals[0]
-
-            for s, e in intervals[1:]:
-
-                if s <= current_end:
-
-                    current_end = max(current_end, e)
-
-                else:
-
-                    merged.append( (current_start, current_end) )
-
-                    current_start = s
-
-                    current_end = e
-
-            merged.append( (current_start, current_end) )
-
-            merged_intervals[x] = merged
-
-        # Iterative DFS to compute answer
-
-        answer = [0]*(n+1)
-
-        stack = [ (1, None, []) ]
-
-        while stack:
-
-            u, parent, parent_merged = stack.pop()
-
-            # Merge parent_merged with merged_intervals[u]
-
-            merged = parent_merged + merged_intervals[u]
-
-            merged.sort()
-
-            # Merge overlapping intervals
-
-            merged_result = []
-
-            for interval in merged:
-
-                if not merged_result:
-
-                    merged_result.append(interval)
-
-                else:
-
-                    last_start, last_end = merged_result[-1]
-
-                    current_start, current_end = interval
-
-                    if current_start <= last_end:
-
-                        merged_result[-1] = (last_start, max(last_end, current_end))
-
-                    else:
-
-                        merged_result.append(interval)
-
-            # Compute coverage_size
-
-            coverage_size = 0
-
-            for s, e in merged_result:
-
-                left = bisect.bisect_left(sorted_in, s)
-
-                right = bisect.bisect_right(sorted_in, e)
-
-                coverage_size += right - left
-
-            answer[u] = coverage_size - 1  # subtract 1 for u itself
-
-            # Push children
-
-            for v in adj[u]:
+            for v in adj[node]:
 
                 if v != parent:
 
-                    stack.append( (v, u, merged_result) )
+                    children.append(v)
 
-        # Output the answer
+            children.sort(reverse=True)
 
-        print(' '.join(map(str, answer[1:])))
+            for v in children:
 
-        This code should handle all cases correctly.
+                stack.append( (v, False, node) )
 
-        However, there is a problem with the merging of parent_merged and merged_intervals[u]. The code uses merged = parent_merged + merged_intervals[u], then sorts and merges. This is O(k log k) time, where k is the length of the combined list.
+    # Precompute sorted_in list
 
-        For large k, this may be slow.
+    sorted_in = sorted(in_time[1:n+1])
 
-        But given the problem constraints and the optimization that intervals are merged once during preprocessing, this should be manageable.
+    # Process m operations
 
-        Let's test this code against the first sample input:
+    U = [[] for _ in range(n+1)]
+
+    for _ in range(m):
+
+        a, b = map(int, input_stream.readline().split())
+
+        a_in = in_time[a]
+
+        a_out = out_time[a]
+
+        b_in = in_time[b]
+
+        b_out = out_time[b]
+
+        # Add to U[a]
+
+        U[a].append( (a_in, a_out) )
+
+        U[a].append( (b_in, b_out) )
+
+        # Add to U[b]
+
+        U[b].append( (a_in, a_out) )
+
+        U[b].append( (b_in, b_out) )
+
+    # Merge intervals for each x
+
+    merged_intervals = [[] for _ in range(n+1)]
+
+    for x in range(1, n+1):
+
+        intervals = U[x]
+
+        if not intervals:
+
+            merged_intervals[x] = []
+
+            continue
+
+        intervals.sort()
+
+        merged = []
+
+        current_start, current_end = intervals[0]
+
+        for s, e in intervals[1:]:
+
+            if s <= current_end:
+
+                current_end = max(current_end, e)
+
+            else:
+
+                merged.append( (current_start, current_end) )
+
+                current_start = s
+
+                current_end = e
+
+        merged.append( (current_start, current_end) )
+
+        merged_intervals[x] = merged
+
+    # Iterative DFS to compute answer
+
+    answer = [0]*(n+1)
+
+    stack = [ (1, None, []) ]
+
+    while stack:
+
+        u, parent, parent_merged = stack.pop()
+
+        # Merge parent_merged with merged_intervals[u]
+
+        merged = parent_merged + merged_intervals[u]
+
+        merged.sort()
+
+        # Merge overlapping intervals
+
+        merged_result = []
+
+        for interval in merged:
+
+            if not merged_result:
+
+                merged_result.append(interval)
+
+            else:
+
+                last_start, last_end = merged_result[-1]
+
+                current_start, current_end = interval
+
+                if current_start <= last_end:
+
+                    merged_result[-1] = (last_start, max(last_end, current_end))
+
+                else:
+
+                    merged_result.append(interval)
+
+        # Compute coverage_size
+
+        coverage_size = 0
+
+        for s, e in merged_result:
+
+            left = bisect.bisect_left(sorted_in, s)
+
+            right = bisect.bisect_right(sorted_in, e)
+
+            coverage_size += right - left
+
+        answer[u] = coverage_size - 1  # subtract 1 for u itself
+
+        # Push children
+
+        for v in adj[u]:
+
+            if v != parent:
+
+                stack.append( (v, u, merged_result) )
+
+    # Output the answer
+
+    print(' '.join(map(str, answer[1:])), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+11 3
+1 2
+2 3
+2 4
+1 5
+5 6
+5 7
+5 8
+6 9
+8 10
+8 11
+2 9
+3 6
+2 8
+""",
+            "output": \
+"""\
+0 6 7 6 0 2 0 5 4 5 5
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 244, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 237, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '0 6 7 6 0 2 0 5 4 5 5'
+Got: '-1 6 7 6 -1 2 -1 5 4 5 5'
+
+```
 
         Sample Input 1:
 

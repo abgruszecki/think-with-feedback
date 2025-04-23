@@ -450,29 +450,79 @@ But the code as written will correctly catch all possible rows that are cyclic s
 
 So the code works.
 
-Testing the first example input:
+Testing against sample input 1.
 
-The first sample input is:
+```python
+def main(input_stream, output_stream):
+    pattern1 = "WBWBWBWB"
+    pattern2 = "BWBWBWBW"
 
+    def is_valid_row(row):
+        if row.count('W') != 4:
+            return False
+        for k in range(8):
+            rotated = row[-k:] + row[:-k] if k !=0 else row
+            if rotated == pattern1 or rotated == pattern2:
+                return True
+        return False
+
+    for _ in range(8):
+        row = input_stream.readline().rstrip("\n").strip()
+        if not is_valid_row(row):
+            print("NO", file=output_stream)
+            return
+    print("YES", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 WBWBWBWB
-
-BWBWBWBW
-
-BWBWBWBW
-
-BWBWBWBW
-
 WBWBWBWB
-
-WBWBWBWB
-
+BBWBWWWB
 BWBWBWBW
+BWBWBWBW
+BWBWBWWW
+BWBWBWBW
+BWBWBWBW
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-WBWBWBWB
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Each row is either pattern1 or pattern2. So each row will pass the check.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So code returns YES.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 The second sample input:
 

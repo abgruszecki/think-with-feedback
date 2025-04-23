@@ -73,17 +73,62 @@ print(total)
 
 Yes. That's the plan.
 
-Now, let's test this logic with the examples.
+Testing against sample input 1.
 
-First example:
+```python
+def main(input_stream, output_stream):
+    a, b = map(int, input_stream.readline().rstrip("\n").split())
+    total = a
+    stubs = a
+    while stubs >= b:
+        new = stubs // b
+        total += new
+        stubs = stubs % b + new
+    print(total, file=output_stream)
 
-a=4, b=2.
 
-stubs starts at 4.
 
-4 >=2 → new=2. total becomes 6. stubs = 0 + 2=2.
+def test():
+    import io
 
-Again, stubs >=2 → new=1. total 7. stubs 0 +1=1. exit. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 3
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

@@ -791,114 +791,159 @@ But after stripping, it's 'try', which is processed correctly.
 
 So code:
 
-stack = []
-try_catch_blocks = []
-throw_line = -1
-throw_type = ''
+Testing against sample input 1.
 
-n = int(input())
-for line_num in range(n):
-    line = input().strip()
-    if not line:
-        continue
-    if line.startswith('try'):
-        stack.append(line_num)
-    elif line.startswith('catch'):
-        # parse catch
-        if not stack:
-            # according to problem statement, input is correct, so stack is not empty
-            pass  # should not happen
-        try_line = stack.pop()
-        # parse params
-        param_start = line.find('(')
-        param_end = line.rfind(')')
-        params_str = line[param_start+1 : param_end].strip()
-        params = [p.strip() for p in params_str.split(',', 1)]
-        exc_type = params[0]
-        # parse message
-        msg = ''
-        parts = params[1].split('"')
-        for i in range(1, len(parts)):
-            if parts[i-1].strip() == '':
-                msg = parts[i]
-                break
-        # parts after splitting on " will have the message in parts[1]
-        # if parts has more than one element, parts[1] is the message.
-        # for example: "abc" → split into ['', 'abc', '']
-        # for example: '  "abc" ' → split into ['  ', 'abc', ' ']
-        # so find the first part that is non-empty after splitting.
-        # alternative:
-        # parts = params[1].split('"')
-        # for part in parts:
-        #     if part.strip() != '':
-        #         # not the message part
-        #         pass
-        # So the message is the first part between quotes.
-        # So, the message is parts[1], but leading and trailing spaces in the quotes are preserved.
-        # So code can be:
-        # msg = parts[1] if len(parts) >=2 else ''
-        # but to handle cases where there are multiple quotes (invalid per problem statement, but input is correct)
-        # So, perhaps split on " and take the first part that is in between.
-        # For example, in params[1] = ' "msg" ', split gives [' ', 'msg', ' '], so parts[1] is 'msg'.
-        # So code:
-        if len(params) <2:
+```python
+def main(input_stream, output_stream):
+    stack = []
+    try_catch_blocks = []
+    throw_line = -1
+    throw_type = ''
+
+    n = int(input_stream.readline().rstrip("\n"))
+    for line_num in range(n):
+        line = input_stream.readline().rstrip("\n").strip()
+        if not line:
+            continue
+        if line.startswith('try'):
+            stack.append(line_num)
+        elif line.startswith('catch'):
+            # parse catch
+            if not stack:
+                # according to problem statement, input is correct, so stack is not empty
+                pass  # should not happen
+            try_line = stack.pop()
+            # parse params
+            param_start = line.find('(')
+            param_end = line.rfind(')')
+            params_str = line[param_start+1 : param_end].strip()
+            params = [p.strip() for p in params_str.split(',', 1)]
+            exc_type = params[0]
+            # parse message
             msg = ''
-        else:
-            msg_part = params[1].strip()
-            if msg_part.startswith('"'):
-                msg = msg_part[1:-1] if msg_part.endswith('"') else msg_part[1:]
+            parts = params[1].split('"')
+            for i in range(1, len(parts)):
+                if parts[i-1].strip() == '':
+                    msg = parts[i]
+                    break
+            # parts after splitting on " will have the message in parts[1]
+            # if parts has more than one element, parts[1] is the message.
+            # for example: "abc" → split into ['', 'abc', '']
+            # for example: '  "abc" ' → split into ['  ', 'abc', ' ']
+            # so find the first part that is non-empty after splitting.
+            # alternative:
+            # parts = params[1].split('"')
+            # for part in parts:
+            #     if part.strip() != '':
+            #         # not the message part
+            #         pass
+            # So the message is the first part between quotes.
+            # So, the message is parts[1], but leading and trailing spaces in the quotes are preserved.
+            # So code can be:
+            # msg = parts[1] if len(parts) >=2 else ''
+            # but to handle cases where there are multiple quotes (invalid per problem statement, but input is correct)
+            # So, perhaps split on " and take the first part that is in between.
+            # For example, in params[1] = ' "msg" ', split gives [' ', 'msg', ' '], so parts[1] is 'msg'.
+            # So code:
+            if len(params) <2:
+                msg = ''
             else:
-                # split on quotes
-                parts = msg_part.split('"')
-                if len(parts) >=2:
-                    msg = parts[1]
+                msg_part = params[1].strip()
+                if msg_part.startswith('"'):
+                    msg = msg_part[1:-1] if msg_part.endswith('"') else msg_part[1:]
                 else:
-                    msg = ''
-        # So better to use the following approach:
-        # Split on " and find the part inside the quotes.
-        parts = params[1].split('"')
-        msg = ''
-        found = False
-        for i in range(len(parts)):
-            if i % 2 == 1:  # inside quotes
-                msg = parts[i]
-                found = True
-                break
-        if not found:
+                    # split on quotes
+                    parts = msg_part.split('"')
+                    if len(parts) >=2:
+                        msg = parts[1]
+                    else:
+                        msg = ''
+            # So better to use the following approach:
+            # Split on " and find the part inside the quotes.
+            parts = params[1].split('"')
             msg = ''
-        try_catch_blocks.append( (try_line, line_num, exc_type, msg) )
-    elif line.startswith('throw'):
-        # parse throw
-        param_start = line.find('(')
-        param_end = line.rfind(')')
-        exc_type = line[param_start+1 : param_end].strip()
-        throw_line = line_num
-        throw_type = exc_type
+            found = False
+            for i in range(len(parts)):
+                if i % 2 == 1:  # inside quotes
+                    msg = parts[i]
+                    found = True
+                    break
+            if not found:
+                msg = ''
+            try_catch_blocks.append( (try_line, line_num, exc_type, msg) )
+        elif line.startswith('throw'):
+            # parse throw
+            param_start = line.find('(')
+            param_end = line.rfind(')')
+            exc_type = line[param_start+1 : param_end].strip()
+            throw_line = line_num
+            throw_type = exc_type
 
-# Now process the try_catch_blocks
-best_catch_line = float('inf')
-best_msg = None
+    # Now process the try_catch_blocks
+    best_catch_line = float('inf')
+    best_msg = None
 
-for try_line, catch_line, exc, msg in try_catch_blocks:
-    if try_line < throw_line and catch_line > throw_line and exc == throw_type:
-        if catch_line < best_catch_line:
-            best_catch_line = catch_line
-            best_msg = msg
+    for try_line, catch_line, exc, msg in try_catch_blocks:
+        if try_line < throw_line and catch_line > throw_line and exc == throw_type:
+            if catch_line < best_catch_line:
+                best_catch_line = catch_line
+                best_msg = msg
 
-if best_msg is not None:
-    print(best_msg)
-else:
-    print("Unhandled Exception")
+    if best_msg is not None:
+        print(best_msg, file=output_stream)
+    else:
+        print("Unhandled Exception", file=output_stream)
 
-But wait, parsing the message in the catch line might be more complex. Let's test with the first sample's catch line3: 'catch ( BE, "BE in line 3")' → params_str after split is 'BE' and '"BE in line 3"'.
 
-When split on '"', the parts are ['', 'BE in line 3', ''] → msg is 'BE in line3'.
 
-Wait, no. The params[1] is '"BE in line 3"'. So params[1].split('"') → ['', 'BE in line 3', ''] → so parts[1] is 'BE in line 3'. So msg is 'BE in line3'? No, the code loops through the split parts and picks the first part that is between quotes. So i=1 (since parts[0] is '', parts[1] is 'BE in line 3', which is the first part inside quotes. So msg is 'BE in line 3'.
+def test():
+    import io
 
-But according to the first sample, the catch line3's message is "BE in line3". But in the first sample's input, the catch line3 is written as "BE in line 3".
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+try
+try
+throw ( AE )
+catch ( AE, "AE in line 3")
+try
+catch(BE, "BE in line 5")
+catch(AE,"AE somewhere")
+""",
+            "output": \
+"""\
+AE in line 3
+""",
+        }, 
+    ]
 
-But the sample's output for the first case is "AE somewhere", so the message for line3 is not relevant, but the code should correctly parse it.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: catch line with message "  Hello  " → parsed as '  Hello  '.
 

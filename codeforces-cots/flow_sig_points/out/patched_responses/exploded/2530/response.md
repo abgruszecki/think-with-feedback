@@ -1705,221 +1705,247 @@ After further research, the correct approach is to maintain for each noble u a c
 
 Thus, the code is:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-from collections import defaultdict
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-cnt_less = defaultdict(int)  # cnt_less[u] is the number of friends v <u.
+    from collections import defaultdict
 
-friends = defaultdict(set)
+    cnt_less = defaultdict(int)  # cnt_less[u] is the number of friends v <u.
 
-empty = [True]*(n+1)
+    friends = defaultdict(set)
 
-for _ in range(m):
+    empty = [True]*(n+1)
 
-    u, v = map(int, input().split())
+    for _ in range(m):
 
-    friends[u].add(v)
+        u, v = map(int, input_stream.readline().rstrip("\n").split())
 
-    friends[v].add(u)
+        friends[u].add(v)
 
-    empty[u] = False
+        friends[v].add(u)
 
-    empty[v] = False
+        empty[u] = False
 
-    if v < u:
+        empty[v] = False
 
-        cnt_less[u] +=1
+        if v < u:
 
-    if u < v:
+            cnt_less[u] +=1
 
-        cnt_less[v] +=1
+        if u < v:
 
-res = 0
+            cnt_less[v] +=1
 
-for u in range(1, n+1):
+    res = 0
 
-    if empty[u] or cnt_less[u] >0:
+    for u in range(1, n+1):
 
-        res +=1
+        if empty[u] or cnt_less[u] >0:
 
-q = int(input())
+            res +=1
 
-for _ in range(q):
+    q = int(input_stream.readline().rstrip("\n"))
 
-    query = list(map(int, input().split()))
+    for _ in range(q):
 
-    if query[0] ==3:
+        query = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-        print(res)
+        if query[0] ==3:
 
-    else:
-
-        u, v = query[1], query[2]
-
-        if query[0] ==1:
-
-            # add friendship
-
-            friends[u].add(v)
-
-            friends[v].add(u)
-
-            # update empty
-
-            prev_empty_u = empty[u]
-
-            empty[u] = False
-
-            prev_empty_v = empty[v]
-
-            empty[v] = False
-
-            # update cnt_less and res
-
-            # for u:
-
-            delta_u = 0
-
-            if v < u:
-
-                if cnt_less[u] ==0:
-
-                    delta_u +=1
-
-                cnt_less[u] +=1
-
-            # for v:
-
-            delta_v =0
-
-            if u <v:
-
-                if cnt_less[v] ==0:
-
-                    delta_v +=1
-
-                cnt_less[v] +=1
-
-            # update res
-
-            if prev_empty_u and not empty[u]:
-
-                res -=1
-
-            if prev_empty_v and not empty[v]:
-
-                res -=1
-
-            if delta_u >0:
-
-                res +=1
-
-            if delta_v >0:
-
-                res +=1
+            print(res, file=output_stream)
 
         else:
 
-            # remove friendship
+            u, v = query[1], query[2]
 
-            friends[u].remove(v)
+            if query[0] ==1:
 
-            friends[v].remove(u)
+                # add friendship
 
-            # update empty
+                friends[u].add(v)
 
-            new_empty_u = len(friends[u]) ==0
+                friends[v].add(u)
 
-            new_empty_v = len(friends[v]) ==0
+                # update empty
 
-            # update res
+                prev_empty_u = empty[u]
 
-            if not empty[u] and new_empty_u:
+                empty[u] = False
 
-                res +=1
+                prev_empty_v = empty[v]
 
-            if not empty[v] and new_empty_v:
+                empty[v] = False
 
-                res +=1
+                # update cnt_less and res
 
-            # update cnt_less and res
+                # for u:
 
-            delta_u = 0
+                delta_u = 0
 
-            if v <u:
+                if v < u:
 
-                cnt_less[u] -=1
+                    if cnt_less[u] ==0:
 
-                if cnt_less[u] ==0:
+                        delta_u +=1
 
-                    delta_u -=1
+                    cnt_less[u] +=1
 
-            delta_v =0
+                # for v:
 
-            if u <v:
+                delta_v =0
 
-                cnt_less[v] -=1
+                if u <v:
 
-                if cnt_less[v] ==0:
+                    if cnt_less[v] ==0:
 
-                    delta_v -=1
+                        delta_v +=1
 
-            # update res
+                    cnt_less[v] +=1
 
-            if delta_u <0:
+                # update res
 
-                if not new_empty_u:
-
-                    res -=1
-
-            if delta_v <0:
-
-                if not new_empty_v:
+                if prev_empty_u and not empty[u]:
 
                     res -=1
 
-            # update empty flags
+                if prev_empty_v and not empty[v]:
 
-            empty[u] = new_empty_u
+                    res -=1
 
-            empty[v] = new_empty_v
+                if delta_u >0:
 
-This code may work for the samples.
+                    res +=1
 
-Testing on the first sample:
+                if delta_v >0:
 
-After initial setup:
+                    res +=1
 
-friends:
+            else:
 
-1: {2,3}
+                # remove friendship
 
-2: {1}
+                friends[u].remove(v)
 
-3: {1,4}
+                friends[v].remove(u)
 
-4: {3}
+                # update empty
 
-empty: all False except possibly 2 and 4. But no, friends for 2 is 1.
+                new_empty_u = len(friends[u]) ==0
 
-cnt_less:
+                new_empty_v = len(friends[v]) ==0
 
-For 1: friends 2 and 3. None <1. cnt_less[1] =0.
+                # update res
 
-For 2: friend 1 <2. cnt_less[2]=1.
+                if not empty[u] and new_empty_u:
 
-For 3: friend 1 <3. cnt_less[3] =1.
+                    res +=1
 
-For 4: friend 3 <4. cnt_less[4] =1.
+                if not empty[v] and new_empty_v:
 
-Initial res = 0 (empty[u] all False) + sum( cnt_less[u] >0 ) for u=1-4.
+                    res +=1
 
-cnt_less[1]=0, others 1. So res = 3.
+                # update cnt_less and res
 
-But the first sample's answer is 2.
+                delta_u = 0
 
-Thus, this code is incorrect.
+                if v <u:
+
+                    cnt_less[u] -=1
+
+                    if cnt_less[u] ==0:
+
+                        delta_u -=1
+
+                delta_v =0
+
+                if u <v:
+
+                    cnt_less[v] -=1
+
+                    if cnt_less[v] ==0:
+
+                        delta_v -=1
+
+                # update res
+
+                if delta_u <0:
+
+                    if not new_empty_u:
+
+                        res -=1
+
+                if delta_v <0:
+
+                    if not new_empty_v:
+
+                        res -=1
+
+                # update empty flags
+
+                empty[u] = new_empty_u
+
+                empty[v] = new_empty_v
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 3
+2 3
+3 4
+4 1
+1
+3
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 220, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 213, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '1'
+Got: '2'
+
+```
 
 Thus, the correct solution must be different. 
 

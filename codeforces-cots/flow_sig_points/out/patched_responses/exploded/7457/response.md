@@ -63,49 +63,119 @@ At the end, output current_pos +1.
 
 Yes. That's the code.
 
-Testing the first sample:
+Testing against sample input 1.
 
-s = 'RGB', t='RRR'
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    t = input_stream.readline().rstrip("\n").strip()
+    pos = 0  # 0-based index
+    for c in t:
+        if pos < len(s) and s[pos] == c:
+            pos += 1
+    print(pos + 1, file=output_stream)
 
-current_pos starts at 0.
 
-First 'R' in t: s[0] is 'R' → move to 1.
 
-Second 'R' in t: s[1] is 'G' → no move.
+def test():
+    import io
 
-Third 'R' → same as above.
-
-Final position is 1 → 1+1=2. Correct.
-
-Second sample:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 RRRBGBRBBB
-
 BBBRR
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-s is "RRRBGBRBBB" → positions 0-based 0 to 10 (since length is 10). The stones are R, R, R, B, G, B, R, B, B, B.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-t is "BBBRR".
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Initial position is 0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Processing 'B' → current stone is R (s[0] is R). No move.
+    print('Tests passed 😎')
 
-Second 'B' → same. Still position 0.
 
-Third 'B' → same. Still 0.
+if __name__ == '__main__':
+    test()
 
-Fourth 'R' → current stone is R (s[0] is R). Move to 1.
 
-Fifth 'R' → current stone is s[1] (R). Move to 2.
+```
 
-Final position is 2 (0-based) → 3. Which matches the sample.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So the code works for that.
+```
 
-Third sample's code would process all steps and compute the correct position.
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    t = input_stream.readline().rstrip("\n").strip()
+    pos = 0  # 0-based index
+    for c in t:
+        if pos < len(s) and s[pos] == c:
+            pos += 1
+    print(pos + 1, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+BRRBGBRGRBGRGRRGGBGBGBRGBRGRGGGRBRRRBRBBBGRRRGGBBB
+BBRBGGRGRGBBBRBGRBRBBBBRBRRRBGBBGBBRRBBGGRBRRBRGRB
+""",
+            "output": \
+"""\
+15
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, the code is correct. The constraints are small, so no need for optimization. The code is O(m) where m is the length of t, which is up to 50 steps. So it's efficient enough.
 

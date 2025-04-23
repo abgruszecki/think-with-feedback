@@ -869,62 +869,107 @@ But we need to note that the DP is filled for all lengths from 1 to n.
 
 So, in Python:
 
-n = int(input())
-s = input().strip()
+Testing against sample input 1.
 
-if n ==0:
-    print(0)
-    exit()
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-dp = [[0]*n for _ in range(n)]
+    if n ==0:
+        print(0, file=output_stream)
+        return
 
-for i in range(n):
-    dp[i][i] =1
+    dp = [[0]*n for _ in range(n)]
 
-for length in range(2, n+1):
-    for i in range(n - length +1):
-        j = i + length -1
+    for i in range(n):
+        dp[i][i] =1
 
-        # Initial case: delete left or right first
-        current = min(dp[i+1][j], dp[i][j-1]) +1
+    for length in range(2, n+1):
+        for i in range(n - length +1):
+            j = i + length -1
 
-        # Check for k > i where s[i] == s[k]
-        for k in range(i+1, j+1):
-            if s[i] == s[k]:
-                if k == i+1:
-                    val = 1 + dp[k][j]
-                else:
-                    val = dp[i+1][k-1] + dp[k][j]
-                if val < current:
-                    current = val
+            # Initial case: delete left or right first
+            current = min(dp[i+1][j], dp[i][j-1]) +1
 
-        # Check for k < j where s[j] == s[k]
-        for k in range(i, j):
-            if s[j] == s[k]:
-                if k == j-1:
-                    val = 1 + dp[i][k]
-                else:
-                    val = dp[i][k] + dp[k+1][j-1]
-                if val < current:
-                    current = val
+            # Check for k > i where s[i] == s[k]
+            for k in range(i+1, j+1):
+                if s[i] == s[k]:
+                    if k == i+1:
+                        val = 1 + dp[k][j]
+                    else:
+                        val = dp[i+1][k-1] + dp[k][j]
+                    if val < current:
+                        current = val
 
-        dp[i][j] = current
+            # Check for k < j where s[j] == s[k]
+            for k in range(i, j):
+                if s[j] == s[k]:
+                    if k == j-1:
+                        val = 1 + dp[i][k]
+                    else:
+                        val = dp[i][k] + dp[k+1][j-1]
+                    if val < current:
+                        current = val
 
-print(dp[0][n-1])
+            dp[i][j] = current
 
-This should handle all cases.
+    print(dp[0][n-1], file=output_stream)
 
-Testing the first sample:
 
-Input 5 abaca.
 
-The code outputs 3.
+def test():
+    import io
 
-The second sample input 8 abcddcba.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+abcddcba
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-The code should output 4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Thus, the code is correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 79, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 72, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '4'
+Got: '5'
+
+```
+
 </think>
 
 ```python

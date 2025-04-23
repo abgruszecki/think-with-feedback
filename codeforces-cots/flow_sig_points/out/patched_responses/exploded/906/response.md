@@ -145,41 +145,77 @@ But if all groups have 0 except one, then the maximum will be the correct value.
 
 So code:
 
-r, g, b = map(int, input().split())
+Testing against sample input 1.
 
-def compute_time(st, offset):
+```python
+def main(input_stream, output_stream):
+    r, g, b = map(int, input_stream.readline().rstrip("\n").split())
 
-    if st ==0:
+    def compute_time(st, offset):
 
-        return 0
+        if st ==0:
 
-    cars = (st +1) //2
+            return 0
 
-    last_depart = (cars -1)*3 + offset
+        cars = (st +1) //2
 
-    return last_depart +30
+        last_depart = (cars -1)*3 + offset
 
-red_time = compute_time(r, 0)
+        return last_depart +30
 
-green_time = compute_time(g, 1)
+    red_time = compute_time(r, 0)
 
-blue_time = compute_time(b, 2)
+    green_time = compute_time(g, 1)
 
-result = max(red_time, green_time, blue_time)
+    blue_time = compute_time(b, 2)
 
-print(result)
+    result = max(red_time, green_time, blue_time)
 
-Wait, let's test this with the first sample.
+    print(result, file=output_stream)
 
-Sample1: r=1, g=3, b=2.
 
-red_time: (1+1)//2=1. (1-1)*3 +0 =0. 0+30=30.
 
-green_time: (3+1)/2=2. (2-1)*3 +1=3+1=4. 4+30=34.
+def test():
+    import io
 
-blue_time: (2+1)/2=1.5 → 1.5 rounded down? Wait, (2+1)//2 in Python is (2+1)//2 = 3//2 =1. So 1 car. (1-1)*3 +2=0+2=2. 2+30=32.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2 1
+""",
+            "output": \
+"""\
+33
+""",
+        }, 
+    ]
 
-Max is 34. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample2: r=3, g=2, b=1.
 

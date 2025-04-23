@@ -123,51 +123,73 @@ Check the four characters.
 
 So code:
 
-n, m = map(int, input().split())
-image = [input().strip() for _ in range(n)]
+Testing against sample input 1.
 
-count = 0
-for i in range(n-1):
-    for j in range(m-1):
-        a = image[i][j]
-        b = image[i][j+1]
-        c = image[i+1][j]
-        d = image[i+1][j+1]
-        s = {a, b, c, d}
-        if s == {'f', 'a', 'c', 'e'}:
-            count += 1
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    image = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
 
-print(count)
+    count = 0
+    for i in range(n-1):
+        for j in range(m-1):
+            a = image[i][j]
+            b = image[i][j+1]
+            c = image[i+1][j]
+            d = image[i+1][j+1]
+            s = {a, b, c, d}
+            if s == {'f', 'a', 'c', 'e'}:
+                count += 1
 
-Yes, that's the code. Let's test it against the samples.
+    print(count, file=output_stream)
 
-Sample 1:
 
-After reading the lines:
 
-image[0] is 'xxxx'
+def test():
+    import io
 
-image[1] is 'xfax'
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 2
+xx
+cf
+ae
+xx
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-image[2] is 'xcex'
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-image[3] is 'xxxx'
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i ranges 0 to 3-1=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For i=1, j=1:
+    print('Tests passed 😎')
 
-a = image[1][1] = 'f'
 
-b = image[1][2] = 'a'
+if __name__ == '__main__':
+    test()
 
-c = image[2][1] = 'e'
 
-d = image[2][2] = 'x' → wait, no. Wait, wait, the third line is 'xcex', so row index 2.
+```
 
-image[2][j] for j=1 is 'c', j+1 is 'e'?
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Wait, perhaps I made a mistake here.
+```
 
 Wait, the first sample's image is:
 

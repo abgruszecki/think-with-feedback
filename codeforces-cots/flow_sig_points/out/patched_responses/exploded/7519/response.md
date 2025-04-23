@@ -1215,265 +1215,246 @@ Thus, for each m, compute exponent_mod as (n -m -1) % (MOD-1), and compute pow(m
 
 Thus, the code can be written as follows:
 
-MOD = 998244353
+Testing against sample input 1.
 
-n = int(input())
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-if n ==0:
+    n = int(input_stream.readline().rstrip("\n"))
 
-   print()
+    if n ==0:
 
-else:
+       print(file=output_stream)
 
-   # Precompute factorial and inverse factorial.
+    else:
 
-   max_n = n
+       # Precompute factorial and inverse factorial.
 
-   fact = [1]*(max_n+1)
+       max_n = n
 
-   for i in range(1, max_n+1):
+       fact = [1]*(max_n+1)
 
-       fact[i] = fact[i-1] *i % MOD
+       for i in range(1, max_n+1):
 
-   inv_fact = [1]*(max_n+1)
+           fact[i] = fact[i-1] *i % MOD
 
-   inv_fact[max_n] = pow(fact[max_n], MOD-2, MOD)
+       inv_fact = [1]*(max_n+1)
 
-   for i in range(max_n-1, -1, -1):
+       inv_fact[max_n] = pow(fact[max_n], MOD-2, MOD)
 
-       inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
+       for i in range(max_n-1, -1, -1):
 
-   # Precompute combinations C(n, m).
+           inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
 
-   C = [0]*(n+1)
+       # Precompute combinations C(n, m).
 
-   for m in range(0, n+1):
+       C = [0]*(n+1)
 
-       if m >n:
+       for m in range(0, n+1):
 
-           C[m] =0
+           if m >n:
 
-       else:
+               C[m] =0
 
-           C[m] = fact[n] * inv_fact[m] % MOD
+           else:
 
-           C[m] = C[m] * inv_fact[n -m] % MOD
+               C[m] = fact[n] * inv_fact[m] % MOD
 
-   # For each k from 1 to n, compute sum_{m=k}^n C(n, m) * m^{exponent} mod MOD.
+               C[m] = C[m] * inv_fact[n -m] % MOD
 
-   answer = []
+       # For each k from 1 to n, compute sum_{m=k}^n C(n, m) * m^{exponent} mod MOD.
 
-   for k in range(1, n+1):
+       answer = []
 
-       res =0
+       for k in range(1, n+1):
 
-       for m in range(k, n+1):
+           res =0
 
-           exponent = (n -m -1) % (MOD-1)
+           for m in range(k, n+1):
 
-           term_m = pow(m, exponent, MOD)
+               exponent = (n -m -1) % (MOD-1)
 
-           term = C[m] * term_m % MOD
+               term_m = pow(m, exponent, MOD)
 
-           res = (res + term) % MOD
+               term = C[m] * term_m % MOD
 
-       res = res * n % MOD
+               res = (res + term) % MOD
 
-       answer.append(res)
+           res = res * n % MOD
 
-   print(' '.join(map(str, answer)))
+           answer.append(res)
 
-Wait, but wait, C(n, m) is computed as fact[n] * inv_fact[m] * inv_fact[n-m}, which is correct.
+       print(' '.join(map(str, answer)), file=output_stream)
 
-Let's test this with the sample input:
 
-Sample 1:
 
-Input: 2
+def test():
+    import io
 
-Expected output: 3 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+""",
+            "output": \
+"""\
+10 7 1
+""",
+        }, 
+    ]
 
-For k=1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum from m=1 to 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-m=1:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-exponent =2-1-1=0.
+    print('Tests passed 😎')
 
-term = C(2,1) * 1^0 = 2 * 1 =2.
 
-m=2:
+if __name__ == '__main__':
+    test()
 
-exponent =2-2-1 =-1. exponent mod (MOD-1) is 998244352-1=998244351.
 
-pow(2, 998244351, MOD) = pow(2, MOD-2, MOD) = inverse(2) mod MOD = 499122177.
+```
 
-term = C(2,2) * 499122177 = 1 * 499122177 =499122177 mod MOD.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 103, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 96, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '10 7 1'
+Got: '19 10 1'
 
-sum =2 +499122177 =499122179.
+```
 
-Multiply by n=2: 499122179 *2 mod MOD.
+Testing against sample input 2.
 
-Compute 499122179 *2 = 998244358 mod 998244353 is 998244358-998244353=5. So 5 mod MOD.
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-But expected is 3.
+    n = int(input_stream.readline().rstrip("\n"))
 
-This indicates that the code is incorrect.
+    if n ==0:
 
-Wait, what's the issue here?
+       print(file=output_stream)
 
-The formula derivation must be wrong.
+    else:
 
-Because according to the sample input 2, the code produces 5 for k=1, but expected is 3.
+       # Precompute factorial and inverse factorial.
 
-Thus, the formula must be incorrect.
+       max_n = n
 
-So where's the mistake?
+       fact = [1]*(max_n+1)
 
-The formula assumes that the sum is n * sum_{m >=k} C(n, m) * m^{n-m-1}.
+       for i in range(1, max_n+1):
 
-But according to the sample input 1:
+           fact[i] = fact[i-1] *i % MOD
 
-n=2.
+       inv_fact = [1]*(max_n+1)
 
-For k=1:
+       inv_fact[max_n] = pow(fact[max_n], MOD-2, MOD)
 
-sum for m=1: C(2,1) * 1^{2-1-1} = 2 *1^0=2.
+       for i in range(max_n-1, -1, -1):
 
-sum for m=2: C(2,2) * 2^{2-2-1} = 1 * 2^{-1} mod MOD.
+           inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
 
-2^{-1} mod MOD is 499122177.
+       # Precompute combinations C(n, m).
 
-So sum is 2 + 499122177 = 499122179.
+       C = [0]*(n+1)
 
-Multiply by n=2: 499122179 * 2 mod MOD is (499122179 * 2) mod MOD.
+       for m in range(0, n+1):
 
-But 499122179 * 2 = 998244358. mod MOD (998244353) is 5.
+           if m >n:
 
-But the correct answer for k=1 is 3.
+               C[m] =0
 
-Thus, the formula is incorrect.
+           else:
 
-This indicates that the earlier reasoning was wrong.
+               C[m] = fact[n] * inv_fact[m] % MOD
 
-Thus, we need to rethink the problem.
+               C[m] = C[m] * inv_fact[n -m] % MOD
 
-Alternative Idea: Let's return to the first sample input.
+       # For each k from 1 to n, compute sum_{m=k}^n C(n, m) * m^{exponent} mod MOD.
 
-Sample input 1:
+       answer = []
 
-n=2.
+       for k in range(1, n+1):
 
-Good sequences are [1,1}, [1,2}.
+           res =0
 
-For k=1, sum is 2+1=3.
+           for m in range(k, n+1):
 
-According to the formula:
+               exponent = (n -m -1) % (MOD-1)
 
-sum for m=1 and m=2.
+               term_m = pow(m, exponent, MOD)
 
-For m=1:
+               term = C[m] * term_m % MOD
 
-C(2,1) =2. m^{n-m} =1^{1} =1. So number of sequences is 2*1=2.
+               res = (res + term) % MOD
 
-For these sequences, the average number of 1's is 2 (each sequence has two 1's).
+           res = res * n % MOD
 
-So contribution is 2 * 2 =4.
+           answer.append(res)
 
-For m=2:
+       print(' '.join(map(str, answer)), file=output_stream)
 
-C(2,2) =1. m^{n-m} =2^{0} =1. number of sequences is 1*1=1.
 
-average number of 1's is 1.
 
-Contribution is 1*1=1.
+def test():
+    import io
 
-Total sum is 4+1=5. Multiply by n=2 gives 10. Which is incorrect.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-But according to the sample, the sum is 3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Thus, the formula is incorrect.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-This indicates that the earlier approach is invalid.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Thus, the problem requires a different approach.
+    print('Tests passed 😎')
 
-Alternative Idea: Let's re-examine the problem.
 
-The correct way to model the sum is to compute for each sequence the occurrences of k and sum over all sequences.
+if __name__ == '__main__':
+    test()
 
-But given the time constraints, we need an O(n^2) dynamic programming approach.
 
-Let's model the problem using two dynamic programming tables:
+```
 
-- dp[m]: the number of good sequences of length i with maximum m.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-- sum_occur[m][k]: the sum of occurrences of k in all good sequences of length i with maximum m.
-
-For each i from 1 to n:
-
-   For each m from 1 to i:
-
-       When adding a new element:
-
-           Case 1: new element is <= m. The maximum remains m.
-
-           The number of such sequences is dp_prev[m] * m.
-
-           The sum_occur for k <=m is sum_prev[m][k] * m + dp_prev[m] * 1.
-
-           Case 2: new element is m+1. The maximum becomes m+1.
-
-           The number of such sequences is dp_prev[m].
-
-           The sum_occur for k <=m is sum_prev[m][k].
-
-           sum_occur for k =m+1 is dp_prev[m].
-
-Thus, for each i and m, we need to compute sum_occur[m][k] for all k <=m.
-
-But storing sum_occur as a 2D array of size [n+1][n+1] would require O(n^2) space, which is acceptable.
-
-Yes! Because for each m, sum_occur[m][k] is only needed for k up to m.
-
-Thus, we can model this with a dynamic programming table where for each m, we track the sum of occurrences of each k up to m.
-
-This would require O(n^2) time and space.
-
-Let's see:
-
-For each i from 1 to n:
-
-   For each m from 1 to i:
-
-       We need to compute:
-
-           sum_occur_new[m][k] = sum_occur_prev[m][k] * m + dp_prev[m] * 1 (for case 1)
-
-           sum_occur_new[m+1][k] = sum_occur_prev[m][k] (for case 2)
-
-           sum_occur_new[m+1][m+1] += dp_prev[m]
-
-But since for each i and m, we can compute the new sums based on the previous i-1 and m, this can be done in O(n^2) time.
-
-Thus, the approach is feasible.
-
-Now, the implementation steps are as follows:
-
-Initialize for i=1:
-
-   m=1:
-
-       dp[1] =1.
-
-       sum_occur[1][1] =1.
-
-For i>1:
-
-   Initialize new_dp and new_sum_occur.
-
-   For each m in 1..i-1:
+```
 
        # Case 1: add any of 1..m to sequences of maximum m.
 

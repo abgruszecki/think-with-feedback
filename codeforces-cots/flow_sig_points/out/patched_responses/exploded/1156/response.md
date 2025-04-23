@@ -440,87 +440,90 @@ Read n, then read the string.
 
 Now, code:
 
-n = int(input())
-s = input().strip()
+Testing against sample input 3.
 
-result = []
-prev_char = None
-count = 0
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-for char in s:
-    if char == prev_char:
-        count += 1
-    else:
-        if prev_char is not None:
-            # process previous group
-            if prev_char in {'a', 'e', 'i', 'o', 'u', 'y'}:
-                if prev_char in {'e', 'o'} and count == 2:
-                    result.append(prev_char * 2)
-                else:
-                    result.append(prev_char)
-            else:
-                result.append(prev_char * count)
-        prev_char = char
-        count = 1
+    result = []
+    prev_char = None
+    count = 0
 
-# process the last group
-if prev_char is not None:
-    if prev_char in {'a', 'e', 'i', 'o', 'u', 'y'}:
-        if prev_char in {'e', 'o'} and count == 2:
-            result.append(prev_char * 2)
+    for char in s:
+        if char == prev_char:
+            count += 1
         else:
-            result.append(prev_char)
-    else:
-        result.append(prev_char * count)
+            if prev_char is not None:
+                # process previous group
+                if prev_char in {'a', 'e', 'i', 'o', 'u', 'y'}:
+                    if prev_char in {'e', 'o'} and count == 2:
+                        result.append(prev_char * 2)
+                    else:
+                        result.append(prev_char)
+                else:
+                    result.append(prev_char * count)
+            prev_char = char
+            count = 1
 
-print(''.join(result))
+    # process the last group
+    if prev_char is not None:
+        if prev_char in {'a', 'e', 'i', 'o', 'u', 'y'}:
+            if prev_char in {'e', 'o'} and count == 2:
+                result.append(prev_char * 2)
+            else:
+                result.append(prev_char)
+        else:
+            result.append(prev_char * count)
 
-Testing this code with the examples.
+    print(''.join(result), file=output_stream)
 
-In the third example:
 
-Input: 18
-aeiouyaaeeiioouuyy
 
-Processing each group:
+def test():
+    import io
 
-a → count 1 → append 'a'.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+24
+aaaoooiiiuuuyyyeeeggghhh
+""",
+            "output": \
+"""\
+aoiuyeggghhh
+""",
+        }, 
+    ]
 
-e → count 1 → append 'e'.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i → append 'i'.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-o → append 'o'.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-u → append 'u'.
+    print('Tests passed 😎')
 
-y → append 'y'.
 
-a → count 2 → a is not e/o → append 'a'.
+if __name__ == '__main__':
+    test()
 
-e → count 2 → e is e, count 2 → append 'ee'.
 
-i → count 2 → append 'i'.
+```
 
-o → count 2 → append 'oo'.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-u → count 2 → append 'u'.
+```
 
-y → count 2 → append 'y'.
-
-Result is a e i o u y a ee i oo u y → which is 'aeiouyaeeioouy'.
-
-Which matches the third example's output.
-
-Thus, the code works.
-
-Now, possible optimizations.
-
-But in Python, appending to a list is efficient, and ''.join(result) is the fastest way to concatenate the parts.
-
-Now, code is O(n) time and O(n) space, which is acceptable given the constraints.
-
-Thus, this code should be correct and efficient.
 </think>
 
 ```python

@@ -527,46 +527,125 @@ The code will:
 
 So code:
 
-k = int(input())
-rs = list(map(int, input().split()))
-rs.sort()
-max_decline = 0
-for i in range(k):
-    available = i + 1 + (25 - k)
-    required = rs[i] - available
-    if required > max_decline:
-        max_decline = required
-print(max_decline)
+Testing against sample input 1.
 
-Yes. This code works.
+```python
+def main(input_stream, output_stream):
+    k = int(input_stream.readline().rstrip("\n"))
+    rs = list(map(int, input_stream.readline().rstrip("\n").split()))
+    rs.sort()
+    max_decline = 0
+    for i in range(k):
+        available = i + 1 + (25 - k)
+        required = rs[i] - available
+        if required > max_decline:
+            max_decline = required
+    print(max_decline, file=output_stream)
 
-Testing the first sample:
 
-Input:
 
-25
+def test():
+    import io
 
-2 3 4 5 6 7 8 9 10 11 12 14 15 16 17 18 19 20 21 22 23 24 25 26 28
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+16 23 8 15 4
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Sorted rs is [2,3,4,5,6,7,8,9,10,11,12,14,15,16,17,18,19,20,21,22,23,24,25,26,28]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For each i from 0 to 24:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-available = i+1 + 0 (since 25-25=0)
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For i=24: available=25.
+    print('Tests passed 😎')
 
-required =28-25=3. So max_decline=3.
 
-Which is correct.
+if __name__ == '__main__':
+    test()
 
-Second sample:
 
-k=5
+```
 
-rs sorted [4,8,15,16,23]
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-available for i=4:4+1 +20=25. 23-25= -2. so required is 0. So max_decline is 0.
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    k = int(input_stream.readline().rstrip("\n"))
+    rs = list(map(int, input_stream.readline().rstrip("\n").split()))
+    rs.sort()
+    max_decline = 0
+    for i in range(k):
+        available = i + 1 + (25 - k)
+        required = rs[i] - available
+        if required > max_decline:
+            max_decline = required
+    print(max_decline, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+14 15 92
+""",
+            "output": \
+"""\
+67
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

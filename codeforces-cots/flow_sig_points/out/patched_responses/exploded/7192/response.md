@@ -1232,49 +1232,80 @@ Let's try to implement this.
 
 The code would be something like:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n = int(sys.stdin.readline())
-a = list(map(int, sys.stdin.readline().split()))
 
-last_occurrence = {0: -1}
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    a = list(map(int, input_stream.readline().split()))
 
-for num in a:
-    new_entries = {}
-    for x in list(last_occurrence.keys()):
-        if last_occurrence[x] < num:
-            new_xor = x ^ num
-            if new_xor not in new_entries or num < new_entries[new_xor]:
-                new_entries[new_xor] = num
-    # Merge new_entries into last_occurrence
-    for x in new_entries:
-        if x not in last_occurrence or new_entries[x] < last_occurrence.get(x, float('inf')):
-            last_occurrence[x] = new_entries[x]
+    last_occurrence = {0: -1}
 
-# Collect and sort the keys
-result = sorted(last_occurrence.keys())
-print(len(result))
-print(' '.join(map(str, result)))
+    for num in a:
+        new_entries = {}
+        for x in list(last_occurrence.keys()):
+            if last_occurrence[x] < num:
+                new_xor = x ^ num
+                if new_xor not in new_entries or num < new_entries[new_xor]:
+                    new_entries[new_xor] = num
+        # Merge new_entries into last_occurrence
+        for x in new_entries:
+            if x not in last_occurrence or new_entries[x] < last_occurrence.get(x, float('inf')):
+                last_occurrence[x] = new_entries[x]
 
-But wait, the initial last_occurrence is {0: -inf}. So in code, we can represent -inf as -1 (since the array elements are >=0). For example, if a_i is 0, then last_occurrence[x] = -1 <0.
+    # Collect and sort the keys
+    result = sorted(last_occurrence.keys())
+    print(len(result), file=output_stream)
+    print(' '.join(map(str, result)), file=output_stream)
 
-Yes.
 
-Testing this code with the first sample:
 
-Input:
+def test():
+    import io
 
-4
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+1 0 1 7 12 5 3 2
+""",
+            "output": \
+"""\
+12
+0 1 2 3 4 5 6 7 10 11 12 13
+""",
+        }, 
+    ]
 
-4 2 2 4
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The code produces:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-4
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-0 2 4 6
+    print('Tests passed 😎')
 
-Which is correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 The second sample input:
 

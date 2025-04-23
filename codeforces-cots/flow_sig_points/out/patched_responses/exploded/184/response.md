@@ -951,102 +951,353 @@ Then, compute the inversion count.
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import heapq
 
-class FenwickTree:
-    def __init__(self, size):
-        self.n = size
-        self.tree = [0]*(self.n +2)  # 1-based
 
-    def update(self, idx, delta=1):
-        while idx <= self.n:
-            self.tree[idx] += delta
-            idx += idx & -idx
+def main(input_stream, output_stream):
+    class FenwickTree:
+        def __init__(self, size):
+            self.n = size
+            self.tree = [0]*(self.n +2)  # 1-based
 
-    def query(self, idx):
-        res = 0
-        while idx > 0:
-            res += self.tree[idx]
-            idx -= idx & -idx
-        return res
+        def update(self, idx, delta=1):
+            while idx <= self.n:
+                self.tree[idx] += delta
+                idx += idx & -idx
 
-n, k = map(int, input().split())
-p = list(map(int, input().split()))
+        def query(self, idx):
+            res = 0
+            while idx > 0:
+                res += self.tree[idx]
+                idx -= idx & -idx
+            return res
 
-# Build adjacency list and in_degree
-adj = [[] for _ in range(n+1)]
-in_degree = [0]*(n+1)
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for x in range(1, n+1):
-    for y in range(x+1, n+1):
-        px = p[x-1]
-        py = p[y-1]
-        if px > py +k:
-            adj[y].append(x)
-            in_degree[x] +=1
-        if py > px +k:
-            adj[x].append(y)
-            in_degree[y] +=1
+    # Build adjacency list and in_degree
+    adj = [[] for _ in range(n+1)]
+    in_degree = [0]*(n+1)
 
-# Topological sort with min-heap
-heap = []
-for x in range(1, n+1):
-    if in_degree[x] == 0:
-        heapq.heappush(heap, x)
+    for x in range(1, n+1):
+        for y in range(x+1, n+1):
+            px = p[x-1]
+            py = p[y-1]
+            if px > py +k:
+                adj[y].append(x)
+                in_degree[x] +=1
+            if py > px +k:
+                adj[x].append(y)
+                in_degree[y] +=1
 
-permutation = []
-while heap:
-    x = heapq.heappop(heap)
-    permutation.append(x)
-    for y in adj[x]:
-        in_degree[y] -=1
-        if in_degree[y] ==0:
-            heapq.heappush(heap, y)
+    # Topological sort with min-heap
+    heap = []
+    for x in range(1, n+1):
+        if in_degree[x] == 0:
+            heapq.heappush(heap, x)
 
-# Compute inversion count
-ft = FenwickTree(n)
-inversion_count =0
-for num in permutation:
-    # query the number of elements already added which are > num
-    count = ft.query(n) - ft.query(num)
-    inversion_count += count
-    ft.update(num)
+    permutation = []
+    while heap:
+        x = heapq.heappop(heap)
+        permutation.append(x)
+        for y in adj[x]:
+            in_degree[y] -=1
+            if in_degree[y] ==0:
+                heapq.heappush(heap, y)
 
-print(inversion_count)
+    # Compute inversion count
+    ft = FenwickTree(n)
+    inversion_count =0
+    for num in permutation:
+        # query the number of elements already added which are > num
+        count = ft.query(n) - ft.query(num)
+        inversion_count += count
+        ft.update(num)
 
-This should work.
+    print(inversion_count, file=output_stream)
 
-Testing this code with the samples:
 
-Sample Input 1:
 
-1 1
+def test():
+    import io
 
-1
-
-Output 0.
-
-Code:
-
-n=1, k=1. p=[1].
-
-No pairs. in_degree for 1 is 0. permutation is [1]. inversion count is 0.
-
-Sample Input 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3 1
-
 2 3 1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-Code builds the edges 3→2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Permutation is [1,3,2]. inversion count 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sample Input 3:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import heapq
+
+
+def main(input_stream, output_stream):
+    class FenwickTree:
+        def __init__(self, size):
+            self.n = size
+            self.tree = [0]*(self.n +2)  # 1-based
+
+        def update(self, idx, delta=1):
+            while idx <= self.n:
+                self.tree[idx] += delta
+                idx += idx & -idx
+
+        def query(self, idx):
+            res = 0
+            while idx > 0:
+                res += self.tree[idx]
+                idx -= idx & -idx
+            return res
+
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    # Build adjacency list and in_degree
+    adj = [[] for _ in range(n+1)]
+    in_degree = [0]*(n+1)
+
+    for x in range(1, n+1):
+        for y in range(x+1, n+1):
+            px = p[x-1]
+            py = p[y-1]
+            if px > py +k:
+                adj[y].append(x)
+                in_degree[x] +=1
+            if py > px +k:
+                adj[x].append(y)
+                in_degree[y] +=1
+
+    # Topological sort with min-heap
+    heap = []
+    for x in range(1, n+1):
+        if in_degree[x] == 0:
+            heapq.heappush(heap, x)
+
+    permutation = []
+    while heap:
+        x = heapq.heappop(heap)
+        permutation.append(x)
+        for y in adj[x]:
+            in_degree[y] -=1
+            if in_degree[y] ==0:
+                heapq.heappush(heap, y)
+
+    # Compute inversion count
+    ft = FenwickTree(n)
+    inversion_count =0
+    for num in permutation:
+        # query the number of elements already added which are > num
+        count = ft.query(n) - ft.query(num)
+        inversion_count += count
+        ft.update(num)
+
+    print(inversion_count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5 2
+5 4 3 2 1
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-5 4 3 2 1 → permutation is [3,4,5,1,2]. inversion count 6.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+import heapq
+
+
+def main(input_stream, output_stream):
+    class FenwickTree:
+        def __init__(self, size):
+            self.n = size
+            self.tree = [0]*(self.n +2)  # 1-based
+
+        def update(self, idx, delta=1):
+            while idx <= self.n:
+                self.tree[idx] += delta
+                idx += idx & -idx
+
+        def query(self, idx):
+            res = 0
+            while idx > 0:
+                res += self.tree[idx]
+                idx -= idx & -idx
+            return res
+
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    # Build adjacency list and in_degree
+    adj = [[] for _ in range(n+1)]
+    in_degree = [0]*(n+1)
+
+    for x in range(1, n+1):
+        for y in range(x+1, n+1):
+            px = p[x-1]
+            py = p[y-1]
+            if px > py +k:
+                adj[y].append(x)
+                in_degree[x] +=1
+            if py > px +k:
+                adj[x].append(y)
+                in_degree[y] +=1
+
+    # Topological sort with min-heap
+    heap = []
+    for x in range(1, n+1):
+        if in_degree[x] == 0:
+            heapq.heappush(heap, x)
+
+    permutation = []
+    while heap:
+        x = heapq.heappop(heap)
+        permutation.append(x)
+        for y in adj[x]:
+            in_degree[y] -=1
+            if in_degree[y] ==0:
+                heapq.heappush(heap, y)
+
+    # Compute inversion count
+    ft = FenwickTree(n)
+    inversion_count =0
+    for num in permutation:
+        # query the number of elements already added which are > num
+        count = ft.query(n) - ft.query(num)
+        inversion_count += count
+        ft.update(num)
+
+    print(inversion_count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 3
+5 8 6 10 2 7 4 1 9 3
+""",
+            "output": \
+"""\
+18
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 100, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 93, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '18'
+Got: '19'
+
+```
 
 Sample Input 4:
 

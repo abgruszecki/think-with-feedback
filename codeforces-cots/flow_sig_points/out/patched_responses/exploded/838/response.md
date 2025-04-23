@@ -835,165 +835,204 @@ Finally, output E[r][c] modulo MOD.
 
 Now, code:
 
-MOD = 998244353
+Testing against sample input 1.
 
-n, m = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-a = []
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-for _ in range(n):
+    a = []
 
-    row = list(map(int, input().split()))
+    for _ in range(n):
 
-    a.append(row)
+        row = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-r, c = map(int, input().split())
+        a.append(row)
 
-r -= 1
+    r, c = map(int, input_stream.readline().rstrip("\n").split())
 
-c -= 1
+    r -= 1
 
-cells = []
+    c -= 1
 
-for i in range(n):
+    cells = []
 
-    for j in range(m):
+    for i in range(n):
 
-        cells.append( (a[i][j], i, j) )
+        for j in range(m):
 
-# Sort cells in increasing order of a_val
+            cells.append( (a[i][j], i, j) )
 
-cells.sort(key=lambda x: x[0])
+    # Sort cells in increasing order of a_val
 
-# Group cells by a_val
+    cells.sort(key=lambda x: x[0])
 
-groups = []
+    # Group cells by a_val
 
-current_val = None
+    groups = []
 
-current_group = []
+    current_val = None
 
-for cell in cells:
+    current_group = []
 
-    val, i, j = cell
+    for cell in cells:
 
-    if val != current_val:
+        val, i, j = cell
 
-        if current_group:
+        if val != current_val:
 
-            groups.append( (current_val, current_group) )
+            if current_group:
 
-        current_val = val
+                groups.append( (current_val, current_group) )
 
-        current_group = []
+            current_val = val
 
-    current_group.append( (i, j) )
+            current_group = []
 
-if current_group:
+        current_group.append( (i, j) )
 
-    groups.append( (current_val, current_group) )
+    if current_group:
 
-sum_x_total = 0
+        groups.append( (current_val, current_group) )
 
-sum_y_total = 0
+    sum_x_total = 0
 
-sum_x2_total = 0
+    sum_y_total = 0
 
-sum_y2_total = 0
+    sum_x2_total = 0
 
-sum_E_total = 0
+    sum_y2_total = 0
 
-count_total = 0
+    sum_E_total = 0
 
-E = [[0] * m for _ in range(n)]
+    count_total = 0
 
-for group_val, group_cells in groups:
+    E = [[0] * m for _ in range(n)]
 
-    group_sum_x = 0
+    for group_val, group_cells in groups:
 
-    group_sum_y = 0
+        group_sum_x = 0
 
-    group_sum_x2 = 0
+        group_sum_y = 0
 
-    group_sum_y2 = 0
+        group_sum_x2 = 0
 
-    group_sum_E = 0
+        group_sum_y2 = 0
 
-    group_count = 0
+        group_sum_E = 0
 
-    for i, j in group_cells:
+        group_count = 0
 
-        x = i + 1
+        for i, j in group_cells:
 
-        y = j + 1
+            x = i + 1
 
-        if count_total == 0:
+            y = j + 1
 
-            e = 0
+            if count_total == 0:
 
-        else:
+                e = 0
 
-            # Compute sum_d_sq
+            else:
 
-            sum_d_sq = (x * x + y * y) * count_total
+                # Compute sum_d_sq
 
-            sum_d_sq -= 2 * x * sum_x_total
+                sum_d_sq = (x * x + y * y) * count_total
 
-            sum_d_sq -= 2 * y * sum_y_total
+                sum_d_sq -= 2 * x * sum_x_total
 
-            sum_d_sq += sum_x2_total
+                sum_d_sq -= 2 * y * sum_y_total
 
-            sum_d_sq += sum_y2_total
+                sum_d_sq += sum_x2_total
 
-            # Compute total_sum
+                sum_d_sq += sum_y2_total
 
-            total_sum = sum_E_total + sum_d_sq
+                # Compute total_sum
 
-            inv_k = pow(count_total, MOD-2, MOD)
+                total_sum = sum_E_total + sum_d_sq
 
-            e = (total_sum % MOD) * inv_k % MOD
+                inv_k = pow(count_total, MOD-2, MOD)
 
-        E[i][j] = e
+                e = (total_sum % MOD) * inv_k % MOD
 
-        group_sum_x += x
+            E[i][j] = e
 
-        group_sum_y += y
+            group_sum_x += x
 
-        group_sum_x2 += x * x
+            group_sum_y += y
 
-        group_sum_y2 += y * y
+            group_sum_x2 += x * x
 
-        group_sum_E = (group_sum_E + e) % MOD
+            group_sum_y2 += y * y
 
-        group_count += 1
+            group_sum_E = (group_sum_E + e) % MOD
 
-    # Update the cumulative sums
+            group_count += 1
 
-    sum_x_total += group_sum_x
+        # Update the cumulative sums
 
-    sum_y_total += group_sum_y
+        sum_x_total += group_sum_x
 
-    sum_x2_total += group_sum_x2
+        sum_y_total += group_sum_y
 
-    sum_y2_total += group_sum_y2
+        sum_x2_total += group_sum_x2
 
-    sum_E_total = (sum_E_total + group_sum_E) % MOD
+        sum_y2_total += group_sum_y2
 
-    count_total += group_count
+        sum_E_total = (sum_E_total + group_sum_E) % MOD
 
-print(E[r][c] % MOD)
+        count_total += group_count
 
-Yes, this should work.
+    print(E[r][c] % MOD, file=output_stream)
 
-Testing the first example:
 
-After processing group 0 (a=1), the group_sum_x is 1+1+1 = 3 (cells (0,0), (0,1), (0,3) are 0-based. Their x in 1-based is 1 for all, since i=0 for all. group_sum_x is 1+1+1 =3.
 
-Then group 1 (a=2) has one cell (0,2) → x=1 (i=0+1=1), y=3 (j=2+1=3). sum_d_sq is (1+3^2)*3 - 2*1*3 - 2*3*7 + 3+21 = 10*3=30 -6-42=30-48= -18 +24=6. sum_E_total is 0. e=6 * inv(3) mod MOD=6 * 332748118 mod MOD= 1996488708 mod MOD=1996488708-2*998244353=1996488708-1996488706=2. So E[0][2] is 2.
+def test():
+    import io
 
-The output is E[0][2] =2, which matches the first example.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 3
+1 5 7
+2 3 1
+1 2
+""",
+            "output": \
+"""\
+665496238
+""",
+        }, 
+    ]
 
-For the second example, the code should compute the correct value.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So this should be the correct code.
 </think>

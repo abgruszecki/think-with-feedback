@@ -527,129 +527,158 @@ else:
 
 So code:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-if n == 2:
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-    print(-1)
+    if n == 2:
 
-else:
-
-    found = False
-
-    # Check for k=1
-
-    for i in range(n-1):
-
-        x = a[i] ^ a[i+1]
-
-        if i > 0:
-
-            if a[i-1] > x:
-
-                print(1)
-
-                found = True
-
-                break
-
-        if i +2 < n:
-
-            if x > a[i+2]:
-
-                print(1)
-
-                found = True
-
-                break
-
-    if not found:
-
-        # Check for k=2
-
-        for i in range(n-2):
-
-            # Case 1: merge i and i+1, then i+2
-
-            x = a[i] ^ a[i+1]
-
-            y = x ^ a[i+2]
-
-            if i > 0 and a[i-1] > y:
-
-                print(2)
-
-                found = True
-
-                break
-
-            if i +3 < n and y > a[i+3]:
-
-                print(2)
-
-                found = True
-
-                break
-
-            # Case 2: merge i+1 and i+2, then i
-
-            x = a[i+1] ^ a[i+2]
-
-            y = a[i] ^ x
-
-            if i >0 and a[i-1] > y:
-
-                print(2)
-
-                found = True
-
-                break
-
-            if i +3 <n and y > a[i+3]:
-
-                print(2)
-
-                found = True
-
-                break
-
-        if not found:
-
-            print(-1)
-
-        else:
-
-            # already printed 2
-
-            pass
+        print(-1, file=output_stream)
 
     else:
 
-        # already printed 1
+        found = False
 
-        pass
+        # Check for k=1
 
-But wait, in the code, when checking for k=2, for each i, we check both cases, and break as soon as any of them is true.
+        for i in range(n-1):
 
-But for example, in the third test case, when i=0, case1 is triggered, so returns 2.
+            x = a[i] ^ a[i+1]
 
-Thus, the code should work.
+            if i > 0:
 
-Now, let's test some cases.
+                if a[i-1] > x:
 
-Test case 1:
+                    print(1, file=output_stream)
 
-4
+                    found = True
 
-2 5 6 8
+                    break
 
-Check k=1:
+            if i +2 < n:
 
-i=0: x=2^5=7. next_el is 6. 7>6 → condition met. So return 1.
+                if x > a[i+2]:
 
-Which is correct.
+                    print(1, file=output_stream)
+
+                    found = True
+
+                    break
+
+        if not found:
+
+            # Check for k=2
+
+            for i in range(n-2):
+
+                # Case 1: merge i and i+1, then i+2
+
+                x = a[i] ^ a[i+1]
+
+                y = x ^ a[i+2]
+
+                if i > 0 and a[i-1] > y:
+
+                    print(2, file=output_stream)
+
+                    found = True
+
+                    break
+
+                if i +3 < n and y > a[i+3]:
+
+                    print(2, file=output_stream)
+
+                    found = True
+
+                    break
+
+                # Case 2: merge i+1 and i+2, then i
+
+                x = a[i+1] ^ a[i+2]
+
+                y = a[i] ^ x
+
+                if i >0 and a[i-1] > y:
+
+                    print(2, file=output_stream)
+
+                    found = True
+
+                    break
+
+                if i +3 <n and y > a[i+3]:
+
+                    print(2, file=output_stream)
+
+                    found = True
+
+                    break
+
+            if not found:
+
+                print(-1, file=output_stream)
+
+            else:
+
+                # already printed 2
+
+                pass
+
+        else:
+
+            # already printed 1
+
+            pass
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 2 3
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case: n=5, 1 2 4 6 20.
 

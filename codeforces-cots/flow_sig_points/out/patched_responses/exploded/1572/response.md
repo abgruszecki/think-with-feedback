@@ -441,123 +441,251 @@ Yes.
 
 So the code would look like:
 
+Testing against sample input 3.
+
+```python
 import bisect
 
-MOD = 10**9 +7
 
-n, x = map(int, input().split())
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-a = list(map(int, input().split()))
+    n, x = map(int, input_stream.readline().rstrip("\n").split())
 
-a_n = a[-1]
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-sum_a = sum(a)
+    a_n = a[-1]
 
-m = sum_a - a_n
+    sum_a = sum(a)
 
-k = n - bisect.bisect_left(a, a_n)
+    m = sum_a - a_n
 
-current = k
+    k = n - bisect.bisect_left(a, a_n)
 
-cnt =0
+    current = k
 
-while current % x ==0:
+    cnt =0
 
-    cnt +=1
+    while current % x ==0:
 
-    current = current //x
+        cnt +=1
 
-min_val = min(cnt, a_n)
+        current = current //x
 
-exponent = m + min_val
+    min_val = min(cnt, a_n)
 
-print(pow(x, exponent, MOD))
+    exponent = m + min_val
 
-This should work.
+    print(pow(x, exponent, MOD), file=output_stream)
 
-Testing the fourth sample:
 
-n=4, x=5
 
-a = [0,0,0,0]
+def test():
+    import io
 
-a_n=0
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 5
+0 0 0 0
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-sum_a=0
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-m=0-0=0
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-k=4 - bisect.bisect_left(a,0) → since all elements are 0, bisect_left returns 0. 4-0=4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-current=4, check divisibility by 5: 4%5 is 4. So cnt=0.
+    print('Tests passed 😎')
 
-min_val= min(0,0) =0.
 
-exponent=0+0=0. 5^0=1. Correct.
+if __name__ == '__main__':
+    test()
 
-Another sample:
 
-Third sample input:
+```
 
-n=2, x=2
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-a = [29,29]
+```
 
-sum_a=58, a_n=29.
+Testing against sample input 2.
 
-m=58-29=29.
+```python
+import bisect
 
-k=2.
 
-current=2, divided by x=2 → cnt=1, current=1. loop stops.
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-min_val= min(1,29) →1.
+    n, x = map(int, input_stream.readline().rstrip("\n").split())
 
-exponent=29+1=30. 2^30 mod 1e9+7 is 73741817. Correct.
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-Second sample:
+    a_n = a[-1]
 
-Input:
+    sum_a = sum(a)
 
+    m = sum_a - a_n
+
+    k = n - bisect.bisect_left(a, a_n)
+
+    current = k
+
+    cnt =0
+
+    while current % x ==0:
+
+        cnt +=1
+
+        current = current //x
+
+    min_val = min(cnt, a_n)
+
+    exponent = m + min_val
+
+    print(pow(x, exponent, MOD), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 2
+29 29
+""",
+            "output": \
+"""\
+73741817
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 1.
+
+```python
+import bisect
+
+
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
+
+    n, x = map(int, input_stream.readline().rstrip("\n").split())
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    a_n = a[-1]
+
+    sum_a = sum(a)
+
+    m = sum_a - a_n
+
+    k = n - bisect.bisect_left(a, a_n)
+
+    current = k
+
+    cnt =0
+
+    while current % x ==0:
+
+        cnt +=1
+
+        current = current //x
+
+    min_val = min(cnt, a_n)
+
+    exponent = m + min_val
+
+    print(pow(x, exponent, MOD), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3 3
-
 1 2 3
+""",
+            "output": \
+"""\
+27
+""",
+        }, 
+    ]
 
-sum_a = 6. a_n=3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-m =6-3=3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-k =3 - bisect.bisect_left(a,3). a is [1,2,3], bisect_left finds index 2. k=3-2=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-current=1. 1%3 !=0. cnt=0.
+    print('Tests passed 😎')
 
-min_val= min(0,3) →0.
 
-exponent=3+0=3. 3^3=27. Correct.
+if __name__ == '__main__':
+    test()
 
-First sample: exponent is 2+1=3. 2^3=8. Correct.
 
-Another test case:
+```
 
-Sample where cnt is larger than a_n. For example:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-n=1, x=2.
-
-a = [5]
-
-sum_a=5. a_n=5.
-
-m=5-5=0.
-
-k=1.
-
-current=1. cnt=0. min_val=0.
-
-exponent=0+0=0 →1.
-
-But let's see:
-
-s is 1/(2^5) → sum is 1. So s=1, t=2^5=32. GCD(1,32)=1. Correct.
+```
 
 Another test case:
 

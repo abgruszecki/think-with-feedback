@@ -95,49 +95,81 @@ loop while i < len(s):
 
 So, code steps:
 
-s = input().strip()
+Testing against sample input 2.
 
-res = []
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-i = 0
+    res = []
 
-while i < len(s):
+    i = 0
 
-    if s[i] == '.':
+    while i < len(s):
 
-        res.append('0')
+        if s[i] == '.':
 
-        i +=1
+            res.append('0')
 
-    else:
-
-        if s[i+1] == '.':
-
-            res.append('1')
+            i +=1
 
         else:
 
-            res.append('2')
+            if s[i+1] == '.':
 
-        i +=2
+                res.append('1')
 
-print(''.join(res))
+            else:
 
-Yes, that should work.
+                res.append('2')
 
-Testing with the examples:
+            i +=2
 
-First input .-.--: i starts at 0. '.' → '0', i=1.
+    print(''.join(res), file=output_stream)
 
-At i=1, '-', check i+1=2, which is '.', append '1', i=3.
 
-At i=3, '.', append 0, i=4.
 
-At i=4, '-', check i+1=5 which is '-', append '2', i=6. Loop ends. So '012'.
+def test():
+    import io
 
-Yes.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+-..-.--
+""",
+            "output": \
+"""\
+1012
+""",
+        }, 
+    ]
 
-Second example: --. → i=0, '-', check i+1=1: '-', append '2', i=2. Then i=2 is '.', append '0'. So '20'.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: -..-.--
 

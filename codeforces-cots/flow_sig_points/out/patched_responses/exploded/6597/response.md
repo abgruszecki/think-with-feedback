@@ -886,58 +886,80 @@ Process each tuple in sorted list.
 
 So the code would be:
 
-n = int(input())
-a = list(map(int, input().split()))
-t = list(map(int, input().split()))
+Testing against sample input 1.
 
-categories = sorted(zip(t, a), key=lambda x: (-x[0], x[1]))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    t = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-parent = {}
+    categories = sorted(zip(t, a), key=lambda x: (-x[0], x[1]))
 
-def find(s):
-    if s not in parent:
-        parent[s] = s
+    parent = {}
+
+    def find(s):
+        if s not in parent:
+            parent[s] = s
+            return s
+        while parent[s] != s:
+            parent[s] = parent[parent[s]]
+            s = parent[s]
         return s
-    while parent[s] != s:
-        parent[s] = parent[parent[s]]
-        s = parent[s]
-    return s
 
-total = 0
-for ti, ai in categories:
-    s = find(ai)
-    total += (s - ai) * ti
-    parent[s] = s + 1  # union with s+1
+    total = 0
+    for ti, ai in categories:
+        s = find(ai)
+        total += (s - ai) * ti
+        parent[s] = s + 1  # union with s+1
 
-print(total)
+    print(total, file=output_stream)
 
-Wait, wait. The union operation is to set parent[s] = find(s+1), but how to handle that. 
 
-In the code above, the 'find' function with path compression is implemented, but the union step is simply setting parent[s] = s+1. Is this correct?
 
-No. The union step should merge s with s+1, so that subsequent find operations on s will return find(s+1). So after assigning s to the current category, we need to set parent[s] to the find(s+1) result.
+def test():
+    import io
 
-But in the code above, after finding s, we set parent[s] = s+1. But this is equivalent to merging s with s+1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 2 3 4 5
+1 1 1 1 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Let's see.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For example, when s=7 is assigned, we call union(7). This sets parent[7] =8.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Then, when someone calls find(7), it will first look at parent[7] =8. Then find(8). If 8 is not in parent, then parent[8] is set to 8, and returns 8. But if 8 is already assigned, it may point to 9, etc.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-This is exactly the same as the union in the previous approach.
+    print('Tests passed 😎')
 
-Thus, the code above correctly implements the union step by setting parent[s] = s+1. 
 
-But why? Because when we assign s, we want the next find(s) to return the find(s+1). So when you call find(s) again, it will follow the path to s+1. So this is a way to path compress s to s+1.
+if __name__ == '__main__':
+    test()
 
-So the code is correct.
 
-Testing this with the first sample:
+```
 
-When category3's ai=7 is processed, find(7) returns 7. Then parent[7] is set to 8.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-When category1's ai=7 is processed, find(7) returns find(8). Since parent[8] is 8 (if not processed), and after setting parent[7] =8, find(7) will return 8, which is the next available.
+```
 
 But in the first sample, after processing category3 (s=7), category0 (s=3), category2 (s=9), category4 (s=8), and then category1 (s=7), the code does:
 

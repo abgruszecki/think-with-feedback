@@ -223,39 +223,77 @@ Compute accordingly.
 
 So the code:
 
-s = input().strip()
+Testing against sample input 1.
 
-parts = s.split()
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-x = int(parts[0])
+    parts = s.split()
 
-if parts[2] == 'week':
+    x = int(parts[0])
 
-    if x ==5 or x ==6:
+    if parts[2] == 'week':
 
-        print(53)
+        if x ==5 or x ==6:
 
-    else:
+            print(53, file=output_stream)
 
-        print(52)
+        else:
 
-else: # month
+            print(52, file=output_stream)
 
-    months_days = [31,29,31,30,31,30,31,31,30,31,30,31]
+    else: # month
 
-    count = sum(1 for days in months_days if days >=x)
+        months_days = [31,29,31,30,31,30,31,31,30,31,30,31]
 
-    print(count)
+        count = sum(1 for days in months_days if days >=x)
 
-Wait, but wait: for the 'month' case, the input x is 1<=x<=31. So even if x is 31, it's okay. For months with 31 days, x=31 is valid.
+        print(count, file=output_stream)
 
-So for example, x=31: count how many months have 31 days. That's 7, as noted.
 
-So this code should handle all cases.
 
-Testing the first sample input:
+def test():
+    import io
 
-Input:4 of week → parts[2] is 'week'. x=4. Not 5 or 6, so output 52.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+30 of month
+""",
+            "output": \
+"""\
+11
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:30 of month → x=30. months_days:
 

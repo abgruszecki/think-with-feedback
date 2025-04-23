@@ -1014,185 +1014,238 @@ Output T - min_loss.
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n, q = map(int, sys.stdin.readline().split())
 
-painters = []
-for _ in range(q):
-    l, r = map(int, sys.stdin.readline().split())
-    painters.append( (l, r) )
+def main(input_stream, output_stream):
+    n, q = map(int, input_stream.readline().split())
 
-# Compute T by merging all intervals.
+    painters = []
+    for _ in range(q):
+        l, r = map(int, input_stream.readline().split())
+        painters.append( (l, r) )
 
-sorted_painters = sorted(painters)
-merged = []
-for l, r in sorted_painters:
-    if not merged:
-        merged.append( (l, r) )
-    else:
-        last_l, last_r = merged[-1]
-        if l <= last_r + 1:
-            # overlap or adjacent, merge
-            new_l = last_l
-            new_r = max(last_r, r)
-            merged[-1] = (new_l, new_r)
-        else:
+    # Compute T by merging all intervals.
+
+    sorted_painters = sorted(painters)
+    merged = []
+    for l, r in sorted_painters:
+        if not merged:
             merged.append( (l, r) )
+        else:
+            last_l, last_r = merged[-1]
+            if l <= last_r + 1:
+                # overlap or adjacent, merge
+                new_l = last_l
+                new_r = max(last_r, r)
+                merged[-1] = (new_l, new_r)
+            else:
+                merged.append( (l, r) )
 
-T = sum( r - l + 1 for l, r in merged )
+    T = sum( r - l + 1 for l, r in merged )
 
-# Precompute S_x for each x.
+    # Precompute S_x for each x.
 
-sections = [[] for _ in range(n+1)]  # sections[0] is unused.
+    sections = [[] for _ in range(n+1)]  # sections[0] is unused.
 
-for i in range(q):
-    l, r = painters[i]
-    for x in range(l, r+1):
-        sections[x].append(i)
+    for i in range(q):
+        l, r = painters[i]
+        for x in range(l, r+1):
+            sections[x].append(i)
 
-# Compute count_1 and count_2.
+    # Compute count_1 and count_2.
 
-count_1 = [0] * q
-count_2 = [ [0]*q for _ in range(q) ]  # count_2[i][j] for i < j.
+    count_1 = [0] * q
+    count_2 = [ [0]*q for _ in range(q) ]  # count_2[i][j] for i < j.
 
-for x in range(1, n+1):
-    s = sections[x]
-    if len(s) == 1:
-        count_1[s[0]] += 1
-    elif len(s) == 2:
-        a, b = s
-        if a > b:
-            a, b = b, a
-        count_2[a][b] += 1
+    for x in range(1, n+1):
+        s = sections[x]
+        if len(s) == 1:
+            count_1[s[0]] += 1
+        elif len(s) == 2:
+            a, b = s
+            if a > b:
+                a, b = b, a
+            count_2[a][b] += 1
 
-# Compute min_loss.
+    # Compute min_loss.
 
-min_loss = float('inf')
+    min_loss = float('inf')
 
-for i in range(q):
-    for j in range(i+1, q):
-        current_loss = count_1[i] + count_1[j] + count_2[i][j]
-        if current_loss < min_loss:
-            min_loss = current_loss
+    for i in range(q):
+        for j in range(i+1, q):
+            current_loss = count_1[i] + count_1[j] + count_2[i][j]
+            if current_loss < min_loss:
+                min_loss = current_loss
 
-print(T - min_loss)
+    print(T - min_loss, file=output_stream)
 
-But this code may have some issues.
 
-For example, when merging the intervals, the code uses the sorted painters list. But the merging should be done based on the sorted intervals regardless of their order. So sorted_painters is sorted by l, then r.
 
-But the code for merging is correct.
+def test():
+    import io
 
-Another possible issue is that the code for merging intervals merges overlapping or adjacent intervals, which is correct.
-
-But let's test with sample input 1.
-
-Sample input 1:
-
-7 5
-
-1 4
-
-4 5
-
-5 6
-
-6 7
-
-3 5
-
-The sorted painters list is:
-
-[(1,4), (3,5), (4,5), (5,6), (6,7)]
-
-Merging:
-
-First interval (1,4).
-
-Next (3,5) overlaps, merged into (1,5).
-
-Next (4,5) is within (1,5).
-
-Next (5,6) overlaps, merged into (1,6).
-
-Next (6,7) overlaps, merged into (1,7). So T is 7.
-
-Then, for x=3, the S_x is painters 0,4. len=2. So count_2[0][4] +=1.
-
-But in the code, when painters are stored as 0,1,2,3,4 (indices 0 to 4), and painters[4] is (3,5). So in the code, for x=3, the S_x would include painter 0 (1-4) and painter 4 (3-5). So s = [0,4]. sorted as 0,4. So count_2[0][4] +=1.
-
-But in the code, count_2 is initialized as a 2D list of q x q. For q=5, that's 5x5. So count_2[0][4] is valid.
-
-Then, the pair (1,4) (indices 1 and 4):
-
-count_1[1] is 0, count_1[4] is 0.
-
-count_2[1][4] is 0, because in S_x for x=4, the painters are 0,1,4 (len=3). For x=5, painters are 1,2,4 (len=3). So there are no x where S_x is [1,4]. So the code's count_2[1][4] is 0.
-
-Thus, current_loss for pair (1,4) is 0 +0 +0=0, which is minimal.
-
-The code then outputs T - 0 =7, which matches the sample.
-
-Thus, the code works for the first sample.
-
-But what about the second sample:
-
-Sample input 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4 3
-
 1 1
-
 2 2
-
 3 4
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-Output:2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The painters are:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Painter0: 1-1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Painter1: 2-2.
+    print('Tests passed 😎')
 
-Painter2:3-4.
 
-Merged intervals: [1-1], [2-2], [3-4]. T = 1 +1 +2 =4.
+if __name__ == '__main__':
+    test()
 
-If we exclude any two painters, the remaining one's coverage is:
 
-Excluding 0 and1: painter2 covers 3-4. Coverage is 2. Which matches the output.
+```
 
-Thus, in this case, the minimal loss is 4-2=2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-But according to the code's logic:
+```
 
-For each x in 1..4:
+Testing against sample input 2.
 
-x=1: covered by painter0. count_1[0] +=1.
+```python
+import sys
 
-x=2: covered by painter1. count_1[1] +=1.
 
-x=3: covered by painter2. count_1[2] +=1.
+def main(input_stream, output_stream):
+    n, q = map(int, input_stream.readline().split())
 
-x=4: covered by painter2. count_1[2] +=1.
+    painters = []
+    for _ in range(q):
+        l, r = map(int, input_stream.readline().split())
+        painters.append( (l, r) )
 
-So count_1 is [1,1, 2, ...].
+    # Compute T by merging all intervals.
 
-count_2 is all zero.
+    sorted_painters = sorted(painters)
+    merged = []
+    for l, r in sorted_painters:
+        if not merged:
+            merged.append( (l, r) )
+        else:
+            last_l, last_r = merged[-1]
+            if l <= last_r + 1:
+                # overlap or adjacent, merge
+                new_l = last_l
+                new_r = max(last_r, r)
+                merged[-1] = (new_l, new_r)
+            else:
+                merged.append( (l, r) )
 
-Then, for all pairs i < j:
+    T = sum( r - l + 1 for l, r in merged )
 
-pair (0,1): loss =1 +1 +0=2. So T -2=2.
+    # Precompute S_x for each x.
 
-pair (0,2): loss=1+2+0=3.
+    sections = [[] for _ in range(n+1)]  # sections[0] is unused.
 
-pair (1,2): loss=1+2+0=3.
+    for i in range(q):
+        l, r = painters[i]
+        for x in range(l, r+1):
+            sections[x].append(i)
 
-So the minimal loss is 2. T -2=4-2=2. Which matches the sample.
+    # Compute count_1 and count_2.
 
-Thus, the code works.
+    count_1 = [0] * q
+    count_2 = [ [0]*q for _ in range(q) ]  # count_2[i][j] for i < j.
+
+    for x in range(1, n+1):
+        s = sections[x]
+        if len(s) == 1:
+            count_1[s[0]] += 1
+        elif len(s) == 2:
+            a, b = s
+            if a > b:
+                a, b = b, a
+            count_2[a][b] += 1
+
+    # Compute min_loss.
+
+    min_loss = float('inf')
+
+    for i in range(q):
+        for j in range(i+1, q):
+            current_loss = count_1[i] + count_1[j] + count_2[i][j]
+            if current_loss < min_loss:
+                min_loss = current_loss
+
+    print(T - min_loss, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4
+1 1
+2 2
+2 3
+3 4
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 3:
 

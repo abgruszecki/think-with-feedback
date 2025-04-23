@@ -1346,13 +1346,16 @@ Implement Dijkstra's with cnt.
 
 So, the code in Python would be:
 
+Testing against sample input 1.
+
+```python
 import heapq
 
-def main():
 
+def main(input_stream, output_stream):
     import sys
 
-    input = sys.stdin.read().split()
+    input = input_stream.read().split()
 
     ptr = 0
 
@@ -1456,7 +1459,7 @@ def main():
 
             if cnt_s[a] * cnt_t[b] == cnt_s[t]:
 
-                print("YES")
+                print("YES", file=output_stream)
 
             else:
 
@@ -1470,11 +1473,11 @@ def main():
 
                     cost = l - allowed_l_prime
 
-                    print(f"CAN {cost}")
+                    print(f"CAN {cost}", file=output_stream)
 
                 else:
 
-                    print("NO")
+                    print("NO", file=output_stream)
 
         else:
 
@@ -1488,45 +1491,60 @@ def main():
 
                 cost = l - allowed_l_prime
 
-                print(f"CAN {cost}")
+                print(f"CAN {cost}", file=output_stream)
 
             else:
 
-                print("NO")
+                print("NO", file=output_stream)
 
-if __name__ == "__main__":
 
-    main()
 
-This code should handle all cases correctly.
+def test():
+    import io
 
-Let's test it against the first sample input.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 3 1 3
+1 2 10
+2 3 10
+1 3 100
+""",
+            "output": \
+"""\
+YES
+YES
+CAN 81
+""",
+        }, 
+    ]
 
-Sample input 1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The edge 2→3:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sum_ab=13=D.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-cnt_s[a=2] is 1 (only one way to reach 2 from s=1).
+    print('Tests passed 😎')
 
-cnt_t[b=3] is the number of ways to reach t from 3. Which in the reversed graph is 1 (path 3→5→6).
 
-cnt_s[t=6] is 2.
+if __name__ == '__main__':
+    test()
 
-So 1 *1=1 !=2 → not all paths.
 
-max_reduce = D-1 -d_s[a] -d_t[b] =13-1 -2-4=6.
+```
 
-allowed_l_prime = min(7-1=6,6)=6.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-allowed_l_prime is 6 >=1.
-
-sum_ab_new=2+6+4=12 <13.
-
-cost is 7-6=1 → output CAN 1. Which matches the sample.
-
-So the code should work.
+```
 
 Another test case is the third sample input:
 

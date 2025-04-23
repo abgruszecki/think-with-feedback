@@ -459,57 +459,95 @@ Wait, but this code has a problem: for node 1, after processing, its effective_a
 
 Yes. So the code seems correct.
 
-But let's test it against the examples.
+Testing against sample input 1.
 
-First example:
+```python
+import sys
 
-Input:
 
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    b = list(map(int, input_stream.readline().split()))
+    a = list(map(int, input_stream.readline().split()))
+    
+    # Initialize children, x, k arrays (1-based)
+    children = [[] for _ in range(n + 1)]
+    x = [0] * (n + 1)
+    k = [0] * (n + 1)
+    
+    for j in range(2, n + 1):
+        xj, kj = map(int, input_stream.readline().split())
+        x[j] = xj
+        k[j] = kj
+        children[xj].append(j)
+    
+    s = [0] * (n + 1)  # s[j] is the surplus/deficit for node j
+    
+    # Process nodes in reverse order
+    for j in range(n, 0, -1):
+        sum_surplus = 0
+        sum_deficit = 0
+        
+        for child in children[j]:
+            cs = s[child]
+            if cs >= 0:
+                sum_surplus += cs
+            else:
+                sum_deficit += (-cs) * k[child]
+        
+        effective = b[j-1] + sum_surplus - sum_deficit
+        required = a[j-1]
+        s[j] = effective - required
+    
+    print("YES" if s[1] >= 0 else "NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
-
-1 2 3
-
 3 2 1
-
+1 2 3
 1 1
+1 2
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-1 1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So nodes 2 and 3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-For node 2: x is 1, k is 1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For node3: x is 1, k is 1.
+    print('Tests passed 😎')
 
-children[1] = [2,3]
 
-Processing nodes 3, 2, 1.
+if __name__ == '__main__':
+    test()
 
-Processing node3:
 
-children[3] is empty. So sum_surplus and sum_deficit are 0.
+```
 
-effective_available = b[3-1] = 3. required is a[3-1] =1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-s[3] =3-1=2 (surplus).
-
-Processing node2:
-
-children[2] is empty.
-
-effective_available =2. required a[1] is 2. s[2] =0.
-
-Processing node1:
-
-children are 2 and3.
-
-sum_surplus = s[2] (0) + s[3] (2) =2.
-
-sum_deficit is 0.
-
-effective_available =1 (b[0]) +2 -0 =3. required a[0]=3. s[1] =0 >=0. So YES.
-
-Which matches the first example.
+```
 
 Second example:
 

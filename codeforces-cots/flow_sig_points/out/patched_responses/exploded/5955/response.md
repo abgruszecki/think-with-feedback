@@ -297,27 +297,64 @@ result = close_count *2
 
 print(result)
 
-Yes. That's the code. But wait, let's test the first example:
+Testing against sample input 1.
 
-Input: (()))(
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    open_count = 0
+    close_count = 0
+    for c in s:
+        if c == '(':
+            open_count += 1
+        else:
+            if close_count < open_count:
+                close_count += 1
+    print(close_count * 2, file=output_stream)
 
-Processing:
 
-Each character:
 
-1. '(': open=1, close=0
+def test():
+    import io
 
-2. '(': open=2, close=0
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+((()())
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-3. ')': close < open (0 <2), so close becomes 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-4. ')': close (1) <2 → becomes 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-5. ')': close is 2, open is 2. So no increment.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-6. '(': open becomes 3.
+    print('Tests passed 😎')
 
-close_count is 2. So 2*2=4. Correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: "(()))(" → same result.
 

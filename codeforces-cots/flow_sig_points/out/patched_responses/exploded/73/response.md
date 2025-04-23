@@ -82,63 +82,91 @@ Yes.
 
 So the code would look like:
 
-n = int(input())
+Testing against sample input 1.
 
-codes = [input().strip() for _ in range(n)]
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-if n == 1:
+    codes = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
 
-    print(6)
+    if n == 1:
 
-else:
+        print(6, file=output_stream)
 
-    min_dist = 6  # maximum possible is 6, start with that
+    else:
 
-    for i in range(n):
+        min_dist = 6  # maximum possible is 6, start with that
 
-        for j in range(i+1, n):
+        for i in range(n):
 
-            d = sum(c1 != c2 for c1, c2 in zip(codes[i], codes[j]))
+            for j in range(i+1, n):
 
-            if d < min_dist:
+                d = sum(c1 != c2 for c1, c2 in zip(codes[i], codes[j]))
 
-                min_dist = d
+                if d < min_dist:
 
-                if min_dist == 1:  # can't get lower, break early
+                    min_dist = d
 
-                    break
+                    if min_dist == 1:  # can't get lower, break early
 
-        if min_dist == 1:
+                        break
 
-            break
+            if min_dist == 1:
 
-    print( (min_dist -1) // 2 )
+                break
 
-Wait, but in the case where min_dist is 1, (1-1)//2 = 0. Which is correct.
+        print( (min_dist -1) // 2 , file=output_stream)
 
-But for n=1, output is 6.
 
-Yes.
 
-But why 6? Because when there's only one code, you can make up to 6 errors. For example, the code is 000000. Even if you type in 111111 (all digits wrong), since there are no other codes, it's uniquely identified. So the maximum k is 6.
+def test():
+    import io
 
-So that's correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+211111
+212111
+222111
+111111
+112111
+121111
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Now, what's the time complexity?
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For n=1000, the code loops 1000*999/2 = 499500 times. Each loop does 6 comparisons. So 499500 * 6 = 2,997,000 operations. That's acceptable for Python in 1 second.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But perhaps we can optimize further.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Wait, in the code above, once min_dist reaches 1, we can break out early. Because if there's a pair with Hamming distance 1, then the minimal is 1, and no need to check further pairs.
+    print('Tests passed 😎')
 
-So adding the early break when min_dist becomes 1 is a good optimization. Similarly, if during checking a pair, the current distance is 0 (but the problem states all promo codes are distinct, so this can't happen). But the problem says "all promo codes are distinct", so the minimal distance is at least 1.
 
-So the code can proceed as written.
+if __name__ == '__main__':
+    test()
 
-Testing sample input 1:
 
-n=2, codes are 000000 and 999999. The Hamming distance is 6. So min_dist=6. (6-1)//2 = 5//2=2. Correct.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2:
 

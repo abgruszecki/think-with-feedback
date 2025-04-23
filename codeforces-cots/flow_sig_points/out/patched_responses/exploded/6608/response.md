@@ -288,39 +288,76 @@ Now, code:
 
 Read the input:
 
-n = int(input())
+Testing against sample input 1.
 
-s = input().strip()
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-count = {'z':0, 'e':0, 'r':0, 'o':0, 'n':0}
+    s = input_stream.readline().rstrip("\n").strip()
 
-for c in s:
+    count = {'z':0, 'e':0, 'r':0, 'o':0, 'n':0}
 
-    count[c] +=1
+    for c in s:
 
-x = min(count['n'], count['o'], count['e'])
+        count[c] +=1
 
-remaining_o = count['o'] -x
+    x = min(count['n'], count['o'], count['e'])
 
-remaining_e = count['e'] -x
+    remaining_o = count['o'] -x
 
-y = min(count['z'], count['r'], remaining_o, remaining_e)
+    remaining_e = count['e'] -x
 
-digits = ['1']*x + ['0']*y
+    y = min(count['z'], count['r'], remaining_o, remaining_e)
 
-print(' '.join(digits))
+    digits = ['1']*x + ['0']*y
 
-Yes, that should work.
+    print(' '.join(digits), file=output_stream)
 
-Testing the first example:
 
-input is 4, ezor.
 
-count:
+def test():
+    import io
 
-z:1, e:1, r:1, o:1, n:0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10
+nznooeeoer
+""",
+            "output": \
+"""\
+1 1 0
+""",
+        }, 
+    ]
 
-x is 0. remaining o=1, e=1. y is 1. Output 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

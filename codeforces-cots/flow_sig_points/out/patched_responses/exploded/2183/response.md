@@ -449,81 +449,115 @@ But the code uses a deque, which is efficient.
 
 Now, code:
 
-import sys
+Testing against sample input 1.
 
+```python
+import sys
 from collections import deque
 
-n = int(sys.stdin.readline())
 
-if n == 1:
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
-    print(0)
+    if n == 1:
 
-else:
+        print(0, file=output_stream)
 
-    adj = [[] for _ in range(n+1)]
+    else:
 
-    for _ in range(n-1):
+        adj = [[] for _ in range(n+1)]
 
-        u, v = map(int, sys.stdin.readline().split())
+        for _ in range(n-1):
 
-        adj[u].append(v)
+            u, v = map(int, input_stream.readline().split())
 
-        adj[v].append(u)
+            adj[u].append(v)
 
-    color = [-1] * (n+1)
+            adj[v].append(u)
 
-    a = 0
+        color = [-1] * (n+1)
 
-    b = 0
+        a = 0
 
-    # Starting node 1
+        b = 0
 
-    color[1] = 0
+        # Starting node 1
 
-    a = 1
+        color[1] = 0
 
-    queue = deque([1])
+        a = 1
 
-    while queue:
+        queue = deque([1])
 
-        u = queue.popleft()
+        while queue:
 
-        for v in adj[u]:
+            u = queue.popleft()
 
-            if color[v] == -1:
+            for v in adj[u]:
 
-                color[v] = 1 - color[u]
+                if color[v] == -1:
 
-                if color[v] == 0:
+                    color[v] = 1 - color[u]
 
-                    a +=1
+                    if color[v] == 0:
 
-                else:
+                        a +=1
 
-                    b +=1
+                    else:
 
-                queue.append(v)
+                        b +=1
 
-    print(a * b - (n -1))
+                    queue.append(v)
 
-Wait, but in this code, the initial a is 1, and the queue starts with node 1.
+        print(a * b - (n -1), file=output_stream)
 
-Yes.
 
-Testing this code against the first sample:
 
-Sample 1:
+def test():
+    import io
 
-3
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
 1 2
+2 3
+3 4
+4 5
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-1 3
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Output: 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Which the code would compute a=1, b=2 → 2-2=0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

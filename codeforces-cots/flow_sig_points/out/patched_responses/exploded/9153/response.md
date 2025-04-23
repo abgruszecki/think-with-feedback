@@ -448,27 +448,92 @@ else:
 
 Wait, but in code, the check for (A1*C2 == A2*C1) and (B1*C2 == B2*C1) can be done with integers. But since all coefficients are integers, this should work.
 
-Testing examples:
+Testing against sample input 1.
 
-First example:
+```python
+def main(input_stream, output_stream):
+    a1, b1, c1 = map(int, input_stream.readline().rstrip("\n").split())
+    a2, b2, c2 = map(int, input_stream.readline().rstrip("\n").split())
 
-Input:
+    # Check if line1 is invalid (no points)
+    if a1 == 0 and b1 == 0:
+        if c1 != 0:
+            print(0, file=output_stream)
+        else:
+            # line1 is all points, check line2
+            if a2 == 0 and b2 == 0:
+                print(-1 if c2 == 0 else 0, file=output_stream)
+            else:
+                print(-1, file=output_stream)
+        return
 
+    # Check if line2 is invalid (no points)
+    if a2 == 0 and b2 == 0:
+        if c2 != 0:
+            print(0, file=output_stream)
+        else:
+            # line2 is all points, check line1
+            if a1 == 0 and b1 == 0:
+                print(-1 if c1 == 0 else 0, file=output_stream)
+            else:
+                print(-1, file=output_stream)
+        return
+
+    # Both lines are valid, calculate determinant
+    det = a1 * b2 - a2 * b1
+    if det != 0:
+        print(1, file=output_stream)
+    else:
+        # Check if equations are multiples (same line)
+        if a1 * c2 == a2 * c1 and b1 * c2 == b2 * c1:
+            print(-1, file=output_stream)
+        else:
+            print(0, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 1 1 0
+2 -2 0
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-2 2 0
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Line1: x + y =0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Line2: 2x +2y +0=0 → same as x + y =0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So after initial checks, det is 1*2 -2*1 =0.
+    print('Tests passed 😎')
 
-Check A1*C2 -A2*C1 →1*0 -2*0=0.
 
-B1*C2 - B2*C1 →1*0 -2*0=0 → both zero. So output -1.
+if __name__ == '__main__':
+    test()
 
-Which matches the first example.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

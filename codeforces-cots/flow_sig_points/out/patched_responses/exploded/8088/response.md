@@ -377,67 +377,90 @@ Yes.
 
 So the code is:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-m = int(input())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for _ in range(m):
+    m = int(input_stream.readline().rstrip("\n"))
 
-    xi, yi = map(int, input().split())
+    for _ in range(m):
 
-    xi_idx = xi - 1
+        xi, yi = map(int, input_stream.readline().rstrip("\n").split())
 
-    current = a[xi_idx]
+        xi_idx = xi - 1
 
-    left = yi - 1
+        current = a[xi_idx]
 
-    right = current - yi
+        left = yi - 1
 
-    if xi_idx > 0:
+        right = current - yi
 
-        a[xi_idx -1] += left
+        if xi_idx > 0:
 
-    if xi_idx + 1 < n:
+            a[xi_idx -1] += left
 
-        a[xi_idx +1] += right
+        if xi_idx + 1 < n:
 
-    a[xi_idx] = 0
+            a[xi_idx +1] += right
 
-for num in a:
+        a[xi_idx] = 0
 
-    print(num)
+    for num in a:
 
-This should handle all cases.
+        print(num, file=output_stream)
 
-Testing with sample inputs.
 
-First sample input:
 
-5
+def test():
+    import io
 
-10 10 10 10 10
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+2 4 1
+1
+2 2
+""",
+            "output": \
+"""\
+3
+0
+3
+""",
+        }, 
+    ]
 
-5
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-2 5 → code steps:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-xi=2, xi_idx=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-current=10.
+    print('Tests passed 😎')
 
-left=4, right=5.
 
-xi_idx>0 → yes (1>0). a[0] +=4 →10+4=14.
+if __name__ == '__main__':
+    test()
 
-xi_idx+1=2 <5 → yes. a[2] +=5 →10+5=15.
 
-a[1] =0.
+```
 
-Then next steps as before.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Which gives the correct output.
+```
 
 So the code is correct.
 </think>

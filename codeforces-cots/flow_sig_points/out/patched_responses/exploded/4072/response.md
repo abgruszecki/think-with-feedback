@@ -355,57 +355,215 @@ Yes.
 
 Now, code:
 
-n, t, k, d = map(int, input().split())
+Testing against sample input 1.
 
-time1 = ((n + k -1) //k) * t
+```python
+def main(input_stream, output_stream):
+    n, t, k, d = map(int, input_stream.readline().rstrip("\n").split())
 
-m = d // t
+    time1 = ((n + k -1) //k) * t
 
-cakes_during = m *k
+    m = d // t
 
-if cakes_during >=n:
+    cakes_during = m *k
 
-    time2 = m *t
+    if cakes_during >=n:
 
-else:
+        time2 = m *t
 
-    rem = n - cakes_during
+    else:
 
-    batches_after = (rem + 2*k -1) // (2*k)
+        rem = n - cakes_during
 
-    time2 = d + batches_after * t
+        batches_after = (rem + 2*k -1) // (2*k)
 
-print("YES" if time2 < time1 else "NO")
+        time2 = d + batches_after * t
 
-Wait, let's test the first example:
+    print("YES" if time2 < time1 else "NO", file=output_stream)
 
-Input:8 6 4 5
 
-time1: (8+4-1)//4= (11//4)=2 →2*6=12.
 
-m=5//6=0 →0. cakes_during=0<8.
+def test():
+    import io
 
-rem=8.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 6 4 6
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-batches_after= (8 +8-1) //8 →15//8=1. 1*6=6. time2=5+6=11 <12 →YES.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Second example:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-8 6 4 6.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-time1= (8+4-1)//4= (11//4=2) →12.
+    print('Tests passed 😎')
 
-m=6//6=1 →4. rem=8-4=4.
 
-batches_after= (4+8-1)//8 → (11)//8=1. time2=6+6=12. 12 not <12 →NO.
+if __name__ == '__main__':
+    test()
 
-Third example:
 
-n=10, t=3, k=11, d=4.
+```
 
-time1= (10 +11-1)//11 →20//11=1 →3*1=3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-m=4//3=1 →11 >=10. time2=3. 3 not <3 →NO.
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, t, k, d = map(int, input_stream.readline().rstrip("\n").split())
+
+    time1 = ((n + k -1) //k) * t
+
+    m = d // t
+
+    cakes_during = m *k
+
+    if cakes_during >=n:
+
+        time2 = m *t
+
+    else:
+
+        rem = n - cakes_during
+
+        batches_after = (rem + 2*k -1) // (2*k)
+
+        time2 = d + batches_after * t
+
+    print("YES" if time2 < time1 else "NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 3 11 4
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    n, t, k, d = map(int, input_stream.readline().rstrip("\n").split())
+
+    time1 = ((n + k -1) //k) * t
+
+    m = d // t
+
+    cakes_during = m *k
+
+    if cakes_during >=n:
+
+        time2 = m *t
+
+    else:
+
+        rem = n - cakes_during
+
+        batches_after = (rem + 2*k -1) // (2*k)
+
+        time2 = d + batches_after * t
+
+    print("YES" if time2 < time1 else "NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 2 1 4
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Fourth example:
 

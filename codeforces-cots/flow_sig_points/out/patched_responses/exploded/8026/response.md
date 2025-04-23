@@ -68,27 +68,74 @@ Now, edge cases to consider:
 
 What if after a lock, then unlock again? Then subsequent colors can be processed.
 
-So the code is straightforward. Let's test with the first example.
+Testing against sample input 1.
 
-Example 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    current_color = 'blue'
+    locked = False
+    for _ in range(n):
+        msg = input_stream.readline().rstrip("\n").strip()
+        if msg == 'lock':
+            if not locked:
+                locked = True
+        elif msg == 'unlock':
+            if locked:
+                locked = False
+        else:
+            if not locked:
+                current_color = msg
+    print(current_color, file=output_stream)
 
-7 messages:
 
-red → since unlocked, color becomes red.
 
-violet → unlocked → color becomes violet.
+def test():
+    import io
 
-unlock → but current state is unlocked, so ignored.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+lock
+unlock
+lock
+unlock
+unlock
+""",
+            "output": \
+"""\
+blue
+""",
+        }, 
+    ]
 
-red → unlocked → color red.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-orange → unlocked → color orange.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-lock → now lock (state becomes locked).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-indigo → since locked, ignored. So final color is orange. Which matches the example.
+    print('Tests passed 😎')
 
-Yes.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: 
 

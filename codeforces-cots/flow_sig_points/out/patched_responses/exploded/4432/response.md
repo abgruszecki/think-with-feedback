@@ -612,15 +612,18 @@ This is a problem, but perhaps the user's instruction is incorrect. For example,
 
 So the code is written as:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-def main():
 
+def main(input_stream, output_stream):
     import sys
 
     from sys import stdin
 
-    n, m = map(int, stdin.readline().split())
+    n, m = map(int, input_stream.readline().split())
 
     adj = [[] for _ in range(n+1)]
 
@@ -630,7 +633,7 @@ def main():
 
     for _ in range(m):
 
-        u, v = map(int, stdin.readline().split())
+        u, v = map(int, input_stream.readline().split())
 
         adj[u].append(v)
 
@@ -702,71 +705,58 @@ def main():
 
         if bitmask[s] != required:
 
-            print("NO")
+            print("NO", file=output_stream)
 
             return
 
-    print("YES")
+    print("YES", file=output_stream)
 
-if __name__ == "__main__":
 
-    main()
 
-But wait, the in_degree_kahn is a copy of the original in_degree. Because the original in_degree was modified when reading the edges. But when we process Kahn's algorithm, we need to use the original in_degree values. So yes, in_degree_kahn is a copy of the original in_degree.
+def test():
+    import io
 
-But in Python, the list.copy() method does a shallow copy, which is correct for a list of integers.
-
-Yes.
-
-Thus, this code should work.
-
-Testing the first example:
-
-Input:
-
-3 1
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 3
 1 2
+1 3
+2 3
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
 
-The adj list for 1 is [2], in_degree is [0,0,1,0], out_degree is [0,1,0,0].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sources are 1 and 3. Sinks are 2 and 3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sink_indices: 2:0, 3:1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-bitmask for 2 is 1<<0=1, 3 is 1<<1=2.
+    print('Tests passed 😎')
 
-Topological order:
 
-sources are 1 and 3.
+if __name__ == '__main__':
+    test()
 
-When processing the queue:
 
-Initially, q contains 1 and 3. But wait, in_degree_kahn for 3 is 0 (since in_degree[3] is 0). So when building the queue, 1 and 3 are added.
+```
 
-Processing 1 first (or 3? depends on the order of the sources list).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Assuming sources are [1,3], then queue is [1,3].
-
-Processing 1: add to topo_order. Then, process its edges to 2. in_degree_kahn[2] becomes 1-1=0. So add 2 to the queue.
-
-Then process 3: add to topo_order. No outgoing edges.
-
-Then process 2: add to topo_order.
-
-So topo_order is [1,3,2].
-
-Reversed order is [2,3,1].
-
-Processing 2: it's a sink, bitmask is 1.
-
-Processing 3: it's a sink, bitmask is 2.
-
-Processing 1: its edges are to 2. OR the bitmask of 2 (1) into 1's bitmask. So 1's bitmask is 1.
-
-Sources are 1 and 3. Their bitmask are 1 and 2. required is (1<<2)-1 =3. So 1 and 3 have 1 and 2, which sum to 3 only if combined, but each source's bitmask must be 3. So output is NO.
-
-Which is correct.
+```
 
 Thus, the code works.
 </think>

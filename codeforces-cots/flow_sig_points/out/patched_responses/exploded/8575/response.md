@@ -887,27 +887,163 @@ Thus, the code steps are:
 
 So the code would look like this.
 
-Let's test this with the examples.
+Testing against sample input 1.
 
-First example:
+```python
+MOD = 998244353
 
-n=1, array [1,4]. sorted is [1,4].
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read
+    data = input().split()
+    
+    n = int(data[0])
+    a = list(map(int, data[1:2*n+1]))
+    a.sort()
+    
+    max_n = 2 * n
+    factorial = [1] * (max_n + 1)
+    for i in range(1, max_n + 1):
+        factorial[i] = factorial[i-1] * i % MOD
+    
+    inv_fact = [1] * (max_n + 1)
+    inv_fact[max_n] = pow(factorial[max_n], MOD-2, MOD)
+    for i in range(max_n-1, -1, -1):
+        inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
+    
+    comb = factorial[2*n] * inv_fact[n] % MOD
+    comb = comb * inv_fact[n] % MOD
+    
+    total = 0
+    for i in range(n):
+        total = (total + (a[i + n] - a[i])) % MOD
+    
+    ans = total * comb % MOD
+    print(ans, file=output_stream)
 
-sum is 4-1=3.
 
-comb(2,1)=2.
 
-3*2=6 mod 998244353 =6.
+def test():
+    import io
 
-Second example:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+2 1 2 1
+""",
+            "output": \
+"""\
+12
+""",
+        }, 
+    ]
 
-n=2, array [2,1,2,1]. sorted is [1,1,2,2].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum is (2-1) + (2-1) = 1+1=2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-comb(4,2) =6.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-2*6=12.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+MOD = 998244353
+
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read
+    data = input().split()
+    
+    n = int(data[0])
+    a = list(map(int, data[1:2*n+1]))
+    a.sort()
+    
+    max_n = 2 * n
+    factorial = [1] * (max_n + 1)
+    for i in range(1, max_n + 1):
+        factorial[i] = factorial[i-1] * i % MOD
+    
+    inv_fact = [1] * (max_n + 1)
+    inv_fact[max_n] = pow(factorial[max_n], MOD-2, MOD)
+    for i in range(max_n-1, -1, -1):
+        inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
+    
+    comb = factorial[2*n] * inv_fact[n] % MOD
+    comb = comb * inv_fact[n] % MOD
+    
+    total = 0
+    for i in range(n):
+        total = (total + (a[i + n] - a[i])) % MOD
+    
+    ans = total * comb % MOD
+    print(ans, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+2 2 2 2 2 2
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

@@ -394,23 +394,139 @@ Yes.
 
 So that's the code.
 
-Testing the samples.
+Testing against sample input 1.
 
-Sample 1:
+```python
+import bisect
 
-4 3 → x = [1,2,3,4]
 
-k=2 (x=3) → target 0. bisect_left returns 0 (x[0] is 1 >=0). m=2-1 -0=1. sum 1.
+def main(input_stream, output_stream):
+    n, d = map(int, input_stream.readline().rstrip("\n").split())
+    x = list(map(int, input_stream.readline().rstrip("\n").split()))
+    total = 0
 
-k=3 → target 4-3=1. x[0] is 1. left_k=0. m=3-1-0=2. sum 3. total 4.
+    for k in range(n):
+        if k < 2:
+            continue
+        target = x[k] - d
+        left_k = bisect.bisect_left(x, target, 0, k+1)
+        m = (k - 1) - left_k
+        if m > 0:
+            total += m * (m + 1) // 2
 
-Sample 2:
+    print(total, file=output_stream)
 
-4 2 → x = [-3,-2,-1,0]
 
-k=2 (x=-1) → target -3. bisect_left returns 0. m=1-0=1. sum 1.
 
-k=3 (x=0 → target-2. bisect_left for -2 in array [ -3, -2, -1, 0 ] → index 1. m=3-1-1=1. sum +=1. total 2.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 2
+-3 -2 -1 0
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import bisect
+
+
+def main(input_stream, output_stream):
+    n, d = map(int, input_stream.readline().rstrip("\n").split())
+    x = list(map(int, input_stream.readline().rstrip("\n").split()))
+    total = 0
+
+    for k in range(n):
+        if k < 2:
+            continue
+        target = x[k] - d
+        left_k = bisect.bisect_left(x, target, 0, k+1)
+        m = (k - 1) - left_k
+        if m > 0:
+            total += m * (m + 1) // 2
+
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 19
+1 10 20 30 50
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

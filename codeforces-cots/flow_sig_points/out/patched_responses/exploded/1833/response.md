@@ -1322,19 +1322,105 @@ But wait, in the even case, after processing all elements, K_even is len(s) + in
 
 Thus, the code correctly computes K_even and correct_even.
 
-Testing this code:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-Input: X.
+    # Compute even K case
+    current_pos = 0
+    inserted_x_even = 0
+    correct_even = 0
 
-even case:
+    for c in s:
+        if c == 'L':
+            if current_pos % 2 == 0:
+                correct_even += 1
+                current_pos += 1
+            else:
+                inserted_x_even += 1
+                current_pos += 1
+                correct_even += 1
+                current_pos += 1
+        elif c == 'R':
+            if current_pos % 2 == 1:
+                correct_even += 1
+                current_pos += 1
+            else:
+                inserted_x_even += 1
+                current_pos += 1
+                correct_even += 1
+                current_pos += 1
+        else:
+            current_pos += 1
 
-Processing X: current_pos increases to 1. inserted_x_even=0.
+    K_even = len(s) + inserted_x_even
+    if K_even % 2 != 0:
+        inserted_x_even += 1
+        K_even += 1
+    percentage_even = (correct_even / K_even * 100) if K_even != 0 else 0.0
 
-K_even =1+0=1, which is odd. So insert 1 X. K_even becomes 2. correct_even=0. percentage_even=0%.
+    # Compute odd K case
+    count_LR = sum(1 for c in s if c in {'L', 'R'})
+    original_length = len(s)
+    if original_length % 2 == 0:
+        minimal_odd_K = original_length + 1
+    else:
+        minimal_odd_K = original_length
 
-odd case: count_LR=0. percentage_odd=0. max is 0.
+    if minimal_odd_K == 0:
+        percentage_odd = 0.0
+    else:
+        percentage_odd = (count_LR * 0.5 / minimal_odd_K) * 100
+
+    max_percentage = max(percentage_even, percentage_odd)
+
+    print(f"{max_percentage:.6f}", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+LXRR
+""",
+            "output": \
+"""\
+50.000000
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

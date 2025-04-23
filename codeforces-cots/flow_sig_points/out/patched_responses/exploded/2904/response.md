@@ -513,87 +513,114 @@ But need to handle the case when n is 1. The code does that.
 
 So the code in Python would be:
 
-digits_to_pos = {
-    '0': (1, 3),
-    '1': (0, 0),
-    '2': (1, 0),
-    '3': (2, 0),
-    '4': (0, 1),
-    '5': (1, 1),
-    '6': (2, 1),
-    '7': (0, 2),
-    '8': (1, 2),
-    '9': (2, 2),
-}
+Testing against sample input 3.
 
-pos_to_digit = {
-    (0,0): '1',
-    (1,0): '2',
-    (2,0): '3',
-    (0,1): '4',
-    (1,1): '5',
-    (2,1): '6',
-    (0,2): '7',
-    (1,2): '8',
-    (2,2): '9',
-    (1,3): '0',
-}
+```python
+def main(input_stream, output_stream):
+    digits_to_pos = {
+        '0': (1, 3),
+        '1': (0, 0),
+        '2': (1, 0),
+        '3': (2, 0),
+        '4': (0, 1),
+        '5': (1, 1),
+        '6': (2, 1),
+        '7': (0, 2),
+        '8': (1, 2),
+        '9': (2, 2),
+    }
 
-n = int(input())
-s = input().strip()
+    pos_to_digit = {
+        (0,0): '1',
+        (1,0): '2',
+        (2,0): '3',
+        (0,1): '4',
+        (1,1): '5',
+        (2,1): '6',
+        (0,2): '7',
+        (1,2): '8',
+        (2,2): '9',
+        (1,3): '0',
+    }
 
-moves = []
-for i in range(n-1):
-    current = s[i]
-    next_d = s[i+1]
-    x1, y1 = digits_to_pos[current]
-    x2, y2 = digits_to_pos[next_d]
-    dx = x2 - x1
-    dy = y2 - y1
-    moves.append( (dx, dy) )
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-found = False
+    moves = []
+    for i in range(n-1):
+        current = s[i]
+        next_d = s[i+1]
+        x1, y1 = digits_to_pos[current]
+        x2, y2 = digits_to_pos[next_d]
+        dx = x2 - x1
+        dy = y2 - y1
+        moves.append( (dx, dy) )
 
-for start_d in '0123456789':
-    path = [start_d]
-    x, y = digits_to_pos[start_d]
-    valid = True
-    for dx, dy in moves:
-        x += dx
-        y += dy
-        if (x, y) not in pos_to_digit:
-            valid = False
-            break
-        path.append(pos_to_digit[(x, y)])
-    if valid:
-        candidate = ''.join(path)
-        if candidate != s:
-            print("NO")
-            exit()
+    found = False
 
-print("YES")
+    for start_d in '0123456789':
+        path = [start_d]
+        x, y = digits_to_pos[start_d]
+        valid = True
+        for dx, dy in moves:
+            x += dx
+            y += dy
+            if (x, y) not in pos_to_digit:
+                valid = False
+                break
+            path.append(pos_to_digit[(x, y)])
+        if valid:
+            candidate = ''.join(path)
+            if candidate != s:
+                print("NO", file=output_stream)
+                return
 
-This should handle all cases.
+    print("YES", file=output_stream)
 
-Testing sample input 3:
 
-Input:
 
-9
+def test():
+    import io
 
-123456789
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+911
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
 
-The moves are generated from the consecutive digits:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-1→2: dx 1-0=1, dy 0-0=0 → (1,0)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-2→3: dx 2-1=1, dy 0-0=0 → (1,0)
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-3→4: 3's position is (2,0), 4 is (0,1). So dx = 0-2 = -2, dy=1-0=1 → (-2, 1). But wait, 3 to 4: 3 is (2,0), 4 is (0,1). dx is 0-2 = -2? Or x2 is 0, x1 is 2. So dx is 0-2 = -2. dy is 1-0 = 1. So yes.
+    print('Tests passed 😎')
 
-Wait, no: current is '3', which is (2,0). next_d is '4', which is (0,1). So dx = 0 - 2 = -2. dy = 1 -0 = 1. So the move is (-2, 1).
 
-But moving from 3 (2,0) by dx=-2, dy=1 would be to (0,1), which is 4. So that's correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 But then, for any starting digit other than '1', will the code generate a valid path?
 

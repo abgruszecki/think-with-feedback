@@ -555,7 +555,11 @@ But in Python, the bisect module's bisect_left function is used.
 
 So code:
 
+Testing against sample input 1.
+
+```python
 import bisect
+
 
 class SegmentTree:
     def __init__(self, size):
@@ -596,9 +600,9 @@ class SegmentTree:
                 return True
         return res
 
-def main():
+def main(input_stream, output_stream):
     import sys
-    input = sys.stdin.read().split()
+    input = input_stream.read().split()
     ptr =0
     n = int(input[ptr])
     ptr +=1
@@ -609,7 +613,7 @@ def main():
     a = list(map(int, input[ptr:ptr+n]))
     a.sort()
     if k ==0:
-        print("YES")
+        print("YES", file=output_stream)
         return
     st = SegmentTree(n+1)
     st.update(0, True)
@@ -624,112 +628,177 @@ def main():
         if st.query(left_j, right_j):
             st.update(i, True)
     if st.query(n, n):
-        print("YES")
+        print("YES", file=output_stream)
     else:
-        print("NO")
+        print("NO", file=output_stream)
 
-if __name__ == "__main__":
-    main()
 
-Wait, but in the main loop, after processing each i, the code updates the segment tree by setting position i to True if the query returns True.
 
-But for i=6 (n=6), the code would call st.update(6, True). Then, the final check is st.query(n, n), which is st.query(6,6). So the dp[6] is True.
+def test():
+    import io
 
-But the code uses the segment tree to track the dp array, which is of size n+1. So for each i, after processing, if dp[i] is True, the segment tree is updated.
-
-Thus, the code should work.
-
-But let's test the sample inputs.
-
-Sample input 1:
-
-6 3 10
-
-7 2 7 7 4 2 → sorted is [2, 2,4,7,7,7]
-
-n=6, k=3, d=10.
-
-The code processes i from 1 to 6.
-
-For i=3 (i=3):
-
-current = a[2] =4.
-
-current -d=4-10 =-6. bisect_left finds 0.
-
-right_j=3-3=0.
-
-so query [0,0], which returns True. So st.update(3, True).
-
-Similarly, when i=6:
-
-current is a[5]=7.
-
-current-d=7-10 =-3. bisect_left returns 0.
-
-right_j=6-3=3.
-
-query [0,3]. The segment tree has True at 0, 3, etc.
-
-So returns True. So st.update(6, True).
-
-Final check: st.query(6,6) → returns True. Output YES.
-
-Sample input 3:
-
-3 2 5
-
-10 16 22 → sorted as [10,16,22].
-
-i=3:
-
-current =22. current-d=17.
-
-bisect_left on [10,16,22] (but i=3, so the array up to index 2 is [10,16,22]. bisect_left for 17 in this array is 2 (since 16 <17 <=22).
-
-right_j=3-2=1.
-
-so left_j=2 > right_j=1. No j. So dp[3] remains False.
-
-Final query is st.query(3,3) → False. Output NO.
-
-Sample input 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 6 2 3
+4 5 3 13 4 10
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
 
-4 5 3 13 4 10 → sorted as [3,4,4,5,10,13].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-n=6, k=2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-For each i >=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For example, when i=4:
+    print('Tests passed 😎')
 
-current is a[3]=5.
 
-current-d=5-3=2.
+if __name__ == '__main__':
+    test()
 
-bisect_left finds the first element >=2 → 0.
 
-right_j=4-2=2.
+```
 
-so query [0,2]. Which includes j=0 (dp[0]=True). So dp[4] is True.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Continue processing.
+```
 
-At i=6, the current is 13. current-d=10. The array up to i=6-1=5 is [3,4,4,5,10,13]. a[5] is 13. a[i-1] is 13.
+Testing against sample input 2.
 
-current-d=10. bisect_left finds the index of 10 in the array. The array is sorted: [3,4,4,5,10,13]. So 10 is at index 4. So left_j=4.
+```python
+import bisect
 
-right_j=6-2=4. So j ranges from4 to4.
 
-Check if any j in 4 has dp[j] True. j=4 → dp[4] is True (since i=4 was processed and True). So query returns True. So dp[6] is True. So output is YES.
+class SegmentTree:
+    def __init__(self, size):
+        self.n = size
+        self.size_tree = 1
+        while self.size_tree < self.n:
+            self.size_tree <<=1
+        self.tree = [False]*(2 * self.size_tree)
+    
+    def update(self, pos, value):
+        # Update the position to True (value is True)
+        pos += self.size_tree
+        if self.tree[pos] != value:
+            self.tree[pos] = value
+            pos >>=1
+            while pos >=1:
+                new_val = self.tree[2*pos] or self.tree[2*pos +1]
+                if self.tree[pos] == new_val:
+                    break
+                self.tree[pos] = new_val
+                pos >>=1
+    
+    def query(self, l, r):
+        # Query [l, r] (inclusive)
+        res = False
+        l += self.size_tree
+        r += self.size_tree
+        while l <= r:
+            if l %2 ==1:
+                res = res or self.tree[l]
+                l +=1
+            if r %2 ==0:
+                res = res or self.tree[r]
+                r -=1
+            l >>=1
+            r >>=1
+            if res:
+                return True
+        return res
 
-Thus, the code should handle all samples correctly.
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    ptr =0
+    n = int(input[ptr])
+    ptr +=1
+    k = int(input[ptr])
+    ptr +=1
+    d = int(input[ptr])
+    ptr +=1
+    a = list(map(int, input[ptr:ptr+n]))
+    a.sort()
+    if k ==0:
+        print("YES", file=output_stream)
+        return
+    st = SegmentTree(n+1)
+    st.update(0, True)
+    for i in range(1, n+1):
+        if i <k:
+            continue
+        current = a[i-1]
+        left_j = bisect.bisect_left(a, current -d, 0, i)
+        right_j = i -k
+        if left_j > right_j:
+            continue
+        if st.query(left_j, right_j):
+            st.update(i, True)
+    if st.query(n, n):
+        print("YES", file=output_stream)
+    else:
+        print("NO", file=output_stream)
 
-Now, regarding the segment tree's efficiency. Each query and update is O(log n), and for 5e5 elements, this is acceptable within the time limit.
 
-Thus, this approach should work.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2 5
+10 16 22
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

@@ -1094,92 +1094,119 @@ Also, the code must precompute prefix arrays for each c.
 
 Now, the code:
 
+Testing against sample input 3.
+
+```python
 import bisect
 
-n, k = map(int, input().split())
-s = input().strip()
 
-prefix_c = []
-for c in range(k):
-    char = chr(ord('a') + c)
-    prefix = [0] * (n + 1)
-    for i in range(n):
-        if s[i] == char or s[i] == '?':
-            prefix[i+1] = prefix[i]
-        else:
-            prefix[i+1] = prefix[i] + 1
-    prefix_c.append(prefix)
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    s = input_stream.readline().rstrip("\n").strip()
 
-low = 0
-high = n
-ans = 0
-
-def is_possible(x):
-    if x == 0:
-        return True
-    if x > n:
-        return False
-    intervals = []
+    prefix_c = []
     for c in range(k):
-        valid = []
-        for i in range(n - x + 1):
-            if prefix_c[c][i + x] - prefix_c[c][i] == 0:
-                valid.append(i)
-        if not valid:
+        char = chr(ord('a') + c)
+        prefix = [0] * (n + 1)
+        for i in range(n):
+            if s[i] == char or s[i] == '?':
+                prefix[i+1] = prefix[i]
+            else:
+                prefix[i+1] = prefix[i] + 1
+        prefix_c.append(prefix)
+
+    low = 0
+    high = n
+    ans = 0
+
+    def is_possible(x):
+        if x == 0:
+            return True
+        if x > n:
             return False
-        intervals.append(valid)
-    # Now perform DP.
-    dp = {0: -1}
-    for bits in range(k):
-        masks = [mask for mask in dp if bin(mask).count('1') == bits]
-        for mask in masks:
-            current_end = dp[mask]
-            for c in range(k):
-                if not (mask & (1 << c)):
-                    # Find the first interval in intervals[c] with start > current_end
-                    idx = bisect.bisect_right(intervals[c], current_end)
-                    if idx < len(intervals[c]):
-                        start = intervals[c][idx]
-                        new_end = start + x - 1
-                        new_mask = mask | (1 << c)
-                        if new_mask not in dp or new_end < dp.get(new_mask, float('inf')):
-                            dp[new_mask] = new_end
-    full_mask = (1 << k) - 1
-    return full_mask in dp
+        intervals = []
+        for c in range(k):
+            valid = []
+            for i in range(n - x + 1):
+                if prefix_c[c][i + x] - prefix_c[c][i] == 0:
+                    valid.append(i)
+            if not valid:
+                return False
+            intervals.append(valid)
+        # Now perform DP.
+        dp = {0: -1}
+        for bits in range(k):
+            masks = [mask for mask in dp if bin(mask).count('1') == bits]
+            for mask in masks:
+                current_end = dp[mask]
+                for c in range(k):
+                    if not (mask & (1 << c)):
+                        # Find the first interval in intervals[c] with start > current_end
+                        idx = bisect.bisect_right(intervals[c], current_end)
+                        if idx < len(intervals[c]):
+                            start = intervals[c][idx]
+                            new_end = start + x - 1
+                            new_mask = mask | (1 << c)
+                            if new_mask not in dp or new_end < dp.get(new_mask, float('inf')):
+                                dp[new_mask] = new_end
+        full_mask = (1 << k) - 1
+        return full_mask in dp
 
-while low <= high:
-    mid = (low + high) // 2
-    if is_possible(mid):
-        ans = mid
-        low = mid + 1
-    else:
-        high = mid - 1
+    while low <= high:
+        mid = (low + high) // 2
+        if is_possible(mid):
+            ans = mid
+            low = mid + 1
+        else:
+            high = mid - 1
 
-print(ans)
+    print(ans, file=output_stream)
 
-This code should handle all cases.
 
-Testing with the third example:
 
-n=2, k=3.
+def test():
+    import io
 
-For x=1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+15 3
+??b?babbc??b?aa
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-Each c has valid intervals [0, 1].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But in the DP step, mask 0 can add c=0 (start=0, end=0), c=1 (start=0, end=0), or c=2 (start=0, end=0).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Then, for masks with 1 bit, trying to add another c.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But the next c's interval must start after end=0. For example, adding c=1:
+    print('Tests passed 😎')
 
-start=0 is not >0. So idx = bisect_right([0,1], 0) → returns 2, which is beyond len(intervals[c=1] which has [0,1]. So no interval is found.
 
-Thus, the code returns False for x=1. The binary search would set high=0 and ans=0.
+if __name__ == '__main__':
+    test()
 
-Hence, the code works.
 
-Thus, the code should handle all cases correctly.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

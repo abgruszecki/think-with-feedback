@@ -1203,159 +1203,147 @@ So, for a substring of length 4, we check if it's in invalid. For other lengths,
 
 Implementing this:
 
-MOD = 10**9+7
+Testing against sample input 1.
 
-invalid = {"0011", "0101", "1110", "1111"}
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9+7
 
-m = int(input())
+    invalid = {"0011", "0101", "1110", "1111"}
 
-s = []
+    m = int(input_stream.readline().rstrip("\n"))
 
-total =0
+    s = []
 
-for _ in range(m):
+    total =0
 
-    c = input().strip()
+    for _ in range(m):
 
-    s.append(c)
+        c = input_stream.readline().rstrip("\n").strip()
 
-    current_len = len(s)
+        s.append(c)
 
-    # process all possible new substrings ending at current_len
+        current_len = len(s)
 
-    for l in range(1,5):
+        # process all possible new substrings ending at current_len
 
-        if current_len < l:
+        for l in range(1,5):
 
-            continue
+            if current_len < l:
 
-        substring = s[-l:]
+                continue
 
-        # compute the number of splits for this substring
+            substring = s[-l:]
 
-        n = l
+            # compute the number of splits for this substring
 
-        dp_sub = [0]*(n+1)
+            n = l
 
-        dp_sub[0] =1
+            dp_sub = [0]*(n+1)
 
-        for k in range(1, n+1):
+            dp_sub[0] =1
 
-            for m_split in range(1,5):
+            for k in range(1, n+1):
 
-                if k - m_split >=0:
+                for m_split in range(1,5):
 
-                    start = k - m_split
+                    if k - m_split >=0:
 
-                    part = substring[start:k]
+                        start = k - m_split
 
-                    part_str = ''.join(part)
+                        part = substring[start:k]
 
-                    # check if part is valid
+                        part_str = ''.join(part)
 
-                    if len(part) <4:
+                        # check if part is valid
 
-                        valid = True
+                        if len(part) <4:
 
-                    else:
+                            valid = True
 
-                        valid = part_str not in invalid
+                        else:
 
-                    if valid:
+                            valid = part_str not in invalid
 
-                        dp_sub[k] += dp_sub[start]
+                        if valid:
 
-                        if dp_sub[k] >= MOD:
+                            dp_sub[k] += dp_sub[start]
 
-                            dp_sub[k] -= MOD
+                            if dp_sub[k] >= MOD:
 
-            dp_sub[k] %= MOD
+                                dp_sub[k] -= MOD
 
-        splits = dp_sub[n]
+                dp_sub[k] %= MOD
 
-        total += splits
+            splits = dp_sub[n]
 
-        total %= MOD
+            total += splits
 
-    print(total % MOD)
+            total %= MOD
 
-But wait, this code would generate the cumulative sum of all possible splits for all substrings of S.
+        print(total % MOD, file=output_stream)
 
-Let's test this code with the first sample input.
 
-Sample 1:
 
-3
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
 1
-
+0
 1
-
+0
 1
+""",
+            "output": \
+"""\
+1
+4
+10
+22
+43
+""",
+        }, 
+    ]
 
-Steps:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Step 1:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-s = ['1']
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-l=1:
+    print('Tests passed 😎')
 
-substring ['1'].
 
-compute splits:
+if __name__ == '__main__':
+    test()
 
-dp_sub[0] =1.
 
-k=1:
+```
 
-m_split=1:
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 120, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 113, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '1\n4\n10\n22\n43'
+Got: '1\n4\n11\n26\n40'
 
-start=0.
-
-part is '1' (valid). dp_sub[1] += dp_sub[0] → 1.
-
-dp_sub[1] =1.
-
-splits =1.
-
-total is 1.
-
-Output:1.
-
-Step 2:
-
-s = ['1','1']
-
-l=1:
-
-substring ['1'] → splits 1. total +=1 → 2.
-
-l=2:
-
-substring ['1','1'].
-
-compute splits:
-
-dp_sub[0] =1.
-
-k=1:
-
-m=1: part '1' valid → dp_sub[1] =1.
-
-k=2:
-
-m=1: part '1' → start=1 → dp_sub[1] →1.
-
-m=2: part '11' valid (length 2). start=0 → dp_sub[0] →1.
-
-so dp_sub[2] =1+1=2.
-
-splits=2. total becomes 2+2=4.
-
-Output:4.
-
-But sample output after step 2 is 3. So this approach is incorrect.
+```
 
 This suggests that there's a mistake in the way the splits are being counted.
 

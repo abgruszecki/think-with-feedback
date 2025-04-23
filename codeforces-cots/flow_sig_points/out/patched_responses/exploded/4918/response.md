@@ -576,53 +576,139 @@ At the end, print(count).
 
 But what about cases where the given a_i and b_i are not non-decreasing? According to the problem statement, the inputs are given in non-decreasing order. So we don't need to handle that.
 
-Testing this code on the samples:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    prev_a, prev_b = 0, 0
+    count = 1
+    for _ in range(n):
+        a, b = map(int, input_stream.readline().rstrip("\n").split())
+        x, y = prev_a, prev_b
+        X, Y = a, b
+        if x == y:
+            new_low = x + 1
+        else:
+            new_low = max(x, y)
+        high = min(X, Y)
+        if high >= new_low:
+            count += high - new_low + 1
+        prev_a, prev_b = X, Y
+    print(count, file=output_stream)
 
-n=3
 
-points:
 
-2 0
+def test():
+    import io
 
-3 1
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+0 0
+0 0
+0 0
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-3 4
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Initial prev is (0,0), count=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-First point (2,0):
+    print('Tests passed 😎')
 
-x=0, y=0 → x==y. new_low=1. high= min(2,0)=0. 0 <1 → add 0. count remains 1.
 
-prev becomes (2,0).
+if __name__ == '__main__':
+    test()
 
-Second point (3,1):
 
-x=2, y=0 → new_low=2. high= min(3,1)=1. 1 <2 → add 0. count remains 1.
+```
 
-prev becomes (3,1).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Third point (3,4):
+```
 
-x=3, y=1 → new_low=3. high= min(3,4)=3. 3 >=3 → add 1. count becomes 2.
+Testing against sample input 2.
 
-Sample 2:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    prev_a, prev_b = 0, 0
+    count = 1
+    for _ in range(n):
+        a, b = map(int, input_stream.readline().rstrip("\n").split())
+        x, y = prev_a, prev_b
+        X, Y = a, b
+        if x == y:
+            new_low = x + 1
+        else:
+            new_low = max(x, y)
+        high = min(X, Y)
+        if high >= new_low:
+            count += high - new_low + 1
+        prev_a, prev_b = X, Y
+    print(count, file=output_stream)
 
-n=3
 
-points are all 0,0.
 
-Processing:
+def test():
+    import io
 
-Initial count=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+5 4
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-Each iteration:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-x=0,y=0. new_low=1. high=0 → add 0. So after three iterations, count remains 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

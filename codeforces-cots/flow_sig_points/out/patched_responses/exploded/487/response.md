@@ -574,121 +574,104 @@ Finally, output res[1], res[2], ..., res[n], space-separated.
 
 So the code would be:
 
-n, k = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-f = [0]*(n+1)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for i in range(n):
+    f = [0]*(n+1)
 
-    # i is 0-based in the list a, representing i+1-th pupil.
+    for i in range(n):
 
-    # a[i] is the value of a_{i+1}, which is j where j's best friend is i+1.
+        # i is 0-based in the list a, representing i+1-th pupil.
 
-    # So f[j] = i+1.
+        # a[i] is the value of a_{i+1}, which is j where j's best friend is i+1.
 
-    j = a[i]
+        # So f[j] = i+1.
 
-    f[j] = i+1
+        j = a[i]
 
-visited = [False]*(n+1)
+        f[j] = i+1
 
-res = [0]*(n+1)
+    visited = [False]*(n+1)
 
-for i in range(1, n+1):
+    res = [0]*(n+1)
 
-    if not visited[i]:
+    for i in range(1, n+1):
 
-        cycle = []
+        if not visited[i]:
 
-        current = i
+            cycle = []
 
-        while not visited[current]:
+            current = i
 
-            visited[current] = True
+            while not visited[current]:
 
-            cycle.append(current)
+                visited[current] = True
 
-            current = f[current]
+                cycle.append(current)
 
-        m = len(cycle)
+                current = f[current]
 
-        shift = k % m
+            m = len(cycle)
 
-        for idx in range(m):
+            shift = k % m
 
-            new_idx = (idx + shift) % m
+            for idx in range(m):
 
-            res[cycle[idx]] = cycle[new_idx]
+                new_idx = (idx + shift) % m
 
-print(' '.join(map(str, res[1:n+1])))
+                res[cycle[idx]] = cycle[new_idx]
 
-Testing this code against sample 1:
+    print(' '.join(map(str, res[1:n+1])), file=output_stream)
 
-Sample 1 input:
 
-4 1
 
-2 4 1 3
+def test():
+    import io
 
-In code:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5
+3 4 5 2 1
+""",
+            "output": \
+"""\
+3 4 5 2 1
+""",
+        }, 
+    ]
 
-a = [2,4,1,3]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Building f:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i in 0-based loop from 0 to 3 (since n=4).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For i=0 (pupil 1):
+    print('Tests passed 😎')
 
-j = a[0] =2 →f[2] =1.
 
-i=1 (pupil 2):
+if __name__ == '__main__':
+    test()
 
-a[1]=4 →f[4] =2.
 
-i=2 (pupil3):
+```
 
-a[2] =1 →f[1] =3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=3 (pupil4):
-
-a[3] =3 →f[3]=4.
-
-So f is [0,3,1,4,2].
-
-Then, cycles:
-
-Starting with 1, which is unvisited.
-
-current=1, add to cycle, mark visited. current becomes f[1]=3.
-
-current=3: add to cycle. current becomes f[3]=4.
-
-current=4: add to cycle. current becomes f[4]=2.
-
-current=2: add to cycle. current becomes f[2]=1, which is visited.
-
-Cycle is [1,3,4,2], m=4.
-
-shift=1 mod4=1.
-
-For each idx in 0-3:
-
-new_idx = idx+1 mod4.
-
-res[1] =3 (cycle[1]).
-
-res[3] =4 (cycle[2]).
-
-res[4] =2 (cycle[3]).
-
-res[2] =1 (cycle[0 mod4=0 →cycle[0] is1).
-
-So res is [0,3,1,4,2, ...], but in the output, res[1..4] is 3,1,4,2 → which matches sample.
-
-So code works.
+```
 
 Another sample, sample 3:
 

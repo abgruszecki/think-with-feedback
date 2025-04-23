@@ -934,119 +934,143 @@ So the plan is:
 
           Now, code:
 
-          n = int(input())
+Testing against sample input 1.
 
-          a_list = [int(input()) for _ in range(n)]
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-          if n ==0:
+    a_list = [int(input_stream.readline().rstrip("\n")) for _ in range(n)]
 
-              # not possible, but handle if needed.
+    if n ==0:
 
-              print("0")
+        # not possible, but handle if needed.
 
-          else:
+        print("0", file=output_stream)
 
-              # compute coefficients.
+    else:
 
-              coeffs = [a_list[0], 1]
+        # compute coefficients.
 
-              for ai in a_list[1:]:
+        coeffs = [a_list[0], 1]
 
-                  m = len(coeffs) -1
+        for ai in a_list[1:]:
 
-                  new_coeffs = [0]*(m+2)
+            m = len(coeffs) -1
 
-                  new_coeffs[0] = coeffs[0] * ai
+            new_coeffs = [0]*(m+2)
 
-                  new_coeffs[-1] = coeffs[-1]
+            new_coeffs[0] = coeffs[0] * ai
 
-                  for k in range(1, m+1):
+            new_coeffs[-1] = coeffs[-1]
 
-                      new_coeffs[k] = coeffs[k-1] + coeffs[k] * ai
+            for k in range(1, m+1):
 
-                  coeffs = new_coeffs
+                new_coeffs[k] = coeffs[k-1] + coeffs[k] * ai
 
-              # generate terms.
+            coeffs = new_coeffs
 
-              terms = []
+        # generate terms.
 
-              # first term is x^n.
+        terms = []
 
-              if n ==1:
+        # first term is x^n.
 
-                  terms.append("X")
+        if n ==1:
 
-              else:
+            terms.append("X")
 
-                  terms.append(f"X^{n}")
+        else:
 
-              for k in range(n-1, -1, -1):
+            terms.append(f"X^{n}")
 
-                  c = coeffs[k]
+        for k in range(n-1, -1, -1):
 
-                  if c ==0:
+            c = coeffs[k]
 
-                      continue
+            if c ==0:
 
-                  # format term part.
+                continue
 
-                  if k ==0:
+            # format term part.
 
-                      term_part = f"{abs(c)}"
+            if k ==0:
 
-                  else:
+                term_part = f"{abs(c)}"
 
-                      if abs(c) ==1:
+            else:
 
-                          coeff_part = ''
+                if abs(c) ==1:
 
-                      else:
+                    coeff_part = ''
 
-                          coeff_part = f"{abs(c)}*"
+                else:
 
-                      if k ==1:
+                    coeff_part = f"{abs(c)}*"
 
-                          x_part = 'X'
+                if k ==1:
 
-                      else:
+                    x_part = 'X'
 
-                          x_part = f'X^{k}'
+                else:
 
-                      term_part = f"{coeff_part}{x_part}"
+                    x_part = f'X^{k}'
 
-                  sign = '+' if c >0 else '-'
+                term_part = f"{coeff_part}{x_part}"
 
-                  terms.append(sign + term_part)
+            sign = '+' if c >0 else '-'
 
-              # join terms.
+            terms.append(sign + term_part)
 
-              print(''.join(terms))
+        # join terms.
 
-          Now, let's test this code with the samples.
+        print(''.join(terms), file=output_stream)
 
-          First sample:
 
-          Input:
 
-          2
+def test():
+    import io
 
-          -1
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+1
+1
+""",
+            "output": \
+"""\
+X^2+2*X+1
+""",
+        }, 
+    ]
 
-          1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-          coeffs becomes [-1,0,1]
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-          terms:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-          X^2.
+    print('Tests passed 😎')
 
-          k=1: c=0 → skipped.
 
-          k=0: c=-1 → term_part '1', sign '-', term '-1'.
+if __name__ == '__main__':
+    test()
 
-          Output: X^2-1.
 
-          Correct.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
           Second sample:
 

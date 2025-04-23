@@ -239,33 +239,135 @@ else:
 
 So in Python:
 
-n = int(input())
-s = input().strip()
+Testing against sample input 1.
 
-if len(set(s)) == 1:
-    print("Yes")
-else:
-    # check if any character has count >=2
-    counts = {}
-    for c in s:
-        counts[c] = counts.get(c, 0) + 1
-        if counts[c] >=2:
-            print("Yes")
-            exit()
-    # after checking all characters, if none have count >=2, then all have count 1
-    print("No")
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-Wait, but this can be optimized. Because once we find a character that appears at least twice, we can immediately output Yes and exit. Otherwise, after processing all characters, if none have count >=2, then output No.
+    if len(set(s)) == 1:
+        print("Yes", file=output_stream)
+    else:
+        # check if any character has count >=2
+        counts = {}
+        for c in s:
+            counts[c] = counts.get(c, 0) + 1
+            if counts[c] >=2:
+                print("Yes", file=output_stream)
+                return
+        # after checking all characters, if none have count >=2, then all have count 1
+        print("No", file=output_stream)
 
-This code would work for all test cases.
 
-Let's test the code against the examples.
 
-First sample:
+def test():
+    import io
 
-6, "aabddc". The code checks each character. The first 'a' increments to 1. The second 'a' increments to 2 → so we print Yes and exit.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+abc
+""",
+            "output": \
+"""\
+No
+""",
+        }, 
+    ]
 
-Second sample: 3, "abc". Each character is counted once. After all, no counts >=2 → output No.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+
+    if len(set(s)) == 1:
+        print("Yes", file=output_stream)
+    else:
+        # check if any character has count >=2
+        counts = {}
+        for c in s:
+            counts[c] = counts.get(c, 0) + 1
+            if counts[c] >=2:
+                print("Yes", file=output_stream)
+                return
+        # after checking all characters, if none have count >=2, then all have count 1
+        print("No", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+jjj
+""",
+            "output": \
+"""\
+Yes
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample: 3, "jjj". The code's first check (all same) is true, so output Yes.
 

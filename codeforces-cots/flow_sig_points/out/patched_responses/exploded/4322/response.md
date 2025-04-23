@@ -285,53 +285,83 @@ Subtract from (a[-1] - a[0}).
 
 Thus, the code will be:
 
-n, k = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-if n == 0 or k == 0:
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-    print(0)
+    if n == 0 or k == 0:
 
-else:
-
-    total = a[-1] - a[0]
-
-    if k == 1:
-
-        print(total)
+        print(0, file=output_stream)
 
     else:
 
-        diffs = [a[i+1] - a[i] for i in range(len(a)-1)]
+        total = a[-1] - a[0]
 
-        # take the top k-1 largest diffs
+        if k == 1:
 
-        diffs.sort(reverse=True)
+            print(total, file=output_stream)
 
-        sum_max = sum(diffs[:k-1])
+        else:
 
-        print(total - sum_max)
+            diffs = [a[i+1] - a[i] for i in range(len(a)-1)]
 
-But wait, in the case when k is 1, we have to make 1 subarray, which is the entire array. So the cost is a[-1] - a[0}, which is correct.
+            # take the top k-1 largest diffs
 
-But when k=1, the code returns that.
+            diffs.sort(reverse=True)
 
-Another case: when k ==n. Then we split each element into its own subarray. The sum is 0. Because each term is (a[i] - a[i}), so sum is 0. Which is correct.
+            sum_max = sum(diffs[:k-1])
 
-Yes.
+            print(total - sum_max, file=output_stream)
 
-Testing the code with the first sample:
 
-diffs are [4,7,1,7,19], sorted as [19,7,7,4,1]. k-1=2. sum of first two: 19+7=26. total is 38. 38-26=12.
 
-Yes.
+def test():
+    import io
 
-So this code should work.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4
+1 3 3 7
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-But for n up to 3e5, the list of diffs will be 3e5-1 elements, and sorting them takes O(n log n) time. For n=3e5, that's acceptable. Because in Python, even 1e6 elements can be sorted in a reasonable time.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So this approach is correct and efficient.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

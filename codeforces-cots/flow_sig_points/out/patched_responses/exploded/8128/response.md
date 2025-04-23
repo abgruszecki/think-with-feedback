@@ -348,23 +348,67 @@ print(result)
 
 Wait, but what if the list is empty? But according to the constraints, n is at least 1, so the list has at least one element, and the dict is non-empty. So the code is safe.
 
-Testing this code on the sample inputs.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    last_occurrence = {}
+    for idx, cafe in enumerate(a):
+        last_occurrence[cafe] = idx
+    min_index = n
+    result = -1
+    for cafe, idx in last_occurrence.items():
+        if idx < min_index:
+            min_index = idx
+            result = cafe
+    print(result, file=output_stream)
 
-5
 
-1 3 2 1 2
 
-Processing:
+def test():
+    import io
 
-indices 0-4.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+2 1 2 2 4 1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-The dict entries are:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-1:3, 3:1, 2:4.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Loop through these. The min index is 1, so result is 3. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

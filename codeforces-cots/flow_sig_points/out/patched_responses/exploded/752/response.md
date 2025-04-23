@@ -233,85 +233,215 @@ But for n up to 2e5, this is manageable.
 
 So code:
 
-n, k = map(int, input().split())
+Testing against sample input 1.
 
-s = input().strip()
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-if k > n:
+    s = input_stream.readline().rstrip("\n").strip()
 
-    print(0)
+    if k > n:
 
-    exit()
+        print(0, file=output_stream)
 
-# process runs
+        return
 
-runs = []
+    # process runs
 
-if not s:
+    runs = []
 
-    print(0)
+    if not s:
 
-    exit()
+        print(0, file=output_stream)
 
-current = s[0]
+        return
 
-count = 1
+    current = s[0]
 
-for c in s[1:]:
+    count = 1
 
-    if c == current:
+    for c in s[1:]:
 
-        count +=1
+        if c == current:
 
-    else:
+            count +=1
 
-        runs.append( (current, count) )
+        else:
 
-        current = c
+            runs.append( (current, count) )
 
-        count = 1
+            current = c
 
-runs.append( (current, count) )
+            count = 1
 
-# compute totals
+    runs.append( (current, count) )
 
-max_total = 0
+    # compute totals
 
-totals = [0] * 26
+    max_total = 0
 
-for char, m in runs:
+    totals = [0] * 26
 
-    idx = ord(char) - ord('a')
+    for char, m in runs:
 
-    totals[idx] += m // k
+        idx = ord(char) - ord('a')
 
-max_total = max(totals)
+        totals[idx] += m // k
 
-print(max_total)
+    max_total = max(totals)
 
-This should handle all cases.
+    print(max_total, file=output_stream)
 
-Testing the sample inputs:
 
-First sample input:
 
-8 2
+def test():
+    import io
 
-aaacaabb
-
-runs are a:3, c:1, a:2, b:2.
-
-For 'a', 3//2=1 (first run), 2//2=1 (third run) → total 2.
-
-For 'b', 2//2=1. So maximum is 2. Correct.
-
-Second sample:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2 1
+ab
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-ab → runs a:1, b:1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For a:1//1=1. For b:1//1=1. So maximum is 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+
+    s = input_stream.readline().rstrip("\n").strip()
+
+    if k > n:
+
+        print(0, file=output_stream)
+
+        return
+
+    # process runs
+
+    runs = []
+
+    if not s:
+
+        print(0, file=output_stream)
+
+        return
+
+    current = s[0]
+
+    count = 1
+
+    for c in s[1:]:
+
+        if c == current:
+
+            count +=1
+
+        else:
+
+            runs.append( (current, count) )
+
+            current = c
+
+            count = 1
+
+    runs.append( (current, count) )
+
+    # compute totals
+
+    max_total = 0
+
+    totals = [0] * 26
+
+    for char, m in runs:
+
+        idx = ord(char) - ord('a')
+
+        totals[idx] += m // k
+
+    max_total = max(totals)
+
+    print(max_total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 2
+abab
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

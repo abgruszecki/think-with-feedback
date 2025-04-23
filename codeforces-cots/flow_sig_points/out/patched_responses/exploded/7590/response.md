@@ -538,215 +538,235 @@ Then, for each i where s[i] is '.', check the conditions.
 
 So code in Python:
 
-n = int(input())
+Testing against sample input 1.
 
-s = input().strip()
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-leftR = [-1]*n
+    s = input_stream.readline().rstrip("\n").strip()
 
-lastR = -1
+    leftR = [-1]*n
 
-for i in range(n):
+    lastR = -1
 
-    if s[i] == 'R':
+    for i in range(n):
 
-        lastR = i
+        if s[i] == 'R':
 
-    elif s[i] == 'L':
+            lastR = i
 
-        lastR = -1
+        elif s[i] == 'L':
 
-    else:
+            lastR = -1
 
-        leftR[i] = lastR
+        else:
 
-rightL = [-1]*n
+            leftR[i] = lastR
 
-lastL = -1
+    rightL = [-1]*n
 
-for i in range(n-1, -1, -1):
+    lastL = -1
 
-    if s[i] == 'L':
+    for i in range(n-1, -1, -1):
 
-        lastL = i
+        if s[i] == 'L':
 
-    elif s[i] == 'R':
+            lastL = i
 
-        lastL = -1
+        elif s[i] == 'R':
 
-    else:
+            lastL = -1
 
-        rightL[i] = lastL
+        else:
 
-count = 0
+            rightL[i] = lastL
 
-for i in range(n):
+    count = 0
 
-    if s[i] == '.':
+    for i in range(n):
 
-        l = leftR[i]
+        if s[i] == '.':
 
-        r = rightL[i]
+            l = leftR[i]
 
-        if l == -1 and r == -1:
+            r = rightL[i]
 
-            count +=1
-
-        elif l != -1 and r != -1:
-
-            d1 = i - l
-
-            d2 = r - i
-
-            if d1 == d2:
+            if l == -1 and r == -1:
 
                 count +=1
 
-print(count)
+            elif l != -1 and r != -1:
 
-Wait, let's test this code against the sample inputs.
+                d1 = i - l
 
-Sample 1:
+                d2 = r - i
 
-Input:
+                if d1 == d2:
 
-14
+                    count +=1
 
-.L.R...LR..L..
+    print(count, file=output_stream)
 
-The code computes leftR and rightL as discussed. For the '.' at i=2, l is -1 and r is -1. So count +=1.
 
-For i=5 (s[i] is '.'), l=3, r=7. d1=2, d2=2 → count +=1.
 
-i=6: l=3, r=7. d1=3, d2=1 → no count.
+def test():
+    import io
 
-i=10: l=8, r=12. d1=2, d2=2 → count +=1.
-
-i=13: l=-1, r=-1 → count +=1.
-
-Wait, but in the sample input, the output is 4. Let's see:
-
-The code's loop for i in 0 to 13:
-
-count starts at 0.
-
-i=0: s[0] is '.' → l=-1, r=1 (from rightL[0] =1? Wait, let's check.
-
-Wait, in the rightL array for i=0:
-
-When processing i=0 (from right to left):
-
-At i=0, s[i] is '.', so rightL[i] is lastL.
-
-But after processing i=1 (which is 'L'), lastL is set to 1. Then when processing i=0 (from right to left), since s[i] is '.', rightL[0] is lastL which is 1.
-
-So for i=0, r=1. So leftR[i] is -1 (since during the left pass, i=0 is '.', but lastR was -1 initially). So l is -1, r is 1. So since one is present and the other isn't, the domino is pushed by the L at 1. So no count.
-
-i=2: l=-1 (since after the L at 1, no R encountered), r is 7? Let's recheck.
-
-Wait, during the rightL computation:
-
-For i=2, in the rightL array:
-
-Processing right to left.
-
-At i=3 (s[i] is R), lastL is set to -1.
-
-Then i=2 (s[i] is '.'), so rightL[i] = lastL (-1).
-
-So for i=2, l is -1 (leftR[i] is -1), r is -1 (rightL[i] is -1). So count +=1.
-
-Yes.
-
-i=4: l is 3, r is7. d1=1, d2=3 → not equal. So no.
-
-i=5: l=3 (d1=2), r=7 (d2=2). So count +=1.
-
-i=6: l=3 (d1=3), r=7 (d2=1). No.
-
-i=9: l=8 (d1=1), r=12 (d2=3). No.
-
-i=10: l=8 (d1=2), r=12 (d2=2). So count +=1.
-
-i=11: l=8 (d1=3), r=12 (d2=1). No.
-
-i=13: s[i] is '.', l=-1 (since after the L at 12, which reset lastR to -1 during the left pass), r=-1 (since when processing i=13 in the rightL array, lastL is -1 because after processing i=13 (s[i] is '.'), then i=12 is 'L' (sets lastL=12), but when processing i=13 (earlier in the right pass?), wait, the right pass is from n-1 downto 0.
-
-Let me recheck the rightL processing for i=13:
-
-Processing starts at i=13 (n-1=13 for n=14). s[13] is '.'.
-
-At that point, lastL is -1 (initialized). So rightL[13] = -1.
-
-Then i=12: s[12] is 'L' → lastL =12. So rightL[12] is set to -1 (since s[12] is not '.').
-
-i=11: s[i] is '.', so rightL[11] =12.
-
-i=10: s[i] is '.', rightL[10] =12.
-
-i=9: s[i] is '.', rightL[9] =12.
-
-i=8: s[i] is 'R' → lastL =-1.
-
-i=7: s[i] is 'L' → lastL=7.
-
-i=6: '.', rightL[6] =7.
-
-etc.
-
-So for i=13 (s[i] is '.'), rightL[13] is -1 (since when processing i=13, the lastL is -1).
-
-So for i=13, l is -1 (leftR[i] is -1) and r is -1 (rightL[i] is -1). So count +=1.
-
-So total count is 1 (i=2) +1 (i=5) +1 (i=10) +1 (i=13) → 4. Which matches the sample.
-
-Second sample input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
-
 R....
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-s is 'R....'.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So n=5.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-leftR array for each '.':
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=0 is R (not '.'), leftR not considered.
+    print('Tests passed 😎')
 
-i=1: '.' → lastR is 0 (from R at 0). So leftR[1] =0.
 
-i=2: '.' → leftR=0.
+if __name__ == '__main__':
+    test()
 
-i=3: '.' → leftR=0.
 
-i=4: '.' → leftR=0.
+```
 
-rightL array: 
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Processing from right to left.
+```
 
-i=4: '.', lastL is -1 → rightL[4] =-1.
+Testing against sample input 2.
 
-i=3: '.', rightL=-1.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-i=2: '.', rightL=-1.
+    s = input_stream.readline().rstrip("\n").strip()
 
-i=1: '.', rightL=-1.
+    leftR = [-1]*n
 
-i=0: 'R' → lastL=-1.
+    lastR = -1
 
-So for each '.' in positions 1-4:
+    for i in range(n):
 
-i=1: l=0, r=-1 → falls right. Not counted.
+        if s[i] == 'R':
 
-i=2: l=0, r=-1 → falls right. Not counted.
+            lastR = i
 
-i=3: l=0, r=-1 → falls right. Not counted.
+        elif s[i] == 'L':
 
-i=4: l=0, r=-1 → falls right. Not counted.
+            lastR = -1
 
-Only the R and the other '.'s are considered. So all '.' dominoes are pushed right. So output is 0.
+        else:
+
+            leftR[i] = lastR
+
+    rightL = [-1]*n
+
+    lastL = -1
+
+    for i in range(n-1, -1, -1):
+
+        if s[i] == 'L':
+
+            lastL = i
+
+        elif s[i] == 'R':
+
+            lastL = -1
+
+        else:
+
+            rightL[i] = lastL
+
+    count = 0
+
+    for i in range(n):
+
+        if s[i] == '.':
+
+            l = leftR[i]
+
+            r = rightL[i]
+
+            if l == -1 and r == -1:
+
+                count +=1
+
+            elif l != -1 and r != -1:
+
+                d1 = i - l
+
+                d2 = r - i
+
+                if d1 == d2:
+
+                    count +=1
+
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+.
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample input:
 

@@ -256,19 +256,60 @@ print(max(0, required))
 
 Yes. So this is the solution.
 
-Now let's test the sample input.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    s = sum(a)
+    required = 2 * k * n - 2 * s - n
+    print(max(0, required), file=output_stream)
 
-Input:
 
-2 10
 
-8 9
+def test():
+    import io
 
-sum is 17.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 5
+4 4 4
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-required = 2*10*2 -2*17 -2 =40-34-2=4. Output 4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

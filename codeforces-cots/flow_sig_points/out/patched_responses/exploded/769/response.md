@@ -569,123 +569,98 @@ deque for BFS.
 
 Now, the code:
 
+Testing against sample input 1.
+
+```python
 from collections import deque
 
-l, r, p = map(int, input().split())
 
-possible = set()
-visited = set()
+def main(input_stream, output_stream):
+    l, r, p = map(int, input_stream.readline().rstrip("\n").split())
 
-initial_product = 1
-initial_b = 0
-initial_steps = 0
+    possible = set()
+    visited = set()
 
-queue = deque([(initial_product, initial_b, initial_steps)])
-visited.add( (initial_product, initial_b, initial_steps) )
+    initial_product = 1
+    initial_b = 0
+    initial_steps = 0
 
-while queue:
-    product, current_b, steps_used = queue.popleft()
-    
-    if steps_used <= p:
-        if l <= product <= r:
-            possible.add(product)
-    
-    if steps_used >= p:
-        continue
-    
-    remaining = p - steps_used
-    max_m = remaining -1  # steps_used + m +1 <= p → m <= remaining -1
-    if max_m <0:
-        continue
-    
-    # m can be from 0 to max_m
-    for m in range(0, max_m +1):
-        new_b = current_b + m
-        new_product = product * new_b
-        if new_product > r:
+    queue = deque([(initial_product, initial_b, initial_steps)])
+    visited.add( (initial_product, initial_b, initial_steps) )
+
+    while queue:
+        product, current_b, steps_used = queue.popleft()
+        
+        if steps_used <= p:
+            if l <= product <= r:
+                possible.add(product)
+        
+        if steps_used >= p:
             continue
         
-        new_steps = steps_used + m +1
-        new_state = (new_product, new_b, new_steps)
-        if new_state not in visited:
-            visited.add(new_state)
-            queue.append(new_state)
+        remaining = p - steps_used
+        max_m = remaining -1  # steps_used + m +1 <= p → m <= remaining -1
+        if max_m <0:
+            continue
+        
+        # m can be from 0 to max_m
+        for m in range(0, max_m +1):
+            new_b = current_b + m
+            new_product = product * new_b
+            if new_product > r:
+                continue
+            
+            new_steps = steps_used + m +1
+            new_state = (new_product, new_b, new_steps)
+            if new_state not in visited:
+                visited.add(new_state)
+                queue.append(new_state)
 
-print(len(possible))
+    print(len(possible), file=output_stream)
 
-But wait, this code may not process all possibilities. For example, after generating a product, steps_used may be less than p, and the remaining steps can be filled with increments. But the product remains the same. So in the code, the product is added to possible only once, when steps_used is <=p.
 
-Wait, no. The code adds the product to possible if steps_used <=p. So for example, if a product is generated with steps_used=2 and p=3, and then there's another step_used=3 with the same product, it would be added again, but since possible is a set, it's stored once.
 
-So the code should collect all possible products that can be generated with steps_used <=p.
+def test():
+    import io
 
-But in the code, the check for adding to possible is done once per state. But the same product can be generated through different paths (different states), but it's added to the set once.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 111 100
+""",
+            "output": \
+"""\
+106
+""",
+        }, 
+    ]
 
-Thus, the code should correctly count all possible x in [l, r] that can be generated in at most p steps.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But there's a possible error in the code: when steps_used is <=p, but the product is already added. For example, if a product is generated with steps_used=2 (p=3), and then again with steps_used=3, but since it's the same product, it's added only once.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Yes, because the possible is a set.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Testing this code with sample input 1:
+    print('Tests passed 😎')
 
-Sample Input 1:
 
-2 10 3 → output 1.
+if __name__ == '__main__':
+    test()
 
-Let's see:
 
-The code's queue starts with (1,0,0).
+```
 
-Processing (1,0,0):
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-steps_used=0 <=3. product=1 is added to possible if between 2 and 10. Not added.
-
-remaining steps=3. max_m=3-0-1=2.
-
-So m can be 0,1,2.
-
-For m=0:
-
-new_b=0. new_product=0. new_steps=1. add to queue.
-
-For m=1:
-
-new_b=1. new_product=1. steps_used=0+1+1=2. new_state (1,1,2).
-
-For m=2:
-
-new_b=2. new_product=2. steps_used=3. new_state (2,2,3).
-
-Then, when processing (0,0,1):
-
-steps_used=1 <=3. product=0 not in [2,10]. So not added.
-
-remaining steps=3-1=2. max_m=2-1=1.
-
-m can be 0,1.
-
-new_b=0+0=0. new_product=0*0=0. steps_used=2. added.
-
-...
-
-But all these paths generate 0, which is not in the desired range.
-
-When processing (1,1,2):
-
-steps_used=2 <=3. product=1 not in [2,10].
-
-remaining steps=3-2=1. max_m=0.
-
-m=0:
-
-new_b=1+0=1. new_product=1*1=1. steps_used=3. added. product is 1, not in range.
-
-When processing (2,2,3):
-
-steps_used=3 <=3. product=2 is in range → added to possible.
-
-So possible now has 2. So the answer is 1.
+```
 
 Sample input 2:
 

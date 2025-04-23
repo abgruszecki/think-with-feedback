@@ -48,39 +48,142 @@ Yes. Let's code that.
 
 In Python, the code would be:
 
-n, k = map(int, input().split())
+Testing against sample inputs 1, 2, 3.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-a.sort()
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-print(sum(a[:k]))
+    a.sort()
 
-Wait, but for the case where the list is not exactly n elements? But the problem says that the second line has exactly n elements. So as long as the input is correct, this code works.
+    print(sum(a[:k]), file=output_stream)
 
-Testing the examples:
 
-First example:
 
-8 5
+def test():
+    import io
 
-1 1 ... (8 times). Sum 5.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 3
+16 8 2 4 512 256 32 128 64 1
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+        {
+            "input": \
+"""\
+5 1
+20 10 50 30 46
+""",
+            "output": \
+"""\
+10
+""",
+        }, 
+        {
+            "input": \
+"""\
+6 6
+6 6 6 6 6 6
+""",
+            "output": \
+"""\
+36
+""",
+        }, 
+    ]
 
-Yes.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Second example: sorted list is as I thought, sum 7.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Third example: sum of first 1 element is 10.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Yes.
+    print('Tests passed 😎')
 
-Fourth example: sum 6*6=36.
 
-Yes.
+if __name__ == '__main__':
+    test()
 
-So this code should work. But why the problem says to think about data structures and optimal approach? Because for n up to 2200, sorting is trivial. So this code is optimal.
 
-So the answer is as simple as that. I think that's the correct approach.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 4.
+
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    a.sort()
+
+    print(sum(a[:k]), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 1
+100
+""",
+            "output": \
+"""\
+100
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

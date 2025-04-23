@@ -1302,63 +1302,102 @@ But wait, in Python, for lists, it's more efficient to precompute the intervals 
 
 But the code should be correct.
 
-Testing the first sample:
+Testing against sample input 1.
 
-n=3, M=10, a=[4,6,7].
+```python
+def main(input_stream, output_stream):
+    n, M = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-intervals are:
+    intervals = []
+    # First interval: 0 to a[0], state on (c=1)
+    intervals.append((0, a[0], 1))
 
-0-4: c=1.
+    # Intervals between a[i] and a[i+1]
+    for i in range(n-1):
+        s = a[i]
+        e = a[i+1]
+        # State is on if (i+1) is even
+        state = 1 if (i+1) % 2 == 0 else 0
+        intervals.append((s, e, state))
 
-4-6: c=0.
+    # Last interval: a[-1] to M
+    s = a[-1]
+    e = M
+    # State is on if n is even
+    state = 1 if n % 2 == 0 else 0
+    intervals.append((s, e, state))
 
-6-7: c=1.
+    original_total = sum((e - s) * c for s, e, c in intervals)
 
-7-10: c=0.
+    # Compute delta for each interval
+    delta = [(1 - 2 * c) * (e - s) for s, e, c in intervals]
 
-delta:
+    m = len(intervals)
+    suffix = [0] * (m + 1)  # suffix sums
 
-0-4: (1-2*1)*4= -4.
+    for i in range(m-1, -1, -1):
+        suffix[i] = delta[i] + suffix[i+1]
 
-4-6: (1-0)*2=2.
+    max_gain = 0
+    for j in range(m):
+        s_j, e_j, c_j = intervals[j]
+        if c_j == 0:
+            gain_split = e_j - s_j - 1
+        else:
+            gain_split = -1
+        gain_flip = suffix[j+1]
+        total = gain_split + gain_flip
+        if total > max_gain:
+            max_gain = total
 
-6-7: (1-2*1)*1= -1.
+    answer = original_total + max_gain if max_gain > 0 else original_total
+    print(answer, file=output_stream)
 
-7-10: (1-0)*3=3.
 
-suffix sums:
 
-suffix[3] =3.
+def test():
+    import io
 
-suffix[2] =-1 +3=2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 12
+1 10
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
 
-suffix[1] =2 +2=4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-suffix[0] =-4 +4=0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Then for j=0:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-c=1 → gain_split -1.
+    print('Tests passed 😎')
 
-gain_flip = suffix[1] =4 → total 3.
 
-j=1:
+if __name__ == '__main__':
+    test()
 
-c=0 → gain_split 2-4-1=6-4-1=1? Wait, no. s_j=4, e_j=6. e_j -s_j -1=6-4-1=1.
 
-gain_flip = suffix[2]=2 → 1+2=3.
+```
 
-j=2: c=1 → gain_split -1 + suffix[3] = -1+3=2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-j=3: c=0 → 10-7-1=2. gain_flip suffix[4] =0. total 2+0=2.
-
-Max_gain is 3.
-
-original_total=4+0+1+0=5.
-
-5+3=8.
-
-Which is correct.
+```
 
 Thus, the code is correct.
 </think>

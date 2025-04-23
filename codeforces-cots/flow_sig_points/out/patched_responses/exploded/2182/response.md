@@ -200,97 +200,90 @@ In Python, the way to create a heap with all elements is to make a list and heap
 
 So:
 
+Testing against sample input 1.
+
+```python
 import heapq
 
-n, m = map(int, input().split())
 
-adj = [[] for _ in range(n+1)]  # 1-based.
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-for _ in range(m):
-    u, v, w = map(int, input().split())
-    adj[u].append( (v, w) )
-    adj[v].append( (u, w) )
+    adj = [[] for _ in range(n+1)]  # 1-based.
 
-a = list(map(int, input().split()))
+    for _ in range(m):
+        u, v, w = map(int, input_stream.readline().rstrip("\n").split())
+        adj[u].append( (v, w) )
+        adj[v].append( (u, w) )
 
-dist = [0]*(n+1)
-for i in range(1, n+1):
-    dist[i] = a[i-1]
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-heap = [ (dist[i], i) for i in range(1, n+1) ]
-heapq.heapify(heap)
+    dist = [0]*(n+1)
+    for i in range(1, n+1):
+        dist[i] = a[i-1]
 
-while heap:
-    d_u, u = heapq.heappop(heap)
-    if d_u > dist[u]:
-        continue  # already processed a better distance
-    for v, w_uv in adj[u]:
-        new_d = d_u + 2 * w_uv
-        if new_d < dist[v]:
-            dist[v] = new_d
-            heapq.heappush(heap, (new_d, v))
+    heap = [ (dist[i], i) for i in range(1, n+1) ]
+    heapq.heapify(heap)
 
-print(' '.join(map(str, dist[1:])))
+    while heap:
+        d_u, u = heapq.heappop(heap)
+        if d_u > dist[u]:
+            continue  # already processed a better distance
+        for v, w_uv in adj[u]:
+            new_d = d_u + 2 * w_uv
+            if new_d < dist[v]:
+                dist[v] = new_d
+                heapq.heappush(heap, (new_d, v))
 
-Wait, but in the first sample input, the code would output the correct results.
+    print(' '.join(map(str, dist[1:])), file=output_stream)
 
-But there's a problem with the way the heap is initialized. For example, in the first step, the heap has all nodes. When we pop a node, say, node3 with a_j 1, then process its edges, which may update node2's distance. Then node2's entry in the heap is still present (as 20). But when node2 is popped later (with a higher distance), it's skipped.
 
-This approach should work.
 
-But in Python, the heap is a min-heap, so the node with the smallest distance is processed first.
+def test():
+    import io
 
-But what about when multiple entries for the same node exist in the heap? For example, when node2 is updated from 20 to 15 (in the first sample), then another entry (15,2) is added. The heap will have (6,1), (15,2), (25,4), (20,2). But when the first (15,2) is popped, it's processed, and any remaining entries for node2 with higher distances will be ignored.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 3
+1 2 1
+2 3 1
+1 3 1
+30 10 20
+""",
+            "output": \
+"""\
+12 10 12
+""",
+        }, 
+    ]
 
-Yes. So the code is correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But in terms of efficiency, the code may push multiple entries into the heap. For large n and m, this could be a problem in Python. But given that the problem allows a time limit of 2 seconds, and with 2e5 nodes and edges, perhaps it's manageable.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Wait, but in the worst case, each edge is processed once for each direction. So for each edge (u, v, w), when u is processed, v's distance may be updated. Then, when v is processed, u's distance may be updated again, but this is only possible if the new distance for u is better. But since the initial a_u is fixed, perhaps this is not necessary.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But the code handles that automatically. For example, when u is processed and adds v to the heap with a new distance, and when v is processed and adds u again, but if the distance for u is already better, the new entry will be ignored.
+    print('Tests passed 😎')
 
-So the code should work.
 
-Now, let's test the code against the samples.
+if __name__ == '__main__':
+    test()
 
-First sample:
 
-4 2
+```
 
-Edges 1-2 (4), 2-3 (7).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-a = [6, 20, 1, 25]
-
-dist is [0,6,20,1,25]
-
-heap starts as [(6,1), (20,2), (1,3), (25,4)]. Heapify arranges this as the smallest first.
-
-First, pop (1,3). Process neighbors. For node3's edges (2,7). So each edge has weight 7. 2*7=14.
-
-For neighbor 2: current distance is 20. 1 +14=15 <20. So update to 15. Push (15,2).
-
-Now, the heap contains (6,1), (15,2), (25,4), (20,2), (1,3) (but (1,3) was popped, and others are there. But after heapify, the next pop is 6,1.
-
-Processing node1. Edges are 2 (4). 2*4=8.
-
-Current distance for node2 is 15. 6 +8=14 <15. So update to 14 and push (14,2).
-
-Now, the heap has (14,2), (15,2), (25,4), 20,2, etc. Next popped is (6,1) but wait, after popping (1,3), the next smallest is (6,1). Then after processing, node2 is updated to 14. Then, when (14,2) is popped, process its edges.
-
-When (14,2) is processed, check neighbors:
-
-Edges are 1 (4), 3 (7). 2*4=8 and 2*7=14.
-
-For node1: 14 +8=22 >6 (current for node1 is 6), so no update.
-
-For node3: 14 +14=28 >1 (current is 1), so no.
-
-Then, next elements in the heap may be (15,2), (25,4), etc. When (15,2) is popped, but the current dist[2] is 14, so it's skipped.
-
-Then, (25,4) is popped. It's 25, which is the current dist[4], so process. But no edges, so nothing happens.
-
-So the final dist is [6,14,1,25], correct.
+```
 
 So the code works for the first sample.
 

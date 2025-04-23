@@ -291,85 +291,106 @@ That's a good optimization.
 
 So the modified code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-data = list(map(int, sys.stdin.read().split()))
-ptr = 0
 
-n, m, k = data[ptr], data[ptr+1], data[ptr+2]
-ptr +=3
+def main(input_stream, output_stream):
+    data = list(map(int, input_stream.read().split()))
+    ptr = 0
 
-points = []
-for _ in range(n):
-    x, y = data[ptr], data[ptr+1]
-    points.append( (x, y) )
-    ptr +=2
-
-fences = []
-for _ in range(m):
-    r = data[ptr]
-    cx = data[ptr+1]
-    cy = data[ptr+2]
-    r_sq = r * r
-    fences.append( (r_sq, cx, cy) )
+    n, m, k = data[ptr], data[ptr+1], data[ptr+2]
     ptr +=3
 
-masks = []
-for x, y in points:
-    mask = 0
-    for i in range(m):
-        r_sq, cx, cy = fences[i]
-        dx = x - cx
-        dy = y - cy
-        dist_sq = dx * dx + dy * dy
-        if dist_sq < r_sq:
-            mask |= 1 << i
-    masks.append( mask )
+    points = []
+    for _ in range(n):
+        x, y = data[ptr], data[ptr+1]
+        points.append( (x, y) )
+        ptr +=2
 
-queries = []
-for _ in range(k):
-    a = data[ptr]
-    b = data[ptr+1]
-    queries.append( (a-1, b-1) )
-    ptr +=2
+    fences = []
+    for _ in range(m):
+        r = data[ptr]
+        cx = data[ptr+1]
+        cy = data[ptr+2]
+        r_sq = r * r
+        fences.append( (r_sq, cx, cy) )
+        ptr +=3
 
-for a, b in queries:
-    xor = masks[a] ^ masks[b]
-    print( bin(xor).count('1') )
+    masks = []
+    for x, y in points:
+        mask = 0
+        for i in range(m):
+            r_sq, cx, cy = fences[i]
+            dx = x - cx
+            dy = y - cy
+            dist_sq = dx * dx + dy * dy
+            if dist_sq < r_sq:
+                mask |= 1 << i
+        masks.append( mask )
 
-Yes. This should handle all cases efficiently.
+    queries = []
+    for _ in range(k):
+        a = data[ptr]
+        b = data[ptr+1]
+        queries.append( (a-1, b-1) )
+        ptr +=2
 
-Testing the first sample:
+    for a, b in queries:
+        xor = masks[a] ^ masks[b]
+        print( bin(xor).count('1') , file=output_stream)
 
-Sample input:
 
-2 1 1
 
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 3 1
 0 0
-
-3 3
-
+4 4
+1 0 0
 2 0 0
-
+3 0 0
 1 2
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-Reading:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-n=2, m=1, k=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-points are (0,0) and (3,3).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-fences: r=2 → r_sq=4. cx=0, cy=0.
+    print('Tests passed 😎')
 
-For point 0 (0,0):
 
-dx=0, dy=0 → dist_sq=0 <4 → mask 1<<0 =1.
+if __name__ == '__main__':
+    test()
 
-Point 1 (3,3):
 
-dx=3, dy=3 → dist_sq=9+9=18 >4 → mask 0.
+```
 
-Query (1-1=0, 2-1=1): 0 and 1. XOR 1^0=1 → count 1. Correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case with m=3. The code would correctly set each bit for the three fences.
 

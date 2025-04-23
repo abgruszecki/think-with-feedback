@@ -263,25 +263,117 @@ else:
 
     print(round_number)
 
-Wait, let's test with the examples.
+Testing against sample input 1.
 
-First example:
+```python
+def main(input_stream, output_stream):
+    n, a, b = map(int, input_stream.readline().rstrip("\n").split())
+    a, b = sorted([a, b])
+    x = (a - 1) ^ (b - 1)
+    h = x.bit_length() - 1
+    round_number = h + 1
+    total_rounds = n.bit_length() - 1  # since n is a power of two
+    print("Final!" if round_number == total_rounds else round_number, file=output_stream)
 
-n=4. bit_length is 3. 3-1=2. So total_rounds is 2.
 
-a=1, b=2. sorted a=1, b=2.
 
-x = (0) ^ (1) = 1. h = 0. round_number =1.
+def test():
+    import io
 
-since 1 <2 → output 1. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 2 6
+""",
+            "output": \
+"""\
+Final!
+""",
+        }, 
+    ]
 
-Second example:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-n=8. bit_length is 4. 4-1=3. total_rounds=3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-a=2, b=6. sorted a=2, b=6.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-x = (1) XOR (5) → 1^5=4. 4 is 100 in binary. h=2. round=3. which equals total_rounds. so output Final!. Correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, a, b = map(int, input_stream.readline().rstrip("\n").split())
+    a, b = sorted([a, b])
+    x = (a - 1) ^ (b - 1)
+    h = x.bit_length() - 1
+    round_number = h + 1
+    total_rounds = n.bit_length() - 1  # since n is a power of two
+    print("Final!" if round_number == total_rounds else round_number, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 7 5
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

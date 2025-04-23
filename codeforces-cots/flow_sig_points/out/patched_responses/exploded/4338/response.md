@@ -1122,33 +1122,169 @@ Thus, the code is only feasible if the number of steps simulated is small.
 
 But given the problem's time constraints, it's the only possible way. 
 
-Testing this code against the examples:
+Testing against sample input 1.
 
-First example:
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    s = list(input_stream.readline().rstrip("\n"))
+    current = s.copy()
+    prev = None
+    prev_prev = None
+    steps_done = 0
 
-Input: 6 1 BWBBWW → 'B','W','B','B','W','W'
+    for steps_done in range(k):
+        next_state = []
+        for i in range(n):
+            left = current[(i-1) % n]
+            right = current[(i+1) % n]
+            me = current[i]
+            count = (left == 'W') + (me == 'W') + (right == 'W')
+            next_char = 'W' if count >= 2 else 'B'
+            next_state.append(next_char)
+        if next_state == current:
+            break
+        if prev is not None and next_state == prev:
+            remaining = k - steps_done - 1
+            if remaining % 2 == 0:
+                current = next_state
+            else:
+                current = prev
+            break
+        prev_prev = prev
+        prev = current.copy()
+        current = next_state
+        if steps_done >= k - 1:
+            break
 
-Step 0:
+    print(''.join(current), file=output_stream)
 
-next_state is computed. 
 
-Each position's next state is determined. 
 
-The code compares next_state with current. If they are different, proceed. 
+def test():
+    import io
 
-Since step is 0, remaining_steps is k=1. 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 3
+WBWBWBW
+""",
+            "output": \
+"""\
+WWWWWWW
+""",
+        }, 
+    ]
 
-After step 0, current becomes next_state. 
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Thus, after one step, the code outputs the correct result. 
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Second example: 7 3 WBWBWBW → 'W','B','W','B','W','B','W'
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-After each step, the state changes. 
+    print('Tests passed 😎')
 
-After 3 steps, all become W. 
 
-The code would simulate 3 steps. 
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    s = list(input_stream.readline().rstrip("\n"))
+    current = s.copy()
+    prev = None
+    prev_prev = None
+    steps_done = 0
+
+    for steps_done in range(k):
+        next_state = []
+        for i in range(n):
+            left = current[(i-1) % n]
+            right = current[(i+1) % n]
+            me = current[i]
+            count = (left == 'W') + (me == 'W') + (right == 'W')
+            next_char = 'W' if count >= 2 else 'B'
+            next_state.append(next_char)
+        if next_state == current:
+            break
+        if prev is not None and next_state == prev:
+            remaining = k - steps_done - 1
+            if remaining % 2 == 0:
+                current = next_state
+            else:
+                current = prev
+            break
+        prev_prev = prev
+        prev = current.copy()
+        current = next_state
+        if steps_done >= k - 1:
+            break
+
+    print(''.join(current), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 4
+BWBWBW
+""",
+            "output": \
+"""\
+BWBWBW
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: 6 4 BWBWBW → after two steps, it returns to the initial state. 
 

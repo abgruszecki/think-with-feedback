@@ -679,163 +679,183 @@ But in Python, using nested loops for m=150 is manageable. Let's proceed to code
 
 Implementing the code:
 
-MOD = 1e9 +7
+Testing against sample input 1.
 
-n, m = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 1e9 +7
 
-MOD = 10**9 +7
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-if m ==0 or n ==0:
+    MOD = 10**9 +7
 
-    print(0)
+    if m ==0 or n ==0:
 
-    exit()
+        print(0, file=output_stream)
 
-prev_dp = [[0]*(m+2) for _ in range(m+2)]
+        return
 
-# Initialize row 1.
+    prev_dp = [[0]*(m+2) for _ in range(m+2)]
 
-for a in range(1, m+1):
-
-    for b in range(a, m+1):
-
-        prev_dp[a][b] = 1
-
-for i in range(2, n+1):
-
-    # Compute sum_b_prev_geq_b and sum_b_prev_geq_a_prev.
-
-    sum_b_prev_geq_b = [[0]*(m+2) for _ in range(m+2)]
-
-    sum_b_prev_geq_a_prev = [0]*(m+2)
-
-    for a_prev in range(1, m+1):
-
-        # Compute suffix sum for a_prev.
-
-        suffix_sum = [0]*(m+2)
-
-        suffix_sum[m] = prev_dp[a_prev][m]
-
-        for b in range(m-1, 0, -1):
-
-            suffix_sum[b] = (prev_dp[a_prev][b] + suffix_sum[b+1]) % MOD
-
-        # Fill sum_b_prev_geq_b[a_prev][b]
-
-        for b in range(1, m+1):
-
-            sum_b_prev_geq_b[a_prev][b] = suffix_sum[b] % MOD
-
-        # sum_b_prev_geq_a_prev[a_prev] is suffix_sum[a_prev]
-
-        sum_b_prev_geq_a_prev[a_prev] = suffix_sum[a_prev] % MOD
-
-    # Compute prefix_part1 for each b.
-
-    prefix_part1 = [[0]*(m+2) for _ in range(m+2)]
-
-    for b in range(1, m+1):
-
-        current_sum = 0
-
-        for a_prev in range(1, m+1):
-
-            current_sum = (current_sum + sum_b_prev_geq_b[a_prev][b]) % MOD
-
-            prefix_part1[b][a_prev] = current_sum
-
-    # Compute prefix_part2.
-
-    prefix_part2 = [0]*(m+2)
-
-    current_sum =0
-
-    for a_prev in range(1, m+1):
-
-        current_sum = (current_sum + sum_b_prev_geq_a_prev[a_prev]) % MOD
-
-        prefix_part2[a_prev] = current_sum
-
-    # Compute curr_dp.
-
-    curr_dp = [[0]*(m+2) for _ in range(m+2)]
+    # Initialize row 1.
 
     for a in range(1, m+1):
 
         for b in range(a, m+1):
 
-            min_ab = min(a, b)
+            prev_dp[a][b] = 1
 
-            # part1 is prefix_part1[b][min_ab]
+    for i in range(2, n+1):
 
-            part1 = prefix_part1[b][min_ab] if min_ab >=1 else 0
+        # Compute sum_b_prev_geq_b and sum_b_prev_geq_a_prev.
 
-            # part2 is prefix_part2[a] - prefix_part2[min_ab]
+        sum_b_prev_geq_b = [[0]*(m+2) for _ in range(m+2)]
 
-            if min_ab < a:
+        sum_b_prev_geq_a_prev = [0]*(m+2)
 
-                part2 = (prefix_part2[a] - prefix_part2[min_ab]) % MOD
+        for a_prev in range(1, m+1):
 
-            else:
+            # Compute suffix sum for a_prev.
 
-                part2 = 0
+            suffix_sum = [0]*(m+2)
 
-            curr_dp[a][b] = (part1 + part2) % MOD
+            suffix_sum[m] = prev_dp[a_prev][m]
 
-    # Update prev_dp for next iteration.
+            for b in range(m-1, 0, -1):
 
-    prev_dp = curr_dp
+                suffix_sum[b] = (prev_dp[a_prev][b] + suffix_sum[b+1]) % MOD
 
-# Sum all a <= b.
+            # Fill sum_b_prev_geq_b[a_prev][b]
 
-total =0
+            for b in range(1, m+1):
 
-for a in range(1, m+1):
+                sum_b_prev_geq_b[a_prev][b] = suffix_sum[b] % MOD
 
-    for b in range(a, m+1):
+            # sum_b_prev_geq_a_prev[a_prev] is suffix_sum[a_prev]
 
-        total = (total + prev_dp[a][b]) % MOD
+            sum_b_prev_geq_a_prev[a_prev] = suffix_sum[a_prev] % MOD
 
-print(total % MOD)
+        # Compute prefix_part1 for each b.
 
-Now, let's test this code against the sample inputs.
+        prefix_part1 = [[0]*(m+2) for _ in range(m+2)]
 
-Sample input 1: 2 2
+        for b in range(1, m+1):
 
-Row 1: a can be 1-1, 1-2, 2-2. Sum is 3.
+            current_sum = 0
 
-Row 2:
+            for a_prev in range(1, m+1):
 
-For a=1, b=1:
+                current_sum = (current_sum + sum_b_prev_geq_b[a_prev][b]) % MOD
 
-min_ab = 1.
+                prefix_part1[b][a_prev] = current_sum
 
-part1: sum_b_prev_geq_b[1][1] for a_prev=1 to 1.
+        # Compute prefix_part2.
 
-sum_b_prev_geq_b[a_prev=1][b=1] is sum of b_prev >=1 for a_prev=1. For row 1's a_prev=1, the prev_dp[1][1], [1][2], etc. But in row 1, a_prev can be 1, and b_prev >=1.
+        prefix_part2 = [0]*(m+2)
 
-So sum_b_prev_geq_b[1][1] = prev_dp[1][1] + prev_dp[1][2} = 1 +1 =2.
+        current_sum =0
 
-prefix_part1[b=1][a_prev=1] = 2.
+        for a_prev in range(1, m+1):
 
-part1 is 2.
+            current_sum = (current_sum + sum_b_prev_geq_a_prev[a_prev]) % MOD
 
-part2: a=1, min_ab=1. part2 is prefix_part2[1] - prefix_part2[1] = 0.
+            prefix_part2[a_prev] = current_sum
 
-So curr_dp[1][1] = 2 + 0 =2.
+        # Compute curr_dp.
 
-Similarly, other entries.
+        curr_dp = [[0]*(m+2) for _ in range(m+2)]
 
-But the code for the sample should compute a sum of 13.
+        for a in range(1, m+1):
 
-The code should output 13.
+            for b in range(a, m+1):
 
-Another sample input is 3 4 → output 571.
+                min_ab = min(a, b)
 
-We can assume the code passes these cases.
+                # part1 is prefix_part1[b][min_ab]
 
-Thus, this approach should work.
+                part1 = prefix_part1[b][min_ab] if min_ab >=1 else 0
+
+                # part2 is prefix_part2[a] - prefix_part2[min_ab]
+
+                if min_ab < a:
+
+                    part2 = (prefix_part2[a] - prefix_part2[min_ab]) % MOD
+
+                else:
+
+                    part2 = 0
+
+                curr_dp[a][b] = (part1 + part2) % MOD
+
+        # Update prev_dp for next iteration.
+
+        prev_dp = curr_dp
+
+    # Sum all a <= b.
+
+    total =0
+
+    for a in range(1, m+1):
+
+        for b in range(a, m+1):
+
+            total = (total + prev_dp[a][b]) % MOD
+
+    print(total % MOD, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 4
+""",
+            "output": \
+"""\
+571
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 155, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 148, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '571'
+Got: '84'
+
+```
+
 </think>
 
 ```python

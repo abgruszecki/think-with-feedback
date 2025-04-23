@@ -619,151 +619,159 @@ Compute the sum.
 
 Now, code:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-x, y = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-if y %x !=0:
+    x, y = map(int, input_stream.readline().rstrip("\n").split())
 
-    print(0)
+    if y %x !=0:
 
-else:
-
-    s = y//x
-
-    if s ==0:
-
-        print(0)
+        print(0, file=output_stream)
 
     else:
 
-        # factorize s
+        s = y//x
 
-        factors = {}
+        if s ==0:
 
-        temp = s
+            print(0, file=output_stream)
 
-        i=2
+        else:
 
-        while i*i <= temp:
+            # factorize s
 
-            if temp%i ==0:
+            factors = {}
 
-                cnt =0
+            temp = s
 
-                while temp%i ==0:
+            i=2
 
-                    cnt +=1
+            while i*i <= temp:
 
-                    temp = temp//i
+                if temp%i ==0:
 
-                factors[i] = cnt
+                    cnt =0
 
-            i +=1
+                    while temp%i ==0:
 
-        if temp>1:
+                        cnt +=1
 
-            factors[temp] =1
+                        temp = temp//i
 
-        # Generate divisors and their mu values
+                    factors[i] = cnt
 
-        divisors = [ (1, 1) ]
+                i +=1
 
-        for p, e in factors.items():
+            if temp>1:
 
-            new_divisors = []
+                factors[temp] =1
 
-            for (d, mu) in divisors:
+            # Generate divisors and their mu values
 
-                for k in range(e +1):
+            divisors = [ (1, 1) ]
 
-                    if k ==0:
+            for p, e in factors.items():
 
-                        new_d = d * (p**k)
+                new_divisors = []
 
-                        new_mu = mu
+                for (d, mu) in divisors:
 
-                        new_divisors.append( (new_d, new_mu) )
+                    for k in range(e +1):
 
-                    else:
+                        if k ==0:
 
-                        if mu ==0:
+                            new_d = d * (p**k)
 
-                            current_mu =0
+                            new_mu = mu
+
+                            new_divisors.append( (new_d, new_mu) )
 
                         else:
 
-                            if k >=2:
+                            if mu ==0:
 
                                 current_mu =0
 
                             else:
 
-                                current_mu = mu * (-1)
+                                if k >=2:
 
-                        new_d = d * (p**k)
+                                    current_mu =0
 
-                        new_divisors.append( (new_d, current_mu) )
+                                else:
 
-            divisors = new_divisors
+                                    current_mu = mu * (-1)
 
-        # Compute the sum
+                            new_d = d * (p**k)
 
-        ans =0
+                            new_divisors.append( (new_d, current_mu) )
 
-        for (d, mu) in divisors:
+                divisors = new_divisors
 
-            if mu ==0:
+            # Compute the sum
 
-                continue
+            ans =0
 
-            t = s //d
+            for (d, mu) in divisors:
 
-            exponent = t-1
+                if mu ==0:
 
-            ans = (ans + mu * pow(2, exponent, MOD)) % MOD
+                    continue
 
-        print( ans % MOD )
+                t = s //d
 
-But wait, when generating exponents for p, in the code for new_d = d * (p**k), since k can be up to e. So for example, when p is 2, e is 3, and k can be 0,1,2,3.
+                exponent = t-1
 
-But the code correctly multiplies d by p^k.
+                ans = (ans + mu * pow(2, exponent, MOD)) % MOD
 
-But in the code above, for each prime p and exponent e, the code loops for k in 0 to e, inclusive.
+            print( ans % MOD , file=output_stream)
 
-So this should generate all possible exponents.
 
-Testing with sample 1:
 
-factors is {3:1}
+def test():
+    import io
 
-divisors = [ (1,1) ]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 8
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-processing p=3, e=1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-new_divisors is generated:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-for each (d, mu) in divisors (only (1,1)):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-   k from 0 to 1:
+    print('Tests passed 😎')
 
-   k=0: (1,1)
 
-   k=1:
+if __name__ == '__main__':
+    test()
 
-      new_d =1 *3^1=3, mu = 1 * (-1) → -1.
 
-So new_divisors is [ (1,1), (3,-1) ]
+```
 
-Then ans is computed.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For each (d, mu):
-
-d=1, mu=1: t=3 → exponent 2 → 4 → term 4.
-
-d=3, mu=-1: t=1 → exponent 0 →1 → term -1.
-
-Sum 3, correct.
+```
 
 So code should work.
 

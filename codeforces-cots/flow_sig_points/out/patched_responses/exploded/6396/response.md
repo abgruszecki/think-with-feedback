@@ -151,117 +151,82 @@ Alternatively, for small constraints, a 2D array is manageable. Let's proceed wi
 
 So code outline:
 
-s1 = input().strip()
-s2 = input().strip()
+Testing against sample input 1.
 
-m = len(s1)
-n = len(s2)
+```python
+def main(input_stream, output_stream):
+    s1 = input_stream.readline().rstrip("\n").strip()
+    s2 = input_stream.readline().rstrip("\n").strip()
 
-dp = [[0]*(n+1) for _ in range(m+1)]
+    m = len(s1)
+    n = len(s2)
 
-# Fill first row (insertions)
-for j in range(1, n+1):
-    dp[0][j] = dp[0][j-1] + (ord(s2[j-1]) - ord('a') + 1)
+    dp = [[0]*(n+1) for _ in range(m+1)]
 
-# Fill first column (deletions)
-for i in range(1, m+1):
-    dp[i][0] = dp[i-1][0] + (ord(s1[i-1]) - ord('a') + 1)
-
-for i in range(1, m+1):
+    # Fill first row (insertions)
     for j in range(1, n+1):
-        delete = dp[i-1][j] + (ord(s1[i-1]) - ord('a') +1)
-        insert = dp[i][j-1] + (ord(s2[j-1]) - ord('a') +1)
-        if s1[i-1] == s2[j-1]:
-            sub = dp[i-1][j-1]
-        else:
-            sub = dp[i-1][j-1] + abs(ord(s1[i-1]) - ord(s2[j-1]))
-        dp[i][j] = min(delete, insert, sub)
+        dp[0][j] = dp[0][j-1] + (ord(s2[j-1]) - ord('a') + 1)
 
-print(dp[m][n])
+    # Fill first column (deletions)
+    for i in range(1, m+1):
+        dp[i][0] = dp[i-1][0] + (ord(s1[i-1]) - ord('a') + 1)
 
-Wait, but substitution cost is the difference between the two letters. For example, 'a' and 'b' have indices 0 and 1, difference is 1. So correct.
+    for i in range(1, m+1):
+        for j in range(1, n+1):
+            delete = dp[i-1][j] + (ord(s1[i-1]) - ord('a') +1)
+            insert = dp[i][j-1] + (ord(s2[j-1]) - ord('a') +1)
+            if s1[i-1] == s2[j-1]:
+                sub = dp[i-1][j-1]
+            else:
+                sub = dp[i-1][j-1] + abs(ord(s1[i-1]) - ord(s2[j-1]))
+            dp[i][j] = min(delete, insert, sub)
 
-Testing sample input 1:
+    print(dp[m][n], file=output_stream)
 
-s1 = 'arc', s2 = 'bug'
 
-First row:
 
-dp[0][0] =0.
+def test():
+    import io
 
-j=1: insert 'b' (2) → 2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+dome
+drone
+""",
+            "output": \
+"""\
+19
+""",
+        }, 
+    ]
 
-j=2: insert 'u' (21) → 23.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-j=3: insert 'g' (7) → 30.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-First column:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=1: delete 'a' → 1.
+    print('Tests passed 😎')
 
-i=2: delete 'r' (18) → 19.
 
-i=3: delete 'c' (3) → 22.
+if __name__ == '__main__':
+    test()
 
-Then for i=1, j=1:
 
-delete: dp[0][1] (2) + 1 (cost of 'a') → 3.
+```
 
-insert: dp[1][0] (1) + 2 (cost of 'b') → 3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-sub: since 'a' != 'b', cost is 1. dp[0][0] (0) +1 → 1. So min is 1.
-
-dp[1][1] =1.
-
-i=1, j=2:
-
-s1[0] is 'a', s2[1] is 'u'.
-
-Options:
-
-delete: dp[0][2] (23) +1 →24.
-
-insert: dp[1][1] (1) + 21 (cost of 'u') → 22.
-
-sub: 'a' vs 'u': ord('a') is 97, 'u' is 117 → 20. dp[0][1] (2) +20 →22. So min of 24,22,22 → 22.
-
-dp[1][2] =22.
-
-i=1, j=3:
-
-s1[0] (a) vs s2[2] (g).
-
-delete: dp[0][3] (30) +1 →31.
-
-insert: dp[1][2] (22) +7 →29.
-
-sub: a and g (diff 6, 6 added to dp[0][2] (23) →23+6=29. So min is 29.
-
-So dp[1][3] =29.
-
-Proceeding to i=2 (second character of s1, which is 'r'), j=1:
-
-s1[1] is 'r', s2[0] is 'b'.
-
-Options:
-
-delete cost: cost of 'r' is 18. So dp[1][1] (1) +18 =19.
-
-insert cost: insert 'b' (cost 2) added to dp[2][0] (19) →19+2=21.
-
-sub: 'r' vs 'b' (ord('r') is 114, 'b' 98 → 16). So dp[1][0] (1) +16 →17. So min is 17.
-
-dp[2][1] =17.
-
-And so on. Eventually, at dp[3][3], the value is 8.
-
-Hmm. Let's see. How does the code get there.
-
-Another way: let's think of the substitution steps.
-
-For example, after 'a' is replaced by 'b', 'r' by 'u', 'c' by 'g'— three substitutions, which sum to 1+3+4=8.
-
-So the code's DP should find that.
+```
 
 Another test case: the second sample input.
 

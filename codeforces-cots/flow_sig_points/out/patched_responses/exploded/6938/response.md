@@ -161,41 +161,76 @@ Yes.
 
 So code:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-max_val = max(a)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-min_val = min(a)
+    max_val = max(a)
 
-max_pos = a.index(max_val)
+    min_val = min(a)
 
-min_pos = len(a) -1 - a[::-1].index(min_val)
+    max_pos = a.index(max_val)
 
-if max_pos < min_pos:
+    min_pos = len(a) -1 - a[::-1].index(min_val)
 
-    res = max_pos + (n-1 - min_pos)
+    if max_pos < min_pos:
 
-else:
+        res = max_pos + (n-1 - min_pos)
 
-    res = max_pos + (n-1 - min_pos) -1
+    else:
 
-print(res)
+        res = max_pos + (n-1 - min_pos) -1
 
-Testing the first sample:
+    print(res, file=output_stream)
 
-Sample Input 1:
 
-4
 
-33 44 11 22
+def test():
+    import io
 
-max_val is 44, index 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+10 10 58 31 63 40 76
+""",
+            "output": \
+"""\
+10
+""",
+        }, 
+    ]
 
-min_val is 11. reversed list is [22,11,44,33]. index(11) is 1 → len(a)-1 -1 =4-1-1=2? Wait len(a) is 4, so 4-1=3. 3 -1 (since a[::-1].index(11) is 1) →3-1=2. So min_pos is 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-max_pos (1) < min_pos (2). So res =1 + (3-2) =2. Correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

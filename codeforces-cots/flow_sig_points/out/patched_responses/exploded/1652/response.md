@@ -263,139 +263,330 @@ But in Python, even for 5000 elements, precomputing is manageable.
 
 Now, the code:
 
-MOD = 998244353
+Testing against sample input 1.
 
-max_n = 5000
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-fact = [1] * (max_n + 1)
+    max_n = 5000
 
-for i in range(1, max_n + 1):
+    fact = [1] * (max_n + 1)
 
-    fact[i] = fact[i-1] * i % MOD
+    for i in range(1, max_n + 1):
 
-inv_fact = [1] * (max_n + 1)
+        fact[i] = fact[i-1] * i % MOD
 
-inv_fact[max_n] = pow(fact[max_n], MOD-2, MOD)
+    inv_fact = [1] * (max_n + 1)
 
-for i in range(max_n-1, -1, -1):
+    inv_fact[max_n] = pow(fact[max_n], MOD-2, MOD)
 
-    inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
+    for i in range(max_n-1, -1, -1):
 
-def comb(n, k):
+        inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
 
-    if k <0 or k >n:
+    def comb(n, k):
 
-        return 0
+        if k <0 or k >n:
 
-    return fact[n] * inv_fact[k] % MOD * inv_fact[n - k] % MOD
+            return 0
 
-def compute_sum(n, m):
+        return fact[n] * inv_fact[k] % MOD * inv_fact[n - k] % MOD
 
-    min_k = min(n, m)
+    def compute_sum(n, m):
 
-    total = 0
+        min_k = min(n, m)
 
-    for k in range(0, min_k +1):
+        total = 0
 
-        c_nk = comb(n, k)
+        for k in range(0, min_k +1):
 
-        c_mk = comb(m, k)
+            c_nk = comb(n, k)
 
-        term = c_nk * c_mk % MOD
+            c_mk = comb(m, k)
 
-        term = term * fact[k] % MOD
+            term = c_nk * c_mk % MOD
 
-        total = (total + term) % MOD
+            term = term * fact[k] % MOD
 
-    return total
+            total = (total + term) % MOD
 
-a, b, c = map(int, input().split())
+        return total
 
-s_ab = compute_sum(a, b)
+    a, b, c = map(int, input_stream.readline().rstrip("\n").split())
 
-s_ac = compute_sum(a, c)
+    s_ab = compute_sum(a, b)
 
-s_bc = compute_sum(b, c)
+    s_ac = compute_sum(a, c)
 
-result = s_ab * s_ac % MOD
+    s_bc = compute_sum(b, c)
 
-result = result * s_bc % MOD
+    result = s_ab * s_ac % MOD
 
-print(result)
+    result = result * s_bc % MOD
 
-But wait, what if a, b, or c is zero? But according to the problem statement, the constraints are 1 ≤ a, b, c ≤ 5000. So no, the inputs are at least 1.
+    print(result, file=output_stream)
 
-Testing the code against the samples:
 
-Sample 1:
 
-Input: 1 1 1.
+def test():
+    import io
 
-compute_sum(1,1) is 2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 2 2
+""",
+            "output": \
+"""\
+63
+""",
+        }, 
+    ]
 
-Similarly for the other pairs.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Product 2*2*2=8.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sample 2: 1 2 2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-s_ab is compute_sum(1,2) = sum k=0 to 1.
+    print('Tests passed 😎')
 
-k=0:1.
 
-k=1: comb(1,1)* comb(2,1) * 1! → 1*2 *1=2. sum is 3.
+if __name__ == '__main__':
+    test()
 
-s_ac is same as s_ab (3). s_bc is compute_sum(2,2):
 
-k=0:1.
+```
 
-k=1: C(2,1)*C(2,1)*1! → 2*2*1=4. sum +=4.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-k=2: C(2,2)*C(2,2)*2! → 1*1*2=2. sum 1+4+2=7.
+```
 
-3 * 3 *7=63.
+Testing against sample input 2.
 
-Sample 3: 1 3 5.
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-compute_sum(1,3) is sum k=0 to 1.
+    max_n = 5000
 
-k=0:1.
+    fact = [1] * (max_n + 1)
 
-k=1: C(1,1)*C(3,1)*1! →1 *3 *1=3. Sum 4.
+    for i in range(1, max_n + 1):
 
-s_ac: compute_sum(1,5):
+        fact[i] = fact[i-1] * i % MOD
 
-k can be 0 or 1.
+    inv_fact = [1] * (max_n + 1)
 
-k=0:1.
+    inv_fact[max_n] = pow(fact[max_n], MOD-2, MOD)
 
-k=1: C(1,1)*C(5,1)*1! → 1*5 *1=5. sum 6.
+    for i in range(max_n-1, -1, -1):
 
-s_bc: compute_sum(3,5).
+        inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
 
-min is 3.
+    def comb(n, k):
 
-sum k=0 to 3.
+        if k <0 or k >n:
 
-k=0:1.
+            return 0
 
-k=1: C(3,1)*C(5,1) *1 →3*5 *1=15.
+        return fact[n] * inv_fact[k] % MOD * inv_fact[n - k] % MOD
 
-k=2: C(3,2)*C(5,2) * 2! →3 *10 *2=60.
+    def compute_sum(n, m):
 
-k=3: C(3,3)*C(5,3)*6 →1 *10 *6=60. Sum is 1+15=16, +60=76, +60=136.
+        min_k = min(n, m)
 
-So product is 4*6=24 *136= 3264. Which matches sample 3.
+        total = 0
 
-So the code works.
+        for k in range(0, min_k +1):
 
-Now, the code should handle up to 5000 for all a, b, c. Let's check the time.
+            c_nk = comb(n, k)
 
-Each compute_sum is O(k_max), which is up to 5000 steps. For three pairs, it's 3*5000 = 15,000 operations. Each operation involves several modular multiplications and lookups. In Python, this is manageable within 1 second.
+            c_mk = comb(m, k)
 
-The precomputation of fact and inv_fact is O(5000), which is negligible.
+            term = c_nk * c_mk % MOD
 
-Thus, this code should work for the given constraints.
+            term = term * fact[k] % MOD
+
+            total = (total + term) % MOD
+
+        return total
+
+    a, b, c = map(int, input_stream.readline().rstrip("\n").split())
+
+    s_ab = compute_sum(a, b)
+
+    s_ac = compute_sum(a, c)
+
+    s_bc = compute_sum(b, c)
+
+    result = s_ab * s_ac % MOD
+
+    result = result * s_bc % MOD
+
+    print(result, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 3 5
+""",
+            "output": \
+"""\
+3264
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
+
+    max_n = 5000
+
+    fact = [1] * (max_n + 1)
+
+    for i in range(1, max_n + 1):
+
+        fact[i] = fact[i-1] * i % MOD
+
+    inv_fact = [1] * (max_n + 1)
+
+    inv_fact[max_n] = pow(fact[max_n], MOD-2, MOD)
+
+    for i in range(max_n-1, -1, -1):
+
+        inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
+
+    def comb(n, k):
+
+        if k <0 or k >n:
+
+            return 0
+
+        return fact[n] * inv_fact[k] % MOD * inv_fact[n - k] % MOD
+
+    def compute_sum(n, m):
+
+        min_k = min(n, m)
+
+        total = 0
+
+        for k in range(0, min_k +1):
+
+            c_nk = comb(n, k)
+
+            c_mk = comb(m, k)
+
+            term = c_nk * c_mk % MOD
+
+            term = term * fact[k] % MOD
+
+            total = (total + term) % MOD
+
+        return total
+
+    a, b, c = map(int, input_stream.readline().rstrip("\n").split())
+
+    s_ab = compute_sum(a, b)
+
+    s_ac = compute_sum(a, c)
+
+    s_bc = compute_sum(b, c)
+
+    result = s_ab * s_ac % MOD
+
+    result = result * s_bc % MOD
+
+    print(result, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 2 9
+""",
+            "output": \
+"""\
+813023575
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

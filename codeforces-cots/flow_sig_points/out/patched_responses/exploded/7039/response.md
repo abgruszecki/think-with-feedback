@@ -356,45 +356,123 @@ print("NO")
 
 Yes. That's the code.
 
-Testing with the examples:
+Testing against sample input 1.
 
-First example: d1=0, d2=1.
+```python
+def main(input_stream, output_stream):
+    days = {'monday':0, 'tuesday':1, 'wednesday':2, 'thursday':3, 'friday':4, 'saturday':5, 'sunday':6}
+    d1 = days[input_stream.readline().rstrip("\n").strip()]
+    d2 = days[input_stream.readline().rstrip("\n").strip()]
+    shifts = [31%7,28%7,31%7,30%7,31%7,30%7,31%7,31%7,30%7,31%7,30%7]
+    for s in shifts:
+        if (d1 + s) %7 == d2:
+            print("YES", file=output_stream)
+            return
+    print("NO", file=output_stream)
 
-Check all shifts:
 
-shifts are [3,0,3,2,3,2,3,3,2,3,2]
 
-Check 3 → 0+3=3 mod7=3 !=1.
+def test():
+    import io
 
-0 → 0+0=0 → no.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+sunday
+sunday
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
 
-3 → 3 → no.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-2 → 2 → no.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-3 →3 → no.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-2 →2 → no.
+    print('Tests passed 😎')
 
-3 →3 → no.
 
-3 →3 → no.
+if __name__ == '__main__':
+    test()
 
-2 →2 → no.
 
-3 →3 → no.
+```
 
-2 →2 → no.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-None, so output NO.
+```
 
-Second example: 6 and6.
+Testing against sample input 2.
 
-Check each shift:
+```python
+def main(input_stream, output_stream):
+    days = {'monday':0, 'tuesday':1, 'wednesday':2, 'thursday':3, 'friday':4, 'saturday':5, 'sunday':6}
+    d1 = days[input_stream.readline().rstrip("\n").strip()]
+    d2 = days[input_stream.readline().rstrip("\n").strip()]
+    shifts = [31%7,28%7,31%7,30%7,31%7,30%7,31%7,31%7,30%7,31%7,30%7]
+    for s in shifts:
+        if (d1 + s) %7 == d2:
+            print("YES", file=output_stream)
+            return
+    print("NO", file=output_stream)
 
-3: 6+3=9 mod7=2 → no.
 
-0: 6+0=6 → yes. So output YES.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+saturday
+tuesday
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:5 and1. 
 

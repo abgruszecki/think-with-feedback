@@ -652,37 +652,109 @@ print(answer)
 
 Yes.
 
-Let's test this against the first example:
+Testing against sample input 1.
 
-Sample input:
+```python
+import sys
 
-3 2
 
-1 2 3
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    perms = []
+    for _ in range(m):
+        perm = list(map(int, input_stream.readline().split()))
+        perms.append(perm)
+    
+    # Precompute positions for each permutation
+    pos = [dict() for _ in range(m)]
+    for j in range(m):
+        for idx, x in enumerate(perms[j]):
+            pos[j][x] = idx
+    
+    if m == 1:
+        # All possible single elements and their intervals
+        print(n * (n + 1) // 2, file=output_stream)
+        return
+    
+    first_perm = perms[0]
+    valid_pairs = []
+    
+    for i in range(n - 1):
+        x = first_perm[i]
+        y = first_perm[i + 1]
+        valid = True
+        for j in range(1, m):
+            px = pos[j].get(x, -1)
+            py = pos[j].get(y, -1)
+            if py != px + 1:
+                valid = False
+                break
+        valid_pairs.append(1 if valid else 0)
+    
+    sum_runs = 0
+    current_run = 0
+    for bit in valid_pairs:
+        if bit:
+            current_run += 1
+        else:
+            if current_run > 0:
+                sum_runs += current_run * (current_run + 1) // 2
+                current_run = 0
+    if current_run > 0:
+        sum_runs += current_run * (current_run + 1) // 2
+    
+    answer = n + sum_runs
+    print(answer, file=output_stream)
 
-2 3 1
 
-valid_pairs for first permutation:
 
-Pair 1-2: check in permutation 2 (indexes 0-based):
+def test():
+    import io
 
-pos_j[1] in permutation 2 is 2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 6
+1 2 3 4 5
+2 3 1 4 5
+3 4 5 1 2
+3 5 4 2 1
+2 3 5 4 1
+1 2 3 4 5
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-pos_j[2] is 0. 0 +1 is 1 != 2. So pair is invalid. valid_pairs[0] =0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Pair 2-3: pos_j[2] is 0, pos_j[3] is 1. 0+1=1 ==1. So valid_pairs[1] =1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-valid_pairs is [0, 1].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-sum_runs is processed:
+    print('Tests passed 😎')
 
-The first element is 0: current_run_length remains 0.
 
-Second element is 1: current_run_length becomes 1. Loop ends, and after processing, current_run_length is 1.
+if __name__ == '__main__':
+    test()
 
-sum_runs += 1*2//2=1.
 
-answer =3 +1=4. Correct.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case:
 

@@ -817,49 +817,129 @@ For each k from 1 to n:
 
 This should work.
 
-Let's test the first sample input:
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+def main(input_stream, output_stream):
+    mod = 998244353
 
-2
+    n = int(input_stream.readline().rstrip("\n"))
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
+    c.sort()
 
-1 2
+    pre_sum = [0] * n
+    pre_ksum = [0] * n
 
-After sorting: [1,2]
+    pre_sum[0] = c[0] % mod
+    pre_ksum[0] = (0 * c[0]) % mod
 
-pre_sum: [1, (1+2)=3]
+    for i in range(1, n):
+        pre_sum[i] = (pre_sum[i-1] + c[i]) % mod
+        pre_ksum[i] = (pre_ksum[i-1] + i * c[i]) % mod
 
-pre_ksum: [0*1=0, 0+1*2=2]
+    inv_n = pow(n, mod-2, mod)
+    result = []
 
-For k=1:
+    for k in range(1, n+1):
+        m = n - k
+        if m == 0:
+            result.append(0)
+            continue
+        if k > m:
+            total = pre_sum[m-1] % mod
+        else:
+            s = m // k
+            r = m % k
+            total = 0
+            current_start = 0
+            for i in range(r):
+                group_size = s + 1
+                a = current_start
+                b = a + group_size - 1
+                if a > 0:
+                    sum_c = (pre_sum[b] - pre_sum[a-1]) % mod
+                    sum_kc = (pre_ksum[b] - pre_ksum[a-1]) % mod
+                else:
+                    sum_c = pre_sum[b] % mod
+                    sum_kc = pre_ksum[b] % mod
+                term1 = ((a + group_size) * sum_c) % mod
+                term2 = sum_kc % mod
+                contribution = (term1 - term2) % mod
+                total = (total + contribution) % mod
+                current_start += group_size
+            for i in range(r, k):
+                group_size = s
+                a = current_start
+                b = a + group_size - 1
+                if a > 0:
+                    sum_c = (pre_sum[b] - pre_sum[a-1]) % mod
+                    sum_kc = (pre_ksum[b] - pre_ksum[a-1]) % mod
+                else:
+                    sum_c = pre_sum[b] % mod
+                    sum_kc = pre_ksum[b] % mod
+                term1 = ((a + group_size) * sum_c) % mod
+                term2 = sum_kc % mod
+                contribution = (term1 - term2) % mod
+                total = (total + contribution) % mod
+                current_start += group_size
+        res = (total * inv_n) % mod
+        result.append(res)
 
-m =2-1=1.
+    print(' '.join(map(str, result)), file=output_stream)
 
-k=1 <=m=1.
 
-s=1//1=1, r=0.
 
-We loop for i in 0 to k-1=0.
+def test():
+    import io
 
-group_size =1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+10 4 3 6 5 10 7 5
+""",
+            "output": \
+"""\
+499122193 249561095 249561092 873463811 499122178 124780545 623902721 0
+""",
+        }, 
+    ]
 
-a=0, b=0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-term1 = (0+1) * pre_sum[0] =1 *1=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-term2= pre_ksum[0] =0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-contribution =1-0=1.
+    print('Tests passed 😎')
 
-sum_val=1.
 
-sum_val /n =1 /2 mod 998244353 = 499122177.
+if __name__ == '__main__':
+    test()
 
-Which matches the sample output.
 
-For k=2:
+```
 
-m=0. Output 0.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 102, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 95, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '499122193 249561095 249561092 873463811 499122178 124780545 623902721 0'
+Got: '499122193 7 124780548 873463811 499122178 124780545 623902721 0'
+
+```
 
 Sample Input 2:
 

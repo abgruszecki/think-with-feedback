@@ -127,23 +127,66 @@ Compute the sum.
 
 So the code could look like:
 
-n = int(input())
-a = list(map(int, input().split()))
-from collections import defaultdict
-counts = defaultdict(int)
-for num in a:
-    c = bin(num).count('1')
-    counts[c] += 1
-total = 0
-for v in counts.values():
-    total += v * (v-1) // 2
-print(total)
+Testing against sample input 1.
 
-This should handle all test cases.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    from collections import defaultdict
+    counts = defaultdict(int)
+    for num in a:
+        c = bin(num).count('1')
+        counts[c] += 1
+    total = 0
+    for v in counts.values():
+        total += v * (v-1) // 2
+    print(total, file=output_stream)
 
-Testing the first sample:
 
-n=3, a=[1,2,4]. All have 1 in their binary. counts[1]=3. 3*2//2=3. Correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+5 3 1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample: a is 5,3,1. counts are 2 (twice, 5 and 3) and 1 (once). So 2*1//2=1. Correct.
 

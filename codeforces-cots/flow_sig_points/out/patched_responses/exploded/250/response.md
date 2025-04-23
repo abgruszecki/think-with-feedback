@@ -1081,33 +1081,91 @@ This approach works for both samples.
 
 Now, the code can be written accordingly.
 
-Now, let's test this logic.
+Testing against sample input 1.
 
-First sample:
+```python
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    idx = 0
+    n1, n2, n3 = map(int, input[idx:idx+3])
+    idx +=3
+    
+    # Read the three bags
+    bag1 = list(map(int, input[idx:idx+n1]))
+    idx +=n1
+    bag2 = list(map(int, input[idx:idx+n2]))
+    idx +=n2
+    bag3 = list(map(int, input[idx:idx+n3]))
+    idx +=n3
+    
+    sum1 = sum(bag1)
+    sum2 = sum(bag2)
+    sum3 = sum(bag3)
+    total = sum1 + sum2 + sum3
+    
+    max1 = max(bag1) if bag1 else 0
+    max2 = max(bag2) if bag2 else 0
+    max3 = max(bag3) if bag3 else 0
+    
+    # Calculate all possible values
+    val1 = total - 2 * sum1
+    val2 = total - 2 * sum2
+    val3 = total - 2 * sum3
+    
+    val4 = total - 2 * (sum1 + sum2 - max1 - max2)
+    val5 = total - 2 * (sum1 + sum3 - max1 - max3)
+    val6 = total - 2 * (sum2 + sum3 - max2 - max3)
+    
+    max_val = max(val1, val2, val3, val4, val5, val6)
+    print(max_val, file=output_stream)
 
-sum_total =26.
 
-sum1=3, sum2=18, sum3=5.
 
-max1=2, max2=6, max3=5.
+def test():
+    import io
 
-Single bag options:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2 2
+7 5 4
+2 9
+7 1
+""",
+            "output": \
+"""\
+29
+""",
+        }, 
+    ]
 
-26-2*3=20.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-26-2*18= -10.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-26-2*5=16.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Pair options:
+    print('Tests passed 😎')
 
-sum1+sum2=21. 21-2-6=13. 26-2*13=0.
 
-sum1+sum3=8. 8-2-5=1. 26-2*1=24.
+if __name__ == '__main__':
+    test()
 
-sum2+sum3=23. 23-6-5=12. 26-2*12=2.
 
-The maximum of all options is 20, which is correct.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

@@ -84,31 +84,62 @@ Then compute the sum.
 
 In Python, the code would be:
 
-n = int(input())
-a = list(map(int, input().split()))
-a.sort()
-total = 0
-for i in range(n):
-    total += abs(a[i] - (i+1))
-print(total)
+Testing against sample input 1.
 
-Yes. That's straightforward.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a.sort()
+    total = 0
+    for i in range(n):
+        total += abs(a[i] - (i+1))
+    print(total, file=output_stream)
 
-But wait, for very large n, using a loop in Python may be slightly slower than using a list comprehension, but for 3e5 elements, it's manageable.
 
-Alternatively, using a generator expression with sum:
 
-sum(abs(a[i] - (i+1)) for i in range(n)) would be even better, but same time.
+def test():
+    import io
 
-But in Python, list comprehensions and generator expressions are efficient. So the code should be fast enough.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+-1 -1 2
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-Testing it against the samples:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-First sample:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-n=2, a = [3,0] → sorted is [0,3]. sum is |0-1| + |3-2| = 1+1=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Yes.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample: sorted is [-1,-1,2]. sum | -1-1 | =2, |-1-2|=3, |2-3|=1. Sum 6.
 

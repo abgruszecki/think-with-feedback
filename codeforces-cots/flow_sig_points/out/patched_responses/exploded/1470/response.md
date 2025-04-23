@@ -135,35 +135,88 @@ So this approach works.
 
 So the code is:
 
+Testing against sample inputs 1, 2, 3.
+
+```python
 import math
 
-n, k = map(int, input().split())
 
-s = n + k
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-d = 9 + 8 * s
+    s = n + k
 
-sqrt_d = int(math.isqrt(d))
+    d = 9 + 8 * s
 
-m = (sqrt_d - 3) // 2
+    sqrt_d = int(math.isqrt(d))
 
-print(n - m)
+    m = (sqrt_d - 3) // 2
 
-Wait, but why can we use integer division here? Because sqrt_d is (sqrt(9+8s)), which is an integer. Let's see.
+    print(n - m, file=output_stream)
 
-For example, s=20: 9+8*20=169. sqrt_d=13. (13-3) is 10, divided by 2 gives 5. Correct.
 
-Yes. So the code works.
 
-But wait, let's test s=6. Suppose s=6, then D=9+48=57, which is not a perfect square. But according to the problem statement, the input is such that the answer exists, so D is a perfect square. So we don't have to handle that case.
+def test():
+    import io
 
-So this code should work. Let's check all the samples.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+9 11
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+        {
+            "input": \
+"""\
+5 0
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+        {
+            "input": \
+"""\
+3 2
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-Sample 1: n=1, k=1. s=2. D=25. sqrt_d=5. m=(5-3)/2=1. x=1-1=0. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample 2: n=9, k=11. s=20. m=5. x=9-5=4. Correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sample 3: n=5, k=0. s=5. m=2. x=5-2=3. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 4: n=3, k=2. s=5. m=2. x=1. Correct.
 

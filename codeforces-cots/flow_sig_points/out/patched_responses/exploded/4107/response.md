@@ -448,229 +448,255 @@ Finally, answer = total_triplets - sum_colin //3.
 
 So, the code would look like:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n = int(input())
 
-points = [tuple(map(int, input().split())) for _ in range(n)]
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-total = 0
+    points = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n)]
 
-if n >=3:
+    total = 0
 
-    total = n*(n-1)*(n-2) //6
+    if n >=3:
 
-sum_colin =0
+        total = n*(n-1)*(n-2) //6
 
-for i in range(n):
+    sum_colin =0
 
-    xi, yi = points[i]
+    for i in range(n):
 
-    slopes = {}
+        xi, yi = points[i]
 
-    for j in range(n):
+        slopes = {}
 
-        if i ==j:
+        for j in range(n):
 
-            continue
+            if i ==j:
 
-        xj, yj = points[j]
+                continue
 
-        dx = xj - xi
+            xj, yj = points[j]
 
-        dy = yj - yi
+            dx = xj - xi
 
-        g = math.gcd(dx, dy)
+            dy = yj - yi
 
-        a = dx // g
+            g = math.gcd(dx, dy)
 
-        b = dy // g
+            a = dx // g
 
-        if a ==0:
+            b = dy // g
 
-            # vertical line
+            if a ==0:
 
-            slope = (0,1)
+                # vertical line
 
-        else:
+                slope = (0,1)
 
-            if a <0:
+            else:
 
-                a = -a
+                if a <0:
 
-                b = -b
+                    a = -a
 
-            slope = (a, b)
+                    b = -b
 
-        if slope in slopes:
+                slope = (a, b)
 
-            slopes[slope] +=1
+            if slope in slopes:
 
-        else:
+                slopes[slope] +=1
 
-            slopes[slope] =1
+            else:
 
-    # Now, for each slope in slopes:
+                slopes[slope] =1
 
-    for cnt in slopes.values():
+        # Now, for each slope in slopes:
 
-        m = cnt +1
+        for cnt in slopes.values():
 
-        sum_colin += (m-1)*(m-2)//2
+            m = cnt +1
 
-ans = total - sum_colin//3
+            sum_colin += (m-1)*(m-2)//2
 
-print(ans)
+    ans = total - sum_colin//3
 
-But wait, let's test this with the first sample input.
+    print(ans, file=output_stream)
 
-Sample input 1:
 
-4
 
-0 0
+def test():
+    import io
 
-1 1
-
-2 0
-
-2 2
-
-Total triplets is C(4,3) =4.
-
-sum_colin should be 3 * (number of colinear triplets). Let's see.
-
-For each point i:
-
-i=0 (0,0):
-
-   j=1: dx=1, dy=1. g=1. a=1, b=1. a is positive. slope (1,1).
-
-   j=2: dx=2, dy=0. g=2. a=1, b=0. a is positive. slope (1,0).
-
-   j=3: dx=2, dy=2. g=2. a=1, b=1. slope (1,1).
-
-   So slopes for i=0: (1,1) appears twice (j=1 and j=3), (1,0) once (j=2).
-
-   For (1,1), cnt=2. m=3. (3-1)*(3-2)/2 = 2*1/2=1. So sum_colin +=1.
-
-   For (1,0), cnt=1. m=2. (2-1)*(2-2)/2 = 0. So sum_colin +=0.
-
-   So sum_colin for i=0 is 1.
-
-i=1 (1,1):
-
-   j=0: dx=-1, dy=-1. g=2 (since dx is -1, dy -1: gcd(1,1)=1. a =-1//1= -1, dy is -1//1= -1. Since a is negative, multiply by -1: a=1, b=1. slope (1,1).
-
-   j=2: dx=1, dy=-1. g=1. a=1, dy=-1. a is positive, so slope is (1,-1).
-
-   j=3: dx=1, dy=1. g=1. a=1, b=1. slope (1,1).
-
-   So slopes for i=1:
-
-       (1,1) has cnt=2 (j=0 and j=3), (1,-1) cnt=1 (j=2).
-
-       For (1,1): m=3. (3-1)*(3-2)/2= 1 → sum_colin +=1.
-
-       For (1,-1): m=2. 0 → sum_colin +=0.
-
-       Total sum_colin +=1.
-
-   So sum_colin now is 2.
-
-i=2 (2,0):
-
-   j=0: dx=-2, dy=0. g=2. a=-1, dy=0. a is negative → multiply by -1: a=1, dy=0. slope (1,0).
-
-   j=1: dx=-1, dy=1. g=1. a=-1, dy=1. a is negative → a=1, dy=-1. slope (1,-1).
-
-   j=3: dx=0, dy=2. g=2. a=0 → slope (0,1).
-
-   So slopes:
-
-       (1,0): cnt=1 (j=0). m=2 → (1*0)/2=0. sum_colin +=0.
-
-       (1,-1): cnt=1 (j=1). m=2 → 0.
-
-       (0,1): cnt=1 (j=3). m=2 → 0.
-
-   Sum_colin remains 2.
-
-i=3 (2,2):
-
-   j=0: dx= -2, dy=-2. g=2 → dx/g =-1, dy/g =-1. a is -1 → multiply by -1: a=1, b=1. slope (1,1).
-
-   j=1: dx=0, dy=0. No, but j=1 is different. Wait, dx=2-1=1, dy=2-1=1. dx=1, dy=1. g=1. a=1, b=1. slope (1,1).
-
-   j=2: dx=0, dy=-2. dx=0 → slope (0,1).
-
-   So slopes:
-
-       (1,1) cnt=2 (j=0 and j=1). m=3 → (3-1)(3-2)/2 = 1 → sum_colin +=1.
-
-       (0,1) cnt=1 (j=2). m=2 → 0.
-
-   So sum_colin +=1. Now sum_colin is 3.
-
-Total sum_colin =1 (i=0) +1 (i=1) +0 (i=2) +1 (i=3) =3.
-
-sum_colin//3=1.
-
-Total triplets is4 → 4-1=3. Which matches the sample output.
-
-Yes, that works.
-
-Another sample:
-
-Sample input 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
-
 0 0
-
 1 1
-
 2 0
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-Total triplets is 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum_colin: let's see.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Each line:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For each i:
+    print('Tests passed 😎')
 
-i=0:
 
-   j=1: dx=1, dy=1. a=1/1=1, b=1/1=1. slope (1,1).
+if __name__ == '__main__':
+    test()
 
-   j=2: dx=2, dy=0. g=2. a=1, dy=0. slope (1,0).
 
-   slopes: (1,1):1 → m=2 → 0; (1,0):1 → m=2 → 0.
+```
 
-   sum_colin +=0+0=0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=1:
+```
 
-   j=0: dx=-1, dy=-1. a=1, b=1. slope (1,1).
+Testing against sample input 2.
 
-   j=2: dx=1, dy=-1. a=1, dy=-1. slope (1,-1).
+```python
+import math
 
-   sum_colin +=0 (m=2 for (1,1)) +0 (m=2 for (1,-1)).
 
-i=2:
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-   j=0: dx=-2, dy=0 → a=1, dy=0. slope (1,0).
+    points = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n)]
 
-   j=1: dx=-1, dy=1. a=1, dy=-1. slope (1,-1).
+    total = 0
 
-   sum_colin +=0 for each.
+    if n >=3:
 
-sum_colin =0.
+        total = n*(n-1)*(n-2) //6
 
-sum_colin//3=0. So answer is 1-0=1.
+    sum_colin =0
 
-Which matches the sample.
+    for i in range(n):
+
+        xi, yi = points[i]
+
+        slopes = {}
+
+        for j in range(n):
+
+            if i ==j:
+
+                continue
+
+            xj, yj = points[j]
+
+            dx = xj - xi
+
+            dy = yj - yi
+
+            g = math.gcd(dx, dy)
+
+            a = dx // g
+
+            b = dy // g
+
+            if a ==0:
+
+                # vertical line
+
+                slope = (0,1)
+
+            else:
+
+                if a <0:
+
+                    a = -a
+
+                    b = -b
+
+                slope = (a, b)
+
+            if slope in slopes:
+
+                slopes[slope] +=1
+
+            else:
+
+                slopes[slope] =1
+
+        # Now, for each slope in slopes:
+
+        for cnt in slopes.values():
+
+            m = cnt +1
+
+            sum_colin += (m-1)*(m-2)//2
+
+    ans = total - sum_colin//3
+
+    print(ans, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+1 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample: n=1. Output is 0.
 

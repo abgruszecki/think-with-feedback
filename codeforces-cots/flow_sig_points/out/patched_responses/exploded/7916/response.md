@@ -244,13 +244,79 @@ max_b = max_length(s, 'b', k)
 
 print(max(max_a, max_b))
 
-Testing this code on the examples.
+Testing against sample input 1.
 
-First example:
+```python
+def main(input_stream, output_stream):
+    def max_length(s, target, k):
+        left = 0
+        max_len = 0
+        count = 0  # Number of non-target characters in the current window
+        for right in range(len(s)):
+            if s[right] != target:
+                count += 1
+            # If the number of changes needed exceeds k, move left pointer
+            while count > k:
+                if s[left] != target:
+                    count -= 1
+                left += 1
+            current_len = right - left + 1
+            if current_len > max_len:
+                max_len = current_len
+        return max_len
 
-n=4, k=2, s=abba.
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    s = input_stream.readline().rstrip("\n").strip()
 
-max_length for 'a' gives 4. For 'b' also 4. Output 4.
+    max_a = max_length(s, 'a', k)
+    max_b = max_length(s, 'b', k)
+
+    print(max(max_a, max_b), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 1
+aabaabaa
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

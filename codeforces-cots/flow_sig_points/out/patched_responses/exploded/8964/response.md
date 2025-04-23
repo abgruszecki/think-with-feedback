@@ -233,127 +233,129 @@ Then, during BFS, start with node 1.
 
 So code:
 
-import sys
+Testing against sample input 1.
 
+```python
+import sys
 from collections import deque
 
-n = int(sys.stdin.readline())
 
-a = list(map(int, sys.stdin.readline().split()))
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
-adj = [[] for _ in range(n+1)]
+    a = list(map(int, input_stream.readline().split()))
 
-for _ in range(n-1):
+    adj = [[] for _ in range(n+1)]
 
-    u, v = map(int, sys.stdin.readline().split())
+    for _ in range(n-1):
 
-    adj[u].append(v)
+        u, v = map(int, input_stream.readline().split())
 
-    adj[v].append(u)
+        adj[u].append(v)
 
-xor_path = [0] * (n+1)
+        adj[v].append(u)
 
-visited = [False] * (n+1)
+    xor_path = [0] * (n+1)
 
-q = deque()
+    visited = [False] * (n+1)
 
-q.append(1)
+    q = deque()
 
-visited[1] = True
+    q.append(1)
 
-xor_path[1] = a[0]
+    visited[1] = True
 
-while q:
+    xor_path[1] = a[0]
 
-    u = q.popleft()
+    while q:
 
-    for v in adj[u]:
+        u = q.popleft()
 
-        if not visited[v]:
+        for v in adj[u]:
 
-            visited[v] = True
+            if not visited[v]:
 
-            xor_path[v] = xor_path[u] ^ a[v-1]
+                visited[v] = True
 
-            q.append(v)
+                xor_path[v] = xor_path[u] ^ a[v-1]
 
-sum_total = 0
+                q.append(v)
 
-for bit in range(20):
+    sum_total = 0
 
-    mask = 1 << bit
+    for bit in range(20):
 
-    cnt = 0
+        mask = 1 << bit
 
-    for x in xor_path[1:]:  # from node 1 to n
+        cnt = 0
 
-        if x & mask:
+        for x in xor_path[1:]:  # from node 1 to n
 
-            cnt +=1
+            if x & mask:
 
-    sum_total += cnt * (n - cnt) * mask
+                cnt +=1
 
-print(sum_total)
+        sum_total += cnt * (n - cnt) * mask
 
-Wait, but in the BFS, for node v, when we compute xor_path[v], it's xor_path[u] ^ a[v-1]. Because node v's a is a[v-1]. For example, node 1 is a[0], node 2 is a[1], etc. That's correct.
+    print(sum_total, file=output_stream)
 
-Testing the first sample input:
 
-Sample 1:
 
-3
+def test():
+    import io
 
-1 2 3
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 2 3 4 5
 1 2
-
 2 3
+3 4
+3 5
+""",
+            "output": \
+"""\
+52
+""",
+        }, 
+    ]
 
-So a is [1,2,3]. 
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-BFS starts at 1. xor_path[1] = 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Then, node 1's neighbors are 2. So visit 2. xor_path[2] = 1 ^ a[1] (a[1] is 2. 1 ^ 2 = 3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Then, node 2's neighbors are 1 and 3. 1 is visited. Visit 3. xor_path[3] = 3 ^ a[2] (3 ^3 = 0.
+    print('Tests passed 😎')
 
-So xor_path is [0,1,3,0] for indexes 0,1,2,3.
 
-Then, in the bit processing:
+if __name__ == '__main__':
+    test()
 
-For each bit 0 to 19 (since 3 is 0b11, which is up to bit 1):
 
-bit 0:
+```
 
-mask 1.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 102, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 95, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '52'
+Got: '38'
 
-xor_path for nodes 1,2,3: 1 (0b1), 3 (0b11), 0 (0b00).
-
-count_1: for bit 0:
-
-1 has bit 0 set.
-
-3 has bit 0 set (binary 11 → least significant bit is 1).
-
-0 has bit 0 not set.
-
-So count_1 is 2.
-
-contribution: 2 * (3-2) * 1 = 2 * 1 *1 = 2.
-
-bit 1:
-
-mask 2.
-
-1 → 0, 3 → 1, 0 → 0.
-
-count_1 is 1 (only node 2's xor_path, 3, has bit 1 set).
-
-contribution: 1 * 2 * 2 → 2 * 2 =4.
-
-bit 2 and higher: since the numbers are up to 3 (binary 11), higher bits are 0. So their contributions are 0.
-
-Total sum is 2 +4 =6. Wait but the sample output is 10. Wait, this suggests a problem. Wait, what's wrong here?
+```
 
 Wait wait, the first sample's correct output is 10. But according to our code's calculation for the first sample, sum is 2+4=6 for bits 0 and 1. But according to the sample explanation:
 

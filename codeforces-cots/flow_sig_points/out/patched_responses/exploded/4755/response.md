@@ -1097,41 +1097,125 @@ But what if the minimal X is not present in sorted_a? For example, when the mini
 
 So, this code should work.
 
-But let's test the third sample input:
+Testing against sample input 3.
 
-Sample input 3:
+```python
+import sys
+from collections import deque
 
-2 1 5
 
-1 1
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
+    a = [0] + a  # 1-based indexing
+    edges = []
+    for _ in range(m):
+        u, v = map(int, input_stream.readline().split())
+        edges.append((u, v))
+    
+    sorted_a = sorted(a[1:])  # Exclude the dummy 0th element
+    
+    def check(X):
+        S = [u for u in range(1, n+1) if a[u] <= X]
+        if not S:
+            return False
+        # Build adjacency list for S
+        adj = [[] for _ in range(n+1)]
+        for u, v in edges:
+            if a[u] <= X and a[v] <= X:
+                adj[u].append(v)
+        # Compute in_degree
+        in_degree = [0] * (n+1)
+        for u in S:
+            for v in adj[u]:
+                in_degree[v] += 1
+        # Kahn's algorithm
+        q = deque()
+        for u in S:
+            if in_degree[u] == 0:
+                q.append(u)
+        processed = 0
+        top_order = []
+        while q:
+            u = q.popleft()
+            top_order.append(u)
+            processed += 1
+            for v in adj[u]:
+                in_degree[v] -= 1
+                if in_degree[v] == 0:
+                    q.append(v)
+        if processed != len(S):
+            return True
+        else:
+            # Compute longest path
+            dp = [0] * (n+1)
+            max_len = 0
+            for u in S:
+                dp[u] = 1
+            for u in top_order:
+                for v in adj[u]:
+                    if dp[v] < dp[u] + 1:
+                        dp[v] = dp[u] + 1
+            max_len = max(dp[u] for u in S)
+            return max_len >= k
+    
+    left = 0
+    right = len(sorted_a) - 1
+    answer = -1
+    while left <= right:
+        mid = (left + right) // 2
+        x_candidate = sorted_a[mid]
+        if check(x_candidate):
+            answer = x_candidate
+            right = mid - 1
+        else:
+            left = mid + 1
+    print(answer if answer != -1 else -1, file=output_stream)
 
-Edge 1 2.
 
-k=5.
 
-The code will sorted_a be [1,1].
+def test():
+    import io
 
-The binary search will check X=1 (the first mid is 0).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 0 1
+1000000000
+""",
+            "output": \
+"""\
+1000000000
+""",
+        }, 
+    ]
 
-Check function:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-S is [1,2].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-adj includes edge 1->2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-in_degree for 1 is 0, for 2 is 1.
+    print('Tests passed 😎')
 
-Kahn's algorithm processes 1 first. Then, 2.
 
-Processed=2 == len(S) (2), so no cycle.
+if __name__ == '__main__':
+    test()
 
-Longest path is 2 steps. Which is less than 5.
 
-So, returns False.
+```
 
-Thus, the code will not find any X and output -1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Thus, correct.
+```
 
 Another test case: sample input 4.
 

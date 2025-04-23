@@ -243,99 +243,218 @@ Now, code-wise:
 
 In Python:
 
-n = int(input())
+Testing against sample input 1.
 
-s = input().strip()
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-lights = []
+    s = input_stream.readline().rstrip("\n").strip()
 
-for _ in range(n):
+    lights = []
 
-    a, b = map(int, input().split())
+    for _ in range(n):
 
-    lights.append( (a, b) )
+        a, b = map(int, input_stream.readline().rstrip("\n").split())
 
-max_on = 0
+        lights.append( (a, b) )
 
-for t in range(0, 121):
+    max_on = 0
 
-    current = 0
+    for t in range(0, 121):
 
-    for i in range(n):
+        current = 0
 
-        a, b = lights[i]
+        for i in range(n):
 
-        initial = int(s[i])
+            a, b = lights[i]
 
-        if t < b:
+            initial = int(s[i])
 
-            state = initial
-
-        else:
-
-            k = (t - b) // a + 1
-
-            if k % 2 == 0:
+            if t < b:
 
                 state = initial
 
             else:
 
-                state = 1 - initial
+                k = (t - b) // a + 1
 
-        current += state
+                if k % 2 == 0:
 
-    if current > max_on:
+                    state = initial
 
-        max_on = current
+                else:
 
-print(max_on)
+                    state = 1 - initial
 
-Wait, but wait: (t - b) could be negative. But in code, if t < b, then we don't enter the else clause. So no problem.
+            current += state
 
-Testing this code against the first sample:
+        if current > max_on:
 
-Sample 1:
+            max_on = current
 
-n=3, s='101', lights are [ (3,3), (3,2), (3,1) ]
+    print(max_on, file=output_stream)
 
-t=0:
 
-for each light:
 
-light 0: a=3, b=3. t=0 <3: state =1.
+def test():
+    import io
 
-light1: a=3, b=2. t=0 <2: state=0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1111
+3 4
+5 2
+3 1
+3 2
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-light2: a=3, b=1. t=0 <1: state=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum 1+0+1=2. So max is 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-t=2:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-light0: t=2 <3: state 1.
+    print('Tests passed 😎')
 
-light1: t=2 >=2. (2-2)/3 +1 =0 +1=1. k=1 is odd. initial 0 → 1.
 
-light2: t=2 >=1. (2-1)/3 +1 =0 +1=1. initial 1 → 0. state 0.
+if __name__ == '__main__':
+    test()
 
-sum 1+1+0=2.
 
-t=3:
+```
 
-light0: t=3 >=3. (3-3)/3 +1 =0 +1=1 → k=1. initial 1 → 0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-light1: t=3 >=2. (3-2)/3 +1 =0 +1=1. initial 0 →1.
+```
 
-light2: (3-1)/3 +1 =2/3=0 +1=1 → 1. initial 1 →0.
+Testing against sample input 2.
 
-sum 0+1+0=1.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-So the code would capture the max as 2.
+    s = input_stream.readline().rstrip("\n").strip()
 
-Sample 2:
+    lights = []
 
-all 4 lights are on initially. So for t=0, sum is4. All other times may have the same sum. So code returns4.
+    for _ in range(n):
+
+        a, b = map(int, input_stream.readline().rstrip("\n").split())
+
+        lights.append( (a, b) )
+
+    max_on = 0
+
+    for t in range(0, 121):
+
+        current = 0
+
+        for i in range(n):
+
+            a, b = lights[i]
+
+            initial = int(s[i])
+
+            if t < b:
+
+                state = initial
+
+            else:
+
+                k = (t - b) // a + 1
+
+                if k % 2 == 0:
+
+                    state = initial
+
+                else:
+
+                    state = 1 - initial
+
+            current += state
+
+        if current > max_on:
+
+            max_on = current
+
+    print(max_on, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+011100
+5 3
+5 5
+2 4
+3 5
+4 2
+1 5
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 90, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 83, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '6'
+Got: '5'
+
+```
 
 Sample3: at some t, all 6 lights are on. So code would find that t.
 

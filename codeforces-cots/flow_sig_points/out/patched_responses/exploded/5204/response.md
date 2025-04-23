@@ -466,21 +466,98 @@ Yes.
 
 So this code should work.
 
-Testing the first example:
+Testing against sample input 1.
 
-n=3, w=2, b=1.
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 + 9
 
-Loop runs for b_days in 1.
+    n, w, b = map(int, input_stream.readline().rstrip("\n").split())
 
-rem=3-1=2. m_white=2 <=2. m_black=1 <=1.
+    max_needed = max(w - 1, b - 1)
+    max_fact = max(max_needed, n)
 
-c_white = comb(1, 1) =1. ways_white=1*2=2.
+    # Precompute factorial and inverse factorial
+    fact = [1] * (max_fact + 1)
+    for i in range(1, max_fact + 1):
+        fact[i] = fact[i-1] * i % MOD
 
-c_black= comb(0,0)=1. ways_black=1*1=1.
+    inv_fact = [1] * (max_fact + 1)
+    inv_fact[max_fact] = pow(fact[max_fact], MOD - 2, MOD)
+    for i in range(max_fact - 1, -1, -1):
+        inv_fact[i] = inv_fact[i + 1] * (i + 1) % MOD
 
-contribution= (2-1)*2*1= 1*2*1=2. ans=2.
+    def comb(a, k):
+        if a < 0 or k < 0 or a < k:
+            return 0
+        return fact[a] * inv_fact[k] % MOD * inv_fact[a - k] % MOD
 
-Output is 2.
+    ans = 0
+
+    # Iterate over possible black days (b_days)
+    for b_days in range(1, n - 1):
+        rem = n - b_days
+        m_white = rem
+        m_black = b_days
+        
+        if m_white > w or m_black > b:
+            continue
+        
+        c_white = comb(w - 1, m_white - 1)
+        c_black = comb(b - 1, m_black - 1)
+        
+        ways_white = c_white * fact[w] % MOD
+        ways_black = c_black * fact[b] % MOD
+        
+        contribution = (rem - 1) * ways_white % MOD
+        contribution = contribution * ways_black % MOD
+        ans = (ans + contribution) % MOD
+
+    print(ans % MOD, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 2 2
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example:
 

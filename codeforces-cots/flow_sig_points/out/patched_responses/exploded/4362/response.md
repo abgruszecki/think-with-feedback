@@ -60,17 +60,61 @@ But the problem is that the number must have 4 digits. But since y is at least 1
 
 So code:
 
-y = int(input())
-n = y + 1
-while True:
-    if len(set(str(n))) == 4:
-        print(n)
-        break
-    n += 1
+Testing against sample input 1.
 
-This is straightforward and should work.
+```python
+def main(input_stream, output_stream):
+    y = int(input_stream.readline().rstrip("\n"))
+    n = y + 1
+    while True:
+        if len(set(str(n))) == 4:
+            print(n, file=output_stream)
+            break
+        n += 1
 
-Testing this code with sample input 1987: it would start at 1988, check each until 2013. For 2013, set('2013') has 4 elements → output.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2013
+""",
+            "output": \
+"""\
+2014
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample input 2013: next is 2014. Check digits: 2,0,1,4 → unique. So output 2014.
 

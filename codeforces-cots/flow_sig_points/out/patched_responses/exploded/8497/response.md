@@ -375,49 +375,86 @@ Then loop l from 0 to n-1:
 
 So, this should work.
 
-Let's test the first sample input.
+Testing against sample input 1.
 
-Sample input 1:
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    max_sum = -float('inf')
 
-10 2
+    for l in range(n):
+        for r in range(l, n):
+            inside = a[l:r+1]
+            outside = a[:l] + a[r+1:]
+            sorted_inside = sorted(inside)
+            sorted_outside = sorted(outside, reverse=True)
+            
+            sum_initial = sum(inside)
+            sum_in = [0]
+            current = 0
+            for num in sorted_inside:
+                current += num
+                sum_in.append(current)
+            
+            sum_out = [0]
+            current = 0
+            for num in sorted_outside:
+                current += num
+                sum_out.append(current)
+            
+            max_swaps = min(k, len(sorted_inside), len(sorted_outside))
+            for s in range(max_swaps + 1):
+                current_sum = sum_initial - sum_in[s] + sum_out[s]
+                if current_sum > max_sum:
+                    max_sum = current_sum
 
-10 -1 2 2 2 2 2 2 -1 10
+    print(max_sum, file=output_stream)
 
-In code:
 
-n=10, k=2.
 
-a = [10, -1, 2, 2, 2, 2, 2, 2, -1, 10]
+def test():
+    import io
 
-For l=1 (second element, -1) and r=8 (element -1):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 10
+-1 -1 -1 -1 -1
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-inside is a[1..8] → elements are: -1, 2, 2, 2, 2, 2, 2, -1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum_initial is (-1) + 2*6 + (-1) = -2 +12=10.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sorted_inside → [-1, -1, 2, 2, 2, 2, 2, 2]
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-outside is a[0] (10) + a[9] (10) → [10,10].
+    print('Tests passed 😎')
 
-sorted_outside → [10,10].
 
-sum_in for s=0:0, s=1:-1, s=2:-2, etc.
+if __name__ == '__main__':
+    test()
 
-sum_out for s=0:0, s=1:10, s=2:20.
 
-max_swaps is min(2, 8, 2) → 2.
+```
 
-So s can be 0,1,2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For s=0: current=10.
-
-s=1: 10 - (-1) +10 = 10+1+10=21.
-
-s=2: 10 - (-1 + -1) +20 → 10+2+20=32.
-
-Which is the sample output. So the code captures that.
-
-Thus, the code works for this case.
+```
 
 Another sample input:
 

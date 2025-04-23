@@ -655,179 +655,285 @@ But for each a_i, in case1 and case2, we perform the checks.
 
 So:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n = int(input())
 
-if n <2:
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-    print("NO")
+    if n <2:
 
-    exit()
+        print("NO", file=output_stream)
 
-a = list(map(int, input().split()))
+        return
 
-total = sum(a)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-if total %2 !=0:
+    total = sum(a)
 
-    print("NO")
+    if total %2 !=0:
 
-    exit()
+        print("NO", file=output_stream)
 
-T = total //2
+        return
 
-prefix = []
+    T = total //2
 
-current =0
+    prefix = []
 
-sum_indices = dict()
+    current =0
 
-for i in range(n):
+    sum_indices = dict()
 
-    current += a[i]
+    for i in range(n):
 
-    prefix.append(current)
+        current += a[i]
 
-    if current not in sum_indices:
+        prefix.append(current)
 
-        sum_indices[current] = []
+        if current not in sum_indices:
 
-    sum_indices[current].append(i)
+            sum_indices[current] = []
 
-for key in sum_indices:
+        sum_indices[current].append(i)
 
-    sum_indices[key].sort()
+    for key in sum_indices:
 
-for i in range(n):
+        sum_indices[key].sort()
 
-    ai = a[i]
+    for i in range(n):
 
-    target1 = T + ai
+        ai = a[i]
 
-    if target1 in sum_indices:
+        target1 = T + ai
 
-        list_k = sum_indices[target1]
+        if target1 in sum_indices:
 
-        left = bisect.bisect_left(list_k, i)
+            list_k = sum_indices[target1]
 
-        if left < len(list_k) and list_k[left] <= n-2:
+            left = bisect.bisect_left(list_k, i)
 
-            print("YES")
+            if left < len(list_k) and list_k[left] <= n-2:
 
-            exit()
+                print("YES", file=output_stream)
 
-    target2 = T - ai
+                return
 
-    if target2 in sum_indices:
+        target2 = T - ai
 
-        list_k = sum_indices[target2]
+        if target2 in sum_indices:
 
-        max_val = min(n-2, i-1)
+            list_k = sum_indices[target2]
 
-        if max_val <0:
+            max_val = min(n-2, i-1)
 
-            continue
+            if max_val <0:
 
-        pos = bisect.bisect_right(list_k, max_val) -1
+                continue
 
-        if pos >=0 and list_k[pos] <= max_val:
+            pos = bisect.bisect_right(list_k, max_val) -1
 
-            print("YES")
+            if pos >=0 and list_k[pos] <= max_val:
 
-            exit()
+                print("YES", file=output_stream)
 
-print("NO")
+                return
 
-But wait, in the code, the sum_indices is built as follows:
+    print("NO", file=output_stream)
 
-for i in 0..n-1:
 
-   add to prefix sum and add to sum_indices the current sum, with index i.
 
-But the split in the original array after k elements (0-based) is allowed up to n-2. Because the original array is of size n. So, the split after k elements (0-based) must be <=n-2 (since the suffix must have at least one element). For example, split after index n-2 (0-based) gives prefix of n-1 elements, suffix of 1.
+def test():
+    import io
 
-But in the code, when building the prefix sums, the sum_indices includes all indices from 0 to n-1. But when checking case1, we have to ensure that k <=n-2.
-
-Thus, the code correctly checks if list_k[left] <=n-2.
-
-But in the code, for case1, the list_k contains indices where the sum is target1, which could be up to n-1 (the entire array sum). But we need to ensure that k is <=n-2.
-
-Thus, the code's check is correct.
-
-Testing the first sample input:
-
-Sample1:
-
-3
-
-1 3 2
-
-sum is 6, T=3.
-
-prefix sums are 1,4,6.
-
-sum_indices:
-
-1: [0]
-
-4: [1]
-
-6: [2]
-
-For a_i=1 (i=0):
-
-case1: target1 =3+1=4. sum_indices[4] is [1]. list_k = [1].
-
-left = bisect_left([1], 0) → 0. check if 1 <=n-2=3-2=1. 1 <=1 → yes. So return YES.
-
-Thus, code outputs YES.
-
-Sample2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
+1 2 3 4 5
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-1 2 3 4 5 → sum is 15, which is odd. So output is NO.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample3:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample inputs 1, 2.
+
+```python
+import bisect
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    if n <2:
+
+        print("NO", file=output_stream)
+
+        return
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    total = sum(a)
+
+    if total %2 !=0:
+
+        print("NO", file=output_stream)
+
+        return
+
+    T = total //2
+
+    prefix = []
+
+    current =0
+
+    sum_indices = dict()
+
+    for i in range(n):
+
+        current += a[i]
+
+        prefix.append(current)
+
+        if current not in sum_indices:
+
+            sum_indices[current] = []
+
+        sum_indices[current].append(i)
+
+    for key in sum_indices:
+
+        sum_indices[key].sort()
+
+    for i in range(n):
+
+        ai = a[i]
+
+        target1 = T + ai
+
+        if target1 in sum_indices:
+
+            list_k = sum_indices[target1]
+
+            left = bisect.bisect_left(list_k, i)
+
+            if left < len(list_k) and list_k[left] <= n-2:
+
+                print("YES", file=output_stream)
+
+                return
+
+        target2 = T - ai
+
+        if target2 in sum_indices:
+
+            list_k = sum_indices[target2]
+
+            max_val = min(n-2, i-1)
+
+            if max_val <0:
+
+                continue
+
+            pos = bisect.bisect_right(list_k, max_val) -1
+
+            if pos >=0 and list_k[pos] <= max_val:
+
+                print("YES", file=output_stream)
+
+                return
+
+    print("NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
+1 2 3 4 5
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+        {
+            "input": \
+"""\
+5
+2 2 3 4 5
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
 
-2 2 3 4 5 → sum is 16. T=8.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-prefix sums: 2,4,7,11,16.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sum_indices:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-2: [0]
+    print('Tests passed 😎')
 
-4: [1]
 
-7: [2]
+if __name__ == '__main__':
+    test()
 
-11: [3]
 
-16: [4]
+```
 
-For each a_i:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Take a_i=4 (index 3).
+```
 
-case1: T +4=12. sum_indices doesn't have 12.
-
-case2: T-4=4. sum_indices[4] is [1]. check if any k in [1] <3 and <=3 (since n-2=5-2=3). k=1 is <=3 and <3 → yes. So code returns YES.
-
-Thus, sample3 outputs YES.
-
-So the code works.
-
-Now, considering the data structures and efficiency.
-
-Building the prefix sum and sum_indices is O(n), and for each a_i, the binary search operations are O(log n). Since there are O(n) elements, the total time is O(n log n), which is acceptable for n=1e5.
-
-Memory usage is O(n) for the sum_indices.
-
-Thus, this is the optimal approach.
 </think>
 
 ```python

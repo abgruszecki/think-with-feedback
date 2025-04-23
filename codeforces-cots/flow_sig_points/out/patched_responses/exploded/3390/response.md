@@ -1142,67 +1142,83 @@ Else, compute the maximum kept over all possible a.
 
 The code is then:
 
-s = input().strip()
+Testing against sample inputs 1, 2.
 
-R = s.count('R')
-L = s.count('L')
-U = s.count('U')
-D = s.count('D')
-n = len(s)
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-if n % 2 != 0:
-    print(-1)
-else:
-    max_kept = 0
-    n_even = n // 2
-    for a in range(0, n_even + 1):
-        b = n_even - a
-        current = min(R, a) + min(L, a) + min(U, b) + min(D, b)
-        if current > max_kept:
-            max_kept = current
-    print(n - max_kept)
+    R = s.count('R')
+    L = s.count('L')
+    U = s.count('U')
+    D = s.count('D')
+    n = len(s)
 
-But wait, this may not work for cases where a is larger than possible R or L.
+    if n % 2 != 0:
+        print(-1, file=output_stream)
+    else:
+        max_kept = 0
+        n_even = n // 2
+        for a in range(0, n_even + 1):
+            b = n_even - a
+            current = min(R, a) + min(L, a) + min(U, b) + min(D, b)
+            if current > max_kept:
+                max_kept = current
+        print(n - max_kept, file=output_stream)
 
-For example, a=3 and R=2. min(R,3) is 2.
 
-But the code correctly handles it.
 
-But why would this approach work?
+def test():
+    import io
 
-Because for each possible a (number of R' and L' pairs), and b (number of U' and D' pairs), the code computes how many of the original characters can be kept. The a and b are allowed to be any non-negative integers that sum to n_even.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+UDUR
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+        {
+            "input": \
+"""\
+RUUR
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-This approach ensures that R' = L' =a and U' = D' =b, and thus, the total displacement is zero.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Thus, the code is correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Testing the examples:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-First example:
+    print('Tests passed 😎')
 
-Input: RRU → n=3, odd. Output -1.
 
-Second example: UDUR → n=4.
+if __name__ == '__main__':
+    test()
 
-R=1, L=0, U=2, D=1.
 
-n_even=2.
+```
 
-Iterate a from 0 to 2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-a=0 → b=2.
-
-current = min(1,0) + min(0,0) + min(2,2) + min(1,2) →0+0+2+1=3.
-
-a=1 → b=1.
-
-current=min(1,1)+0+min(2,1)+1 →1+0+1+1=3.
-
-a=2 → b=0.
-
-current=1+0+0+0=1.
-
-max_kept is 3. Changes 4-3=1.
+```
 
 Third example: RUUR → counts R=3, U=1, L=0, D=0. n=4.
 

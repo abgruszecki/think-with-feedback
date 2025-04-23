@@ -893,12 +893,16 @@ But handling large input efficiently.
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import heapq
 from collections import defaultdict
 
-def main():
+
+def main(input_stream, output_stream):
     import sys
-    input = sys.stdin.read().split()
+    input = input_stream.read().split()
     ptr = 0
     n = int(input[ptr])
     ptr +=1
@@ -916,7 +920,7 @@ def main():
     # Group s_list into (s, count)
     grouped = []
     if not s_list:
-        print(0)
+        print(0, file=output_stream)
         return
     current_s = s_list[0]
     count =1
@@ -958,30 +962,53 @@ def main():
         if not heap:
             break  # no more clusters left
 
-    print(total)
+    print(total, file=output_stream)
 
-if __name__ == "__main__":
-    main()
 
-This code should handle the samples correctly. 
 
-Testing sample 1:
+def test():
+    import io
 
-The grouped is [(4,2), (8,1)].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 6
+1 1 1 1 1 1 1 1 1 1
+0 0 0 0 0 0
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-Clusters are pushed into the heap as 8,4,3,2,2 (as negatives). 
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing s=4:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Pop 8. use 2. remaining=0. 
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-No remaining clusters are added back. 
+    print('Tests passed 😎')
 
-Processing s=8:
 
-heap has 4,3,2,2. Pop 4, which is <8. Push back and break. 
+if __name__ == '__main__':
+    test()
 
-Total is 2. 
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

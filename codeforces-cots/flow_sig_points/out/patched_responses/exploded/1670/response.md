@@ -151,59 +151,245 @@ Return the total.
 
 So in code:
 
-s = input().strip()
+Testing against sample input 1.
 
-if not s:
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-    print(0)
+    if not s:
 
-else:
+        print(0, file=output_stream)
 
-    total =0
+    else:
 
-    prev = s[0]
+        total =0
 
-    count =1
+        prev = s[0]
 
-    for c in s[1:]:
+        count =1
 
-        if c == prev:
+        for c in s[1:]:
 
-            count +=1
+            if c == prev:
 
-        else:
+                count +=1
 
-            total += (count +4) //5  # equivalent to ceil(count/5)
+            else:
 
-            prev = c
+                total += (count +4) //5  # equivalent to ceil(count/5)
 
-            count =1
+                prev = c
 
-    total += (count +4) //5
+                count =1
 
-    print(total)
+        total += (count +4) //5
 
-Wait, because (count +4) //5 is the same as ceil(count/5). For example:
+        print(total, file=output_stream)
 
-count =5 → (5+4)//5=9//5=1. 5/5=1 → correct.
 
-count=6 → (6+4)/5=10/5=2 → 6/5=1.2 → ceil is 2.
 
-Yes.
+def test():
+    import io
 
-So this code should handle all cases correctly.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+CCCCCCPPPPPP
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-Let's test it against the samples.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample 1: input CPCPCPC.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Each run is 1. So for each run, (1+4)//5 =5//5=1. 7 runs → sum 7. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sample 2: CCCCCCPPPPPP → first run 6 → (6+4)/5=10/5=2. Second run 6 → 2. Sum 4. Correct.
+    print('Tests passed 😎')
 
-Sample 3: CCCCCCPPCPPPPPPPPPP → runs of 6, 2, 1, 10.
 
-6 → 2, 2 →1, 1→1, 10→2. Sum 2+1+1+2=6. Correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    if not s:
+
+        print(0, file=output_stream)
+
+    else:
+
+        total =0
+
+        prev = s[0]
+
+        count =1
+
+        for c in s[1:]:
+
+            if c == prev:
+
+                count +=1
+
+            else:
+
+                total += (count +4) //5  # equivalent to ceil(count/5)
+
+                prev = c
+
+                count =1
+
+        total += (count +4) //5
+
+        print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+CCCCCCPPCPPPPPPPPPP
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    if not s:
+
+        print(0, file=output_stream)
+
+    else:
+
+        total =0
+
+        prev = s[0]
+
+        count =1
+
+        for c in s[1:]:
+
+            if c == prev:
+
+                count +=1
+
+            else:
+
+                total += (count +4) //5  # equivalent to ceil(count/5)
+
+                prev = c
+
+                count =1
+
+        total += (count +4) //5
+
+        print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+CCCCCCCCCC
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample4: 10 C → (10+4)/5=14//5=2. Correct.
 

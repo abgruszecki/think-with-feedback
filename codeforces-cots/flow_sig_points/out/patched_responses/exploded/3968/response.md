@@ -505,35 +505,84 @@ Yes.
 
 So the code's loops are correct.
 
-Testing this code with the first example:
+Testing against sample input 1.
 
-Input: '1234' → len=4.
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    n = len(s)
+    max_sum = -1
 
-n-1=3 → i ranges from 1 to 2 (since range(1,3) is 1,2).
+    if n < 3:
+        print(-1, file=output_stream)
+    else:
+        for i in range(1, n-1):
+            for j in range(i+1, n):
+                s1 = s[:i]
+                s2 = s[i:j]
+                s3 = s[j:]
+                if len(s1) > 7 or len(s2) > 7 or len(s3) > 7:
+                    continue
+                valid = True
+                for part in [s1, s2, s3]:
+                    if len(part) > 1 and part[0] == '0':
+                        valid = False
+                        break
+                if not valid:
+                    continue
+                n1 = int(s1)
+                n2 = int(s2)
+                n3 = int(s3)
+                if n1 > 1000000 or n2 > 1000000 or n3 > 1000000:
+                    continue
+                current_sum = n1 + n2 + n3
+                if current_sum > max_sum:
+                    max_sum = current_sum
+        print(max_sum if max_sum != -1 else -1, file=output_stream)
 
-For i=1:
 
-j ranges from 2 to 3 (since j is in range(2,4)).
 
-j=2: s1='1', s2='2', s3='34'.
+def test():
+    import io
 
-Check lengths: all <=7.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+9000
+""",
+            "output": \
+"""\
+90
+""",
+        }, 
+    ]
 
-Check leading zeros: all ok.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Values: 1,2,34 → sum 37.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-j=3: s1=1, s2=23, s3=4 → sum 1+23+4=28.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For i=2:
+    print('Tests passed 😎')
 
-j can be 3.
 
-s1=12, s2=3, s3=4 → sum 12+3+4=19.
+if __name__ == '__main__':
+    test()
 
-So maximum is 37.
 
-So code works.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case: '9000' → len=4.
 

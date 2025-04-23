@@ -158,35 +158,66 @@ Then loop d from 1 to 5.
 
 So the code would be:
 
-n = int(input())
-friends = list(map(int, input().split()))
-sum_friends = sum(friends)
-total_people = n +1
-count =0
-for d in range(1,6):
-    total = sum_friends +d
-    mod_val = (total -1) % total_people
-    if mod_val !=0:
-        count +=1
-print(count)
+Testing against sample input 1.
 
-Testing the first sample:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    friends = list(map(int, input_stream.readline().rstrip("\n").split()))
+    sum_friends = sum(friends)
+    total_people = n +1
+    count =0
+    for d in range(1,6):
+        total = sum_friends +d
+        mod_val = (total -1) % total_people
+        if mod_val !=0:
+            count +=1
+    print(count, file=output_stream)
 
-Input: 1 1 → sum_friends=1, total_people=2.
 
-d ranges from 1 to5.
 
-For d=1: total=2 → (2-1) mod2=1 → count +=1.
+def test():
+    import io
 
-d=2: total=3 →2 mod2=0 → no.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+2
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-d=3: total=4 →3 mod2=1 → yes.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-d=4:5-1=4 mod2=0 → no.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-d=5:6-1=5 mod2=1 → yes.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Total 3, which is correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Yes.
 

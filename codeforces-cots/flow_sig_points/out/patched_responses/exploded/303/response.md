@@ -45,24 +45,63 @@ The maximum value in the counter's values is the answer.
 
 So code would look something like:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import Counter
 
-n = int(sys.stdin.readline())
-a = list(map(int, sys.stdin.readline().split()))
-counts = Counter(a)
-print(max(counts.values()))
 
-Wait, but what if n is zero? But according to the constraints, n is at least 1. So no problem.
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    a = list(map(int, input_stream.readline().split()))
+    counts = Counter(a)
+    print(max(counts.values()), file=output_stream)
 
-Testing with the sample inputs.
 
-First sample input:
 
-6
-1 2 4 3 3 2
+def test():
+    import io
 
-Counter would have counts: 1:1, 2:2, 4:1, 3:2. Max is 2. Output is 2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+100
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample: 1 coin. Output 1.
 

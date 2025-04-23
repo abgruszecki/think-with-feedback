@@ -595,56 +595,94 @@ But for the DP table, the code needs to be initialized for n up to 35 and h up t
 
 So here's the code:
 
-n, h = map(int, input().split())
+Testing against sample input 1.
 
-max_n = 35
-max_h = 35
+```python
+def main(input_stream, output_stream):
+    n, h = map(int, input_stream.readline().rstrip("\n").split())
 
-# Precompute catalan numbers
-catalan = [0] * (max_n +1)
-catalan[0] = 1
-for i in range(1, max_n+1):
-    catalan[i] = sum(catalan[j] * catalan[i - j -1] for j in range(i))
+    max_n = 35
+    max_h = 35
 
-# Precompute dp table
-dp = [[0]*(max_h +1) for _ in range(max_n +1)]
-for h_val in range(max_h +1):
-    dp[0][h_val] =1
+    # Precompute catalan numbers
+    catalan = [0] * (max_n +1)
+    catalan[0] = 1
+    for i in range(1, max_n+1):
+        catalan[i] = sum(catalan[j] * catalan[i - j -1] for j in range(i))
 
-for n_val in range(1, max_n +1):
+    # Precompute dp table
+    dp = [[0]*(max_h +1) for _ in range(max_n +1)]
     for h_val in range(max_h +1):
-        if h_val >=n_val:
-            dp[n_val][h_val] = catalan[n_val]
-        else:
-            if h_val <1:
-                dp[n_val][h_val] =0
+        dp[0][h_val] =1
+
+    for n_val in range(1, max_n +1):
+        for h_val in range(max_h +1):
+            if h_val >=n_val:
+                dp[n_val][h_val] = catalan[n_val]
             else:
-                total =0
-                for k in range(1, n_val +1):
-                    left = k-1
-                    right = n_val -k
-                    total += dp[left][h_val-1] * dp[right][h_val-1]
-                dp[n_val][h_val] = total
+                if h_val <1:
+                    dp[n_val][h_val] =0
+                else:
+                    total =0
+                    for k in range(1, n_val +1):
+                        left = k-1
+                        right = n_val -k
+                        total += dp[left][h_val-1] * dp[right][h_val-1]
+                    dp[n_val][h_val] = total
 
-if h > n_val:
-    print(0)
-else:
-    required_h_minus_1 = h-1
-    if required_h_minus_1 <0:
-        ans = catalan[n]
+    if h > n_val:
+        print(0, file=output_stream)
     else:
-        ans = catalan[n] - dp[n][required_h_minus_1]
-    print(ans)
+        required_h_minus_1 = h-1
+        if required_h_minus_1 <0:
+            ans = catalan[n]
+        else:
+            ans = catalan[n] - dp[n][required_h_minus_1]
+        print(ans, file=output_stream)
 
-Wait, but n_val in the loop is up to 35. So for n=35, which is allowed, the code correctly computes.
 
-Testing the first example: input 3 2.
 
-n=3, h=2.
+def test():
+    import io
 
-required_h_minus_1 =1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 3
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-dp[3][1] is 0. So ans =5-0=5.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: input 3 3.
 

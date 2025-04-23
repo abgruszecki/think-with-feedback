@@ -371,23 +371,68 @@ print(''.join(digits))
 
 Wait, but in the case where after reading the '1's, the next character is not '0', it's the end of the string. So that's the last digit.
 
-Testing the sample input:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+    i = 0
+    digits = []
+    while i < len(s):
+        cnt = 0
+        while i < len(s) and s[i] == '1':
+            cnt += 1
+            i += 1
+        digits.append(str(cnt))
+        if i < len(s) and s[i] == '0':
+            i += 1
+    print(''.join(digits), file=output_stream)
 
-3
 
-111
 
-Processing:
+def test():
+    import io
 
-i starts at 0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+9
+110011101
+""",
+            "output": \
+"""\
+2031
+""",
+        }, 
+    ]
 
-Read 3 '1's → count=3. digits is ['3'].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i is now 3 (len(s)=3). So loop ends.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Output '3' → correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 
@@ -435,9 +480,68 @@ So the code should work correctly for all cases.
 
 Now, edge cases.
 
-Case 1: digits with zero in the middle.
+Testing against sample input 1.
 
-Input: '10' → digits [1,0]. Output '10'.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+    i = 0
+    digits = []
+    while i < len(s):
+        cnt = 0
+        while i < len(s) and s[i] == '1':
+            cnt += 1
+            i += 1
+        digits.append(str(cnt))
+        if i < len(s) and s[i] == '0':
+            i += 1
+    print(''.join(digits), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+9
+110011101
+""",
+            "output": \
+"""\
+2031
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Case 2: leading zero? Not possible since input starts with '1'.
 

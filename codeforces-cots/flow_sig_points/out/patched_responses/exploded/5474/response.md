@@ -349,31 +349,70 @@ For each exam in sorted order:
 
 The final prev_day is the answer.
 
-Wait, but let's test this against the sample inputs.
+Testing against sample input 1.
 
-First sample input:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    exams = []
+    for _ in range(n):
+        a, b = map(int, input_stream.readline().rstrip("\n").split())
+        exams.append((a, b))
+    exams.sort()
+    prev_day = 0
+    for a, b in exams:
+        if b >= prev_day:
+            prev_day = b
+        else:
+            prev_day = a
+    print(prev_day, file=output_stream)
 
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
-
+6 1
 5 2
+4 3
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-3 1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-4 2
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sorted by a_i: 3,4,5.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Processing:
+    print('Tests passed 😎')
 
-prev_day =0.
 
-First exam (a=3, b=1). Since 1 >=0 → take 1. prev_day=1.
+if __name__ == '__main__':
+    test()
 
-Second exam (a=4, b=2). 2 >=1 → take 2. prev_day=2.
 
-Third exam (a=5, b=2). 2 >=2 → take2. prev_day=2.
+```
 
-Output is 2. Which matches.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

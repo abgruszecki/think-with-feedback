@@ -137,51 +137,93 @@ Yes.
 
 So code:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-total_ones = a.count(1)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-total_neg = len(a) - total_ones
+    total_ones = a.count(1)
 
-for _ in range(m):
+    total_neg = len(a) - total_ones
 
-    l, r = map(int, input().split())
+    for _ in range(m):
 
-    k = r - l + 1
+        l, r = map(int, input_stream.readline().rstrip("\n").split())
 
-    if k % 2 !=0:
+        k = r - l + 1
 
-        print(0)
+        if k % 2 !=0:
 
-    else:
-
-        required = k //2
-
-        if total_ones >= required and total_neg >= required:
-
-            print(1)
+            print(0, file=output_stream)
 
         else:
 
-            print(0)
+            required = k //2
 
-Yes. Let's test this code against the samples.
+            if total_ones >= required and total_neg >= required:
 
-Sample 1:
+                print(1, file=output_stream)
 
-Input:
+            else:
 
+                print(0, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5
+-1 1 1 1 -1
+1 1
 2 3
+3 5
+2 5
+1 5
+""",
+            "output": \
+"""\
+0
+1
+0
+1
+0
+""",
+        }, 
+    ]
 
-1 -1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Queries:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-1 1 → k=1 → 0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-1 2 → k=2 → required 1 each. total_ones=1, total_neg=1 → yes →1.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

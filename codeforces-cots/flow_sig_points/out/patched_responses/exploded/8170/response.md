@@ -72,43 +72,153 @@ Then output the result.
 
 So the code can look like this:
 
-s = input().strip()
+Testing against sample input 1.
 
-op_index = -1
-op = None
-for i, c in enumerate(s):
-    if c in '+-*/%':
-        op_index = i
-        op = c
-        break
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-a = int(s[:op_index])
-b = int(s[op_index+1:])
+    op_index = -1
+    op = None
+    for i, c in enumerate(s):
+        if c in '+-*/%':
+            op_index = i
+            op = c
+            break
 
-if op == '+':
-    res = a + b
-elif op == '-':
-    res = a - b
-elif op == '*':
-    res = a * b
-elif op == '/':
-    res = a // b
-elif op == '%':
-    res = a % b
+    a = int(s[:op_index])
+    b = int(s[op_index+1:])
 
-print(res)
+    if op == '+':
+        res = a + b
+    elif op == '-':
+        res = a - b
+    elif op == '*':
+        res = a * b
+    elif op == '/':
+        res = a // b
+    elif op == '%':
+        res = a % b
 
-But wait, what about the case where the operator is '-' but the code mistakenly picks a different operator? No, because the problem says the input is a valid expression with exactly one operator. So the code will find the first occurrence of any operator, split correctly.
+    print(res, file=output_stream)
 
-Wait, but if there are multiple operators, but the problem says the input is of the form a?b, which implies a single operator. So the code is correct.
 
-Testing the examples:
 
-First example: '123+456'
+def test():
+    import io
 
-Loop through each character. The third character is '+', so a is 123, b is 456. 123 +456 = 579. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+192/5
+""",
+            "output": \
+"""\
+38
+""",
+        }, 
+    ]
 
-Second example: '192/5' → operator is '/' at index 3. a=192, b=5. 192//5=38. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    op_index = -1
+    op = None
+    for i, c in enumerate(s):
+        if c in '+-*/%':
+            op_index = i
+            op = c
+            break
+
+    a = int(s[:op_index])
+    b = int(s[op_index+1:])
+
+    if op == '+':
+        res = a + b
+    elif op == '-':
+        res = a - b
+    elif op == '*':
+        res = a * b
+    elif op == '/':
+        res = a // b
+    elif op == '%':
+        res = a % b
+
+    print(res, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+945%19
+""",
+            "output": \
+"""\
+14
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: '945%19' → operator is '%' at index 3. 945 %19 is 14. Correct.
 

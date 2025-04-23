@@ -537,57 +537,105 @@ Then, for each k in 1 to min(m, n-1):
 
        add to sum.
 
-Let's test the first sample input:
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 + 7
 
-3 2 1 3
+    n, m, a, b = map(int, input_stream.readline().rstrip("\n").split())
 
-Sample Output:5.
+    if n < 2:
+        print(0, file=output_stream)
+        return
 
-Let's see.
+    max_fact = max(n-2, m-1)
+    fact = [1] * (max_fact + 1)
+    for i in range(1, max_fact + 1):
+        fact[i] = fact[i-1] * i % MOD
 
-n=3, m=2.
+    inv_fact = [1] * (max_fact + 1)
+    if max_fact >= 0:
+        inv_fact[max_fact] = pow(fact[max_fact], MOD-2, MOD)
+        for i in range(max_fact - 1, -1, -1):
+            inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
 
-max_fact = max(3-2=1, 2-1=1) →1.
+    max_k = min(m, n-1)
+    result = 0
 
-precompute fact[0..1] = [1, 1]
+    for k in range(1, max_k + 1):
+        c_denominator = k-1
+        if c_denominator > m-1:
+            continue
+        if m-1 < 0:
+            comb = 0
+        else:
+            comb = fact[m-1] * inv_fact[c_denominator] % MOD
+            comb = comb * inv_fact[m-1 - c_denominator] % MOD
+        
+        term_denom = n - k -1
+        if term_denom < 0:
+            term1 = 0
+        else:
+            if n-2 < 0:
+                term1 = 0
+            else:
+                term1 = fact[n-2] * inv_fact[term_denom] % MOD
+        
+        exponent = n - k -1
+        base = (k + 1) * m % MOD
+        pow_val = pow(base, exponent, MOD) if exponent >=0 else 0
+        
+        term = comb * term1 % MOD
+        term = term * pow_val % MOD
+        result = (result + term) % MOD
 
-inv_fact[0..1] = [1, 1], since inv_fact[1] = pow(1, MOD-2) →1, and inv_fact[0] = inv_fact[1] *1 →1.
+    print(result, file=output_stream)
 
-Loop k from 1 to min(2, 3-1=2) →k=1,2.
 
-For k=1:
 
-comb = C(1, 0) =1.
+def test():
+    import io
 
-term1 = fact[1] * inv_fact[3-1-1=1] →1 * inv_fact[1] =1*1=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 1 1 2
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-exponent=3-1-1=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-base=(1+1)*2=4.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-pow_val=4^1=4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-term=1 *1 *4=4.
+    print('Tests passed 😎')
 
-For k=2:
 
-comb = C(1,1) =1.
+if __name__ == '__main__':
+    test()
 
-term1 = fact[1] * inv_fact[3-2-1=0] →1 * inv_fact[0] →1*1=1.
 
-exponent=3-2-1=0 →pow_val=1.
+```
 
-base=(2+1)*2=6 →6^0=1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-term=1 *1 *1=1.
+```
 
-sum =4+1=5. Which matches the sample.
-
-So the code works for the first sample.
-
-Thus, the code should be correct.
 </think>
 
 ```python

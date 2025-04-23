@@ -1195,203 +1195,162 @@ But we can verify x + y ==n+1, but per problem statement, the inputs are valid.
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n, q = map(int, input().split())
 
-processed = set()
+def main(input_stream, output_stream):
+    n, q = map(int, input_stream.readline().rstrip("\n").split())
 
-u_list = []  # sorted list of x's for 'U' actions
+    processed = set()
 
-l_list = []  # sorted list of x's for 'L' actions
+    u_list = []  # sorted list of x's for 'U' actions
 
-l_dict = dict()  # maps row y to max x
+    l_list = []  # sorted list of x's for 'L' actions
 
-u_dict = dict()  # maps column x to max y
+    l_dict = dict()  # maps row y to max x
 
-for _ in range(q):
+    u_dict = dict()  # maps column x to max y
 
-    x, y, dir = input().split()
+    for _ in range(q):
 
-    x = int(x)
+        x, y, dir = input_stream.readline().rstrip("\n").split()
 
-    y = int(y)
+        x = int(x)
 
-    dir = dir.strip()
+        y = int(y)
 
-    if x in processed:
+        dir = dir.strip()
 
-        print(0)
+        if x in processed:
 
-        continue
+            print(0, file=output_stream)
 
-    processed.add(x)
+            continue
 
-    if dir == 'L':
+        processed.add(x)
 
-        # Compute y0 =n+1 -x
+        if dir == 'L':
 
-        y0 = n + 1 - x
+            # Compute y0 =n+1 -x
 
-        # Find the maximum x_u in u_list <=x
+            y0 = n + 1 - x
 
-        max_u = 0
+            # Find the maximum x_u in u_list <=x
 
-        idx = bisect.bisect_right(u_list, x) -1
+            max_u = 0
 
-        if idx >=0:
+            idx = bisect.bisect_right(u_list, x) -1
 
-            max_u = u_list[idx]
+            if idx >=0:
 
-        # max_l in l_dict.get(y0, 0)
+                max_u = u_list[idx]
 
-        max_l = l_dict.get(y0, 0)
+            # max_l in l_dict.get(y0, 0)
 
-        steps = x - max(max_u, max_l)
+            max_l = l_dict.get(y0, 0)
 
-        if steps >0:
+            steps = x - max(max_u, max_l)
 
-            l_dict[y0] = x
+            if steps >0:
 
-            # Insert x into l_list in sorted order
+                l_dict[y0] = x
 
-            bisect.insort(l_list, x)
+                # Insert x into l_list in sorted order
 
-        print(steps)
+                bisect.insort(l_list, x)
 
-    else: # 'U'
+            print(steps, file=output_stream)
 
-        # y0 =n+1 -x
+        else: # 'U'
 
-        y0 = n +1 -x
+            # y0 =n+1 -x
 
-        # Find the minimum x_l in l_list >=x
+            y0 = n +1 -x
 
-        max_l_y =0
+            # Find the minimum x_l in l_list >=x
 
-        idx = bisect.bisect_left(l_list, x)
+            max_l_y =0
 
-        if idx < len(l_list):
+            idx = bisect.bisect_left(l_list, x)
 
-            x_l = l_list[idx]
+            if idx < len(l_list):
 
-            max_l_y = (n+1) - x_l
+                x_l = l_list[idx]
 
-        # max_u in u_dict.get(x,0)
+                max_l_y = (n+1) - x_l
 
-        max_u = u_dict.get(x,0)
+            # max_u in u_dict.get(x,0)
 
-        steps = y0 - max(max_l_y, max_u)
+            max_u = u_dict.get(x,0)
 
-        if steps >0:
+            steps = y0 - max(max_l_y, max_u)
 
-            u_dict[x] = y0
+            if steps >0:
 
-            bisect.insort(u_list, x)
+                u_dict[x] = y0
 
-        print(steps)
+                bisect.insort(u_list, x)
 
-This should work.
+            print(steps, file=output_stream)
 
-Testing with sample inputs:
 
-Sample input 1:
 
-6 5
+def test():
+    import io
 
-3 4 U
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 6
+2 9 U
+10 1 U
+1 10 U
+8 3 L
+10 1 L
+6 5 U
+""",
+            "output": \
+"""\
+9
+1
+10
+6
+0
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
-6 1 L
-
-2 5 L
-
-1 6 U
-
-4 3 U
-
-The code should process as follows:
-
-Action 1: dir U.
-
-y0=7-3=4.
-
-l_list is empty, so idx=0 in bisect_left. len(l_list) is0 → no x_l.
-
-max_l_y=0.
-
-max_u=0.
-
-steps=4-0=4.
-
-Add x=3 to u_list.
-
-Output4.
-
-Action2: x=6, dir L.
-
-y0=7-6=1.
-
-max_u is largest x in u_list <=6. u_list is [3]. idx=1-1=0. max_u=3.
-
-max_l = l_dict.get(1,0)=0.
-
-steps=6-3=3.
-
-Add to l_dict[1]=6. Insert 6 into l_list → [6].
-
-Output3.
-
-Action3: x=2, dir L.
-
-y0=7-2=5.
-
-max_u is largest x in u_list <=2. u_list [3]. bisect_right(u_list,2) is0. idx=-1 → no max_u.
-
-max_u=0.
-
-max_l = l_dict.get(5,0)=0.
-
-steps=2-0=2.
-
-Add l_dict[5]=2. Insert 2 into l_list → [2,6].
-
-Output2.
-
-Action4: x=1, dir U.
-
-y0=7-1=6.
-
-Check l_list for x >=1. l_list [2,6]. bisect_left(l_list,1) is0. x_l=2.
-
-max_l_y=7-2=5.
-
-max_u= u_dict.get(1,0)=0.
-
-steps=6-5=1.
-
-Add to u_dict[1]=6. Insert 1 into u_list → [1,3].
-
-Output1.
-
-Action5: x=4, dir U.
-
-y0=7-4=3.
-
-Check l_list for x >=4. l_list [2,6]. bisect_left returns 1. x_l=6.
-
-max_l_y=7-6=1.
-
-max_u=0.
-
-steps=3-1=2.
-
-Add to u_dict[4]=3. Insert4 into u_list → [1,3,4].
-
-Output2.
-
-Which matches the sample.
-
-Thus, the code is correct.
 </think>
 
 ```python

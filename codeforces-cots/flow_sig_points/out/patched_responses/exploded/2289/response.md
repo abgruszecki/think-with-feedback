@@ -716,13 +716,17 @@ But the code handles this naturally.
 
 Thus, the code is as follows:
 
+Testing against sample input 1.
+
+```python
 import sys
 from functools import lru_cache
 
-def main():
-    x_initial, y_initial, n, d = map(int, sys.stdin.readline().split())
+
+def main(input_stream, output_stream):
+    x_initial, y_initial, n, d = map(int, input_stream.readline().split())
     d_squared = d * d
-    vectors = [tuple(map(int, sys.stdin.readline().split())) for _ in range(n)]
+    vectors = [tuple(map(int, input_stream.readline().split())) for _ in range(n)]
 
     @lru_cache(maxsize=None)
     def can_win(x, y, a_ref, d_ref, is_anton_turn):
@@ -759,58 +763,53 @@ def main():
         return False
 
     initial_win = can_win(x_initial, y_initial, False, False, True)
-    print("Anton" if initial_win else "Dasha")
+    print("Anton" if initial_win else "Dasha", file=output_stream)
 
-if __name__ == "__main__":
-    main()
 
-Wait, but in the code above, the reflection logic is handled differently. For Anton's turn, if he hasn't used his reflection, he can reflect. Then, the new_a_ref becomes True, and the turn is Dasha's. Similarly for Dasha.
 
-This is correct.
+def test():
+    import io
 
-Now, let's test the first sample input.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0 0 2 4
+1 1
+1 2
+""",
+            "output": \
+"""\
+Dasha
+""",
+        }, 
+    ]
 
-Sample input 1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-0 0 2 3
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-vectors are (1,1), (1,2)
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-When Anton's turn comes, he can choose to add (1,2). The new_x = 1, new_y = 2.
+    print('Tests passed 😎')
 
-Then, Dasha's turn. She can reflect (since d_ref is False). New_x=2, new_y=1. d_ref becomes True. Turn is Anton's.
 
-Anton's options: add vectors or reflect (since a_ref is False).
+if __name__ == '__main__':
+    test()
 
-If he adds (1,1) to (2,1) → (3,2). Distance squared is 13>9 → invalid.
 
-If he adds (1,2) → (3,3) → 18>9 → invalid.
+```
 
-If he reflects → new_x=1, new_y=2. a_ref becomes True. Turn is Dasha's.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Dasha's options: she can't reflect (d_ref is True). She can add vectors to (1,2):
-
-Adding (1,1) → (2,3) → 13>9.
-
-Adding (1,2) → (2,4) → 20>9.
-
-No valid moves. So she loses. So Anton wins.
-
-Thus, the code would return True for the initial state.
-
-But how does the code handle this?
-
-In the state (1,2, False, False, False) (Dasha's turn), the code checks if Dasha can reflect. She can, since d_ref is False.
-
-Reflecting leads to (2,1), d_ref becomes True. The new state is (2,1, False, True, True) (Anton's turn).
-
-In this state, Anton can reflect (a_ref is False). Reflecting leads to (1,2, True, True, False) (Dasha's turn). Dasha can't reflect, and adding vectors leads to invalid positions. So Dasha has no moves, so Anton wins.
-
-Thus, the code's can_win(2,1, False, True, True) would return True. So Dasha's reflection move leads to a state where Anton can win. Hence, in the state (1,2, False, False, False), Dasha's reflection move leads to Anton's win, so this move is not a winning move for Dasha. Thus, Dasha has no other valid moves (adding vectors leads to invalid positions), so she loses.
-
-Thus, the code returns True for the initial state, and "Anton" is printed.
-
-Thus, the code works for the first sample input.
+```
 
 The second sample input:
 

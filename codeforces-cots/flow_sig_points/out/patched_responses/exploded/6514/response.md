@@ -399,15 +399,81 @@ print(stolen)
 
 Yes, this code should work.
 
-Testing the first sample:
+Testing against sample input 1.
 
-others = [1,11,2,8] → heap initialized as [-1, -11, -2, -8]. Wait, but the heap will be a min-heap, so the smallest (most negative) is -11. So the first popped is -11 → current_max is 11. Limak's votes is 5. So 5 <=11 → steal.
+```python
+import heapq
 
-After stealing, limak_votes becomes 6. The max_val was 11, subtract 1 →10. Push -10 into the heap. Now the heap has -10, -8, -2, -1. The next iteration, the max is 10. 6 <=10 → steal again. And so on.
 
-Yes.
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a1 = a[0]
+    others = a[1:]
 
-So this code should work.
+    heap = [-x for x in others]
+    heapq.heapify(heap)
+
+    stolen = 0
+    limak_votes = a1
+
+    while heap:
+        current_max = -heap[0]
+        if limak_votes > current_max:
+            break
+        stolen += 1
+        limak_votes += 1
+        max_val = -heapq.heappop(heap)
+        max_val -= 1
+        heapq.heappush(heap, -max_val)
+
+    print(stolen, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 8 8 8
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

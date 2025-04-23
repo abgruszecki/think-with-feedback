@@ -1452,230 +1452,173 @@ Process BFS.
 
 Thus, the code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import deque
 
-n, m, k = map(int, sys.stdin.readline().split())
-grid = [sys.stdin.readline().strip() for _ in range(n)]
 
-# Precompute the four matrices
-right_max = [[0]*m for _ in range(n)]
-left_max = [[0]*m for _ in range(n)]
-up_max = [[0]*m for _ in range(n)]
-down_max = [[0]*m for _ in range(n)]
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().split())
+    grid = [input_stream.readline().strip() for _ in range(n)]
 
-# Compute right_max
-for x in range(n):
-    current_max = 0
-    for y in range(m-1, -1, -1):
-        if grid[x][y] == '#':
-            current_max = 0
-        else:
-            if y+1 < m and grid[x][y+1] == '.':
-                current_max += 1
-            else:
+    # Precompute the four matrices
+    right_max = [[0]*m for _ in range(n)]
+    left_max = [[0]*m for _ in range(n)]
+    up_max = [[0]*m for _ in range(n)]
+    down_max = [[0]*m for _ in range(n)]
+
+    # Compute right_max
+    for x in range(n):
+        current_max = 0
+        for y in range(m-1, -1, -1):
+            if grid[x][y] == '#':
                 current_max = 0
-            current_max = min(current_max, k)
-            right_max[x][y] = current_max
+            else:
+                if y+1 < m and grid[x][y+1] == '.':
+                    current_max += 1
+                else:
+                    current_max = 0
+                current_max = min(current_max, k)
+                right_max[x][y] = current_max
 
-# Compute left_max
-for x in range(n):
-    current_max = 0
+    # Compute left_max
+    for x in range(n):
+        current_max = 0
+        for y in range(m):
+            if grid[x][y] == '#':
+                current_max = 0
+            else:
+                if y-1 >= 0 and grid[x][y-1] == '.':
+                    current_max += 1
+                else:
+                    current_max = 0
+                current_max = min(current_max, k)
+                left_max[x][y] = current_max
+
+    # Compute up_max
     for y in range(m):
-        if grid[x][y] == '#':
-            current_max = 0
-        else:
-            if y-1 >= 0 and grid[x][y-1] == '.':
-                current_max += 1
-            else:
+        current_max = 0
+        for x in range(n):
+            if grid[x][y] == '#':
                 current_max = 0
-            current_max = min(current_max, k)
-            left_max[x][y] = current_max
-
-# Compute up_max
-for y in range(m):
-    current_max = 0
-    for x in range(n):
-        if grid[x][y] == '#':
-            current_max = 0
-        else:
-            if x-1 >= 0 and grid[x-1][y] == '.':
-                current_max += 1
             else:
+                if x-1 >= 0 and grid[x-1][y] == '.':
+                    current_max += 1
+                else:
+                    current_max = 0
+                current_max = min(current_max, k)
+                up_max[x][y] = current_max
+
+    # Compute down_max
+    for y in range(m):
+        current_max = 0
+        for x in range(n-1, -1, -1):
+            if grid[x][y] == '#':
                 current_max = 0
-            current_max = min(current_max, k)
-            up_max[x][y] = current_max
-
-# Compute down_max
-for y in range(m):
-    current_max = 0
-    for x in range(n-1, -1, -1):
-        if grid[x][y] == '#':
-            current_max = 0
-        else:
-            if x+1 < n and grid[x+1][y] == '.':
-                current_max += 1
             else:
-                current_max = 0
-            current_max = min(current_max, k)
-            down_max[x][y] = current_max
+                if x+1 < n and grid[x+1][y] == '.':
+                    current_max += 1
+                else:
+                    current_max = 0
+                current_max = min(current_max, k)
+                down_max[x][y] = current_max
 
-x1, y1, x2, y2 = map(int, sys.stdin.readline().split())
-start = (x1-1, y1-1)
-end = (x2-1, y2-1)
+    x1, y1, x2, y2 = map(int, input_stream.readline().split())
+    start = (x1-1, y1-1)
+    end = (x2-1, y2-1)
 
-if start == end:
-    print(0)
-    exit()
+    if start == end:
+        print(0, file=output_stream)
+        return
 
-dist = [[-1 for _ in range(m)] for __ in range(n)]
-q = deque()
+    dist = [[-1 for _ in range(m)] for __ in range(n)]
+    q = deque()
 
-start_x, start_y = start
-dist[start_x][start_y] = 0
-q.append( (start_x, start_y) )
+    start_x, start_y = start
+    dist[start_x][start_y] = 0
+    q.append( (start_x, start_y) )
 
-directions = [ 
-    (0, 1, right_max),    # right
-    (0, -1, left_max),    # left
-    (-1, 0, up_max),      # up
-    (1, 0, down_max),     # down
-]
+    directions = [ 
+        (0, 1, right_max),    # right
+        (0, -1, left_max),    # left
+        (-1, 0, up_max),      # up
+        (1, 0, down_max),     # down
+    ]
 
-found = False
-while q:
-    x, y = q.popleft()
-    current_dist = dist[x][y]
+    found = False
+    while q:
+        x, y = q.popleft()
+        current_dist = dist[x][y]
 
-    for dx, dy, matrix in directions:
-        s = matrix[x][y]
-        s = min(s, k)
-        for i in range(1, s+1):
-            new_x = x + dx * i
-            new_y = y + dy * i
-            if new_x < 0 or new_x >= n or new_y < 0 or new_y >= m:
-                break
-            if grid[new_x][new_y] == '#':
-                break
-            if dist[new_x][new_y] != -1:
-                break
-            dist[new_x][new_y] = current_dist + 1
-            if (new_x, new_y) == end:
-                print(dist[new_x][new_y])
-                exit()
-            q.append( (new_x, new_y) )
+        for dx, dy, matrix in directions:
+            s = matrix[x][y]
+            s = min(s, k)
+            for i in range(1, s+1):
+                new_x = x + dx * i
+                new_y = y + dy * i
+                if new_x < 0 or new_x >= n or new_y < 0 or new_y >= m:
+                    break
+                if grid[new_x][new_y] == '#':
+                    break
+                if dist[new_x][new_y] != -1:
+                    break
+                dist[new_x][new_y] = current_dist + 1
+                if (new_x, new_y) == end:
+                    print(dist[new_x][new_y], file=output_stream)
+                    return
+                q.append( (new_x, new_y) )
 
-print(-1)
+    print(-1, file=output_stream)
 
-But wait, the code for the up_max and down_max precomputation may be incorrect.
 
-For up_max:
 
-In the code, for up_max:
+def test():
+    import io
 
-for y in range(m):
-
-    current_max = 0
-
-    for x in range(n):
-
-        if grid[x][y] == '#':
-
-            current_max =0
-
-        else:
-
-            if x-1 >=0 and grid[x-1][y] == '.':
-
-                current_max +=1
-
-            else:
-
-                current_max =0
-
-            current_max = min(current_max, k)
-
-            up_max[x][y] = current_max
-
-But this is processing x from 0 to n-1. For cell (x, y), the up_max is the number of steps possible in the up direction (dx=-1).
-
-But for example, if x=0, then up_max[x][y] is 0, since can't move up.
-
-x=1: if grid[1][y] is '.', and grid[0][y] is '.', then current_max is 1.
-
-x=2: if grid[2][y] is '.', and grid[1][y] is '.', then current_max is 2.
-
-So, up_max[x][y] is the number of steps possible upwards.
-
-But if there is a blocked cell in x=1:
-
-grid[0][y] is '.', grid[1][y] is '#', grid[2][y] is '.'.
-
-For x=0:
-
-current_max is 0 (x-1 is invalid).
-
-x=1: grid is '#', current_max 0.
-
-x=2: grid is '.', x-1 is 1 (blocked), current_max is 0.
-
-Thus, up_max[2][y] is 0.
-
-Which is correct.
-
-But for x=3 in a row of all '.' cells, the current_max would be 3 (steps up to x=0), but min(3, k).
-
-Thus, the code is correct.
-
-Similarly for down_max.
-
-Thus, the code is correct.
-
-But let's test the first sample:
-
-Sample 1:
-
-3 4 4
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 4 1
 ....
-
 ###.
-
 ....
+1 1 3 1
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
 
-Start: 0,0. End: 2,0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-precompute right_max for row 0:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-cells are '.' '.' '.' '.'.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Processing from y=3 to 0.
+    print('Tests passed 😎')
 
-y=3: current_max 0.
 
-y=2: current_max 1 (y+1=3 is '.').
+if __name__ == '__main__':
+    test()
 
-y=1: current_max 2.
 
-y=0: current_max 3. min(3,4) → 3.
+```
 
-Thus, right_max[0][0] is 3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For down_max in column 0:
-
-Processing from x=2 downto 0.
-
-For x=2: grid[x][0] is '.', x+1 is 3 (invalid) → current_max 0.
-
-x=1: grid[x][0] is '#', current_max 0.
-
-x=0: grid[x][0] is '.', x+1=1 is '#', current_max 0.
-
-Thus, down_max[0][0] is 0.
-
-So, when processing (0,0), the down direction has s=0, so no steps.
-
-But in the sample, the correct path is to move right, then down, then left.
+```
 
 But according to the code, during processing (0,0), the right direction allows 3 steps.
 

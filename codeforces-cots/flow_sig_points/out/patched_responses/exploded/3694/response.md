@@ -1173,14 +1173,18 @@ We'll represent x as -1, 0..2000. So for each event, when it's 'win y' or 'sell 
 
 Implementing this in Python:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-def main():
+
+def main(input_stream, output_stream):
     import sys
-    n = int(sys.stdin.readline())
+    n = int(input_stream.readline())
     events = []
     for _ in range(n):
-        parts = sys.stdin.readline().split()
+        parts = input_stream.readline().split()
         typ, x = parts[0], int(parts[1])
         events.append( (typ, x) )
 
@@ -1220,34 +1224,54 @@ def main():
         current = next_dp
 
     # The answer is the maximum value in current
-    print(max(current))
+    print(max(current), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+win 5
+sell 6
+sell 4
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
 
 if __name__ == '__main__':
-    main()
+    test()
 
-But wait, what about the maximum possible value? Since x can be up to 2000, 2^x can be very large. But Python can handle big integers, so it's okay.
 
-Testing this code with the sample inputs:
+```
 
-Sample 1:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-7
-
-win 10
-
-win 5
-
-win 3
-
-sell 5
-
-sell 3
-
-win 10
-
-sell 10
-
-Output is 1056.
+```
 
 Sample 2:
 

@@ -60,45 +60,153 @@ Wait, but when you have "that" followed by "I", that's correct. Because "hate th
 
 Yes. So the code can be written as:
 
-n = int(input())
+Testing against sample input 1.
 
-parts = []
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-for i in range(1, n+1):
+    parts = []
 
-    if i % 2 == 1:
+    for i in range(1, n+1):
 
-        feeling = 'hate'
+        if i % 2 == 1:
 
-    else:
+            feeling = 'hate'
 
-        feeling = 'love'
+        else:
 
-    if i < n:
+            feeling = 'love'
 
-        parts.append(f"I {feeling} that")
+        if i < n:
 
-    else:
+            parts.append(f"I {feeling} that")
 
-        parts.append(f"I {feeling} it")
+        else:
 
-result = ' '.join(parts)
+            parts.append(f"I {feeling} it")
 
-print(result)
+    result = ' '.join(parts)
 
-Let's test this with the examples.
+    print(result, file=output_stream)
 
-Test case 1: n=1.
 
-Loop runs once. i=1, which is odd. Since i is not less than n (1 ==1), so append "I hate it". The parts list is ["I hate it"]. Join gives "I hate it". Correct.
 
-Test case 2: n=2.
+def test():
+    import io
 
-i=1: odd. feeling hate. i <2 → yes. Append "I hate that".
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+""",
+            "output": \
+"""\
+I hate that I love it
+""",
+        }, 
+    ]
 
-i=2: even. feeling love. i is not <2, append "I love it".
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Join gives "I hate that I love it". Correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    parts = []
+
+    for i in range(1, n+1):
+
+        if i % 2 == 1:
+
+            feeling = 'hate'
+
+        else:
+
+            feeling = 'love'
+
+        if i < n:
+
+            parts.append(f"I {feeling} that")
+
+        else:
+
+            parts.append(f"I {feeling} it")
+
+    result = ' '.join(parts)
+
+    print(result, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+""",
+            "output": \
+"""\
+I hate that I love that I hate it
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Test case 3: n=3.
 

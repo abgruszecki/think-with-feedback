@@ -329,61 +329,97 @@ But we need to read the chains efficiently.
 
 In Python, reading the input as:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n, k = map(int, sys.stdin.readline().split())
 
-sum_mi_minus_1 = 0
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
 
-max_L =0
+    sum_mi_minus_1 = 0
 
-for _ in range(k):
+    max_L =0
 
-    parts = list(map(int, sys.stdin.readline().split()))
+    for _ in range(k):
 
-    mi = parts[0]
+        parts = list(map(int, input_stream.readline().split()))
 
-    a = parts[1:]
+        mi = parts[0]
 
-    sum_mi_minus_1 += mi -1
+        a = parts[1:]
 
-    if a[0] ==1:
+        sum_mi_minus_1 += mi -1
 
-        current_L =1
+        if a[0] ==1:
 
-        for j in range(1, mi):
+            current_L =1
 
-            if a[j] == a[j-1] +1:
+            for j in range(1, mi):
 
-                current_L +=1
+                if a[j] == a[j-1] +1:
 
-            else:
+                    current_L +=1
 
-                break
+                else:
 
-        if current_L > max_L:
+                    break
 
-            max_L = current_L
+            if current_L > max_L:
 
-answer = sum_mi_minus_1 + (n-1) - 2*(max_L -1)
+                max_L = current_L
 
-print(answer)
+    answer = sum_mi_minus_1 + (n-1) - 2*(max_L -1)
 
-This code should handle the inputs correctly.
+    print(answer, file=output_stream)
 
-Let's test the first sample:
 
-3 2
 
-2 1 2
+def test():
+    import io
 
-1 3
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 3
+3 1 3 7
+2 2 5
+2 4 6
+""",
+            "output": \
+"""\
+10
+""",
+        }, 
+    ]
 
-sum_mi_minus_1 is (2-1)+(1-1) =1+0=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-max_L is 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-answer:1 +2 -2*(2-1) =3-2=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

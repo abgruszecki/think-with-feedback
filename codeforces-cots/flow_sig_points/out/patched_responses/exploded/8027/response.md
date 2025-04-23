@@ -132,35 +132,137 @@ But how to count occurrences. For example, for the input "AnnAnn", and friend na
 
 So the code would be:
 
-s = input().strip()
+Testing against sample input 1.
 
-friends = ["Danil", "Olya", "Slava", "Ann", "Nikita"]
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-total = 0
+    friends = ["Danil", "Olya", "Slava", "Ann", "Nikita"]
 
-for name in friends:
+    total = 0
 
-    total += s.count(name)
+    for name in friends:
 
-if total == 1:
+        total += s.count(name)
 
-    print("YES")
+    if total == 1:
 
-else:
+        print("YES", file=output_stream)
 
-    print("NO")
+    else:
 
-Wait, but wait. Let's test this code against the examples.
+        print("NO", file=output_stream)
 
-First example:
 
-Input: "Alex_and_broken_contest"
 
-None of the friend names are present. So sum is 0 → output NO. Which matches the example.
+def test():
+    import io
 
-Second example: "NikitaAndString"
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+NikitaAndString
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
 
-The friend name "Nikita" occurs once. So sum is 1 → YES. Which matches.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    friends = ["Danil", "Olya", "Slava", "Ann", "Nikita"]
+
+    total = 0
+
+    for name in friends:
+
+        total += s.count(name)
+
+    if total == 1:
+
+        print("YES", file=output_stream)
+
+    else:
+
+        print("NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+Danil_and_Olya
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: "Danil_and_Olya" → two occurrences (Danil and Olya), sum is 2 → output NO. Which matches the sample.
 

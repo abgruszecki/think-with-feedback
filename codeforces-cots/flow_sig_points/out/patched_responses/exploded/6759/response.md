@@ -1229,125 +1229,153 @@ The code:
 
 Initialize:
 
-n = int(input())
+Testing against sample input 1.
 
-p = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-if n ==0:
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-    print(0)
+    if n ==0:
 
-    exit()
+        print(0, file=output_stream)
 
-count =0
+        return
 
-# Initialize for first element
+    count =0
 
-a_val = p[0]
+    # Initialize for first element
 
-a_low =0
+    a_val = p[0]
 
-d_val = p[0]
+    a_low =0
 
-d_low =0
+    d_val = p[0]
 
-count +=1 # for r=0
+    d_low =0
 
-for r in range(1, n):
+    count +=1 # for r=0
 
-    current = p[r]
+    for r in range(1, n):
 
-    # Compute new_a_low and new_a_val
+        current = p[r]
 
-    candidates_a = []
+        # Compute new_a_low and new_a_val
 
-    # Check previous a_val
+        candidates_a = []
 
-    if a_val < current:
+        # Check previous a_val
 
-        candidates_a.append(a_low)
+        if a_val < current:
 
-    # Check previous d_val
+            candidates_a.append(a_low)
 
-    if d_val < current:
+        # Check previous d_val
 
-        candidates_a.append(d_low)
+        if d_val < current:
 
-    # Add option to start new subarray
+            candidates_a.append(d_low)
 
-    candidates_a.append(r)
+        # Add option to start new subarray
 
-    new_a_low = min(candidates_a)
+        candidates_a.append(r)
 
-    new_a_val = current
+        new_a_low = min(candidates_a)
 
-    # Compute new_d_low and new_d_val
+        new_a_val = current
 
-    candidates_d = []
+        # Compute new_d_low and new_d_val
 
-    if a_val > current:
+        candidates_d = []
 
-        candidates_d.append(a_low)
+        if a_val > current:
 
-    if d_val > current:
+            candidates_d.append(a_low)
 
-        candidates_d.append(d_low)
+        if d_val > current:
 
-    # Add option to start new subarray
+            candidates_d.append(d_low)
 
-    candidates_d.append(r)
+        # Add option to start new subarray
 
-    new_d_low = min(candidates_d)
+        candidates_d.append(r)
 
-    new_d_val = current
+        new_d_low = min(candidates_d)
 
-    # Update a and d
+        new_d_val = current
 
-    a_val, a_low = new_a_val, new_a_low
+        # Update a and d
 
-    d_val, d_low = new_d_val, new_d_low
+        a_val, a_low = new_a_val, new_a_low
 
-    # Compute earliest_l for this r
+        d_val, d_low = new_d_val, new_d_low
 
-    earliest_l = min(new_a_low, new_d_low)
+        # Compute earliest_l for this r
 
-    # Add the number of valid l's
+        earliest_l = min(new_a_low, new_d_low)
 
-    current_count = r - earliest_l +1
+        # Add the number of valid l's
 
-    count += current_count
+        current_count = r - earliest_l +1
 
-print(count)
+        count += current_count
 
-Testing this code against the first example:
+    print(count, file=output_stream)
 
-Input:
 
-3
 
-2 3 1
+def test():
+    import io
 
-Processing:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+4 5 2 6 1 3
+""",
+            "output": \
+"""\
+19
+""",
+        }, 
+    ]
 
-r=0: count=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-r=1 (3):
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-candidates_a: a_val=2<3 → add 0. d_val=2<3 → add 0. add r=1. candidates_a = [0,0,1]. new_a_low=0. new_a_val=3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-candidates_d: a_val=2>3? No. d_val=2>3? No. add r=1. candidates_d=[1]. new_d_low=1. new_d_val=3.
+    print('Tests passed 😎')
 
-earliest_l=0. current_count=1-0+1=2. count=1+2=3.
 
-r=2 (1):
+if __name__ == '__main__':
+    test()
 
-candidates_a: a_val=3<1? No. d_val=3<1? No. add 2. candidates_a=[2]. new_a_low=2. new_a_val=1.
 
-candidates_d: a_val=3>1 → add a_low=0. d_val=3>1 → add d_low=1. add r=2. candidates_d = [0,1,2]. new_d_low=0. new_d_val=1.
+```
 
-earliest_l=0. current_count=2-0+1=3. count=3+3=6.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 126, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 119, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '19'
+Got: '21'
 
-Which is correct.
+```
 
 Another test case:
 

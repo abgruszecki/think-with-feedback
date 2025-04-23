@@ -249,97 +249,213 @@ So the updated code would precompute divisors more efficiently.
 
 Now, the code will be as follows:
 
-n, k = map(int, input().split())
+Testing against sample input 1.
 
-MOD = 10**9 +7
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-if k == 0:
+    MOD = 10**9 +7
 
-    print(0)
+    if k == 0:
 
-else:
+        print(0, file=output_stream)
 
-    # Precompute divisors for each j
+    else:
 
-    divisors = [[] for _ in range(n+1)]
+        # Precompute divisors for each j
 
-    for m in range(1, n+1):
+        divisors = [[] for _ in range(n+1)]
 
-        for j in range(m, n+1, m):
+        for m in range(1, n+1):
 
-            divisors[j].append(m)
+            for j in range(m, n+1, m):
 
-    # Initialize DP
+                divisors[j].append(m)
 
-    prev = [0] * (n+1)
+        # Initialize DP
 
-    for j in range(1, n+1):
-
-        prev[j] = 1
-
-    # Iterate from 2 to k
-
-    for _ in range(2, k+1):
-
-        curr = [0] * (n+1)
+        prev = [0] * (n+1)
 
         for j in range(1, n+1):
 
-            sum_val = 0
+            prev[j] = 1
 
-            for m in divisors[j]:
+        # Iterate from 2 to k
 
-                sum_val += prev[m]
+        for _ in range(2, k+1):
 
-                if sum_val >= MOD:
+            curr = [0] * (n+1)
 
-                    sum_val -= MOD
+            for j in range(1, n+1):
 
-            curr[j] = sum_val % MOD
+                sum_val = 0
 
-        prev = curr
+                for m in divisors[j]:
 
-    # Sum all prev[j] for j from 1 to n
+                    sum_val += prev[m]
 
-    total = sum(prev[1:n+1]) % MOD
+                    if sum_val >= MOD:
 
-    print(total)
+                        sum_val -= MOD
 
-Testing sample input 1:
+                curr[j] = sum_val % MOD
 
-n=3, k=2.
+            prev = curr
 
-divisors:
+        # Sum all prev[j] for j from 1 to n
 
-1: [1]
+        total = sum(prev[1:n+1]) % MOD
 
-2: [1,2]
+        print(total, file=output_stream)
 
-3: [1,3]
 
-4: but n=3, so j up to 3.
 
-Then, initial prev is [0,1,1,1].
+def test():
+    import io
 
-Next step (k=2):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 4
+""",
+            "output": \
+"""\
+39
+""",
+        }, 
+    ]
 
-for j=1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum m in divisors[1] which is [1]. sum_val += prev[1] =1. curr[1] =1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-j=2: divisors [1,2]. sum prev[1] + prev[2] =1+1=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-j=3: sum prev[1] + prev[3] =1+1=2.
+    print('Tests passed 😎')
 
-curr is [0,1,2,2]. Sum is 5. Correct.
 
-Sample 2:
+if __name__ == '__main__':
+    test()
 
-n=6, k=4.
 
-But code should handle this correctly.
+```
 
-Another test case: when k=1, output is sum of 1's for all j. So 2 for n=2. Correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+
+    MOD = 10**9 +7
+
+    if k == 0:
+
+        print(0, file=output_stream)
+
+    else:
+
+        # Precompute divisors for each j
+
+        divisors = [[] for _ in range(n+1)]
+
+        for m in range(1, n+1):
+
+            for j in range(m, n+1, m):
+
+                divisors[j].append(m)
+
+        # Initialize DP
+
+        prev = [0] * (n+1)
+
+        for j in range(1, n+1):
+
+            prev[j] = 1
+
+        # Iterate from 2 to k
+
+        for _ in range(2, k+1):
+
+            curr = [0] * (n+1)
+
+            for j in range(1, n+1):
+
+                sum_val = 0
+
+                for m in divisors[j]:
+
+                    sum_val += prev[m]
+
+                    if sum_val >= MOD:
+
+                        sum_val -= MOD
+
+                curr[j] = sum_val % MOD
+
+            prev = curr
+
+        # Sum all prev[j] for j from 1 to n
+
+        total = sum(prev[1:n+1]) % MOD
+
+        print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Now, in Python, using list comprehensions and modulo operations efficiently.
 

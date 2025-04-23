@@ -870,35 +870,258 @@ So max_diameter is 1.
 
 Which matches the sample output.
 
-Another sample:
+Testing against sample input 2.
 
-Second input:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    edges = [[] for _ in range(n)]
+
+    for _ in range(n-1):
+
+       u, v = map(int, input_stream.readline().rstrip("\n").split())
+
+       u -=1
+
+       v -=1
+
+       edges[u].append(v)
+
+       edges[v].append(u)
+
+    # Precompute smallest prime factors (SPF) up to 2e5.
+
+    max_a = 2 *10**5
+
+    spf = list(range(max_a +1))
+
+    for i in range(2, int(max_a**0.5) +1):
+
+       if spf[i] == i:
+
+           for j in range(i*i, max_a+1, i):
+
+               if spf[j] == j:
+
+                   spf[j] = i
+
+    # Function to get unique primes of x
+
+    def get_primes(x):
+
+       primes = set()
+
+       if x ==1:
+
+           return primes
+
+       while x !=1:
+
+           p = spf[x]
+
+           primes.add(p)
+
+           while x % p ==0:
+
+               x = x//p
+
+       return primes
+
+    # For each node, get its primes.
+
+    primes_list = [get_primes(x) for x in a]
+
+    # Build prime_to_nodes dictionary.
+
+    from collections import defaultdict
+
+    prime_to_nodes = defaultdict(list)
+
+    for i in range(n):
+
+       for p in primes_list[i]:
+
+           prime_to_nodes[p].append(i)
+
+    max_diameter = 0
+
+    # For each prime in prime_to_nodes, process its nodes.
+
+    for p, nodes in prime_to_nodes.items():
+
+       m = len(nodes)
+
+       if m ==0:
+
+           continue
+
+       # The maximum possible diameter for this group is at least 1 (if m >=1)
+
+       # But maybe there's a larger one.
+
+       # We need to process connected components.
+
+       # Create a visited array for this group.
+
+       visited = [False]*n
+
+       # Iterate through all nodes in nodes.
+
+       for u in nodes:
+
+           if not visited[u]:
+
+               # BFS to find connected component.
+
+               component = []
+
+               q = deque([u])
+
+               visited[u] = True
+
+               component.append(u)
+
+               while q:
+
+                   current = q.popleft()
+
+                   for v in edges[current]:
+
+                       if not visited[v] and p in primes_list[v]:
+
+                           visited[v] = True
+
+                           q.append(v)
+
+                           component.append(v)
+
+               # Compute diameter of this component.
+
+               # component is a list of nodes.
+
+               # component_set = set(component)
+
+               # compute diameter.
+
+               if not component:
+
+                   continue
+
+               # First BFS to find farthest node.
+
+               start = component[0]
+
+               max_dist = 1
+
+               farthest_node = start
+
+               visited_bfs = {node:False for node in component}
+
+               q = deque([(start, 1)])
+
+               visited_bfs[start] = True
+
+               while q:
+
+                   node, dist = q.popleft()
+
+                   if dist > max_dist:
+
+                       max_dist = dist
+
+                       farthest_node = node
+
+                   for v in edges[node]:
+
+                       if v in component and not visited_bfs[v]:
+
+                           visited_bfs[v] = True
+
+                           q.append( (v, dist +1) )
+
+               # Second BFS from farthest_node.
+
+               max_dist = 1
+
+               visited_bfs = {node:False for node in component}
+
+               q = deque([(farthest_node, 1)])
+
+               visited_bfs[farthest_node] = True
+
+               while q:
+
+                   node, dist = q.popleft()
+
+                   if dist > max_dist:
+
+                       max_dist = dist
+
+                   for v in edges[node]:
+
+                       if v in component and not visited_bfs[v]:
+
+                           visited_bfs[v] = True
+
+                           q.append( (v, dist +1) )
+
+               # Update max_diameter.
+
+               if max_dist > max_diameter:
+
+                   max_diameter = max_dist
+
+    print(max_diameter if max_diameter >=1 else 0, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
+1 1 1
+1 2
+2 3
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-2 3 4
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Edges are 1-3 and 2-3 (nodes 0, 1, 2).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-In this case, the tree is 0 connected to 2, and 1 connected to 2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For prime 2:
+    print('Tests passed 😎')
 
-nodes 0 and 2.
 
-In the induced subgraph, 0 is connected to 2 (since in the original tree, 0 is connected to 2 (third node?), wait, let's see:
+if __name__ == '__main__':
+    test()
 
-Original edges are between 1-3 and 2-3. Wait, in the input, the edges are:
 
-First edge is 1 and 3 → nodes 0 and 2 (0-based: 1 becomes 0, 3 becomes 2).
+```
 
-Second edge is 2 and 3 → node 1 (2) and node 2 (3).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Wait, no. The input is for 3 nodes. The first edge is 1-3: but in 0-based terms, nodes are 0, 1, 2. So input 1 and 3 would be out of range. Wait, the input is probably 1-based. So in code, after reading u and v, subtract 1 to convert to 0-based.
-
-So the input edges for the second sample:
-
-1 3 → but n=3, so nodes 1 and 3 are out of range. So probably, the input is:
+```
 
 Sample input 2:
 

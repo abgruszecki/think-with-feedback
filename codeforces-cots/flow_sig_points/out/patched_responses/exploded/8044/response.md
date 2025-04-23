@@ -313,86 +313,86 @@ But note that in Python, the heapq module only provides a min-heap. So when addi
 
 So, the code should be:
 
+Testing against sample input 1.
+
+```python
 import heapq
 
-n, k = map(int, input().split())
-songs = []
-for _ in range(n):
-    t, b = map(int, input().split())
-    songs.append( (-b, t) )  # sort in descending order of b, so store as -b for min-heap
 
-songs.sort()
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    songs = []
+    for _ in range(n):
+        t, b = map(int, input_stream.readline().rstrip("\n").split())
+        songs.append( (-b, t) )  # sort in descending order of b, so store as -b for min-heap
 
-max_pleasure = 0
-heap = []
-sum_t = 0
+    songs.sort()
 
-for neg_b, t in songs:
-    b = -neg_b
-    heapq.heappush(heap, t)
-    sum_t += t
-    if len(heap) > k:
-        popped = heapq.heappop(heap)
-        sum_t -= popped
-    current_pleasure = sum_t * b
-    if current_pleasure > max_pleasure:
-        max_pleasure = current_pleasure
+    max_pleasure = 0
+    heap = []
+    sum_t = 0
 
-print(max_pleasure)
+    for neg_b, t in songs:
+        b = -neg_b
+        heapq.heappush(heap, t)
+        sum_t += t
+        if len(heap) > k:
+            popped = heapq.heappop(heap)
+            sum_t -= popped
+        current_pleasure = sum_t * b
+        if current_pleasure > max_pleasure:
+            max_pleasure = current_pleasure
 
-Wait, but songs are sorted in ascending order of -b, which is descending order of b. So the first song in the list has the highest b. Then each next has lower or equal.
+    print(max_pleasure, file=output_stream)
 
-So for each song, we process them in order of highest to lowest b.
 
-The heap is a min-heap. So when we push t, and the heap's size exceeds k, we pop the smallest t in the heap. So the heap contains the largest possible t's, up to k elements.
 
-The sum_t is the sum of the elements in the heap, which are the largest k t's so far.
+def test():
+    import io
 
-Multiply by the current b (which is the minimum in the subset, since all songs processed before have higher or equal b, and this is the current song's b).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 3
+12 31
+112 4
+100 100
+13 55
+55 50
+""",
+            "output": \
+"""\
+10000
+""",
+        }, 
+    ]
 
-So this should work.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Testing with the first example:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-After sorting, songs are ordered by b descending:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-6 8 (b=8) --> stored as (-8,6)
+    print('Tests passed 😎')
 
-4 7 (b=7) --> (-7,4)
 
-3 6 (b=6) --> (-6,3)
+if __name__ == '__main__':
+    test()
 
-15 1 (b=1) --> (-1,15)
 
-So the sorted list is:
+```
 
-[(-8,6), (-7,4), (-6,3), (-1,15)]
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Processing each:
-
-First song: b=8, t=6.
-
-heap is [6]. sum_t=6.
-
-current_pleasure=6*8=48. max is 48.
-
-Second song: b=7, t=4.
-
-add to heap: heap is [4,6] (min-heap, but after pushing, it's heapified. So the heap structure is [4,6], sum=10.
-
-current_pleasure=10*7=70. max is 70.
-
-Third song: t=3, b=6.
-
-sum becomes 10+3=13. heap size 3 (elements 3,4,6). sum=13*6=78. max is 78.
-
-Fourth song: t=15, b=1.
-
-Add 15 to heap. heap becomes [3,4,6,15]. size 4>3. Pop 3. sum_t=13-3 +15 = 25.
-
-current_pleasure=25*1=25. max remains 78.
-
-Thus, correct.
+```
 
 Second example:
 

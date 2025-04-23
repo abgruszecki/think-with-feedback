@@ -25,27 +25,63 @@ Result is first_half_reversed + second_half_reversed.
 
 So code would be something like:
 
-s = input().strip()
+Testing against sample input 1.
 
-n = len(s) // 2
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-first = s[:n][::-1]
+    n = len(s) // 2
 
-second = s[n:][::-1]
+    first = s[:n][::-1]
 
-print(first + second)
+    second = s[n:][::-1]
 
-Yes. That's all. For example, in the second test case 'qwertyasdfgh' which is length 12. So n is 6. The first half is 'qwerty' → reversed is 'ytrewq'. The second half is 'asdfgh' → reversed is 'hgfdsa'. So concatenated gives 'ytrewqhgfdsa', which matches the sample.
+    print(first + second, file=output_stream)
 
-So the code is straightforward. There's no need for any complex data structures here. Since the string operations are O(n) and n is up to 20, it's very efficient. So this approach is optimal.
 
-Now, the code in Python:
 
-Read the input, split into two parts, reverse each, concatenate and print.
+def test():
+    import io
 
-Testing the code with the examples. Let's check the first example:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+qwertyasdfgh
+""",
+            "output": \
+"""\
+ytrewqhgfdsa
+""",
+        }, 
+    ]
 
-Input: codeforces → len 10. n=5. s[:5] is 'codef', reversed is 'fedoc'. s[5:] is 'orces' (assuming the original split is correct). Wait 'codeforces' is spelled as c o d e f o r c e s. So the first 5 letters are c o d e f → indices 0-4. Then the next 5 are o (5), r (6), c (7), e (8), s (9). So reversed second half would be s e c r o. So when reversed, the second part is 'secro'. So concatenated is 'fedoc' + 'secro' = 'fedocsecro' which is correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Yes. So the code works.
 

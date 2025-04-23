@@ -213,132 +213,79 @@ Then process each character in the string.
 
 So code:
 
+Testing against sample input 1.
+
+```python
 import heapq
 
-n = int(input())
-w_list = list(map(int, input().split()))
-rows = sorted([(w, i+1) for i, w in enumerate(w_list)], key=lambda x: x[0])
-s = input().strip()
 
-output = []
-current_intro = 0
-heap = []
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    w_list = list(map(int, input_stream.readline().rstrip("\n").split()))
+    rows = sorted([(w, i+1) for i, w in enumerate(w_list)], key=lambda x: x[0])
+    s = input_stream.readline().rstrip("\n").strip()
 
-for c in s:
-    if c == '0':
-        w, idx = rows[current_intro]
-        output.append(idx)
-        heapq.heappush(heap, (-w, idx))
-        current_intro += 1
-    else:
-        neg_w, idx = heapq.heappop(heap)
-        output.append(idx)
+    output = []
+    current_intro = 0
+    heap = []
 
-print(' '.join(map(str, output)))
+    for c in s:
+        if c == '0':
+            w, idx = rows[current_intro]
+            output.append(idx)
+            heapq.heappush(heap, (-w, idx))
+            current_intro += 1
+        else:
+            neg_w, idx = heapq.heappop(heap)
+            output.append(idx)
 
-Wait, but in the first sample, after adding the first two rows (2 and 1) to the heap, the heap elements are (-1, 2) and (-3, 1). When we push into the heap, the heapq in Python maintains it as a min-heap. So the first element is the smallest. So after pushing (-1,2) and (-3, 1), the heap structure is:
+    print(' '.join(map(str, output)), file=output_stream)
 
-The root is -3 (since it's smaller than -1). So when you pop, you get (-3, 1), which is the row with w=3. So the first '1' in the sample would output 1. The second '1' would pop (-1, 2), output 2.
 
-Which matches the sample's output.
 
-Yes, the code seems correct.
+def test():
+    import io
 
-Testing the second sample:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 6
-
 10 8 9 11 13 5
-
 010010011101
+""",
+            "output": \
+"""\
+6 6 2 3 3 1 4 4 1 2 5 5
+""",
+        }, 
+    ]
 
-The sorted rows are:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-5 (row 6), 8 (row2), 9 (row3), 10 (row1), 11 (row4), 13 (row5).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The passenger string is 0 1 0 0 1 0 0 1 1 1 0 1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Processing each character:
+    print('Tests passed 😎')
 
-Let's index the sorted rows as 0:5 (6), 1:8 (2), 2:9 (3), 3:10 (1), 4:11 (4), 5:13 (5).
 
-current_intro starts at 0.
+if __name__ == '__main__':
+    test()
 
-heap is empty.
 
-Processing each character:
+```
 
-0: take row 0 (5,6). push (-5,6). output 6.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-current_intro is 1.
-
-1: pop the heap. Only (-5,6). output 6.
-
-current_intro still 1.
-
-0: take row1 (8,2). push (-8,2). output 2.
-
-current_intro 2.
-
-0: take row2 (9,3). push (-9,3). output3.
-
-current_intro 3.
-
-1: pop max from heap. The heap has (-8,2), (-9,3). The smallest is -9, so pop (-9,3). output3.
-
-current_intro 3.
-
-0: take row3 (10,1). push (-10,1). output1.
-
-current_intro4.
-
-0: take row4 (11,4). push (-11,4). output4.
-
-current_intro5.
-
-1: pop max. The heap has (-8,2), (-10,1), (-11,4). The smallest is -11, so pop (-11,4). output4.
-
-1: pop next smallest, which is -10 (row1). output1.
-
-1: pop next, which is -8 (row2). output2.
-
-0: take row5 (13,5). push (-13,5). output5.
-
-current_intro6 (but n is 6, so no more).
-
-1: pop (-13,5). output5.
-
-So the output is 6,6,2,3,3,1,4,4,1,2,5,5. Which matches the sample.
-
-Yes, so the code works.
-
-Now, for the code:
-
-We need to read the input correctly, then process the string.
-
-The code is as written above. Let's test for possible edge cases.
-
-Edge case 1: n=1. Input:
-
-1
-
-5
-
-01
-
-The sorted rows is [(5,1)].
-
-Passenger string is '01'.
-
-Processing:
-
-0: take row1. Push (-5,1). output [1].
-
-1: pop (-5,1). output [1,1].
-
-Which is correct.
+```
 
 Another edge case: all introverts first, then extroverts.
 

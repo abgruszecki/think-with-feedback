@@ -270,10 +270,14 @@ Then sum the message.
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-def main():
-    data = sys.stdin.read().split()
+
+def main(input_stream, output_stream):
+    data = input_stream.read().split()
     ptr = 0
     n, k, m = map(int, data[ptr:ptr+3])
     ptr +=3
@@ -298,22 +302,59 @@ def main():
     # process the message
     message = data[ptr:ptr+m]
     total = sum(word_min[word] for word in message)
-    print(total)
+    print(total, file=output_stream)
 
-if __name__ == "__main__":
-    main()
 
-This code should handle the inputs correctly.
 
-Testing the first sample:
+def test():
+    import io
 
-The groups are processed correctly. The message is summed correctly.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 4 4
+i loser am the second
+100 20 1 5 10
+1 1
+1 3
+2 2 5
+1 4
+i am the second
+""",
+            "output": \
+"""\
+116
+""",
+        }, 
+    ]
 
-But wait, in the group processing, for the third group, indices are 2 and 5 (1-based), which become 1 and 4 (0-based). The words are 'loser' (words[1]) and 'second' (words[4]). So their entries in the dictionary are both set to min(1,10) in the first sample, which is 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Thus, the code should be correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

@@ -1399,54 +1399,92 @@ Thus, after much struggling, I conclude that the correct approach is to model th
 
 The code for this is as follows, which passes the sample inputs:
 
-n = int(input())
-s = input()
+Testing against sample input 1.
 
-next_occurrence = [{} for _ in range(n + 2)]
-for i in range(n-1, -1, -1):
-    next_occurrence[i] = next_occurrence[i+1].copy()
-    next_occurrence[i][s[i]] = i
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n")
 
-max_len = 0
-current_pos = -1
-allowed = set(s)
+    next_occurrence = [{} for _ in range(n + 2)]
+    for i in range(n-1, -1, -1):
+        next_occurrence[i] = next_occurrence[i+1].copy()
+        next_occurrence[i][s[i]] = i
 
-while True:
-    next_pos = None
-    best_char = None
-    for c in allowed:
-        pos = next_occurrence[current_pos + 1].get(c)
-        if pos is not None:
-            if next_pos is None or pos < next_pos:
-                next_pos = pos
-                best_char = c
-    if next_pos is None:
-        break
-    max_len += 1
-    current_pos = next_pos
-    allowed = set(s[next_pos])
+    max_len = 0
+    current_pos = -1
+    allowed = set(s)
 
-print(max_len)
+    while True:
+        next_pos = None
+        best_char = None
+        for c in allowed:
+            pos = next_occurrence[current_pos + 1].get(c)
+            if pos is not None:
+                if next_pos is None or pos < next_pos:
+                    next_pos = pos
+                    best_char = c
+        if next_pos is None:
+            break
+        max_len += 1
+        current_pos = next_pos
+        allowed = set(s[next_pos])
 
-This code initializes the allowed set as all characters in the string. For each step, it selects the earliest possible character from the allowed set. After selecting a character, the allowed set is updated to the characters in the current substring (which is the character itself). This allows the next step to select the same character again if it appears later.
+    print(max_len, file=output_stream)
 
-Testing this code with the first sample:
 
-Input:
 
-7
+def test():
+    import io
 
-abcdbcc
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+bbcb
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-The allowed set starts as {'a','b','c','d'}.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The earliest character is 'a' at 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-allowed becomes {'a'}.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Next step looks for 'a' after 0. The next 'a' is not present, so loop breaks.
+    print('Tests passed 😎')
 
-Thus, the code returns 1, which is incorrect.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 65, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 58, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '2'
+Got: '3'
+
+```
 
 Thus, this code is also incorrect.
 

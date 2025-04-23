@@ -130,11 +130,60 @@ Wait, but what if the array is not sorted? But the problem statement says that t
 
 So the code is correct.
 
-Testing the first example:
+Testing against sample input 1.
 
-a = [3,6,7,10], k=2. sum_replace is 7+10=17. Then sum_total is 26. subtract 17, add 2*2=4. 26-17=9 +4=13.
+```python
+def main(input_stream, output_stream):
+    n, k, x = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    total = sum(a)
+    replaced_sum = sum(a[-k:]) if k else 0
+    print(total - replaced_sum + x * k, file=output_stream)
 
-Yes.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 2 1
+100 100 100 100 100
+""",
+            "output": \
+"""\
+302
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: a is [100,100,100,100,100], k=2. sum_replace is 100+100=200. sum_total 500. 500-200=300 +2*1=302.
 

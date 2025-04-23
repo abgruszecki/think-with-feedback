@@ -319,36 +319,66 @@ In Python, for efficiency, when reading a large list, it's better to read the en
 
 So, the code would be:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n, a, b = map(int, sys.stdin.readline().split())
-x = list(map(int, sys.stdin.readline().split()))
-ans = []
-for xi in x:
-    M = (xi * a) // b
-    w = (M * b + a -1) // a
-    ans.append(str(xi - w))
-print(' '.join(ans))
 
-Yes, that's the code. Let's test with the samples.
+def main(input_stream, output_stream):
+    n, a, b = map(int, input_stream.readline().split())
+    x = list(map(int, input_stream.readline().split()))
+    ans = []
+    for xi in x:
+        M = (xi * a) // b
+        w = (M * b + a -1) // a
+        ans.append(str(xi - w))
+    print(' '.join(ans), file=output_stream)
 
-Sample 1:
 
-After reading, the x list is [12,6,11,9,1].
 
-Processing each:
+def test():
+    import io
 
-12: M=12*1//4=3. w=(3*4 +1-1)/1=12. 12-12=0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 1 2
+1 2 3
+""",
+            "output": \
+"""\
+1 0 1
+""",
+        }, 
+    ]
 
-6: M=6*1//4=1. w=(4 +0)/1=4. 6-4=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-11: M=11*1//4=2. w=(8+0)/1=8. 11-8=3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-9: M=9//4=2. w=8. 9-8=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-1: M=0. w=0. 1-0=1.
+    print('Tests passed 😎')
 
-So output is 0 2 3 1 1. Correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample:
 

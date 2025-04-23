@@ -267,105 +267,234 @@ Handle the input. Note that the edges are given as u_i, v_i, x_i.
 
 The code:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-n, k = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-parent = list(range(n+1))  # 1-based
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-size = [1]*(n+1)
+    parent = list(range(n+1))  # 1-based
 
-def find(u):
+    size = [1]*(n+1)
 
-    while parent[u] != u:
+    def find(u):
 
-        parent[u] = parent[parent[u]]
+        while parent[u] != u:
 
-        u = parent[u]
+            parent[u] = parent[parent[u]]
 
-    return u
+            u = parent[u]
 
-for _ in range(n-1):
+        return u
 
-    u, v, x = map(int, input().split())
+    for _ in range(n-1):
 
-    if x ==0:
+        u, v, x = map(int, input_stream.readline().rstrip("\n").split())
 
-        ru = find(u)
+        if x ==0:
 
-        rv = find(v)
+            ru = find(u)
 
-        if ru != rv:
+            rv = find(v)
 
-            if size[ru] < size[rv]:
+            if ru != rv:
 
-                parent[ru] = rv
+                if size[ru] < size[rv]:
 
-                size[rv] += size[ru]
+                    parent[ru] = rv
 
-            else:
+                    size[rv] += size[ru]
 
-                parent[rv] = ru
+                else:
 
-                size[ru] += size[rv]
+                    parent[rv] = ru
 
-# Now collect all root components
+                    size[ru] += size[rv]
 
-sum_bad =0
+    # Now collect all root components
 
-seen = set()
+    sum_bad =0
 
-for i in range(1, n+1):
+    seen = set()
 
-    root = find(i)
+    for i in range(1, n+1):
 
-    if root not in seen:
+        root = find(i)
 
-        seen.add(root)
+        if root not in seen:
 
-        sum_bad = (sum_bad + pow(size[root], k, MOD)) % MOD
+            seen.add(root)
 
-total = pow(n, k, MOD)
+            sum_bad = (sum_bad + pow(size[root], k, MOD)) % MOD
 
-ans = (total - sum_bad) % MOD
+    total = pow(n, k, MOD)
 
-print(ans)
+    ans = (total - sum_bad) % MOD
 
-Wait, but in the code above, the find function is implemented iteratively. Also, when we process each edge, we call find(u) and find(v). Then union them.
+    print(ans, file=output_stream)
 
-But when collecting the components, after processing all edges, the for loop iterates over each node, finds its root, and if the root hasn't been seen, adds the size of the component to sum_bad. Because each root is processed once.
 
-Yes.
 
-But the code for the DSU can be optimized. The find function here uses path compression by making each node point directly to the root during the find. This is correct.
+def test():
+    import io
 
-Wait, the find function as written:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 6
+1 2 0
+1 3 0
+1 4 0
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-def find(u):
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-    while parent[u] != u:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-        parent[u] = parent[parent[u]]
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-        u = parent[u]
+    print('Tests passed 😎')
 
-    return u
 
-This is path compression, but it's iterative. Each time find is called, the parent of u is updated to its grandparent. This is a standard path compression technique. So after the first find, subsequent calls will be O(1) on average.
+if __name__ == '__main__':
+    test()
 
-Yes.
 
-So the code should be correct.
+```
 
-Testing against the examples.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-First example:
+```
 
-n=4, k=4. All edges are black. So no unions. Each component is size 1. So sum_bad is 4 * 1^4 =4. total is 4^4=256. 256-4=252. Correct.
+Testing against sample input 2.
 
-Second example:
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-n=4, edges all red. So all nodes are in one component. sum_bad is 4^6 mod MOD. total is 4^6 mod MOD. 4^6=4096. 4096-4096=0. Correct.
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+
+    parent = list(range(n+1))  # 1-based
+
+    size = [1]*(n+1)
+
+    def find(u):
+
+        while parent[u] != u:
+
+            parent[u] = parent[parent[u]]
+
+            u = parent[u]
+
+        return u
+
+    for _ in range(n-1):
+
+        u, v, x = map(int, input_stream.readline().rstrip("\n").split())
+
+        if x ==0:
+
+            ru = find(u)
+
+            rv = find(v)
+
+            if ru != rv:
+
+                if size[ru] < size[rv]:
+
+                    parent[ru] = rv
+
+                    size[rv] += size[ru]
+
+                else:
+
+                    parent[rv] = ru
+
+                    size[ru] += size[rv]
+
+    # Now collect all root components
+
+    sum_bad =0
+
+    seen = set()
+
+    for i in range(1, n+1):
+
+        root = find(i)
+
+        if root not in seen:
+
+            seen.add(root)
+
+            sum_bad = (sum_bad + pow(size[root], k, MOD)) % MOD
+
+    total = pow(n, k, MOD)
+
+    ans = (total - sum_bad) % MOD
+
+    print(ans, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 5
+1 2 1
+2 3 0
+""",
+            "output": \
+"""\
+210
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

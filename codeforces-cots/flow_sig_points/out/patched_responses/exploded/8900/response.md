@@ -309,83 +309,102 @@ So for each note, the steps are:
 
    Read n.
 
-   a = list(map(int, input().split()))
+Testing against sample input 1.
 
-   b = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-   total =0
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-   for ai, bi in zip(a, b):
+    total =0
 
-       lower = max(1, bi - ai)
+    for ai, bi in zip(a, b):
 
-       upper = min(ai, bi -1)
+        lower = max(1, bi - ai)
 
-       if lower > upper:
+        upper = min(ai, bi -1)
 
-           total -=1
+        if lower > upper:
 
-           continue
+            total -=1
 
-       mid = bi // 2
+            continue
 
-       candidates = [mid, mid +1, lower, upper]
+        mid = bi // 2
 
-       max_p = 0
+        candidates = [mid, mid +1, lower, upper]
 
-       for xi in candidates:
+        max_p = 0
 
-           if lower <= xi <= upper:
+        for xi in candidates:
 
-               p = xi * (bi - xi)
+            if lower <= xi <= upper:
 
-               if p > max_p:
+                p = xi * (bi - xi)
 
-                   max_p = p
+                if p > max_p:
 
-       total += max_p
+                    max_p = p
 
-   print(total)
+        total += max_p
 
-   Wait, but for bi=2, ai=1:
+    print(total, file=output_stream)
 
-   lower is max(1, 2-1)=1, upper is min(1, 1) =1. So xi=1. product is 1*1=1.
 
-   Which is correct.
 
-   So this code should handle all cases.
+def test():
+    import io
 
-   Let's test the first sample:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+2
+5
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-   Input:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-   3
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-   1 1 2
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-   2 2 3
+    print('Tests passed 😎')
 
-   For the third note:
 
-   ai=2, bi=3.
+if __name__ == '__main__':
+    test()
 
-   lower = max(1,3-2)=1.
 
-   upper = min(2,3-1=2) →2.
+```
 
-   mid=1.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 75, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 68, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '-1'
+Got: '1'
 
-   candidates are 1,2,1,2.
-
-   So xi can be 1,2,1,2 → check 1 and 2.
-
-   For xi=1: product 1*2=2.
-
-   For xi=2: product 2*1=2.
-
-   So max_p=2.
-
-   So code is correct.
+```
 
    Now, edge cases: when bi is 2 and ai=1. Then lower and upper are 1 and 1. So code adds 1*1=1.
 

@@ -995,19 +995,22 @@ This approach should work.
 
 Thus, the code can be written as:
 
+Testing against sample input 1.
+
+```python
 from collections import Counter
 
-def main():
 
-    a = input().strip()
+def main(input_stream, output_stream):
+    a = input_stream.readline().rstrip("\n").strip()
 
-    b = input().strip()
+    b = input_stream.readline().rstrip("\n").strip()
 
     if len(a) < len(b):
 
         # output sorted in descending order
 
-        print(''.join(sorted(a, reverse=True)))
+        print(''.join(sorted(a, reverse=True)), file=output_stream)
 
         return
 
@@ -1017,7 +1020,7 @@ def main():
 
     if a_sorted <= b:
 
-        print(a_sorted)
+        print(a_sorted, file=output_stream)
 
         return
 
@@ -1091,63 +1094,52 @@ def main():
 
     result = backtrack(0, a_counter, True, [])
 
-    print(result)
+    print(result, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3921
+10000
+""",
+            "output": \
+"""\
+9321
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
 
 if __name__ == '__main__':
+    test()
 
-    main()
 
-This code should handle the cases correctly.
+```
 
-Testing with the first sample:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-a=123, b=222.
-
-a_sorted is '321' > '222'.
-
-So backtracking starts.
-
-pos=0, current_prefix is [], tight=True.
-
-max_digit is '2'.
-
-digits_sorted are ['3','2','1'].
-
-d='3' is skipped (3>2).
-
-d='2' is considered.
-
-new_counter is {'1':1, '3':1}.
-
-new_tight is True (2 ==2).
-
-new_prefix is ['2'].
-
-Proceed to pos=1.
-
-At pos=1:
-
-max_digit is '2' (b_digits[1]).
-
-digits_sorted are ['3', '1'].
-
-d='3' is skipped (3>2).
-
-d='1' is considered.
-
-new_counter is {'3':1}.
-
-new_tight is False (1 <2).
-
-new_prefix is ['2','1'].
-
-new_tight is False → build candidate.
-
-remaining digits: ['3'].
-
-candidate is '21' + '3' → '213' which is <= '222'. So returns '213'.
-
-Thus, the correct result.
+```
 
 Another test case: a=3921, b=10000. Since len(a) is4, len(b) is5. So output is sorted a descending: 9321.
 

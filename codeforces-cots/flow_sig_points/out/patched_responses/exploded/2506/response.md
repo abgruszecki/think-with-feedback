@@ -725,261 +725,117 @@ Then, to compare, each transformation is converted to a list of strings (rows), 
 
 So code:
 
-n = int(input())
+Testing against sample input 1.
 
-grid1 = [list(input().strip()) for _ in range(n)]
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-grid2 = [input().strip() for _ in range(n)]
+    grid1 = [list(input_stream.readline().rstrip("\n").strip()) for _ in range(n)]
 
-def rotate90(matrix):
+    grid2 = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
 
-    return [list(row) for row in zip(*matrix[::-1])]
+    def rotate90(matrix):
 
-def generate_transformations(matrix):
+        return [list(row) for row in zip(*matrix[::-1])]
 
-    transforms = []
+    def generate_transformations(matrix):
 
-    current = matrix
+        transforms = []
 
-    transforms.append(current)
-
-    for _ in range(3):
-
-        current = rotate90(current)
+        current = matrix
 
         transforms.append(current)
 
-    # flipped vertically
+        for _ in range(3):
 
-    flipped = [row[::-1] for row in matrix]
+            current = rotate90(current)
 
-    current = flipped
+            transforms.append(current)
 
-    transforms.append(current)
+        # flipped vertically
 
-    for _ in range(3):
+        flipped = [row[::-1] for row in matrix]
 
-        current = rotate90(current)
+        current = flipped
 
         transforms.append(current)
 
-    return transforms
+        for _ in range(3):
 
-# Generate all possible transformations
+            current = rotate90(current)
 
-transformed = generate_transformations(grid1)
+            transforms.append(current)
 
-# Check each transformed version
+        return transforms
 
-for t in transformed:
+    # Generate all possible transformations
 
-    # Convert to list of strings
+    transformed = generate_transformations(grid1)
 
-    t_str = [''.join(row) for row in t]
+    # Check each transformed version
 
-    if t_str == grid2:
+    for t in transformed:
 
-        print("Yes")
+        # Convert to list of strings
 
-        exit()
+        t_str = [''.join(row) for row in t]
 
-print("No")
+        if t_str == grid2:
 
-Wait, but wait: in the generate_transformations function, the flipped matrix is the original matrix flipped vertically, then rotated. But for each of the four rotations (0,90,180,270) of the flipped matrix.
+            print("Yes", file=output_stream)
 
-Yes.
+            return
 
-But in the code, after flipping the original matrix (vertical flip), then generate the four rotations. So the code for the flipped part adds the flipped matrix (rot0), then rotated 90, 180, 270.
+    print("No", file=output_stream)
 
-So total of 8 transformations.
 
-But let's test the sample input 2:
 
-Sample input 2:
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2
-
 XX
-
 OO
-
 XO
-
 OX
+""",
+            "output": \
+"""\
+No
+""",
+        }, 
+    ]
 
-So grid1 is:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-XX
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-OO → as list of lists: [ ['X', 'X'], ['O','O'] ]
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-grid2 is:
+    print('Tests passed 😎')
 
-XO
 
-OX → [ 'XO', 'OX' ]
+if __name__ == '__main__':
+    test()
 
-After generating transformations:
 
-Original rotations:
+```
 
-Original (0):
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-XX → 'XX'
-
-OO → 'OO'
-
-rot90: after rotating 90 degrees.
-
-The code would transpose and reverse. So original is:
-
-['X', 'X']
-
-['O', 'O']
-
-reversed (matrix[::-1]) becomes:
-
-['O', 'O'], ['X', 'X']
-
-zip(*matrix[::-1]) gives:
-
-('O', 'X'), ('O', 'X') → so rotated 90 is:
-
-[ ['O', 'X'], ['O', 'X'] ]
-
-rot90 → 'OX', 'OX'
-
-rot180: rotate 90 again. So the current is [ ['O', 'X'], ['O', 'X'] ]
-
-rotating again: matrix[::-1] is ['O','X'], ['O','X'] reversed → same as original. zip gives:
-
-('O', 'O'), ('X', 'X') → rotated 180 is:
-
-['O', 'O'], ['X', 'X'] → which is the original rotated 180.
-
-rot270 is another rotation, which would be ['X','O'], ['X','O'] ?
-
-Wait, perhaps it's easier to generate all four rotations.
-
-Then, for the vertical flip of the original.
-
-Original grid1 is:
-
-XX → ['X','X']
-
-OO → ['O','O']
-
-Flipping vertically (reverse each row):
-
-['X','X'] → reversed becomes ['X','X'] → same as original.
-
-['O','O'] → reversed is same.
-
-So vertical flip of original is same as original.
-
-Then, rotating that (so vertical flip rotations would be same as original rotations.
-
-So for this case, the vertical flip doesn't change the grid1, so the transformations generated would include the original rotations and the same rotations again. So in this case, the code would generate 8 transformations, but some duplicates. But in the second sample input, the grid2 is:
-
-XO
-
-OX → which is not present in any of the transformations. So the output is 'No'.
-
-Which matches the sample.
-
-Thus, the code seems correct.
-
-But wait, what about flipping horizontally? For example, in the first sample input, the correct transformation is flipping vertically and then rotating 90 degrees. But according to the code, this is covered.
-
-Because flipping vertically (original flipped) and then rotating 90 is part of the 8 transformations.
-
-Yes.
-
-Thus, the code should work correctly.
-
-Now, check the sample inputs.
-
-First sample input:
-
-After grid1 is:
-
-Row 0: X O O O
-
-Row 1: X X O O
-
-Row 2: O O O O
-
-Row 3: X X X X
-
-The vertical flip of this would reverse each row.
-
-Row 0 becomes O O O X.
-
-Row1 becomes O O X X.
-
-Row2 remains O O O O.
-
-Row3 remains X X X X.
-
-Then, rotating that 90 degrees.
-
-So vertical flipped grid:
-
-Original flipped:
-
-["O","O","O","X"], ["O","O","X","X"], ["O","O","O","O"], ["X","X","X","X"]
-
-Then rotate90: zip(*matrix[::-1]).
-
-matrix[::-1] is the reversed list of rows: ["X","X","X","X"], ["O","O","O","O"], ["O","O","X","X"], ["O","O","O","X"]
-
-zip those rows:
-
-columns are:
-
-(X, O, O, O) → column 0: X, O, O, O → becomes row 0 after zip.
-
-But zip(*matrix[::-1]) gives tuples:
-
-First row of the rotated matrix is (X, O, O, O), which becomes ['X', 'O', 'O', 'O'].
-
-Second row: (X, O, O, O) → ['X', 'O', 'O', 'O'].
-
-Third row: (X, X, O, O) → ['X', 'X', 'O', 'O'].
-
-Fourth row: (X, O, O, X) → ['X', 'O', 'O', 'X'].
-
-So the rotated grid after flipping vertically and rotating 90 is:
-
-XOOO
-
-XOOO
-
-XXOO
-
-XO X X ?
-
-Wait, perhaps the sample's first transformation after vertical flip and rotate90 gives the desired grid2.
-
-The sample's grid2 is:
-
-XOOO
-
-XOOO
-
-XOXO
-
-XOXX.
-
-So after the vertical flip and rotate90, the transformed grid would have rows:
-
-Row0: X O O O → matches first line of grid2.
-
-Row1: X O O O → matches second line.
-
-Row2: X X O O → but the third line of grid2 is XOXO (X O X O).
-
-So perhaps the code's generated transformations don't directly match. So perhaps in the code, the correct transformation is flipping vertically then rotating 270 degrees, or some other combination.
+```
 
 Alternatively, perhaps the code's approach does generate the correct transformation.
 

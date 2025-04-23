@@ -234,92 +234,114 @@ But let's proceed.
 
 Sample code:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n = int(input())
-points = []
-y_dict = dict()
-x_dict = dict()
 
-for _ in range(n):
-    x, y = map(int, input().split())
-    points.append( (x, y) )
-    if y not in y_dict:
-        y_dict[y] = []
-    y_dict[y].append(x)
-    if x not in x_dict:
-        x_dict[x] = []
-    x_dict[x].append(y)
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    points = []
+    y_dict = dict()
+    x_dict = dict()
 
-# sort the lists in the dictionaries
-for y in y_dict:
-    y_dict[y].sort()
-for x in x_dict:
-    x_dict[x].sort()
+    for _ in range(n):
+        x, y = map(int, input_stream.readline().rstrip("\n").split())
+        points.append( (x, y) )
+        if y not in y_dict:
+            y_dict[y] = []
+        y_dict[y].append(x)
+        if x not in x_dict:
+            x_dict[x] = []
+        x_dict[x].append(y)
 
-count = 0
+    # sort the lists in the dictionaries
+    for y in y_dict:
+        y_dict[y].sort()
+    for x in x_dict:
+        x_dict[x].sort()
 
-for x, y in points:
-    # check left and right
-    y_x = y_dict[y]
-    idx = bisect.bisect_left(y_x, x)
-    if idx == 0:
-        has_left = False
-    else:
-        has_left = True
-    if idx == len(y_x) - 1:
-        has_right = False
-    else:
-        has_right = True
+    count = 0
 
-    # check upper and lower
-    x_y = x_dict[x]
-    idy = bisect.bisect_left(x_y, y)
-    if idy == 0:
-        has_lower = False
-    else:
-        has_lower = True
-    if idy == len(x_y) -1:
-        has_upper = False
-    else:
-        has_upper = True
+    for x, y in points:
+        # check left and right
+        y_x = y_dict[y]
+        idx = bisect.bisect_left(y_x, x)
+        if idx == 0:
+            has_left = False
+        else:
+            has_left = True
+        if idx == len(y_x) - 1:
+            has_right = False
+        else:
+            has_right = True
 
-    if has_left and has_right and has_lower and has_upper:
-        count +=1
+        # check upper and lower
+        x_y = x_dict[x]
+        idy = bisect.bisect_left(x_y, y)
+        if idy == 0:
+            has_lower = False
+        else:
+            has_lower = True
+        if idy == len(x_y) -1:
+            has_upper = False
+        else:
+            has_upper = True
 
-print(count)
+        if has_left and has_right and has_lower and has_upper:
+            count +=1
 
-Wait, but in the code above, for a given x and y, the y_x list (x's in same y) is sorted. So bisect_left gives the first occurrence of x. Since all points are unique, x exists exactly once. So idx is the correct position.
+    print(count, file=output_stream)
 
-So for example, if the list is [0,1,3], x=1: idx is 1. So left exists (idx>0) and right exists (idx < 2 (since len is 3, 3-1=2)). So yes.
 
-Similarly for the y list.
 
-This code should work.
+def test():
+    import io
 
-Testing the first sample input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+0 0
+0 1
+1 0
+0 -1
+-1 0
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-Sample 1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-8 points.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-After building the dicts:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-y_dict for y=1: [0,1,3] (from x's 0,1,3).
+    print('Tests passed 😎')
 
-For point (1,1):
 
-y_x = [0,1,3]. idx is 1.
+if __name__ == '__main__':
+    test()
 
-has_left: True (since 1>0). has_right: 1 < 2 → True.
 
-x_dict for x=1: [0,1,2,3]. y=1, idy is 1. has_lower: True (0 exists). has_upper: 2 and 3 → idy=1 < 3 → True.
+```
 
-So all four conditions are met. So count increases.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Similarly for (1,2), which is in y=2's x list (0,1,4). x=1 is in the list. idx=1. left exists (0), right exists (4). Then in x=1's y list, y=2 is index 2. So lower exists (0,1) and upper (3). So all four conditions met.
-
-So code would output 2, which matches the sample.
+```
 
 Sample 2:
 

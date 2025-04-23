@@ -102,29 +102,69 @@ Read p and n from input. Then read n lines of x_i.
 
 So code outline:
 
-p, n = map(int, input().split())
-occupied = set()
-for i in range(n):
-    x = int(input())
-    mod = x % p
-    if mod in occupied:
-        print(i+1)
-        exit()
-    occupied.add(mod)
-print(-1)
+Testing against sample input 1.
 
-Yes, that's the code.
+```python
+def main(input_stream, output_stream):
+    p, n = map(int, input_stream.readline().rstrip("\n").split())
+    occupied = set()
+    for i in range(n):
+        x = int(input_stream.readline().rstrip("\n"))
+        mod = x % p
+        if mod in occupied:
+            print(i+1, file=output_stream)
+            return
+        occupied.add(mod)
+    print(-1, file=output_stream)
 
-Testing the sample inputs:
 
-Sample 1:
 
-Input:
-10 5
-0 → mod10=0 → added.
-21 →1 → added.
-53 →3 → added.
-41 →1 → conflict. i is 3 (0-based), so output 4.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5
+0
+1
+2
+3
+4
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

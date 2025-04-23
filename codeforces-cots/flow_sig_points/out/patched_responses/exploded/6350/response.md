@@ -383,49 +383,81 @@ else:
 
    print(ans)
 
-But let's test this code against the sample inputs.
+Testing against sample input 1.
 
-Sample input 1:
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a.sort(reverse=True)
+    total = sum(a)
+    if total < m:
+        print(-1, file=output_stream)
+    else:
+        low, high = 1, n
+        answer = n
+        while low <= high:
+            mid = (low + high) // 2
+            s = 0
+            for i in range(n):
+                subtract = i // mid
+                temp = a[i] - subtract
+                if temp <= 0:
+                    break
+                s += temp
+                if s >= m:
+                    break
+            if s >= m:
+                answer = mid
+                high = mid - 1
+            else:
+                low = mid + 1
+        print(answer, file=output_stream)
 
-5 8
 
-2 3 1 1 2 → sorted as [3,2,2,1,1]
 
-sum_total is 9 >=8.
+def test():
+    import io
 
-binary search between 1 and 5.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 10
+1 3 4 2 1 4 2
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-Check mid=3 (since (1+5)//2=3):
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-for i=0-4.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i//3 for each:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-0//3=0 → temp=3 → sum=3.
+    print('Tests passed 😎')
 
-i=1: 1//3=0 → temp=2 → sum=5.
 
-i=2: 2//3=0 → temp=2 → sum=7.
+if __name__ == '__main__':
+    test()
 
-i=3:3//3=1 → temp=1-1=0 → break.
 
-sum is 7 <8. So can't use d=3. So we need to go higher.
+```
 
-low becomes 4.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-mid=4.
-
-i=0: subtract 0 → 3 → sum=3.
-
-i=1: subtract 1//4=0 → 2 → sum=5.
-
-i=2: subtract 2//4=0 → 2 → sum=7.
-
-i=3: subtract 3//4=0 → 1 → sum=8. sum >=8. break.
-
-current_sum is 8 >=8. So ans=4, high=3.
-
-Loop ends. So output is 4. Correct.
+```
 
 Sample input 5:
 
@@ -453,35 +485,81 @@ i=3:5-3=2 → sum=14.
 
 i=4:5-4=1 → sum=15. So sum >=15. So d=1 is possible. So answer is 1.
 
-Sample input 4:
+Testing against sample input 4.
 
-5 16.
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a.sort(reverse=True)
+    total = sum(a)
+    if total < m:
+        print(-1, file=output_stream)
+    else:
+        low, high = 1, n
+        answer = n
+        while low <= high:
+            mid = (low + high) // 2
+            s = 0
+            for i in range(n):
+                subtract = i // mid
+                temp = a[i] - subtract
+                if temp <= 0:
+                    break
+                s += temp
+                if s >= m:
+                    break
+            if s >= m:
+                answer = mid
+                high = mid - 1
+            else:
+                low = mid + 1
+        print(answer, file=output_stream)
 
-sum is 25 >=16.
 
-Check d=1: sum=15 <16. So need higher d.
 
-Check d=2:
+def test():
+    import io
 
-for each i:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 26
+5 5 5 5 5
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-i//2:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-0 →0 →5 → sum 5.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-1→0 →5 → sum 10.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-2→1 →5-1=4 → sum 14.
+    print('Tests passed 😎')
 
-3→1 →5-1=4 → sum 18.
 
-sum is 14+4=18 >=16. So mid=2. So set high=1. Then low becomes 2, high=1. Loop ends. So answer is 2.
+if __name__ == '__main__':
+    test()
 
-Yes.
 
-So the code works for the samples.
+```
 
-Now, about the edge cases.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: n=1, m=1.
 

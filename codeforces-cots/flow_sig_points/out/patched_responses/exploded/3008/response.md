@@ -805,103 +805,99 @@ In Python, we can use a while loop, which continues until we return.
 
 So, code outline:
 
-a, b, c = map(int, input().split())
+Testing against sample input 1.
 
-current_remainder = a
+```python
+def main(input_stream, output_stream):
+    a, b, c = map(int, input_stream.readline().rstrip("\n").split())
 
-seen = {}
+    current_remainder = a
 
-position = 1
+    seen = {}
 
-while True:
+    position = 1
 
-    current_remainder *= 10
+    while True:
 
-    digit = current_remainder // b
+        current_remainder *= 10
 
-    if digit == c:
+        digit = current_remainder // b
 
-        print(position)
+        if digit == c:
 
-        exit()
+            print(position, file=output_stream)
 
-    new_remainder = current_remainder % b
+            return
 
-    if new_remainder == 0:
+        new_remainder = current_remainder % b
 
-        if c == 0:
+        if new_remainder == 0:
 
-            print(position +1)
+            if c == 0:
 
-        else:
+                print(position +1, file=output_stream)
 
-            print(-1)
+            else:
 
-        exit()
+                print(-1, file=output_stream)
 
-    if new_remainder in seen:
+            return
 
-        print(-1)
+        if new_remainder in seen:
 
-        exit()
+            print(-1, file=output_stream)
 
-    seen[new_remainder] = position +1
+            return
 
-    current_remainder = new_remainder
+        seen[new_remainder] = position +1
 
-    position +=1
+        current_remainder = new_remainder
 
-Wait, but in the code, after processing each step, the position increments by 1.
+        position +=1
 
-But in the first iteration (position=1):
 
-current_remainder is a.
 
-Multiply by10 → a*10.
+def test():
+    import io
 
-digit is (a*10) //b.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 3 7
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-Check if digit is c.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-new_remainder is (a*10) %b.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Check if new_remainder is zero.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-If not, check if new_remainder is in seen (initially empty).
+    print('Tests passed 😎')
 
-Add new_remainder to seen with position+1 (2).
 
-current_remainder becomes new_remainder.
+if __name__ == '__main__':
+    test()
 
-position increments to 2.
 
-So next iteration:
+```
 
-current_remainder is new_remainder (from previous step).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Multiply by10 again.
-
-So code seems correct.
-
-Testing this code with the first example:
-
-input 1 2 0.
-
-current_remainder =1.
-
-Loop:
-
-position=1:
-
-current_remainder *=10 →10.
-
-digit =10//2=5. 5 !=0. new_remainder=0.
-
-Check new_remainder ==0 → yes.
-
-Check if c is 0 → yes. Print position+1=1+1=2. Exit.
-
-Which is correct.
+```
 
 Another test case: 2 3 7.
 

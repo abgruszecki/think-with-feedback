@@ -453,65 +453,98 @@ But in Python, for n=1e5, using input() in a loop is possible but may be slow. T
 
 So in code:
 
-import sys
+Testing against sample input 1.
 
+```python
+import sys
 from collections import defaultdict
 
-n, m = map(int, sys.stdin.readline().split())
 
-subjects = defaultdict(list)
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
 
-for _ in range(n):
+    subjects = defaultdict(list)
 
-    s_i, r_i = map(int, sys.stdin.readline().split())
+    for _ in range(n):
 
-    subjects[s_i-1].append(r_i)
+        s_i, r_i = map(int, input_stream.readline().split())
 
-sums_for_k = defaultdict(int)
+        subjects[s_i-1].append(r_i)
 
-for s in subjects.values():
+    sums_for_k = defaultdict(int)
 
-    s.sort(reverse=True)
+    for s in subjects.values():
 
-    current_sum = 0
+        s.sort(reverse=True)
 
-    for i in range(len(s)):
+        current_sum = 0
 
-        current_sum += s[i]
+        for i in range(len(s)):
 
-        k = i +1
+            current_sum += s[i]
 
-        if current_sum >0:
+            k = i +1
 
-            sums_for_k[k] += current_sum
+            if current_sum >0:
 
-if sums_for_k:
+                sums_for_k[k] += current_sum
 
-    print(max(sums_for_k.values()))
+    if sums_for_k:
 
-else:
+        print(max(sums_for_k.values()), file=output_stream)
 
-    print(0)
+    else:
 
-Wait, but in the code above, for each subject s in subjects.values(), which is a list of students. Then, for each student in s (sorted in reverse), compute current_sum.
+        print(0, file=output_stream)
 
-Yes.
 
-Testing this code against the examples:
 
-First example:
+def test():
+    import io
 
-sums_for_k after processing all subjects:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 3
+2 6
+3 6
+2 5
+3 5
+1 11
+""",
+            "output": \
+"""\
+23
+""",
+        }, 
+    ]
 
-k=1:9 (subject0) +6 (subject1) +6 (subject2) =21.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-k=2:11 (subject1) +11 (subject2) =22.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-k=3:12 (subject2).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So the maximum is 22.
+    print('Tests passed 😎')
 
-Which is correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Yes.
 

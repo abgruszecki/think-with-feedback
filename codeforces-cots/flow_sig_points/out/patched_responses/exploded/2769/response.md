@@ -832,37 +832,98 @@ But for a=1 and b=1, sum_ab_p_min=2. The loop runs from 2 to 2. So 1 iteration.
 
 Thus, the code should work.
 
-But let's test the code with the first example:
+Testing against sample input 1.
 
-Input:
+```python
+def main(input_stream, output_stream):
+    a, b = input_stream.readline().rstrip("\n").split()
+    a_digits = list(map(int, a))
+    b_digits = list(map(int, b))
+    max_a = max(a_digits)
+    max_b = max(b_digits)
+    p_min = max(max_a, max_b) + 1
 
-78 87
+    def to_base_p(digits, p):
+        val = 0
+        for d in digits:
+            val = val * p + d
+        return val
 
-Digits of a: [7,8], max_a=8.
+    a_p_min = to_base_p(a_digits, p_min)
+    b_p_min = to_base_p(b_digits, p_min)
+    sum_ab_p_min = a_p_min + b_p_min
 
-Digits of b: [8,7], max_b=8.
+    max_length = 0
 
-p_min = 8+1=9.
+    for p in range(p_min, sum_ab_p_min + 1):
+        try:
+            a_p = 0
+            for d in a_digits:
+                a_p = a_p * p + d
+            b_p = 0
+            for d in b_digits:
+                b_p = b_p * p + d
+            sum_ab = a_p + b_p
+            cnt = 0
+            n = sum_ab
+            if n == 0:
+                cnt = 1
+            else:
+                while n > 0:
+                    cnt += 1
+                    n = n // p
+            if cnt > max_length:
+                max_length = cnt
+        except:
+            # In case p is too large leading to overflow (unlikely in Python)
+            pass
 
-sum_ab_p_min = 71 +79=150.
+    print(max_length, file=output_stream)
 
-Loop p from 9 to 150.
 
-For p=9:
 
-sum_ab=150. count_digits(150,9): 150//9=16, 16//9=1, 1//9=0. count=3.
+def test():
+    import io
 
-For p=15:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-a_p =7*15+8=113, b_p=8*15+7=127. sum_ab=240.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-count_digits(240,15): 240//15=16 →16//15=1 →1//15=0. count=3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So the code would find the maximum of 3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Thus, this approach works.
+    print('Tests passed 😎')
 
-Thus, the code can be written as follows.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

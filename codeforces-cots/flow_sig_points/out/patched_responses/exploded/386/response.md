@@ -1487,93 +1487,113 @@ Thus, this should make the code fast enough.
 
 Now, implementing this in Python:
 
-s = input().strip()
+Testing against sample input 1.
 
-t = input().strip()
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-len_s = len(s)
+    t = input_stream.readline().rstrip("\n").strip()
 
-len_t = len(t)
+    len_s = len(s)
 
-if len_t == 0 or len_t > len_s:
+    len_t = len(t)
 
-    print(0)
+    if len_t == 0 or len_t > len_s:
 
-    exit()
+        print(0, file=output_stream)
 
-# Precompute failure function and next_state
+        return
 
-fail = [0]*len_t
+    # Precompute failure function and next_state
 
-k = 0
+    fail = [0]*len_t
 
-for j in range(1, len_t):
+    k = 0
 
-    while k > 0 and t[j] != t[k]:
+    for j in range(1, len_t):
 
-        k = fail[k-1]
+        while k > 0 and t[j] != t[k]:
 
-    if t[j] == t[k]:
+            k = fail[k-1]
 
-        k += 1
+        if t[j] == t[k]:
 
-    fail[j] = k
+            k += 1
 
-next_state = [[0]*26 for _ in range(len_t +1)]
+        fail[j] = k
 
-for j in range(len_t +1):
+    next_state = [[0]*26 for _ in range(len_t +1)]
 
-    for c_idx in range(26):
+    for j in range(len_t +1):
 
-        c = chr(ord('a') + c_idx)
+        for c_idx in range(26):
 
-        if j < len_t and t[j] == c:
+            c = chr(ord('a') + c_idx)
 
-            next_state[j][c_idx] = j+1
+            if j < len_t and t[j] == c:
 
-        else:
-
-            if j == 0:
-
-                next_state[j][c_idx] = 0
+                next_state[j][c_idx] = j+1
 
             else:
 
-                if j <= len_t -1:
+                if j == 0:
 
-                    k_val = fail[j-1]
+                    next_state[j][c_idx] = 0
 
                 else:
 
-                    k_val = fail[-1]
+                    if j <= len_t -1:
 
-                next_state[j][c_idx] = next_state[k_val][c_idx]
+                        k_val = fail[j-1]
 
-prev_dp = [-1e18]*(len_t +1)
+                    else:
 
-prev_dp[0] = 0
+                        k_val = fail[-1]
 
-active_js = [0]
+                    next_state[j][c_idx] = next_state[k_val][c_idx]
 
-for i in range(len_s):
+    prev_dp = [-1e18]*(len_t +1)
 
-    curr_dp = [-1e18]*(len_t +1)
+    prev_dp[0] = 0
 
-    new_active = set()
+    active_js = [0]
 
-    current_char = s[i]
+    for i in range(len_s):
 
-    for j in active_js:
+        curr_dp = [-1e18]*(len_t +1)
 
-        current_val = prev_dp[j]
+        new_active = set()
 
-        if current_val == -1e18:
+        current_char = s[i]
 
-            continue
+        for j in active_js:
 
-        if current_char == '?':
+            current_val = prev_dp[j]
 
-            for c_idx in range(26):
+            if current_val == -1e18:
+
+                continue
+
+            if current_char == '?':
+
+                for c_idx in range(26):
+
+                    j_next = next_state[j][c_idx]
+
+                    count_inc = 1 if j_next == len_t else 0
+
+                    new_count = current_val + count_inc
+
+                    if new_count > curr_dp[j_next]:
+
+                        curr_dp[j_next] = new_count
+
+                        new_active.add(j_next)
+
+            else:
+
+                c_idx = ord(current_char) - ord('a')
 
                 j_next = next_state[j][c_idx]
 
@@ -1587,41 +1607,58 @@ for i in range(len_s):
 
                     new_active.add(j_next)
 
-        else:
+        prev_dp = curr_dp
 
-            c_idx = ord(current_char) - ord('a')
+        active_js = list(new_active)
 
-            j_next = next_state[j][c_idx]
+    max_occurrences = max(prev_dp)
 
-            count_inc = 1 if j_next == len_t else 0
+    print(max(max_occurrences,0), file=output_stream)
 
-            new_count = current_val + count_inc
 
-            if new_count > curr_dp[j_next]:
 
-                curr_dp[j_next] = new_count
+def test():
+    import io
 
-                new_active.add(j_next)
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+glo?yto?e??an?
+or
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-    prev_dp = curr_dp
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-    active_js = list(new_active)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-max_occurrences = max(prev_dp)
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-print(max(max_occurrences,0))
+    print('Tests passed 😎')
 
-This code should handle the cases efficiently.
 
-Testing the first example:
+if __name__ == '__main__':
+    test()
 
-Input:
-winlose???winl???w??
-win
 
-After processing, the code should output 5.
+```
 
-The code should correctly track the state transitions and count each occurrence.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example:
 

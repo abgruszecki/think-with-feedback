@@ -58,23 +58,65 @@ Then capitalize the first letter of the variable name.
 
 So the code could be written as:
 
-s = input().strip()
-v = input().strip()
+Testing against sample input 1.
 
-if '.' in v:
-    prefix = 'f'
-else:
-    prefix = 'i'
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    v = input_stream.readline().rstrip("\n").strip()
 
-var_part = s[0].upper() + s[1:]
-print(prefix + var_part)
+    if '.' in v:
+        prefix = 'f'
+    else:
+        prefix = 'i'
 
-Wait, but what if the variable name is a single character? Like 'x'? Then s[1:] would be an empty string, which is fine. Because s is between 1 and 10 characters in length. So no problem.
+    var_part = s[0].upper() + s[1:]
+    print(prefix + var_part, file=output_stream)
 
-Testing the examples:
 
-First example:
-input count and 18. '.' not in '18', so 'i' + 'Count' → iCount. Correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+weight
+3.95
+""",
+            "output": \
+"""\
+fWeight
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: weight and 3.95. '.' present → 'f' + 'Weight' → fWeight. Correct.
 

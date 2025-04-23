@@ -187,58 +187,167 @@ Add 1 and print.
 
 Now, code:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-x = list(map(int, input().split()))
-y = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-# Compute prefix sums for x
-prefix_x = []
-current = 0
-for num in x:
-    current += num
-    prefix_x.append(current)
+    x = list(map(int, input_stream.readline().rstrip("\n").split()))
+    y = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-prefix_y = []
-current = 0
-for num in y:
-    current += num
-    prefix_y.append(current)
+    # Compute prefix sums for x
+    prefix_x = []
+    current = 0
+    for num in x:
+        current += num
+        prefix_x.append(current)
 
-# Ensure that the total sum is the same (as per problem statement)
-# but the code may not need to check as per input constraints.
+    prefix_y = []
+    current = 0
+    for num in y:
+        current += num
+        prefix_y.append(current)
 
-a = prefix_x[:-1]
-b = prefix_y[:-1]
+    # Ensure that the total sum is the same (as per problem statement)
+    # but the code may not need to check as per input constraints.
 
-set_a = set(a)
-set_b = set(b)
+    a = prefix_x[:-1]
+    b = prefix_y[:-1]
 
-common = len(set_a & set_b)
+    set_a = set(a)
+    set_b = set(b)
 
-print(common + 1)
+    common = len(set_a & set_b)
 
-Yes, that's the code.
+    print(common + 1, file=output_stream)
 
-Now, let's test the sample inputs.
 
-Sample 1:
 
-7 6
+def test():
+    import io
 
-2 5 3 1 11 4 4 → prefix sums are 2,7,10,11,22,26,30. a is [2,7,10,11,22,26]
-
-y: 7 8 2 4 1 8 → sum is 7,15,17,21,22,30. b is [7,15,17,21,22].
-
-set_a contains 2,7,10,11,22,26. set_b contains 7,15,17,21,22. The intersection is 7,22 → size 2. So output 3.
-
-Sample 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3 3
+1 10 100
+1 100 10
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-1 10 100 → prefix sums 1, 11, 111. a is [1,11].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-y is 1,100,10 → sum is 1, 101, 111. b is [1,101]. The intersection is {1} → size 1 → output 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+
+    x = list(map(int, input_stream.readline().rstrip("\n").split()))
+    y = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    # Compute prefix sums for x
+    prefix_x = []
+    current = 0
+    for num in x:
+        current += num
+        prefix_x.append(current)
+
+    prefix_y = []
+    current = 0
+    for num in y:
+        current += num
+        prefix_y.append(current)
+
+    # Ensure that the total sum is the same (as per problem statement)
+    # but the code may not need to check as per input constraints.
+
+    a = prefix_x[:-1]
+    b = prefix_y[:-1]
+
+    set_a = set(a)
+    set_b = set(b)
+
+    common = len(set_a & set_b)
+
+    print(common + 1, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 4
+4
+1 1 1 1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

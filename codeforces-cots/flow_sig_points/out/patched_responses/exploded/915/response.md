@@ -207,33 +207,149 @@ print(total)
 
 This should work.
 
-Testing the sample inputs:
+Testing against sample inputs 1, 2.
 
-Sample 1: n=4, k=1:
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    der = [1, 0, 1, 2, 9]
+    total = 0
+    for m in range(k + 1):
+        if m == 0:
+            c = 1
+        elif m == 1:
+            c = n
+        elif m == 2:
+            c = n * (n - 1) // 2
+        elif m == 3:
+            c = n * (n - 1) * (n - 2) // 6
+        elif m == 4:
+            c = n * (n - 1) * (n - 2) * (n - 3) // 24
+        else:
+            c = 0  # This case won't occur due to problem constraints
+        total += c * der[m]
+    print(total, file=output_stream)
 
-m=0: 1*1=1
 
-m=1:4*0=0 → total 1.
 
-Sample 2: n=4, k=2:
+def test():
+    import io
 
-m=0:1 →1
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 2
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+        {
+            "input": \
+"""\
+5 3
+""",
+            "output": \
+"""\
+31
+""",
+        }, 
+    ]
 
-m=1:0 →0
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-m=2: 4*3/2=6 →6*1=6 → total 7.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Which is correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sample 3: n=5, k=3:
+    print('Tests passed 😎')
 
-m=0:1
 
-m=1:5*0=0
+if __name__ == '__main__':
+    test()
 
-m=2:10*1=10
 
-m=3: (5*4*3)/6=10 →10*2=20 → total 31.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    der = [1, 0, 1, 2, 9]
+    total = 0
+    for m in range(k + 1):
+        if m == 0:
+            c = 1
+        elif m == 1:
+            c = n
+        elif m == 2:
+            c = n * (n - 1) // 2
+        elif m == 3:
+            c = n * (n - 1) * (n - 2) // 6
+        elif m == 4:
+            c = n * (n - 1) * (n - 2) * (n - 3) // 24
+        else:
+            c = 0  # This case won't occur due to problem constraints
+        total += c * der[m]
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 4
+""",
+            "output": \
+"""\
+76
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample4: n=5, k=4:
 

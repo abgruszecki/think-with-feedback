@@ -268,65 +268,165 @@ Yes.
 
 So, code:
 
-s = input().strip()
+Testing against sample input 1.
 
-mirror = {
-    'A':'A', 'H':'H', 'I':'I', 'M':'M', 'O':'O', 'T':'T', 'U':'U', 'V':'V', 'W':'W', 'X':'X', 'Y':'Y',
-    'B':'D', 'D':'B', 'P':'Q', 'Q':'P',
-    'a':'a', 'h':'h', 'i':'i', 'm':'m', 'o':'o', 't':'t', 'u':'u', 'v':'v', 'w':'w', 'x':'x', 'y':'y',
-    'b':'d', 'd':'b', 'p':'q', 'q':'p'
-}
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-n = len(s)
+    mirror = {
+        'A':'A', 'H':'H', 'I':'I', 'M':'M', 'O':'O', 'T':'T', 'U':'U', 'V':'V', 'W':'W', 'X':'X', 'Y':'Y',
+        'B':'D', 'D':'B', 'P':'Q', 'Q':'P',
+        'a':'a', 'h':'h', 'i':'i', 'm':'m', 'o':'o', 't':'t', 'u':'u', 'v':'v', 'w':'w', 'x':'x', 'y':'y',
+        'b':'d', 'd':'b', 'p':'q', 'q':'p'
+    }
 
-for i in range(n//2):
-    left = s[i]
-    right = s[n-1 -i]
+    n = len(s)
 
-    # Check if left exists in mirror and right exists in mirror
-    if left not in mirror or right not in mirror:
-        print("NIE")
-        exit()
-    if mirror[left] != right:
-        print("NIE")
-        exit()
+    for i in range(n//2):
+        left = s[i]
+        right = s[n-1 -i]
 
-# Check middle character if odd length
-if n % 2 == 1:
-    mid_char = s[n//2]
-    if mid_char not in mirror or mirror[mid_char] != mid_char:
-        print("NIE")
-        exit()
+        # Check if left exists in mirror and right exists in mirror
+        if left not in mirror or right not in mirror:
+            print("NIE", file=output_stream)
+            return
+        if mirror[left] != right:
+            print("NIE", file=output_stream)
+            return
 
-print("TAK")
+    # Check middle character if odd length
+    if n % 2 == 1:
+        mid_char = s[n//2]
+        if mid_char not in mirror or mirror[mid_char] != mid_char:
+            print("NIE", file=output_stream)
+            return
 
-Testing this code against the examples:
+    print("TAK", file=output_stream)
 
-First example:
 
-Input: oXoxoXo
 
-Wait, the input is "oXoxoXo". Let's see:
+def test():
+    import io
 
-The length is 7. So n//2 = 3. So loop runs 0 to 2 (i=0,1,2).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+bod
+""",
+            "output": \
+"""\
+TAK
+""",
+        }, 
+    ]
 
-i=0: left='o', right='o'. 'o' is in mirror (mirror['o'] is 'o'), so mirror[left] is 'o', which matches right. OK.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=1: left='X', right='X'. mirror['X'] is 'X', so OK.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=2: left='o', right='o'. OK.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Then check the middle character (index 3) is 'x'. mirror['x'] is 'x'. So condition is met.
+    print('Tests passed 😎')
 
-Output is TAK.
 
-Second example: "bod" (length 3).
+if __name__ == '__main__':
+    test()
 
-i ranges up to 1 (n//2 is 1, so loop runs i=0).
 
-i=0: left 'b', right 'd'. mirror['b'] is 'd', which equals right. So OK.
+```
 
-Then check the middle character (index 1) is 'o'. mirror['o'] is 'o', so OK. Output TAK.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    mirror = {
+        'A':'A', 'H':'H', 'I':'I', 'M':'M', 'O':'O', 'T':'T', 'U':'U', 'V':'V', 'W':'W', 'X':'X', 'Y':'Y',
+        'B':'D', 'D':'B', 'P':'Q', 'Q':'P',
+        'a':'a', 'h':'h', 'i':'i', 'm':'m', 'o':'o', 't':'t', 'u':'u', 'v':'v', 'w':'w', 'x':'x', 'y':'y',
+        'b':'d', 'd':'b', 'p':'q', 'q':'p'
+    }
+
+    n = len(s)
+
+    for i in range(n//2):
+        left = s[i]
+        right = s[n-1 -i]
+
+        # Check if left exists in mirror and right exists in mirror
+        if left not in mirror or right not in mirror:
+            print("NIE", file=output_stream)
+            return
+        if mirror[left] != right:
+            print("NIE", file=output_stream)
+            return
+
+    # Check middle character if odd length
+    if n % 2 == 1:
+        mid_char = s[n//2]
+        if mid_char not in mirror or mirror[mid_char] != mid_char:
+            print("NIE", file=output_stream)
+            return
+
+    print("TAK", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+ER
+""",
+            "output": \
+"""\
+NIE
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: "ER" (length 2).
 

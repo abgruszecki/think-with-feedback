@@ -795,127 +795,235 @@ for i in range(2, 501):
 
 Then, read the input.
 
-n, k, m = map(int, input().split())
+Testing against sample input 3.
 
-if k ==1 or k ==n:
-    print(n % MOD)
-    exit()
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 + 7
 
-We need to create a DP table. Let's create a 2D array E where E[l][pos] is stored.
+    inv = [1] * 501
+    for i in range(2, 501):
+        inv[i] = pow(i, MOD-2, MOD)
 
-Since l can be up to m (250), and pos up to l, we can create a list of lists where E is a list of (m+2) elements, each of which is a list of (m+2) elements, initialized to 0.
+    n, k, m = map(int, input_stream.readline().rstrip("\n").split())
 
-E = [[0]*(m+2) for _ in range(m+2)]
+    if k == 1 or k == n:
+        print(n % MOD, file=output_stream)
+        return
 
-Then, process l from m down to 1:
+    E = [[0] * (m + 2) for _ in range(m + 2)]
 
-for l in range(m, 0, -1):
-    for pos in range(1, l+1):
-        if pos ==1 or pos == l:
-            E[l][pos] = l % MOD
-        else:
-            create_contrib = 0
-            if l < m:
-                # compute create_sum
-                num_less = pos
-                num_more = (l +1) - pos
-                term1 = (num_less * E[l+1][pos+1]) % MOD
-                term2 = (num_more * E[l+1][pos]) % MOD
-                create_sum = (term1 + term2) % MOD
-                inv_l_plus_1 = inv[l+1]
-                create_coeff = ( (m - l) * inv[m] ) % MOD
-                create_contrib = (create_sum * inv_l_plus_1) % MOD
-                create_contrib = (create_contrib * create_coeff) % MOD
+    for l in range(m, 0, -1):
+        for pos in range(1, l + 1):
+            if pos == 1 or pos == l:
+                E[l][pos] = l % MOD
             else:
                 create_contrib = 0
-            
-            break_contrib = 0
-            if l >1:
-                sum_terms = 0
-                for i in range(1, l):
-                    if i < pos:
-                        new_l = l -i
-                        new_pos = pos -i
-                        if new_pos ==1 or new_pos == new_l:
-                            term = new_l
-                        else:
-                            term = E[new_l][new_pos]
-                    else:
-                        new_l = i
-                        new_pos = pos
-                        if new_pos ==1 or new_pos == new_l:
-                            term = new_l
-                        else:
-                            term = E[new_l][new_pos]
-                    sum_terms = (sum_terms + term) % MOD
-                # compute break_contrib
-                inv_l_minus_1 = inv[l-1]
-                break_coeff = (l * inv[m]) % MOD
-                break_contrib = (sum_terms * inv_l_minus_1) % MOD
-                break_contrib = (break_contrib * break_coeff) % MOD
-            else:
+                if l < m:
+                    num_less = pos
+                    num_more = (l + 1) - pos
+                    term1 = (num_less * E[l+1][pos+1]) % MOD
+                    term2 = (num_more * E[l+1][pos]) % MOD
+                    create_sum = (term1 + term2) % MOD
+                    inv_l_plus_1 = inv[l+1]
+                    create_coeff = ((m - l) * inv[m]) % MOD
+                    create_contrib = (create_sum * inv_l_plus_1) % MOD
+                    create_contrib = (create_contrib * create_coeff) % MOD
+                
                 break_contrib = 0
-            E[l][pos] = (create_contrib + break_contrib) % MOD
+                if l > 1:
+                    sum_terms = 0
+                    for i in range(1, l):
+                        if i < pos:
+                            new_l = l - i
+                            new_pos = pos - i
+                            if new_pos == 1 or new_pos == new_l:
+                                term = new_l
+                            else:
+                                term = E[new_l][new_pos]
+                        else:
+                            new_l = i
+                            new_pos = pos
+                            if new_pos == 1 or new_pos == new_l:
+                                term = new_l
+                            else:
+                                term = E[new_l][new_pos]
+                        sum_terms = (sum_terms + term) % MOD
+                    inv_l_minus_1 = inv[l-1]
+                    break_coeff = (l * inv[m]) % MOD
+                    break_contrib = (sum_terms * inv_l_minus_1) % MOD
+                    break_contrib = (break_contrib * break_coeff) % MOD
+                E[l][pos] = (create_contrib + break_contrib) % MOD
 
-After processing all l and pos, output E[n][k].
+    print(E[n][k] % MOD, file=output_stream)
 
-print(E[n][k] % MOD)
 
-But wait, for l=3 and m=3, when creating, l+1=4 which is beyond m. But in the code, l < m is checked, so when l=3 and m=3, create_contrib is zero.
 
-Now, let's test sample input 3:
+def test():
+    import io
 
-3 2 3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2 5
+""",
+            "output": \
+"""\
+941659828
+""",
+        }, 
+    ]
 
-The code will compute E[3][2].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing l=3 down:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-For l=3, pos=2:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-create_contrib: l is 3, which is equal to m=3. So create_contrib is 0.
+    print('Tests passed 😎')
 
-break_contrib:
 
-l=3>1. sum_terms over i=1 to 2.
+if __name__ == '__main__':
+    test()
 
-i=1:
 
-1 < pos=2 → new_l=3-1=2, new_pos=2-1=1. new_pos is 1 → term=2.
+```
 
-i=2:
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 93, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 86, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '941659828'
+Got: '973333342'
 
-2 >= pos=2 → new_l=2, new_pos=2. new_pos is 2 == new_l → term=2.
+```
 
-sum_terms = 2 + 2 =4.
+Testing against sample input 4.
 
-inv_l_minus_1 = inv[2] = 500000004.
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 + 7
 
-break_coeff = 3 * inv[3] = 3 * 333333336 = 1 mod MOD.
+    inv = [1] * 501
+    for i in range(2, 501):
+        inv[i] = pow(i, MOD-2, MOD)
 
-break_contrib = (4 * 500000004) mod MOD → 4 * 500000004 = 2000000016 → mod 1e9+7 is 2000000016 - 2*1e9+7= 2000000016-2000000070= 2000000016-2000000070 = -54 → + MOD → 999999953.
+    n, k, m = map(int, input_stream.readline().rstrip("\n").split())
 
-But 4 * inv[2] is 2 → 2 * 1 = 2 mod MOD.
+    if k == 1 or k == n:
+        print(n % MOD, file=output_stream)
+        return
 
-So sum_terms is 4 → 4 * inv[2] = 2 → 2 * (3 * inv(3)) → 2 * 1 → 2 mod MOD.
+    E = [[0] * (m + 2) for _ in range(m + 2)]
 
-So break_contrib is 2.
+    for l in range(m, 0, -1):
+        for pos in range(1, l + 1):
+            if pos == 1 or pos == l:
+                E[l][pos] = l % MOD
+            else:
+                create_contrib = 0
+                if l < m:
+                    num_less = pos
+                    num_more = (l + 1) - pos
+                    term1 = (num_less * E[l+1][pos+1]) % MOD
+                    term2 = (num_more * E[l+1][pos]) % MOD
+                    create_sum = (term1 + term2) % MOD
+                    inv_l_plus_1 = inv[l+1]
+                    create_coeff = ((m - l) * inv[m]) % MOD
+                    create_contrib = (create_sum * inv_l_plus_1) % MOD
+                    create_contrib = (create_contrib * create_coeff) % MOD
+                
+                break_contrib = 0
+                if l > 1:
+                    sum_terms = 0
+                    for i in range(1, l):
+                        if i < pos:
+                            new_l = l - i
+                            new_pos = pos - i
+                            if new_pos == 1 or new_pos == new_l:
+                                term = new_l
+                            else:
+                                term = E[new_l][new_pos]
+                        else:
+                            new_l = i
+                            new_pos = pos
+                            if new_pos == 1 or new_pos == new_l:
+                                term = new_l
+                            else:
+                                term = E[new_l][new_pos]
+                        sum_terms = (sum_terms + term) % MOD
+                    inv_l_minus_1 = inv[l-1]
+                    break_coeff = (l * inv[m]) % MOD
+                    break_contrib = (sum_terms * inv_l_minus_1) % MOD
+                    break_contrib = (break_contrib * break_coeff) % MOD
+                E[l][pos] = (create_contrib + break_contrib) % MOD
 
-So E[3][2] = 0 + 2 = 2.
+    print(E[n][k] % MOD, file=output_stream)
 
-Which is correct.
 
-Sample input 4: 3 2 5.
 
-The code will compute E[3][2], but in this case, m=5, so create can happen.
+def test():
+    import io
 
-But the code will correctly compute all possibilities.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 4 20
+""",
+            "output": \
+"""\
+196683114
+""",
+        }, 
+    ]
 
-Thus, the code should handle all cases correctly.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Edge cases:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-- When m is equal to the initial l (n). For example, if n=2, m=2, and initial pos=1: output is 2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 93, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 86, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '196683114'
+Got: '465939684'
+
+```
 
 Another case: initial pos is not at the ends, but during breaking, the Doctor is moved to the end.
 

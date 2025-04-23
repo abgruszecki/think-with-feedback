@@ -805,7 +805,11 @@ So the code should correctly process all swaps.
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import bisect
+
 
 class FenwickTree:
     def __init__(self, size):
@@ -824,9 +828,9 @@ class FenwickTree:
             idx -= idx & -idx
         return res
 
-def main():
+def main(input_stream, output_stream):
     import sys
-    input = sys.stdin.read().split()
+    input = input_stream.read().split()
     ptr = 0
     n = int(input[ptr])
     ptr +=1
@@ -886,24 +890,54 @@ def main():
                 count_modified = right - left
                 sum_case += possible - count_modified
     total = inv_mod + sum_case
-    print(total)
+    print(total, file=output_stream)
 
-if __name__ == "__main__":
-    main()
 
-This should handle all cases.
 
-Testing the first sample:
+def test():
+    import io
 
-Sample input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 6
+3 4
+2 5
+""",
+            "output": \
+"""\
+15
+""",
+        }, 
+    ]
 
-2
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-4 2
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-1 4
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The code processes the swaps correctly, leading to sorted_S = [1,2,4], elements [2,4,1]. The inversion_among_modified is 2. sum_case is 2. Total is 4.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 The second sample:
 

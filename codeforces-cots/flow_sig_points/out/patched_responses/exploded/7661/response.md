@@ -709,23 +709,106 @@ Yes.
 
 Now, code:
 
-Testing this code with the sample inputs.
+Testing against sample inputs 1, 2.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    import sys
+    n, *rest = list(map(int, input_stream.read().split()))
+    x = rest[:n]
+    x.sort()
+    
+    # Compute maximum
+    last = -float('inf')
+    count_max = 0
+    for num in x:
+        for delta in (-1, 0, 1):
+            pos = num + delta
+            if pos > last:
+                count_max += 1
+                last = pos
+                break
+    
+    # Compute minimum
+    count_min = 0
+    current_start = current_end = None
+    for num in x:
+        if count_min == 0:
+            current_start = num - 1
+            current_end = num + 1
+            count_min = 1
+        else:
+            new_start = num - 1
+            new_end = num + 1
+            if new_start > current_end:
+                count_min += 1
+                current_start, current_end = new_start, new_end
+            else:
+                merged_start = max(current_start, new_start)
+                merged_end = min(current_end, new_end)
+                if merged_start <= merged_end:
+                    current_start, current_end = merged_start, merged_end
+                else:
+                    count_min += 1
+                    current_start, current_end = new_start, new_end
+    
+    print(count_min, count_max, file=output_stream)
 
-4
 
-1 2 4 4 → sorted [1,2,4,4]
 
-max is4, min is2.
+def test():
+    import io
 
-Sample 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 9
+1 1 8 8 8 4 4 4 4
+""",
+            "output": \
+"""\
+3 8
+""",
+        }, 
+        {
+            "input": \
+"""\
+7
+4 3 7 1 4 3 3
+""",
+            "output": \
+"""\
+3 6
+""",
+        }, 
+    ]
 
-1 1 8 8 8 4 4 4 4 → sorted [1,1,4,4,4,4,8,8,8]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-max is8, min is3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

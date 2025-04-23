@@ -317,11 +317,60 @@ Yes.
 
 So the code is straightforward.
 
-Let's test the first example:
+Testing against sample input 1.
 
-al=5, ar=1. bl=10, br=5.
+```python
+def main(input_stream, output_stream):
+    al, ar = map(int, input_stream.readline().rstrip("\n").split())
+    bl, br = map(int, input_stream.readline().rstrip("\n").split())
+    condition1 = (br >= al - 1) and (br <= 2 * (al + 1))
+    condition2 = (bl >= ar - 1) and (bl <= 2 * (ar + 1))
+    print("YES" if condition1 or condition2 else "NO", file=output_stream)
 
-Check case1: x=5, y=5. 5 >=5-1=4 → yes. 5 <= 2*(6)=12 → yes. So condition met. Output YES.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 5
+3 3
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: al=4, ar=5. bl=3, br=3.
 
@@ -329,19 +378,127 @@ Case1: x=4, y=3. 3 >=3 → yes. 3 <= 10 → yes. So condition met.
 
 Third example: al=1, ar=2. bl=11, br=6.
 
-Case1: x=1, y=6. 6 >=0 → yes. 6 <=4 → no. So no.
+Testing against sample inputs 1, 2.
 
-Case2: x=2, y=11. 11 >=1 → yes. 11 <=6 → no. So no. Output NO.
+```python
+def main(input_stream, output_stream):
+    al, ar = map(int, input_stream.readline().rstrip("\n").split())
+    bl, br = map(int, input_stream.readline().rstrip("\n").split())
+    condition1 = (br >= al - 1) and (br <= 2 * (al + 1))
+    condition2 = (bl >= ar - 1) and (bl <= 2 * (ar + 1))
+    print("YES" if condition1 or condition2 else "NO", file=output_stream)
 
-Thus, code works.
 
-Another test case: input 1 2 and 3 3.
 
-Girl's ar=2, boy's bl=3. So case2: x=2, y=3. 3 >=1 → yes. 3 <= 2*(3)=6 → yes. So yes.
+def test():
+    import io
 
-Thus, code returns yes.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 5
+3 3
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+        {
+            "input": \
+"""\
+1 2
+11 6
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-So the code seems correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    al, ar = map(int, input_stream.readline().rstrip("\n").split())
+    bl, br = map(int, input_stream.readline().rstrip("\n").split())
+    condition1 = (br >= al - 1) and (br <= 2 * (al + 1))
+    condition2 = (bl >= ar - 1) and (bl <= 2 * (ar + 1))
+    print("YES" if condition1 or condition2 else "NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 2
+11 6
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

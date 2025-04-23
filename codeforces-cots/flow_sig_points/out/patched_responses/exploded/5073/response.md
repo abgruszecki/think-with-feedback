@@ -151,118 +151,90 @@ Yes.
 
 So the code would look something like this:
 
-n = int(input())
-a = int(input())
-b = int(input())
-c = int(input())
+Testing against sample input 1.
 
-# Create the distance matrix
-distance = [
-    [0, a, b],
-    [a, 0, c],
-    [b, c, 0]
-]
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = int(input_stream.readline().rstrip("\n"))
+    b = int(input_stream.readline().rstrip("\n"))
+    c = int(input_stream.readline().rstrip("\n"))
 
-if n == 1:
-    print(0)
-    exit()
+    # Create the distance matrix
+    distance = [
+        [0, a, b],
+        [a, 0, c],
+        [b, c, 0]
+    ]
 
-# Initialize for k=1
-prev_dp = [float('inf')] * 3
-prev_dp[0] = 0  # first meal is at Rabbit's house (0)
+    if n == 1:
+        print(0, file=output_stream)
+        return
 
-for k in range(2, n+1):
-    current_dp = [float('inf')] * 3
-    for current_house in range(3):
-        # Get the possible previous houses (not current_house)
-        prev_houses = [h for h in range(3) if h != current_house]
-        # For each possible previous house, check if we can come from there
-        for prev_house in prev_houses:
-            if prev_dp[prev_house] + distance[prev_house][current_house] < current_dp[current_house]:
-                current_dp[current_house] = prev_dp[prev_house] + distance[prev_house][current_house]
-    prev_dp = current_dp
+    # Initialize for k=1
+    prev_dp = [float('inf')] * 3
+    prev_dp[0] = 0  # first meal is at Rabbit's house (0)
 
-# The minimal total distance is the minimal among the possible houses after n meals
-print(min(prev_dp))
+    for k in range(2, n+1):
+        current_dp = [float('inf')] * 3
+        for current_house in range(3):
+            # Get the possible previous houses (not current_house)
+            prev_houses = [h for h in range(3) if h != current_house]
+            # For each possible previous house, check if we can come from there
+            for prev_house in prev_houses:
+                if prev_dp[prev_house] + distance[prev_house][current_house] < current_dp[current_house]:
+                    current_dp[current_house] = prev_dp[prev_house] + distance[prev_house][current_house]
+        prev_dp = current_dp
 
-Wait, but let's test this with the first example.
+    # The minimal total distance is the minimal among the possible houses after n meals
+    print(min(prev_dp), file=output_stream)
 
-First example input:
 
-3
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
 2
 3
-1
+5
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-So a=2 (R-O), b=3 (R-E), c=1 (O-E).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-n=3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-For k=2:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-prev_dp is initialized for k=1: [0, inf, inf].
+    print('Tests passed 😎')
 
-In the loop for k=2:
 
-current_dp is computed.
+if __name__ == '__main__':
+    test()
 
-For current_house=0 (R):
 
-prev_houses are 1 and 2.
+```
 
-prev_house=1: prev_dp[1] is inf, so no.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-prev_house=2: prev_dp[2] is inf. So current_dp[0] remains inf.
-
-So for current_house=0, current_dp[0] is inf.
-
-For current_house=1 (O):
-
-prev_house can be 0 or 2.
-
-prev_house=0: prev_dp[0] is 0, plus distance[0][1] = a=2. So 0+2=2. So current_dp[1] is 2.
-
-prev_house=2: prev_dp[2] is inf. So current_dp[1] is 2.
-
-For current_house=2 (E):
-
-prev_house can be 0 or 1.
-
-prev_house=0: prev_dp[0] is 0 + distance[0][2] =3. So 0+3=3.
-
-prev_house=1: prev_dp[1] is inf. So current_dp[2] is 3.
-
-So after k=2, prev_dp is [inf, 2, 3].
-
-Now, for k=3 (since n=3):
-
-current_dp is computed again.
-
-For current_house=0 (R):
-
-prev_houses are 1 and 2.
-
-prev_house=1: prev_dp[1] is 2. distance[1][0] is a=2. So 2+2=4.
-
-prev_house=2: prev_dp[2] is 3. distance[2][0] is b=3. 3+3=6. So current_dp[0] is min(4,6)=4.
-
-For current_house=1 (O):
-
-prev_house can be 0 or 2.
-
-prev_house=0: prev_dp[0] is inf. So no contribution.
-
-prev_house=2: prev_dp[2] is3. distance[2][1] is c=1. 3+1=4. So current_dp[1] is4.
-
-For current_house=2 (E):
-
-prev_house can be 0 (inf) or 1 (2).
-
-prev_house=1: 2 + distance[1][2] = 2 +1=3. So current_dp[2] is3.
-
-So current_dp after k=3 is [4,4,3]. The minimum of these is 3, which matches the first example.
-
-So the code works for that case.
+```
 
 Another example: n=1. The code outputs 0, as required.
 

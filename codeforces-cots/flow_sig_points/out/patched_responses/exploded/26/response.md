@@ -141,65 +141,177 @@ If right_arrow_needed, add " >>" at the end.
 
 So code steps:
 
-n, p, k = map(int, input().split())
+Testing against sample input 1.
 
-start = max(1, p - k)
+```python
+def main(input_stream, output_stream):
+    n, p, k = map(int, input_stream.readline().rstrip("\n").split())
 
-end = min(n, p + k)
+    start = max(1, p - k)
 
-numbers = list(range(start, end+1))
+    end = min(n, p + k)
 
-left_arrow = start > 1
+    numbers = list(range(start, end+1))
 
-right_arrow = end < n
+    left_arrow = start > 1
 
-elements = []
+    right_arrow = end < n
 
-for num in numbers:
+    elements = []
 
-    if num == p:
+    for num in numbers:
 
-        elements.append(f"({num})")
+        if num == p:
 
-    else:
+            elements.append(f"({num})")
 
-        elements.append(str(num))
+        else:
 
-result = []
+            elements.append(str(num))
 
-if left_arrow:
+    result = []
 
-    result.append("<<")
+    if left_arrow:
 
-result += elements
+        result.append("<<")
 
-if right_arrow:
+    result += elements
 
-    result.append(">>")
+    if right_arrow:
 
-print(' '.join(result))
+        result.append(">>")
 
-Wait, let's test this with the first example:
+    print(' '.join(result), file=output_stream)
 
-n=17, p=5, k=2. start=5-2=3, end=5+2=7.
 
-numbers 3-7 → [3,4,5,6,7]. left_arrow is 3>1 → true. right_arrow is 7 <17 → true.
 
-elements: 3,4, (5),6,7.
+def test():
+    import io
 
-so result is ["<<", "3", "4", "(5)", "6", "7", ">>"].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 5 2
+""",
+            "output": \
+"""\
+<< 3 4 (5) 6
+""",
+        }, 
+    ]
 
-join with spaces → "<< 3 4 (5) 6 7 >>" → correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Another example: input 6 5 2. n=6, p=5, k=2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-start =5-2=3, end=5+2=7 → min(6,7) →6. So numbers 3-6.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-left_arrow: 3>1 → yes. right_arrow: 6 <6 → no. So the result is "<< 3 4 5 6" → but wait, p is 5. So the elements are 3,4,5 becomes (5), 6. So elements: 3,4, (5), 6. Then, the result is ["<<", "3", "4", "(5)", "6"], and since right_arrow is false, no >>. So output is "<< 3 4 (5) 6" → which matches the second example.
+    print('Tests passed 😎')
 
-Another example: input 6 1 2. start is 1-2 =-1 → max(1, -1) →1. end is 1+2=3. numbers 1-3. left_arrow is 1>1 → false. So no <<. right_arrow is 3 <6 → yes. So elements: (1), 2, 3. Then append >>. So output is (1) 2 3 >> → which matches the third example.
 
-Fourth example: input 6 2 2. start is 2-2=0 → max(1, 0) →1. end is 2+2=4. numbers 1-4. So elements 1, (2), 3,4. left_arrow? start is 1, so left_arrow is 1>1 → false. right_arrow: end 4 <6 → yes. So output is 1 (2) 3 4 >> → correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 4.
+
+```python
+def main(input_stream, output_stream):
+    n, p, k = map(int, input_stream.readline().rstrip("\n").split())
+
+    start = max(1, p - k)
+
+    end = min(n, p + k)
+
+    numbers = list(range(start, end+1))
+
+    left_arrow = start > 1
+
+    right_arrow = end < n
+
+    elements = []
+
+    for num in numbers:
+
+        if num == p:
+
+            elements.append(f"({num})")
+
+        else:
+
+            elements.append(str(num))
+
+    result = []
+
+    if left_arrow:
+
+        result.append("<<")
+
+    result += elements
+
+    if right_arrow:
+
+        result.append(">>")
+
+    print(' '.join(result), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+9 6 3
+""",
+            "output": \
+"""\
+<< 3 4 5 (6) 7 8 9
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: input 8 5 4. start 5-4=1, end 5+4=9 → min(8,9) →8. So numbers 1-8. left_arrow is 1>1 → no. right_arrow is 8 <8 → no. So output is all numbers, with (5). So "1 2 3 4 (5) 6 7 8".
 

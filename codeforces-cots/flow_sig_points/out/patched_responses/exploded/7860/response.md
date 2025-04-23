@@ -300,13 +300,59 @@ So the steps are:
 
    Wait, but what if after making y 256s, there are some 5s or 6s left? Doesn't matter because they can't be used for anything else.
 
-   Let's test the sample inputs.
+Testing against sample input 1.
 
-   Sample 1:
+```python
+def main(input_stream, output_stream):
+    k2, k3, k5, k6 = map(int, input_stream.readline().rstrip("\n").split())
+    y = min(k5, k6, k2)
+    remaining_2 = k2 - y
+    x = min(k3, remaining_2)
+    print(256 * y + 32 * x, file=output_stream)
 
-   Input: 5 1 3 4 → k2=5, k3=1, k5=3, k6=4.
 
-   y = min(3,4,5) →3. Then remaining_2=5-3=2. x is min(1,2) →1. Sum=3*256=768 +1*32=32 → total 800. Which matches the sample.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 1 1 1
+""",
+            "output": \
+"""\
+256
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
    Another sample:
 

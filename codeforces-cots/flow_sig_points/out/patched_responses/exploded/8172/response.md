@@ -1176,33 +1176,167 @@ But wait, what about the roots that have no edges in the conflict graph. For exa
 
 Thus, the code correctly counts all components.
 
-But let's test the first sample.
+Testing against sample input 1.
 
-Sample input 1:
+```python
+import sys
+from sys import stdin
+from collections import defaultdict, deque
 
-n=3, m=0.
 
-DSU components: 1, 2, 3.
+MOD = 10**9 + 7
 
-Hate edges: none. So adj is empty.
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    parent = list(range(n+1))
+    rank = [1] * (n+1)
+    
+    def find(u):
+        while parent[u] != u:
+            parent[u] = parent[parent[u]]
+            u = parent[u]
+        return u
+    
+    def union(u, v):
+        u_root = find(u)
+        v_root = find(v)
+        if u_root == v_root:
+            return
+        if rank[u_root] < rank[v_root]:
+            parent[u_root] = v_root
+        else:
+            parent[v_root] = u_root
+            if rank[u_root] == rank[v_root]:
+                rank[u_root] += 1
+    
+    edges = []
+    love_edges = []
+    hate_edges = []
+    for _ in range(m):
+        a, b, c = map(int, input_stream.readline().split())
+        if a > b:
+            a, b = b, a
+        edges.append((a, b, c))
+        if c == 1:
+            love_edges.append((a, b))
+        else:
+            hate_edges.append((a, b))
+    
+    # Process love edges to merge components
+    for a, b in love_edges:
+        union(a, b)
+    
+    # Check all edges for validity
+    valid = True
+    for a, b, c in edges:
+        if c == 1:
+            if find(a) != find(b):
+                valid = False
+        else:
+            if find(a) == find(b):
+                valid = False
+    if not valid:
+        print(0, file=output_stream)
+        return
+    
+    # Build conflict graph
+    adj = defaultdict(list)
+    processed = set()
+    for a, b in hate_edges:
+        u = find(a)
+        v = find(b)
+        if u == v:
+            print(0, file=output_stream)
+            return
+        if u > v:
+            u, v = v, u
+        if (u, v) not in processed:
+            adj[u].append(v)
+            adj[v].append(u)
+            processed.add((u, v))
+    
+    # Collect all roots
+    roots = set(find(i) for i in range(1, n+1))
+    color = {}
+    visited = set()
+    component_count = 0
+    is_bipartite = True
+    
+    for root in roots:
+        if root in visited:
+            continue
+        component_count += 1
+        queue = deque([root])
+        visited.add(root)
+        color[root] = 0
+        while queue:
+            current = queue.popleft()
+            for neighbor in adj[current]:
+                if neighbor not in color:
+                    color[neighbor] = color[current] ^ 1
+                    visited.add(neighbor)
+                    queue.append(neighbor)
+                else:
+                    if color[neighbor] == color[current]:
+                        is_bipartite = False
+                        break
+            if not is_bipartite:
+                break
+        if not is_bipartite:
+            break
+    
+    if not is_bipartite:
+        print(0, file=output_stream)
+    else:
+        print(pow(2, component_count - 1, MOD), file=output_stream)
 
-roots = {1, 2, 3}
 
-Processing:
 
-component_count starts at 0.
+def test():
+    import io
 
-For root=1: not in visited. component_count becomes 1. Add to visited. color[1] =0. adj.get(1) is empty. loop ends. No issues.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4
+1 2 1
+2 3 1
+3 4 0
+4 1 0
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-For root=2: not in visited. component_count becomes 2. Add to visited. color[2] =0. adj.get(2) is empty. loop ends.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For root=3: not in visited. component_count becomes 3. Add to visited. color[3] =0. adj.get(3) is empty. loop ends.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Thus, component_count is 3. The answer is 2^(3-1) =4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Which matches.
+    print('Tests passed 😎')
 
-Thus, the code is correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, the final code should:
 

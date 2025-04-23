@@ -478,45 +478,78 @@ else:
 
 This should handle all cases.
 
-Testing the sample input 1:
+Testing against sample input 1.
 
-Sample Input 1: ")((())))(()())"
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    stack = [-1]  # Initial base for length calculation
+    max_len = 0
+    count = 0
 
-Processing steps:
+    for i, char in enumerate(s):
+        if char == '(':
+            stack.append(i)
+        else:
+            stack.pop()
+            if not stack:
+                stack.append(i)
+            else:
+                curr_len = i - stack[-1]
+                if curr_len > max_len:
+                    max_len = curr_len
+                    count = 1
+                elif curr_len == max_len:
+                    count += 1
 
-stack starts with [-1]
+    if max_len == 0:
+        print("0 1", file=output_stream)
+    else:
+        print(f"{max_len} {count}", file=output_stream)
 
-i=0, char is ')', stack.pop() is -1. stack is empty. append 0. stack [0]
 
-i=1, char is '(', append 1. stack [0,1]
 
-i=2, char '(', append 2. stack [0,1,2]
+def test():
+    import io
 
-i=3, char '(', append3. stack [0,1,2,3]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+))(
+""",
+            "output": \
+"""\
+0 1
+""",
+        }, 
+    ]
 
-i=4, char ')', pop3. stack [0,1,2]. curr_len=4-2=2. max_len=2, count=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=5, char ')', pop2. stack [0,1]. curr_len=5-1=4. max_len=4, count=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=6, char ')', pop1. stack [0]. curr_len=6-0=6. max_len=6, count=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=7, char ')', pop0. stack is empty. append7. stack [7]
+    print('Tests passed 😎')
 
-i=8, char '(', append8. stack [7,8]
 
-i=9, char '(', append9. stack [7,8,9]
+if __name__ == '__main__':
+    test()
 
-i=10, char ')', pop9. stack [7,8]. curr_len=10-8=2. less than 6.
 
-i=11, char '(', append10. stack [7,8,10]
+```
 
-i=12, char ')', pop10. stack [7,8]. curr_len=12-8=4. less than 6.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=13, char ')', pop8. stack [7]. curr_len=13-7=6. equals max_len, count becomes 2.
-
-i=14, char ')', pop7. stack is empty. append14.
-
-So max_len is 6, count is 2. So output is 6 2. Correct.
+```
 
 Sample Input 2: "))(".
 

@@ -281,11 +281,67 @@ Another example: input is "++-". sum_list is [1,2,1]. min_sum is 1. So S is 0. S
 
 So the code seems to handle all cases correctly.
 
-Testing the sample inputs:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    current_sum = 0
+    min_sum = 0
+    max_sum = 0
+    for c in s:
+        current_sum += 1 if c == '+' else -1
+        if current_sum < min_sum:
+            min_sum = current_sum
+        if current_sum > max_sum:
+            max_sum = current_sum
+    s_val = max(0, -min_sum)
+    result = max(s_val, s_val + max_sum)
+    print(result, file=output_stream)
 
-Input "+-+-+", sum_list is [1,0,1,0,1]. min_sum=0, S=0. max_sum=1. 0+1=1. max(0,1)=1. Correct.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+---
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2: input "---", sum_list [-1,-2,-3]. min_sum=-3 →S=3. max_sum=-1. S+max_sum=2. max(3,2)=3. Correct.
 

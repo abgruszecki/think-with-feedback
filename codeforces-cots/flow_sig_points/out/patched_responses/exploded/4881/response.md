@@ -606,103 +606,115 @@ Sum all diameters.
 
 Thus, the code is:
 
-n = int(input())
+Testing against sample input 2.
 
-total = 0
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-for _ in range(n):
+    total = 0
 
-    parts = list(map(int, input().split()))
+    for _ in range(n):
 
-    ni = parts[0]
+        parts = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-    edges = parts[1:]
+        ni = parts[0]
 
-    adj = [[] for _ in range(ni+1)]
+        edges = parts[1:]
 
-    for i in range(0, len(edges), 2):
+        adj = [[] for _ in range(ni+1)]
 
-        a = edges[i]
+        for i in range(0, len(edges), 2):
 
-        b = edges[i+1]
+            a = edges[i]
 
-        adj[a].append(b)
+            b = edges[i+1]
 
-        adj[b].append(a)
+            adj[a].append(b)
 
-    # Compute diameter
+            adj[b].append(a)
 
-    def bfs(start):
+        # Compute diameter
 
-        from collections import deque
+        def bfs(start):
 
-        visited = {start: 0}
+            from collections import deque
 
-        q = deque([start])
+            visited = {start: 0}
 
-        while q:
+            q = deque([start])
 
-            u = q.popleft()
+            while q:
 
-            for v in adj[u]:
+                u = q.popleft()
 
-                if v not in visited:
+                for v in adj[u]:
 
-                    visited[v] = visited[u] + 1
+                    if v not in visited:
 
-                    q.append(v)
+                        visited[v] = visited[u] + 1
 
-        max_dist = max(visited.values())
+                        q.append(v)
 
-        far_node = max(visited, key=lambda x: visited[x])
+            max_dist = max(visited.values())
 
-        return far_node, max_dist
+            far_node = max(visited, key=lambda x: visited[x])
 
-    u, _ = bfs(1)
+            return far_node, max_dist
 
-    v, max_dist = bfs(u)
+        u, _ = bfs(1)
 
-    total += max_dist
+        v, max_dist = bfs(u)
 
-print(total)
+        total += max_dist
 
-This should work.
+    print(total, file=output_stream)
 
-Let's test the second sample input:
 
-Sample Input 2:
 
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2
+5 1 2 2 3 3 4 3 5
+7 3 4 1 2 2 4 4 6 2 7 6 5
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
 
-3 1 2 2 3
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-4 1 2 2 3 2 4
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-First spider:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-adj is:
+    print('Tests passed 😎')
 
-1: [2]
 
-2: [1,3]
+if __name__ == '__main__':
+    test()
 
-3: [2]
 
-BFS from 1: farthest is 3 (distance 2). Then BFS from 3: farthest is 1 (distance 2). So diameter is 2.
+```
 
-Second spider:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-adj is:
-
-1: [2]
-
-2: [1,3,4]
-
-3: [2]
-
-4: [2]
-
-BFS from 1: farthest is 3 or 4 (distance 2). Then BFS from 4: farthest is 1 (distance 3: 4-2-1). So the diameter is 3? But sample output is 4.
+```
 
 Wait, wait, the sample input for the second spider is:
 

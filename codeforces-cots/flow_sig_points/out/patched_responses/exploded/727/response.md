@@ -705,35 +705,215 @@ else:
 
 But this code may have some inefficiencies. For example, for each valid pair (p1, p2), when checking k1, it recomputes for p1 all possible p2_candidate in the second set, even if this p1 was checked before. So for multiple valid pairs with the same p1, the same computation for k1 is done multiple times. But since n and m are small (up to 12), this is acceptable.
 
-Testing the code against the samples.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-valid_pairs has one entry. Check k1 and k2.
+    first_line = list(map(int, input_stream.readline().rstrip("\n").split()))
+    first_pairs = []
+    for i in range(n):
+        a, b = first_line[2*i], first_line[2*i +1]
+        first_pairs.append((min(a, b), max(a, b)))
 
-k1 for p1 (1,2):
+    second_line = list(map(int, input_stream.readline().rstrip("\n").split()))
+    second_pairs = []
+    for i in range(m):
+        a, b = second_line[2*i], second_line[2*i +1]
+        second_pairs.append((min(a, b), max(a, b)))
 
-x_list = [1].
+    valid_pairs = []
+    for p1 in first_pairs:
+        s_p1 = set(p1)
+        for p2 in second_pairs:
+            s_p2 = set(p2)
+            intersect = s_p1 & s_p2
+            if len(intersect) == 1:
+                x = intersect.pop()
+                valid_pairs.append((p1, p2, x))
 
-k1 is True.
+    if not valid_pairs:
+        print(-1, file=output_stream)
+    else:
+        x_candidates = {x for (_, _, x) in valid_pairs}
+        if len(x_candidates) == 1:
+            print(x_candidates.pop(), file=output_stream)
+        else:
+            all_true = True
+            for (p1, p2, _) in valid_pairs:
+                s_p1 = set(p1)
+                x_list = []
+                for p2c in second_pairs:
+                    sc = set(p2c)
+                    if len(s_p1 & sc) == 1:
+                        x_list.append((s_p1 & sc).pop())
+                k1 = len(set(x_list)) <= 1
 
-k2 for p2 (1,5):
+                s_p2 = set(p2)
+                x_list2 = []
+                for p1c in first_pairs:
+                    sc = set(p1c)
+                    if len(s_p2 & sc) == 1:
+                        x_list2.append((s_p2 & sc).pop())
+                k2 = len(set(x_list2)) <= 1
 
-x_list2 = [1].
+                if not (k1 and k2):
+                    all_true = False
+                    break
 
-k2 is True.
+            print(0 if all_true else -1, file=output_stream)
 
-So all_true is True, but since x_candidates is 1, output 1.
 
-Sample 2:
 
-valid_pairs has two entries. For each:
+def test():
+    import io
 
-First entry: p1 (1,2), p2 (1,5). k1 and k2 are True.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 2
+1 2 3 4
+1 5 6 4
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Second entry: p1 (3,4), p2 (6,4). k1 and k2 are True.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-all_true remains True. x_candidates has two elements, so output 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+
+    first_line = list(map(int, input_stream.readline().rstrip("\n").split()))
+    first_pairs = []
+    for i in range(n):
+        a, b = first_line[2*i], first_line[2*i +1]
+        first_pairs.append((min(a, b), max(a, b)))
+
+    second_line = list(map(int, input_stream.readline().rstrip("\n").split()))
+    second_pairs = []
+    for i in range(m):
+        a, b = second_line[2*i], second_line[2*i +1]
+        second_pairs.append((min(a, b), max(a, b)))
+
+    valid_pairs = []
+    for p1 in first_pairs:
+        s_p1 = set(p1)
+        for p2 in second_pairs:
+            s_p2 = set(p2)
+            intersect = s_p1 & s_p2
+            if len(intersect) == 1:
+                x = intersect.pop()
+                valid_pairs.append((p1, p2, x))
+
+    if not valid_pairs:
+        print(-1, file=output_stream)
+    else:
+        x_candidates = {x for (_, _, x) in valid_pairs}
+        if len(x_candidates) == 1:
+            print(x_candidates.pop(), file=output_stream)
+        else:
+            all_true = True
+            for (p1, p2, _) in valid_pairs:
+                s_p1 = set(p1)
+                x_list = []
+                for p2c in second_pairs:
+                    sc = set(p2c)
+                    if len(s_p1 & sc) == 1:
+                        x_list.append((s_p1 & sc).pop())
+                k1 = len(set(x_list)) <= 1
+
+                s_p2 = set(p2)
+                x_list2 = []
+                for p1c in first_pairs:
+                    sc = set(p1c)
+                    if len(s_p2 & sc) == 1:
+                        x_list2.append((s_p2 & sc).pop())
+                k2 = len(set(x_list2)) <= 1
+
+                if not (k1 and k2):
+                    all_true = False
+                    break
+
+            print(0 if all_true else -1, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 3
+1 2 4 5
+1 2 1 3 2 3
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

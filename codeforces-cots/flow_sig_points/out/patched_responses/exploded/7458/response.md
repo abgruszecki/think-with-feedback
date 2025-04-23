@@ -499,59 +499,113 @@ So the steps in code are:
 
 So the code would look like:
 
-n = int(input())
+Testing against sample input 1.
 
-items = []
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-sum_all_w = 0
+    items = []
 
-max_w = 0
+    sum_all_w = 0
 
-for _ in range(n):
+    max_w = 0
 
-    ti, ci = map(int, input().split())
+    for _ in range(n):
 
-    w = ti + 1
+        ti, ci = map(int, input_stream.readline().rstrip("\n").split())
 
-    items.append( (w, ci) )
+        w = ti + 1
 
-    sum_all_w += w
+        items.append( (w, ci) )
 
-    if w > max_w:
+        sum_all_w += w
 
-        max_w = w
+        if w > max_w:
 
-sum_cap = min( n + max_w, sum_all_w )
+            max_w = w
 
-INF = float('inf')
+    sum_cap = min( n + max_w, sum_all_w )
 
-dp = [INF] * (sum_cap +1)
+    INF = float('inf')
 
-dp[0] =0
+    dp = [INF] * (sum_cap +1)
 
-for w, c in items:
+    dp[0] =0
 
-    # Iterate from sum_cap down to w.
+    for w, c in items:
 
-    for s in range(sum_cap, w-1, -1):
+        # Iterate from sum_cap down to w.
 
-        new_s = min(s +w, sum_cap)
+        for s in range(sum_cap, w-1, -1):
 
-        if dp[s -w] + c < dp[new_s]:
+            new_s = min(s +w, sum_cap)
 
-            dp[new_s] = dp[s -w] + c
+            if dp[s -w] + c < dp[new_s]:
 
-# Find the minimal cost in dp[n ... sum_cap]
+                dp[new_s] = dp[s -w] + c
 
-result = min( dp[n : sum_cap+1] )
+    # Find the minimal cost in dp[n ... sum_cap]
 
-print(result)
+    result = min( dp[n : sum_cap+1] )
 
-Let's test this code with the first sample:
+    print(result, file=output_stream)
 
-sum_cap =4 +3=7. sum_all_w is 3+1+2+2=8 →sum_cap is7.
 
-After processing all items, the dp from 4 to7 is [8,10,10,10], the min is 8.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+0 1
+0 10
+0 100
+""",
+            "output": \
+"""\
+111
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 86, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 79, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '111'
+Got: '11'
+
+```
 
 Second sample input:
 

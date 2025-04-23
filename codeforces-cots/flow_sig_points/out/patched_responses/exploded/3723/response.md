@@ -411,65 +411,193 @@ Then compute cost_square and cost_non_square.
 
 Now, for code:
 
+Testing against sample input 2.
+
+```python
 import math
 
-n = int(input())
-a = list(map(int, input().split()))
 
-sum_non_square = 0
-differences = []
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for x in a:
-    s = math.isqrt(x)
-    is_square = (s * s == x)
-    if is_square:
-        # cost_square is 0
-        # cost_non_square: 2 if x is 0, else 1
-        if x ==0:
-            cn = 2
+    sum_non_square = 0
+    differences = []
+
+    for x in a:
+        s = math.isqrt(x)
+        is_square = (s * s == x)
+        if is_square:
+            # cost_square is 0
+            # cost_non_square: 2 if x is 0, else 1
+            if x ==0:
+                cn = 2
+            else:
+                cn =1
+            sum_non_square += cn
+            # difference is 0 - cn
+            differences.append(0 - cn)
         else:
-            cn =1
-        sum_non_square += cn
-        # difference is 0 - cn
-        differences.append(0 - cn)
-    else:
-        # compute cost_square: min between x - lower and upper -x
-        lower = s * s
-        upper = (s+1)*(s+1)
-        cost_down = x - lower
-        cost_up = upper - x
-        cs = min(cost_down, cost_up)
-        # cost_non_square is 0
-        sum_non_square +=0
-        # difference is cs -0
-        differences.append(cs)
+            # compute cost_square: min between x - lower and upper -x
+            lower = s * s
+            upper = (s+1)*(s+1)
+            cost_down = x - lower
+            cost_up = upper - x
+            cs = min(cost_down, cost_up)
+            # cost_non_square is 0
+            sum_non_square +=0
+            # difference is cs -0
+            differences.append(cs)
 
-k = n //2
+    k = n //2
 
-# sort differences and take first k
-differences.sort()
+    # sort differences and take first k
+    differences.sort()
 
-sum_diff = sum(differences[:k])
+    sum_diff = sum(differences[:k])
 
-total = sum_non_square + sum_diff
+    total = sum_non_square + sum_diff
 
-print(total)
+    print(total, file=output_stream)
 
-This code should work.
 
-Testing sample 2:
 
-input 6 0 0 0 0 0 0.
+def test():
+    import io
 
-Each x is 0. So is_square is true. cn is 2. sum_non_square is 6*2=12.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+120 110 23 34 25 45
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-differences are 0-2=-2 for each.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sorted differences is six -2's. sum first 3: -6. total 12-6=6.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sample 1:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-sum_non_square is 1. differences are 3,2,5,-1. sorted -1,2,3,5. sum first 2: -1+2=1. 1+1=2.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 1.
+
+```python
+import math
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    sum_non_square = 0
+    differences = []
+
+    for x in a:
+        s = math.isqrt(x)
+        is_square = (s * s == x)
+        if is_square:
+            # cost_square is 0
+            # cost_non_square: 2 if x is 0, else 1
+            if x ==0:
+                cn = 2
+            else:
+                cn =1
+            sum_non_square += cn
+            # difference is 0 - cn
+            differences.append(0 - cn)
+        else:
+            # compute cost_square: min between x - lower and upper -x
+            lower = s * s
+            upper = (s+1)*(s+1)
+            cost_down = x - lower
+            cost_up = upper - x
+            cs = min(cost_down, cost_up)
+            # cost_non_square is 0
+            sum_non_square +=0
+            # difference is cs -0
+            differences.append(cs)
+
+    k = n //2
+
+    # sort differences and take first k
+    differences.sort()
+
+    sum_diff = sum(differences[:k])
+
+    total = sum_non_square + sum_diff
+
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+0 0 0 0 0 0
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 4: sum_non_square is 6 (1+1+1+1+2). differences for squares: -1, -1, -1, -1, -2. For non-squares:7,3,4,5,3. So sorted list includes these, sum first 5 is -2-1*4= -6. sum 6-6=0.
 

@@ -607,95 +607,136 @@ Then for each case, if the condition is met, compute the perimeter, and update m
 
 So code:
 
-x1, y1 = map(int, input().split())
+Testing against sample input 1.
 
-x2, y2 = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    x1, y1 = map(int, input_stream.readline().rstrip("\n").split())
 
-min_perim = float('inf')
+    x2, y2 = map(int, input_stream.readline().rstrip("\n").split())
 
-# Case 1: starting on left edge (x1 is L)
+    min_perim = float('inf')
 
-if x1 < x2:
+    # Case 1: starting on left edge (x1 is L)
 
-    h = (x2 +1) - x1
+    if x1 < x2:
 
-    B = min(y1, y2 -1)
+        h = (x2 +1) - x1
 
-    T = max(y1, y2 +1)
+        B = min(y1, y2 -1)
 
-    v = T - B
+        T = max(y1, y2 +1)
 
-    perim = 2 * (h + v)
+        v = T - B
 
-    if perim < min_perim:
+        perim = 2 * (h + v)
 
-        min_perim = perim
+        if perim < min_perim:
 
-# Case 2: starting on right edge (x1 is R)
+            min_perim = perim
 
-if x1 > x2:
+    # Case 2: starting on right edge (x1 is R)
 
-    h = x1 - (x2 -1)
+    if x1 > x2:
 
-    B = min(y1, y2 -1)
+        h = x1 - (x2 -1)
 
-    T = max(y1, y2 +1)
+        B = min(y1, y2 -1)
 
-    v = T - B
+        T = max(y1, y2 +1)
 
-    perim = 2 * (h + v)
+        v = T - B
 
-    if perim < min_perim:
+        perim = 2 * (h + v)
 
-        min_perim = perim
+        if perim < min_perim:
 
-# Case 3: starting on bottom edge (y1 is B)
+            min_perim = perim
 
-if y1 < y2:
+    # Case 3: starting on bottom edge (y1 is B)
 
-    # compute horizontal dimension
+    if y1 < y2:
 
-    L = min(x2 -1, x1)
+        # compute horizontal dimension
 
-    R = max(x2 +1, x1)
+        L = min(x2 -1, x1)
 
-    h = R - L
+        R = max(x2 +1, x1)
 
-    v = (y2 +1) - y1
+        h = R - L
 
-    perim = 2 * (h + v)
+        v = (y2 +1) - y1
 
-    if perim < min_perim:
+        perim = 2 * (h + v)
 
-        min_perim = perim
+        if perim < min_perim:
 
-# Case4: starting on top edge (y1 is T)
+            min_perim = perim
 
-if y1 > y2:
+    # Case4: starting on top edge (y1 is T)
 
-    L = min(x2 -1, x1)
+    if y1 > y2:
 
-    R = max(x2 +1, x1)
+        L = min(x2 -1, x1)
 
-    h = R - L
+        R = max(x2 +1, x1)
 
-    v = y1 - (y2 -1)
+        h = R - L
 
-    perim = 2 * (h + v)
+        v = y1 - (y2 -1)
 
-    if perim < min_perim:
+        perim = 2 * (h + v)
 
-        min_perim = perim
+        if perim < min_perim:
 
-print(min_perim)
+            min_perim = perim
 
-Testing sample input 1:
+    print(min_perim, file=output_stream)
 
-Case1 is possible. h=5+1-1=5. B= min(5,2-1=1) →1. T= max(5,2+1=3) →5. v=5-1=4. perim=2*(5+4)=18.
 
-Case4 is possible. y1=5>2. L = min(5-1=4,1) →1? Wait, x2 is5 in sample1. So x2-1=4. x1 is1. So L = min(4,1) →1. R= max(5+1=6,1) →6. h=6-1=5. v=5 - (2-1)=4. perim=2*(5+4)=18.
 
-So min_perim is 18.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0 1
+0 0
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample2: case4.
 

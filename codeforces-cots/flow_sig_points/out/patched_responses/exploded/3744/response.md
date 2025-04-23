@@ -557,107 +557,100 @@ return True
 
 So the code in Python would look like:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-max_a = max(a)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-low = 1
+    max_a = max(a)
 
-high = max_a
+    low = 1
 
-best_k =0
+    high = max_a
 
-while low <= high:
+    best_k =0
 
-    mid = (low + high) //2
+    while low <= high:
 
-    valid = True
+        mid = (low + high) //2
+
+        valid = True
+
+        for num in a:
+
+            x = (num + mid) // (mid +1)
+
+            if x * mid > num:
+
+                valid = False
+
+                break
+
+        if valid:
+
+            best_k = mid
+
+            low = mid +1
+
+        else:
+
+            high = mid -1
+
+    total =0
 
     for num in a:
 
-        x = (num + mid) // (mid +1)
+        total += (num + best_k) // (best_k +1)
 
-        if x * mid > num:
+    print(total, file=output_stream)
 
-            valid = False
 
-            break
 
-    if valid:
+def test():
+    import io
 
-        best_k = mid
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+2 7
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-        low = mid +1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-    else:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-        high = mid -1
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-total =0
+    print('Tests passed 😎')
 
-for num in a:
 
-    total += (num + best_k) // (best_k +1)
+if __name__ == '__main__':
+    test()
 
-print(total)
 
-But let's test this code with the first sample.
+```
 
-Sample 1:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-3
-
-4 7 8
-
-max_a=8.
-
-binary search steps:
-
-low=1, high=8.
-
-mid=4.
-
-Check mid=4:
-
-for 4:
-
-x= (4+4)//5=8//5=1. 1*4=4 → 4 <=4: ok.
-
-for7:
-
-x= (7+4)/5=11//5=2. 2*4=8>7 → invalid. So mid=4 is invalid.
-
-high=3.
-
-mid=2.
-
-Check mid=2.
-
-For each:
-
-4: x=6//3=2. 2*2=4 <=4 → ok.
-
-7:9//3=3. 3*2=6 <=7 → ok.
-
-8: 10//3=3. 3*2=6 <=8 → ok. So valid. best_k=2. low=3.
-
-mid= (3+3)/2=3.
-
-Check mid=3.
-
-For each:
-
-4: (4+3)//4=7//4=1. 1*3=3 <=4 → ok.
-
-7: (7+3)/4=10//4=2. 2*3=6 <=7 → ok.
-
-8: (8+3)/4=11//4=2. 2*3=6 <=8 → ok. So valid. best_k=3. low=4.
-
-low=4>high=3 → exit loop.
-
-sum is 1+2+2=5 → correct.
+```
 
 Sample 2:
 

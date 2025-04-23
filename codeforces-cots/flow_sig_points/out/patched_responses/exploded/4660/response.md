@@ -345,31 +345,98 @@ else:
 
 That's the code.
 
-Now, let's test this against the sample inputs.
+Testing against sample input 1.
 
-First sample:
+```python
+def main(input_stream, output_stream):
+    t, sx, sy, ex, ey = map(int, input_stream.readline().rstrip("\n").split())
+    wind = input_stream.readline().rstrip("\n").strip()
 
-Input:
+    dx = ex - sx
+    dy = ey - sy
 
-5 0 0 1 1
+    required_e = dx if dx > 0 else 0
+    required_w = -dx if dx < 0 else 0
+    required_n = dy if dy > 0 else 0
+    required_s = -dy if dy < 0 else 0
 
-SESNW
+    e = []
+    w = []
+    n = []
+    s = []
 
-dx=1, dy=1.
+    for idx, c in enumerate(wind):
+        if c == 'E':
+            e.append(idx)
+        elif c == 'W':
+            w.append(idx)
+        elif c == 'N':
+            n.append(idx)
+        elif c == 'S':
+            s.append(idx)
 
-required_e=1, required_w=0, required_n=1, required_s=0.
+    possible = True
+    if required_e > len(e) or required_w > len(w) or required_n > len(n) or required_s > len(s):
+        possible = False
 
-E positions: in the wind 'S','E','S','N','W' → indices where E occurs is [1].
+    if not possible:
+        print(-1, file=output_stream)
+    else:
+        max_step = -1
+        if required_e > 0:
+            max_step = max(max_step, e[required_e - 1])
+        if required_w > 0:
+            max_step = max(max_step, w[required_w - 1])
+        if required_n > 0:
+            max_step = max(max_step, n[required_n - 1])
+        if required_s > 0:
+            max_step = max(max_step, s[required_s - 1])
+        print(max_step + 1, file=output_stream)
 
-required_e=1 → check len(e_positions) >=1. Yes.
 
-required_n=1. N occurs at index 3. So n_positions is [3]. len is 1 >=1.
 
-So for required_e, the index is 0 (required_e-1=0, e_positions[0]=1).
+def test():
+    import io
 
-For required_n, index is 3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 5 3 3 6
+NENSWESNEE
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-max_step is max(1,3) →3. 3+1=4. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

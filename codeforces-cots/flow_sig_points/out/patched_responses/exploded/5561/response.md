@@ -149,59 +149,79 @@ But the problem says that each of the required pieces must have a certain color.
 
 So, the code steps:
 
+Testing against sample input 1.
+
+```python
 from collections import Counter
 
-s1 = input().strip()
 
-s2 = input().strip()
+def main(input_stream, output_stream):
+    s1 = input_stream.readline().rstrip("\n").strip()
 
-available = Counter(s1)
+    s2 = input_stream.readline().rstrip("\n").strip()
 
-required = Counter(s2)
+    available = Counter(s1)
 
-sum_area =0
+    required = Counter(s2)
 
-for color in required:
+    sum_area =0
 
-    if available[color] ==0:
+    for color in required:
 
-        print(-1)
+        if available[color] ==0:
 
-        exit()
+            print(-1, file=output_stream)
 
-    sum_area += min( required[color], available[color] )
+            return
 
-print( sum_area )
+        sum_area += min( required[color], available[color] )
 
-Wait, but wait, no. Because in the required Counter, for each color in s2, the required_count is the number of times it appears. So for each color in required, check if available has that color. Because, available could have 0, but that's possible only if the color is not present in the available sheets. Because when you count with Counter, if a color is not in available, available[color] returns 0.
+    print( sum_area , file=output_stream)
 
-But the problem is, suppose the required color is present in s2, but not in s1. Then, available[color] is 0, and in that case, we return -1.
 
-Yes.
 
-But in the code, for color in required: required is the Counter of s2. So for each color in s2, check if available[color] is zero. If any is zero, return -1. Else sum the min between required and available counts.
+def test():
+    import io
 
-But wait, in the code:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+a
+z
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-s1 = input().strip()
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-available = Counter(s1)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So available has all the colors from s1. If a color is not in s1, available[color] returns 0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So the code correctly checks if any required color is not present (available[color] ==0) → output -1.
+    print('Tests passed 😎')
 
-So this code should handle the samples correctly.
 
-Let's test the first sample:
+if __name__ == '__main__':
+    test()
 
-input:
 
-aaabbac → counts: a:4, b:2, c:1.
+```
 
-garland: aabbccac → counts a:3, b:2, c:3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-sum is 3 + 2 + min(3,1) → 3+2+1=6 → correct.
+```
 
 Second sample: available is a, required is z → code checks required's color z, available[z] is 0 → output -1.
 

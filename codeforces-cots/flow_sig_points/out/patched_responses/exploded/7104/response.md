@@ -167,29 +167,64 @@ So the steps are:
 
 So the code would be something like:
 
-n = int(input())
-from collections import defaultdict
-counts = defaultdict(int)
-for _ in range(n):
-    s = input().strip()
-    counts[s] += 1
-print(max(counts.values()))
+Testing against sample input 1.
 
-Yes. Let's test this with the sample inputs.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    from collections import defaultdict
+    counts = defaultdict(int)
+    for _ in range(n):
+        s = input_stream.readline().rstrip("\n").strip()
+        counts[s] += 1
+    print(max(counts.values()), file=output_stream)
 
-First sample:
 
-4
 
-0101
+def test():
+    import io
 
-1000
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+111
+111
+111
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-1111
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-0101
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The counts are {'0101':2, '1000':1, '1111':1}. Max is 2. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

@@ -523,80 +523,107 @@ For example, 1e5 * log(1e5) is about 1e5 * 17 = 1.7e6 operations, which is manag
 
 Thus, the code in Python is:
 
+Testing against sample input 2.
+
+```python
 import heapq
 
-n, m = map(int, input().split())
 
-adj = [[] for _ in range(n+1)]
-for _ in range(m):
-    u, v = map(int, input().split())
-    if u != v:
-        adj[u].append(v)
-        adj[v].append(u)
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-# Convert to sets to eliminate duplicates, then sort
-for u in range(n+1):
-    adj[u] = sorted(list(set(adj[u])))
+    adj = [[] for _ in range(n+1)]
+    for _ in range(m):
+        u, v = map(int, input_stream.readline().rstrip("\n").split())
+        if u != v:
+            adj[u].append(v)
+            adj[v].append(u)
 
-visited = [False] * (n+1)
-heap = []
-result = []
+    # Convert to sets to eliminate duplicates, then sort
+    for u in range(n+1):
+        adj[u] = sorted(list(set(adj[u])))
 
-# Initialize with node 1
-visited[1] = True
-result.append(1)
-for neighbor in adj[1]:
-    if not visited[neighbor]:
-        heapq.heappush(heap, neighbor)
+    visited = [False] * (n+1)
+    heap = []
+    result = []
 
-while len(result) < n:
-    # Find the smallest unvisited node
-    while heap:
-        current = heapq.heappop(heap)
-        if not visited[current]:
-            break
-    else:
-        break  # This should not happen as the graph is connected
-
-    visited[current] = True
-    result.append(current)
-    for neighbor in adj[current]:
+    # Initialize with node 1
+    visited[1] = True
+    result.append(1)
+    for neighbor in adj[1]:
         if not visited[neighbor]:
             heapq.heappush(heap, neighbor)
 
-print(' '.join(map(str, result)))
+    while len(result) < n:
+        # Find the smallest unvisited node
+        while heap:
+            current = heapq.heappop(heap)
+            if not visited[current]:
+                break
+        else:
+            break  # This should not happen as the graph is connected
 
-Wait, but in the code, after initial processing of node 1, the code adds all of node 1's neighbors to the heap, but only if not visited. 
+        visited[current] = True
+        result.append(current)
+        for neighbor in adj[current]:
+            if not visited[neighbor]:
+                heapq.heappush(heap, neighbor)
 
-But since node 1's neighbors are not visited (since we just marked node 1 as visited), this adds them to the heap. 
+    print(' '.join(map(str, result)), file=output_stream)
 
-Then, in the loop, we process each popped node. 
 
-But this code may have a problem. 
 
-For example, when the initial processing of node 1's neighbors adds them to the heap. Then, when a node is popped from the heap, it's processed. But during processing, the code adds all unvisited neighbors. 
+def test():
+    import io
 
-But the code for adding the initial neighbors of node 1 may have duplicates. 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 10
+1 4
+6 8
+2 5
+3 7
+9 4
+5 6
+3 4
+8 10
+8 9
+1 10
+""",
+            "output": \
+"""\
+1 4 3 7 9 8 6 5 2 10
+""",
+        }, 
+    ]
 
-But in the code, the adjacency list is built as a sorted list of unique neighbors. So for node 1, the adjacency list has unique elements, sorted. So the initial for loop adds each neighbor once. 
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But after that, during processing of other nodes, adding their neighbors may add nodes that are already in the heap. 
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But since the code checks if the neighbor is visited before adding, and the heap may contain multiple entries of the same node, the code will process the first occurrence (smallest), and the rest will be skipped. 
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Thus, the code should work correctly. 
+    print('Tests passed 😎')
 
-Testing the second sample:
 
-After node 4 is processed, its neighbors are 1 (visited),3,5. So adding 3 and 5. 
+if __name__ == '__main__':
+    test()
 
-Then, when 3 is processed, adds 2. 
 
-When 2 is processed, adds 3 (but 3 is already visited). 
+```
 
-When 5 is processed, adds 1 and 4 (both visited). 
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So the order is correct. 
+```
 
 Now, in terms of handling the adjacency list correctly. 
 

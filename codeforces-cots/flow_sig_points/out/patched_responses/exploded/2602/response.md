@@ -547,73 +547,107 @@ Now, in Python, to create a copy of the list, we can use new_a = a.copy() if a i
 
 So, for example:
 
-original = list(map(int, input().split()))
+Testing against sample input 1.
 
-max_score =0
+```python
+def main(input_stream, output_stream):
+    original = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for i in range(14):
+    max_score =0
 
-   if original[i] ==0:
+    for i in range(14):
 
-       continue
+       if original[i] ==0:
 
-   s = original[i]
+           continue
 
-   new_a = original.copy()
+       s = original[i]
 
-   new_a[i] =0
+       new_a = original.copy()
 
-   full_cycles = s //14
+       new_a[i] =0
 
-   remainder = s %14
+       full_cycles = s //14
 
-   start = (i+1) %14
+       remainder = s %14
 
-   # add full_cycles to all positions
+       start = (i+1) %14
 
-   for j in range(14):
+       # add full_cycles to all positions
 
-       new_a[j] += full_cycles
+       for j in range(14):
 
-   # add remainder stones
+           new_a[j] += full_cycles
 
-   for j in range(14):
+       # add remainder stones
 
-       delta = (j - start) %14
+       for j in range(14):
 
-       if delta < remainder:
+           delta = (j - start) %14
 
-           new_a[j] +=1
+           if delta < remainder:
 
-   # sum even
+               new_a[j] +=1
 
-   current =0
+       # sum even
 
-   for num in new_a:
+       current =0
 
-       if num %2 ==0:
+       for num in new_a:
 
-           current +=num
+           if num %2 ==0:
 
-   if current > max_score:
+               current +=num
 
-       max_score = current
+       if current > max_score:
 
-print(max_score)
+           max_score = current
 
-But wait, in Python, when you do original.copy(), since original is a list of integers, it's a shallow copy. So for each new_a, it's a new list. Then, modifying new_a in place is okay.
+    print(max_score, file=output_stream)
 
-This code should work.
 
-Testing with the sample inputs.
 
-Sample 1:
+def test():
+    import io
 
-Input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 1 1 1 1 0 0 0 0 0 0 0 0 0
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
 
-0 1 1 0 0 0 0 0 0 7 0 0 0 0
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-After processing i=9 (the 7 in position 9), new_a is as discussed. The code computes the sum correctly.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

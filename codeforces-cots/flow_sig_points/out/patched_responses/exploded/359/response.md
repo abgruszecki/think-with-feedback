@@ -348,21 +348,77 @@ Thus, the code is manageable.
 
 So, putting it all together.
 
-Testing the sample input:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    parity = 0
+    for i in range(n):
+        for j in range(i+1, n):
+            if a[i] > a[j]:
+                parity ^= 1
+    m = int(input_stream.readline().rstrip("\n"))
+    for _ in range(m):
+        l, r = map(int, input_stream.readline().rstrip("\n").split())
+        k = r - l + 1
+        delta = (k * (k - 1) // 2) % 2
+        parity ^= delta
+        print('odd' if parity else 'even', file=output_stream)
 
-3
 
-1 2 3
 
-Inversion count 0 → parity 0.
+def test():
+    import io
 
-Queries:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 2 4 3
+4
+1 1
+1 4
+1 4
+2 3
+""",
+            "output": \
+"""\
+odd
+odd
+odd
+even
+""",
+        }, 
+    ]
 
-1 2 → k=2 → delta 1 → parity 0 ^1 =1 → 'odd'.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-2 3 → k=2 → delta 1 → 1^1=0 → 'even'.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

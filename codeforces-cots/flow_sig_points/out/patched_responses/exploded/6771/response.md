@@ -343,57 +343,92 @@ Wait, but what about the case where the fight count exceeds a very large number?
 
 This code should handle all cases.
 
-Now, let's test the sample input 1.
+Testing against sample input 1.
 
-Sample 1:
+```python
+from collections import deque
 
-4
 
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s1 = deque(map(int, input_stream.readline().rstrip("\n").split()[1:]))
+    s2 = deque(map(int, input_stream.readline().rstrip("\n").split()[1:]))
+
+    seen = set()
+    fight_count = 0
+
+    while True:
+        if not s1:
+            print(fight_count, 2, file=output_stream)
+            break
+        if not s2:
+            print(fight_count, 1, file=output_stream)
+            break
+        
+        state = (tuple(s1), tuple(s2))
+        if state in seen:
+            print(-1, file=output_stream)
+            break
+        seen.add(state)
+        
+        a = s1.popleft()
+        b = s2.popleft()
+        
+        if a > b:
+            s1.append(b)
+            s1.append(a)
+        else:
+            s2.append(a)
+            s2.append(b)
+        
+        fight_count += 1
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 2
 2 1 3
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-2 4 2 → s2 is deque([4, 2])
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Initial state: s1 = deque([1,3]), s2 = deque([4,2])
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Check s1 and s2 not empty. State is ((1,3), (4,2)) → add to seen.
+    print('Tests passed 😎')
 
-Fight: a=1, b=4. 4 wins. s2 appends 1,4. So s2 becomes deque([2,1,4]). s1 is now deque([3]). fight count 1.
 
-Next state: s1 = deque([3]), s2 = deque([2,1,4]). Check if this state is in seen (no). Add to seen.
+if __name__ == '__main__':
+    test()
 
-Fight: 3 vs 2. 3 wins. s1 appends 2,3. So s1 becomes deque([3,2,3]? No. After popping 3, s1 is empty. Then appending 2 and 3. So s1 becomes deque([2,3]). s2 becomes deque([1,4]). fight count 2.
 
-Continue this until the sample's answer of 6 fights.
+```
 
-The code would correctly count the steps and return 6, 2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So the code should work.
+```
 
-Now, the code must read from input, and write output as required.
-
-Edge Cases:
-
-What if n=2. For example, each has 1 card.
-
-s1 = [1], s2 = [2]. First fight: 1 vs 2. 2 wins. s2 appends 1,2. So s2 becomes [1,2]. s1 is empty. So the fight count is 1, winner is 2.
-
-Another case where the same state repeats. For example:
-
-n=2.
-
-s1 starts with [2], s2 starts with [1].
-
-Fight 1: 2>1. s1 appends 1,2. s1 becomes [1,2]. s2 is empty. So fight count 1, winner is 1. So no cycle.
-
-Another case where after a fight, the state returns to the initial state. Like sample 2.
-
-Another test case where the game ends in one step.
-
-So the code should handle all these.
-
-Thus, the code should be correct.
 </think>
 
 ```python

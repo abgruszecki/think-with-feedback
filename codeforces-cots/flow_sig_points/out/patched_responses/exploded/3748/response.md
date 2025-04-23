@@ -123,25 +123,74 @@ Yes. Because if s is a perfect square, then k is an odd integer, and n=(k-1)/2 i
 
 So the code can be written as:
 
+Testing against sample inputs 1, 2.
+
+```python
 import math
 
-x = int(input())
-s = 8 * x + 1
-sqrt_s = math.isqrt(s)
-if sqrt_s * sqrt_s == s:
-    print("YES")
-else:
-    print("NO")
 
-Wait, but wait. What if x is zero? But according to the problem statement, x is at least 1. So that's not a problem.
+def main(input_stream, output_stream):
+    x = int(input_stream.readline().rstrip("\n"))
+    s = 8 * x + 1
+    sqrt_s = math.isqrt(s)
+    if sqrt_s * sqrt_s == s:
+        print("YES", file=output_stream)
+    else:
+        print("NO", file=output_stream)
 
-So let's test some examples.
 
-Sample Input 1: 1.
 
-s=8*1+1=9. sqrt_s=3. 3*3=9. So output YES. Correct.
+def test():
+    import io
 
-Sample Input 2: 2. s=17. sqrt_s is 4 (4²=16 <17). 4*4=16 !=17. So output NO. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+        {
+            "input": \
+"""\
+3
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample Input 3:3. s=25. sqrt_s=5. 5²=25. So YES. Correct.
 

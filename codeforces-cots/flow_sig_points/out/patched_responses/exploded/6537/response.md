@@ -61,23 +61,63 @@ inches = total_inches % 12
 
 So the code would be:
 
-n = int(input())
+Testing against sample input 1.
 
-total_inches = round(n / 3)
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-a = total_inches // 12
+    total_inches = round(n / 3)
 
-b = total_inches % 12
+    a = total_inches // 12
 
-print(a, b)
+    b = total_inches % 12
 
-Wait, but wait: what if n is not divisible by 3, but when divided by 3, the decimal part is exactly 0.5? For example, n= 1.5 cm? But the input n is given as an integer. So n is an integer between 1 and 10000. So n is in cm. For example, n=3: exactly 1 inch. n=4 cm: 4/3 is 1.333..., which rounds to 1. So 1 inch. But when n is 4, that's 1.333... which rounds to 1. So 4 cm converts to 1 inch, which is 3 cm. So that's 1 cm less than the original. But according to the problem's rounding rules, that's correct.
+    print(a, b, file=output_stream)
 
-So the code seems straightforward. Let's test some edge cases.
 
-Edge case 1: n=0. But according to constraints, n is at least 1. So not possible.
 
-Edge case: n=1. 0.333 rounds to 0. So total_inches 0. Then 0 0. But wait, 1 cm. The note says 1 cm rounds to 0. So output is 0 0. Wait, but the problem statement says to print two non-negative integers. So yes.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+""",
+            "output": \
+"""\
+0 2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: n=2. Rounds to 1. So 0 1.
 

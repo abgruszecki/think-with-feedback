@@ -111,30 +111,61 @@ So, let's code that.
 
 For example, in Python:
 
-n = int(input())
-a = list(map(int, input().split()))
-total = 0
-for i in range(n):
-    total += min(a[i], a[(i+1) % n])
-print(total // 2)
+Testing against sample input 1.
 
-Yes. That's straightforward.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    total = 0
+    for i in range(n):
+        total += min(a[i], a[(i+1) % n])
+    print(total // 2, file=output_stream)
 
-Testing the first sample:
 
-n=4, a = [3,1,4,6].
 
-Loop for i from 0 to 3:
+def test():
+    import io
 
-i=0: min(3,1) →1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+1 2 1 2 1 2
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-i=1: min(1,4) →1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=2: min(4,6) →4.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=3: min(6,3) →3. Sum is 1+1+4+3=9. 9//2=4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Which matches.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample: the third input.
 

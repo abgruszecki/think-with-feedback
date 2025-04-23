@@ -1365,85 +1365,112 @@ while low <= high:
 
 print(best)
 
-Testing this code with the first sample:
+Testing against sample input 1.
 
-For mid=2:
+```python
+import sys
 
-required = [0,0,0,0,1,1]
 
-sum_req=2, max_req=1.
+def main(input_stream, output_stream):
+    n, m, w = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
+    current_min = min(a)
+    low = current_min
+    high = current_min + m
+    best = current_min
 
-sum_req <=2*3=6.
+    while low <= high:
+        mid = (low + high) // 2
+        required = [max(0, mid - x) for x in a]
+        sum_req = sum(required)
+        max_req = max(required) if required else 0
 
-max_req <=2.
+        if sum_req == 0:
+            best = mid
+            low = mid + 1
+            continue
+        if max_req > m or sum_req > m * w:
+            high = mid - 1
+            continue
 
-Processing each i:
+        delta = [0] * (n + 1)
+        current_water = 0
+        additions = 0
+        valid = True
 
-i=0:
+        for i in range(n):
+            if i >= w:
+                current_water -= delta[i - w]
+            if current_water < required[i]:
+                needed = required[i] - current_water
+                start = i - w + 1
+                if start < 0:
+                    start = 0
+                if start > n - w:
+                    valid = False
+                    break
+                delta[start] += needed
+                end = start + w
+                if end <= n:
+                    delta[end] -= needed
+                additions += needed
+                current_water += needed
+                if additions > m:
+                    valid = False
+                    break
 
-current_water=0.
+        if valid and additions <= m:
+            best = mid
+            low = mid + 1
+        else:
+            high = mid - 1
 
-required[0]=0. current_water is sufficient.
+    print(best, file=output_stream)
 
-i=1:
 
-current_water=0.
 
-required[1]=0. ok.
+def test():
+    import io
 
-i=2:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 5 1
+5 8
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
 
-current_water=0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-required[2]=0. ok.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=3:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-current_water=0.
+    print('Tests passed 😎')
 
-required[3]=0. ok.
 
-i=4:
+if __name__ == '__main__':
+    test()
 
-current_water=0.
 
-required[4]=1. needed=1.
+```
 
-start=4-3+1=2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-start=2 <=3 (n-w=6-3=3).
-
-delta[2] +=1.
-
-delta[5] -=1.
-
-additions=1.
-
-current_water=1.
-
-i=5:
-
-current_water -= delta[5-3=2] (delta[2]=1) →1-1=0.
-
-current_water=0.
-
-required[5]=1. needed=1.
-
-start=5-3+1=3.
-
-start=3 <=3.
-
-delta[3] +=1.
-
-delta[6] -=1.
-
-additions=2.
-
-current_water=1.
-
-Thus, additions=2 <=m=2. So the check passes. mid=2 is accepted.
-
-Thus, the code will return the correct answer of 2.
+```
 
 The second sample:
 

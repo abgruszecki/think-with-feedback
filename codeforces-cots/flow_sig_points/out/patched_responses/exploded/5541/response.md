@@ -627,77 +627,140 @@ For each query:
 
 Now, the code.
 
-Testing for sample input 1.
+Testing against sample input 1.
 
-Sample input 1:
+```python
+import sys
 
+
+def main(input_stream, output_stream):
+    MOD = 2520
+    n = int(input_stream.readline())
+    k = list(map(int, input_stream.readline().split()))
+    m = []
+    edges = []
+    for _ in range(n):
+        mi = int(input_stream.readline())
+        e = list(map(lambda x: int(x)-1, input_stream.readline().split()))
+        m.append(mi)
+        edges.append(e)
+    
+    # Precompute next_state
+    next_state = [[(0, 0) for _ in range(MOD)] for _ in range(n)]
+    for u in range(n):
+        for c_mod in range(MOD):
+            k_i = k[u]
+            mi = m[u]
+            x = (c_mod + k_i) % mi
+            next_u = edges[u][x]
+            next_c = (c_mod + k_i) % MOD
+            next_state[u][c_mod] = (next_u, next_c)
+    
+    ans = [[-1 for _ in range(MOD)] for _ in range(n)]
+    
+    for u in range(n):
+        for c_mod in range(MOD):
+            if ans[u][c_mod] != -1:
+                continue
+            stack = []
+            visited = {}
+            current = (u, c_mod)
+            while True:
+                if ans[current[0]][current[1]] != -1:
+                    # Assign to all in stack
+                    cnt = ans[current[0]][current[1]]
+                    for (nu, nc) in stack:
+                        ans[nu][nc] = cnt
+                    break
+                if current in visited:
+                    # Found cycle
+                    start_idx = visited[current]
+                    cycle = stack[start_idx:]
+                    unique_nodes = set(n for n, _ in cycle)
+                    cnt = len(unique_nodes)
+                    # Assign cycle
+                    for (nu, nc) in cycle:
+                        ans[nu][nc] = cnt
+                    # Assign pre-cycle
+                    for (nu, nc) in stack[:start_idx]:
+                        ans[nu][nc] = cnt
+                    break
+                visited[current] = len(stack)
+                stack.append(current)
+                current = next_state[current[0]][current[1]]
+    
+    q = int(input_stream.readline())
+    for _ in range(q):
+        x, y = map(int, input_stream.readline().split())
+        u = x - 1
+        initial_c_mod = (y % MOD + MOD) % MOD
+        print(ans[u][initial_c_mod], file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
+4 -5 -3 -1
+2
+2 3
+1
+2
+3
+2 4 1
+4
+3 1 2 1
+6
+1 0
+2 0
+3 -1
+4 -2
+1 1
+1 5
+""",
+            "output": \
+"""\
+1
+1
+1
+3
+1
+1
+""",
+        }, 
+    ]
 
-0 0 0 0
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Then, nodes 1-4 have k=0 each.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Edges:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Node 1 (code 0):
+    print('Tests passed 😎')
 
-m=2, edges 2 3 → code's 1 and 2.
 
-Node 2 (code 1):
+if __name__ == '__main__':
+    test()
 
-m=1, edges 2 → code's 1.
 
-Node 3 (code 2):
+```
 
-m=3, edges 2 4 1 → code's 1, 3, 0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Node 4 (code 3):
+```
 
-m=4, edges 3 1 2 1 → code's 2, 0, 1, 0.
-
-Then, next_state for each node and c_mod.
-
-But since k_i are all 0, the next_c_mod is (c_mod + 0) mod 2520 = c_mod.
-
-But x is (c_mod + 0) mod m_i.
-
-For node 0 (m=2), x = c_mod mod 2.
-
-For example, for c_mod=0 → x=0 → next_u=1 (code's 1).
-
-For c_mod=1 → x=1 mod2=1 → next_u=2 (code's 2).
-
-For code's node 0, next_state[0][c_mod] is:
-
-edges[0][ (c_mod) % 2 ] , c_mod.
-
-So for example, when c_mod is 0 → next node is 1 (code's 1), next_c_mod=0.
-
-But this would create a cycle between (1,0) → next_state[1][0].
-
-For node 1 (code's 1), m=1. x = c_mod mod 1 = 0. So next node is edges[1][0] =1 (code's 1). next_c_mod remains the same.
-
-Thus, node 1, any c_mod leads to next node 1. So ans for (1, c_mod) is 1.
-
-Similarly, for node 3 (code's 3), m=4. x = c_mod mod4. So edges are [2,0,1,0]. So depending on c_mod mod4, next node is 2,0,1,0.
-
-But in the first sample, when starting at node 0 (code's 0) with y=0 → initial_c_mod=0.
-
-The traversal is:
-
-(0,0) → (1,0) → (1,0) → cycle of size 1. So ans is 1.
-
-Which matches the sample.
-
-Now, the code.
-
-But in Python, the way to handle large 2D arrays.
-
-Implementing next_state as a list of lists of tuples.
-
-But given that n is up to 1e3 and MOD is 2520, it's manageable.
-
-So here's the code:
 </think>
 
 ```python

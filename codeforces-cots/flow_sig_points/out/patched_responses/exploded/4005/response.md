@@ -181,19 +181,125 @@ print( sum_vertices - sum_edges )
 
 Yes. That's the code.
 
-Testing against the first sample:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    sum_vertices = sum(x * (n - x + 1) for x in a)
+    sum_edges = 0
+    for i in range(n - 1):
+        x, y = a[i], a[i+1]
+        min_val = min(x, y)
+        max_val = max(x, y)
+        sum_edges += min_val * (n - max_val + 1)
+    print(sum_vertices - sum_edges, file=output_stream)
 
-3
 
-2 1 3 → sum_vertices is 2*2 +1*3 +3*1 → 4+3+3=10. sum_edges: between 2&1: min 1, max 2 → 1*2=2. Between 1&3: min 1, max3 →1*1=1. sum_edges=3. 10-3=7. Correct.
 
-Sample 2:
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
+2 1 1 3
+""",
+            "output": \
+"""\
+11
+""",
+        }, 
+    ]
 
-2 1 1 3 → sum_vertices: 2*3=6, 1*4=4, 1*4=4, 3*2=6 → sum 20. sum_edges: edges (2,1) → 1*3=3, (1,1) →1*4=4, (1,3) →1*2=2. sum_edges=9. 20-9=11. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    sum_vertices = sum(x * (n - x + 1) for x in a)
+    sum_edges = 0
+    for i in range(n - 1):
+        x, y = a[i], a[i+1]
+        min_val = min(x, y)
+        max_val = max(x, y)
+        sum_edges += min_val * (n - max_val + 1)
+    print(sum_vertices - sum_edges, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10
+1 5 2 5 5 3 10 6 5 1
+""",
+            "output": \
+"""\
+104
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

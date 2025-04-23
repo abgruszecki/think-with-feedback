@@ -637,137 +637,107 @@ But for the pairs, we need to generate x and y such that x*a + y*b <=n and (x>0 
 
 So:
 
-n = int(input())
-a = int(input())
-b = int(input())
+Testing against sample input 3.
 
-total = 4 * a + 2 * b
-if total ==0:
-    print(0)
-    exit()
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = int(input_stream.readline().rstrip("\n"))
+    b = int(input_stream.readline().rstrip("\n"))
 
-lower_bound = (total + n -1) // n
+    total = 4 * a + 2 * b
+    if total ==0:
+        print(0, file=output_stream)
+        return
 
-pairs = []
-max_x = n // a
-for x in range(0, max_x +1):
-    remaining = n - x * a
-    if remaining <0:
-        continue
-    max_y = remaining // b
-    for y in range(0, max_y +1):
-        if x *a + y * b <=n and (x >0 or y>0):
-            pairs.append( (x, y) )
+    lower_bound = (total + n -1) // n
 
-for k in range(lower_bound, 7):
-    visited = set()
-    from collections import deque
-    q = deque()
-    initial = (4, 2, 0)
-    q.append(initial)
-    visited.add(initial)
-    found = False
-    while q:
-        a_rem, b_rem, bars = q.popleft()
-        if a_rem ==0 and b_rem ==0 and bars ==k:
-            found = True
-            break
-        if bars >=k:
+    pairs = []
+    max_x = n // a
+    for x in range(0, max_x +1):
+        remaining = n - x * a
+        if remaining <0:
             continue
-        for (x, y) in pairs:
-            if x <= a_rem and y <= b_rem:
-                new_a = a_rem -x
-                new_b = b_rem -y
-                new_bars = bars +1
-                new_state = (new_a, new_b, new_bars)
-                if new_state not in visited:
-                    visited.add(new_state)
-                    q.append(new_state)
-    if found:
-        print(k)
-        exit()
+        max_y = remaining // b
+        for y in range(0, max_y +1):
+            if x *a + y * b <=n and (x >0 or y>0):
+                pairs.append( (x, y) )
 
-print(6)
+    for k in range(lower_bound, 7):
+        visited = set()
+        from collections import deque
+        q = deque()
+        initial = (4, 2, 0)
+        q.append(initial)
+        visited.add(initial)
+        found = False
+        while q:
+            a_rem, b_rem, bars = q.popleft()
+            if a_rem ==0 and b_rem ==0 and bars ==k:
+                found = True
+                break
+            if bars >=k:
+                continue
+            for (x, y) in pairs:
+                if x <= a_rem and y <= b_rem:
+                    new_a = a_rem -x
+                    new_b = b_rem -y
+                    new_bars = bars +1
+                    new_state = (new_a, new_b, new_bars)
+                    if new_state not in visited:
+                        visited.add(new_state)
+                        q.append(new_state)
+        if found:
+            print(k, file=output_stream)
+            return
 
-Testing this code with the samples:
+    print(6, file=output_stream)
 
-Sample 3:
 
-Input:
 
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+20
+5
 6
-
-4
-
+""",
+            "output": \
+"""\
 2
+""",
+        }, 
+    ]
 
-lower_bound = (4*4 + 2*2) = 20. 20/6 = 3.333 → ceil is4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For k=4.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The pairs are:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-x=0:
+    print('Tests passed 😎')
 
-possible y's: 3, 2, 1, 0. But (0,0) is excluded.
 
-So (0,1), (0,2), (0,3).
+if __name__ == '__main__':
+    test()
 
-x=1:
 
-a=4. 4*1=4. remaining 6-4=2. b=2. max_y=2//2=1. So y can be 0 or1. So pairs (1,0), (1,1).
+```
 
-So pairs are:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-(0,1), (0,2), (0,3), (1,0), (1,1).
-
-Now, for k=4, the code should find a way to split.
-
-For example, two bars with (1,1), which contributes x=2, y=2. Then two bars with (1,0), contributing x=2. Total x=4, y=2. Bars used=4.
-
-So the code's BFS:
-
-Initial state (4,2,0).
-
-For each bar:
-
-Possible (x,y):
-
-At initial state, a_rem=4, b_rem=2, bars=0.
-
-Possible pairs:
-
-Check which pairs x<=4 and y<=2.
-
-For (1,1): x=1<=4, y=1<=2. new_a=3, new_b=1, bars=1.
-
-Add (3,1,1).
-
-For (1,0): new_a=3, new_b=2, bars=1.
-
-For (0,3): y=3>2 → skip.
-
-For (0,2): new_a=4, new_b=0, bars=1.
-
-etc.
-
-The code will explore various paths.
-
-For example, the path that leads to two bars of (1,1), then two of (1,0):
-
-State after first (1,1): (3,1,1).
-
-Second (1,1): (2,0,2).
-
-Then, two (1,0) bars:
-
-Third bar (1,0): (1,0,3).
-
-Fourth bar (1,0): (0,0,4). This state is (0,0,4), which matches k=4. So found.
-
-Thus, code will return 4.
-
-Thus, the code works.
+```
 
 Another sample:
 

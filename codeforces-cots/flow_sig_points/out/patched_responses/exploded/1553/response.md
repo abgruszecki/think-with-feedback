@@ -310,177 +310,302 @@ So for person u (1-based), their skill is a[u-1].
 
 Thus, the code for the initial heap is:
 
+Testing against sample input 1.
+
+```python
 import heapq
 
-n = int(input())
 
-s = input().strip()
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-a = list(map(int, input().split()))
+    s = input_stream.readline().rstrip("\n").strip()
 
-prev = [0]*(n+2)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-next_ = [0]*(n+2)  # next is a keyword in Python, so use next_
+    prev = [0]*(n+2)
 
-for i in range(1, n+1):
+    next_ = [0]*(n+2)  # next is a keyword in Python, so use next_
 
-    prev[i] = i-1 if i > 1 else 0
+    for i in range(1, n+1):
 
-    next_[i] = i+1 if i < n else 0
+        prev[i] = i-1 if i > 1 else 0
 
-alive = [False]*(n+2)
+        next_[i] = i+1 if i < n else 0
 
-for i in range(1, n+1):
+    alive = [False]*(n+2)
 
-    alive[i] = True
+    for i in range(1, n+1):
 
-heap = []
+        alive[i] = True
 
-for i in range(1, n):
+    heap = []
 
-    u = i
+    for i in range(1, n):
 
-    v = i + 1
+        u = i
 
-    if s[u-1] != s[v-1]:
+        v = i + 1
 
-        diff = abs(a[u-1] - a[v-1])
+        if s[u-1] != s[v-1]:
 
-        heapq.heappush(heap, (diff, u, v))
+            diff = abs(a[u-1] - a[v-1])
 
-result = []
+            heapq.heappush(heap, (diff, u, v))
 
-while heap:
+    result = []
 
-    diff, u, v = heapq.heappop(heap)
+    while heap:
 
-    # Check if u and v are alive and adjacent
+        diff, u, v = heapq.heappop(heap)
 
-    if not (alive[u] and alive[v]):
+        # Check if u and v are alive and adjacent
 
-        continue
+        if not (alive[u] and alive[v]):
 
-    if next_[u] != v or prev[v] != u:
+            continue
 
-        continue
+        if next_[u] != v or prev[v] != u:
 
-    # They are a valid pair
+            continue
 
-    result.append( (min(u, v), max(u, v)) )
+        # They are a valid pair
 
-    # Mark them as not alive
+        result.append( (min(u, v), max(u, v)) )
 
-    alive[u] = False
+        # Mark them as not alive
 
-    alive[v] = False
+        alive[u] = False
 
-    # Get left and right nodes
+        alive[v] = False
 
-    left_node = prev[u]
+        # Get left and right nodes
 
-    right_node = next_[v]
+        left_node = prev[u]
 
-    # Update the links
+        right_node = next_[v]
 
-    if left_node != 0:
+        # Update the links
 
-        next_[left_node] = right_node
+        if left_node != 0:
 
-    if right_node != 0:
+            next_[left_node] = right_node
 
-        prev[right_node] = left_node
+        if right_node != 0:
 
-    # Check if left_node and right_node form a valid pair
+            prev[right_node] = left_node
 
-    if left_node !=0 and right_node !=0:
+        # Check if left_node and right_node form a valid pair
 
-        if s[left_node-1] != s[right_node-1]:
+        if left_node !=0 and right_node !=0:
 
-            new_diff = abs(a[left_node-1] - a[right_node-1])
+            if s[left_node-1] != s[right_node-1]:
 
-            heapq.heappush(heap, (new_diff, left_node, right_node))
+                new_diff = abs(a[left_node-1] - a[right_node-1])
 
-print(len(result))
+                heapq.heappush(heap, (new_diff, left_node, right_node))
 
-for pair in result:
+    print(len(result), file=output_stream)
 
-    print(pair[0], pair[1])
+    for pair in result:
 
-Wait, but this code may have an issue. Because after removing u and v, the new pair is left_node and right_node. But their adjacency is now direct (since the links are updated), so their next and prev pointers are set correctly.
+        print(pair[0], pair[1], file=output_stream)
 
-But when we add left_node and right_node to the heap, it's possible that they were added before, but that's okay. Because when the pair is popped again, it's checked whether they are alive and adjacent.
 
-But since they are now adjacent, and alive (since they are part of the linked list), the check will pass only if they are alive and adjacent.
 
-But what if left_node and right_node are not adjacent in the original array but are now adjacent after some removals?
+def test():
+    import io
 
-Yes, that's possible. But since the code uses the linked list to track their adjacency, the check during processing will correctly verify if they are adjacent.
-
-This code should handle all cases.
-
-Testing this code against the examples:
-
-First example:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
-
-BGBG
-
-4 2 4 3
-
-Initial pairs:
-
-1-2: B vs G → valid. diff is |4-2|=2.
-
-2-3: G vs B → valid. |2-4|=2.
-
-3-4: B vs G → valid. |4-3|=1.
-
-So the heap contains (2,1,2), (2,2,3), (1,3,4). Ordered as 1 (3,4), then 2 (1,2), then 2 (2,3).
-
-Processing the heap:
-
-The first popped is (1,3,4). Check if 3 and4 are alive and adjacent. They are. Process them. Add (3,4) to result. Mark them as dead. left_node is prev[3] =2, right_node is next[4]=0. So next[2] is set to 0. prev[0] is not set. Then check left_node (2) and right_node (0) → no new pair.
-
-The heap now has (2,1,2) and (2,2,3).
-
-Next popped is (2,1,2). Check if alive and adjacent. 1's next is 2, 2's prev is 1. So yes. Process. Add (1,2) to result. Mark them as dead. left_node is prev[1] =0, right_node is next[2]=3 (but 3 is dead). So next[0] is 3 (but 0 is not a valid node). So no new pair added.
-
-The heap now has (2,2,3), but when popped, check if 2 and3 are alive. 2 is now dead (processed in previous step). So the pair is skipped. So the result is 2 pairs, which matches the example.
-
-Second example:
-
-Input:
-
-4
-
 BBGG
-
 4 6 1 5
+""",
+            "output": \
+"""\
+2
+2 3
+1 4
+""",
+        }, 
+    ]
 
-The genders are B B G G.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Initial pairs:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-1-2: B B → invalid.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-2-3: B G → valid. |6-1|=5.
+    print('Tests passed 😎')
 
-3-4: G G → invalid.
 
-So the initial heap has (5,2,3).
+if __name__ == '__main__':
+    test()
 
-Another pairs may be added during processing.
 
-Processing:
+```
 
-First popped (5,2,3). Check if 2 and3 are alive and adjacent. They are. Process them. Add (2,3) to result. Mark them as dead. left_node is 1, right_node is4. Now, 1's next is4, 4's prev is1. Check if they are B and G (s[0] is B, s[3] is G). So valid. Compute |4-5|=1. Add (1,4) to heap.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Next popped is (1,1,4). Check if 1 and4 are alive and adjacent. 1's next is4, and 4's prev is1. So yes. Process. Add (1,4) to result. Now, left_node is prev[1] =0, right_node is next[4] =0. No new pair.
+```
 
-So the output is 2 pairs: 2 3 and 1 4, which matches the example.
+Testing against sample input 2.
+
+```python
+import heapq
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    s = input_stream.readline().rstrip("\n").strip()
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    prev = [0]*(n+2)
+
+    next_ = [0]*(n+2)  # next is a keyword in Python, so use next_
+
+    for i in range(1, n+1):
+
+        prev[i] = i-1 if i > 1 else 0
+
+        next_[i] = i+1 if i < n else 0
+
+    alive = [False]*(n+2)
+
+    for i in range(1, n+1):
+
+        alive[i] = True
+
+    heap = []
+
+    for i in range(1, n):
+
+        u = i
+
+        v = i + 1
+
+        if s[u-1] != s[v-1]:
+
+            diff = abs(a[u-1] - a[v-1])
+
+            heapq.heappush(heap, (diff, u, v))
+
+    result = []
+
+    while heap:
+
+        diff, u, v = heapq.heappop(heap)
+
+        # Check if u and v are alive and adjacent
+
+        if not (alive[u] and alive[v]):
+
+            continue
+
+        if next_[u] != v or prev[v] != u:
+
+            continue
+
+        # They are a valid pair
+
+        result.append( (min(u, v), max(u, v)) )
+
+        # Mark them as not alive
+
+        alive[u] = False
+
+        alive[v] = False
+
+        # Get left and right nodes
+
+        left_node = prev[u]
+
+        right_node = next_[v]
+
+        # Update the links
+
+        if left_node != 0:
+
+            next_[left_node] = right_node
+
+        if right_node != 0:
+
+            prev[right_node] = left_node
+
+        # Check if left_node and right_node form a valid pair
+
+        if left_node !=0 and right_node !=0:
+
+            if s[left_node-1] != s[right_node-1]:
+
+                new_diff = abs(a[left_node-1] - a[right_node-1])
+
+                heapq.heappush(heap, (new_diff, left_node, right_node))
+
+    print(len(result), file=output_stream)
+
+    for pair in result:
+
+        print(pair[0], pair[1], file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+BGBB
+1 1 2 3
+""",
+            "output": \
+"""\
+1
+1 2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

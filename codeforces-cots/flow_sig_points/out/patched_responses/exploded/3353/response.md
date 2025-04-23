@@ -245,53 +245,92 @@ Wait, perhaps a better approach is to use a list of functions or a dictionary, b
 
 So code:
 
-mod = 10**9 +7
+Testing against sample input 1.
 
-x, y = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    mod = 10**9 +7
 
-n = int(input())
+    x, y = map(int, input_stream.readline().rstrip("\n").split())
 
-m = n %6
+    n = int(input_stream.readline().rstrip("\n"))
 
-if m ==0:
+    m = n %6
 
-    m =6
+    if m ==0:
 
-if m ==1:
+        m =6
 
-    res = x
+    if m ==1:
 
-elif m ==2:
+        res = x
 
-    res = y
+    elif m ==2:
 
-elif m ==3:
+        res = y
 
-    res = y -x
+    elif m ==3:
 
-elif m ==4:
+        res = y -x
 
-    res = -x
+    elif m ==4:
 
-elif m ==5:
+        res = -x
 
-    res = -y
+    elif m ==5:
 
-else: # m=6
+        res = -y
 
-    res = x - y
+    else: # m=6
 
-print(res % mod)
+        res = x - y
 
-Wait, but why else for m=6? Because when m was set to 6 if n%6 is 0. So when m is 6, the code goes into the else clause.
+    print(res % mod, file=output_stream)
 
-Yes.
 
-Testing first sample input:
 
-x=2, y=3, n=3.
+def test():
+    import io
 
-n=3 mod6 is 3 → m=3. res is y-x=1 → 1 mod 1e9+7 is 1. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0 -1
+2
+""",
+            "output": \
+"""\
+1000000006
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample: x=0, y=-1, n=2. m=2 → res = y =-1. mod gives 1e9+6. Correct.
 

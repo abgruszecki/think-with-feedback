@@ -1103,39 +1103,105 @@ The steps are:
 
 Thus, this code correctly checks whether for each Max's pair, there's a pair in Min's set with c >a and d >b.
 
-Let's test this code with the first sample:
+Testing against sample input 1.
 
-Sample 1:
+```python
+import bisect
 
-Max's pairs: (2,3), (3,2)
 
-Min's pairs: (3,10), (10,3).
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read
+    data = input().split()
+    idx = 0
+    n, m = int(data[idx]), int(data[idx+1])
+    idx +=2
+    x, y = int(data[idx]), int(data[idx+1])
+    idx +=2
+    max_pairs = []
+    for _ in range(n):
+        a, b = int(data[idx]), int(data[idx+1])
+        max_pairs.append((a, b))
+        idx +=2
+    min_pairs = []
+    for _ in range(m):
+        c, d = int(data[idx]), int(data[idx+1])
+        min_pairs.append((c, d))
+        idx +=2
+    
+    # Sort Min's pairs by c ascending
+    min_pairs.sort()
+    sorted_c = [p[0] for p in min_pairs]
+    sorted_d = [p[1] for p in min_pairs]
+    m_len = len(min_pairs)
+    max_d_from = [0] * m_len
+    if m_len > 0:
+        max_d = sorted_d[-1]
+        max_d_from[-1] = max_d
+        for i in range(m_len-2, -1, -1):
+            max_d = max(max_d, sorted_d[i])
+            max_d_from[i] = max_d
+    
+    for a, b in max_pairs:
+        # Find the first index where c > a
+        i = bisect.bisect_right(sorted_c, a)
+        if i >= m_len:
+            print("Max", file=output_stream)
+            return
+        current_max_d = max_d_from[i]
+        if current_max_d > b:
+            continue
+        else:
+            print("Max", file=output_stream)
+            return
+    print("Min", file=output_stream)
 
-Sort Min's pairs by c:
 
-(3,10) comes before (10,3) if sorted by c.
 
-Wait, no. 3 <10, so sorted_c is sorted by c in ascending order.
+def test():
+    import io
 
-So sorted_c is [(3,10), (10,3)].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 1
+1 1
+3 4
+1 1
+""",
+            "output": \
+"""\
+Max
+""",
+        }, 
+    ]
 
-max_d_from for index 0 is max(10,3) = 10.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-max_d_from for index 1 is 3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-For Max's pair (2,3):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Binary search for first c>2. The first pair is (3,10). index i=0.
+    print('Tests passed 😎')
 
-max_d_from[0] =10>3 → ok.
 
-For pair (3,2):
+if __name__ == '__main__':
+    test()
 
-Binary search for first c>3. The first pair is (10,3). index i=1.
 
-max_d_from[1] =3>2 → ok.
+```
 
-All pairs pass → return "Min".
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

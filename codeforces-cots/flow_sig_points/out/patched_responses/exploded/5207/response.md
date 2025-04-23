@@ -1431,181 +1431,231 @@ Here's how:
 
                                has_island_adjacent[root_cell] = has_island_adjacent[root_cell] or has_island_adjacent[root_neighbor]
 
-                               if rank_reach[root_cell] == rank_reach[root_neighbor]:
+Testing against sample input 1.
+
+```python
+from collections import deque
+
+
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    idx = 0
+    n = int(input[idx]); idx +=1
+    m = int(input[idx]); idx +=1
+    q = int(input[idx]); idx +=1
+    
+    grid = []
+    for _ in range(n):
+        grid.append(input[idx].strip())
+        idx +=1
+    
+    INF = float('inf')
+    dist = [[INF]*m for _ in range(n)]
+    q_bfs = deque()
+    
+    for i in range(n):
+        for j in range(m):
+            if grid[i][j] == 'v':
+                dist[i][j] = 0
+                q_bfs.append((i, j))
+    
+    directions = [ (-1,0), (1,0), (0,-1), (0,1) ]
+    
+    while q_bfs:
+        i, j = q_bfs.popleft()
+        current_d = dist[i][j]
+        for di, dj in directions:
+            ni, nj = i + di, j + dj
+            if 0 <= ni < n and 0 <= nj < m:
+                if dist[ni][nj] > current_d + 1:
+                    dist[ni][nj] = current_d + 1
+                    q_bfs.append((ni, nj))
+    
+    is_border = [[False]*m for _ in range(n)]
+    for i in range(n):
+        for j in range(m):
+            if i == 0 or i == n-1 or j ==0 or j == m-1:
+                is_border[i][j] = True
+    
+    island_adjacent = set()
+    for i in range(n):
+        for j in range(m):
+            if grid[i][j] == '#':
+                for di, dj in directions:
+                    ni, nj = i + di, j + dj
+                    if 0 <= ni < n and 0 <= nj < m and grid[ni][nj] != '#':
+                        island_adjacent.add((ni, nj))
+    island_adjacent_set = island_adjacent
+    
+    cells = []
+    for i in range(n):
+        for j in range(m):
+            if grid[i][j] != '#':
+                cells.append((-dist[i][j], i, j))
+    cells.sort()
+    
+    parent_no_border = list(range(n*m))
+    rank_no_border = [1]*(n*m)
+    has_border = [False]*(n*m)
+    max_d_no_border = [[0]*m for _ in range(n)]
+    
+    def find_no_border(u):
+        while parent_no_border[u] != u:
+            parent_no_border[u] = parent_no_border[parent_no_border[u]]
+            u = parent_no_border[u]
+        return u
+    
+    for c in cells:
+        d_neg, i, j = c
+        current_d = -d_neg
+        cell_idx = i * m + j
+        parent_no_border[cell_idx] = cell_idx
+        rank_no_border[cell_idx] = 1
+        current_has_border = is_border[i][j]
+        has_border[cell_idx] = current_has_border
+        
+        for di, dj in directions:
+            ni, nj = i + di, j + dj
+            if 0 <= ni < n and 0 <= nj < m and dist[ni][nj] >= current_d:
+                neighbor_idx = ni * m + nj
+                if parent_no_border[neighbor_idx] != neighbor_idx:
+                    root1 = find_no_border(cell_idx)
+                    root2 = find_no_border(neighbor_idx)
+                    if root1 != root2:
+                        if rank_no_border[root1] < rank_no_border[root2]:
+                            parent_no_border[root1] = root2
+                            has_border[root2] = has_border[root2] or has_border[root1]
+                        else:
+                            parent_no_border[root2] = root1
+                            has_border[root1] = has_border[root1] or has_border[root2]
+                            if rank_no_border[root1] == rank_no_border[root2]:
+                                rank_no_border[root1] +=1
+        
+        root = find_no_border(cell_idx)
+        if has_border[root]:
+            max_d_no_border[i][j] = current_d -1
+        else:
+            max_d_no_border[i][j] = current_d
+    
+    parent_reach = list(range(n*m))
+    rank_reach = [1]*(n*m)
+    has_island_adjacent = [False]*(n*m)
+    max_d_reach_island = [[0]*m for _ in range(n)]
+    
+    def find_reach(u):
+        while parent_reach[u] != u:
+            parent_reach[u] = parent_reach[parent_reach[u]]
+            u = parent_reach[u]
+        return u
+    
+    for c in cells:
+        d_neg, i, j = c
+        current_d = -d_neg
+        cell_idx = i * m + j
+        parent_reach[cell_idx] = cell_idx
+        rank_reach[cell_idx] = 1
+        current_has_ia = (i, j) in island_adjacent_set
+        has_island_adjacent[cell_idx] = current_has_ia
+        
+        for di, dj in directions:
+            ni, nj = i + di, j + dj
+            if 0 <= ni < n and 0 <= nj < m and dist[ni][nj] >= current_d:
+                neighbor_idx = ni * m + nj
+                if parent_reach[neighbor_idx] != neighbor_idx:
+                    root1 = find_reach(cell_idx)
+                    root2 = find_reach(neighbor_idx)
+                    if root1 != root2:
+                        if rank_reach[root1] < rank_reach[root2]:
+                            parent_reach[root1] = root2
+                            has_island_adjacent[root2] = has_island_adjacent[root2] or has_island_adjacent[root1]
+                        else:
+                            parent_reach[root2] = root1
+                            has_island_adjacent[root1] = has_island_adjacent[root1] or has_island_adjacent[root2]
+                            if rank_reach[root1] == rank_reach[root2]:
+                                rank_reach[root1] +=1
+        
+        root = find_reach(cell_idx)
+        if has_island_adjacent[root]:
+            max_d_reach_island[i][j] = current_d
+        else:
+            max_d_reach_island[i][j] = 0
+    
+    for _ in range(q):
+        x = int(input[idx])-1; idx +=1
+        y = int(input[idx])-1; idx +=1
+        if grid[x][y] == 'v':
+            print(0, file=output_stream)
+            continue
+        d1 = max_d_no_border[x][y]
+        d2 = max_d_reach_island[x][y]
+        print(min(d1, d2), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 3 5
+..v
+.#.
+...
+1 2
+1 3
+2 3
+2 1
+3 2
+""",
+            "output": \
+"""\
+0
+0
+0
+0
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 203, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 196, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '0\n0\n0\n0\n0'
+Got: '0\n0\n0\n2\n2'
+
+```
 
-                                   rank_reach[root_cell] +=1
-
-       root = find_reach(cell_idx)
-
-       if has_island_adjacent[root]:
-
-           max_d_reach_island[i][j] = current_d
-
-       else:
-
-           max_d_reach_island[i][j] = 0
-
-   # Handle queries
-
-   for _ in range(q):
-
-       x, y = map(int, input().split())
-
-       x -= 1
-
-       y -= 1
-
-       if grid[x][y] == 'v':
-
-           print(0)
-
-           continue
-
-       d1 = max_d_no_border[x][y]
-
-       d2 = max_d_reach_island[x][y]
-
-       ans = min(d1, d2)
-
-       print(ans)
-
-   But wait, the functions find_no_border and find_reach are not defined. Oh right, we need to define the find functions with path compression.
-
-   So, add the following functions inside the code:
-
-   def find_no_border(u):
-
-       if parent_no_border[u] != u:
-
-           parent_no_border[u] = find_no_border(parent_no_border[u])
-
-       return parent_no_border[u]
-
-   def find_reach(u):
-
-       if parent_reach[u] != u:
-
-           parent_reach[u] = find_reach(parent_reach[u])
-
-       return parent_reach[u]
-
-   But in Python, functions can't be defined inside code that's executed in the main script unless they are nested. However, for the sake of code correctness, we can define the find functions inside the code block.
-
-   Alternatively, we can use lambda functions, but that's complicated.
-
-   So, the correct way is to define the find functions before using them.
-
-   Thus, the code should include the following functions:
-
-   def find_no_border(u):
-
-       while parent_no_border[u] != u:
-
-           parent_no_border[u] = parent_no_border[parent_no_border[u]]
-
-           u = parent_no_border[u]
-
-       return u
-
-   def find_reach(u):
-
-       while parent_reach[u] != u:
-
-           parent_reach[u] = parent_reach[parent_reach[u]]
-
-           u = parent_reach[u]
-
-       return u
-
-   But in Python, recursion depth is limited, so iterative find is better.
-
-   So, the find functions are implemented iteratively with path compression.
-
-   So, the code needs to have these functions defined.
-
-   Now, putting it all together.
-
-   Also, note that the initial code for processing the cells in sorted order may have bugs when checking if the neighbor has been processed. For example, in the DSU processing for max_d_no_border, when a cell is processed, we check its four neighbors. For each neighbor, if their distance is >= current_d (the current cell's distance), then they have been processed (since we process cells in descending order). However, this is only true if the neighbor's distance is >= current_d. So, if the neighbor's distance is exactly current_d, then they are processed in the same iteration. But how to determine if the neighbor has been processed.
-
-   Wait, the cells are sorted in descending order of distance. So, for a cell with current_d, all cells processed before it have distance >= current_d. So, when processing a cell (i,j), any neighbor (ni,nj) with distance >= current_d must have been processed already.
-
-   Because the cells are processed in descending order. So, when processing cell (i,j) with distance d, any cell with distance >=d has already been processed (because the list is sorted in descending order).
-
-   So, during processing cell (i,j), for each neighbor (ni,nj), if their distance >=d, then they have been processed and are already in the DSU. So, the code for the DSU is correct.
-
-   But how to represent this in code.
-
-   For example, in the code:
-
-   for di, dj in directions:
-
-       ni, nj = i + di, j + dj
-
-       if 0 <= ni < n and 0 <= nj < m:
-
-           neighbor_idx = ni * m + nj
-
-           # Check if neighbor has been processed (distance >= current_d)
-
-           if dist[ni][nj] >= current_d:
-
-               if parent_no_border[neighbor_idx] != neighbor_idx:
-
-                   # The neighbor has been processed (already in DSU)
-
-                   # Union
-
-                   ...
-
-   The condition 'dist[ni][nj] >= current_d' ensures that the neighbor is processed in the same or earlier steps. So, their parent may have been initialized.
-
-   But when processing cells in order, the current cell's distance is current_d, and neighbors with higher or equal distance have been processed before.
-
-   So, for the current cell, when processing the neighbors, if the neighbor's distance is >= current_d, then it has already been processed.
-
-   So, the code is correct.
-
-   Now, considering that the code may have large memory usage for the parent arrays, but with n*m up to 3e5, it's manageable.
-
-   Finally, the code should handle all cases.
-
-   Now, let's test this code against the first sample input.
-
-   First sample input:
-
-   9 9 3
-
-   .........
-
-   .........
-
-   ....###..
-
-   ...v#....
-
-   ..###....
-
-   ...##...v
-
-   ...##....
-
-   .........
-
-   v........
-
-   The first query is (1,1) which after converting to zero-based is (0,0). The cell is '.'.
-
-   The distance to the nearest 'v' is computed as 3. So, the max_d_no_border for this cell is 3 (if not connected to border) or 2 (if connected).
-
-   The code should compute that the cell is part of a component that does not connect to the border and can reach the island_adjacent cells.
-
-   The answer is 3.
-
-   The code should output 3.
-
-   So, the code should handle this.
-
-   Now, let's proceed to write the full code with all these steps.
 </think>
 
 ```python

@@ -675,29 +675,93 @@ But wait, for the initial step, the code starts with k=1. But what if n=1? Then,
 
 Yes.
 
-Testing this code with the samples.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-After processing tier1, state0 and state1 are1+0=1? Wait no. Wait the code:
+    # Preprocess the positions for each tier
+    positions = [[] for _ in range(n + 1)]
+    for idx in range(2 * n):
+        val = a[idx]
+        positions[val].append(idx)
 
-prev_left is pos_dict[1][0] which is0, prev_right is1.
+    # Sort each tier's positions
+    for k in range(1, n + 1):
+        positions[k].sort()
 
-state0 is 0+1=1. state1 is0+1=1.
+    if n == 0:
+        print(0, file=output_stream)
+        return
 
-Yes.
+    # Initialize DP states for tier 1
+    prev_left, prev_right = positions[1][0], positions[1][1]
+    state0 = prev_left + prev_right
+    state1 = prev_left + prev_right
 
-Then for tier2:
+    # Iterate through each tier from 2 to n
+    for k in range(2, n + 1):
+        curr_left, curr_right = positions[k]
+        # Calculate transition costs
+        cost00 = abs(curr_left - prev_left) + abs(curr_right - prev_right)
+        cost01 = abs(curr_right - prev_left) + abs(curr_left - prev_right)
+        cost10 = abs(curr_left - prev_right) + abs(curr_right - prev_left)
+        cost11 = abs(curr_right - prev_right) + abs(curr_left - prev_left)
+        
+        new_state0 = min(state0 + cost00, state1 + cost10)
+        new_state1 = min(state0 + cost01, state1 + cost11)
+        
+        state0, state1 = new_state0, new_state1
+        prev_left, prev_right = curr_left, curr_right
 
-current_left=2, current_right=3.
+    print(min(state0, state1), file=output_stream)
 
-cost00 = 2-0 (2) + 3-1 (2) →4. So state0_prev (1) +4 →5.
 
-cost10: 2-1 (1) +3-0 (3) →4 →1+4=5.
 
-so new_state0 is5.
+def test():
+    import io
 
-Similarly for new_state1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+2 1 1 2
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

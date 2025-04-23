@@ -593,65 +593,97 @@ So the code is correct.
 
 Therefore, the code can be written as:
 
+Testing against sample inputs 1, 2.
+
+```python
 import math
 from collections import defaultdict
 
-n = int(input())
-sum_deltas = defaultdict(int)
 
-for _ in range(n):
-    k, b = map(int, input().split())
-    if k == 0:
-        continue
-    # compute x0 = (-b)/k as a reduced fraction
-    numerator = -b
-    denominator = k
-    g = math.gcd(abs(numerator), abs(denominator))
-    numerator //= g
-    denominator //= g
-    if denominator <0:
-        numerator *= -1
-        denominator *= -1
-    # delta is abs(k)
-    sum_deltas[(numerator, denominator)] += abs(k)
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    sum_deltas = defaultdict(int)
 
-# the answer is the number of entries in sum_deltas with sum !=0
-# but since all sums are >=1 (abs(k) is at least 1, since k is not zero)
-# So all entries are valid.
-print(len(sum_deltas))
+    for _ in range(n):
+        k, b = map(int, input_stream.readline().rstrip("\n").split())
+        if k == 0:
+            continue
+        # compute x0 = (-b)/k as a reduced fraction
+        numerator = -b
+        denominator = k
+        g = math.gcd(abs(numerator), abs(denominator))
+        numerator //= g
+        denominator //= g
+        if denominator <0:
+            numerator *= -1
+            denominator *= -1
+        # delta is abs(k)
+        sum_deltas[(numerator, denominator)] += abs(k)
 
-Wait, but what if k_i is something like 1 and -1 for the same x0? Let's see:
+    # the answer is the number of entries in sum_deltas with sum !=0
+    # but since all sums are >=1 (abs(k) is at least 1, since k is not zero)
+    # So all entries are valid.
+    print(len(sum_deltas), file=output_stream)
 
-Function1: k=1, b=0 → x0 is 0. Delta is 1.
 
-Function2: k=-1, b=0 → x0 is 0 (since (-0)/-1 =0). Delta is 1.
 
-So sum_deltas for x0 0 is 1+1=2. So the code counts this as one entry, and the answer is 1. But according to the problem's analysis, the delta for x0 is (1 + 1) =2. So the slope changes by 2, hence there is a corner.
+def test():
+    import io
 
-Which is correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 0
+0 2
+-1 1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+        {
+            "input": \
+"""\
+3
+-2 -4
+1 7
+-5 1
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-So the code is correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But wait, the code's answer is the number of entries in the sum_deltas dictionary, since all entries have sum >=1. So yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Thus, the code is correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Testing the examples:
+    print('Tests passed 😎')
 
-First example:
 
-1
-1 0 → x0 is 0. sum_deltas has 1 entry. So output 1.
+if __name__ == '__main__':
+    test()
 
-Second example:
 
-3 functions:
+```
 
-1 0 → sum_deltas[(0,1)] =1
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-0 2 → ignored.
-
--1 1 → x0 is (-1)/-1=1. Reduced fraction (1,1). sum_deltas has two entries. So output 2.
+```
 
 Third example:
 

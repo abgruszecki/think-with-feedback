@@ -1189,107 +1189,187 @@ class FenwickTree:
 
 Thus, the code:
 
-class FenwickTree:
-    def __init__(self, size):
-        self.size = size
-        self.tree = [0] * (self.size + 1)
+Testing against sample input 1.
 
-    def update(self, index, delta):
-        index += 1
-        while index <= self.size:
-            self.tree[index] += delta
-            index += index & -index
+```python
+def main(input_stream, output_stream):
+    class FenwickTree:
+        def __init__(self, size):
+            self.size = size
+            self.tree = [0] * (self.size + 1)
 
-    def query(self, index):
-        res = 0
-        index += 1
-        while index >0:
-            res += self.tree[index]
-            index -= index & -index
-        return res
+        def update(self, index, delta):
+            index += 1
+            while index <= self.size:
+                self.tree[index] += delta
+                index += index & -index
 
-n = int(input())
-s = input().strip()
-target = s[::-1]
+        def query(self, index):
+            res = 0
+            index += 1
+            while index >0:
+                res += self.tree[index]
+                index -= index & -index
+            return res
 
-from collections import defaultdict, deque
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+    target = s[::-1]
 
-char_indices = defaultdict(deque)
-# Preprocess the original's indices in reverse order (descending)
-for i in reversed(range(n)):
-    c = s[i]
-    char_indices[c].append(i)
+    from collections import defaultdict, deque
 
-fenwick = FenwickTree(n)
-inversion_count =0
+    char_indices = defaultdict(deque)
+    # Preprocess the original's indices in reverse order (descending)
+    for i in reversed(range(n)):
+        c = s[i]
+        char_indices[c].append(i)
 
-# Process the target in reverse order (from right to left)
-for c in reversed(target):
-    j = char_indices[c].popleft()
-    inversion_count += fenwick.query(j-1)
-    fenwick.update(j, 1)
+    fenwick = FenwickTree(n)
+    inversion_count =0
 
-print(inversion_count)
+    # Process the target in reverse order (from right to left)
+    for c in reversed(target):
+        j = char_indices[c].popleft()
+        inversion_count += fenwick.query(j-1)
+        fenwick.update(j, 1)
 
-Testing this code on the first sample:
+    print(inversion_count, file=output_stream)
 
-Sample1:
 
-n=5, s=aaaza → reversed is 'azaaa'.
 
-Processing reversed(target) is 'aaaza'.
+def test():
+    import io
 
-For each character in reversed(target):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+cbaabc
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Processing 'a', 'a', 'a', 'z', 'a'.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Wait, no. reversed(target) is reversed('azaaa') → 'aaaza'.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So processing each c in reversed(target):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-1. 'a' → j=4. query(3) →0. inversion_count=0. add4.
+    print('Tests passed 😎')
 
-2. 'a' → j=2. query(1) →0. add2.
 
-3. 'a' → j=1. query(0) →0. add1.
+if __name__ == '__main__':
+    test()
 
-4. 'z' → j=3. query(2) →2 (elements 4,2,1 are processed. query(j-1=2) → sum of elements <=2. Which are 2 and1. So query returns2. inversion_count +=2. total=2.
 
-5. 'a' → j=0. query(-1) →0. add0. total remains2.
+```
 
-Which matches the sample's answer.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Sample2:
+```
 
-n=6, s='cbaabc' → reversed is 'cbaabc'. Processing reversed(target) is 'cbaabc' reversed → 'cbaabc'.
+Testing against sample input 2.
 
-Preprocessing the original indices in reversed order:
+```python
+def main(input_stream, output_stream):
+    class FenwickTree:
+        def __init__(self, size):
+            self.size = size
+            self.tree = [0] * (self.size + 1)
 
-Original s is 'c','b','a','a','b','c'. Reversed indices are5,4,3,2,1,0.
+        def update(self, index, delta):
+            index += 1
+            while index <= self.size:
+                self.tree[index] += delta
+                index += index & -index
 
-char_indices['c'] has 5,0.
+        def query(self, index):
+            res = 0
+            index += 1
+            while index >0:
+                res += self.tree[index]
+                index -= index & -index
+            return res
 
-char_indices['b'] has4,1.
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+    target = s[::-1]
 
-char_indices['a'] has3,2.
+    from collections import defaultdict, deque
 
-Processing reversed(target) → 'cbaabc' reversed → 'cbaabc' → processing each character in reversed order:
+    char_indices = defaultdict(deque)
+    # Preprocess the original's indices in reverse order (descending)
+    for i in reversed(range(n)):
+        c = s[i]
+        char_indices[c].append(i)
 
-Processing 'c', 'b', 'a', 'a', 'b', 'c'.
+    fenwick = FenwickTree(n)
+    inversion_count =0
 
-1. 'c' → j=5. query(4) →0. add5. inversion_count=0.
+    # Process the target in reverse order (from right to left)
+    for c in reversed(target):
+        j = char_indices[c].popleft()
+        inversion_count += fenwick.query(j-1)
+        fenwick.update(j, 1)
 
-2. 'b' → j=4. query(3) →0. add4. inversion_count=0.
+    print(inversion_count, file=output_stream)
 
-3. 'a' → j=3. query(2) →0. add3. inversion_count=0.
 
-4. 'a' → j=2. query(1) →0. add2. inversion_count=0.
 
-5. 'b' → j=1. query(0) →0. add1. inversion_count=0.
+def test():
+    import io
 
-6. 'c' → j=0. query(-1) →0. add0. inversion_count=0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+9
+icpcsguru
+""",
+            "output": \
+"""\
+30
+""",
+        }, 
+    ]
 
-Total inversion_count is0, which matches sample2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

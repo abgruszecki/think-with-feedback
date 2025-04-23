@@ -1449,149 +1449,153 @@ Now, write the code.
 
 The code:
 
-s = input().strip()
+Testing against sample input 1.
 
-n = len(s)
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-if n == 0:
+    n = len(s)
 
-    print('')
+    if n == 0:
 
-    exit()
+        print('', file=output_stream)
 
-# Precompute suffix_min
+        return
 
-suffix_min = [None] * (n + 1)
+    # Precompute suffix_min
 
-current_min = 'z'
+    suffix_min = [None] * (n + 1)
 
-for i in range(n-1, -1, -1):
+    current_min = 'z'
 
-    current_min = min(s[i], current_min)
+    for i in range(n-1, -1, -1):
 
-    suffix_min[i] = current_min
+        current_min = min(s[i], current_min)
 
-suffix_min[n] = None  # when k == n, no characters left
+        suffix_min[i] = current_min
 
-stack = []
+    suffix_min[n] = None  # when k == n, no characters left
 
-min_stack = []
+    stack = []
 
-u = []
+    min_stack = []
 
-k = 0
+    u = []
 
-while k < n or stack:
+    k = 0
 
-    if stack:
+    while k < n or stack:
 
-        if k < n:
+        if stack:
 
-            current_suffix_min = suffix_min[k]
+            if k < n:
 
-            stack_min = min_stack[-1]
+                current_suffix_min = suffix_min[k]
 
-            overall_min = min(stack_min, current_suffix_min)
+                stack_min = min_stack[-1]
 
-            if stack[-1] <= overall_min:
+                overall_min = min(stack_min, current_suffix_min)
+
+                if stack[-1] <= overall_min:
+
+                    u.append(stack.pop())
+
+                    min_stack.pop()
+
+                else:
+
+                    # push next character
+
+                    char = s[k]
+
+                    stack.append(char)
+
+                    if min_stack:
+
+                        new_min = min(min_stack[-1], char)
+
+                    else:
+
+                        new_min = char
+
+                    min_stack.append(new_min)
+
+                    k +=1
+
+            else:
+
+                # pop all remaining elements
 
                 u.append(stack.pop())
 
                 min_stack.pop()
 
+        else:
+
+            # stack is empty, push next character
+
+            char = s[k]
+
+            stack.append(char)
+
+            if min_stack:
+
+                new_min = min(min_stack[-1], char)
+
             else:
 
-                # push next character
+                new_min = char
 
-                char = s[k]
+            min_stack.append(new_min)
 
-                stack.append(char)
+            k +=1
 
-                if min_stack:
+    print(''.join(u), file=output_stream)
 
-                    new_min = min(min_stack[-1], char)
 
-                else:
 
-                    new_min = char
+def test():
+    import io
 
-                min_stack.append(new_min)
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+acdb
+""",
+            "output": \
+"""\
+abdc
+""",
+        }, 
+    ]
 
-                k +=1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-        else:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-            # pop all remaining elements
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-            u.append(stack.pop())
+    print('Tests passed 😎')
 
-            min_stack.pop()
 
-    else:
+if __name__ == '__main__':
+    test()
 
-        # stack is empty, push next character
 
-        char = s[k]
+```
 
-        stack.append(char)
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-        if min_stack:
-
-            new_min = min(min_stack[-1], char)
-
-        else:
-
-            new_min = char
-
-        min_stack.append(new_min)
-
-        k +=1
-
-print(''.join(u))
-
-Testing this code with sample inputs.
-
-First sample:
-
-input 'cab' → output 'abc'.
-
-Second sample 'acdb' → 'abdc'.
-
-Another test case: s = 'abdc' → output 'abdc'.
-
-Wait, but according to previous analysis, the code should output 'abcd'? No, earlier analysis shows that s = 'abdc' produces 'abcd' via the algorithm.
-
-Wait, let's re-examine.
-
-s = 'abdc' → 'a', 'b', 'd', 'c'.
-
-Processing steps:
-
-Push 'a', pop → u 'a'.
-
-Push 'b', pop → u 'ab'.
-
-Push 'd', check:
-
-current_suffix_min is 'c' (k=2, suffix_min[2] is min('d', 'c') → 'c').
-
-stack_min is 'd'.
-
-overall_min is min('d', 'c') → 'c'.
-
-current_top 'd' <= 'c'? No. Push 'c' → stack ['d', 'c'].
-
-Now, k=3, which is len(s). So pop 'c' → u 'abc'. stack ['d'].
-
-k=3 is >= len(s), so pop 'd' → u 'abcd'.
-
-Thus, code outputs 'abcd'.
-
-But according to the code, what happens?
-
-Yes.
-
-Thus, the code works.
+```
 
 Another test case: s = 'abac', which has multiple a's.
 

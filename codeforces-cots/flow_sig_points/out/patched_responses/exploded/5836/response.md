@@ -57,23 +57,67 @@ So the plan is to generate each of the first k numbers in this way, sum them, an
 
 So the code would be something like:
 
-k, p = map(int, input().split())
+Testing against sample input 1.
 
-sum_total = 0
+```python
+def main(input_stream, output_stream):
+    k, p = map(int, input_stream.readline().rstrip("\n").split())
 
-for i in range(1, k+1):
+    sum_total = 0
 
-    s = str(i) + str(i)[::-1]
+    for i in range(1, k+1):
 
-    num = int(s)
+        s = str(i) + str(i)[::-1]
 
-    sum_total += num
+        num = int(s)
 
-print(sum_total % p)
+        sum_total += num
 
-Wait, that's straightforward. Let's test this against the samples.
+    print(sum_total % p, file=output_stream)
 
-First sample input: k=2, p=100. The numbers are 11 and 22. Sum is 33. 33 mod 100 is 33. Correct.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 30
+""",
+            "output": \
+"""\
+15
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample: k=5, p=30. Sum is 11+22+33+44+55=165. 165 mod 30 is 165 - 5*30=165-150=15. Correct.
 

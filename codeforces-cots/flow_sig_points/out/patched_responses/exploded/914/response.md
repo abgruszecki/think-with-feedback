@@ -1517,59 +1517,149 @@ else:
 
 This should handle all cases.
 
-Now, let's test this code with the sample inputs.
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    ranking = list(map(int, input_stream.readline().rstrip("\n").split()))
+    teams = [list(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n)]
+    k = int(input_stream.readline().rstrip("\n"))
 
+    pos = {student: idx for idx, student in enumerate(ranking)}
+    team_list = []
+    captain_indices = []
+    student_to_team = {}
+
+    for i, team in enumerate(teams):
+        captain = min(team, key=lambda x: pos[x])
+        captain_indices.append(captain)
+        team_list.append(team)
+        for s in team:
+            student_to_team[s] = i
+
+    team_idx = student_to_team.get(k)
+    if team_idx is None:
+        return
+
+    current_team = team_list[team_idx]
+    captain = captain_indices[team_idx]
+
+    if k != captain:
+        others = [s for s in ranking if s != k]
+        print(' '.join(map(str, sorted(others))), file=output_stream)
+    else:
+        teammates = [s for s in current_team if s != k]
+        t1, t2 = sorted(teammates)
+        previous_teams = team_list[:team_idx]
+        non_available = []
+        for t in previous_teams:
+            non_available.extend(t)
+        all_students = set(ranking)
+        available = all_students - set(non_available) - {k}
+        remaining_available = sorted(available - {t1, t2})
+        available_ordered = [t1, t2] + remaining_available
+        non_available_sorted = sorted(non_available)
+        
+        merged = []
+        i = j = 0
+        selected_t1 = selected_t2 = False
+        
+        while i < len(non_available_sorted) or j < len(available_ordered):
+            if selected_t1 and selected_t2:
+                break
+            if i < len(non_available_sorted) and j < len(available_ordered):
+                if non_available_sorted[i] < available_ordered[j]:
+                    merged.append(non_available_sorted[i])
+                    i += 1
+                else:
+                    if j == 0:
+                        merged.append(available_ordered[j])
+                        j += 1
+                        selected_t1 = True
+                    elif j == 1:
+                        merged.append(available_ordered[j])
+                        j += 1
+                        selected_t2 = True
+            elif i < len(non_available_sorted):
+                merged.append(non_available_sorted[i])
+                i += 1
+            else:
+                if j == 0:
+                    merged.append(available_ordered[j])
+                    j += 1
+                    selected_t1 = True
+                else:
+                    merged.append(available_ordered[j])
+                    j += 1
+                    selected_t2 = True
+        
+        remaining_non_available = non_available_sorted[i:]
+        remaining_available = available_ordered[j:]
+        
+        p = q = 0
+        merged_remaining = []
+        while p < len(remaining_non_available) and q < len(remaining_available):
+            if remaining_non_available[p] < remaining_available[q]:
+                merged_remaining.append(remaining_non_available[p])
+                p += 1
+            else:
+                merged_remaining.append(remaining_available[q])
+                q += 1
+        merged_remaining.extend(remaining_non_available[p:])
+        merged_remaining.extend(remaining_available[q:])
+        merged += merged_remaining
+        
+        print(' '.join(map(str, merged)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
-
 5 4 1 2 6 3 7 8 9
-
 5 6 2
-
 9 3 4
-
 1 7 8
+8
+""",
+            "output": \
+"""\
+1 2 3 4 5 6 7 9
+""",
+        }, 
+    ]
 
-4
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-k is 4.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-team_index is 1 (second team in the input list, since teams are 0-based).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The team is [9,3,4], captain is 4 (k is captain).
+    print('Tests passed 😎')
 
-non_available is the first team (5,6,2).
 
-available_students = all_students - {5,6,2} - {4} → 1,3,7,8,9.
+if __name__ == '__main__':
+    test()
 
-teammates are 9 and3 → sorted as 3 and9.
 
-remaining_available = sorted(available_students - {3,9}) → sorted([1,7,8]) → [1,7,8].
+```
 
-available_ordered is [3,9,1,7,8].
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-non_available_sorted is [2,5,6].
-
-Merge process:
-
-i=0 (2), j=0 (3). 2<3 → merged.append(2), i=1.
-
-i=1 (5), j=0 (3). 5>3 → merged.append(3), j=1, selected_t1=True.
-
-i=1 (5), j=1 (9). 5<9 → merged.append(5), i=2.
-
-i=2 (6), j=1 (9). 6<9 → merged.append(6), i=3.
-
-non_available_sorted is exhausted.
-
-selected_t2 is False. j=1 (9). merged.append(9), j=2. selected_t2 = True.
-
-remaining_non_available is empty. remaining_available is [1,7,8].
-
-merged_remaining is [1,7,8].
-
-Final merged list is [2,3,5,6,9,1,7,8], which matches the sample.
+```
 
 Sample Input 3:
 

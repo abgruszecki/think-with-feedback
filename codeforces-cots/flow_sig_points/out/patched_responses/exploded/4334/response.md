@@ -89,15 +89,62 @@ Yes. So the steps are:
 
 4. The answer is max(k_min_sum, max_a)
 
-Wait, but wait. Let's test with the first sample input.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    s = sum(a)
+    max_a = max(a)
+    required = (2 * s // n) + 1
+    k = max(required, max_a)
+    print(k, file=output_stream)
 
-n=5, a=[1,1,1,5,1]
 
-sum_elodreip=9
 
-k_min_sum = (2*9 //5) +1 = 18//5=3, +1=4. So max between 4 and 5 (max_a is 5) is 5. Correct.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+2 2 3 2 2
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 
@@ -145,15 +192,62 @@ Now, considering the constraints. n is up to 100, a_i up to 100, so sum_elodreip
 
 So the code should be straightforward.
 
-Now, test the sample input 1:
+Testing against sample input 1.
 
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    s = sum(a)
+    max_a = max(a)
+    required = (2 * s // n) + 1
+    k = max(required, max_a)
+    print(k, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
+2 2 3 2 2
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-1 1 1 5 1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum is 9.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-k_min_sum = (18//5)+1 =3+1=4. Max_a is 5. So max(4,5)=5. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2:
 

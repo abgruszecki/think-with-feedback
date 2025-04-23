@@ -37,18 +37,115 @@ Read the input line. Split into parts. Convert each part to integer. Sort the li
 
 So code outline:
 
-s = input().strip()
-parts = s.split('+')
-numbers = [int(part) for part in parts]
-numbers.sort()
-result = '+'.join(map(str, numbers))
-print(result)
+Testing against sample input 1.
 
-Yes, that's it. But let's test with the examples.
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    parts = s.split('+')
+    numbers = [int(part) for part in parts]
+    numbers.sort()
+    result = '+'.join(map(str, numbers))
+    print(result, file=output_stream)
 
-First example input: "3+2+1" → split into ['3','2','1'] → numbers [3,2,1] → sorted [1,2,3] → joined as "1+2+3" → correct.
 
-Second example input: "1+1+3+1+3" → split into ['1','1','3','1','3'] → numbers [1,1,3,1,3] → sorted [1,1,1,3,3] → output "1+1+1+3+3" → correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1+1+3+1+3
+""",
+            "output": \
+"""\
+1+1+1+3+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    parts = s.split('+')
+    numbers = [int(part) for part in parts]
+    numbers.sort()
+    result = '+'.join(map(str, numbers))
+    print(result, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: input "2" → split into ['2'] → sorted → output "2" → correct.
 

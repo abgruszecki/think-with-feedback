@@ -57,36 +57,78 @@ Read n, then s. Then count A and D. Compare and print.
 
 So the code would be:
 
-n = int(input())
-s = input().strip()
+Testing against sample inputs 1, 2.
 
-a = s.count('A')
-d = s.count('D')
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-if a > d:
-    print("Anton")
-elif d > a:
-    print("Danik")
-else:
-    print("Friendship")
+    a = s.count('A')
+    d = s.count('D')
 
-Wait, but what if the sum of a and d is not n? Like, if the string has other characters. But the problem statement says that the string consists of uppercase A and D only. So it's safe.
+    if a > d:
+        print("Anton", file=output_stream)
+    elif d > a:
+        print("Danik", file=output_stream)
+    else:
+        print("Friendship", file=output_stream)
 
-Yes, so this code should work.
 
-Testing the examples:
 
-First example:
+def test():
+    import io
 
-6
-ADAAAA
-
-s = 'ADAAAA' → count A: 5, D:1 → Anton.
-
-Second example:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 7
-DDDAADA → DDD (3) + AADA (3 A's? Let's see: 'DDDAADA' → D D D A A D A → A's are 3, D's are 4. So Danik.
+DDDAADA
+""",
+            "output": \
+"""\
+Danik
+""",
+        }, 
+        {
+            "input": \
+"""\
+6
+DADADA
+""",
+            "output": \
+"""\
+Friendship
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: 'DADADA' → A's are 3, D's 3 → Friendship.
 

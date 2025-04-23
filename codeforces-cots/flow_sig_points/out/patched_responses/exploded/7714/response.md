@@ -83,37 +83,135 @@ All handled by mod 1440.
 
 So the code would be:
 
-s = input().strip()
+Testing against sample input 1.
 
-a = int(input())
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-hh, mm = map(int, s.split(':'))
+    a = int(input_stream.readline().rstrip("\n"))
 
-total = hh *60 + mm + a
+    hh, mm = map(int, s.split(':'))
 
-total %= 1440
+    total = hh *60 + mm + a
 
-new_h = total // 60
+    total %= 1440
 
-new_m = total %60
+    new_h = total // 60
 
-print(f"{new_h:02}:{new_m:02}")
+    new_m = total %60
 
-Wait, the format specifiers in Python. For example, if new_h is 0, then 02d will make it 00. Yep.
+    print(f"{new_h:02}:{new_m:02}", file=output_stream)
 
-Testing this code with the examples:
 
-First example:
 
-Input 23:59 and 10.
+def test():
+    import io
 
-hh is 23, mm 59. total starts as 23*60+59 = 1439. Add 10: 1449. total becomes 1449 mod 1440 is 9. new_h is 9//60=0, new_m=9. Output 00:09.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+20:20
+121
+""",
+            "output": \
+"""\
+22:21
+""",
+        }, 
+    ]
 
-Second example:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-20:20, a=121.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-hh=20, mm=20. total= 20*60 +20= 1220. 1220+121=1341. 1341 mod 1440 is 1341. 1341//60 is 22, 22*60=1320. 1341-1320=21. So 22:21.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    a = int(input_stream.readline().rstrip("\n"))
+
+    hh, mm = map(int, s.split(':'))
+
+    total = hh *60 + mm + a
+
+    total %= 1440
+
+    new_h = total // 60
+
+    new_m = total %60
+
+    print(f"{new_h:02}:{new_m:02}", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10:10
+0
+""",
+            "output": \
+"""\
+10:10
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: 10:10 +0. total is 610. mod 1440 is 610. 610//60=10, 610%60=10. So 10:10.
 

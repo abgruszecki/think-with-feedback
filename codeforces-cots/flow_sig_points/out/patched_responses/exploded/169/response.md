@@ -497,80 +497,99 @@ But in Python, the heapq module allows us to push and pop elements.
 
 Now, code steps:
 
+Testing against sample input 1.
+
+```python
 import heapq
 
-a = list(map(int, input().split()))
-n = int(input())
-b = list(map(int, input().split()))
 
-sorted_frets = []
-for note in b:
-    frets = []
-    for ai in a:
-        frets.append(note - ai)
-    frets.sort()
-    sorted_frets.append(frets)
+def main(input_stream, output_stream):
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    n = int(input_stream.readline().rstrip("\n"))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-heap = []
-current_max = -float('inf')
+    sorted_frets = []
+    for note in b:
+        frets = []
+        for ai in a:
+            frets.append(note - ai)
+        frets.sort()
+        sorted_frets.append(frets)
 
-for i in range(n):
-    val = sorted_frets[i][0]
-    heapq.heappush(heap, (val, i, 0))
-    if val > current_max:
-        current_max = val
+    heap = []
+    current_max = -float('inf')
 
-min_range = current_max - heap[0][0]
+    for i in range(n):
+        val = sorted_frets[i][0]
+        heapq.heappush(heap, (val, i, 0))
+        if val > current_max:
+            current_max = val
 
-while True:
-    current_min, note_idx, ptr = heapq.heappop(heap)
-    # Check if there's next element in this note's list
-    if ptr + 1 < len(sorted_frets[note_idx]):
-        next_ptr = ptr + 1
-        next_val = sorted_frets[note_idx][next_ptr]
-        heapq.heappush(heap, (next_val, note_idx, next_ptr))
-        if next_val > current_max:
-            current_max = next_val
-        # Update the minimal range
-        current_range = current_max - heap[0][0]
-        if current_range < min_range:
-            min_range = current_range
-    else:
-        break
+    min_range = current_max - heap[0][0]
 
-print(min_range)
+    while True:
+        current_min, note_idx, ptr = heapq.heappop(heap)
+        # Check if there's next element in this note's list
+        if ptr + 1 < len(sorted_frets[note_idx]):
+            next_ptr = ptr + 1
+            next_val = sorted_frets[note_idx][next_ptr]
+            heapq.heappush(heap, (next_val, note_idx, next_ptr))
+            if next_val > current_max:
+                current_max = next_val
+            # Update the minimal range
+            current_range = current_max - heap[0][0]
+            if current_range < min_range:
+                min_range = current_range
+        else:
+            break
 
-This code should work.
+    print(min_range, file=output_stream)
 
-Let's test it against the sample input 1:
 
-Sample input 1:
 
-1 4 100 10 30 5
+def test():
+    import io
 
-6
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 1 2 2 3 3
+7
+13 4 11 12 11 13 12
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
 
-101 104 105 110 130 200
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The sorted_frets for each note:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Note 101:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Compute 101 - each a_i:
+    print('Tests passed 😎')
 
-100, 97, 1, 91, 71, 96 → sorted [1,71,91,96,97,100]
 
-Note 104:
+if __name__ == '__main__':
+    test()
 
-104-1=103, 104-4=100, 104-100=4, 104-10=94, 104-30=74, 104-5=99 → sorted [4,74,94,99,100,103]
 
-Similarly, for other notes. However, each note has a possible fret of 100. So when all notes select 100, the range is 0.
+```
 
-The code's initial heap contains the first element of each sorted list. For the first note, it's 1. The second note's first element is 4. And so on. The current_max is the maximum of all these first elements. Then, the code processes by popping the smallest and pushing the next element in that list.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Eventually, all notes will reach their 100 entry. At that point, the current_max and current_min would be 100, leading to min_range 0.
-
-The code should find this.
+```
 
 The code for the second sample:
 

@@ -153,41 +153,143 @@ Now, in terms of optimization: since the code is O(1), there's nothing to optimi
 
 So the code should be:
 
-trump = input().strip()
-card1, card2 = input().split()
+Testing against sample input 1.
 
-rank_order = {'6':0, '7':1, '8':2, '9':3, 'T':4, 'J':5, 'Q':6, 'K':7, 'A':8}
+```python
+def main(input_stream, output_stream):
+    trump = input_stream.readline().rstrip("\n").strip()
+    card1, card2 = input_stream.readline().rstrip("\n").split()
 
-s1, r1 = card1[1], card1[0]
-s2, r2 = card2[1], card2[0]
+    rank_order = {'6':0, '7':1, '8':2, '9':3, 'T':4, 'J':5, 'Q':6, 'K':7, 'A':8}
 
-# Check if first is trump and second is not
-if s1 == trump and s2 != trump:
-    print("YES")
-elif s1 == s2:
-    # same suit, compare ranks
-    if rank_order[r1] > rank_order[r2]:
-        print("YES")
+    s1, r1 = card1[1], card1[0]
+    s2, r2 = card2[1], card2[0]
+
+    # Check if first is trump and second is not
+    if s1 == trump and s2 != trump:
+        print("YES", file=output_stream)
+    elif s1 == s2:
+        # same suit, compare ranks
+        if rank_order[r1] > rank_order[r2]:
+            print("YES", file=output_stream)
+        else:
+            print("NO", file=output_stream)
     else:
-        print("NO")
-else:
-    print("NO")
+        print("NO", file=output_stream)
 
-Wait, wait. Wait, in the code, s1 is card1's suit. Because card1 is, for example, "QH", so card1[1] is 'H'.
 
-Yes.
 
-So that's correct.
+def test():
+    import io
 
-Testing the first example:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+S
+8D 6D
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
 
-card1 is QH. s1 is H. trump is H. s2 is S. So first condition is met: s1 is trump, s2 is not. Output YES.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Second example: trump is S.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-card1 is 8D: s1 is D. card2 is 6D: s2 is D. So same suit. Check ranks: 8 (index 2) >6 (0). So YES.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    trump = input_stream.readline().rstrip("\n").strip()
+    card1, card2 = input_stream.readline().rstrip("\n").split()
+
+    rank_order = {'6':0, '7':1, '8':2, '9':3, 'T':4, 'J':5, 'Q':6, 'K':7, 'A':8}
+
+    s1, r1 = card1[1], card1[0]
+    s2, r2 = card2[1], card2[0]
+
+    # Check if first is trump and second is not
+    if s1 == trump and s2 != trump:
+        print("YES", file=output_stream)
+    elif s1 == s2:
+        # same suit, compare ranks
+        if rank_order[r1] > rank_order[r2]:
+            print("YES", file=output_stream)
+        else:
+            print("NO", file=output_stream)
+    else:
+        print("NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+C
+7H AS
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: trump is C.
 

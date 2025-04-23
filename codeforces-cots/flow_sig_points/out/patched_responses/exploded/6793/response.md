@@ -789,75 +789,67 @@ Now, let's implement this in Python.
 
 The code would be:
 
-s = input().strip()
+Testing against sample input 2.
 
-n_count = s.count('n')
-i_count = s.count('i')
-e_count = s.count('e')
-t_count = s.count('t')
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-max_n = (n_count -1) // 2 if n_count > 0 else 0
-max_e = e_count //3
+    n_count = s.count('n')
+    i_count = s.count('i')
+    e_count = s.count('e')
+    t_count = s.count('t')
 
-possible = min( max_n, i_count, max_e, t_count )
+    max_n = (n_count -1) // 2 if n_count > 0 else 0
+    max_e = e_count //3
 
-print( possible if possible >=0 else 0 )
+    possible = min( max_n, i_count, max_e, t_count )
 
-Wait, but what if n_count is 0, then max_n is 0. So possible is min(0, ...) →0.
+    print( possible if possible >=0 else 0 , file=output_stream)
 
-But what about other letters? For example, if there are no n's, even if other letters are present, possible is zero.
 
-So that's correct.
 
-Testing the third sample:
+def test():
+    import io
 
-Input is 'nineteenineteen'.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+nineteenineteen
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-n_count =5.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-max_n = (5-1)//2 =2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i_count=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-e_count=6 →6//3=2.
+    print('Tests passed 😎')
 
-t_count=2.
 
-possible = min(2,2,2,2)=2. Correct.
+if __name__ == '__main__':
+    test()
 
-Sample input 2: "nneteenabcnneteenabcnneteenabcnneteenabcnneteenabcii".
 
-Let's compute the counts:
+```
 
-n_count: let's see, the input contains multiple 'n's.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-But in the input, each occurrence of "nneteen" has two 'n's. Let's see how many times "nneteen" appears. But perhaps it's easier to count all 'n's in the input.
-
-Assuming the input is "nneteenabcnneteenabcnneteenabcnneteenabcnneteenabcii".
-
-Let's count the 'n's:
-
-Each "nneteen" has two 'n's.
-
-The input has "nneteen" repeated 5 times? So 2*5=10 n's.
-
-i_count: each "nneteen" has one 'i', but the input has "abcii" at the end. So i_count is 5*1 +2=7? Not sure, but the sample output is 2. So according to the code:
-
-max_n = (10-1)//2=9//2=4.
-
-i_count=7.
-
-e_count: each "nneteen" has 3 e's (from the 'teen' part). So 5*3=15 e's. So e_count//3=5.
-
-t_count: each "nneteen" has one t. So 5*1=5.
-
-possible = min(4,7,5,5) →4. But the sample output is 2.
-
-So this contradicts the code.
-
-Wait, sample input 2's output is 2. So according to the code, the code would output 4, but sample output is 2. So there's a mistake here.
-
-Ah! So the code is incorrect. So what's wrong here.
+```
 
 Wait, sample input 2's output is 2, which suggests that the code's logic is wrong.
 

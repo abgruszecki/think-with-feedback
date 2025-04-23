@@ -701,105 +701,118 @@ But how to handle the order of edges in the output. Because the input edges are 
 
 So, code outline:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-edges = []
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-M = [0] * n
+    edges = []
 
-for _ in range(m):
+    M = [0] * n
 
-    a, b = map(int, input().split())
+    for _ in range(m):
 
-    u = a - 1
+        a, b = map(int, input_stream.readline().rstrip("\n").split())
 
-    v = b - 1
+        u = a - 1
 
-    edges.append( (u, v) )
+        v = b - 1
 
-    M[u] |= 1 << v
+        edges.append( (u, v) )
 
-inv = [0] * n
+        M[u] |= 1 << v
 
-for i in range(n):
+    inv = [0] * n
 
-    inv[i] = 1 << i
+    for i in range(n):
 
-for c in range(n):
+        inv[i] = 1 << i
 
-    pivot = -1
+    for c in range(n):
 
-    for r in range(c, n):
+        pivot = -1
 
-        if (M[r] >> c) & 1:
+        for r in range(c, n):
 
-            pivot = r
+            if (M[r] >> c) & 1:
 
-            break
+                pivot = r
 
-    # swap rows c and pivot
+                break
 
-    M[c], M[pivot] = M[pivot], M[c]
+        # swap rows c and pivot
 
-    inv[c], inv[pivot] = inv[pivot], inv[c]
+        M[c], M[pivot] = M[pivot], M[c]
 
-    for r in range(n):
+        inv[c], inv[pivot] = inv[pivot], inv[c]
 
-        if r != c and (M[r] >> c) & 1:
+        for r in range(n):
 
-            M[r] ^= M[c]
+            if r != c and (M[r] >> c) & 1:
 
-            inv[r] ^= inv[c]
+                M[r] ^= M[c]
 
-for u, v in edges:
+                inv[r] ^= inv[c]
 
-    if (inv[v] >> u) & 1:
+    for u, v in edges:
 
-        print("NO")
+        if (inv[v] >> u) & 1:
 
-    else:
+            print("NO", file=output_stream)
 
-        print("YES")
+        else:
 
-But this code will not work for n=2000. Let's test with small samples.
+            print("YES", file=output_stream)
 
-Sample Input 1:
 
-After code processes edges:
 
-M = [3, 2]
+def test():
+    import io
 
-inv starts as [1, 2].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 3
+1 1
+2 2
+3 3
+""",
+            "output": \
+"""\
+NO
+NO
+NO
+""",
+        }, 
+    ]
 
-Processing column 0:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-pivot is 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-No other rows to process.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Processing column 1:
+    print('Tests passed 😎')
 
-pivot is 1.
 
-For row 0:
+if __name__ == '__main__':
+    test()
 
-M[0] has bit 1 set (3 >> 1 is 1, &1 → 1).
 
-So M[0] ^= M[1] → 3 ^ 2 = 1.
+```
 
-inv[0] ^= inv[1] → 1 ^ 2 = 3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So after processing, inv is [3, 2].
-
-For edges:
-
-(0,0): inv[0] is 3 (0b11), bit 0 → 1 → NO.
-
-(0,1): inv[1] is 2 (0b10), bit 0 → 0 → YES.
-
-(1,1): inv[1] is 2 (0b10), bit 1 → 1 → NO.
-
-Which is correct.
+```
 
 Now, let's test the code for n=2000. But even with this code, for n=2000, it's O(n^3) steps.
 

@@ -883,97 +883,182 @@ So here's the plan:
 
    Now, the code should handle all cases.
 
-   Let's test this approach against the sample input.
+Testing against sample input 1.
 
-   First sample:
+```python
+import bisect
 
-   Input:
 
-   2 2 3
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    ptr = 0
+    n = int(input[ptr])
+    m = int(input[ptr+1])
+    q = int(input[ptr+2])
+    ptr +=3
+    
+    grid = []
+    for _ in range(n):
+        row = input[ptr].strip()
+        grid.append(list(row))
+        ptr +=1
+    
+    # Initialize non_hat_rows for each column (1-based)
+    non_hat_rows = [[] for _ in range(m+2)]  # columns 1..m
+    for y in range(1, m+1):
+        for x in range(n, 0, -1):
+            if grid[x-1][y-1] != '^':
+                non_hat_rows[y].append(x)
+    
+    for _ in range(q):
+        event = input[ptr]
+        ptr +=1
+        if event == 'C':
+            x = int(input[ptr])
+            y = int(input[ptr+1])
+            c = input[ptr+2]
+            ptr +=3
+            # Update grid
+            prev_c = grid[x-1][y-1]
+            grid[x-1][y-1] = c
+            # Check if the change affects the non_hat_rows[y]
+            # For column y
+            lst = non_hat_rows[y]
+            if prev_c != '^' and c == '^':
+                # Remove x from lst
+                idx = bisect.bisect_left(lst, x, key=lambda a: -a)
+                if idx < len(lst) and lst[idx] == x:
+                    lst.pop(idx)
+            elif prev_c == '^' and c != '^':
+                # Add x to lst if not present
+                idx = bisect.bisect_left(lst, x, key=lambda a: -a)
+                if idx >= len(lst) or (idx < len(lst) and lst[idx] != x):
+                    lst.insert(idx, x)
+        else:
+            # 'A' event
+            x = int(input[ptr])
+            y = int(input[ptr+1])
+            ptr +=2
+            current_x = x
+            current_y = y
+            result = None
+            while True:
+                # Find first non '^' row in current_y <= current_x
+                lst = non_hat_rows[current_y]
+                idx = bisect.bisect_left(lst, current_x, key=lambda a: -a)
+                if idx < len(lst):
+                    x_prime = lst[idx]
+                else:
+                    # All rows in current_y are '^', exit to 0, current_y
+                    result = (0, current_y)
+                    break
+                # Simulate row x_prime
+                visited = set()
+                current_col = current_y
+                exit_found = False
+                while True:
+                    if current_col < 1 or current_col > m:
+                        result = (x_prime, current_col)
+                        exit_found = True
+                        break
+                    if current_col in visited:
+                        result = (-1, -1)
+                        exit_found = True
+                        break
+                    visited.add(current_col)
+                    dir = grid[x_prime -1][current_col -1]
+                    if dir == '^':
+                        # Move up to x_prime-1, current_col
+                        current_x = x_prime -1
+                        current_y = current_col
+                        break
+                    elif dir == '<':
+                        new_col = current_col -1
+                    else:
+                        new_col = current_col +1
+                    if new_col <1:
+                        result = (x_prime, 0)
+                        exit_found = True
+                        break
+                    elif new_col >m:
+                        result = (x_prime, m+1)
+                        exit_found = True
+                        break
+                    else:
+                        current_col = new_col
+                if exit_found:
+                    break
+                # Continue processing with current_x and current_y
+            print(result[0], result[1], file=output_stream)
 
-   >>
 
-   ^^
 
-   Events:
+def test():
+    import io
 
-   A 2 1
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 5 7
+><<^<
+^<^^>
+>>>^>
+>^>>^
+A 3 1
+A 2 2
+C 1 4 <
+A 3 1
+C 1 2 ^
+A 3 1
+A 2 2
+""",
+            "output": \
+"""\
+0 4
+-1 -1
+-1 -1
+0 2
+0 2
+""",
+        }, 
+    ]
 
-   C 1 2 <
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-   A 2 1
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-   Sample output:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-   1 3
+    print('Tests passed 😎')
 
-   -1 -1
 
-   Let's see.
+if __name__ == '__main__':
+    test()
 
-   For the first 'A 2 1':
 
-   y =1.
+```
 
-   column_list for y=1 is rows where cell is not '^'.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 155, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 148, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '0 4\n-1 -1\n-1 -1\n0 2\n0 2'
+Got: '0 1\n0 2\n0 1\n0 1\n0 2'
 
-   The initial grid row 1 is '>>', so cell (1, 1) is '>', which is not '^'. So non_hat_rows[1] contains [1, 2]. Wait, no. Wait, the rows are 1 and 2 (since n=2). Let's see:
-
-   For column y=1:
-
-   row 1, cell (1,1) is '>', so non_hat_rows[1] includes row 1.
-
-   row 2, cell (2,1) is '^', so not included.
-
-   So non_hat_rows[1] is [1].
-
-   So x=2, y=1.
-
-   Find x_prime in non_hat_rows[1] which is <=2. The list is [1]. So x_prime=1.
-
-   Simulate row 1, starting at column 1.
-
-   row 1 is '>>'.
-
-   current_col =1.
-
-   dir is '>', new_col=2.
-
-   current_col=2.
-
-   dir is '>', new_col=3, which is > m (2). So return exit (1,3). So output is 1 3.
-
-   For the second event: C 1 2 <.
-
-   So, row 1, column 2 was '>', now changed to '<'. For column y=2, we need to update non_hat_rows[2]. Before the change, if the cell was '>', which is not '^', so it was in the list. Now, changed to '<', which is not '^', so no change to the list. So non_hat_rows[2] remains.
-
-   For the third event: A 2 1.
-
-   y=1.
-
-   non_hat_rows[1] is still [1].
-
-   x_prime=1.
-
-   simulate row 1, starting at column 1.
-
-   row 1's cells are '><' (since after change, cell (1,2) is '<'.
-
-   current_col=1.
-
-   dir is '>', new_col=2.
-
-   current_col=2.
-
-   dir is '<', new_col=1.
-
-   Now, current_col=1 is in visited (visited is {1, 2}), loop detected. Return loop.
-
-   So output is -1 -1.
-
-   Which matches the sample.
-
-   So, the approach works for this case.
+```
 
    Another sample:
 

@@ -1427,13 +1427,112 @@ print(count)
 
 This code should handle all possible cases.
 
-Let's test it against the sample inputs.
+Testing against sample input 1.
 
-Sample Input 1: BABBBABBA (n=9)
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    n = len(s)
+    count = 0
 
-The possible solutions are 2.
+    for f0 in [0, 1]:
+        for f1 in [0, 1]:
+            valid = True
+            prev_prev, prev = f0, f1
+            # Compute f2 to f_{n-1}
+            for i in range(1, n-1):
+                s_prev = s[i-1]
+                s_curr = s[i]
+                s_next = s[i+1]
+                # Calculate a_i
+                p_prev = 'A' if (s_prev == 'A') ^ (prev_prev) else 'B'
+                p_curr = 'A' if (s_curr == 'A') ^ (prev) else 'B'
+                a_i = 1 if p_prev == 'A' and p_curr == 'B' else 0
+                K = (prev - a_i) % 2
+                # Determine next_f
+                if K == 1:
+                    next_f = 0 if s_next == 'B' else 1
+                else:
+                    next_f = 1 if s_next == 'B' else 0
+                prev_prev, prev = prev, next_f
+            # Check f0'
+            if n >= 2:
+                s_prev = s[-2]
+                s_curr = s[-1]
+                s_next = s[0]
+                p_prev = 'A' if (s_prev == 'A') ^ (prev_prev) else 'B'
+                p_curr = 'A' if (s_curr == 'A') ^ (prev) else 'B'
+                a_i = 1 if p_prev == 'A' and p_curr == 'B' else 0
+                K = (prev - a_i) % 2
+                next_f0 = 0 if (s[0] == 'B') ^ (K == 1) else 1
+                if next_f0 != f0:
+                    continue
+            # Check f1'
+            s_prev = s[-1]
+            s_curr = s[0]
+            s_next = s[1]
+            p_prev = 'A' if (s_prev == 'A') ^ (prev) else 'B'
+            p_curr = 'A' if (s_curr == 'A') ^ (f0) else 'B'
+            a_i = 1 if p_prev == 'A' and p_curr == 'B' else 0
+            K = (f0 - a_i) % 2
+            next_f1 = 0 if (s[1] == 'B') ^ (K == 1) else 1
+            if next_f1 == f1:
+                count += 1
 
-The code should find two valid (f0, f1) pairs.
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+ABABB
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 85, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 78, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '2'
+Got: '1'
+
+```
 
 Sample Input 2: ABABB → output 2.
 

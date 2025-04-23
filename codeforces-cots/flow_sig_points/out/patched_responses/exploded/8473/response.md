@@ -1812,23 +1812,145 @@ Yes, because the code appends the dominoes to a list, which is 0-based. So for j
 
 Thus, the code is correct. 
 
-Testing this code with the first sample input:
+Testing against sample input 1.
 
-The cost array is [4,3,6,3,1,2,1]. 
+```python
+import sys
 
-For j=7 (0-based index 6), cost is1. 
 
-L[7] is 5. 
+def main(input_stream, output_stream):
+    input = input_stream.read().split()
+    ptr = 0
+    n, m = map(int, input[ptr:ptr+2])
+    ptr +=2
+    
+    blocks = []
+    for _ in range(n):
+        k = int(input[ptr])
+        ptr +=1
+        a = list(map(int, input[ptr:ptr+k]))
+        ptr +=k
+        c = list(map(int, input[ptr:ptr+k]))
+        ptr +=k
+        blocks.append( (a, c) )
+    
+    q = int(input[ptr])
+    ptr +=1
+    
+    a = []
+    cost = []
+    for _ in range(q):
+        id_i, mul_i = map(int, input[ptr:ptr+2])
+        ptr +=2
+        block_a, block_c = blocks[id_i-1]
+        a.extend(block_a)
+        cost.extend( [x * mul_i for x in block_c] )
+    
+    # Compute R array
+    R = [0]*(m+2)  # 1-based to m
+    for i in range(m, 0, -1):
+        R[i] = i + a[i-1] -1
+        if i < m and R[i] >= i+1:
+            if R[i+1] > R[i]:
+                R[i] = R[i+1]
+    
+    # Compute L array
+    L = [0]*(m+2)  # 1-based to m
+    for i in range(1, m+1):
+        L[i] = i - a[i-1] +1
+        if i > 1 and (i-1) >= L[i]:
+            if L[i-1] < L[i]:
+                L[i] = L[i-1]
+    
+    INF = float('inf')
+    dp = [INF] * (m +1)
+    dp[0] = 0
+    
+    for j in range(1, m+1):
+        # Push right
+        if dp[j-1] != INF:
+            current_cost = dp[j-1] + cost[j-1]
+            right_end = R[j]
+            if right_end > m:
+                right_end = m
+            if current_cost < dp[right_end]:
+                dp[right_end] = current_cost
+        
+        # Push left
+        left_start = L[j]
+        if left_start < 1:
+            left_cost = cost[j-1]
+        else:
+            if dp[left_start-1] != INF:
+                left_cost = dp[left_start-1] + cost[j-1]
+            else:
+                left_cost = INF
+        if left_cost < dp[j]:
+            dp[j] = left_cost
+        
+        # Propagate
+        if dp[j-1] < dp[j]:
+            dp[j] = dp[j-1]
+    
+    print(dp[m], file=output_stream)
 
-Left_start is5. left_start-1=4. 
 
-dp[4] is4. 
 
-left_cost=4+1=5. 
+def test():
+    import io
 
-Thus, dp[7] is min(5, previous value) →5. 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 1
+1
+1
+100000
+1
+1 100000
+""",
+            "output": \
+"""\
+10000000000
+""",
+        }, 
+    ]
 
-Thus, the code outputs5. 
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 118, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 111, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '10000000000'
+Got: '0'
+
+```
 
 Sample input 2:
 

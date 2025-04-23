@@ -361,45 +361,39 @@ After the loop, if best_a is -1, output -1. Else, output '4'*a + '7'*b.
 
 Now, code:
 
-n = int(input())
+Testing against sample input 1.
 
-best_a = -1
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-best_b = -1
+    best_a = -1
 
-min_total = None
+    best_b = -1
 
-max_b = n //7
+    min_total = None
 
-for b in range(max_b +1):
+    max_b = n //7
 
-    rem = n -7*b
+    for b in range(max_b +1):
 
-    if rem <0:
+        rem = n -7*b
 
-        break  # since b increases, rem will keep decreasing, so break early.
+        if rem <0:
 
-    if rem %4 !=0:
+            break  # since b increases, rem will keep decreasing, so break early.
 
-        continue
+        if rem %4 !=0:
 
-    a = rem //4
+            continue
 
-    total = a +b
+        a = rem //4
 
-    # Compare with current best.
+        total = a +b
 
-    if best_a == -1:
+        # Compare with current best.
 
-        best_a = a
-
-        best_b = b
-
-        min_total = total
-
-    else:
-
-        if total < min_total:
+        if best_a == -1:
 
             best_a = a
 
@@ -407,53 +401,75 @@ for b in range(max_b +1):
 
             min_total = total
 
-        elif total == min_total:
+        else:
 
-            if a > best_a:
+            if total < min_total:
 
                 best_a = a
 
                 best_b = b
 
-if best_a == -1:
+                min_total = total
 
-    print(-1)
+            elif total == min_total:
 
-else:
+                if a > best_a:
 
-    print('4' * best_a + '7' * best_b)
+                    best_a = a
 
-Wait, but in the code, the loop is from b=0 to max_b. But in the loop, once rem becomes negative, we break. So if in the loop, b starts from 0, and for each iteration, we calculate rem. If rem becomes negative, we break, so no further iterations. For example, for n=100, when b is 14 (7*14=98, rem=2), then next b=15 (7*15=105>100) → rem=100-105= -5. So we break. So the loop runs until b=14, but breaks at 15.
+                    best_b = b
 
-But in the code above, the loop is written as for b in range(max_b +1). So max_b is n//7, but for example, when n is 14, n//7 is 2. So loop runs from 0 to 2. For b=2, rem=14-14=0. Then rem%4 is 0 → a=0. So a valid.
+    if best_a == -1:
 
-But in the code, for each b in 0 to max_b, inclusive, we check rem. So if n is 15, n//7 is 2 (7*2=14 <=15). Then for b=3 (since the loop is up to 2), no. So the code correctly checks all possible b.
+        print(-1, file=output_stream)
 
-Wait, no. The max_b is n//7. For example, when n=15, 15//7 is 2 (since 7*2=14 <=15). So loop runs from 0 to 2.
+    else:
 
-But for b=2, rem=15-14=1, which is not divisible by 4. So no. So the code will check all possible b up to n//7.
+        print('4' * best_a + '7' * best_b, file=output_stream)
 
-But what if there's a b larger than n//7 such that 7*b <=n? Because n//7 is the floor division. For example, if n=7*3=21, then 21//7=3. So yes, it's covered.
 
-So the code is correct.
 
-Testing this code with sample inputs:
+def test():
+    import io
 
-Sample Input 1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-11
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample Output:47.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Let's see:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Loop for b from 0 to 1 (11//7=1).
+    print('Tests passed 😎')
 
-b=0: rem=11. 11%4=3 → invalid.
 
-b=1: rem=4. 4%4=0 → a=1. total=2. best_a=1, best_b=1.
+if __name__ == '__main__':
+    test()
 
-So output is 47.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample Input 2:
 

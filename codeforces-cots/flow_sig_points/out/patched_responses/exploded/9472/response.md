@@ -831,45 +831,79 @@ ans +=1.
 
 So code works.
 
-Another test case:
+Testing against sample input 2.
 
-Sample input 2:
+```python
+def main(input_stream, output_stream):
+    A, B, C, D = map(int, input_stream.readline().rstrip("\n").split())
+    ans = 0
 
-1 2 2 5.
+    for x in range(A, B + 1):
+        y_min = max(B, C - x + 1)
+        if y_min > C:
+            continue
+        threshold = D - x + 1
+        y1 = min(C, threshold)
+        
+        part1 = 0
+        if y1 >= y_min:
+            count1 = y1 - y_min + 1
+            part1 = (x - C) * count1 + (y_min + y1) * count1 // 2
+        
+        part2_start = threshold + 1
+        y2_start = max(part2_start, y_min)
+        part2 = 0
+        if y2_start <= C:
+            count2 = C - y2_start + 1
+            part2 = (D - C + 1) * count2
+        
+        ans += part1 + part2
 
-x=1:
+    print(ans, file=output_stream)
 
-y_min = max(2, 2 -1 +1=2) →2.
 
-threshold=5-1+1=5. y1 = min(2,5)=2.
 
-count1=1.
+def test():
+    import io
 
-part1= (1-2)*1 + (2+2)*1//2 →-1 + 2=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+500000 500000 500000 500000
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-part2_start=5+1=6. y2_start= max(6,2)=6>2. part2=0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-ans +=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-x=2:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-y_min = max(2, 2-2+1=1) →2.
+    print('Tests passed 😎')
 
-threshold=5-2+1=4. y1= min(2,4)=2.
 
-count1=1.
+if __name__ == '__main__':
+    test()
 
-part1= (2-2)*1 + (2+2)*1//2 →0+2=2.
 
-part2_start=4+1=5. y2_start=5>2. part2=0.
+```
 
-ans +=2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Total is 3.
-
-Which matches sample.
-
-Thus, the code is correct.
+```
 
 Now, let's implement this in Python.
 

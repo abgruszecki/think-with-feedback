@@ -98,47 +98,135 @@ But wait, for n=1, the max_len would be 1. Which is correct.
 
 So code outline:
 
-n, d = map(int, input().split())
-x = list(map(int, input().split()))
-x.sort()
+Testing against sample input 1.
 
-max_len = 0
-left = 0
+```python
+def main(input_stream, output_stream):
+    n, d = map(int, input_stream.readline().rstrip("\n").split())
+    x = list(map(int, input_stream.readline().rstrip("\n").split()))
+    x.sort()
 
-for right in range(n):
-    while x[right] - x[left] > d:
-        left +=1
-    current_len = right - left +1
-    if current_len > max_len:
-        max_len = current_len
+    max_len = 0
+    left = 0
 
-print(n - max_len)
+    for right in range(n):
+        while x[right] - x[left] > d:
+            left +=1
+        current_len = right - left +1
+        if current_len > max_len:
+            max_len = current_len
 
-Wait, let's test this with sample inputs.
+    print(n - max_len, file=output_stream)
 
-First sample input:
 
-3 1
 
-2 1 4 → sorted becomes [1,2,4]
+def test():
+    import io
 
-Loop through right=0,1,2.
-
-Right=0: x[0]-x[0]=0 <=1. current_len=1. max_len=1.
-
-Right=1: x[1] -x[0]=2-1=1 ≤1 → len=2. max_len=2.
-
-Right=2: x[2] -x[0]=4-1=3>1. So enter loop: left becomes 1. Now x[2]-x[1] =4-2=2>1 → left becomes 2. Now loop ends. current_len=1. max_len remains 2.
-
-So max_len is 2. So answer is 3-2=1. Correct.
-
-Second sample:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3 0
+7 7 7
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-7,7,7 sorted → [7,7,7]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-All x[right] -x[left] is 0. So for each right, left is 0. So current_len for right=2 is 3. So answer is 3-3=0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, d = map(int, input_stream.readline().rstrip("\n").split())
+    x = list(map(int, input_stream.readline().rstrip("\n").split()))
+    x.sort()
+
+    max_len = 0
+    left = 0
+
+    for right in range(n):
+        while x[right] - x[left] > d:
+            left +=1
+        current_len = right - left +1
+        if current_len > max_len:
+            max_len = current_len
+
+    print(n - max_len, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 3
+1 3 4 6 9 10
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

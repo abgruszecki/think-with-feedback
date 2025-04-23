@@ -1006,135 +1006,78 @@ If there are no groups, the answer is 1.
 
 So the code:
 
-s = input().strip()
+Testing against sample input 1.
 
-groups = []
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    groups = []
+    current_group = 0
 
-current_group = 0
+    for i in range(len(s) - 1):
+        a, b = int(s[i]), int(s[i+1])
+        if a + b == 9:
+            current_group += 1
+        else:
+            if current_group > 0:
+                groups.append(current_group)
+                current_group = 0
+    if current_group > 0:
+        groups.append(current_group)
 
-n = len(s)
+    result = 1
+    for m in groups:
+        if m % 2 == 0:
+            ways = (m // 2) + 1
+        else:
+            ways = 1
+        result *= ways
 
-for i in range(n -1):
+    print(result, file=output_stream)
 
-    if int(s[i]) + int(s[i+1]) == 9:
 
-        current_group +=1
 
-    else:
+def test():
+    import io
 
-        if current_group >0:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+123456789987654321
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-            groups.append(current_group)
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-            current_group =0
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-# after loop
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-if current_group >0:
+    print('Tests passed 😎')
 
-    groups.append(current_group)
 
-result = 1
+if __name__ == '__main__':
+    test()
 
-for m in groups:
 
-    if m % 2 ==0:
+```
 
-        ways = (m // 2) +1
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-    else:
-
-        ways = 1
-
-    result *= ways
-
-print(result)
-
-Wait, no. Because the code groups consecutive pairs as follows. For example, in the first sample:
-
-The pairs are at positions 0-1, 3-4, 4-5.
-
-The code for i=0: s[0] + s[1] = 3+6=9 → current_group becomes 1.
-
-i=1: s[1]+s[2] =6+9=15 → no. So current_group is 1, add to groups, reset to 0.
-
-i=2: s[2]+s[3] =9+7=16 → no.
-
-i=3: s[3]+s[4] =7+2=9 → current_group becomes 1.
-
-i=4: s[4]+s[5] =2+7=9 → current_group becomes 2.
-
-i=5: loop ends.
-
-Then, after loop, add current_group 2 to groups.
-
-So groups is [1, 2]. Which is correct.
-
-But in the code above, the way the current_group is incremented is incorrect. Because the code increments current_group by 1 for each consecutive pair. For example, when consecutive pairs are found.
-
-But let's see:
-
-The code starts with current_group =0.
-
-At i=0, the pair is found: current_group becomes 1.
-
-At i=1, the pair is not found (6+9=15). So current_group is 1, added to groups. current_group reset to 0.
-
-At i=3: pair found (7+2=9). current_group becomes 1.
-
-At i=4: pair found (2+7=9). current_group becomes 2.
-
-Loop ends. current_group is 2 → added to groups.
-
-So groups is [1, 2]. Which is correct.
-
-Thus, the code's grouping is correct.
-
-But wait, the code increments current_group by 1 for each i where the pair is found. But for consecutive pairs, this would count the number of pairs in the group.
-
-But the code groups consecutive pairs correctly.
-
-For example, for three consecutive pairs (0-1, 1-2, 2-3):
-
-At i=0: pair found → current_group becomes 1.
-
-i=1: pair found → current_group becomes 2.
-
-i=2: pair found → current_group becomes 3.
-
-i=3: no pair (assuming). current_group added to groups (3) → groups becomes [3].
-
-So yes, the code counts the number of pairs in a consecutive group.
-
-But the code increments current_group by 1 for each consecutive i where the pair is found. But consecutive pairs are overlapping. For example, i=0 and i=1 are overlapping pairs. So the code groups them into a single group of length 2 (two pairs).
-
-But according to the code, current_group is incremented by 1 for each i where the pair is found, which is correct. Because for each i, the code is checking if the current pair (i,i+1) exists. If so, the group length increases by 1.
-
-So the code's grouping is correct.
-
-Thus, the code will correctly compute the groups and their lengths.
-
-Now, for each group length m:
-
-If m is even: ways = (m//2) +1.
-
-If m is odd: ways =1.
-
-Multiply all ways.
-
-So the code is correct.
-
-Testing the first sample:
-
-groups = [1, 2].
-
-First group m=1: ways=1.
-
-Second group m=2: (2//2)+1= 1+1=2.
-
-Total ways: 1*2=2.
-
-Which matches.
+```
 
 Another example: input 1818.
 

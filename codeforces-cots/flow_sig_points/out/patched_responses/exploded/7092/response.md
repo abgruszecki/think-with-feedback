@@ -86,74 +86,293 @@ So stairways are a[start..end], and the step count is a[end]
 
 So the code can be:
 
-n = int(input())
-a = list(map(int, input().split()))
+Testing against sample input 1.
 
-split_points = []
-for i in range(n):
-    if a[i] == 1:
-        split_points.append(i)
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-stairways = []
-for i in range(len(split_points)):
-    start = split_points[i]
-    if i == len(split_points)-1:
-        end = n-1
-    else:
-        end = split_points[i+1] -1
-    stairways.append(a[end])
+    split_points = []
+    for i in range(n):
+        if a[i] == 1:
+            split_points.append(i)
 
-print(len(stairways))
-print(' '.join(map(str, stairways)))
+    stairways = []
+    for i in range(len(split_points)):
+        start = split_points[i]
+        if i == len(split_points)-1:
+            end = n-1
+        else:
+            end = split_points[i+1] -1
+        stairways.append(a[end])
 
-Wait, let's test this logic with sample inputs.
+    print(len(stairways), file=output_stream)
+    print(' '.join(map(str, stairways)), file=output_stream)
 
-Sample 1:
 
-7
-1 2 3 1 2 3 4
 
-split_points = [0,3]. Then len is 2.
+def test():
+    import io
 
-Loop i from 0 to 1.
-
-i=0:
-
-start=0. since i is not last (1 is last index?), wait len(split_points) is 2. i ranges from 0 to 1.
-
-Wait for i in 0 to len(split_points)-1:
-
-split_points is [0,3]. len is 2. So indices are 0 and 1.
-
-i=0: start=0. next split is 3. end = 3-1=2. So a[0..2] is [1,2,3]. step is 3.
-
-i=1: start=3. since i is last, end is 6. a[3..6] is [1,2,3,4]. step is 4. So stairways are [3,4]. Correct.
-
-Sample 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
 1 1 1 1
+""",
+            "output": \
+"""\
+4
+1 1 1 1
+""",
+        }, 
+    ]
 
-split_points is [0,1,2,3]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-for i in 0..3:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=0: start=0, end=0 (split_points[1]-1=1-1=0). step is 1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=1: start=1, end=2-1=1. step is 1.
+    print('Tests passed 😎')
 
-i=2: start=2, end=3-1=2. step is 1.
 
-i=3: start=3, end=3 (n-1=3). step is 1.
+if __name__ == '__main__':
+    test()
 
-So stairways [1,1,1,1]. Correct.
 
-Sample 3:
+```
 
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    split_points = []
+    for i in range(n):
+        if a[i] == 1:
+            split_points.append(i)
+
+    stairways = []
+    for i in range(len(split_points)):
+        start = split_points[i]
+        if i == len(split_points)-1:
+            end = n-1
+        else:
+            end = split_points[i+1] -1
+        stairways.append(a[end])
+
+    print(len(stairways), file=output_stream)
+    print(' '.join(map(str, stairways)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
 1 2 3 4 5
+""",
+            "output": \
+"""\
+1
+5
+""",
+        }, 
+    ]
 
-split_points is [0]. So in loop, i=0 (only one element in split_points). end is 4. step is 5. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    split_points = []
+    for i in range(n):
+        if a[i] == 1:
+            split_points.append(i)
+
+    stairways = []
+    for i in range(len(split_points)):
+        start = split_points[i]
+        if i == len(split_points)-1:
+            end = n-1
+        else:
+            end = split_points[i+1] -1
+        stairways.append(a[end])
+
+    print(len(stairways), file=output_stream)
+    print(' '.join(map(str, stairways)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 2 1 2 1
+""",
+            "output": \
+"""\
+3
+2 2 1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Sample 4:
+
+5
+1 2 1 2 1
+
+split_points is [0, 2,4].
+
+i=0: start 0, next split is 2. end=1. a[0..1] is [1,2]. step 2.
+
+i=1: start 2. next split is4. end=3. a[2..3] is [1,2]. step 2.
+
+i=2: start 4. end=4. a[4] is 1. step 1.
+
+So stairways [2,2,1]. Correct.
+
+Yes, this seems to handle all the cases.
+
+Now, time and memory considerations. The input is up to n=1000 elements, which is manageable.
+
+The code runs in O(n) time. Because collecting split_points is O(n), then processing split_points is O(m) where m is the number of stairways. Since m can be up to 1000 (if all elements are 1), but 1000 is manageable. So overall O(n) time.
+
+Space is O(n) for storing the split points and stairways. But since n is up to 1000, it's okay.
+
+So the code is efficient.
+
+Now, code:
+
+Read n, then the list a.
+
+Collect split_points as all indices where a[i] is 1.
+
+Then, for each split in split_points, determine the end, then append a[end] to the stairways list.
+
+Then output the length and the stairways.
+
+Yes.
+
+So the code in Python would be:
+
+Sample 4:
+
+5
+1 2 1 2 1
+
+split_points is [0, 2,4].
+
+i=0: start 0, next split is 2. end=1. a[0..1] is [1,2]. step 2.
+
+i=1: start 2. next split is4. end=3. a[2..3] is [1,2]. step 2.
+
+i=2: start 4. end=4. a[4] is 1. step 1.
+
+So stairways [2,2,1]. Correct.
+
+Yes, this seems to handle all the cases.
+
+Now, time and memory considerations. The input is up to n=1000 elements, which is manageable.
+
+The code runs in O(n) time. Because collecting split_points is O(n), then processing split_points is O(m) where m is the number of stairways. Since m can be up to 1000 (if all elements are 1), but 1000 is manageable. So overall O(n) time.
+
+Space is O(n) for storing the split points and stairways. But since n is up to 1000, it's okay.
+
+So the code is efficient.
+
+Now, code:
+
+Read n, then the list a.
+
+Collect split_points as all indices where a[i] is 1.
+
+Then, for each split in split_points, determine the end, then append a[end] to the stairways list.
+
+Then output the length and the stairways.
+
+Yes.
+
+So the code in Python would be:
 
 Sample 4:
 

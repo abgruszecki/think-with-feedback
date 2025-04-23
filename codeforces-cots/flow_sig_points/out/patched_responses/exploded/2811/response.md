@@ -467,61 +467,87 @@ Read the two lines, split into actions, compare each pair, count scores, output.
 
 So the code:
 
-team1 = input().strip()
-team2 = input().strip()
+Testing against sample input 1.
 
-def split_actions(s):
-    return [s[i:i+2] for i in range(0, len(s), 2)]
+```python
+def main(input_stream, output_stream):
+    team1 = input_stream.readline().rstrip("\n").strip()
+    team2 = input_stream.readline().rstrip("\n").strip()
 
-actions1 = split_actions(team1)
-actions2 = split_actions(team2)
+    def split_actions(s):
+        return [s[i:i+2] for i in range(0, len(s), 2)]
 
-beats = {
-    '8<': ['[]'],
-    '[]': ['()'],
-    '()': ['8<']
-}
+    actions1 = split_actions(team1)
+    actions2 = split_actions(team2)
 
-t1 = 0
-t2 = 0
+    beats = {
+        '8<': ['[]'],
+        '[]': ['()'],
+        '()': ['8<']
+    }
 
-for a1, a2 in zip(actions1, actions2):
-    if a1 == a2:
-        continue
-    if a2 in beats.get(a1, []):
-        t1 +=1
-    elif a1 in beats.get(a2, []):
-        t2 +=1
+    t1 = 0
+    t2 = 0
 
-if t1 > t2:
-    print("TEAM 1 WINS")
-elif t2 > t1:
-    print("TEAM 2 WINS")
-else:
-    print("TIE")
+    for a1, a2 in zip(actions1, actions2):
+        if a1 == a2:
+            continue
+        if a2 in beats.get(a1, []):
+            t1 +=1
+        elif a1 in beats.get(a2, []):
+            t2 +=1
 
-This code should handle all cases.
+    if t1 > t2:
+        print("TEAM 1 WINS", file=output_stream)
+    elif t2 > t1:
+        print("TEAM 2 WINS", file=output_stream)
+    else:
+        print("TIE", file=output_stream)
 
-Testing sample input 1:
 
-team1's actions: ['[]', '()', '[]', '8<']
-team2's: ['8<', '[]', '()', '8<']
 
-Loop:
+def test():
+    import io
 
-a1, a2 = '[]', '8<'
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8<8<()
+[]8<[]
+""",
+            "output": \
+"""\
+TIE
+""",
+        }, 
+    ]
 
-Check if a2 is in beats['[]'] (beats['[]'] is ['()']). No. Check if a1 is in beats['8<'] (['[]']). Yes. So t2 +=1 → t2=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Next pair: '()' vs '[]'.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-a2 is '[]'. beats['()'] is ['8<'] → no. Check a1 in beats[a2] (beats['[]'] is ['()']). a1 is '()' which is in the list → team2 gets a point. t2=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Third pair: '[]' vs '()'. a2 is in beats['[]'] (['()'] → yes). So t1 +=1 → t1=1.
+    print('Tests passed 😎')
 
-Fourth pair: '8<' vs '8<': same → no points.
 
-Total t1=1, t2=2 → TEAM 2 WINS.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

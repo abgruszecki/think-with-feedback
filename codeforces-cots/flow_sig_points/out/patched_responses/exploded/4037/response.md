@@ -92,22 +92,63 @@ Then take the max of that list.
 
 So the code is:
 
-n, m = map(int, input().split())
-minima = []
-for _ in range(n):
-    row = list(map(int, input().split()))
-    minima.append(min(row))
-print(max(minima))
+Testing against sample input 1.
 
-Yes, that's the code. Let's test it against the examples.
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    minima = []
+    for _ in range(n):
+        row = list(map(int, input_stream.readline().rstrip("\n").split()))
+        minima.append(min(row))
+    print(max(minima), file=output_stream)
 
-First example input:
 
-3 4
-4 1 3 5 → min 1
-2 2 2 2 → min 2
-5 4 5 1 → min 1
-minima list is [1,2,1]. max is 2 → correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 3
+1 2 3
+2 3 1
+3 1 2
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

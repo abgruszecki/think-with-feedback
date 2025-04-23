@@ -422,79 +422,115 @@ But since in Python, modulo can be negative, so the final step is (result) % MOD
 
 So code:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-n = int(input())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-s = input().strip()
+    n = int(input_stream.readline().rstrip("\n"))
 
-w = input().strip()
+    s = input_stream.readline().rstrip("\n").strip()
 
-count_s_q = s.count('?')
+    w = input_stream.readline().rstrip("\n").strip()
 
-count_w_q = w.count('?')
+    count_s_q = s.count('?')
 
-total_s = pow(10, count_s_q, MOD)
+    count_w_q = w.count('?')
 
-total_w = pow(10, count_w_q, MOD)
+    total_s = pow(10, count_s_q, MOD)
 
-total_pairs = (total_s * total_w) % MOD
+    total_w = pow(10, count_w_q, MOD)
 
-A = 1
+    total_pairs = (total_s * total_w) % MOD
 
-B = 1
+    A = 1
 
-C = 1
+    B = 1
 
-for sc, wc in zip(s, w):
+    C = 1
 
-    # determine possible_s and possible_w
+    for sc, wc in zip(s, w):
 
-    # compute a_i, b_i, c_i
+        # determine possible_s and possible_w
 
-    # case 1: both fixed
-    if sc != '?' and wc != '?':
-        s_d = int(sc)
-        w_d = int(wc)
-        a_i = 1 if s_d >= w_d else 0
-        b_i = 1 if s_d <= w_d else 0
-        c_i = 1 if s_d == w_d else 0
-    elif sc != '?':  # sc is fixed, wc is ?
-        s_d = int(sc)
-        # w is ?, possible_w is 0-9
-        a_i = s_d + 1  # number of w_d <= s_d
-        b_i = 10 - s_d  # number of w_d >= s_d
-        c_i = 1  # only w_d == s_d
-    elif wc != '?':  # sc is ?, wc is fixed
-        w_d = int(wc)
-        a_i = 10 - w_d  # number of s_d >= w_d
-        b_i = w_d + 1   # number of s_d <= w_d
-        c_i = 1
-    else:  # both are ?
-        a_i = 55
-        b_i = 55
-        c_i = 10
+        # compute a_i, b_i, c_i
 
-    A = (A * a_i) % MOD
-    B = (B * b_i) % MOD
-    C = (C * c_i) % MOD
+        # case 1: both fixed
+        if sc != '?' and wc != '?':
+            s_d = int(sc)
+            w_d = int(wc)
+            a_i = 1 if s_d >= w_d else 0
+            b_i = 1 if s_d <= w_d else 0
+            c_i = 1 if s_d == w_d else 0
+        elif sc != '?':  # sc is fixed, wc is ?
+            s_d = int(sc)
+            # w is ?, possible_w is 0-9
+            a_i = s_d + 1  # number of w_d <= s_d
+            b_i = 10 - s_d  # number of w_d >= s_d
+            c_i = 1  # only w_d == s_d
+        elif wc != '?':  # sc is ?, wc is fixed
+            w_d = int(wc)
+            a_i = 10 - w_d  # number of s_d >= w_d
+            b_i = w_d + 1   # number of s_d <= w_d
+            c_i = 1
+        else:  # both are ?
+            a_i = 55
+            b_i = 55
+            c_i = 10
 
-result = (total_pairs - A - B + C) % MOD
-print(result % MOD)
+        A = (A * a_i) % MOD
+        B = (B * b_i) % MOD
+        C = (C * c_i) % MOD
 
-Yes, this should work. Let's test the sample inputs.
+    result = (total_pairs - A - B + C) % MOD
+    print(result % MOD, file=output_stream)
 
-First sample:
 
-n=2
 
-s = '90', w = '09'
+def test():
+    import io
 
-Processing each position:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+11
+55
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Pos 0: sc='9', wc='0' → case 1. s_d=9, w_d=0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-a_i=1, b_i=1 (since 9<=0 is false, so b_i=0? Wait, wait.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Wait, in case 1, when sc is fixed and wc is fixed:
 

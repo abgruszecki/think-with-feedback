@@ -667,141 +667,199 @@ Else, Draw.
 
 So the code is:
 
-players = [tuple(map(int, input().split())) for _ in range(4)]
+Testing against sample input 1.
 
-# Team1 options: (b0, a1), (b1, a0)
-t1_options = [
-    (players[0][1], players[1][0]),
-    (players[1][1], players[0][0]),
-]
+```python
+def main(input_stream, output_stream):
+    players = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(4)]
 
-# Team2 options: (b2, a3), (b3, a2)
-t2_options = [
-    (players[2][1], players[3][0]),
-    (players[3][1], players[2][0]),
-]
+    # Team1 options: (b0, a1), (b1, a0)
+    t1_options = [
+        (players[0][1], players[1][0]),
+        (players[1][1], players[0][0]),
+    ]
 
-team1_win = False
-for t1_a, t1_d in t1_options:
-    # Check if team2 can win with any of their options
-    team2_win_any = any(
-        (t2_d > t1_a) and (t2_a > t1_d) for t2_a, t2_d in t2_options
-    )
-    if team2_win_any:
-        continue
-    # Check if team1's conditions hold for all team2's options
-    team1_win_all = all(
-        (t1_d > t2_a) and (t1_a > t2_d) for t2_a, t2_d in t2_options
-    )
-    if team1_win_all:
-        team1_win = True
-        break
+    # Team2 options: (b2, a3), (b3, a2)
+    t2_options = [
+        (players[2][1], players[3][0]),
+        (players[3][1], players[2][0]),
+    ]
 
-if team1_win:
-    print("Team 1")
-else:
-    team2_win_all = True
+    team1_win = False
     for t1_a, t1_d in t1_options:
-        team2_has_option = any(
+        # Check if team2 can win with any of their options
+        team2_win_any = any(
             (t2_d > t1_a) and (t2_a > t1_d) for t2_a, t2_d in t2_options
         )
-        if not team2_has_option:
-            team2_win_all = False
+        if team2_win_any:
+            continue
+        # Check if team1's conditions hold for all team2's options
+        team1_win_all = all(
+            (t1_d > t2_a) and (t1_a > t2_d) for t2_a, t2_d in t2_options
+        )
+        if team1_win_all:
+            team1_win = True
             break
-    if team2_win_all:
-        print("Team 2")
+
+    if team1_win:
+        print("Team 1", file=output_stream)
     else:
-        print("Draw")
+        team2_win_all = True
+        for t1_a, t1_d in t1_options:
+            team2_has_option = any(
+                (t2_d > t1_a) and (t2_a > t1_d) for t2_a, t2_d in t2_options
+            )
+            if not team2_has_option:
+                team2_win_all = False
+                break
+        if team2_win_all:
+            print("Team 2", file=output_stream)
+        else:
+            print("Draw", file=output_stream)
 
-Let's test this code against the examples.
 
-First example:
 
-Players input:
+def test():
+    import io
 
-1 100 → player0: a=1, b=100
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 1
+2 2
+3 3
+2 2
+""",
+            "output": \
+"""\
+Team 2
+""",
+        }, 
+    ]
 
-100 1 → player1: a=100, b=1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-99 99 → player2: a=99, b=99
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-99 99 → player3: a=99, b=99
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-t1_options:
+    print('Tests passed 😎')
 
-player0's b is 100, player1's a is 100 → (100, 100)
 
-player1's b is 1, player0's a is 1 → (1, 1)
+if __name__ == '__main__':
+    test()
 
-For the first option (100,100):
 
-team2 options are (99,99) and (99,99).
+```
 
-Check team2_win_any:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For each option, check if t2_d (99) > 100 → no and t2_a (99) > 100 → no. So team2_win_any is False.
+```
 
-Then check team1_win_all: for both options, t1_d (100) > 99 (t2_a) → yes. t1_a (100) > 99 (t2_d) → yes. So team1_win_all is True. So team1_win becomes True.
+Testing against sample input 2.
 
-So output Team1.
+```python
+def main(input_stream, output_stream):
+    players = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(4)]
 
-Second example:
+    # Team1 options: (b0, a1), (b1, a0)
+    t1_options = [
+        (players[0][1], players[1][0]),
+        (players[1][1], players[0][0]),
+    ]
 
-Players:
+    # Team2 options: (b2, a3), (b3, a2)
+    t2_options = [
+        (players[2][1], players[3][0]),
+        (players[3][1], players[2][0]),
+    ]
 
-1 1 → player0: a=1, b=1
+    team1_win = False
+    for t1_a, t1_d in t1_options:
+        # Check if team2 can win with any of their options
+        team2_win_any = any(
+            (t2_d > t1_a) and (t2_a > t1_d) for t2_a, t2_d in t2_options
+        )
+        if team2_win_any:
+            continue
+        # Check if team1's conditions hold for all team2's options
+        team1_win_all = all(
+            (t1_d > t2_a) and (t1_a > t2_d) for t2_a, t2_d in t2_options
+        )
+        if team1_win_all:
+            team1_win = True
+            break
 
-2 2 → player1: a=2, b=2
+    if team1_win:
+        print("Team 1", file=output_stream)
+    else:
+        team2_win_all = True
+        for t1_a, t1_d in t1_options:
+            team2_has_option = any(
+                (t2_d > t1_a) and (t2_a > t1_d) for t2_a, t2_d in t2_options
+            )
+            if not team2_has_option:
+                team2_win_all = False
+                break
+        if team2_win_all:
+            print("Team 2", file=output_stream)
+        else:
+            print("Draw", file=output_stream)
 
-3 3 → player2: a=3, b=3
 
-2 2 → player3: a=2, b=2
 
-t1_options:
+def test():
+    import io
 
-Option0: (1,2), option1: (2,1).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 3
+2 2
+1 1
+2 2
+""",
+            "output": \
+"""\
+Draw
+""",
+        }, 
+    ]
 
-Check team2 options:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-player2's b is3, player3's a is2 → (3,2).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-player3's b is2, player2's a is3 → (2,3).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So team2 options are (3,2) and (2,3).
+    print('Tests passed 😎')
 
-For team1's option (1,2) → t1_a=1, t1_d=2.
 
-Check team2 options:
+if __name__ == '__main__':
+    test()
 
-For (3,2): t2_d=2 >1 → yes. t2_a=3>2 → yes. So team2 can win. So team1's option is skipped.
 
-Next team1 option: (2,1). t1_a=2, t1_d=1.
+```
 
-Check team2 options:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For (3,2): t2_d=2>2? No. t2_a=3>1 → yes. So (2>2 is false) → team2's conditions are not met.
-
-For (2,3): t2_d=3>2 → yes. t2_a=2>1 → yes. So team2 can win.
-
-Thus, team1 has no valid option.
-
-Check team2_win_all:
-
-For each team1 option:
-
-First team1 option: (1,2):
-
-team2_has_option → check if any team2 option allows win.
-
-Yes: (3,2) allows team2 to win.
-
-So team2_has_option is True.
-
-Second team1 option: (2,1):
-
-team2_has_option → (2,3) allows team2 to win. So yes.
-
-Thus, team2_win_all is True → output Team2.
+```
 
 Third example:
 

@@ -741,113 +741,221 @@ We'll use bisect for this.
 
 So code outline:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n, k = map(int, input().split())
 
-a = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-b = list(map(int, input().split()))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-# Compute x_i for each ingredient
-x_list = []
-for ai, bi in zip(a, b):
-    if ai ==0:
-        # according to constraints, ai >=1, so no need.
-        pass
-    xi = (bi + ai -1) // ai
-    x_list.append( (xi, ai, bi) )
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-# Sort by x_i
-x_list.sort()
+    # Compute x_i for each ingredient
+    x_list = []
+    for ai, bi in zip(a, b):
+        if ai ==0:
+            # according to constraints, ai >=1, so no need.
+            pass
+        xi = (bi + ai -1) // ai
+        x_list.append( (xi, ai, bi) )
 
-sorted_x = [xi for xi, ai, bi in x_list]
-sorted_a = [ai for xi, ai, bi in x_list]
-sorted_b = [bi for xi, ai, bi in x_list]
+    # Sort by x_i
+    x_list.sort()
 
-# Compute prefix sums for a and b
-prefix_a = [0]*(n+1)
-prefix_b = [0]*(n+1)
-for i in range(n):
-    prefix_a[i+1] = prefix_a[i] + sorted_a[i]
-    prefix_b[i+1] = prefix_b[i] + sorted_b[i]
+    sorted_x = [xi for xi, ai, bi in x_list]
+    sorted_a = [ai for xi, ai, bi in x_list]
+    sorted_b = [bi for xi, ai, bi in x_list]
 
-# Compute upper_bound
-max_possible = []
-for ai, bi in zip(a, b):
-    temp = (bi + k) // ai
-    max_possible.append(temp)
-upper_bound = min(max_possible)
+    # Compute prefix sums for a and b
+    prefix_a = [0]*(n+1)
+    prefix_b = [0]*(n+1)
+    for i in range(n):
+        prefix_a[i+1] = prefix_a[i] + sorted_a[i]
+        prefix_b[i+1] = prefix_b[i] + sorted_b[i]
 
-low =0
-high = upper_bound
-ans =0
+    # Compute upper_bound
+    max_possible = []
+    for ai, bi in zip(a, b):
+        temp = (bi + k) // ai
+        max_possible.append(temp)
+    upper_bound = min(max_possible)
 
-while low <= high:
-    mid = (low + high) //2
-    # find the number of x_i <=mid
-    m = bisect.bisect_right(sorted_x, mid)
-    sum_a = prefix_a[m]
-    sum_b = prefix_b[m]
-    required = mid * sum_a - sum_b
-    if required <=k:
-        ans = mid
-        low = mid +1
-    else:
-        high = mid -1
+    low =0
+    high = upper_bound
+    ans =0
 
-print(ans)
+    while low <= high:
+        mid = (low + high) //2
+        # find the number of x_i <=mid
+        m = bisect.bisect_right(sorted_x, mid)
+        sum_a = prefix_a[m]
+        sum_b = prefix_b[m]
+        required = mid * sum_a - sum_b
+        if required <=k:
+            ans = mid
+            low = mid +1
+        else:
+            high = mid -1
 
-Testing this code with the samples.
+    print(ans, file=output_stream)
 
-Sample 1:
 
-Input:
-1 1000000000
-1
-1000000000
 
-x_i for the only ingredient:
+def test():
+    import io
 
-(b_i +a_i -1) //a_i → (1e9 +1-1) //1 =1e9.
-
-max_possible is (1e9 +1e9) //1=2e9.
-
-upper_bound=2e9.
-
-Binary search:
-
-mid=2e9 →m=1 (sorted_x is [1e9], bisect_right(2e9) returns 1.
-
-sum_a=1, sum_b=1e9.
-
-required=2e9 *1 -1e9 =2e9 -1e9 =1e9 <=k=1e9. So possible. ans=2e9.
-
-Sample2:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 10 1
+1000000000 1000000000 1000000000 1000000000 1000000000 1000000000 1000000000 1000000000 1000000000 1000000000
+1 1 1 1 1 1 1 1 1 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-a all 1e9.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-b all 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-x_i for each is (1 +1e9 -1)/1e9 = (1e9)/1e9=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So sorted_x is ten 1's.
+    print('Tests passed 😎')
 
-prefix_a is sum of 1e9 ten times. prefix_a[10] =1e9 *10.
 
-upper_bound is min( (1 +1)/1e9 for each i →2//1e9=0.
+if __name__ == '__main__':
+    test()
 
-So high=0.
 
-mid=0.
+```
 
-m= bisect_right(sorted_x,0) →0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-sum_a=0, sum_b=0. required=0*0 -0=0 <=1. So ans=0.
+```
+
+Testing against sample input 2.
+
+```python
+import bisect
+
+
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    # Compute x_i for each ingredient
+    x_list = []
+    for ai, bi in zip(a, b):
+        if ai ==0:
+            # according to constraints, ai >=1, so no need.
+            pass
+        xi = (bi + ai -1) // ai
+        x_list.append( (xi, ai, bi) )
+
+    # Sort by x_i
+    x_list.sort()
+
+    sorted_x = [xi for xi, ai, bi in x_list]
+    sorted_a = [ai for xi, ai, bi in x_list]
+    sorted_b = [bi for xi, ai, bi in x_list]
+
+    # Compute prefix sums for a and b
+    prefix_a = [0]*(n+1)
+    prefix_b = [0]*(n+1)
+    for i in range(n):
+        prefix_a[i+1] = prefix_a[i] + sorted_a[i]
+        prefix_b[i+1] = prefix_b[i] + sorted_b[i]
+
+    # Compute upper_bound
+    max_possible = []
+    for ai, bi in zip(a, b):
+        temp = (bi + k) // ai
+        max_possible.append(temp)
+    upper_bound = min(max_possible)
+
+    low =0
+    high = upper_bound
+    ans =0
+
+    while low <= high:
+        mid = (low + high) //2
+        # find the number of x_i <=mid
+        m = bisect.bisect_right(sorted_x, mid)
+        sum_a = prefix_a[m]
+        sum_b = prefix_b[m]
+        required = mid * sum_a - sum_b
+        if required <=k:
+            ans = mid
+            low = mid +1
+        else:
+            high = mid -1
+
+    print(ans, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 1
+2 1 4
+11 3 16
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

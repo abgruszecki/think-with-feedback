@@ -991,113 +991,131 @@ But in the BFS approach, we need to generate these positions and check if they a
 
 Thus, the code would look something like this:
 
+Testing against sample input 1.
+
+```python
 from collections import deque
 
-n, m, k = map(int, input().split())
-grid = []
-exit_pos = None
-pass_count = 0
-for i in range(n):
-    row = list(input().strip())
-    for j in range(m):
-        if row[j] == 'E':
-            exit_pos = (i, j)
-        if row[j] in '.E':
-            pass_count +=1
-    grid.append(row)
-commands = input().strip()
 
-if pass_count == 1:
-    print(0)
-    exit()
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
+    grid = []
+    exit_pos = None
+    pass_count = 0
+    for i in range(n):
+        row = list(input_stream.readline().rstrip("\n").strip())
+        for j in range(m):
+            if row[j] == 'E':
+                exit_pos = (i, j)
+            if row[j] in '.E':
+                pass_count +=1
+        grid.append(row)
+    commands = input_stream.readline().rstrip("\n").strip()
 
-# Reverse the commands.
-reversed_commands = commands[::-1]
+    if pass_count == 1:
+        print(0, file=output_stream)
+        return
 
-ex, ey = exit_pos
+    # Reverse the commands.
+    reversed_commands = commands[::-1]
 
-# Initialize distance matrix.
-dist = [[-1 for _ in range(m)] for _ in range(n)]
-dist[ex][ey] = 0
-queue = deque()
-queue.append((ex, ey))
+    ex, ey = exit_pos
 
-max_step = 0
+    # Initialize distance matrix.
+    dist = [[-1 for _ in range(m)] for _ in range(n)]
+    dist[ex][ey] = 0
+    queue = deque()
+    queue.append((ex, ey))
 
-for step in range(1, len(reversed_commands)+1):
-    cmd = reversed_commands[step-1]
-    next_queue = deque()
-    processed = set()
+    max_step = 0
 
-    while queue:
-        x, y = queue.popleft()
+    for step in range(1, len(reversed_commands)+1):
+        cmd = reversed_commands[step-1]
+        next_queue = deque()
+        processed = set()
 
-        # Check current cell is passable.
-        if grid[x][y] not in '.E':
-            continue
+        while queue:
+            x, y = queue.popleft()
 
-        # Depending on the command, add possible previous positions.
-        if cmd == 'L':
-            # Original command is L. So possible previous positions are:
-            # 1. (x, y) if moving left is blocked.
-            if y-1 <0 or grid[x][y-1] == '#':
-                if dist[x][y] == -1:
-                    dist[x][y] = step
-                if (x, y) not in processed:
-                    next_queue.append((x, y))
-                    processed.add((x, y))
-            # 2. (x, y+1) if moving left from there leads to (x,y).
-            if y+1 < m and grid[x][y] in '.E' and grid[x][y+1] in '.E':
-                if dist[x][y+1] == -1:
-                    dist[x][y+1] = step
-                    next_queue.append((x, y+1))
-                    processed.add((x, y+1))
-        elif cmd == 'R':
-            if y+1 >=m or grid[x][y+1] == '#':
-                if dist[x][y] == -1:
-                    dist[x][y] = step
-                if (x, y) not in processed:
-                    next_queue.append((x, y))
-                    processed.add((x, y))
-            if y-1 >=0 and grid[x][y] in '.E' and grid[x][y-1] in '.E':
-                if dist[x][y-1] == -1:
-                    dist[x][y-1] = step
-                    next_queue.append((x, y-1))
-                    processed.add((x, y-1))
-        elif cmd == 'U':
-            if x-1 <0 or grid[x-1][y] == '#':
-                if dist[x][y] == -1:
-                    dist[x][y] = step
-                if (x, y) not in processed:
-                    next_queue.append((x, y))
-                    processed.add((x, y))
-            if x+1 <n and grid[x][y] in '.E' and grid[x+1][y] in '.E':
-                if dist[x+1][y] == -1:
-                    dist[x+1][y] = step
-                    next_queue.append((x+1, y))
-                    processed.add((x+1, y))
-        elif cmd == 'D':
-            if x+1 >=n or grid[x+1][y] == '#':
-                if dist[x][y] == -1:
-                    dist[x][y] = step
-                if (x, y) not in processed:
-                    next_queue.append((x, y))
-                    processed.add((x, y))
-            if x-1 >=0 and grid[x][y] in '.E' and grid[x-1][y] in '.E':
-                if dist[x-1][y] == -1:
-                    dist[x-1][y] = step
-                    next_queue.append((x-1, y))
-                    processed.add((x-1, y))
+            # Check current cell is passable.
+            if grid[x][y] not in '.E':
+                continue
 
-    queue = next_queue
-    if not queue:
-        break
+            # Depending on the command, add possible previous positions.
+            if cmd == 'L':
+                # Original command is L. So possible previous positions are:
+                # 1. (x, y) if moving left is blocked.
+                if y-1 <0 or grid[x][y-1] == '#':
+                    if dist[x][y] == -1:
+                        dist[x][y] = step
+                    if (x, y) not in processed:
+                        next_queue.append((x, y))
+                        processed.add((x, y))
+                # 2. (x, y+1) if moving left from there leads to (x,y).
+                if y+1 < m and grid[x][y] in '.E' and grid[x][y+1] in '.E':
+                    if dist[x][y+1] == -1:
+                        dist[x][y+1] = step
+                        next_queue.append((x, y+1))
+                        processed.add((x, y+1))
+            elif cmd == 'R':
+                if y+1 >=m or grid[x][y+1] == '#':
+                    if dist[x][y] == -1:
+                        dist[x][y] = step
+                    if (x, y) not in processed:
+                        next_queue.append((x, y))
+                        processed.add((x, y))
+                if y-1 >=0 and grid[x][y] in '.E' and grid[x][y-1] in '.E':
+                    if dist[x][y-1] == -1:
+                        dist[x][y-1] = step
+                        next_queue.append((x, y-1))
+                        processed.add((x, y-1))
+            elif cmd == 'U':
+                if x-1 <0 or grid[x-1][y] == '#':
+                    if dist[x][y] == -1:
+                        dist[x][y] = step
+                    if (x, y) not in processed:
+                        next_queue.append((x, y))
+                        processed.add((x, y))
+                if x+1 <n and grid[x][y] in '.E' and grid[x+1][y] in '.E':
+                    if dist[x+1][y] == -1:
+                        dist[x+1][y] = step
+                        next_queue.append((x+1, y))
+                        processed.add((x+1, y))
+            elif cmd == 'D':
+                if x+1 >=n or grid[x+1][y] == '#':
+                    if dist[x][y] == -1:
+                        dist[x][y] = step
+                    if (x, y) not in processed:
+                        next_queue.append((x, y))
+                        processed.add((x, y))
+                if x-1 >=0 and grid[x][y] in '.E' and grid[x-1][y] in '.E':
+                    if dist[x-1][y] == -1:
+                        dist[x-1][y] = step
+                        next_queue.append((x-1, y))
+                        processed.add((x-1, y))
 
-    # Update max_step if needed.
-    # We need to check if all passable cells have been visited.
-    # But checking this every step is O(nm), which is 22500 operations per step.
-    # So after each step, we can check if the number of visited cells is pass_count.
-    # So, compute the current count.
+        queue = next_queue
+        if not queue:
+            break
+
+        # Update max_step if needed.
+        # We need to check if all passable cells have been visited.
+        # But checking this every step is O(nm), which is 22500 operations per step.
+        # So after each step, we can check if the number of visited cells is pass_count.
+        # So, compute the current count.
+        current_count = 0
+        max_dist = 0
+        for i in range(n):
+            for j in range(m):
+                if dist[i][j] != -1 and grid[i][j] in '.E':
+                    current_count +=1
+                    if dist[i][j] > max_dist:
+                        max_dist = dist[i][j]
+        if current_count == pass_count:
+            print(k - max_dist, file=output_stream)
+            return
+
+    # After processing all commands, check if all passable cells are visited.
     current_count = 0
     max_dist = 0
     for i in range(n):
@@ -1107,140 +1125,59 @@ for step in range(1, len(reversed_commands)+1):
                 if dist[i][j] > max_dist:
                     max_dist = dist[i][j]
     if current_count == pass_count:
-        print(k - max_dist)
-        exit()
+        print(k - max_dist, file=output_stream)
+    else:
+        print(-1, file=output_stream)
 
-# After processing all commands, check if all passable cells are visited.
-current_count = 0
-max_dist = 0
-for i in range(n):
-    for j in range(m):
-        if dist[i][j] != -1 and grid[i][j] in '.E':
-            current_count +=1
-            if dist[i][j] > max_dist:
-                max_dist = dist[i][j]
-if current_count == pass_count:
-    print(k - max_dist)
-else:
-    print(-1)
 
-But this approach is also O(k * nm) in the worst case, which is not feasible.
 
-But given the problem's time constraints, perhaps the intended solution is to use this reverse BFS approach, which is the only viable one.
+def test():
+    import io
 
-Let's test the first sample input.
-
-Sample 1:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5 5 7
 #####
-#...#
+#.#.#
 #...#
 #E..#
 #####
 UULLDDR
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-Reversed commands: RDDLUUU
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Wait, original commands are UULLDDR. Reversed is R D D L U U U.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing in reverse order.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The exit is at (3,1).
+    print('Tests passed 😎')
 
-Initially, S = {(3,1)}.
 
-Step 1: command R.
+if __name__ == '__main__':
+    test()
 
-For each cell (3,1) in S:
 
-R is the original command (processed in reverse). So in the reverse step, command R is processed.
+```
 
-For command R, the possible previous positions are:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-a. (3,1) if moving R from (3,1) is blocked. So check if (3,1+1) is wall. (3,2) is '.'.
-
-So no.
-
-b. (3,0): moving R from (3,0) leads to (3,1) if (3,1) is passable.
-
-So (3,0) is a previous position. So new_S = { (3,0) }.
-
-Step 2: command D.
-
-Original command D, processed in reverse.
-
-For (3,0):
-
-D command is processed. Possible previous positions:
-
-a. (3,0) if moving D from (3,0) is blocked. (4,0) is '#'.
-
-So (3,0) is added.
-
-b. (2,0) moving D from (2,0) leads to (3,0) if (3,0) is passable.
-
-So new_S = { (3,0), (2,0) }.
-
-Step 3: command D.
-
-Original command D.
-
-For each cell in S:
-
-For (3,0):
-
-D command: possible previous positions are (3,0) (if moving D is blocked, which it is) and (2,0).
-
-For (2,0):
-
-D command: moving D leads to (3,0). (3,0) is passable.
-
-So possible previous positions are (2,0) (if moving D is blocked? No. (3,0) is passable.
-
-So previous positions are (2,0) (if moving D from (2,0) is allowed, which it is, so (2,0) moving D to (3,0). So in reverse, previous position is (2,0) for (3,0).
-
-Wait, this is getting complicated.
-
-But according to the code's logic, each reverse step processes the command and adds the possible previous positions.
-
-Eventually, after processing all commands in reverse, the code determines if all passable cells are covered.
-
-In the first sample, the answer is 6. So the code should return 7 - 6 = 1 step? Or perhaps the reverse processing steps are 6 steps, and the prefix is 7-6 = 1.
-
-Wait, no. The answer is 6, which is the length of the prefix. So when the code processes i reverse steps, the prefix is k - i. In the first sample, k=7. So if during reverse processing, after i=1 step, the S covers all passable cells, the prefix would be 7-1=6. Which matches the sample.
-
-But how?
-
-In the sample input, the reversed commands are R D D L U U U.
-
-So the code processes the reversed commands in order:
-
-Step 1: R
-
-Step 2: D
-
-Step 3: D
-
-Step 4: L
-
-Step 5: U
-
-Step 6: U
-
-Step 7: U
-
-The answer is 6. Which implies that during the reverse processing of 1 step (i=1), the S covers all passable cells. So k - i = 7-1=6.
-
-But how?
-
-Perhaps in the first sample, after processing 1 reverse step (command R), the S includes all passable cells. But why?
-
-This seems unlikely.
-
-Hmm. Perhaps my understanding of the reverse processing is incorrect.
+```
 
 Alternatively, perhaps the reverse approach is not the way to go, and the correct solution is to precompute for each cell the earliest step when it reaches E.
 

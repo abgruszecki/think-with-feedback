@@ -807,75 +807,126 @@ else:
 
 This should work.
 
-Testing the first sample input:
+Testing against sample input 1.
 
-n=3, m=3.
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    h = input_stream.readline().rstrip("\n").strip()
+    v = input_stream.readline().rstrip("\n").strip()
 
-h = "><>"
+    total_nodes = n * m
+    adj = [[] for _ in range(total_nodes)]
 
-v = "v^v"
+    for i in range(n):
+        for j in range(m):
+            current = i * m + j
+            # Horizontal direction
+            if h[i] == '>':
+                if j + 1 < m:
+                    adj[current].append(current + 1)
+            else:
+                if j - 1 >= 0:
+                    adj[current].append(current - 1)
+            # Vertical direction
+            if v[j] == 'v':
+                if i + 1 < n:
+                    adj[current].append((i + 1) * m + j)
+            else:
+                if i - 1 >= 0:
+                    adj[current].append((i - 1) * m + j)
 
-Building adj:
+    # First pass to determine processing order
+    visited = [False] * total_nodes
+    processing_order = []
 
-For i=0 (horizontal direction '>'):
+    for u in range(total_nodes):
+        if not visited[u]:
+            stack = [(u, False)]
+            while stack:
+                node, processed = stack.pop()
+                if processed:
+                    processing_order.append(node)
+                    continue
+                if visited[node]:
+                    continue
+                visited[node] = True
+                stack.append((node, True))
+                # Process children in reverse to maintain order with stack
+                for neighbor in reversed(adj[node]):
+                    if not visited[neighbor]:
+                        stack.append((neighbor, False))
 
-j can be 0,1,2.
+    # Build reversed adjacency list
+    reversed_adj = [[] for _ in range(total_nodes)]
+    for u in range(total_nodes):
+        for v_neighbor in adj[u]:
+            reversed_adj[v_neighbor].append(u)
 
-At i=0, j=0:
+    # Second pass to count SCCs
+    visited_rev = [False] * total_nodes
+    scc_count = 0
 
-h[0] is '>', so j+1=1 is <3: add edge to 1.
+    for node in reversed(processing_order):
+        if not visited_rev[node]:
+            scc_count += 1
+            stack = [node]
+            visited_rev[node] = True
+            while stack:
+                current = stack.pop()
+                for neighbor in reversed_adj[current]:
+                    if not visited_rev[neighbor]:
+                        visited_rev[neighbor] = True
+                        stack.append(neighbor)
 
-v[j=0] is 'v', so i+1=1 <3: add edge to 3.
+    print("YES" if scc_count == 1 else "NO", file=output_stream)
 
-So adj[0] = [1,3]
 
-j=1: h[0] '>' → j+1=2 <3: add edge to 2.
 
-v[j=1] is '^', so i-1 can't be >=0 (i=0) → no vertical edge.
+def test():
+    import io
 
-adj[1] = [2, ... ]?
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 6
+<><>
+v^v^v^
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
 
-Wait, j=1: i=0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-v[j=1] is '^', so i-1 would be -1. So no edge.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So adj[1] has edge 2 (from horizontal) and no vertical.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Wait, vertical street j=1 direction is '^', so moving north from (i,j) = (0,1) is impossible.
+    print('Tests passed 😎')
 
-So adj[1] is [2].
 
-Similarly, j=2: h[0] '>', but j+1=3 is >=3: no. So no horizontal edge.
+if __name__ == '__main__':
+    test()
 
-v[j=2] is 'v' → i+1=1 <3: add edge to 3*3 +2? Wait, i+1=1, j=2.
 
-So (1,2) → index is 1 *3 +2 =5. So adj[2].append(5).
+```
 
-So adj[2] = [5].
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So for node 2 (i=0,j=2), adj[2] is [5].
+```
 
-And so on.
-
-But perhaps the graph is such that not all nodes are reachable from each other.
-
-The code would find the number of SCCs. If it's more than 1, output NO.
-
-So the code should correctly handle this.
-
-Another point to consider is that the reversed_adj is built correctly.
-
-Once adj is built, reversed_adj is built by adding for each u → v in adj, reversed_adj[v] gets u.
-
-Thus, the code builds the reversed adjacency list correctly.
-
-Thus, the code should work.
-
-In terms of speed, with n and m up to 20, total nodes is 400. Each node has up to 2 edges. So the adj lists are small. Kosaraju's runs in O(V + E), which is O(400 + 800) = 1200 steps. So even for multiple test cases, this is manageable.
-
-Memory-wise, the adjacency lists for 400 nodes, each with 2 edges, are manageable. Python's lists should handle this without problem.
-
-Thus, the code should be correct and efficient.
 </think>
 
 ```python

@@ -1271,33 +1271,179 @@ The code finds best_case2=32.
 
 Which is correct.
 
-Sample input 1:
+Testing against sample input 1.
 
-case1_d=(9+4)/3=13/3=4.333 →4. Which is <max_ai=5.
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    sum_ai = sum(a)
+    max_ai = max(a)
 
-Binary search between 1 and4.
+    def is_valid(d):
+        total = 0
+        for ai in a:
+            m = (ai + d - 1) // d  # ceil(ai / d)
+            total += m * d
+            if total - sum_ai > k:
+                return False
+        return (total - sum_ai) <= k
 
-The code checks d=4, which sum is 16-9=7>4. Not valid.
+    # Case 1: Check if d >= max_ai is possible
+    case1_d = (sum_ai + k) // n
+    case1_valid = False
+    if case1_d >= max_ai:
+        case1_valid = is_valid(case1_d)
 
-Then mid=2. sum is 2+4+6=12-9=3 <=4. Valid. best_case2=2. low=3.
+    # Case 2: Binary search for d < max_ai
+    best_case2 = 0
+    low, high = 1, max_ai - 1
+    while low <= high:
+        mid = (low + high) // 2
+        if is_valid(mid):
+            best_case2 = max(best_case2, mid)
+            low = mid + 1
+        else:
+            high = mid - 1
 
-mid=3. sum is 3+3+6=12-9=3. Valid. best_case2=3. low=4.
+    # Determine the answer
+    answer = best_case2
+    if case1_valid:
+        answer = max(answer, case1_d)
 
-mid=4. sum invalid. high=3.
+    print(answer, file=output_stream)
 
-Loop ends. best_case2=3. case1_d is invalid. So answer is3.
 
-Correct.
 
-The previous example where case1 is valid:
+def test():
+    import io
 
-ai=7, k=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 40
+10 30 50
+""",
+            "output": \
+"""\
+32
+""",
+        }, 
+    ]
 
-sum_ai=7, case1_d=8.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-case1_d>=7.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-is_valid(8) → sum_md=8*1=8. 8-7=1<=1. valid.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 1.
+
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    sum_ai = sum(a)
+    max_ai = max(a)
+
+    def is_valid(d):
+        total = 0
+        for ai in a:
+            m = (ai + d - 1) // d  # ceil(ai / d)
+            total += m * d
+            if total - sum_ai > k:
+                return False
+        return (total - sum_ai) <= k
+
+    # Case 1: Check if d >= max_ai is possible
+    case1_d = (sum_ai + k) // n
+    case1_valid = False
+    if case1_d >= max_ai:
+        case1_valid = is_valid(case1_d)
+
+    # Case 2: Binary search for d < max_ai
+    best_case2 = 0
+    low, high = 1, max_ai - 1
+    while low <= high:
+        mid = (low + high) // 2
+        if is_valid(mid):
+            best_case2 = max(best_case2, mid)
+            low = mid + 1
+        else:
+            high = mid - 1
+
+    # Determine the answer
+    answer = best_case2
+    if case1_valid:
+        answer = max(answer, case1_d)
+
+    print(answer, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 40
+10 30 50
+""",
+            "output": \
+"""\
+32
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 binary search case2: 1 to6.
 

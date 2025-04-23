@@ -887,111 +887,164 @@ print(total)
 
 Yes.
 
-Let's test this code with the first example.
+Testing against sample input 1.
 
-The first example:
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
+    pos = p.index(m)
 
-n=5, m=4.
+    balance = []
+    for num in p:
+        if num == m:
+            balance.append(0)
+        elif num > m:
+            balance.append(1)
+        else:
+            balance.append(-1)
 
-p = [2,4,5,3,1]
+    prefix = [0] * (n + 1)
+    for i in range(n):
+        prefix[i + 1] = prefix[i] + balance[i]
 
-pos =1.
+    from collections import defaultdict
+    freq = defaultdict(int)
+    for i in range(pos + 1):
+        freq[prefix[i]] += 1
 
-B = [-1,0,1,-1,-1]
+    total = 0
+    for r in range(pos, n):
+        current = prefix[r + 1]
+        total += freq.get(current, 0)
+        total += freq.get(current - 1, 0)
 
-S is [0, -1, -1, 0, -1, -2]
+    print(total, file=output_stream)
 
-Frequency map for S[0] to S[1] (i from 0 to 1):
 
-S[0]=0 → count 1.
 
-S[1]=-1 → count 1.
+def test():
+    import io
 
-Then, for r=1 (inclusive) to 4:
-
-r=0-based.
-
-r ranges from 1 to4.
-
-For r=1 (r=1 in code):
-
-current_sum = S[2] =-1.
-
-Add freq[-1] (1) and freq[-2] (0). Total +=1.
-
-For r=2:
-
-current_sum = S[3] =0.
-
-Add freq[0] (1) and freq[-1] (1). Total +=2.
-
-For r=3:
-
-current_sum = S[4] =-1.
-
-Add 1 (freq[-1]) and 0 (freq[-2]). Total +=1.
-
-For r=4:
-
-current_sum = S[5] =-2.
-
-Add 0 (freq[-2] not present) and 0 (freq[-3] not present). Total +=0.
-
-Total is 1+2+1+0=4. Correct.
-
-Now, the second example:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5 5
-
 1 2 3 4 5
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-pos=4 (0-based).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-B array: all elements except 5 are less than 5. So B is [-1, -1, -1, -1, 0].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Prefix sums S:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-S[0] =0.
+    print('Tests passed 😎')
 
-S[1]=-1.
 
-S[2]=-2.
+if __name__ == '__main__':
+    test()
 
-S[3]=-3.
 
-S[4]=-4.
+```
 
-S[5]=-4.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Frequency map for S[0..4] (i from 0 to 4):
+```
 
-S[0] =0 → count 1.
+Testing against sample input 2.
 
-S[1]=-1 → count 1.
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
+    pos = p.index(m)
 
-S[2]=-2 → count 1.
+    balance = []
+    for num in p:
+        if num == m:
+            balance.append(0)
+        elif num > m:
+            balance.append(1)
+        else:
+            balance.append(-1)
 
-S[3]=-3 → count1.
+    prefix = [0] * (n + 1)
+    for i in range(n):
+        prefix[i + 1] = prefix[i] + balance[i]
 
-S[4]=-4 → count1.
+    from collections import defaultdict
+    freq = defaultdict(int)
+    for i in range(pos + 1):
+        freq[prefix[i]] += 1
 
-So freq has 0:1, -1:1, -2:1, -3:1, -4:1.
+    total = 0
+    for r in range(pos, n):
+        current = prefix[r + 1]
+        total += freq.get(current, 0)
+        total += freq.get(current - 1, 0)
 
-For each r from 4 to4 (since n=5):
+    print(total, file=output_stream)
 
-r=4.
 
-current_sum = S[5] =-4.
 
-Add freq[-4] (1) and freq[-5] (0). So total +=1.
+def test():
+    import io
 
-So output is 1. Which matches the example.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+15 8
+1 15 2 14 3 13 4 8 12 5 11 6 10 7 9
+""",
+            "output": \
+"""\
+48
+""",
+        }, 
+    ]
 
-Third example's output is 48, but the code will handle it correctly.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Thus, the code is correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

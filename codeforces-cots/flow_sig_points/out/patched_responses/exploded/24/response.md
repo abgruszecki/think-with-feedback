@@ -292,69 +292,89 @@ Now, implement this in Python.
 
 Read the inputs:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-b = list(map(int, input().split()))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-max_a = max(a)
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-min_b = min(b)
+    max_a = max(a)
 
-if max_a >= min_b:
+    min_b = min(b)
 
-    print(-1)
+    if max_a >= min_b:
 
-else:
+        print(-1, file=output_stream)
 
-    # Iterate from max_a to min_b-1 inclusive.
+    else:
 
-    for v in range(max_a, min_b):
+        # Iterate from max_a to min_b-1 inclusive.
 
-        # Check if any a_i satisfies 2a_i <=v.
+        for v in range(max_a, min_b):
 
-        for ai in a:
+            # Check if any a_i satisfies 2a_i <=v.
 
-            if 2 * ai <= v:
+            for ai in a:
 
-                print(v)
+                if 2 * ai <= v:
 
-                exit()
+                    print(v, file=output_stream)
 
-    # If here, no v found.
+                    return
 
-    print(-1)
+        # If here, no v found.
 
-This code should work.
+        print(-1, file=output_stream)
 
-But wait, in the loop, for each v in the range max_a to min_b (exclusive). For example, if min_b is 6, then the loop runs v=5, which is correct.
 
-Yes.
 
-So the code is correct.
+def test():
+    import io
 
-Testing the first sample input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 1
+3 4 5
+6
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-3 6
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-4 5 2 → a = [4,5,2], max_a=5.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-b is 8 9 6 10 7 11 → min_b is 6.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-max_a < min_b → proceed.
+    print('Tests passed 😎')
 
-Loop v from 5 to 6 (exclusive), so v=5.
 
-Check for ai in a:
+if __name__ == '__main__':
+    test()
 
-4 → 8 <=5? No.
 
-5 → 10 <=5? No.
+```
 
-2 →4 <=5? Yes. So print 5.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Correct.
+```
 
 Second example:
 

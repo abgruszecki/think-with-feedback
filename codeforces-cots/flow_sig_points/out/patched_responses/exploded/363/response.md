@@ -1074,11 +1074,15 @@ Now, code:
 
 But in Python, the code would look like this:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import defaultdict
 
-def main():
-    s = sys.stdin.readline().strip()
+
+def main(input_stream, output_stream):
+    s = input_stream.readline().strip()
     tokens = s.split(',')
     n = len(tokens)
     all_nodes = []
@@ -1107,44 +1111,55 @@ def main():
         levels[depth].append(text)
         if depth > max_depth:
             max_depth = depth
-    print(max_depth)
+    print(max_depth, file=output_stream)
     for d in range(1, max_depth+1):
-        print(' '.join(levels[d]))
+        print(' '.join(levels[d]), file=output_stream)
 
-if __name__ == "__main__":
-    main()
 
-But wait, what if there are no nodes? The problem states that each comment is a non-empty string, and the input is guaranteed to be valid. So there's at least one node.
 
-Testing this code with the first example:
+def test():
+    import io
 
-Input: hello,2,ok,0,bye,0,test,0,one,1,two,2,a,0,b,0
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+a,5,A,0,a,0,A,0,a,0,A,0
+""",
+            "output": \
+"""\
+2
+a
+A a A a A
+""",
+        }, 
+    ]
 
-The all_nodes list after parsing will be:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-('hello',1), ('ok',2), ('bye',2), ('test',1), ('one',1), ('two',2), ('a',3), ('b',3)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Grouping:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-depth 1: ['hello', 'test', 'one']
+    print('Tests passed 😎')
 
-depth 2: ['ok', 'bye', 'two']
 
-depth 3: ['a', 'b']
+if __name__ == '__main__':
+    test()
 
-max_depth=3.
 
-Output is:
+```
 
-3
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-hello test one
-
-ok bye two
-
-a b
-
-Which matches the first example.
+```
 
 Another test case: the second example.
 

@@ -71,27 +71,66 @@ But what about the time? Sorting a takes O(n log n) time. For m elements, each b
 
 But in Python, list comprehensions are efficient. So this approach should work.
 
-Testing the first example:
+Testing against sample input 1.
 
-Input:
+```python
+import bisect
+import sys
 
-5 4
 
-1 3 5 7 9
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
+    b = list(map(int, input_stream.readline().split()))
+    a.sort()
+    result = [bisect.bisect_right(a, x) for x in b]
+    print(' '.join(map(str, result)), file=output_stream)
 
-6 4 2 8
 
-After sorting a becomes [1,3,5,7,9].
 
-For 6: bisect_right finds the position where 6 would be inserted. The elements are 1,3,5,7,9. 6 is between 5 and 7. So bisect_right returns 3 (since 5 is the last element <=6). So count is 3.
+def test():
+    import io
 
-For 4: elements <=4 are 1,3. So bisect_right returns 2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5
+1 2 1 2 5
+3 1 4 1 5
+""",
+            "output": \
+"""\
+4 2 4 2 5
+""",
+        }, 
+    ]
 
-For 2: elements <=2 are 1. So 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For 8: elements <=8 are 1,3,5,7. So 4. Which matches the sample output.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The code seems correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample input:
 

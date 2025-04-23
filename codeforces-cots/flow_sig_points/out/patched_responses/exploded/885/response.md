@@ -525,129 +525,141 @@ Yes.
 
 So code:
 
-import bisect
+Testing against sample input 1.
 
+```python
+import bisect
 from collections import defaultdict
 
-n = int(input())
 
-groups = defaultdict(list)
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-for _ in range(n):
+    groups = defaultdict(list)
 
-    s = input().strip()
+    for _ in range(n):
 
-    balance = 0
+        s = input_stream.readline().rstrip("\n").strip()
 
-    left_min = 0
+        balance = 0
 
-    min_balance = 0
+        left_min = 0
 
-    for c in s:
+        min_balance = 0
 
-        balance += 1 if c == '(' else -1
+        for c in s:
 
-        min_balance = min(min_balance, balance)
+            balance += 1 if c == '(' else -1
 
-    # left_min is the minimum balance encountered
+            min_balance = min(min_balance, balance)
 
-    left = min_balance
+        # left_min is the minimum balance encountered
 
-    right = balance
+        left = min_balance
 
-    groups[right].append(left)
+        right = balance
 
-# Now, sort each group's list of lefts
+        groups[right].append(left)
 
-for key in groups:
+    # Now, sort each group's list of lefts
 
-    groups[key].sort()
+    for key in groups:
 
-total = 0
+        groups[key].sort()
 
-for a in groups:
+    total = 0
 
-    # count_a is the number of lefts >=0 in group a
+    for a in groups:
 
-    sorted_a = groups[a]
+        # count_a is the number of lefts >=0 in group a
 
-    pos_a = bisect.bisect_left(sorted_a, 0)
+        sorted_a = groups[a]
 
-    count_a = len(sorted_a) - pos_a
+        pos_a = bisect.bisect_left(sorted_a, 0)
 
-    # find -a group
+        count_a = len(sorted_a) - pos_a
 
-    required_b = -a
+        # find -a group
 
-    if required_b not in groups:
+        required_b = -a
 
-        count_b = 0
+        if required_b not in groups:
 
-    else:
+            count_b = 0
 
-        sorted_b = groups[required_b]
+        else:
 
-        # required x is -a for a's required_b group
+            sorted_b = groups[required_b]
 
-        x = required_b
+            # required x is -a for a's required_b group
 
-        # Wait, no.
+            x = required_b
 
-        # For the j strings (right = required_b = -a), the condition is left_j >= (-a)
+            # Wait, no.
 
-        # Because right_i is a, right_j is -a. So right_i + left_j = a + left_j >=0 → left_j >= -a.
+            # For the j strings (right = required_b = -a), the condition is left_j >= (-a)
 
-        # So x is -a.
+            # Because right_i is a, right_j is -a. So right_i + left_j = a + left_j >=0 → left_j >= -a.
 
-        x = -a
+            # So x is -a.
 
-        # Now, find the number of elements in sorted_b >= x.
+            x = -a
 
-        pos_b = bisect.bisect_left(sorted_b, x)
+            # Now, find the number of elements in sorted_b >= x.
 
-        count_b = len(sorted_b) - pos_b
+            pos_b = bisect.bisect_left(sorted_b, x)
 
-    total += count_a * count_b
+            count_b = len(sorted_b) - pos_b
 
-print(total)
+        total += count_a * count_b
 
-Wait, no. required_b is -a. So for the j strings (right_j = required_b = -a), we need left_j >= (-a). So x is (-a).
+    print(total, file=output_stream)
 
-But required_b is -a. So x is (-a).
 
-Yes.
 
-So, for example, when a is 1, required_b is -1. x is -1. So in group -1, we need left_j >=-1.
+def test():
+    import io
 
-Yes.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+()
+()
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-So the code is correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Testing this code against the first sample:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-In the first sample, group a=1's sorted list is [1]. count_a is len([1]) - bisect_left([1], 0) → 1-0=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-required_b is -1. x is -a = -1.
+    print('Tests passed 😎')
 
-group -1's list is [-1]. bisect_left([-1], -1) → returns 0. count_b is 1-0=1. So contribution 1*1=1.
 
-For a=0, count_a is 1, count_b is 1. contribution 1.
+if __name__ == '__main__':
+    test()
 
-For a=-1, count_a is 0 (since group[-1] is [-1], bisect_left([-1],0) is 1. count_a is 1-1=0. contribution 0.
 
-Total is 1+1+0=2.
+```
 
-Yes.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So the code works.
-
-Now, edge cases:
-
-What if a string has right=3 and left=2. Then, it can pair with a string with right=-3 and left >=-3.
-
-But if the other string has left=-3, then a + left_j = 3 + (-3) =0 >=0 → valid.
-
-So code handles that.
+```
 
 Another case: a string has right=5 and left=3. Then, it can pair with a string with right=-5 and left >=-5.
 

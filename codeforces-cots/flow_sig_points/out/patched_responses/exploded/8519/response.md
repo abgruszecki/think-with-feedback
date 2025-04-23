@@ -593,134 +593,136 @@ Similarly for Bonnie's turn: she looks for the smallest (a - b) that is negative
 
 So the code would look like:
 
+Testing against sample input 1.
+
+```python
 import heapq
 
-n = int(input())
 
-class Photo:
-    def __init__(self, a, b, next_photo):
-        self.a = a
-        self.b = b
-        self.next_photo = next_photo
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-available_photos = set()
-max_heap = []
-min_heap = []
+    class Photo:
+        def __init__(self, a, b, next_photo):
+            self.a = a
+            self.b = b
+            self.next_photo = next_photo
 
-for _ in range(n):
-    a1, b1, a2, b2 = map(int, input().split())
-    bottom = Photo(a2, b2, None)
-    top = Photo(a1, b1, bottom)
-    available_photos.add(top)
-    # Push into heaps
-    heapq.heappush(max_heap, (-(top.a - top.b), top))
-    heapq.heappush(min_heap, (top.a - top.b, top))
+    available_photos = set()
+    max_heap = []
+    min_heap = []
 
-total_diff = 0
-current_player = 'Alice'
-pass_count = 0
+    for _ in range(n):
+        a1, b1, a2, b2 = map(int, input_stream.readline().rstrip("\n").split())
+        bottom = Photo(a2, b2, None)
+        top = Photo(a1, b1, bottom)
+        available_photos.add(top)
+        # Push into heaps
+        heapq.heappush(max_heap, (-(top.a - top.b), top))
+        heapq.heappush(min_heap, (top.a - top.b, top))
 
-while pass_count < 2 and len(available_photos) > 0:
-    if current_player == 'Alice':
-        # Try to take the best possible photo
-        taken = False
-        while max_heap:
-            neg_diff, photo = heapq.heappop(max_heap)
-            diff = -neg_diff
-            if photo in available_photos and diff > 0:
-                available_photos.remove(photo)
-                total_diff += diff
-                pass_count = 0
-                taken = True
-                # Add next photo if exists
-                next_photo = photo.next_photo
-                if next_photo is not None:
-                    available_photos.add(next_photo)
-                    heapq.heappush(max_heap, (-(next_photo.a - next_photo.b), next_photo))
-                    heapq.heappush(min_heap, (next_photo.a - next_photo.b, next_photo))
-                break
-        if not taken:
-            pass_count += 1
-        current_player = 'Bonnie'
-    else:
-        # Bonnie's turn
-        taken = False
-        while min_heap:
-            diff, photo = heapq.heappop(min_heap)
-            if photo in available_photos and diff < 0:
-                available_photos.remove(photo)
-                total_diff += diff
-                pass_count = 0
-                taken = True
-                next_photo = photo.next_photo
-                if next_photo is not None:
-                    available_photos.add(next_photo)
-                    heapq.heappush(max_heap, (-(next_photo.a - next_photo.b), next_photo))
-                    heapq.heappush(min_heap, (next_photo.a - next_photo.b, next_photo))
-                break
-        if not taken:
-            pass_count += 1
-        current_player = 'Alice'
+    total_diff = 0
+    current_player = 'Alice'
+    pass_count = 0
 
-print(total_diff)
+    while pass_count < 2 and len(available_photos) > 0:
+        if current_player == 'Alice':
+            # Try to take the best possible photo
+            taken = False
+            while max_heap:
+                neg_diff, photo = heapq.heappop(max_heap)
+                diff = -neg_diff
+                if photo in available_photos and diff > 0:
+                    available_photos.remove(photo)
+                    total_diff += diff
+                    pass_count = 0
+                    taken = True
+                    # Add next photo if exists
+                    next_photo = photo.next_photo
+                    if next_photo is not None:
+                        available_photos.add(next_photo)
+                        heapq.heappush(max_heap, (-(next_photo.a - next_photo.b), next_photo))
+                        heapq.heappush(min_heap, (next_photo.a - next_photo.b, next_photo))
+                    break
+            if not taken:
+                pass_count += 1
+            current_player = 'Bonnie'
+        else:
+            # Bonnie's turn
+            taken = False
+            while min_heap:
+                diff, photo = heapq.heappop(min_heap)
+                if photo in available_photos and diff < 0:
+                    available_photos.remove(photo)
+                    total_diff += diff
+                    pass_count = 0
+                    taken = True
+                    next_photo = photo.next_photo
+                    if next_photo is not None:
+                        available_photos.add(next_photo)
+                        heapq.heappush(max_heap, (-(next_photo.a - next_photo.b), next_photo))
+                        heapq.heappush(min_heap, (next_photo.a - next_photo.b, next_photo))
+                    break
+            if not taken:
+                pass_count += 1
+            current_player = 'Alice'
 
-Wait, but there's a problem here. The while loops inside each player's turn may pop elements from the heap that are no longer available or not meeting the criteria. So for example, when a photo is popped from the max_heap, we check if it's available and if its diff is positive. If not, we proceed to pop the next one.
+    print(total_diff, file=output_stream)
 
-But this could lead to popping many elements from the heap until we find a valid one. But since each photo is processed only once, the total number of heap operations would be O(n log n), which should be manageable for 1e5 elements.
 
-Another potential issue is that the same photo can be present in both heaps, but once it's taken, it's removed from the available_photos set. So when the other heap pops it, it's not in the set and is skipped.
 
-Testing this code with the first example:
+def test():
+    import io
 
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2
+5 4 8 8
+4 12 14 0
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-12 3 4 7
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-1 15 9 1
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Stack 1: top is (12, 3) next is (4,7). Bottom is (4,7) next is None.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Stack 2: top is (1,15) next is (9,1). Bottom is (9,1) next is None.
+    print('Tests passed 😎')
 
-Available_photos initially contains both tops.
 
-Max_heap has entries for the two tops:
+if __name__ == '__main__':
+    test()
 
-For stack 1: diff is 12-3=9. So stored as -9 in max_heap. So the max_heap entries are (-9, photo1), (- (1-15) = 14, photo2). Wait, 1-15 = -14. So stored as 14 in the max_heap (since it's - (diff)).
 
-Wait, for photo2 (1,15), diff is 1-15 = -14. So in max_heap, it's stored as -(-14) = 14. So when the max_heap is popped, the first entry will be the one with the smallest - (diff), which is the largest diff. Wait, no. The max_heap is a min-heap, so the smallest stored value is popped first. So stored as - (diff), so the smallest stored value corresponds to the largest diff.
+```
 
-So in the first example, the initial max_heap has entries (-9, photo1) and (14, photo2). The min-heap is a min-heap with entries (-14 (photo2's diff) and 9 (photo1's diff)).
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 109, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 102, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '4'
+Got: '7'
 
-But when Alice's turn comes, she pops the smallest stored value in the max_heap. Which is -9 (since stored as ( -9, photo1 )). The stored value is -9, which is smaller than 14. So popped first.
-
-She checks if photo1 is available (yes) and diff=9>0. So takes it. Adds the next photo (4,7). Then, the next photo (4,7) is added to the available set and both heaps.
-
-Then, the available_photos now include photo2 (1,15) and the new photo (4,7).
-
-Then, Bonnie's turn. She pops from the min-heap. The min-heap has entries:
-
--14 (photo2's diff), 9 (photo1's diff), and after adding photo3 (4,7's diff is 4-7=-3), so the min-heap entries are -14, -3, 9. So the min-heap's first entry is -14.
-
-But Bonnie's turn: she looks for the smallest (diff) < 0. So she takes photo2 (diff is -14). Adds its next photo (9,1). The next photo's diff is 9-1=8>0. So added to heaps.
-
-Total_diff now is 9 (from photo1) + (-14) (from photo2) = -5.
-
-Then, Alice's turn again. The available_photos now are the next photo of photo1 (4,7) and next of photo2 (9,1). Also, the next photo of photo1 has diff 4-7=-3, and next of photo2 is 9-1=8.
-
-Alice's turn: she takes the maximum diff available. Which is 8 (from next of photo2). So adds 8 to total_diff. Now total_diff is -5 +8=3.
-
-Then Bonnie's turn. Available photos are (4,7) and the next photo of photo2's next is None. So the available_photos now is (4,7) (diff -3), and the next of photo2's next is None, but after taking the next of photo2, no new photo is added. So Bonnie's turn: she looks for the smallest diff <0. The photo (4,7) has diff -3. She takes it, adding -3 to total_diff (now 3-3=0). Then adds its next photo (None).
-
-Then Alice's turn: available_photos is empty. She passes. Pass_count increases to 1.
-
-Bonnie's turn: available_photos is empty. She passes. Pass_count increases to 2. The loop ends.
-
-So the total_diff is 0? But the sample input's output is 1.
-
-Wait, this suggests that the code isn't handling the example correctly. What's wrong here?
+```
 
 Wait, let's re-examine the first example.
 

@@ -460,79 +460,104 @@ Apply the greedy algorithm.
 
 So code:
 
-s = input().strip()
+Testing against sample input 1.
 
-p = input().strip()
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-n = len(s)
+    p = input_stream.readline().rstrip("\n").strip()
 
-m = len(p)
+    n = len(s)
 
-if m > n:
+    m = len(p)
 
-    print(0)
+    if m > n:
 
-    exit()
+        print(0, file=output_stream)
 
-intervals = []
+        return
 
-target = p
+    intervals = []
 
-p_len = m
+    target = p
 
-for i in range(n - m + 1):
+    p_len = m
 
-    if s[i:i+m] == target:
+    for i in range(n - m + 1):
 
-        intervals.append( (i, i + m -1) )
+        if s[i:i+m] == target:
 
-if not intervals:
+            intervals.append( (i, i + m -1) )
 
-    print(0)
+    if not intervals:
 
-    exit()
+        print(0, file=output_stream)
 
-# Sort intervals by end
+        return
 
-intervals.sort(key=lambda x: x[1])
+    # Sort intervals by end
 
-count = 0
+    intervals.sort(key=lambda x: x[1])
 
-last_end = -1
+    count = 0
 
-for start, end in intervals:
+    last_end = -1
 
-    if start > last_end:
+    for start, end in intervals:
 
-        count +=1
+        if start > last_end:
 
-        last_end = end
+            count +=1
 
-print(count)
+            last_end = end
 
-This should handle all cases.
+    print(count, file=output_stream)
 
-Testing this code against the examples:
 
-Sample 1:
 
-s = 'intellect' → len 8.
+def test():
+    import io
 
-p = 'tell' → len 4.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+google
+apple
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-n -m +1 is 5. So i from 0 to4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Check substrings:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=0: 'int' → no.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=1: 'nte' → no.
+    print('Tests passed 😎')
 
-i=2: 'tell' → yes. interval (2,5).
 
-others no.
+if __name__ == '__main__':
+    test()
 
-So intervals list has one interval. count is 1. Output is 1.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

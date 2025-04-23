@@ -392,25 +392,64 @@ result = sum_all + sum_maxima
 
 print(result)
 
-Testing this code with the sample inputs.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    m = int(input[0])
+    a = list(map(int, input[1:m+1]))
+    sum_all = sum(a)
+    a_sorted = sorted(a, reverse=True)
+    required = (m - 1) // 3
+    sum_max = sum(a_sorted[:required])
+    print(sum_all + sum_max, file=output_stream)
 
-Input:
 
-1
 
-13
+def test():
+    import io
 
-m=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 2 3 4
+""",
+            "output": \
+"""\
+14
+""",
+        }, 
+    ]
 
-required =0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum_all=13.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sum_maxima=0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-result=13+0=13. Correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample2:
 

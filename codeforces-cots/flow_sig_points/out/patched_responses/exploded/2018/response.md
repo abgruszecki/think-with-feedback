@@ -787,75 +787,103 @@ But since the prefix_sum can be up to 1e9 * 2e5 = 2e14, which fits in Python's i
 
 So, code:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n, q = map(int, input().split())
 
-a = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n, q = map(int, input_stream.readline().rstrip("\n").split())
 
-prefix_sum = [0]*(n+1)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for i in range(n):
+    prefix_sum = [0]*(n+1)
 
-    prefix_sum[i+1] = prefix_sum[i] + a[i]
+    for i in range(n):
 
-S = prefix_sum[-1]
+        prefix_sum[i+1] = prefix_sum[i] + a[i]
 
-k_list = list(map(int, input().split()))
+    S = prefix_sum[-1]
 
-current_total =0
+    k_list = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for k in k_list:
+    current_total =0
 
-    if S ==0:
+    for k in k_list:
 
-        print(n)
+        if S ==0:
 
-        continue
+            print(n, file=output_stream)
 
-    available = S - current_total
+            continue
 
-    arrows_used = min(k, available)
+        available = S - current_total
 
-    current_total += arrows_used
+        arrows_used = min(k, available)
 
-    current_total %= S
+        current_total += arrows_used
 
-    if current_total ==0:
+        current_total %= S
 
-        print(n)
+        if current_total ==0:
 
-    else:
+            print(n, file=output_stream)
 
-        idx = bisect.bisect_right(prefix_sum, current_total) -1
+        else:
 
-        print(n - idx)
+            idx = bisect.bisect_right(prefix_sum, current_total) -1
 
-This should handle all cases.
+            print(n - idx, file=output_stream)
 
-Testing the first sample:
 
-Sample Input 1:
 
-5 5
+def test():
+    import io
 
-1 2 1 2 1
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4
+1 2 3 4
+9 1 10 6
+""",
+            "output": \
+"""\
+1
+4
+4
+1
+""",
+        }, 
+    ]
 
-3 10 1 1 1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-current_total starts at0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-First k=3:
+    print('Tests passed 😎')
 
-available=7-0=7.
 
-arrows_used=3.
+if __name__ == '__main__':
+    test()
 
-current_total=3. 3 !=0.
 
-bisect_right(prefix_sum,3) in [0,1,3,4,6,7] → returns3. idx=2. 5-2=3. Correct.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second k=10:
 

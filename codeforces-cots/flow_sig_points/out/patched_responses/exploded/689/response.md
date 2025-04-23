@@ -465,9 +465,12 @@ But in Python, for the suffix_counts, appending and reversing is O(n). For n=1e6
 
 Now, code:
 
-import sys
+Testing against sample input 1.
 
+```python
+import sys
 from collections import defaultdict
+
 
 class FenwickTree:
 
@@ -499,9 +502,8 @@ class FenwickTree:
 
         return res
 
-def main():
-
-    input = sys.stdin.read().split()
+def main(input_stream, output_stream):
+    input = input_stream.read().split()
 
     n = int(input[0])
 
@@ -577,57 +579,52 @@ def main():
 
         ft.update(prefix_counts[j])
 
-    print(ans)
+    print(ans, file=output_stream)
 
-if __name__ == "__main__":
 
-    main()
 
-Wait, but the Fenwick Tree's size is set to max_prefix. So if prefix_counts[j] is larger than max_prefix, then when we call ft.update(prefix_counts[j]), the index is beyond the size of the Fenwick Tree. But in the code above, the update function loops while idx <= self.size, so for example, if the Fenwick Tree's size is 4, and we update index 5, the loop doesn't execute. So that element is not added.
+def test():
+    import io
 
-But that's a problem. Because in the case where the Fenwick Tree's size is set to max_prefix, but there exists a prefix_counts[j] greater than max_prefix, which is impossible because max_prefix is the maximum of the prefix_counts. Wait, no. Because when we compute max_prefix as the maximum of prefix_counts, then all elements in prefix_counts are <= max_prefix. So when we call update with prefix_counts[j], which is <= max_prefix, the index is within the Fenwick Tree's size.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 1 1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-So the code is safe.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Because:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-max_prefix = max(prefix_counts)
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So all elements in prefix_counts are <= max_prefix.
+    print('Tests passed 😎')
 
-Thus, when we call ft.update(prefix_counts[j]), the index is prefix_counts[j], which is <= max_prefix, which is the size of the Fenwick Tree.
 
-Thus, the code is correct.
+if __name__ == '__main__':
+    test()
 
-Testing the sample input 1:
 
-prefix_counts are [1,1,2,3,2,3,4], max_prefix is 4. Fenwick Tree size is 4.
+```
 
-Processing j=0:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-x = suffix_counts[0] =4.
-
-sum_x = ft.query(4). The Fenwick Tree is empty. sum_x is 0. ans +=0-0=0. Then update with 1 → index 1 in Fenwick Tree is incremented.
-
-For j=1, x=3. current_total is 1. sum_x is query(3) → sum of elements <=3. Fenwick Tree has 1. So sum_x is1. ans += 1-1=0. Then add 1 (prefix_counts[1] is 1). So Fenwick Tree now has 2 entries of 1.
-
-For j=2, x=3. current_total is2. sum_x is query(3) → 2 elements (both 1's). sum_x is2. ans += 2-2=0. Add 2.
-
-For j=3, x=2. current_total is3. sum_x is query(2) → 2 (two 1's) +1 (the 2) =3. ans +=3-3=0. Add 3.
-
-j=4, x=2. current_total is4. sum_x is query(2) → sum of elements <=2: 2 (1's) +1 (2) +1 (3 is not <=2). Wait, no. Fenwick Tree has elements 1,1,2,3.
-
-Wait, no: after j=0, added 1. j=1, added 1. j=2, added 2. j=3, added3.
-
-So at j=4, the Fenwick Tree has 4 elements: [1,1,2,3].
-
-sum_x is query(2). The query returns the sum of elements <=2. So in the Fenwick Tree, 1+1+2 → total 4. So sum_x=4. current_total is4. ans +=4-4=0. But wait, according to the sample, j=4 contributes 1. Wait, perhaps this is a mistake.
-
-Wait, in the first example, when j=4 (0-based, so fifth element in the array), which is the element 2 (a[4] is 2). suffix_counts[j=4] is2. The Fenwick Tree at this point has elements 1,1,2,3 (from j=0 to j=3).
-
-sum_greater is current_total (4) - query(2).
-
-query(2) returns the sum of elements <=2: 1+1+2 =4. sum_greater is4-4=0. But according to the sample explanation, j=4 contributes 1. What's wrong here?
+```
 
 Wait, in the sample explanation, for j=4 (which is the fifth element in the array, 0-based index 4), the current_total is4. The Fenwick Tree has elements [1,1,2,3]. sum_greater is4 - sum up to x=2. sum up to 2 is 1+1+2 (since 2 is <=2). sum is4. 4-4=0.
 

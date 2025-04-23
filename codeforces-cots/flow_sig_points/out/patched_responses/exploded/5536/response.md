@@ -356,101 +356,82 @@ Now, handling the code.
 
 Now, in Python, the code for generating the numbers:
 
+Testing against sample input 1.
+
+```python
 import itertools
 
-def generate_lucky_numbers():
 
-    nums = []
+def main(input_stream, output_stream):
+    def generate_lucky_numbers():
+        nums = []
+        for length in range(1, 11):
+            for digits in itertools.product(('4', '7'), repeat=length):
+                num = int(''.join(digits))
+                nums.append(num)
+        return sorted(nums)
 
-    for length in range(1, 11):
+    l, r = map(int, input_stream.readline().rstrip("\n").split())
+    lucky = [0] + generate_lucky_numbers()
+    total = 0
 
-        for digits in itertools.product(['4', '7'], repeat=length):
+    for i in range(len(lucky) - 1):
+        prev = lucky[i]
+        curr = lucky[i+1]
+        start = prev + 1
+        end = curr
+        overlap_start = max(start, l)
+        overlap_end = min(end, r)
+        if overlap_start > overlap_end:
+            continue
+        count = overlap_end - overlap_start + 1
+        total += count * curr
 
-            num = int(''.join(digits))
+    print(total, file=output_stream)
 
-            nums.append(num)
 
-    return sorted(nums)
 
-l, r = map(int, input().split())
+def test():
+    import io
 
-lucky = [0] + generate_lucky_numbers()
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 7
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
 
-sum_total = 0
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-for i in range(len(lucky) -1):
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-    prev = lucky[i]
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-    curr = lucky[i+1]
+    print('Tests passed 😎')
 
-    start = prev + 1
 
-    end = curr
+if __name__ == '__main__':
+    test()
 
-    overlap_start = max(start, l)
 
-    overlap_end = min(end, r)
+```
 
-    if overlap_start > overlap_end:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-        continue
-
-    count = overlap_end - overlap_start + 1
-
-    sum_total += count * curr
-
-print(sum_total)
-
-Wait, but what if the r is beyond the last lucky number? For example, if the largest lucky number is 7777777777 (10 digits), and r is 1e10 (which is 10 digits as well). Then, the last interval would be (prev, curr], but curr is 7777777777. Then, numbers beyond curr would have next(x) as the next lucky number. But since we generated all up to 10 digits, maybe there's a larger one. Wait, no. For 10 digits, all combinations are generated. So if the maximum possible is 7777777777, which is 10 digits. But what if the x is 7777777778? Then next(x) would be the next lucky number, which would be 44444444444 (11 digits). But in our generated list, we don't have that, so our code would not include it, leading to an error.
-
-Wait, this is a problem. Because the code as written generates up to 10 digits, but numbers like 44444444444 (11 digits) are larger than 1e9 (which is 10 digits). So for x in 7777777778 (which is 10 digits, 7777777778 is 10 digits), the next(x) would be the next possible lucky number. But if we didn't generate that, the code would miss it.
-
-Ah, right. So the code as written has a flaw. It doesn't generate all possible lucky numbers up to the maximum possible needed. So if r is 1e9 (10 digits), and the next number after the largest generated number (say 7777777777) is 44444444444 (11 digits), then any x between 7777777778 and 44444444444 would have next(x) as 44444444444. But since our code's generated list only includes numbers up to 10 digits, it would not include that 11-digit number. Hence, the code would miss that interval.
-
-So how to handle this?
-
-We need to generate all possible lucky numbers up to a certain maximum that is larger than 1e9.
-
-Wait, the maximum x is 1e9. So the next(x) for x=1e9 is the smallest lucky number >=1e9. Let's see. The smallest lucky number >=1e9 is 4444444444 (10 digits) which is 4,444,444,444. Which is larger than 1e9. So that's 10 digits. So generating up to 10 digits is sufficient.
-
-Wait, 1e9 is 1,000,000,000. The next lucky number after that would be the smallest 10-digit lucky number >=1e9. Let's see.
-
-The 10-digit lucky numbers start from 4444444444 (10 4s) and go up to 7777777777 (10 7s). So the first 10-digit lucky number is 4444444444, which is 4.444e9, which is larger than 1e9. So for x=1e9, next(x) is 4444444444.
-
-So generating all possible 10-digit lucky numbers is sufficient.
-
-But in the code, the for loop is up to 10 digits. So the code will generate all possible 10-digit numbers. So yes.
-
-But what if x is 7777777777 (the largest 10-digit lucky number) and r is 7777777777? Then the code would have generated it, and the interval would be (prev, curr], which would be (prev, 7777777777], where prev is the previous lucky number. For example, the code would generate 7777777777 as the last element in the list. So for x=7777777777, the next(x) is 7777777777. So it's covered.
-
-But what if x is 7777777777 +1 (which is 7777777778)? Then next(x) is 44444444444, which is an 11-digit number. But since in the code we generated only up to 10 digits, 44444444444 is not included. So the code would not cover it.
-
-But according to the problem statement, the input r can be up to 1e9 (1,000,000,000). So if the code's generated list includes up to 10-digit numbers, then for x up to 1e9, the code is correct. Because the largest x is 1e9, and 4444444444 is a 10-digit number. So for any x up to 1e9, the next(x) is a 10-digit or shorter lucky number. So generating up to 10 digits is sufficient.
-
-Because the next(x) for x <=1e9 will be a lucky number of up to 10 digits. For example, 4444444444 is 4.4e9, which is larger than 1e9, so x=1e9 will have next(x) 4444444444, which is included in the generated list.
-
-So the code is correct for all x in [1, 1e9], which is the problem's input constraints.
-
-Therefore, generating all possible lucky numbers up to 10 digits is sufficient.
-
-So the code should work.
-
-Testing the first sample:
-
-Input: 2 7
-
-The generated list (after prepending 0) is:
-
-0,4,7,44,47,74,77,444,... etc.
-
-So the consecutive pairs are (0,4), (4,7), (7,44), etc.
-
-For the first pair (0,4): interval is 1-4. Overlap with [2,7] is 2-4. Count is 3. contribution 3*4=12.
-
-Second pair (4,7): interval 5-7. Overlap with 5-7. Count 3. contribution 3*7=21. Sum total 33.
-
-Which matches the sample.
+```
 
 Another test case: 7 7. The interval for (4,7] is 5-7. Overlap is 7. Contribution 7*1=7.
 

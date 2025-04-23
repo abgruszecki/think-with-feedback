@@ -242,37 +242,137 @@ Generate the original, delete last, delete second last. Then parse all to intege
 
 So in code:
 
-s = input().strip()
+Testing against sample input 1.
 
-# generate possible options
-options = [s]
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-# option1: delete last character
-option1 = s[:-1]
-options.append(option1)
+    # generate possible options
+    options = [s]
 
-# option2: delete second last character (if possible)
-option2 = s[:-2] + s[-1]
-options.append(option2)
+    # option1: delete last character
+    option1 = s[:-1]
+    options.append(option1)
 
-# convert all options to integers and find the maximum
-max_val = max( [ int(opt) for opt in options ] )
+    # option2: delete second last character (if possible)
+    option2 = s[:-2] + s[-1]
+    options.append(option2)
 
-print( max_val )
+    # convert all options to integers and find the maximum
+    max_val = max( [ int(opt) for opt in options ] )
 
-Wait, but for the option2, if the original s is of length 2 (positive case), then s[:-2] is empty. So option2 becomes s[-1], which is correct.
+    print( max_val , file=output_stream)
 
-Testing the sample inputs.
 
-Sample 1:
 
-Input: 2230 → output 2230.
+def test():
+    import io
 
-Candidates: 2230, 223, 220. Max is 2230.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+-10
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Sample 2:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Input: -10 → candidates are "-10", "-1", "-0" (which is 0). Max is 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    # generate possible options
+    options = [s]
+
+    # option1: delete last character
+    option1 = s[:-1]
+    options.append(option1)
+
+    # option2: delete second last character (if possible)
+    option2 = s[:-2] + s[-1]
+    options.append(option2)
+
+    # convert all options to integers and find the maximum
+    max_val = max( [ int(opt) for opt in options ] )
+
+    print( max_val , file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+-100003
+""",
+            "output": \
+"""\
+-10000
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

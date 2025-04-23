@@ -301,7 +301,230 @@ For a non-zero, when iterating through the keys in cnt, we can avoid checking al
 
 So in code:
 
-a = int(input())
+Testing against sample input 1.
+
+```python
+def main(input_stream, output_stream):
+    a = int(input_stream.readline().rstrip("\n"))
+
+    s = input_stream.readline().rstrip("\n").strip()
+
+    digits = [int(c) for c in s]
+
+    n = len(digits)
+
+    prefix_sum = [0] * (n +1)
+
+    for i in range(n):
+
+        prefix_sum[i+1] = prefix_sum[i] + digits[i]
+
+    from collections import defaultdict
+
+    cnt = defaultdict(int)
+
+    for j in range(1, n+1):
+
+        current = prefix_sum[j]
+
+        for i in range(j):
+
+            sum_sub = current - prefix_sum[i]
+
+            cnt[sum_sub] +=1
+
+    if a ==0:
+
+        count_zero = cnt.get(0, 0)
+
+        total_subs = n * (n+1) //2
+
+        ans = count_zero * (2 * total_subs - count_zero)
+
+    else:
+
+        ans =0
+
+        for k1 in cnt:
+
+            if k1 ==0:
+
+                continue
+
+            if a % k1 !=0:
+
+                continue
+
+            k2 = a //k1
+
+            ans += cnt[k1] * cnt.get(k2, 0)
+
+    print(ans, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+16
+439873893693495623498263984765
+""",
+            "output": \
+"""\
+40
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+In the code's cnt, for this sample input, the sum 5 occurs in:
+
+- j=2, i=1 (sum 2)
+
+- j=3, i=1 (sum5)
+
+- j=5, i=4 (sum5).
+
+Wait, j=5 is prefix_sum[5] =15. i ranges from 0-4.
+
+i=4: sum 15 -10=5 (digits 4-4:5).
+
+So sum5 is from:
+
+- j=2, i=1: sum2 (digits 1-1:2).
+
+No, wait j=2 is prefix_sum[2]=3. i=0: sum3-0=3 (digits 0-1:1+2=3).
+
+i=1: sum3-1=2 (digits 1-1:2).
+
+So sum5 comes from j=3, i=1 (sum5, digits 1-2:2+3=5) and j=5, i=4 (sum5, digits4-4:5). So sum5 occurs twice.
+
+But wait, in the code's cnt, sum5 is counted twice.
+
+But when we have the code's cnt, the sum5 will have a frequency of 2.
+
+Similarly, sum3 occurs in j=2, i=0 (sum3), j=3, i=2 (sum3), j=1, i=0 (sum1), etc.
+
+Wait, perhaps the code's cnt for sum3 is 2.
+
+But in any case, when a=10, the code will look for pairs (k1, k2) where k1 *k2=10.
+
+So possible k1 values in the sample are 1,2,3,4,5,6,7,9,10,14,15, etc.
+
+Looking for divisors of 10. So possible k1 could be 1,2,5,10.
+
+So for each k1 in cnt that is a divisor of 10:
+
+Check if a mod k1 is zero.
+
+For example:
+
+k1=1: a/k1=10. Check if 10 is in cnt. So cnt[1] * cnt[10].
+
+k1=2: a/k1=5. cnt[2] * cnt[5].
+
+k1=5: a/k1=2. cnt[5] * cnt[2].
+
+k1=10: a/k1=1. cnt[10] * cnt[1].
+
+Also, possible k1 could be 10, but is 10 present in cnt?
+
+In the sample input, there is a subarray [1,2,3,4] (sum10), so yes, cnt[10] is 1.
+
+So the code will compute:
+
+For k1=1:
+
+contribution is cnt[1] * cnt[10] =1 *1=1.
+
+k1=2: contribution is cnt[2] * cnt[5] =1 *2=2.
+
+k1=5: contribution is cnt[5] * cnt[2] =2 *1=2.
+
+k1=10: contribution is 1 *1=1.
+
+Additionally, any other divisors of 10? Like 10's factors could be 1,2,5,10. Are there any other k1 in cnt that are divisors of 10?
+
+For example, if there's a sum of 5, then 5 is a divisor. So yes.
+
+So total contribution is 1+2+2+1=6, which matches the sample output.
+
+So the code works for this case.
+
+Another sample:
+
+Input:
+
+16
+
+439873893693495623498263984765
+
+Output:40
+
+But without knowing the exact breakdown, it's hard to test, but the code should handle it.
+
+Now, possible optimizations in the code:
+
+In Python, using a defaultdict can be slower than using a regular dictionary. So perhaps precomputing the prefix sums, and for each j, precompute the current_sum and then loop i from 0 to j-1, and increment the counts.
+
+But in practice, for n=4000, this code may work within the time limit.
+
+But perhaps the code can be optimized by precomputing the prefix_sum once and then using a list for the counts, since the maximum possible sum is 9*4000=36,000. So a list of size 36001 (sum can be up to 36000) can be used. 
+
+But using a list is faster than a dictionary. For example:
+
+sum_counts = [0] * (max_sum +1)
+
+But the problem is that the possible sum can be up to 36,000. So for each sum_sub, which can be between 0 (if all digits are zero) and 36,000, we can represent it as an array.
+
+But first, we need to compute the maximum possible sum. For the given s, the sum can be up to 9*4000=36,000. So the array can be of size 36001.
+
+So the code can be modified as follows:
+
+max_possible_sum = 9 * len(digits)
+
+sum_counts = [0] * (max_possible_sum +1)
+
+Then, for each sum_sub in the loops:
+
+sum_counts[sum_sub] +=1
+
+This would avoid dictionary lookups and speed things up.
+
+But how to compute the maximum possible sum.
+
+Wait, len(digits) can be up to 4000. So max_possible_sum is 4000 *9=36,000.
+
+So the code can be adjusted to:
 
 s = input().strip()
 
@@ -309,15 +532,15 @@ digits = [int(c) for c in s]
 
 n = len(digits)
 
-prefix_sum = [0] * (n +1)
+prefix_sum = [0]*(n+1)
 
 for i in range(n):
 
     prefix_sum[i+1] = prefix_sum[i] + digits[i]
 
-from collections import defaultdict
+max_sum = 9 * n  # maximum possible sum of any subarray
 
-cnt = defaultdict(int)
+sum_counts = [0]*(max_sum +1)
 
 for j in range(1, n+1):
 
@@ -327,247 +550,71 @@ for j in range(1, n+1):
 
         sum_sub = current - prefix_sum[i]
 
-        cnt[sum_sub] +=1
+        if sum_sub <= max_sum:
 
-if a ==0:
+            sum_counts[sum_sub] +=1
 
-    count_zero = cnt.get(0, 0)
+        else:
 
-    total_subs = n * (n+1) //2
+            # this can't happen because current is prefix_sum[j] which is sum of digits 0..j-1. The maximum sum for a subarray is sum of all digits, which is prefix_sum[n] = sum of digits. But prefix_sum[j] is <= prefix_sum[n], and sum_sub is current - prefix_sum[i]. But since prefix_sum is increasing, current >= prefix_sum[i]. So sum_sub >=0. But the maximum possible sum_sub is sum of all digits (prefix_sum[n] - 0). So sum_sub can be up to sum of all digits. But sum of all digits is up to 9*4000=36,000. So sum_sub is <=36,000. So the 'if sum_sub <= max_sum' is redundant. So we can skip it.
 
-    ans = count_zero * (2 * total_subs - count_zero)
+So the code can be:
 
-else:
+sum_counts = [0]*(max_sum +1)
 
-    ans =0
+for j in range(1, n+1):
 
-    for k1 in cnt:
+    current = prefix_sum[j]
 
-        if k1 ==0:
+    for i in range(j):
 
-            continue
+        sum_sub = current - prefix_sum[i]
 
-        if a % k1 !=0:
+        sum_counts[sum_sub] +=1
 
-            continue
+But this requires that all sum_sub values are <= max_sum. Which is true.
 
-        k2 = a //k1
+So this approach would be more efficient as array access is faster than dictionary lookups.
 
-        ans += cnt[k1] * cnt.get(k2, 0)
+Then, when a is zero:
 
-print(ans)
+count_zero = sum_counts[0]
 
-But let's test this code against the sample inputs.
+total_subs = n*(n+1)//2
 
-Sample Input 1:
+ans = count_zero * (2 * total_subs - count_zero)
 
-10
+For a non-zero:
 
-12345
+ans =0
 
-The digits are [1,2,3,4,5]
+for k1 in range(1, max_sum +1):
 
-n=5.
+    if sum_counts[k1] ==0:
 
-The possible subarray sums are computed as follows.
+        continue
 
-But let's compute the prefix sums:
+    if a %k1 !=0:
 
-prefix_sum[0] =0
+        continue
 
-prefix_sum[1] =1
+    k2 = a//k1
 
-prefix_sum[2] =1+2=3
+    if k2 > max_sum:
 
-prefix_sum[3] =3+3=6
+        continue
 
-prefix_sum[4] =6+4=10
+    ans += sum_counts[k1] * sum_counts[k2]
 
-prefix_sum[5] =10+5=15
+This is O(max_sum) time, which is O(36,000) iterations, which is very fast.
 
-For each j from 1 to 5:
+This would optimize the code significantly compared to using a dictionary.
 
-j=1:
+So the code should be rewritten using a list instead of a dictionary.
 
-i ranges from 0 to 0.
+But how to handle sum_sub values that exceed max_sum? Well, since the maximum possible sum_sub is 9*4000=36,000, and max_sum is 9*4000, the sum_sub can't exceed it. So the list is of size 36,001, and sum_sub can be from 0 to 36,000.
 
-sum_sub = prefix_sum[1] - prefix_sum[0] =1-0=1. cnt[1] +=1.
-
-j=2:
-
-i=0: sum_sub=3-0=3. cnt[3] +=1.
-
-i=1: sum_sub=3-1=2. cnt[2] +=1.
-
-j=3:
-
-i=0: 6-0=6.
-
-i=1:6-1=5.
-
-i=2:6-3=3.
-
-So cnt[6] +=1, cnt[5] +=1, cnt[3] +=1.
-
-j=4:
-
-i ranges from 0 to3.
-
-sums are 10-0=10, 10-1=9, 10-3=7, 10-6=4. So cnt[10] +=1, 9,7,4.
-
-j=5:
-
-i from 0 to4.
-
-sums are 15-0=15, 15-1=14, 15-3=12, 15-6=9, 15-10=5.
-
-So all subarrays and their sums:
-
-Looking for all possible sums:
-
-But to save time, perhaps the code will count correctly. Then the cnt will have all the subarray sums with their frequencies.
-
-For example, the sum 10 occurs once (the sum of digits 1-4, which is 1+2+3+4=10). But wait, when j=4 (prefix_sum[4] =10), the subarrays are from i=0 to 3 (since j=4, the sum is prefix_sum[4] - prefix_sum[i] for i<4). So when i=0, sum is 10-0=10 (digits 0-3 inclusive). So yes, sum 10 occurs once.
-
-Then, for the sample input a=10, the code will look for all pairs (k1, k2) where k1 *k2 =10.
-
-The possible k1 values in cnt must be divisors of 10. Let's see what possible sums can be in cnt.
-
-Looking at the digits 1,2,3,4,5:
-
-Possible subarray sums:
-
-sum of 1: 1.
-
-sum of 2: 2.
-
-sum of 3: 3.
-
-sum of 4:4.
-
-sum of 5:5.
-
-sum of 1+2=3.
-
-sum of 2+3=5.
-
-sum of 3+4=7.
-
-sum of 4+5=9.
-
-sum of 1+2+3=6.
-
-sum of 2+3+4=9.
-
-sum of 3+4+5=12.
-
-sum of 1+2+3+4=10.
-
-sum of 2+3+4+5=14.
-
-sum of 1+2+3+4+5=15.
-
-And other possible sums.
-
-Wait, but in reality, the code counts all possible subarrays. So for the digits [1,2,3,4,5], the possible subarrays are all possible contiguous sequences. For example:
-
-The subarray [1,2] sum 3.
-
-[2,3] sum 5.
-
-[3,4] sum7.
-
-[4,5] sum9.
-
-[1,2,3,4] sum 10.
-
-So in the cnt, the sum 10 appears once.
-
-Other possible sums:
-
-sum 3 can be from [1,2], [3].
-
-sum 5 can be from [5], [2,3], [1,2,3,4,5] (sum 15, but that's the sum of the entire array).
-
-Wait, let's recompute all possible subarrays and their sums:
-
-For the array [1,2,3,4,5], the subarrays are:
-
-Length 1:
-
-1 (sum1), 2 (sum2),3 (sum3),4 (sum4),5 (sum5).
-
-Length 2:
-
-1+2=3, 2+3=5, 3+4=7,4+5=9.
-
-Length 3:
-
-1+2+3=6, 2+3+4=9,3+4+5=12.
-
-Length4:
-
-1+2+3+4=10, 2+3+4+5=14.
-
-Length5: 15.
-
-So the sums are:
-
-1,2,3,4,5,3,5,7,9,6,9,12,10,14,15.
-
-So their frequencies:
-
-sum 1:1
-
-sum2:1
-
-sum3:2 (from [1,2] and [3])
-
-sum4:1
-
-sum5:2 (from [5] and [2,3])
-
-sum7:1
-
-sum9:2 (from [4,5] and [2,3,4])
-
-sum6:1
-
-sum12:1
-
-sum10:1
-
-sum14:1
-
-sum15:1
-
-Wait, but according to the code, for each j in 1 to 5, and i from 0 to j-1, the code counts all possible sums.
-
-For example, when j=3 (sum of the first 3 digits:6), the possible i's are 0,1,2.
-
-sums are 6-0=6 (digits 0-2: sum 1+2+3=6).
-
-6-1=5 (digits 1-2: sum 2+3=5).
-
-6-3=3 (digits 2-2: sum3).
-
-So in this case, sum3 is counted once here.
-
-But when j=2 (sum 3):
-
-i=0: sum3.
-
-i=1: sum3-1=2.
-
-So sum3 is counted once here, sum2 once.
-
-So for sum3, the code counts it twice (from j=2, i=0 and j=3, i=2).
-
-So the total sum3 is two occurrences.
-
-Similarly, sum5 occurs in j=2 (sum5 is 5? No. Wait, j=3, i=1: sum is 6-1=5 (digits 1-2: 2+3=5). Also, j=4, i=4 (no, wait j=4 is prefix_sum[4]=10. i ranges from 0-3. For i=3: sum 10-6=4 (digits 3-3:4).
-
-Wait, perhaps it's better to just rely on the code to count correctly.
+So the code becomes:
 
 In the code's cnt, for this sample input, the sum 5 occurs in:
 

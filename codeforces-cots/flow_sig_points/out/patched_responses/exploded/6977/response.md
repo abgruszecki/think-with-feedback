@@ -821,169 +821,162 @@ else:
 
 So, putting it all together:
 
-n, k, m, a = map(int, input().split())
+Testing against sample input 2.
 
-g = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, k, m, a = map(int, input_stream.readline().rstrip("\n").split())
 
-current_votes = [0] * (n +1)
+    g = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-last_time = [0] * (n +1)  # 1-based indexing
+    current_votes = [0] * (n +1)
 
-for time_step in range(a):
+    last_time = [0] * (n +1)  # 1-based indexing
 
-    c = g[time_step]
+    for time_step in range(a):
 
-    current_votes[c] +=1
+        c = g[time_step]
 
-    last_time[c] = time_step +1  # time_step is 0-based, so +1
+        current_votes[c] +=1
 
-result = []
+        last_time[c] = time_step +1  # time_step is 0-based, so +1
 
-for i in range(1, n+1):
+    result = []
 
-    # Check guaranteed (ri=1)
+    for i in range(1, n+1):
 
-    current_i = current_votes[i]
+        # Check guaranteed (ri=1)
 
-    # Check if current_i is zero and no remaining votes (m-a is zero)
+        current_i = current_votes[i]
 
-    if current_i ==0 and (m -a) ==0:
+        # Check if current_i is zero and no remaining votes (m-a is zero)
 
-        ri =3
+        if current_i ==0 and (m -a) ==0:
 
-        result.append(ri)
+            ri =3
 
-        continue
+            result.append(ri)
 
-    # Check guaranteed
+            continue
 
-    if current_i ==0:
+        # Check guaranteed
 
-        guaranteed = False
+        if current_i ==0:
 
-    else:
+            guaranteed = False
 
-        count_guaranteed =0
+        else:
 
-        for j in range(1, n+1):
+            count_guaranteed =0
 
-            if j ==i:
+            for j in range(1, n+1):
 
-                continue
+                if j ==i:
 
-            if current_votes[j] + (m -a) > current_i:
+                    continue
 
-                count_guaranteed +=1
+                if current_votes[j] + (m -a) > current_i:
 
-        guaranteed = (count_guaranteed < k)
+                    count_guaranteed +=1
 
-    # Check possible
+            guaranteed = (count_guaranteed < k)
 
-    best_votes_i = current_i + (m -a)
+        # Check possible
 
-    possible = False
-
-    if best_votes_i >0:
-
-        count_possible =0
-
-        for j in range(1, n+1):
-
-            if j ==i:
-
-                continue
-
-            j_votes = current_votes[j]
-
-            if j_votes > best_votes_i:
-
-                count_possible +=1
-
-            elif j_votes == best_votes_i:
-
-                if last_time[j] < m:
-
-                    count_possible +=1
-
-        possible = (count_possible <k)
-
-    else:
+        best_votes_i = current_i + (m -a)
 
         possible = False
 
-    # Determine ri
+        if best_votes_i >0:
 
-    if guaranteed:
+            count_possible =0
 
-        ri =1
+            for j in range(1, n+1):
 
-    elif possible:
+                if j ==i:
 
-        ri =2
+                    continue
 
-    else:
+                j_votes = current_votes[j]
 
-        ri =3
+                if j_votes > best_votes_i:
 
-    result.append(ri)
+                    count_possible +=1
 
-print(' '.join(map(str, result)))
+                elif j_votes == best_votes_i:
 
-This should handle all cases.
+                    if last_time[j] < m:
 
-Testing the second example:
+                        count_possible +=1
 
-Input:
+            possible = (count_possible <k)
 
-3 1 5 3
+        else:
 
+            possible = False
+
+        # Determine ri
+
+        if guaranteed:
+
+            ri =1
+
+        elif possible:
+
+            ri =2
+
+        else:
+
+            ri =3
+
+        result.append(ri)
+
+    print(' '.join(map(str, result)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2 5 3
 1 3 1
+""",
+            "output": \
+"""\
+1 2 2
+""",
+        }, 
+    ]
 
-current_votes: 1 has 2, 3 has1. 2 has 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-last_time: 1's last_time is3, 3's is2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-m=5, a=3 → m-a=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For candidate1:
+    print('Tests passed 😎')
 
-current_i=2.
 
-guaranteed check:
+if __name__ == '__main__':
+    test()
 
-count_guaranteed = j=2 (0+2=2 >2? No). j=3 (1+2=3>2 → yes). So count_guaranteed=1 >=1 → no. So guaranteed is false.
 
-possible:
+```
 
-best_votes_i =2+2=4.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Check j=2:0 <4 → no. j=3:1 <4 → no. So count_possible=0 <1 → possible is true. So ri=2.
-
-For candidate2:
-
-current_i=0.
-
-possible: best_votes_i=0+2=2>0.
-
-Check j=1: current_votes[j] is2. 2 ==2. last_time[j] is3 <5 → yes. So count_possible +=1. j=3:1 <2 → no. count_possible=1 >=1 → possible is false. So ri=3.
-
-For candidate3:
-
-current_i=1.
-
-guaranteed:
-
-j=1:2+2=4>1 → count_guaranteed +=1. j=2:0+2=2>1 → count_guaranteed +=1. total 2 >=1 → no.
-
-possible:
-
-best_votes_i=1+2=3.
-
-j=1:2 <3 → no. j=2:0 <3 → no. count_possible=0 <1 → possible → ri=2.
-
-So output is 2 3 2.
-
-Which is correct.
+```
 
 Third example:
 

@@ -107,35 +107,67 @@ But wait, because k*n mod10 is (k mod10) *n mod10. So yes.
 
 So the code would be:
 
-k, r = map(int, input().split())
+Testing against sample input 1.
 
-mod = k % 10
+```python
+def main(input_stream, output_stream):
+    k, r = map(int, input_stream.readline().rstrip("\n").split())
 
-for n in range(1, 11):
+    mod = k % 10
 
-    total_mod = (mod * n) %10
+    for n in range(1, 11):
 
-    if total_mod ==0 or total_mod == r:
+        total_mod = (mod * n) %10
 
-        print(n)
+        if total_mod ==0 or total_mod == r:
 
-        exit()
+            print(n, file=output_stream)
 
-So this should work.
+            return
 
-But wait, what if r is 0? Wait, the problem states that r is between 1 and 9. So no.
 
-So the code is safe.
 
-Testing the first sample input:
+def test():
+    import io
 
-k=117 mod10=7. r=3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+237 7
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-Check n from1-10:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-n=1:7*1=7 mod10=7. Not 3 or0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-n=9:7*9=63 mod10=3. So yes. Output 9.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: k=15 mod10=5. r=2. n=2:5*2=10 mod10=0. So yes.
 

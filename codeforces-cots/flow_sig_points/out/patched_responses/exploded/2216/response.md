@@ -243,138 +243,299 @@ So first, precompute the prefix hash array and the power array.
 
 In Python:
 
-mod = 10**18 + 3
-base = 911382629
+Testing against sample input 1.
 
-t = input().strip()
-sbegin = input().strip()
-send = input().strip()
+```python
+def main(input_stream, output_stream):
+    mod = 10**18 + 3
+    base = 911382629
 
-len_t = len(t)
-len_sbegin = len(sbegin)
-len_send = len(send)
+    t = input_stream.readline().rstrip("\n").strip()
+    sbegin = input_stream.readline().rstrip("\n").strip()
+    send = input_stream.readline().rstrip("\n").strip()
 
-# Precompute starts
-starts = []
-for i in range(len_t - len_sbegin + 1):
-    if t[i:i+len_sbegin] == sbegin:
-        starts.append(i)
+    len_t = len(t)
+    len_sbegin = len(sbegin)
+    len_send = len(send)
 
-# Precompute ends
-ends = []
-for j in range(len_send -1, len_t):
-    start = j - len_send +1
-    if t[start:j+1] == send:
-        ends.append(j)
+    # Precompute starts
+    starts = []
+    for i in range(len_t - len_sbegin + 1):
+        if t[i:i+len_sbegin] == sbegin:
+            starts.append(i)
 
-# Precompute prefix hashes and power array
-prefix_hash = [0]*(len_t +1)
-power = [1]*(len_t +1)
-for i in range(len_t):
-    prefix_hash[i+1] = (prefix_hash[i] * base + ord(t[i])) % mod
-    power[i+1] = (power[i] * base) % mod
+    # Precompute ends
+    ends = []
+    for j in range(len_send -1, len_t):
+        start = j - len_send +1
+        if t[start:j+1] == send:
+            ends.append(j)
 
-def get_hash(l, r):
-    # substring t[l..r] (0-based, inclusive)
-    length = r - l +1
-    h = (prefix_hash[r+1] - prefix_hash[l] * power[length]) % mod
-    return h
+    # Precompute prefix hashes and power array
+    prefix_hash = [0]*(len_t +1)
+    power = [1]*(len_t +1)
+    for i in range(len_t):
+        prefix_hash[i+1] = (prefix_hash[i] * base + ord(t[i])) % mod
+        power[i+1] = (power[i] * base) % mod
 
-unique_hashes = set()
+    def get_hash(l, r):
+        # substring t[l..r] (0-based, inclusive)
+        length = r - l +1
+        h = (prefix_hash[r+1] - prefix_hash[l] * power[length]) % mod
+        return h
 
-for i in starts:
-    for j in ends:
-        s_start = j - len_send +1
-        if s_start >= i:
-            current_hash = get_hash(i, j)
-            unique_hashes.add(current_hash)
+    unique_hashes = set()
 
-print(len(unique_hashes))
+    for i in starts:
+        for j in ends:
+            s_start = j - len_send +1
+            if s_start >= i:
+                current_hash = get_hash(i, j)
+                unique_hashes.add(current_hash)
 
-Wait, but what if there's a hash collision? For example, two different substrings have the same hash. To mitigate this, perhaps use a tuple of two different hash functions. But in practice, with a large mod, the probability is low, but for the problem, it's possible. However, given the time and code constraints, perhaps this is acceptable. Alternatively, we can compute two different hashes and store tuples.
+    print(len(unique_hashes), file=output_stream)
 
-But for the problem's constraints, maybe using a single hash is sufficient.
 
-But let's think: what's the maximum number of possible substrings? For a string of length 2000, there are 2000*2001/2 = ~2e6 possible substrings. So using a 64-bit mod (like 1e18+3) gives a collision probability of about 2e6 / 1e18, which is negligible. So the chance of collision is extremely low, and the problem likely doesn't have test cases designed to cause collisions. So using a single hash is acceptable.
 
-So the code above should work.
+def test():
+    import io
 
-But let's test the examples.
-
-First example:
-
-Input:
-round
-ro
-ou
-
-t is 'round' (length 5)
-sbegin is 'ro' (len 2)
-send is 'ou' (len 2)
-
-starts: positions where 'ro' occurs. In 'round', 'ro' is at index 0. So starts = [0].
-
-ends: positions where 'ou' ends. 'ou' is in positions 1-2 (since j starts from 1 (len_send-1=1), j can be 1, 2, ...,4. The substring from j -1 to j is:
-
-For j=1: positions 0-1: 'ro' != 'ou'
-
-j=2: positions 1-2: 'ou' → yes. So ends has 2.
-
-j=3: 2-3: 'un' → no.
-
-j=4: 3-4: 'nd' → no.
-
-So ends = [2].
-
-Now, for i=0 and j=2:
-
-s_start = 2 -2 +1 =1. 1 >=0 → valid.
-
-The substring is 0-2 → 'rou', which starts with 'ro' and ends with 'ou'. So this is valid. The hash is computed, added to the set. So the count is 1. Which matches the first example.
-
-Second example:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 codeforces
 code
 forca
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-t is 'codeforces' (length 10)
-sbegin is 'code' (len 4)
-send is 'forca' (len 5). But len_send is 5, so the string must be at least 5 characters. But the entire t is 10 characters. So for ends, j ranges from 4 (5-1) to 9. For each j, the substring j-4 to j must be 'forca'. But 'forca' is length 5, and in 'codeforces', there's no such substring. So ends is empty. So the answer is 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Third example:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    mod = 10**18 + 3
+    base = 911382629
+
+    t = input_stream.readline().rstrip("\n").strip()
+    sbegin = input_stream.readline().rstrip("\n").strip()
+    send = input_stream.readline().rstrip("\n").strip()
+
+    len_t = len(t)
+    len_sbegin = len(sbegin)
+    len_send = len(send)
+
+    # Precompute starts
+    starts = []
+    for i in range(len_t - len_sbegin + 1):
+        if t[i:i+len_sbegin] == sbegin:
+            starts.append(i)
+
+    # Precompute ends
+    ends = []
+    for j in range(len_send -1, len_t):
+        start = j - len_send +1
+        if t[start:j+1] == send:
+            ends.append(j)
+
+    # Precompute prefix hashes and power array
+    prefix_hash = [0]*(len_t +1)
+    power = [1]*(len_t +1)
+    for i in range(len_t):
+        prefix_hash[i+1] = (prefix_hash[i] * base + ord(t[i])) % mod
+        power[i+1] = (power[i] * base) % mod
+
+    def get_hash(l, r):
+        # substring t[l..r] (0-based, inclusive)
+        length = r - l +1
+        h = (prefix_hash[r+1] - prefix_hash[l] * power[length]) % mod
+        return h
+
+    unique_hashes = set()
+
+    for i in starts:
+        for j in ends:
+            s_start = j - len_send +1
+            if s_start >= i:
+                current_hash = get_hash(i, j)
+                unique_hashes.add(current_hash)
+
+    print(len(unique_hashes), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 abababab
 a
 b
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-sbegin is 'a' (len 1), send is 'b' (len 1).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-starts are all positions where 'a' occurs. The string is 'abababab' → indexes 0, 2, 4, 6.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-ends are all positions where 'b' occurs. indexes 1,3,5,7.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For each i in starts and j in ends where j >= i (since len_send is 1, j >= i is required (s_start = j - 0 =j >=i → j >=i).
+    print('Tests passed 😎')
 
-So for starts [0,2,4,6] and ends [1,3,5,7], the valid pairs are:
 
-i=0, j=1,3,5,7 → all j >=0. The substrings are:
+if __name__ == '__main__':
+    test()
 
-0-1 → 'ab', 0-3 → 'abab', 0-5 → 'ababab', 0-7 → 'abababab'.
 
-i=2, j must be >=2. So j=3,5,7. Substrings: 2-3 → 'ab', 2-5 → 'abab', 2-7 → 'ababab'.
+```
 
-But wait, for j=3: substring from 2 to 3 is 'ab'.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=4, j >=4: j=5,7. Substrings 4-5 'ab', 4-7 'abab'.
+```
 
-i=6, j >=6: j=7. Substring 6-7 'ab'.
+Testing against sample input 3.
 
-But the distinct substrings are:
+```python
+def main(input_stream, output_stream):
+    mod = 10**18 + 3
+    base = 911382629
 
-'ab' (appears multiple times, but only once in the set), 'abab' (length 4), 'ababab' (length 6), 'abababab' (length 8). So total 4. Which matches the example.
+    t = input_stream.readline().rstrip("\n").strip()
+    sbegin = input_stream.readline().rstrip("\n").strip()
+    send = input_stream.readline().rstrip("\n").strip()
+
+    len_t = len(t)
+    len_sbegin = len(sbegin)
+    len_send = len(send)
+
+    # Precompute starts
+    starts = []
+    for i in range(len_t - len_sbegin + 1):
+        if t[i:i+len_sbegin] == sbegin:
+            starts.append(i)
+
+    # Precompute ends
+    ends = []
+    for j in range(len_send -1, len_t):
+        start = j - len_send +1
+        if t[start:j+1] == send:
+            ends.append(j)
+
+    # Precompute prefix hashes and power array
+    prefix_hash = [0]*(len_t +1)
+    power = [1]*(len_t +1)
+    for i in range(len_t):
+        prefix_hash[i+1] = (prefix_hash[i] * base + ord(t[i])) % mod
+        power[i+1] = (power[i] * base) % mod
+
+    def get_hash(l, r):
+        # substring t[l..r] (0-based, inclusive)
+        length = r - l +1
+        h = (prefix_hash[r+1] - prefix_hash[l] * power[length]) % mod
+        return h
+
+    unique_hashes = set()
+
+    for i in starts:
+        for j in ends:
+            s_start = j - len_send +1
+            if s_start >= i:
+                current_hash = get_hash(i, j)
+                unique_hashes.add(current_hash)
+
+    print(len(unique_hashes), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+aba
+ab
+ba
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 But according to the code, for each (i,j) pair, the code computes the hash of the substring t[i..j]. For example, when i=0 and j=1: t[0:1+1] → 'ab' → hash is stored. Then, when i=2 and j=3: t[2:4] → 'ab' → same hash. So in the set, 'ab' is added once. But according to the problem statement, the distinct substrings are considered, so the code's approach counts this as one. But in the third example, the answer is 4. Wait, but according to the example note, the answer is four: 'ab', 'abab', 'ababab', 'abababab'.
 

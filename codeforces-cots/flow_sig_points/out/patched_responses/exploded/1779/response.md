@@ -303,81 +303,109 @@ Then compute the max.
 
 So, code:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-degrees = [0] * (n + 1)
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-lower_neighbors = [[] for _ in range(n + 1)]
+    degrees = [0] * (n + 1)
 
-for _ in range(m):
+    lower_neighbors = [[] for _ in range(n + 1)]
 
-    u, v = map(int, input().split())
+    for _ in range(m):
 
-    degrees[u] += 1
+        u, v = map(int, input_stream.readline().rstrip("\n").split())
 
-    degrees[v] += 1
+        degrees[u] += 1
 
-    if u < v:
+        degrees[v] += 1
 
-        lower_neighbors[v].append(u)
+        if u < v:
 
-    elif v < u:
+            lower_neighbors[v].append(u)
 
-        lower_neighbors[u].append(v)
+        elif v < u:
 
-max_len = [1] * (n + 1)
+            lower_neighbors[u].append(v)
 
-for u in range(1, n + 1):
+    max_len = [1] * (n + 1)
 
-    current_max = 0
+    for u in range(1, n + 1):
 
-    for v in lower_neighbors[u]:
+        current_max = 0
 
-        if max_len[v] > current_max:
+        for v in lower_neighbors[u]:
 
-            current_max = max_len[v]
+            if max_len[v] > current_max:
 
-    if current_max != 0:
+                current_max = max_len[v]
 
-        max_len[u] = current_max + 1
+        if current_max != 0:
 
-max_beauty = 0
+            max_len[u] = current_max + 1
 
-for u in range(1, n + 1):
+    max_beauty = 0
 
-    beauty = max_len[u] * degrees[u]
+    for u in range(1, n + 1):
 
-    if beauty > max_beauty:
+        beauty = max_len[u] * degrees[u]
 
-        max_beauty = beauty
+        if beauty > max_beauty:
 
-print(max_beauty)
+            max_beauty = beauty
 
-This should work.
+    print(max_beauty, file=output_stream)
 
-Testing the first sample:
 
-Sample input 1:
 
-8 6
+def test():
+    import io
 
-4 5
-
-3 5
-
-2 5
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 6
 1 2
+1 3
+1 4
+2 3
+2 4
+3 4
+""",
+            "output": \
+"""\
+12
+""",
+        }, 
+    ]
 
-2 8
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-6 7
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-lower_neighbors for 5 is [4,3,2]. So when u=5 is processed, the max of their len is 2 (from u=2), len[5] becomes 3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Yes.
+    print('Tests passed 😎')
 
-Sample output is 9.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

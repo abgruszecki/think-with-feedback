@@ -1582,111 +1582,150 @@ For each sensor (xi, yi):
 
       Now, the code:
 
-      import math
+Testing against sample input 1.
 
-      def main():
-          import sys
-          input = sys.stdin.read().split()
-          idx = 0
-          n = int(input[idx]); idx +=1
-          m = int(input[idx]); idx +=1
-          k = int(input[idx]); idx +=1
-          T = (n * m) // math.gcd(n, m)
-          for _ in range(k):
-              xi = int(input[idx]); idx +=1
-              yi = int(input[idx]); idx +=1
-              candidates = []
-              # Case 1: even x, even y
-              x1 = xi
-              y1 = yi
-              if x1 == y1:
-                  t = x1
-                  # Check a and b
-                  a = (t - xi) // n
-                  if (t - xi) % n == 0 and a >=0 and a % 2 == 0:
-                      b = (t - yi) // m
-                      if (t - yi) % m ==0 and b >=0 and b %2 ==0:
-                          candidates.append(t)
-              # Case 2: even x, odd y
-              x2 = xi
-              y2 = m - yi
-              if x2 == y2:
-                  t = x2
-                  a = (t - xi) // n
-                  if (t - xi) % n ==0 and a >=0 and a %2 ==0:
-                      b_val = t - (m - yi)
-                      if b_val <0:
-                          continue
-                      b = b_val // m
-                      if b_val % m ==0 and b >=0 and b %2 ==1:
-                          candidates.append(t)
-              # Case 3: odd x, even y
-              x3 = n - xi
-              y3 = yi
-              if x3 == y3:
-                  t = x3
-                  a_val = t - (n - xi)
-                  if a_val <0:
-                      continue
-                  a = a_val // n
-                  if a_val %n ==0 and a >=0 and a %2 ==1:
-                      b_val = t - yi
-                      if b_val <0:
-                          continue
-                      b = b_val // m
-                      if b_val %m ==0 and b >=0 and b %2 ==0:
-                          candidates.append(t)
-              # Case4: odd x, odd y
-              x4 = n - xi
-              y4 = m - yi
-              if x4 == y4:
-                  t = x4
-                  a_val = t - (n - xi)
-                  if a_val <0:
-                      continue
-                  a = a_val // n
-                  if a_val %n ==0 and a >=0 and a %2 ==1:
-                      b_val = t - (m - yi)
-                      if b_val <0:
-                          continue
-                      b = b_val // m
-                      if b_val %m ==0 and b >=0 and b %2 ==1:
-                          candidates.append(t)
-              # Find minimal valid t < T
-              valid = [t for t in candidates if t < T]
-              if valid:
-                  print(min(valid))
-              else:
-                  print(-1)
+```python
+import math
 
-      if __name__ == "__main__":
-          main()
 
-      Now, let's test this code with the first sample:
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    idx = 0
+    n = int(input[idx]); idx +=1
+    m = int(input[idx]); idx +=1
+    k = int(input[idx]); idx +=1
+    T = (n * m) // math.gcd(n, m)
+    for _ in range(k):
+        xi = int(input[idx]); idx +=1
+        yi = int(input[idx]); idx +=1
+        candidates = []
+        # Case 1: even x, even y
+        x1 = xi
+        y1 = yi
+        if x1 == y1:
+            t = x1
+            # Check a and b
+            a = (t - xi) // n
+            if (t - xi) % n == 0 and a >=0 and a % 2 == 0:
+                b = (t - yi) // m
+                if (t - yi) % m ==0 and b >=0 and b %2 ==0:
+                    candidates.append(t)
+        # Case 2: even x, odd y
+        x2 = xi
+        y2 = m - yi
+        if x2 == y2:
+            t = x2
+            a = (t - xi) // n
+            if (t - xi) % n ==0 and a >=0 and a %2 ==0:
+                b_val = t - (m - yi)
+                if b_val <0:
+                    continue
+                b = b_val // m
+                if b_val % m ==0 and b >=0 and b %2 ==1:
+                    candidates.append(t)
+        # Case 3: odd x, even y
+        x3 = n - xi
+        y3 = yi
+        if x3 == y3:
+            t = x3
+            a_val = t - (n - xi)
+            if a_val <0:
+                continue
+            a = a_val // n
+            if a_val %n ==0 and a >=0 and a %2 ==1:
+                b_val = t - yi
+                if b_val <0:
+                    continue
+                b = b_val // m
+                if b_val %m ==0 and b >=0 and b %2 ==0:
+                    candidates.append(t)
+        # Case4: odd x, odd y
+        x4 = n - xi
+        y4 = m - yi
+        if x4 == y4:
+            t = x4
+            a_val = t - (n - xi)
+            if a_val <0:
+                continue
+            a = a_val // n
+            if a_val %n ==0 and a >=0 and a %2 ==1:
+                b_val = t - (m - yi)
+                if b_val <0:
+                    continue
+                b = b_val // m
+                if b_val %m ==0 and b >=0 and b %2 ==1:
+                    candidates.append(t)
+        # Find minimal valid t < T
+        valid = [t for t in candidates if t < T]
+        if valid:
+            print(min(valid), file=output_stream)
+        else:
+            print(-1, file=output_stream)
 
-      Input:
 
-      3 3 4
 
-      1 1
+def test():
+    import io
 
-      1 2
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 4 6
+1 1
+2 1
+1 2
+2 2
+1 3
+2 3
+""",
+            "output": \
+"""\
+1
+-1
+-1
+2
+5
+-1
+""",
+        }, 
+    ]
 
-      2 1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-      2 2
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-      Output:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-      1
+    print('Tests passed 😎')
 
-      -1
 
-      -1
+if __name__ == '__main__':
+    test()
 
-      2
 
-      Let's see for the fourth sensor (2,2):
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 123, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 116, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '1\n-1\n-1\n2\n5\n-1'
+Got: '1\n-1\n-1\n2\n-1\n-1'
+
+```
 
       case1: x1=2, y1=2. t=2.
 

@@ -1008,163 +1008,443 @@ But in Python, splitting a string is O(n) time, which is acceptable for 1e6 char
 
 So the code steps:
 
-s = input().strip()
+Testing against sample input 1.
 
-dot_pos = s.find('.')
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-if dot_pos == -1:
+    dot_pos = s.find('.')
 
-    integer_part = s
+    if dot_pos == -1:
 
-    fractional_part = ''
+        integer_part = s
 
-else:
-
-    integer_part = s[:dot_pos]
-
-    fractional_part = s[dot_pos+1:]
-
-# process integer_part
-
-new_integer = integer_part.lstrip('0')
-
-# process fractional_part
-
-new_fraction = fractional_part.rstrip('0') if fractional_part else ''
-
-# combined_digits
-
-combined = new_integer + new_fraction
-
-# find first non-zero in combined
-
-if not combined:
-
-    # impossible as x is positive
-
-    print(0)
-
-else:
-
-    first_non_zero = None
-
-    for i, c in enumerate(combined):
-
-        if c != '0':
-
-            first_non_zero = i
-
-            break
-
-    if first_non_zero is None:
-
-        # all zeros, but x is positive, so impossible
-
-        print(0)
+        fractional_part = ''
 
     else:
 
-        f = first_non_zero
+        integer_part = s[:dot_pos]
 
-        significant_digits = combined[f:]
+        fractional_part = s[dot_pos+1:]
 
-        # form a_str
+    # process integer_part
 
-        if len(significant_digits) == 1:
+    new_integer = integer_part.lstrip('0')
 
-            a_str = significant_digits
+    # process fractional_part
+
+    new_fraction = fractional_part.rstrip('0') if fractional_part else ''
+
+    # combined_digits
+
+    combined = new_integer + new_fraction
+
+    # find first non-zero in combined
+
+    if not combined:
+
+        # impossible as x is positive
+
+        print(0, file=output_stream)
+
+    else:
+
+        first_non_zero = None
+
+        for i, c in enumerate(combined):
+
+            if c != '0':
+
+                first_non_zero = i
+
+                break
+
+        if first_non_zero is None:
+
+            # all zeros, but x is positive, so impossible
+
+            print(0, file=output_stream)
 
         else:
 
-            rest = significant_digits[1:].rstrip('0')
+            f = first_non_zero
 
-            if rest:
+            significant_digits = combined[f:]
 
-                a_str = significant_digits[0] + '.' + rest
+            # form a_str
+
+            if len(significant_digits) == 1:
+
+                a_str = significant_digits
 
             else:
 
-                a_str = significant_digits[0]
+                rest = significant_digits[1:].rstrip('0')
 
-        # compute exponent
+                if rest:
 
-        if new_integer:
+                    a_str = significant_digits[0] + '.' + rest
 
-            exponent = len(new_integer) - 1
+                else:
+
+                    a_str = significant_digits[0]
+
+            # compute exponent
+
+            if new_integer:
+
+                exponent = len(new_integer) - 1
+
+            else:
+
+                exponent = -(f + 1)
+
+            # output
+
+            if exponent != 0:
+
+                print(f"{a_str}E{exponent}", file=output_stream)
+
+            else:
+
+                print(a_str, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+01.23400
+""",
+            "output": \
+"""\
+1.234
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    dot_pos = s.find('.')
+
+    if dot_pos == -1:
+
+        integer_part = s
+
+        fractional_part = ''
+
+    else:
+
+        integer_part = s[:dot_pos]
+
+        fractional_part = s[dot_pos+1:]
+
+    # process integer_part
+
+    new_integer = integer_part.lstrip('0')
+
+    # process fractional_part
+
+    new_fraction = fractional_part.rstrip('0') if fractional_part else ''
+
+    # combined_digits
+
+    combined = new_integer + new_fraction
+
+    # find first non-zero in combined
+
+    if not combined:
+
+        # impossible as x is positive
+
+        print(0, file=output_stream)
+
+    else:
+
+        first_non_zero = None
+
+        for i, c in enumerate(combined):
+
+            if c != '0':
+
+                first_non_zero = i
+
+                break
+
+        if first_non_zero is None:
+
+            # all zeros, but x is positive, so impossible
+
+            print(0, file=output_stream)
 
         else:
 
-            exponent = -(f + 1)
+            f = first_non_zero
 
-        # output
+            significant_digits = combined[f:]
 
-        if exponent != 0:
+            # form a_str
 
-            print(f"{a_str}E{exponent}")
+            if len(significant_digits) == 1:
+
+                a_str = significant_digits
+
+            else:
+
+                rest = significant_digits[1:].rstrip('0')
+
+                if rest:
+
+                    a_str = significant_digits[0] + '.' + rest
+
+                else:
+
+                    a_str = significant_digits[0]
+
+            # compute exponent
+
+            if new_integer:
+
+                exponent = len(new_integer) - 1
+
+            else:
+
+                exponent = -(f + 1)
+
+            # output
+
+            if exponent != 0:
+
+                print(f"{a_str}E{exponent}", file=output_stream)
+
+            else:
+
+                print(a_str, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+.100
+""",
+            "output": \
+"""\
+1E-1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    dot_pos = s.find('.')
+
+    if dot_pos == -1:
+
+        integer_part = s
+
+        fractional_part = ''
+
+    else:
+
+        integer_part = s[:dot_pos]
+
+        fractional_part = s[dot_pos+1:]
+
+    # process integer_part
+
+    new_integer = integer_part.lstrip('0')
+
+    # process fractional_part
+
+    new_fraction = fractional_part.rstrip('0') if fractional_part else ''
+
+    # combined_digits
+
+    combined = new_integer + new_fraction
+
+    # find first non-zero in combined
+
+    if not combined:
+
+        # impossible as x is positive
+
+        print(0, file=output_stream)
+
+    else:
+
+        first_non_zero = None
+
+        for i, c in enumerate(combined):
+
+            if c != '0':
+
+                first_non_zero = i
+
+                break
+
+        if first_non_zero is None:
+
+            # all zeros, but x is positive, so impossible
+
+            print(0, file=output_stream)
 
         else:
 
-            print(a_str)
+            f = first_non_zero
 
-But let's test this code with the examples.
+            significant_digits = combined[f:]
 
-Example 1: input '16' → integer_part '16', fractional_part ''.
+            # form a_str
 
-new_integer = '16' (stripped of leading zeros → same).
+            if len(significant_digits) == 1:
 
-new_fraction is ''.
+                a_str = significant_digits
 
-combined is '16'.
+            else:
 
-f is 0.
+                rest = significant_digits[1:].rstrip('0')
 
-significant_digits is '16'.
+                if rest:
 
-a_str: len is 2.
+                    a_str = significant_digits[0] + '.' + rest
 
-rest is '6' (since after stripping trailing zeros from '16'[1:], which is '6' → no zeros to strip. So rest is '6' → a_str is '1.6'.
+                else:
 
-exponent: new_integer is '16' → len is 2. exponent is 2-1=1.
+                    a_str = significant_digits[0]
 
-output is '1.6E1' → correct.
+            # compute exponent
 
-Example 2: input '01.23400'.
+            if new_integer:
 
-integer_part is '01', fractional_part is '23400'.
+                exponent = len(new_integer) - 1
 
-new_integer is '1' (stripped of leading zeros).
+            else:
 
-new_fraction is '234' (stripped of trailing zeros).
+                exponent = -(f + 1)
 
-combined is '1' + '234' → '1234'.
+            # output
 
-f is 0.
+            if exponent != 0:
 
-significant_digits is '1234' → len 4.
+                print(f"{a_str}E{exponent}", file=output_stream)
 
-rest is '234' → a_str '1.234'.
+            else:
 
-exponent: new_integer is '1' → len 1 → exponent 0.
+                print(a_str, file=output_stream)
 
-output '1.234' → correct.
 
-Example 3: input '.100'.
 
-integer_part is '', fractional_part is '100'.
+def test():
+    import io
 
-new_integer is ''.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+100.
+""",
+            "output": \
+"""\
+1E2
+""",
+        }, 
+    ]
 
-new_fraction is '1' (stripped of trailing zeros).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-combined is '' + '1' → '1'.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-f is 0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-exponent: new_integer is empty → -(0 +1) → -1.
+    print('Tests passed 😎')
 
-a_str is '1'.
 
-output '1E-1' → correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Example 4: input '100.' → integer_part '100', fractional_part is ''.
 

@@ -615,69 +615,93 @@ After all tags are processed, sort the results and print them space-separated.
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import sys
 import re
 
-s = ''.join([input().strip() for _ in range(10)]).strip()
-tags = re.findall(r'<[^>]+>', s)
 
-tag_stack = []
-table_stack = []
-results = []
+def main(input_stream, output_stream):
+    s = ''.join([input_stream.readline().rstrip("\n").strip() for _ in range(10)]).strip()
+    tags = re.findall(r'<[^>]+>', s)
 
-for tag in tags:
-    if tag.startswith('</'):
-        name = tag[2:-1]
-        if name == 'table':
-            if table_stack:
-                results.append(table_stack.pop())
-        if tag_stack:
-            tag_stack.pop()
-    else:
-        name = tag[1:-1]
-        tag_stack.append(name)
-        if name == 'table':
-            table_stack.append(0)
-        elif name == 'td':
-            if len(tag_stack) >=3 and tag_stack[-2] == 'tr' and tag_stack[-3] == 'table' and table_stack:
-                table_stack[-1] += 1
+    tag_stack = []
+    table_stack = []
+    results = []
 
-results.sort()
-print(' '.join(map(str, results)))
+    for tag in tags:
+        if tag.startswith('</'):
+            name = tag[2:-1]
+            if name == 'table':
+                if table_stack:
+                    results.append(table_stack.pop())
+            if tag_stack:
+                tag_stack.pop()
+        else:
+            name = tag[1:-1]
+            tag_stack.append(name)
+            if name == 'table':
+                table_stack.append(0)
+            elif name == 'td':
+                if len(tag_stack) >=3 and tag_stack[-2] == 'tr' and tag_stack[-3] == 'table' and table_stack:
+                    table_stack[-1] += 1
 
-Wait, but in the code above, when a closing tag is processed, the code pops from tag_stack even if it's not the same as the name. But since the input is valid according to the problem statement, the stack is properly formed. So the code can safely pop.
+    results.sort()
+    print(' '.join(map(str, results)), file=output_stream)
 
-Yes. Because the input is guaranteed to be valid. So the code can process each closing tag by popping the tag_stack once.
 
-Testing with the sample inputs:
 
-Sample 1:
+def test():
+    import io
 
-Input is one line: "<table><tr><td></td></tr></table>"
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+<table>
+<tr>
+<td>
+<table><tr><td></td></tr><tr><td></
+td
+></tr><tr
+><td></td></tr><tr><td></td></tr></table>
+</td>
+</tr>
+</table>
+""",
+            "output": \
+"""\
+1 4
+""",
+        }, 
+    ]
 
-tags = ['<table>', '<tr>', '<td>', '</td>', '</tr>', '</table>']
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-- '<table>': tag_stack ['table'], table_stack [0]
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-- '<tr>': tag_stack ['table', 'tr']
+    print('Tests passed 😎')
 
-- '<td>': tag_stack ['table', 'tr', 'td']. Check len >=3, yes. tag_stack[-2] is 'tr', -3 is 'table'. So table_stack[-1] +=1 → 0 → 1.
 
-- '</td>': closing. Pop tag_stack → ['table', 'tr']
+if __name__ == '__main__':
+    test()
 
-- '</tr>': closing. Pop → ['table']
 
-- '</table>': closing. Pop tag_stack (empty). Append table_stack.pop() (0 → but wait, no.
+```
 
-Wait, wait. When processing the closing </table>:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-The code checks if name is 'table', then appends the popped value from table_stack. Since the table_stack has [0] (the outer table's counter was pushed as 0, then incremented to 1 when the td was opened).
-
-Wait, no. When the outer table is opened, table_stack is [0]. Then, when the <td> is processed, table_stack[-1] is incremented to 1. Then, when </table> is processed, the code appends table_stack.pop() → which is 1. So results will have [1]. Then sorted is [1]. So code works.
-
-Yes. So code is correct.
+```
 
 Sample 2:
 

@@ -154,63 +154,99 @@ Then m lines of fruit names.
 
 So:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-prices = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-from collections import defaultdict
+    prices = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-counts = defaultdict(int)
+    from collections import defaultdict
 
-for _ in range(m):
+    counts = defaultdict(int)
 
-    fruit = input().strip()
+    for _ in range(m):
 
-    counts[fruit] +=1
+        fruit = input_stream.readline().rstrip("\n").strip()
 
-sorted_counts = sorted(counts.values(), reverse=True)
+        counts[fruit] +=1
 
-k = len(sorted_counts)
+    sorted_counts = sorted(counts.values(), reverse=True)
 
-# Compute min sum
+    k = len(sorted_counts)
 
-prices_sorted_asc = sorted(prices)
+    # Compute min sum
 
-min_sum = 0
+    prices_sorted_asc = sorted(prices)
 
-for i in range(k):
+    min_sum = 0
 
-    min_sum += sorted_counts[i] * prices_sorted_asc[i]
+    for i in range(k):
 
-# Compute max sum
+        min_sum += sorted_counts[i] * prices_sorted_asc[i]
 
-prices_sorted_desc = sorted(prices, reverse=True)
+    # Compute max sum
 
-max_sum = 0
+    prices_sorted_desc = sorted(prices, reverse=True)
 
-for i in range(k):
+    max_sum = 0
 
-    max_sum += sorted_counts[i] * prices_sorted_desc[i]
+    for i in range(k):
 
-print(min_sum, max_sum)
+        max_sum += sorted_counts[i] * prices_sorted_desc[i]
 
-Wait, but the prices list has n elements, and k can be up to n (since the problem says the number of distinct fruits in Valera's list is <=n). So when k is 5, and prices has 5 elements, the code takes the first 5 prices. Which is correct.
+    print(min_sum, max_sum, file=output_stream)
 
-But wait, in the case where k is less than n, we have to take the first k elements of the sorted prices. Because the other prices are assigned to fruits not in Valera's list. So, yes. So the code is correct.
 
-Testing the first sample:
 
-prices [4,2,1,10,5]
+def test():
+    import io
 
-sorted asc: [1,2,4,5,10]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 5
+3 5 1 6 8 1
+peach
+grapefruit
+banana
+orange
+orange
+""",
+            "output": \
+"""\
+11 30
+""",
+        }, 
+    ]
 
-sorted_counts is [1,1,1] (k=3)
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-selected_prices for min: 1,2,4.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sum is 7.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Yes.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example:
 

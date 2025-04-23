@@ -461,51 +461,161 @@ count +=1
 
 So the code would be:
 
-digit_masks = [63,6,91,79,102,109,125,7,127,111]
+Testing against sample input 1.
 
-n = input().strip()
+```python
+def main(input_stream, output_stream):
+    digit_masks = [63,6,91,79,102,109,125,7,127,111]
 
-n1 = int(n[0])
+    n = input_stream.readline().rstrip("\n").strip()
 
-n2 = int(n[1])
+    n1 = int(n[0])
 
-mask1 = digit_masks[n1]
+    n2 = int(n[1])
 
-mask2 = digit_masks[n2]
+    mask1 = digit_masks[n1]
 
-count =0
+    mask2 = digit_masks[n2]
 
-for x in range(100):
+    count =0
 
-    xt = x //10
+    for x in range(100):
 
-    xu = x %10
+        xt = x //10
 
-    mxt = digit_masks[xt]
+        xu = x %10
 
-    mxu = digit_masks[xu]
+        mxt = digit_masks[xt]
 
-    if (mxt & mask1) == mask1 and (mxu & mask2) == mask2:
+        mxu = digit_masks[xu]
 
-        count +=1
+        if (mxt & mask1) == mask1 and (mxu & mask2) == mask2:
 
-print(count)
+            count +=1
 
-This should work.
+    print(count, file=output_stream)
 
-Testing the first example:
 
-Input 89 → n1=8 (mask127), n2=9 (mask111).
 
-For x in 0..99:
+def test():
+    import io
 
-Only x_tens that is 8 (mask127) will satisfy (127 &127) ==127. x_units must be 8 or9.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+00
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-So count is 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Second example: input 00 → mask1=63 (digit0), mask2=63. x_tens can be 0 or8. x_units same. So 2*2=4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    digit_masks = [63,6,91,79,102,109,125,7,127,111]
+
+    n = input_stream.readline().rstrip("\n").strip()
+
+    n1 = int(n[0])
+
+    n2 = int(n[1])
+
+    mask1 = digit_masks[n1]
+
+    mask2 = digit_masks[n2]
+
+    count =0
+
+    for x in range(100):
+
+        xt = x //10
+
+        xu = x %10
+
+        mxt = digit_masks[xt]
+
+        mxu = digit_masks[xu]
+
+        if (mxt & mask1) == mask1 and (mxu & mask2) == mask2:
+
+            count +=1
+
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+73
+""",
+            "output": \
+"""\
+15
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: 15 possibilities.
 

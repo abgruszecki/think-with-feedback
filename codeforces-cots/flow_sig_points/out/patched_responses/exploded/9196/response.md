@@ -183,47 +183,83 @@ Now, the code needs to read the input correctly.
 
 In Python, the code would be:
 
+Testing against sample input 1.
+
+```python
 from collections import Counter
 
-n, k = map(int, input().split())
 
-s = input().strip()
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-counts = Counter(s)
+    s = input_stream.readline().rstrip("\n").strip()
 
-freqs = sorted(counts.values(), reverse=True)
+    counts = Counter(s)
 
-total = 0
+    freqs = sorted(counts.values(), reverse=True)
 
-remaining = k
+    total = 0
 
-for f in freqs:
+    remaining = k
 
-    take = min(f, remaining)
+    for f in freqs:
 
-    total += take * take
+        take = min(f, remaining)
 
-    remaining -= take
+        total += take * take
 
-    if remaining ==0:
+        remaining -= take
 
-        break
+        if remaining ==0:
 
-print(total)
+            break
 
-Yes.
+    print(total, file=output_stream)
 
-But wait, what if the sum of all possible letters is less than k? Wait, the problem says that k is between 1 and n. So sum of all letters is n, and since k <=n, remaining would reach zero before or exactly when the sum is k.
 
-So the code is correct.
 
-Testing the first sample input:
+def test():
+    import io
 
-counts are D:9, F:4, Z:2. sorted as 9,4,2. remaining starts at 10.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 4
+YJSNPI
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-First iteration: take 9. total 81. remaining 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Second iteration: take min(4,1)=1. total 82. remaining 0. break. So output 82.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample input: counts are all 1. sorted as [1,1,1,1,1,1]. k=4. take 1,1,1,1. sum 4.
 

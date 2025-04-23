@@ -620,63 +620,114 @@ for (s, d) in current_states:
 
 print(max_distance)
 
-This code should work. Let's test with the first example.
+Testing against sample input 1.
 
-Example 1:
+```python
+def main(input_stream, output_stream):
+    commands = input_stream.readline().rstrip("\n").strip()
+    n = int(input_stream.readline().rstrip("\n"))
 
-Input: FT, n=1.
+    current_states = {(0, 1): (0, 0)}
 
-Commands are 'F', 'T'.
+    for cmd in commands:
+        next_states = {}
+        for (s, d) in current_states:
+            min_p, max_p = current_states[(s, d)]
+            
+            # Option 1: do not flip the current command
+            if cmd == 'F':
+                new_d = d
+                new_min = min_p + d
+                new_max = max_p + d
+            else:
+                new_d = -d
+                new_min = min_p
+                new_max = max_p
+            key = (s, new_d)
+            if key in next_states:
+                existing_min, existing_max = next_states[key]
+                new_min_combined = min(existing_min, new_min)
+                new_max_combined = max(existing_max, new_max)
+                next_states[key] = (new_min_combined, new_max_combined)
+            else:
+                next_states[key] = (new_min, new_max)
+            
+            # Option 2: flip the current command if possible
+            if s < n:
+                new_s = s + 1
+                flipped_cmd = 'T' if cmd == 'F' else 'F'
+                if flipped_cmd == 'F':
+                    new_d_flipped = d
+                    new_min_flipped = min_p + d
+                    new_max_flipped = max_p + d
+                else:
+                    new_d_flipped = -d
+                    new_min_flipped = min_p
+                    new_max_flipped = max_p
+                key_flipped = (new_s, new_d_flipped)
+                if key_flipped in next_states:
+                    existing_min, existing_max = next_states[key_flipped]
+                    new_min_combined = min(existing_min, new_min_flipped)
+                    new_max_combined = max(existing_max, new_max_flipped)
+                    next_states[key_flipped] = (new_min_combined, new_max_combined)
+                else:
+                    next_states[key_flipped] = (new_min_flipped, new_max_flipped)
+        current_states = next_states
 
-Initial current_states: {(0,1): (0,0)}.
+    max_distance = 0
+    for (s, d) in current_states:
+        if (n - s) >= 0 and (n - s) % 2 == 0:
+            min_p, max_p = current_states[(s, d)]
+            current_max = max(abs(min_p), abs(max_p))
+            if current_max > max_distance:
+                max_distance = current_max
 
-Processing first command 'F':
+    print(max_distance, file=output_stream)
 
-For (0,1), min_p=0, max_p=0.
 
-Option 1: not flipped. cmd 'F', new_d=1. new_min=0+1=1, new_max=0+1=1. So next_states[(0,1)] = (1,1).
 
-Option 2: flip, s=0<1. new_s=1. flipped_cmd is 'T'. new_d_flipped is -1. new_min_flipped=0, new_max_flipped=0. So next_states[(1,-1)] = (0,0).
+def test():
+    import io
 
-current_states after first command is {(0,1): (1,1), (1,-1): (0,0)}.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+FFFTFFF
+2
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-Processing second command 'T':
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For each state in current_states:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-First state: (0,1), min_p=1, max_p=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Option 1: not flipped. cmd 'T' → new_d is -1. new_min=1, new_max=1. So next_states[(0,-1)] = (1,1).
+    print('Tests passed 😎')
 
-Option 2: flip, s=0 <1. new_s=1. flipped_cmd is 'F'. new_d_flipped is 1. new_min_flipped=1+1=2, new_max_flipped=1+1=2. So next_states[(1,1)] = (2,2).
 
-Second state: (1,-1), min_p=0, max_p=0.
+if __name__ == '__main__':
+    test()
 
-Option 1: not flipped. cmd 'T' → new_d is 1. new_min=0, new_max=0. So next_states[(1,1)] = (0,0). But existing next_states for (1,1) is (2,2). So merged with (0,0). The new entry for (1,1) would be min(0,2)=0 and max(0,2)=2. So (1,1) has (0,2).
 
-Option 2: flip, s=1 is not <1 → invalid.
+```
 
-So after processing second command:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-next_states has:
-
-(0,-1): (1,1)
-
-(1,1): (0,2)
-
-current_states is these two.
-
-Now, after processing all commands, check for each state:
-
-For (0,-1):
-
-s=0. remaining =1-0=1, which is odd → invalid.
-
-For (1,1):
-
-s=1. remaining=1-1=0 → even. min_p=0, max_p=2. So current_max is max(0, 2) →2. So max_distance is 2.
-
-Which matches the example.
+```
 
 Another test case:
 

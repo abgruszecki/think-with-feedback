@@ -147,13 +147,62 @@ else:
 
         print("Second")
 
-Testing the samples:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    a, b, r = map(int, input_stream.readline().rstrip("\n").split())
+    diameter = 2 * r
+    if diameter > a or diameter > b:
+        print("Second", file=output_stream)
+    else:
+        m = (a - diameter) // diameter + 1
+        n = (b - diameter) // diameter + 1
+        print("First" if (m * n) % 2 else "Second", file=output_stream)
 
-5 5 2 → 2*2=4. 5 >=4? yes.
 
-a-4=1 → 1//4=0 → +1 →1. same for b. total=1 → odd. Output 'First'.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 7 4
+""",
+            "output": \
+"""\
+Second
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

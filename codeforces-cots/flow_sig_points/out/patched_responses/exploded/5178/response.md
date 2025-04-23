@@ -209,13 +209,141 @@ for i in range(n - r, n):
 
 print(total)
 
-Testing the first sample:
+Testing against sample input 1.
 
-Input 2 1 6. Sum is 7. avg=3, r=1. sorted is [1,6]. The first n - r =1 element (1). Check if 1>3? No. Then in the second loop (i from 1 to 1), check 6>4 (3+1=4). 6-4=2. Total 2. Correct.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    m = list(map(int, input_stream.readline().rstrip("\n").split()))
+    total_sum = sum(m)
+    avg = total_sum // n
+    remainder = total_sum % n
+    sorted_m = sorted(m)
+    result = 0
+
+    for i in range(n - remainder):
+        if sorted_m[i] > avg:
+            result += sorted_m[i] - avg
+
+    for i in range(n - remainder, n):
+        if sorted_m[i] > avg + 1:
+            result += sorted_m[i] - (avg + 1)
+
+    print(result, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+10 11 10 11 10 11 11
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample: 5 elements. sum is 15, avg=3, r=0. So all targets are 3. sorted [1,2,3,4,5]. For all 5 elements. First 5-0=5 elements. For each, if mi>3: 4>3 contributes 1, 5>3 contributes 2. So total 3. Correct.
 
-Second sample: sum is 10+11*3 +10*3? Wait, the input is 7 servers, 10,11,10,11,10,11,11. Sum is 10*3 +11*4 =30 +44=74. avg =74//7=10 (since 7*10=70, remainder 4). So r=4. So the first 7-4=3 servers (after sorting) have target 10, the rest 11. sorted array would be [10,10,10,11,11,11,11]. So the first 3 are 10, 10,10. They are <=10, no contribution. The remaining 4 are 11,11,11,11. Their target is 11. So 11-11=0. So total 0. Correct.
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    m = list(map(int, input_stream.readline().rstrip("\n").split()))
+    total_sum = sum(m)
+    avg = total_sum // n
+    remainder = total_sum % n
+    sorted_m = sorted(m)
+    result = 0
+
+    for i in range(n - remainder):
+        if sorted_m[i] > avg:
+            result += sorted_m[i] - avg
+
+    for i in range(n - remainder, n):
+        if sorted_m[i] > avg + 1:
+            result += sorted_m[i] - (avg + 1)
+
+    print(result, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 2 3 4 5
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So the code works for the samples.
 

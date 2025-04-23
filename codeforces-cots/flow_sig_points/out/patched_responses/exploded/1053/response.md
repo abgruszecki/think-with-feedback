@@ -283,57 +283,89 @@ But note that the a here is the maximum number of 0.5L bottles. So in the equati
 
 So code steps:
 
-n, a, b, c = map(int, input().split())
+Testing against sample input 1.
 
-count =0
+```python
+def main(input_stream, output_stream):
+    n, a, b, c = map(int, input_stream.readline().rstrip("\n").split())
 
-max_z = min(c, n//2)
+    count =0
 
-for z in range(0, max_z +1):
+    max_z = min(c, n//2)
 
-    # since z can be up to max_z inclusive
+    for z in range(0, max_z +1):
 
-    remaining = n - 2*z
+        # since z can be up to max_z inclusive
 
-    if remaining <0:
+        remaining = n - 2*z
 
-        continue  # but z is <=n//2 → remaining >=0, so this is redundant
+        if remaining <0:
 
-    max_k = a //2
+            continue  # but z is <=n//2 → remaining >=0, so this is redundant
 
-    # k can be up to min(max_k, remaining)
+        max_k = a //2
 
-    k_max = min(max_k, remaining)
+        # k can be up to min(max_k, remaining)
 
-    # y must be remaining -k <=b → k >= remaining -b
+        k_max = min(max_k, remaining)
 
-    k_min = max(0, remaining - b)
+        # y must be remaining -k <=b → k >= remaining -b
 
-    if k_min > k_max:
+        k_min = max(0, remaining - b)
 
-        continue
+        if k_min > k_max:
 
-    possible = k_max - k_min +1
+            continue
 
-    count += possible
+        possible = k_max - k_min +1
 
-print(count)
+        count += possible
 
-Wait, but this code is almost correct, but wait: in the code above, max_z is min(c, n//2). So when z is in 0 to max_z (inclusive). So that's correct.
+    print(count, file=output_stream)
 
-Testing the first example:
 
-n=10, a=5 → max_k =5//2=2.
 
-For z=2:
+def test():
+    import io
 
-remaining=10-4=6.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 0 0 2
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-k_min =6-5=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-k_max= min(2,6)=2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-so possible is 2-1+1=2. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Yes.
 

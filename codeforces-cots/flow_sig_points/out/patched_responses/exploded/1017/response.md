@@ -214,19 +214,39 @@ if start <=90:
 
 So code outline:
 
-n = int(input())
+Testing against sample input 1.
 
-times = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-prev = 0
+    times = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-possible_ends = []
+    prev = 0
 
-for t in times:
+    possible_ends = []
+
+    for t in times:
+
+        start = prev +1
+
+        end = t -1
+
+        if start <= end:
+
+            length = end - start +1
+
+            if length >=15:
+
+                possible_ends.append(start +14)
+
+        prev = t
+
+    # handle after last t
 
     start = prev +1
 
-    end = t -1
+    end =90
 
     if start <= end:
 
@@ -236,53 +256,381 @@ for t in times:
 
             possible_ends.append(start +14)
 
-    prev = t
+    if possible_ends:
 
-# handle after last t
+        answer = min(possible_ends)
 
-start = prev +1
+    else:
 
-end =90
+        answer =90
+
+    print(answer, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+9
+16 20 30 40 50 60 70 80 90
+""",
+            "output": \
+"""\
+15
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    times = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    prev = 0
+
+    possible_ends = []
+
+    for t in times:
+
+        start = prev +1
+
+        end = t -1
+
+        if start <= end:
+
+            length = end - start +1
+
+            if length >=15:
+
+                possible_ends.append(start +14)
+
+        prev = t
+
+    # handle after last t
+
+    start = prev +1
+
+    end =90
+
+    if start <= end:
+
+        length = end - start +1
+
+        if length >=15:
+
+            possible_ends.append(start +14)
+
+    if possible_ends:
+
+        answer = min(possible_ends)
+
+    else:
+
+        answer =90
+
+    print(answer, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+9
+15 20 30 40 50 60 70 80 90
+""",
+            "output": \
+"""\
+90
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Sample input 3: the first interval is 1-14, length 14. So no. Then other intervals. The possible_ends is empty. So answer is 90.
+
+Another test case: input 9, times 15,20, etc.
+
+After the first interval (1-14, length 14), no addition. Then intervals between 15 and 20: 16-19 (length 4). Then between 20 and 30: 21-29 (9). Etc. None reach 15. The after the last time (90) is 91-90, which is invalid. So possible_ends is empty. Output 90.
+
+Another test case: suppose the first interval is 1-20 (start=1, end=20). length 20 >=15. So possible_end is 1+14=15. So output 15.
+
+Another case: first interval is 1-14 (length 14), then the next interval is 16-30 (length 15). So possible_end is 16+14=30. Then the answer is min(15,30) is 15? No, but wait, in this scenario, the first interval's possible_end is 15, but the first interval has length 14, so possible_end is not added. Only the second interval adds 30. So answer is 30.
+
+Wait, no. Let's see. The first interval is 1-14. start=1, end=14. length 14. So 14 <15. So no. The next interval could be between 15 and 30. Suppose the list has t1=15, t2=31. Then between them, interval is 16-30. length 15. So possible_end is 16+14=30. So answer is 30.
+
+So code seems to handle that.
+
+So the code seems correct.
+
+Now, code:
+
+Read n, list of times.
+
+prev is 0.
+
+possible_ends = list.
+
+Loop over each time t:
+
+   compute start and end.
+
+   if start <= end:
+
+      compute length.
+
+      if >=15:
+
+          add start+14.
+
+   set prev = t.
+
+Then handle after the last time.
+
+start = prev+1.
+
+end=90.
 
 if start <= end:
 
-    length = end - start +1
+   compute length.
 
-    if length >=15:
+   if >=15:
 
-        possible_ends.append(start +14)
+       add start+14.
 
-if possible_ends:
-
-    answer = min(possible_ends)
-
-else:
-
-    answer =90
-
-print(answer)
-
-Wait, but what if there are multiple possible_ends? We choose the minimum one, which is the earliest possible end_time.
+If any possible_ends, answer is the min. else 90.
 
 Yes.
 
-Testing sample input 1:
+So the code should work.
 
-possible_ends after processing intervals:
-
-In the first interval, length 6, no addition.
-
-Second interval, 8-19, length 12, no.
-
-Third interval (21-87) has length 67 >=15. Add 21+14=35.
-
-Then after last t=88, the interval is 89-90, length 2. No.
-
-So possible_ends is [35]. min is 35. Correct.
+Now, let's test another example.
 
 Sample input 2:
 
-First interval is 1-15. length 15. Add 1+14=15. possible_ends is [15]. The answer is 15.
+9
+
+16 20 30 40 50 60 70 80 90
+
+The intervals:
+
+Before 16: 1-15. length 15. So possible_end is 1+14=15. So added to possible_ends. So answer is 15.
+
+Sample input 3:
+
+9
+
+15 20 30 40 50 60 70 80 90
+
+First interval is 1-14. length 14. Not added. Then between 15 and 20: 16-19. length 4. Then intervals between others are shorter than 15. After last time (90), start is 91, which is invalid. So possible_ends is empty. Output 90.
+
+Another example: n=1, t=1. Then the first interval is 1-0 (invalid). Then after the last time, start=2, end=90. length 89. possible_end is 2+14=16. So answer is 16.
+
+Wait, no. Wait, the after interval is start=1+1=2, end=90. length 89. So 89 >=15. So possible_end is 2+14=16. So answer is 16. But in this case, the first 15 boring minutes start at 2. So 2-16? Wait, 2+14=16. So he stops at 16. So total watched time is 16.
+
+Yes.
+
+Another example: n=1, t=90. Then after the interval is 1-89. length 89. possible_end is 1+14=15. So answer is 15.
+
+But wait, after 15 minutes (1-15), he stops. So he watches up to 15.
+
+So code would output 15.
+
+Yes.
+
+Another test case: n=2, t=1 and t=17. The intervals are:
+
+Between 0 and 1-1=0: invalid.
+
+Between 1 and 17-1=16: start=2, end=16. length 15. possible_end is 2+14=16. So answer is 16. So the code would add 16 to possible_ends. The answer is 16.
+
+So code works.
+
+Another case where two intervals have possible_ends. For example, the first interval has possible_end 15, and another interval has possible_end 20. The answer is 15.
+
+So code takes the minimum.
+
+So the code is correct.
+
+Now, implement this in Python.
+
+The code must read n, then the list of times. The list is already sorted, as per input.
+
+So code:
+
+Sample input 3: the first interval is 1-14, length 14. So no. Then other intervals. The possible_ends is empty. So answer is 90.
+
+Another test case: input 9, times 15,20, etc.
+
+After the first interval (1-14, length 14), no addition. Then intervals between 15 and 20: 16-19 (length 4). Then between 20 and 30: 21-29 (9). Etc. None reach 15. The after the last time (90) is 91-90, which is invalid. So possible_ends is empty. Output 90.
+
+Another test case: suppose the first interval is 1-20 (start=1, end=20). length 20 >=15. So possible_end is 1+14=15. So output 15.
+
+Another case: first interval is 1-14 (length 14), then the next interval is 16-30 (length 15). So possible_end is 16+14=30. Then the answer is min(15,30) is 15? No, but wait, in this scenario, the first interval's possible_end is 15, but the first interval has length 14, so possible_end is not added. Only the second interval adds 30. So answer is 30.
+
+Wait, no. Let's see. The first interval is 1-14. start=1, end=14. length 14. So 14 <15. So no. The next interval could be between 15 and 30. Suppose the list has t1=15, t2=31. Then between them, interval is 16-30. length 15. So possible_end is 16+14=30. So answer is 30.
+
+So code seems to handle that.
+
+So the code seems correct.
+
+Now, code:
+
+Read n, list of times.
+
+prev is 0.
+
+possible_ends = list.
+
+Loop over each time t:
+
+   compute start and end.
+
+   if start <= end:
+
+      compute length.
+
+      if >=15:
+
+          add start+14.
+
+   set prev = t.
+
+Then handle after the last time.
+
+start = prev+1.
+
+end=90.
+
+if start <= end:
+
+   compute length.
+
+   if >=15:
+
+       add start+14.
+
+If any possible_ends, answer is the min. else 90.
+
+Yes.
+
+So the code should work.
+
+Now, let's test another example.
+
+Sample input 2:
+
+9
+
+16 20 30 40 50 60 70 80 90
+
+The intervals:
+
+Before 16: 1-15. length 15. So possible_end is 1+14=15. So added to possible_ends. So answer is 15.
+
+Sample input 3:
+
+9
+
+15 20 30 40 50 60 70 80 90
+
+First interval is 1-14. length 14. Not added. Then between 15 and 20: 16-19. length 4. Then intervals between others are shorter than 15. After last time (90), start is 91, which is invalid. So possible_ends is empty. Output 90.
+
+Another example: n=1, t=1. Then the first interval is 1-0 (invalid). Then after the last time, start=2, end=90. length 89. possible_end is 2+14=16. So answer is 16.
+
+Wait, no. Wait, the after interval is start=1+1=2, end=90. length 89. So 89 >=15. So possible_end is 2+14=16. So answer is 16. But in this case, the first 15 boring minutes start at 2. So 2-16? Wait, 2+14=16. So he stops at 16. So total watched time is 16.
+
+Yes.
+
+Another example: n=1, t=90. Then after the interval is 1-89. length 89. possible_end is 1+14=15. So answer is 15.
+
+But wait, after 15 minutes (1-15), he stops. So he watches up to 15.
+
+So code would output 15.
+
+Yes.
+
+Another test case: n=2, t=1 and t=17. The intervals are:
+
+Between 0 and 1-1=0: invalid.
+
+Between 1 and 17-1=16: start=2, end=16. length 15. possible_end is 2+14=16. So answer is 16. So the code would add 16 to possible_ends. The answer is 16.
+
+So code works.
+
+Another case where two intervals have possible_ends. For example, the first interval has possible_end 15, and another interval has possible_end 20. The answer is 15.
+
+So code takes the minimum.
+
+So the code is correct.
+
+Now, implement this in Python.
+
+The code must read n, then the list of times. The list is already sorted, as per input.
+
+So code:
 
 Sample input 3: the first interval is 1-14, length 14. So no. Then other intervals. The possible_ends is empty. So answer is 90.
 

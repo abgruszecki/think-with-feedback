@@ -217,57 +217,91 @@ So the code would be:
 
 Read n.
 
-t = list(map(int, input().split()))
+Testing against sample input 1.
 
-from collections import Counter
+```python
+def main(input_stream, output_stream):
+    t = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-counts = Counter(t)
+    from collections import Counter
 
-total = 0
+    counts = Counter(t)
 
-# Handle 0 case
+    total = 0
 
-if 0 in counts:
+    # Handle 0 case
 
-    c = counts[0]
+    if 0 in counts:
 
-    total += c * (c -1) // 2
+        c = counts[0]
 
-# Handle other pairs
+        total += c * (c -1) // 2
 
-for x in counts:
+    # Handle other pairs
 
-    if x >0:
+    for x in counts:
 
-        if -x in counts:
+        if x >0:
 
-            total += counts[x] * counts[-x]
+            if -x in counts:
 
-print(total)
+                total += counts[x] * counts[-x]
 
-Yes.
+    print(total, file=output_stream)
 
-Let's test the first sample.
 
-Sample 1:
 
-Input:
+def test():
+    import io
 
-5
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+0 0 0
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
--3 3 0 0 3
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-counts = { -3:1, 3:2, 0:2 }
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-0's contribution is 2*1//2 =1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Then for x in counts:
+    print('Tests passed 😎')
 
-x = -3: not x>0 → skip.
 
-x=3: x>0, check -3 is present. counts[3] * counts[-3] = 2*1=2. Add to total → total becomes 1+2=3.
+if __name__ == '__main__':
+    test()
 
-Then x=0: x>0 is false. So total is 3. Correct.
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 64, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 57, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '3'
+Got: '0'
+
+```
 
 Sample 2:
 

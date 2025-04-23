@@ -1529,87 +1529,108 @@ Thus, the code can be structured as follows:
 
 This should work. 
 
-Let's test this with the first example:
+Testing against sample input 1.
 
-Input: 5 4 3 2 1.
+```python
+import sys
 
-pos[1] =5, pos[2]=4, pos[3]=3, pos[4]=2, pos[5]=1.
 
-For x=1:
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    p = list(map(int, input_stream.readline().split()))
+    pos = [0] * (n + 1)
+    for i in range(n):
+        pos[p[i]] = i + 1  # 1-based index
 
-sum_pos =5.
+    class FenwickTree:
+        def __init__(self, size):
+            self.size = size
+            self.tree = [0] * (size + 1)
+        
+        def update(self, idx, delta):
+            while idx <= self.size:
+                self.tree[idx] += delta
+                idx += idx & -idx
+        
+        def query(self, idx):
+            res = 0
+            while idx > 0:
+                res += self.tree[idx]
+                idx -= idx & -idx
+            return res
 
-s=(5-0)/1=5.
+    ft = FenwickTree(n)
+    sum_pos = 0
+    total_inv = 0
+    output = []
+    for k in range(1, n + 1):
+        x = k
+        current_pos = pos[x]
+        sum_pos += current_pos
+        
+        # Compute s
+        numerator = sum_pos - (k * (k - 1) // 2)
+        s = numerator // k
+        
+        sum_desired = s * k + (k * (k - 1) // 2)
+        swaps_gather = (sum_desired - sum_pos) // 2
+        
+        # Compute inversions
+        count = ft.query(current_pos)
+        inv = (k - 1) - count
+        total_inv += inv
+        
+        ft.update(current_pos, 1)
+        
+        f_k = swaps_gather + total_inv
+        output.append(str(f_k))
+    
+    print(' '.join(output), file=output_stream)
 
-sum_desired=5*1 +0=5.
 
-swaps_gather=0.
 
-total_inv=0.
+def test():
+    import io
 
-f[1]=0+0=0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 2 3
+""",
+            "output": \
+"""\
+0 0 0
+""",
+        }, 
+    ]
 
-x=2:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum_pos=5+4=9.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-s=(9-1)/2=4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-sum_desired=4*2+1=9.
+    print('Tests passed 😎')
 
-swaps_gather=0.
 
-total_inv is computed as:
+if __name__ == '__main__':
+    test()
 
-x=2: elements already inserted (x-1=1). query pos[2]=4. returns number of elements <=4, which is 1 (pos[1]=5 is >4). So inv=1-0=1. total_inv=1.
 
-f[2]=0+1=1.
+```
 
-x=3:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-sum_pos=9+3=12.
-
-s=(12-3)/3=9/3=3.
-
-sum_desired=3*3+3=12.
-
-swaps_gather=0.
-
-total_inv: x=3, elements inserted 2. query pos[3]=3. returns number of elements <=3. pos[1]=5, pos[2]=4. So query returns 0. inv=2-0=2. total_inv=1+2=3.
-
-f[3]=0+3=3.
-
-x=4:
-
-sum_pos=12+2=14.
-
-s=(14-6)/4=8/4=2.
-
-sum_desired=2*4 +6=14.
-
-swaps_gather=0.
-
-total_inv: x=4, pos[4]=2. elements inserted 3. query(2) returns 0. inv=3-0=3. total_inv=3+3=6.
-
-f[4] =0+6=6.
-
-x=5:
-
-sum_pos=14+1=15.
-
-s=(15-10)/5=5/5=1.
-
-sum_desired=1*5 +10=15.
-
-swaps_gather=0.
-
-total_inv: x=5, pos[5]=1. elements inserted 4. query(1) returns 0. inv=4-0=4. total_inv=6+4=10.
-
-f[5]=0+10=10.
-
-Which matches the example. 
-
-Thus, this approach is correct. 
+```
 
 Now, the code can be implemented using a Fenwick Tree to track the number of elements inserted and their positions, and compute the number of inversions incrementally. 
 

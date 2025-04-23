@@ -254,145 +254,170 @@ Now, let's code this.
 
 But in Python, the initial code would be:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n = int(input())
-l = list(map(int, input().split()))
-c = list(map(int, input().split()))
 
-dp = dict()
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    l = list(map(int, input_stream.readline().rstrip("\n").split()))
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for i in range(n):
-    li = l[i]
-    ci = c[i]
-    new_dp = dict(dp)  # copy the existing entries (subsets without this card)
-    # Process existing entries in dp to generate new entries by adding this card
-    for g in list(dp.keys()):
-        new_gcd = math.gcd(g, li)
-        new_cost = dp[g] + ci
-        if new_gcd in new_dp:
-            if new_cost < new_dp[new_gcd]:
+    dp = dict()
+
+    for i in range(n):
+        li = l[i]
+        ci = c[i]
+        new_dp = dict(dp)  # copy the existing entries (subsets without this card)
+        # Process existing entries in dp to generate new entries by adding this card
+        for g in list(dp.keys()):
+            new_gcd = math.gcd(g, li)
+            new_cost = dp[g] + ci
+            if new_gcd in new_dp:
+                if new_cost < new_dp[new_gcd]:
+                    new_dp[new_gcd] = new_cost
+            else:
                 new_dp[new_gcd] = new_cost
+        # Now, add the current card alone if not already present with a lower cost
+        if li in new_dp:
+            if ci < new_dp[li]:
+                new_dp[li] = ci
         else:
-            new_dp[new_gcd] = new_cost
-    # Now, add the current card alone if not already present with a lower cost
-    if li in new_dp:
-        if ci < new_dp[li]:
             new_dp[li] = ci
+        # Update dp to new_dp
+        dp = new_dp
+
+    # Check if gcd 1 is present
+    if 1 in dp:
+        print(dp[1], file=output_stream)
     else:
-        new_dp[li] = ci
-    # Update dp to new_dp
-    dp = new_dp
+        print(-1, file=output_stream)
 
-# Check if gcd 1 is present
-if 1 in dp:
-    print(dp[1])
-else:
-    print(-1)
 
-Wait, but in the code above, when we create new_dp as a copy of dp, and then for each g in dp, we add the new_gcd entries, which may override existing entries in new_dp (which are copies of the original dp's entries). For example, if the original dp has an entry for 10 with cost 5, and adding the new card gives a new_gcd of 10 with cost 5+3=8, then the new_dp will have 10:5 (from the copy) and then check if new_gcd (10) is in new_dp. Since it is, and 8 is larger than 5, nothing changes. So the code is correct.
 
-Testing the first sample:
+def test():
+    import io
 
-After processing first card (100,1), dp is {100:1}.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+10 20 30 40 50
+1 1 1 1 1
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-Processing second card (99,1):
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-new_dp is {100:1}.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Then, loop over g in [100]:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-new_gcd = gcd(100,99) =1. new_cost is 1+1=2. So new_dp[1] = 2.
+    print('Tests passed 😎')
 
-Then, check if 99 is in new_dp. It's not, so add it with cost 1. So new_dp is {100:1, 1:2, 99:1}.
 
-So dp becomes this.
+if __name__ == '__main__':
+    test()
 
-Third card (9900, 1):
 
-new_dp starts as {100:1, 1:2, 99:1}.
+```
 
-Loop over each key in dp (100, 1, 99):
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For 100: gcd(100,9900) is 100. new_cost is 1+1=2. new_dp[100] is already 1, which is better.
+```
 
-For 1: gcd(1,9900) is 1. new_cost is 2+1=3. new_dp[1] is 2, which is better.
+Testing against sample input 3.
 
-For 99: gcd(99,9900) is 99. new_cost is 1+1=2. new_dp[99] is 1, which is better.
+```python
+import math
 
-Then, check if 9900 is in new_dp. It's not, so add it with cost 1. So new_dp includes 9900:1. But the minimal for 1 is 2.
 
-So the answer is 2.
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    l = list(map(int, input_stream.readline().rstrip("\n").split()))
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-Which is correct.
+    dp = {}
 
-The code seems correct for this case.
+    for li, ci in zip(l, c):
+        new_dp = dict(dp)
+        for g in list(dp.keys()):
+            new_gcd = math.gcd(g, li)
+            new_cost = dp[g] + ci
+            if new_gcd in new_dp:
+                if new_cost < new_dp[new_gcd]:
+                    new_dp[new_gcd] = new_cost
+            else:
+                new_dp[new_gcd] = new_cost
+        if li in new_dp:
+            if ci < new_dp[li]:
+                new_dp[li] = ci
+        else:
+            new_dp[li] = ci
+        dp = new_dp
 
-Now, let's think about the second sample. All l's are multiples of 10. The DP will never reach a gcd of 1. So the code returns -1.
+    print(dp.get(1, -1), file=output_stream)
 
-So the code should work.
 
-Now, the third sample includes a card with l=1, but cost 10. The other cards' l's are 15015, etc. The code should find that a subset of the first 6 cards (cost 6) has a gcd of 1.
 
-How?
+def test():
+    import io
 
-The code would process each card. For example, 15015 is 15*1001, 10010 is 10*1001, etc. The first six cards' gcd could be 1. Let's say that after processing these six cards, the DP includes a gcd of 1 with cost 6. Then, the seventh card (l=1) is processed, but adding it would not reduce the cost (since 6 is cheaper than 10). So the code returns 6.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+4264 4921 6321 6984 2316 8432 6120 1026
+4264 4921 6321 6984 2316 8432 6120 1026
+""",
+            "output": \
+"""\
+7237
+""",
+        }, 
+    ]
 
-So the code should handle this.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Now, the fourth sample. The code should compute the minimal cost subset with gcd 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Now, considering the constraints of n=300 and possible time per step. The code for each card processes O(k) entries in the DP. For each card, the number of entries k could be up to, say, a few hundred. With 300 cards, this would be acceptable. In Python, even 300 * 1e4 steps would be manageable in 2 seconds.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Now, the code uses math.gcd, which handles positive integers. However, the l's are given as positive integers. So there's no issue. Also, the initial entries are all positive.
+    print('Tests passed 😎')
 
-But what if the current g is 0? Well, initially, the DP is empty. So when processing the first card, the code adds its li to the new_dp. So the first entry is li, which is positive. So all subsequent entries are positive, so math.gcd will work.
 
-Now, one possible optimization is to process the cards in a certain order. For example, processing cards with smaller l first may lead to more rapid reduction of the gcd. But in the worst case, the order doesn't affect correctness.
+if __name__ == '__main__':
+    test()
 
-Another possible optimization is to use a dictionary that's represented as a defaultdict with the minimal cost, but the code above uses regular dictionaries and checks for existence.
 
-So the code as written should be correct and efficient.
+```
 
-Testing with the sample inputs.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Sample 3:
-
-7
-15015 10010 6006 4290 2730 2310 1
-1 1 1 1 1 1 10
-
-The first six cards' l's:
-
-Let's compute their GCD:
-
-But wait, perhaps the first six cards can form a subset with GCD 1.
-
-But let's see:
-
-For example, the GCD of 15015 and 10010.
-
-15015 factors: 3 * 5 * 7 * 11 * 13.
-
-10010 factors: 2 * 5 * 7 * 11 * 13.
-
-GCD is 5 *7 * 11 *13 = 5005.
-
-Adding 6006 (which is 2 * 3 * 7 * 11 * 13). GCD(5005, 6006) = 7*11*13 = 1001.
-
-Then adding 4290 (which is 2 * 3 * 5 * 11 * 13). GCD(1001, 4290) = GCD(1001, 4290). 1001 = 7*11*13. 4290 is divisible by 11 and 13. 4290 / (11*13) = 30. So GCD is 11*13=143.
-
-Then adding 2730 (which is 2*3*5*7*13). GCD(143, 2730) = 13.
-
-Then adding 2310 (2*3*5*7*11). GCD(13, 2310) is 1.
-
-So the GCD of these six cards is 1. So the minimal cost is 6.
-
-Thus, the code would generate an entry for 1 with cost 6 after processing the sixth card. The seventh card (cost 10) would not affect this.
-
-So the code returns 6.
-
-Thus, the code is correct.
+```
 
 Therefore, the code should solve the problem correctly.
 </think>

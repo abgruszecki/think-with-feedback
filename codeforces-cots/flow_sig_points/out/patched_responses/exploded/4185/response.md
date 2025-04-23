@@ -301,81 +301,82 @@ Read n and k from input. Then read the string s. Then process each character in 
 
 The code would be something like:
 
-n, k = map(int, input().split())
-s = input().strip()
+Testing against sample input 1.
 
-current_dp = set()
-current_dp.add( (0, 0) )
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    s = input_stream.readline().rstrip("\n").strip()
 
-for c in s:
-    next_dp = set()
-    for (current, max_val) in current_dp:
-        # Handle Y possibility
-        if c == 'Y' or c == '?':
-            new_current = 0
-            new_max = max_val
-            next_dp.add( (new_current, new_max) )
-        # Handle N possibility
-        if c == 'N' or c == '?':
-            new_current = current + 1
-            new_max = max(max_val, new_current)
-            next_dp.add( (new_current, new_max) )
-    current_dp = next_dp
+    current_dp = set()
+    current_dp.add( (0, 0) )
 
-# Check if any max_val in current_dp is exactly k
-for (cur, m) in current_dp:
-    if m == k:
-        print("YES")
-        exit()
-print("NO")
+    for c in s:
+        next_dp = set()
+        for (current, max_val) in current_dp:
+            # Handle Y possibility
+            if c == 'Y' or c == '?':
+                new_current = 0
+                new_max = max_val
+                next_dp.add( (new_current, new_max) )
+            # Handle N possibility
+            if c == 'N' or c == '?':
+                new_current = current + 1
+                new_max = max(max_val, new_current)
+                next_dp.add( (new_current, new_max) )
+        current_dp = next_dp
 
-Wait, but wait: in the code, the current_dp is a set of tuples (current_streak, max_so_far). After processing all characters, the max_so_far is the maximum streak up to that point, which is the maximum for the entire string. So yes, checking if any of the m's equals k is correct.
+    # Check if any max_val in current_dp is exactly k
+    for (cur, m) in current_dp:
+        if m == k:
+            print("YES", file=output_stream)
+            return
+    print("NO", file=output_stream)
 
-Yes. So this code should work.
 
-Testing the first example:
 
-Input:
+def test():
+    import io
 
-5 2
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 1
+????NN
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-NYNNY
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-After processing each character:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Initial: {(0,0)}
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-First 'N':
+    print('Tests passed 😎')
 
-Only process N. For (0,0):
 
-new_current = 1, new_max = 1. So next_dp is {(1,1)}.
+if __name__ == '__main__':
+    test()
 
-Second 'Y':
 
-Process Y. For (1,1):
+```
 
-new_current=0, new_max=1. So next_dp {(0,1)}.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Third 'N':
-
-Process N. For (0,1):
-
-new_current=1, new_max=1. So next_dp {(1,1)}.
-
-Fourth 'N':
-
-Process N. For (1,1):
-
-new_current=2, new_max=2. So next_dp {(2,2)}.
-
-Fifth 'Y':
-
-Process Y. For (2,2):
-
-new_current=0, new_max=2. So next_dp {(0,2)}.
-
-Check if any m is 2: yes. Output YES.
+```
 
 Second example:
 

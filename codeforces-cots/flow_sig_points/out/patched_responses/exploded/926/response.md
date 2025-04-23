@@ -841,81 +841,122 @@ Now, code:
 
 But for Python, the code:
 
-l = int(input())
+Testing against sample input 1.
 
-s = input().strip()
+```python
+def main(input_stream, output_stream):
+    l = int(input_stream.readline().rstrip("\n"))
 
-valid_splits = []
+    s = input_stream.readline().rstrip("\n").strip()
 
-for k in range(len(s)-1):
+    valid_splits = []
 
-    if s[k+1] != '0':
+    for k in range(len(s)-1):
 
-        valid_splits.append(k)
+        if s[k+1] != '0':
 
-mid = (l-1) // 2
+            valid_splits.append(k)
 
-valid_splits.sort(key=lambda x: abs(x - mid))
+    mid = (l-1) // 2
 
-candidates = valid_splits[:20]
+    valid_splits.sort(key=lambda x: abs(x - mid))
 
-def add_str(a, b):
+    candidates = valid_splits[:20]
 
-    a_rev = a[::-1]
+    def add_str(a, b):
 
-    b_rev = b[::-1]
+        a_rev = a[::-1]
 
-    max_len = max(len(a_rev), len(b_rev))
+        b_rev = b[::-1]
 
-    carry = 0
+        max_len = max(len(a_rev), len(b_rev))
 
-    result = []
+        carry = 0
 
-    for i in range(max_len):
+        result = []
 
-        digit_a = int(a_rev[i]) if i < len(a_rev) else 0
+        for i in range(max_len):
 
-        digit_b = int(b_rev[i]) if i < len(b_rev) else 0
+            digit_a = int(a_rev[i]) if i < len(a_rev) else 0
 
-        total = digit_a + digit_b + carry
+            digit_b = int(b_rev[i]) if i < len(b_rev) else 0
 
-        result.append(str(total % 10))
+            total = digit_a + digit_b + carry
 
-        carry = total // 10
+            result.append(str(total % 10))
 
-    if carry:
+            carry = total // 10
 
-        result.append(str(carry))
+        if carry:
 
-    sum_str = ''.join(reversed(result)).lstrip('0')
+            result.append(str(carry))
 
-    return sum_str if sum_str else '0'
+        sum_str = ''.join(reversed(result)).lstrip('0')
 
-min_sum = None
+        return sum_str if sum_str else '0'
 
-for k in candidates:
+    min_sum = None
 
-    left = s[:k+1]
+    for k in candidates:
 
-    right = s[k+1:]
+        left = s[:k+1]
 
-    sum_ = add_str(left, right)
+        right = s[k+1:]
 
-    current = (len(sum_), sum_)
+        sum_ = add_str(left, right)
 
-    if min_sum is None or current < min_sum:
+        current = (len(sum_), sum_)
 
-        min_sum = current
+        if min_sum is None or current < min_sum:
 
-print(min_sum[1])
+            min_sum = current
 
-But wait, in the case where there are multiple candidates, like 20, but some of them have the same sum length but lex order.
+    print(min_sum[1], file=output_stream)
 
-This code will correctly select the minimal sum.
 
-Testing the first example:
 
-After sorting, the valid splits are ordered by distance to mid (3). The first split is 3, which is the correct split.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+101
+""",
+            "output": \
+"""\
+11
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 The code computes '1234' + '567' = 1801.
 

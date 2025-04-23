@@ -903,93 +903,170 @@ ans = (1 * 2 * 2 *1 ) % m.
 
 Thus, the code can be written as follows:
 
-n, d, m = map(int, input().split())
+Testing against sample input 1.
 
-if (d >= 2 and n >=2) or (d == 1 and n ==2):
+```python
+def main(input_stream, output_stream):
+    n, d, m = map(int, input_stream.readline().rstrip("\n").split())
 
-    if d ==1 and n ==2:
+    if (d >= 2 and n >=2) or (d == 1 and n ==2):
 
-        total = (1 * 2 * 2) % m
+        if d ==1 and n ==2:
+
+            total = (1 * 2 * 2) % m
+
+        else:
+
+            mod = 2 * m
+
+            fact = 1
+
+            for i in range(2, n+1):
+
+                fact = (fact * i) % mod
+
+            # compute fact // 2
+
+            if fact %2 !=0:
+
+                fact += mod
+
+            fact = (fact //2) % m
+
+            total = (fact * 2 * n * (n-1)) % m
+
+        print(total, file=output_stream)
 
     else:
 
-        mod = 2 * m
+        print(0, file=output_stream)
 
-        fact = 1
 
-        for i in range(2, n+1):
 
-            fact = (fact * i) % mod
+def test():
+    import io
 
-        # compute fact // 2
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 1 250
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-        if fact %2 !=0:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-            fact += mod
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-        fact = (fact //2) % m
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-        total = (fact * 2 * n * (n-1)) % m
+    print('Tests passed 😎')
 
-    print(total)
 
-else:
+if __name__ == '__main__':
+    test()
 
-    print(0)
 
-Wait, but when mod is 2*m, and fact is even modulo mod, then dividing by 2 gives the correct result. For example, if fact is even, then fact // 2 is correct. If fact is odd, then fact + mod will be even, and then divided by 2.
+```
 
-Because when computed modulo mod, fact is congruent to the actual factorial mod mod. So if the actual factorial is even, then fact is even. If the actual factorial is odd, then mod must be even (since mod is 2*m, which is even if m is >=1). So if the actual factorial is odd, then mod is even, and fact would be odd, but adding mod (which is even) would make it even, then dividing by 2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-But why?
+```
 
-Because the actual factorial is either even or odd. The code computes fact = (factorial(n)) mod (2*m). But when n >=2, factorial(n) is even. Because 2 is a factor of any n >=2.
+Testing against sample input 2.
 
-Thus, fact must be even. So no need to add mod.
+```python
+def main(input_stream, output_stream):
+    n, d, m = map(int, input_stream.readline().rstrip("\n").split())
 
-Thus, the code can be simplified:
+    if (d >= 2 and n >=2) or (d == 1 and n ==2):
 
-mod = 2 * m
+        if d ==1 and n ==2:
 
-fact = 1
+            total = (1 * 2 * 2) % m
 
-for i in range(2, n+1):
+        else:
 
-    fact = (fact * i) % mod
+            mod = 2 * m
 
-fact = (fact // 2) % m
+            fact = 1
 
-total = (fact * 2 * n * (n-1)) % m
+            for i in range(2, n+1):
 
-print(total)
+                fact = (fact * i) % mod
 
-Because for n >=2, factorial(n) is even, so fact will be even. Thus, dividing by 2 is safe.
+            # compute fact // 2
 
-Thus, the code works.
+            if fact %2 !=0:
 
-Testing this with sample 3:
+                fact += mod
 
-n=3, d=2, m=100.
+            fact = (fact //2) % m
 
-mod= 200.
+            total = (fact * 2 * n * (n-1)) % m
 
-fact is computed as 2*3=6 mod 200=6. 6//2=3 mod 100=3.
+        print(total, file=output_stream)
 
-total =3 * 2 *3 *2 = 36 mod 100=36.
+    else:
 
-Which is correct.
+        print(0, file=output_stream)
 
-Sample 1:
 
-n=2, d=1, m=1e9+7.
 
-The code enters the 'd ==1 and n ==2' branch. 1*2*2=4 mod m=4.
+def test():
+    import io
 
-Sample 2:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2 100
+""",
+            "output": \
+"""\
+36
+""",
+        }, 
+    ]
 
-n=3, d=1. Not allowed. Output 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Thus, the code is correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

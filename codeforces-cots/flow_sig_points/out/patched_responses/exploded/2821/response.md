@@ -93,17 +93,63 @@ Wait, but a has exactly n elements. When m is larger than n, sum the first n ele
 
 Yes. So this code should work for all cases.
 
-Testing the first sample input:
+Testing against sample input 1.
 
-Input:
+```python
+def main(input_stream, output_stream):
+    n, d = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    m = int(input_stream.readline().rstrip("\n"))
+    a.sort()
+    k = min(m, n)
+    total = sum(a[:k]) - max(0, m - n) * d
+    print(total, file=output_stream)
 
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2 1
-
 2 1
+10
+""",
+            "output": \
+"""\
+-5
+""",
+        }, 
+    ]
 
-2
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-After sorting, a is [1, 2]. sum is 1+2=3. m-n is 0. So 3-0=3. Correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

@@ -96,59 +96,88 @@ So this should do it.
 
 Now, code:
 
-n = int(input())
+Testing against sample input 1.
 
-points = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-if n <= 1:
+    points = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-   print(0)
+    if n <= 1:
 
-else:
+       print(0, file=output_stream)
 
-   count = 0
+    else:
 
-   current_min = points[0]
+       count = 0
 
-   current_max = points[0]
+       current_min = points[0]
 
-   for i in range(1, n):
+       current_max = points[0]
 
-       p = points[i]
+       for i in range(1, n):
 
-       if p > current_max:
+           p = points[i]
 
-           count +=1
+           if p > current_max:
 
-           current_max = p
+               count +=1
 
-       elif p < current_min:
+               current_max = p
 
-           count +=1
+           elif p < current_min:
 
-           current_min = p
+               count +=1
 
-   print(count)
+               current_min = p
 
-Wait, but in the first sample, when the fifth element is 200 which equals the current max (200), but since it's not strictly greater, it's not counted. So the code correctly ignores it.
+       print(count, file=output_stream)
 
-Yes.
 
-Testing the first sample:
 
-points = [100,50,200,150,200]
+def test():
+    import io
 
-Loop:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10
+4664 6496 5814 7010 5762 5736 6944 4850 3698 7242
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-i=0 (points[1] is 50). 50 < 100 → count becomes 1. current_min is 50.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=1 (points[2] is 200). 200 > 100 → count becomes 2. current_max is 200.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=2 (points[3] is 150). between 50 and 200 → no.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=3 (points[4] is 200). not greater than current_max (200), not less than current_min (50). So no.
+    print('Tests passed 😎')
 
-Total count 2. Correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 The code seems correct.
 

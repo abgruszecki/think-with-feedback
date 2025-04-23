@@ -123,19 +123,75 @@ while left <= right:
 
 Then print s, d.
 
-Yes. Let's test this with the first example.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    cards = list(map(int, input_stream.readline().rstrip("\n").split()))
+    left, right = 0, n - 1
+    sereja, dima = 0, 0
+    turn = True  # True for Sereja's turn
 
-n=4, cards = [4,1,2,10]
+    while left <= right:
+        if cards[left] > cards[right]:
+            chosen = cards[left]
+            left += 1
+        else:
+            chosen = cards[right]
+            right -= 1
+        if turn:
+            sereja += chosen
+        else:
+            dima += chosen
+        turn = not turn
 
-left=0, right=3. turn=True (S's turn). cards[0] is 4, right is 10. 10 is larger. So S adds 10. right becomes 2. turn becomes False.
+    print(sereja, dima, file=output_stream)
 
-Next step: left=0, right=2. cards[0] is 4, cards[2] is 2. 4 is larger. So D takes 4. d=4. left becomes 1. turn is True again.
 
-Next step: left=1, right=2. cards[1] is 1, cards[2] is 2. 2 is larger. S takes 2, adds to 10+2=12. right becomes 1. turn becomes False.
 
-Next step: left=1, right=1. cards[1] is 1. D takes 1. d=4+1=5. left becomes 2. loop ends. So output is 12 5. Correct.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+1 2 3 4 5 6 7
+""",
+            "output": \
+"""\
+16 12
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

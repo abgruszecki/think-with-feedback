@@ -626,79 +626,83 @@ We need to:
 
 Now, code:
 
-n = int(input())
-a = list(map(int, input().split()))
+Testing against sample input 1.
 
-if n < 2:
-    print(0)
-    exit()
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-d = [abs(a[i] - a[i+1]) for i in range(n-1)]
+    if n < 2:
+        print(0, file=output_stream)
+        return
 
-if not d:
-    print(0)
-    exit()
+    d = [abs(a[i] - a[i+1]) for i in range(n-1)]
 
-max_val = d[0]  # initial current_pos is d[0], which is the first element's sum
+    if not d:
+        print(0, file=output_stream)
+        return
 
-current_pos = d[0]
-current_neg = -d[0]
+    max_val = d[0]  # initial current_pos is d[0], which is the first element's sum
 
-for i in range(1, len(d)):
-    # Compute new_pos and new_neg
-    new_pos = max(d[i], current_neg + d[i])
-    new_neg = max(-d[i], current_pos - d[i])
-    current_max = max(new_pos, new_neg)
-    if current_max > max_val:
-        max_val = current_max
-    current_pos, current_neg = new_pos, new_neg
+    current_pos = d[0]
+    current_neg = -d[0]
 
-print(max_val)
+    for i in range(1, len(d)):
+        # Compute new_pos and new_neg
+        new_pos = max(d[i], current_neg + d[i])
+        new_neg = max(-d[i], current_pos - d[i])
+        current_max = max(new_pos, new_neg)
+        if current_max > max_val:
+            max_val = current_max
+        current_pos, current_neg = new_pos, new_neg
 
-Testing this code.
+    print(max_val, file=output_stream)
 
-Sample Input 1:
 
-5
-1 4 2 3 1
 
-d = [3, 2, 1, 2]
+def test():
+    import io
 
-The code steps:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 5 4 7
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-current_pos =3, current_neg=-3. max_val=3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=1 (d=2):
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-new_pos = max(2, -3 +2 =-1 →2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-new_neg = max(-2, 3-2=1 →1.
+    print('Tests passed 😎')
 
-max_val becomes 3 (current max is 3).
 
-current_pos=2, current_neg=1.
+if __name__ == '__main__':
+    test()
 
-i=2 (d=1):
 
-new_pos = max(1, 1+1=2 →2.
+```
 
-new_neg = max(-1, 2-1=1 →1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-max_val remains3.
-
-current_pos=2, current_neg=1.
-
-i=3 (d=2):
-
-new_pos = max(2, 1 +2=3 →3.
-
-new_neg = max(-2, 2-2=0 →0.
-
-max_val becomes3.
-
-current_pos=3, current_neg=0.
-
-So the code outputs3.
+```
 
 Sample Input 2:
 

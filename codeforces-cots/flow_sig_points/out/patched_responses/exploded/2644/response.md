@@ -1557,103 +1557,116 @@ Thus, the code can proceed as follows:
 
 Implement:
 
-def is_prime(x):
-    if x < 2:
-        return False
-    for i in range(2, int(x**0.5)+1):
-        if x % i ==0:
+Testing against sample input 1.
+
+```python
+def main(input_stream, output_stream):
+    def is_prime(x):
+        if x < 2:
             return False
-    return True
+        for i in range(2, int(x**0.5)+1):
+            if x % i ==0:
+                return False
+        return True
 
-mod = 998244353
+    mod = 998244353
 
-n = int(input())
-a = list(map(int, input().split()))
-from collections import defaultdict, Counter
-from math import factorial
-from itertools import combinations
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    from collections import defaultdict, Counter
+    from math import factorial
+    from itertools import combinations
 
-cnt = Counter(a)
-primes = [x for x in cnt if is_prime(x)]
-distinct_primes = list(set(primes))  # since primes are already primes, but we need distinct.
+    cnt = Counter(a)
+    primes = [x for x in cnt if is_prime(x)]
+    distinct_primes = list(set(primes))  # since primes are already primes, but we need distinct.
 
-k = len(distinct_primes)
-if k < n:
-    print(0)
-    exit()
+    k = len(distinct_primes)
+    if k < n:
+        print(0, file=output_stream)
+        return
 
-ans =0
+    ans =0
 
-for comb in combinations(distinct_primes, n):
-    # Create a copy of the counter
-    remaining = cnt.copy()
-    valid = True
-    for p in comb:
-        if remaining[p] <1:
-            valid = False
-            break
-        remaining[p] -=1
-    if not valid:
-        continue
-    # Now check the remaining elements.
-    exponents = []
-    for num, freq in remaining.items():
-        if freq ==0:
+    for comb in combinations(distinct_primes, n):
+        # Create a copy of the counter
+        remaining = cnt.copy()
+        valid = True
+        for p in comb:
+            if remaining[p] <1:
+                valid = False
+                break
+            remaining[p] -=1
+        if not valid:
             continue
-        if num <1:
-            valid = False
-            break
-        exponents.extend([num]*freq)
-    if not valid or len(exponents)!=n:
-        continue
-    # compute multinomial coefficient: n! / product (counts! )
-    exp_cnt = Counter(exponents)
-    numerator = factorial(n)
-    denominator = 1
-    for c in exp_cnt.values():
-        denominator *= factorial(c)
-        denominator %= mod
-    # Compute numerator * inverse(denominator) mod mod
-    multinom = (numerator * pow(denominator, mod-2, mod)) % mod
-    ans = (ans + multinom) % mod
+        # Now check the remaining elements.
+        exponents = []
+        for num, freq in remaining.items():
+            if freq ==0:
+                continue
+            if num <1:
+                valid = False
+                break
+            exponents.extend([num]*freq)
+        if not valid or len(exponents)!=n:
+            continue
+        # compute multinomial coefficient: n! / product (counts! )
+        exp_cnt = Counter(exponents)
+        numerator = factorial(n)
+        denominator = 1
+        for c in exp_cnt.values():
+            denominator *= factorial(c)
+            denominator %= mod
+        # Compute numerator * inverse(denominator) mod mod
+        multinom = (numerator * pow(denominator, mod-2, mod)) % mod
+        ans = (ans + multinom) % mod
 
-print(ans)
+    print(ans, file=output_stream)
 
-But this code is not correct for the first sample.
 
-Testing the first sample:
 
-Input:
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2
+2 2 3 5
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-1 3 2 3
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The distinct_primes are 2 and 3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Combination is (2,3).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-remaining after subtracting 1 from 2 and 3:
+    print('Tests passed 😎')
 
-cnt[2] was 1 → 0.
 
-cnt[3] was 2 →1.
+if __name__ == '__main__':
+    test()
 
-remaining elements: 3 (count 1), 1 (count 1).
 
-exponents = [3,1].
+```
 
-exp_cnt is {3:1, 1:1}.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-numerator = 2! =2.
-
-denominator = 1! *1! =2.
-
-multinom = 2 * inverse(2) mod mod.
-
-Since inverse(2) is 499122177, multinom = 2 * 499122177 mod mod = 1.
-
-But the sample answer is 2. So this code gives 1, which is wrong.
+```
 
 Ah! Here's the mistake.
 

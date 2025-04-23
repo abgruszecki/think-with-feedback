@@ -517,79 +517,199 @@ For i in reversed(range(n)):
 
 So, code in Python:
 
-n, p = map(int, input().split())
-s = list(input().strip())
+Testing against sample input 1.
 
-found = False
-for i in reversed(range(n)):
-    current_char = s[i]
-    # Generate possible next characters for this position.
-    start = ord(current_char) + 1
-    end = ord('a') + p -1
-    for c_ord in range(start, end +1):
-        c = chr(c_ord)
-        # Check constraints for position i.
-        # i must not be equal to i-1 and i-2.
-        valid = True
-        if i > 0 and c == s[i-1]:
-            valid = False
-        if i > 1 and c == s[i-2]:
-            valid = False
-        if valid:
-            # Now, try to build the rest of the string.
-            new_s = s[:i] + [c]
-            # Fill the rest of the characters from i+1 to n-1.
-            possible = True
-            for j in range(i+1, n):
-                # Find the smallest possible character for new_s[j].
-                # prev1 is new_s[j-1], prev2 is new_s[j-2] if j >=2.
-                prev1 = new_s[j-1]
-                prev2 = new_s[j-2] if j-2 >=0 else None
-                for candidate_ord in range(ord('a'), ord('a') + p):
-                    candidate = chr(candidate_ord)
-                    if candidate == prev1:
-                        continue
-                    if prev2 is not None and candidate == prev2:
-                        continue
-                    # Valid candidate.
-                    new_s.append(candidate)
-                    break
-                else:
-                    # No candidate found.
-                    possible = False
-                    break
-            if possible:
-                print(''.join(new_s))
-                exit()
-    # If any of the c's worked, we would have exited already.
-# After all i's, no solution.
-print("NO")
+```python
+def main(input_stream, output_stream):
+    n, p = map(int, input_stream.readline().rstrip("\n").split())
+    s = list(input_stream.readline().rstrip("\n").strip())
 
-Let's test this code against the samples.
+    found = False
+    for i in reversed(range(n)):
+        current_char = s[i]
+        # Generate possible next characters for this position.
+        start = ord(current_char) + 1
+        end = ord('a') + p -1
+        for c_ord in range(start, end +1):
+            c = chr(c_ord)
+            # Check constraints for position i.
+            # i must not be equal to i-1 and i-2.
+            valid = True
+            if i > 0 and c == s[i-1]:
+                valid = False
+            if i > 1 and c == s[i-2]:
+                valid = False
+            if valid:
+                # Now, try to build the rest of the string.
+                new_s = s[:i] + [c]
+                # Fill the rest of the characters from i+1 to n-1.
+                possible = True
+                for j in range(i+1, n):
+                    # Find the smallest possible character for new_s[j].
+                    # prev1 is new_s[j-1], prev2 is new_s[j-2] if j >=2.
+                    prev1 = new_s[j-1]
+                    prev2 = new_s[j-2] if j-2 >=0 else None
+                    for candidate_ord in range(ord('a'), ord('a') + p):
+                        candidate = chr(candidate_ord)
+                        if candidate == prev1:
+                            continue
+                        if prev2 is not None and candidate == prev2:
+                            continue
+                        # Valid candidate.
+                        new_s.append(candidate)
+                        break
+                    else:
+                        # No candidate found.
+                        possible = False
+                        break
+                if possible:
+                    print(''.join(new_s), file=output_stream)
+                    return
+        # If any of the c's worked, we would have exited already.
+    # After all i's, no solution.
+    print("NO", file=output_stream)
 
-Sample 2:
 
-3 4 → cba.
 
-The code loops i=2:
+def test():
+    import io
 
-current_char is 'a'. start is ord('a')+1=98, end is ord('a')+3=100 (i.e., 'd').
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 4
+cba
+""",
+            "output": \
+"""\
+cbd
+""",
+        }, 
+    ]
 
-Check c_ord from 98 to 100:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-c_ord 98: 'b'.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Check valid: i=2. i>0 → check if 'b' == s[1] ('b') → yes. So invalid.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-c_ord 99: 'c' → check s[1] ('b') → okay. Check s[0] ('c') → 'c' == 'c' → invalid.
+    print('Tests passed 😎')
 
-c_ord 100: 'd' → check s[1] ('b') → okay. Check s[0] ('c') → okay. So valid.
 
-Now, new_s is s[:2] + ['d'] → s[:2] is ['c', 'b'] → new_s is ['c', 'b', 'd'].
+if __name__ == '__main__':
+    test()
 
-Then, j starts from 3 (since n=3), so loop doesn't run. So possible is True.
 
-Print 'cbd' → correct.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, p = map(int, input_stream.readline().rstrip("\n").split())
+    s = list(input_stream.readline().rstrip("\n").strip())
+
+    found = False
+    for i in reversed(range(n)):
+        current_char = s[i]
+        # Generate possible next characters for this position.
+        start = ord(current_char) + 1
+        end = ord('a') + p -1
+        for c_ord in range(start, end +1):
+            c = chr(c_ord)
+            # Check constraints for position i.
+            # i must not be equal to i-1 and i-2.
+            valid = True
+            if i > 0 and c == s[i-1]:
+                valid = False
+            if i > 1 and c == s[i-2]:
+                valid = False
+            if valid:
+                # Now, try to build the rest of the string.
+                new_s = s[:i] + [c]
+                # Fill the rest of the characters from i+1 to n-1.
+                possible = True
+                for j in range(i+1, n):
+                    # Find the smallest possible character for new_s[j].
+                    # prev1 is new_s[j-1], prev2 is new_s[j-2] if j >=2.
+                    prev1 = new_s[j-1]
+                    prev2 = new_s[j-2] if j-2 >=0 else None
+                    for candidate_ord in range(ord('a'), ord('a') + p):
+                        candidate = chr(candidate_ord)
+                        if candidate == prev1:
+                            continue
+                        if prev2 is not None and candidate == prev2:
+                            continue
+                        # Valid candidate.
+                        new_s.append(candidate)
+                        break
+                    else:
+                        # No candidate found.
+                        possible = False
+                        break
+                if possible:
+                    print(''.join(new_s), file=output_stream)
+                    return
+        # If any of the c's worked, we would have exited already.
+    # After all i's, no solution.
+    print("NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4
+abcd
+""",
+            "output": \
+"""\
+abda
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

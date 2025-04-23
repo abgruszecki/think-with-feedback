@@ -183,49 +183,74 @@ We can proceed to implement this.
 
 So in Python:
 
-a = input().strip()
+Testing against sample input 1.
 
-s = input().strip()
+```python
+def main(input_stream, output_stream):
+    a = input_stream.readline().rstrip("\n").strip()
 
-s_sorted = sorted(s, reverse=True)
+    s = input_stream.readline().rstrip("\n").strip()
 
-a_list = list(a)
+    s_sorted = sorted(s, reverse=True)
 
-i = 0
+    a_list = list(a)
 
-for j in range(len(a_list)):
+    i = 0
 
-    if i < len(s_sorted) and s_sorted[i] > a_list[j]:
+    for j in range(len(a_list)):
 
-        a_list[j] = s_sorted[i]
+        if i < len(s_sorted) and s_sorted[i] > a_list[j]:
 
-        i += 1
+            a_list[j] = s_sorted[i]
 
-print(''.join(a_list))
+            i += 1
 
-Yes, this should work.
+    print(''.join(a_list), file=output_stream)
 
-Testing the first example:
 
-Input:
 
-1024
+def test():
+    import io
 
-010
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+987
+1234567
+""",
+            "output": \
+"""\
+987
+""",
+        }, 
+    ]
 
-s_sorted is ['1','0','0']
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Loop through a_list:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-j=0: s_sorted[0] is '1', a_list[0] is '1' → not greater → no.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-j=1: s_sorted[0] is '1' > '0' → replace, i becomes 1.
+    print('Tests passed 😎')
 
-j=2: s_sorted[1] is '0' < '2' → no.
 
-j=3: s_sorted[1] is '0' <4 → no.
+if __name__ == '__main__':
+    test()
 
-Result is '1124' → correct.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: a is '999', s is '111' → no replacement, output is '999'.
 

@@ -295,85 +295,126 @@ But in Python, functions can be written. But to save code lines, perhaps impleme
 
 So the code:
 
-n = int(input())
+Testing against sample input 1.
 
-if n ==0:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-    print(0)
+    if n ==0:
 
-    exit()
+        print(0, file=output_stream)
 
-students = [tuple(map(int, input().split())) for _ in range(n)]
+        return
 
-alex = students[0]
+    students = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n)]
 
-a_start, a_end = alex
+    alex = students[0]
 
-if n ==1:
+    a_start, a_end = alex
 
-    print(a_end - a_start)
+    if n ==1:
 
-    exit()
+        print(a_end - a_start, file=output_stream)
 
-others = students[1:]
+        return
 
-# Merge the others' intervals
+    others = students[1:]
 
-# Sort the others by start time
+    # Merge the others' intervals
 
-others_sorted = sorted(others, key=lambda x: x[0])
+    # Sort the others by start time
 
-merged = []
+    others_sorted = sorted(others, key=lambda x: x[0])
 
-if others_sorted:
+    merged = []
 
-    merged = [list(others_sorted[0])]
+    if others_sorted:
 
-    for s, e in others_sorted[1:]:
+        merged = [list(others_sorted[0])]
 
-        last_s, last_e = merged[-1]
+        for s, e in others_sorted[1:]:
 
-        if s <= last_e:
+            last_s, last_e = merged[-1]
 
-            # merge
+            if s <= last_e:
 
-            merged[-1][1] = max(last_e, e)
+                # merge
 
-        else:
+                merged[-1][1] = max(last_e, e)
 
-            merged.append([s, e])
+            else:
 
-    # Convert merged to tuples for easier processing
+                merged.append([s, e])
 
-    merged = [ (s, e) for s, e in merged ]
+        # Convert merged to tuples for easier processing
 
-total_overlap = 0
+        merged = [ (s, e) for s, e in merged ]
 
-for s, e in merged:
+    total_overlap = 0
 
-    # Compute overlap with Alex's interval
+    for s, e in merged:
 
-    overlap_start = max(a_start, s)
+        # Compute overlap with Alex's interval
 
-    overlap_end = min(a_end, e)
+        overlap_start = max(a_start, s)
 
-    if overlap_start < overlap_end:
+        overlap_end = min(a_end, e)
 
-        total_overlap += (overlap_end - overlap_start)
+        if overlap_start < overlap_end:
 
-answer = (a_end - a_start) - total_overlap
+            total_overlap += (overlap_end - overlap_start)
 
-print(answer)
+    answer = (a_end - a_start) - total_overlap
 
-Yes, this should work.
+    print(answer, file=output_stream)
 
-Testing the first sample:
 
-others = [(2,8), (1,6)] → sorted becomes [(1,6), (2,8)]
 
-merged starts with (1,6). Then next (2,8) starts at 2 which is <=6. So merge to (1,8). So merged is [(1,8)].
+def test():
+    import io
 
-Then overlap with 0-5 is max(0,1) =1, min(5,8)=5. 5-1=4. Total overlap 4. 5-4=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+0 10
+1 5
+7 15
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

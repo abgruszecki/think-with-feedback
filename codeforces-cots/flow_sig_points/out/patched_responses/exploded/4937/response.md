@@ -265,109 +265,237 @@ then process each run.
 
 Now, code:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-s = input().strip()
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-if 'w' in s or 'm' in s:
+    s = input_stream.readline().rstrip("\n").strip()
 
-    print(0)
+    if 'w' in s or 'm' in s:
 
-else:
+        print(0, file=output_stream)
 
-    max_len = len(s)
+    else:
 
-    # Precompute dp up to max possible run length, which is len(s)
+        max_len = len(s)
 
-    dp = [0]*(max_len +2)  # since run can be up to len(s) in length
+        # Precompute dp up to max possible run length, which is len(s)
 
-    if max_len >=1:
+        dp = [0]*(max_len +2)  # since run can be up to len(s) in length
 
-        dp[1] =1
+        if max_len >=1:
 
-    if max_len >=2:
+            dp[1] =1
 
-        dp[2] =2
+        if max_len >=2:
 
-    for i in range(3, max_len+1):
+            dp[2] =2
 
-        dp[i] = (dp[i-1] + dp[i-2]) % MOD
+        for i in range(3, max_len+1):
 
-    res =1
+            dp[i] = (dp[i-1] + dp[i-2]) % MOD
 
-    n = len(s)
+        res =1
 
-    if n ==0:
+        n = len(s)
 
-        print(0)
+        if n ==0:
 
-        exit()
+            print(0, file=output_stream)
 
-    current_char = s[0]
+            return
 
-    count =1
+        current_char = s[0]
 
-    for i in range(1, n):
+        count =1
 
-        if s[i] == current_char:
+        for i in range(1, n):
 
-            count +=1
+            if s[i] == current_char:
 
-        else:
+                count +=1
 
-            # process the current run
+            else:
 
-            if current_char in ['u', 'n']:
+                # process the current run
 
-                res = res * dp[count] % MOD
+                if current_char in ['u', 'n']:
 
-            current_char = s[i]
+                    res = res * dp[count] % MOD
 
-            count =1
+                current_char = s[i]
 
-    # process the last run
+                count =1
 
-    if current_char in ['u', 'n']:
+        # process the last run
 
-        res = res * dp[count] % MOD
+        if current_char in ['u', 'n']:
 
-    print(res)
+            res = res * dp[count] % MOD
 
-Wait, but what if the maximum run length is longer than the precomputed dp array? For example, if the input is a run of 1e5 'u's. Then, in the code above, when the code precomputes dp up to max_len, which is len(s) (which could be 1e5). So when len(s) is 1e5, the loop runs from 3 to max_len (1e5). So the dp array is correctly filled.
+        print(res, file=output_stream)
 
-But in the code above, the code precomputes dp up to max_len, which is the length of the input. But the actual runs can't be longer than len(s), so the maximum possible run length is len(s). So precomputing up to max_len is sufficient.
 
-But for example, if the input is a run of 1e5 'u's, the code will compute dp[1e5], which is the correct value.
 
-Yes.
+def test():
+    import io
 
-Testing the code against the examples.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+banana
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-First example:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Input: 'ouuokarinn'
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Runs:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-o (1, not u/n → factor 1)
+    print('Tests passed 😎')
 
-u (2, which is 2 → factor 2)
 
-o (1)
+if __name__ == '__main__':
+    test()
 
-k (1)
 
-a (1)
+```
 
-r (1)
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i (1)
+```
 
-n (2 → factor 2)
+Testing against sample input 2.
 
-Total 2*2=4 → correct.
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-Second example: 'banana' → no runs of u or n longer than 1. So product is 1 → correct.
+    s = input_stream.readline().rstrip("\n").strip()
+
+    if 'w' in s or 'm' in s:
+
+        print(0, file=output_stream)
+
+    else:
+
+        max_len = len(s)
+
+        # Precompute dp up to max possible run length, which is len(s)
+
+        dp = [0]*(max_len +2)  # since run can be up to len(s) in length
+
+        if max_len >=1:
+
+            dp[1] =1
+
+        if max_len >=2:
+
+            dp[2] =2
+
+        for i in range(3, max_len+1):
+
+            dp[i] = (dp[i-1] + dp[i-2]) % MOD
+
+        res =1
+
+        n = len(s)
+
+        if n ==0:
+
+            print(0, file=output_stream)
+
+            return
+
+        current_char = s[0]
+
+        count =1
+
+        for i in range(1, n):
+
+            if s[i] == current_char:
+
+                count +=1
+
+            else:
+
+                # process the current run
+
+                if current_char in ['u', 'n']:
+
+                    res = res * dp[count] % MOD
+
+                current_char = s[i]
+
+                count =1
+
+        # process the last run
+
+        if current_char in ['u', 'n']:
+
+            res = res * dp[count] % MOD
+
+        print(res, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+nnn
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: 'nnn' → run of 3 'n's. dp[3] =3 → correct.
 

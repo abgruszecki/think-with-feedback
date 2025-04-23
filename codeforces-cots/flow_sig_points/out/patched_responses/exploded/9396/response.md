@@ -535,17 +535,18 @@ Another possible optimization is to use a Counter or a default dictionary for th
 
 So in code:
 
+Testing against sample input 1.
+
+```python
 from heapq import heappush, heappop
-
 import sys
-
 from collections import defaultdict
 
-def main():
 
-    n, k = map(int, sys.stdin.readline().split())
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
 
-    arr = [int(sys.stdin.readline()) for _ in range(n)]
+    arr = [int(input_stream.readline()) for _ in range(n)]
 
     counts = defaultdict(int)
 
@@ -609,81 +610,63 @@ def main():
 
             if valid_max is not None:
 
-                print(valid_max)
+                print(valid_max, file=output_stream)
 
             else:
 
-                print("Nothing")
+                print("Nothing", file=output_stream)
 
-if __name__ == "__main__":
 
-    main()
 
-But wait, when processing the window, after pushing elements to the heap, the code checks the current counts. However, the counts dictionary is being modified as the window slides. So when the code is processing the heap for a window, the counts dictionary is correct for that window.
+def test():
+    import io
 
-Testing this code on the first sample:
-
-Sample 1:
-
-Input:
-
-5 3
-
-1
-
-2
-
-2
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 4
 3
-
 3
-
-Output:
-
-1
-
 3
-
+4
+4
 2
+""",
+            "output": \
+"""\
+4
+Nothing
+3
+""",
+        }, 
+    ]
 
-When right=2 (window 0-2, k=3):
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-counts after adding 2 (third element):
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-1:1, 2:2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So the heap has -1 and -2 (pushed when their counts were 1). But for the third element (2), the count becomes 2, so it's not pushed again.
+    print('Tests passed 😎')
 
-Processing the heap:
 
-Check top is -1. current=1. counts[1] is 1 → valid. So output 1.
+if __name__ == '__main__':
+    test()
 
-Then for the next window (right=3):
 
-left increments to 1. counts[1] is 0 → deleted. counts[2] becomes 1 (since left=0 was removed, counts[2] was 2 → 1. So heappush -2.
+```
 
-Then, when processing the window (right=3):
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-counts is 2:2 (because right=3 is 3, which was added, making counts[3] 1. So counts after this addition is:
-
-2:2 (since left=1, right=3: elements 2,2,3 → counts[2]=2, 3=1).
-
-So when processing the heap:
-
-The heap has -3 (from right=3, counts[3] becomes 1 → pushed) and -2 (from left increment).
-
-The top is -3 (current=3). counts[3] is 1 → valid. Output 3.
-
-Third window (right=4):
-
-counts[3] becomes 2. Then, left increments to 2. The left_num is 2 (element at index 2). counts[2] becomes 1 → heappush -2.
-
-Processing this window:
-
-The heap has -2 (from left increment) and possibly other elements. The window's elements are 2,3,3. counts: 2:1, 3:2. So current is 2 (from the heap). counts[2] is 1 → valid. Output 2.
-
-Which matches the sample.
+```
 
 Sample 2:
 

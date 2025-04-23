@@ -417,17 +417,123 @@ If count is odd → print "Yes". Else → "No".
 
 Yes, this should work.
 
-Testing the examples:
+Testing against sample input 1.
 
-First example: "abacaba".
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    stack = []
+    count = 0
+    for c in s:
+        if stack and stack[-1] == c:
+            stack.pop()
+            count += 1
+        else:
+            stack.append(c)
+    print("Yes" if count % 2 else "No", file=output_stream)
 
-Processing:
 
-Each character is pushed, no pairs except none. Count remains 0. Even → "No".
 
-Second example: "iiq".
+def test():
+    import io
 
-Processing first two 'i's → count 1. 'q' is pushed. Count is 1 → "Yes".
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+iiq
+""",
+            "output": \
+"""\
+Yes
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    stack = []
+    count = 0
+    for c in s:
+        if stack and stack[-1] == c:
+            stack.pop()
+            count += 1
+        else:
+            stack.append(c)
+    print("Yes" if count % 2 else "No", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+abba
+""",
+            "output": \
+"""\
+No
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: "abba".
 

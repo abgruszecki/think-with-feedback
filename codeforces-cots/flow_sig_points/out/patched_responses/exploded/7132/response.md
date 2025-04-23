@@ -1364,67 +1364,73 @@ For each i from 0 to n-1:
 
 This approach accumulates all leftover sticks from previous i's into a global carry pool, which can be used with any higher i's.
 
-Let's test this with the first sample:
+Testing against sample input 1.
 
-Sample input:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    carry = 0
+    triangles = 0
 
-n=5, a=[1,2,2,2,2]
+    for num in a:
+        use = min(carry, num // 2)
+        triangles += use
+        num -= 2 * use
+        carry -= use
+        
+        t = num // 3
+        triangles += t
+        num -= 3 * t
+        
+        carry += num
 
-carry starts at 0.
+    print(triangles, file=output_stream)
 
-i=0:
 
-a[i]=1.
 
-carry=0 → use=0.
+def test():
+    import io
 
-form triplets: 0. a[i] remains 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 1 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-carry +=1 → carry=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-triangles=0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=1:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-a[i]=2.
+    print('Tests passed 😎')
 
-carry=1. use = min(1, 2//2=1) → use=1. a[i] becomes 0. carry becomes 0.
 
-form triplets:0. a[i] is 0. carry +=0 → carry=0.
+if __name__ == '__main__':
+    test()
 
-triangles=1.
 
-i=2:
+```
 
-a[i]=2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-carry=0 → use=0.
-
-form triplets: 2//3=0. a[i] remains 2. carry +=2 → carry=2.
-
-triangles=1.
-
-i=3:
-
-a[i]=2.
-
-carry=2. use = min(2, 2//2=1) → use=1. a[i] becomes 0. carry becomes 1.
-
-form triplets:0. carry +=0 → carry=1.
-
-triangles=2.
-
-i=4:
-
-a[i]=2.
-
-carry=1. use = min(1, 2//2=1) → use=1. a[i] becomes 0. carry becomes 0.
-
-form triplets:0. carry +=0.
-
-triangles=3.
-
-So total triangles is 3, which matches the sample.
+```
 
 Another test case: third sample.
 

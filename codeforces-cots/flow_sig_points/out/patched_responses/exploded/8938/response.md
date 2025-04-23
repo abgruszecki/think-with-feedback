@@ -1037,213 +1037,213 @@ So here's a possible plan:
 
    So the code for preprocessing:
 
-   MOD = 10**9 +7
+Testing against sample input 1.
 
-   inv5 = [0,1,3,2,4]  # inverse modulo 5 for 0,1,2,3,4.
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-   n, m = map(int, input().split())
+    inv5 = [0,1,3,2,4]  # inverse modulo 5 for 0,1,2,3,4.
 
-   groups = []
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-   for _ in range(n):
+    groups = []
 
-       s = input().strip()
+    for _ in range(n):
 
-       groups.append( [ (ord(c) - ord('a')) %5 for c in s ] )
+        s = input_stream.readline().rstrip("\n").strip()
 
-   # Build matrix A: m rows x n columns.
+        groups.append( [ (ord(c) - ord('a')) %5 for c in s ] )
 
-   A = []
+    # Build matrix A: m rows x n columns.
 
-   for j in range(m):
+    A = []
 
-       row = []
+    for j in range(m):
 
-       for i in range(n):
+        row = []
 
-           row.append( groups[i][j] )
+        for i in range(n):
 
-       A.append(row)
+            row.append( groups[i][j] )
 
-   operations = []
+        A.append(row)
 
-   rank =0
+    operations = []
 
-   for c in range(n):
+    rank =0
 
-       # Find pivot in column c, starting from row rank
+    for c in range(n):
 
-       pivot_row = None
+        # Find pivot in column c, starting from row rank
 
-       for r in range(rank, m):
+        pivot_row = None
 
-           if A[r][c] %5 !=0:
+        for r in range(rank, m):
 
-               pivot_row = r
+            if A[r][c] %5 !=0:
 
-               break
+                pivot_row = r
 
-       if pivot_row is None:
+                break
 
-           continue
+        if pivot_row is None:
 
-       # Swap with current rank row
+            continue
 
-       if pivot_row != rank:
+        # Swap with current rank row
 
-           A[rank], A[pivot_row] = A[pivot_row], A[rank]
+        if pivot_row != rank:
 
-           operations.append( ('swap', rank, pivot_row) )
+            A[rank], A[pivot_row] = A[pivot_row], A[rank]
 
-       # Scale the pivot row to have 1 in column c
+            operations.append( ('swap', rank, pivot_row) )
 
-       coeff = A[rank][c]
+        # Scale the pivot row to have 1 in column c
 
-       inv = inv5[coeff %5]
+        coeff = A[rank][c]
 
-       # Scale the entire row
+        inv = inv5[coeff %5]
 
-       for j in range(c, n):
+        # Scale the entire row
 
-           A[rank][j] = (A[rank][j] * inv) %5
+        for j in range(c, n):
 
-       operations.append( ('scale', rank, inv) )
+            A[rank][j] = (A[rank][j] * inv) %5
 
-       # Eliminate other rows
+        operations.append( ('scale', rank, inv) )
 
-       for r in range(m):
+        # Eliminate other rows
 
-           if r == rank:
+        for r in range(m):
 
-               continue
+            if r == rank:
 
-           factor = A[r][c] %5
+                continue
 
-           if factor !=0:
+            factor = A[r][c] %5
 
-               # Subtract factor * pivot row from row r
+            if factor !=0:
 
-               for j in range(c, n):
+                # Subtract factor * pivot row from row r
 
-                   A[r][j] = (A[r][j] - factor * A[rank][j]) %5
+                for j in range(c, n):
 
-               operations.append( ('eliminate', r, rank, factor) )
+                    A[r][j] = (A[r][j] - factor * A[rank][j]) %5
 
-       rank +=1
+                operations.append( ('eliminate', r, rank, factor) )
 
-   # Now, process queries.
+        rank +=1
 
-   q = int(input())
+    # Now, process queries.
 
-   for _ in range(q):
+    q = int(input_stream.readline().rstrip("\n"))
 
-       b_str = input().strip()
+    for _ in range(q):
 
-       if len(b_str) !=m:
+        b_str = input_stream.readline().rstrip("\n").strip()
 
-           print(0)
+        if len(b_str) !=m:
 
-           continue
+            print(0, file=output_stream)
 
-       b = [ (ord(c) - ord('a')) %5 for c in b_str ]
+            continue
 
-       # Apply operations to b
+        b = [ (ord(c) - ord('a')) %5 for c in b_str ]
 
-       current_b = b.copy()
+        # Apply operations to b
 
-       for op in operations:
+        current_b = b.copy()
 
-           if op[0] == 'swap':
+        for op in operations:
 
-               i, j = op[1], op[2]
+            if op[0] == 'swap':
 
-               current_b[i], current_b[j] = current_b[j], current_b[i]
+                i, j = op[1], op[2]
 
-           elif op[0] == 'scale':
+                current_b[i], current_b[j] = current_b[j], current_b[i]
 
-               i, inv = op[1], op[2]
+            elif op[0] == 'scale':
 
-               current_b[i] = (current_b[i] * inv) %5
+                i, inv = op[1], op[2]
 
-           elif op[0] == 'eliminate':
+                current_b[i] = (current_b[i] * inv) %5
 
-               dest, src, factor = op[1], op[2], op[3]
+            elif op[0] == 'eliminate':
 
-               current_b[dest] = (current_b[dest] - factor * current_b[src]) %5
+                dest, src, factor = op[1], op[2], op[3]
 
-       # Check if any of the rows from rank to m-1 are non-zero
+                current_b[dest] = (current_b[dest] - factor * current_b[src]) %5
 
-       valid = True
+        # Check if any of the rows from rank to m-1 are non-zero
 
-       for r in range(rank, m):
+        valid = True
 
-           if current_b[r] %5 !=0:
+        for r in range(rank, m):
 
-               valid = False
+            if current_b[r] %5 !=0:
 
-               break
+                valid = False
 
-       if not valid:
+                break
 
-           print(0)
+        if not valid:
 
-       else:
+            print(0, file=output_stream)
 
-           ans = pow(5, n - rank, MOD)
+        else:
 
-           print(ans)
+            ans = pow(5, n - rank, MOD)
 
-   Now, let's test this code with the first example:
+            print(ans, file=output_stream)
 
-   Sample input 1:
 
-   1 1
 
-   b
+def test():
+    import io
 
-   2
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 4
+aaaa
+bbbb
+1
+cccc
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-   a
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-   e
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-   The code reads n=1, m=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-   groups is [[1]].
+    print('Tests passed 😎')
 
-   Matrix A is [[1]].
 
-   Gaussian elimination steps:
+if __name__ == '__main__':
+    test()
 
-   column 0:
 
-   pivot_row is 0.
+```
 
-   no swap.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-   coeff is 1. inv is 1.
-
-   scale row 0 by 1. No change.
-
-   eliminate other rows (none).
-
-   operations list: [('scale', 0, 1)].
-
-   rank=1.
-
-   Queries:
-
-   First query: 'a' → [0].
-
-   apply scale to 0 → 0.
-
-   check rows from 1 to 0 (none). valid is True.
-
-   ans =5^(1-1)=1.
-
-   Second query: 'e' →4. transformed via scale (4*1=4). check rows 1-0 (none). ans is 1.
-
-   Which matches.
+```
 
    Sample input 2:
 

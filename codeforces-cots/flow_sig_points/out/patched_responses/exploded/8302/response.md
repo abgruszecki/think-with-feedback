@@ -428,103 +428,109 @@ But perhaps in Python, using integers for masks is manageable.
 
 So, code outline:
 
-n = int(input())
-segments = []
-H = []  # list of horizontal segments, each is (x1, y1, x2, y2, original_index)
-V = []  # list of vertical segments, each is (x1, y1, x2, y2, original_index)
+Testing against sample input 1.
 
-for original_index in range(n):
-    x1, y1, x2, y2 = map(int, input().split())
-    if x1 == x2:
-        # vertical
-        V.append( (x1, y1, x2, y2, original_index) )
-    else:
-        # horizontal
-        H.append( (x1, y1, x2, y2, original_index) )
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    segments = []
+    H = []  # list of horizontal segments, each is (x1, y1, x2, y2, original_index)
+    V = []  # list of vertical segments, each is (x1, y1, x2, y2, original_index)
 
-# Precompute for each vertical, the mask of horizontal segments it intersects
-v_masks = []
-for v in V:
-    x_v = v[0]
-    y1_v = v[1]
-    y2_v = v[2]
-    y_v_min = min(y1_v, y2_v)
-    y_v_max = max(y1_v, y2_v)
-    mask = 0
-    for h in H:
-        h_orig_idx = h[4]
-        y_h = h[1]
-        x1_h = h[0]
-        x2_h = h[2]
-        x_h_min = min(x1_h, x2_h)
-        x_h_max = max(x1_h, x2_h)
-        if (x_h_min <= x_v <= x_h_max) and (y_v_min <= y_h <= y_v_max):
-            mask |= 1 << h_orig_idx
-    v_masks.append( (v[4], mask) )  # store original index and mask
+    for original_index in range(n):
+        x1, y1, x2, y2 = map(int, input_stream.readline().rstrip("\n").split())
+        if x1 == x2:
+            # vertical
+            V.append( (x1, y1, x2, y2, original_index) )
+        else:
+            # horizontal
+            H.append( (x1, y1, x2, y2, original_index) )
 
-# Now, sort the v_masks by original index
-v_masks.sort(key=lambda x: x[0])
+    # Precompute for each vertical, the mask of horizontal segments it intersects
+    v_masks = []
+    for v in V:
+        x_v = v[0]
+        y1_v = v[1]
+        y2_v = v[2]
+        y_v_min = min(y1_v, y2_v)
+        y_v_max = max(y1_v, y2_v)
+        mask = 0
+        for h in H:
+            h_orig_idx = h[4]
+            y_h = h[1]
+            x1_h = h[0]
+            x2_h = h[2]
+            x_h_min = min(x1_h, x2_h)
+            x_h_max = max(x1_h, x2_h)
+            if (x_h_min <= x_v <= x_h_max) and (y_v_min <= y_h <= y_v_max):
+                mask |= 1 << h_orig_idx
+        v_masks.append( (v[4], mask) )  # store original index and mask
 
-total = 0
+    # Now, sort the v_masks by original index
+    v_masks.sort(key=lambda x: x[0])
 
-# Iterate through all pairs of verticals (i, j) where i < j in the sorted list
-for i in range(len(v_masks)):
-    vi_orig, mask_i = v_masks[i]
-    for j in range(i+1, len(v_masks)):
-        vj_orig, mask_j = v_masks[j]
-        # compute the intersection
-        common = mask_i & mask_j
-        c = common.bit_count()
-        total += c * (c - 1) // 2
+    total = 0
 
-print(total)
+    # Iterate through all pairs of verticals (i, j) where i < j in the sorted list
+    for i in range(len(v_masks)):
+        vi_orig, mask_i = v_masks[i]
+        for j in range(i+1, len(v_masks)):
+            vj_orig, mask_j = v_masks[j]
+            # compute the intersection
+            common = mask_i & mask_j
+            c = common.bit_count()
+            total += c * (c - 1) // 2
 
-But wait, the code for the verticals' mask creation is iterating through H, which is a list of horizontal segments. For each h in H, we get the original index h[4]. Then, for each vertical, we check if it intersects h. If yes, set the bit corresponding to h's original index.
+    print(total, file=output_stream)
 
-Yes. So, the mask for vertical v will have bits set for the original indices of the horizontal segments that intersect it.
 
-Yes. Then, when we sort the verticals by their original indices, and iterate through all pairs (i, j) where i < j, their original indices are ordered, so the pair is valid.
 
-This should handle all possible pairs of verticals with v1 < v2 (original indices), and count the number of horizontal pairs (h1 < h2) that intersect both.
+def test():
+    import io
 
-This approach should work.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 5 1 0
+0 1 5 1
+5 4 0 4
+4 2 4 0
+4 3 4 5
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Testing on the first sample input:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample input 1:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-7
--1 4 -1 -2 → vertical (original index 0)
-6 -1 -2 -1 → horizontal (original index 1)
--2 3 6 3 → horizontal (original index 2)
-2 -2 2 4 → vertical (original index 3)
-4 -1 4 3 → vertical (original index 4)
-5 3 5 1 → vertical (original index 5)
-5 2 1 2 → horizontal (original index 6)
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-H list will have original indices 1, 2, 6.
+    print('Tests passed 😎')
 
-V list has original indices 0, 3, 4,5.
 
-Now, for each vertical in V, compute which horizontals (original indices 1,2,6) they intersect.
+if __name__ == '__main__':
+    test()
 
-For example, vertical 0 (original index 0) has x = -1, y from -2 to 4.
 
-Check each horizontal in H:
+```
 
-Original index 1: horizontal segment is from x -2 to 6, y=-1. So x_h_min = -2, x_h_max=6. The vertical's x is -1, which is between them. The horizontal's y is -1. The vertical's y ranges from -2 to 4. So -1 is between them. So this horizontal (original index 1) intersects. So bit 1 is set.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Original index 2: horizontal segment y=3. The vertical's x is -1. The horizontal x ranges from -2 to 6 → includes -1. The vertical's y ranges from -2 to 4. The horizontal's y is 3, which is within the vertical's range. So yes. Bit 2 is set.
-
-Original index 6: horizontal segment is x from 1 to5 (since the segment is 5,2 to 1,2 → x1=5, x2=1. x_h_min =1, x_h_max=5. y=2. vertical x is -1 → not between 1 and 5. So no. Bit 6 is not set.
-
-So mask for vertical 0 is 1<<1 | 1<<2 → binary 110.
-
-Similarly, other verticals are processed.
-
-Then, when pairs of verticals are processed, their masks are ANDed, and the count is computed.
-
-This should give the correct result.
+```
 
 But with the code as written, there's a problem: the mask for a vertical is built by iterating over all horizontal segments in H, but for each h in H, the original index is h[4]. But when we set the mask for the vertical, we use 1 << h_orig_idx. But h_orig_idx is the original index of the horizontal segment. For example, in the first sample input, H includes segments with original indices 1, 2, 6. So for each of these, when the vertical is checked, their original indices are used.
 

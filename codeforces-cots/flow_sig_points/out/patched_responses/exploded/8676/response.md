@@ -712,153 +712,230 @@ But in Python, how to handle the initial DP. Let's create a 26x26 array filled w
 
 We can initialize the DP as follows:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n = int(sys.stdin.readline())
 
-INF = float('-inf')
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
-dp = [[INF]*26 for _ in range(26)]
+    INF = float('-inf')
 
-max_len = 0
+    dp = [[INF]*26 for _ in range(26)]
 
-for _ in range(n):
+    max_len = 0
 
-    name = sys.stdin.readline().strip()
+    for _ in range(n):
 
-    if not name:
+        name = input_stream.readline().strip()
 
-        continue  # but according to problem statement, names are non-empty.
+        if not name:
 
-    c = ord(name[0]) - ord('a')
+            continue  # but according to problem statement, names are non-empty.
 
-    d = ord(name[-1]) - ord('a')
+        c = ord(name[0]) - ord('a')
 
-    l = len(name)
+        d = ord(name[-1]) - ord('a')
 
-    # Create new_dp as a copy of the current dp
+        l = len(name)
 
-    new_dp = [row.copy() for row in dp]
+        # Create new_dp as a copy of the current dp
 
-    # Update transitions
+        new_dp = [row.copy() for row in dp]
 
-    for s in range(26):
+        # Update transitions
 
-        if dp[s][c] != INF:
+        for s in range(26):
 
-            possible_sum = dp[s][c] + l
+            if dp[s][c] != INF:
 
-            if possible_sum > new_dp[s][d]:
+                possible_sum = dp[s][c] + l
 
-                new_dp[s][d] = possible_sum
+                if possible_sum > new_dp[s][d]:
 
-    # Update standalone case
+                    new_dp[s][d] = possible_sum
 
-    if l > new_dp[c][d]:
+        # Update standalone case
 
-        new_dp[c][d] = l
+        if l > new_dp[c][d]:
 
-    # Update dp
+            new_dp[c][d] = l
 
-    dp = new_dp
+        # Update dp
 
-    # Check for closed sequences
+        dp = new_dp
 
-    current_max = max(dp[s][s] for s in range(26))
+        # Check for closed sequences
 
-    if current_max > max_len:
+        current_max = max(dp[s][s] for s in range(26))
 
-        max_len = current_max
+        if current_max > max_len:
 
-print(max_len if max_len != INF else 0)
+            max_len = current_max
 
-Wait, but what if all dp[s][s] are INF? Then current_max will be INF. So after all steps, the max_len is 0 (if no closed sequences were found), but in the code, after processing all steps, the max_len is either INF or some positive number.
+    print(max_len if max_len != INF else 0, file=output_stream)
 
-But no. Because the code's initial max_len is 0. During processing, if a valid sequence is found (even a single name with c == d), then current_max would be >=1, so max_len would be updated.
 
-But if all names have c != d, and no sequences can form a closed loop, then current_max remains INF throughout. So the code's max_len would remain 0.
 
-But when the code prints, it does 'print(max_len if max_len != INF else 0)'.
+def test():
+    import io
 
-Wait, no. Because in the code, current_max is computed as the maximum of dp[s][s], which can be INF. So during processing, current_max can be INF. But since max_len is initialized to 0, and in the code's if condition, 'if current_max > max_len: max_len = current_max', then if current_max is INF, which is less than 0 (since INF is negative), the condition is not met. So max_len remains 0.
-
-Thus, after processing all names, if no closed sequences are found, max_len remains 0. So the code can directly print max_len. But in cases where all dp[s][s] are INF, the max_len is 0, which is correct.
-
-Thus, the code can simply print max_len.
-
-Wait, no. For example, if all possible dynasties have sum less than 0 (which is impossible because the sum is the sum of lengths, which are positive). So the code's 'max_len' is 0, and that's the correct answer.
-
-Thus, the code can output 'max_len'.
-
-But wait, for example, if the first name is 'a', which has c = d =0. Then the new_dp[0][0] is 1. current_max is 1, which is >0. So max_len becomes 1.
-
-If no names have c ==d, then the max_len remains 0.
-
-Thus, the code's print statement can be print(max_len) directly.
-
-So the code is as written.
-
-Testing the code on the samples:
-
-Sample 1:
-
-3
-
-abc
-
-ca
-
-cba
-
-After processing first name:
-
-dp[0][2] =3.
-
-max_len is 0.
-
-After processing second name:
-
-dp[0][0] =5, dp[2][0] =2.
-
-current_max is 5. max_len is 5.
-
-After third name:
-
-dp[0][0] =6.
-
-current_max is 6. max_len is 6.
-
-Output is 6.
-
-Sample 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
+vvp
+vvp
+dam
+vvp
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-vvp → starts with 'v', ends with 'p' → (21, 15). l=3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-vvp → same.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-dam → starts with 'd' (3), ends with 'm' (12). l=3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-vvp → again.
+    print('Tests passed 😎')
 
-Processing these names:
 
-First name: vvp → new_dp[21][15] =3. current_max is -inf. max_len remains 0.
+if __name__ == '__main__':
+    test()
 
-Second name: vvp → same as first. Transition: look for s where previous_dp[s][21]. Previous_dp is first step's dp, which has all INF except (21,15) =3. So s=21. So possible_sum =3 +3=6. So new_dp[21][15] =6 (but standalone is 3, so new_dp[21][15] is max(3, 6) →6. current_max is max of dp[s][s] →21 vs 21? No. new_dp[21][15] is 6. So current_max is -inf. So max_len remains 0.
 
-Third name: dam. c=3, d=12, l=3.
+```
 
-Transitions: look for s where previous_dp[s][3] != INF. Previous_dp after second step:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-All are INF except (21,15)=6. So no s has previous_dp[s][3] != INF. So transitions don't contribute. Standalone: new_dp[3][12] =3. current_max is max of dp[s][s] →-inf. So max_len remains 0.
+```
 
-Fourth name: vvp. c=21, d=15. l=3.
+Testing against sample input 2.
 
-Transitions: look for s where previous_dp[s][21] != INF. Previous_dp after third step has (21,15) =6, (3,12)=3. So for s=21: previous_dp[21][21] is INF. Because previous_dp's entries are (21,15)=6, (3,12)=3. So transitions: for s=21, previous_dp[s][c=21] is INF. So transitions do nothing. Standalone: new_dp[21][15] is max(6 (from previous), 3) →6. current_max is -inf. So max_len remains 0.
+```python
+import sys
 
-So output is 0.
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+
+    INF = float('-inf')
+
+    dp = [[INF]*26 for _ in range(26)]
+
+    max_len = 0
+
+    for _ in range(n):
+
+        name = input_stream.readline().strip()
+
+        if not name:
+
+            continue  # but according to problem statement, names are non-empty.
+
+        c = ord(name[0]) - ord('a')
+
+        d = ord(name[-1]) - ord('a')
+
+        l = len(name)
+
+        # Create new_dp as a copy of the current dp
+
+        new_dp = [row.copy() for row in dp]
+
+        # Update transitions
+
+        for s in range(26):
+
+            if dp[s][c] != INF:
+
+                possible_sum = dp[s][c] + l
+
+                if possible_sum > new_dp[s][d]:
+
+                    new_dp[s][d] = possible_sum
+
+        # Update standalone case
+
+        if l > new_dp[c][d]:
+
+            new_dp[c][d] = l
+
+        # Update dp
+
+        dp = new_dp
+
+        # Check for closed sequences
+
+        current_max = max(dp[s][s] for s in range(26))
+
+        if current_max > max_len:
+
+            max_len = current_max
+
+    print(max_len if max_len != INF else 0, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+ab
+c
+def
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

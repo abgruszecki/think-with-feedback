@@ -147,57 +147,86 @@ Another point: the adjacency matrix can be represented as a list of lists of boo
 
 So in code:
 
-n, m = map(int, input().split())
-a = list(map(int, input().split()))
-adj = [[False]*n for _ in range(n)]
-for _ in range(m):
-    u, v = map(int, input().split())
-    u -=1
-    v -=1
-    adj[u][v] = True
-    adj[v][u] = True
+Testing against sample input 2.
 
-min_sum = float('inf')
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    adj = [[False]*n for _ in range(n)]
+    for _ in range(m):
+        u, v = map(int, input_stream.readline().rstrip("\n").split())
+        u -=1
+        v -=1
+        adj[u][v] = True
+        adj[v][u] = True
 
-# Iterate through all possible triplets
-for i in range(n):
-    for j in range(i+1, n):
-        if not adj[i][j]:
-            continue
-        for k in range(j+1, n):
-            if adj[i][k] and adj[j][k]:
-                total = a[i] + a[j] + a[k]
-                if total < min_sum:
-                    min_sum = total
+    min_sum = float('inf')
 
-if min_sum == float('inf'):
-    print(-1)
-else:
-    print(min_sum)
+    # Iterate through all possible triplets
+    for i in range(n):
+        for j in range(i+1, n):
+            if not adj[i][j]:
+                continue
+            for k in range(j+1, n):
+                if adj[i][k] and adj[j][k]:
+                    total = a[i] + a[j] + a[k]
+                    if total < min_sum:
+                        min_sum = total
 
-Wait, but the order of checking for the edges in the triplet can be optimized. For example, in the code above, i < j < k. So the triplet (i,j,k) must have all edges between them. So for the triplet to form a triangle, all three pairs must be connected.
+    if min_sum == float('inf'):
+        print(-1, file=output_stream)
+    else:
+        print(min_sum, file=output_stream)
 
-But in the code, we first check if i and j are connected (since adj[i][j] is checked before entering the k loop). Then, for each k, check if i and k are connected, and j and k are connected. So all three pairs are checked.
 
-Yes.
 
-But perhaps a better way is to check all three pairs in one line. Like:
+def test():
+    import io
 
-if adj[i][j] and adj[j][k] and adj[i][k]:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4
+1 1 1 1
+1 2
+2 3
+3 4
+4 1
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-But in the code above, we already check adj[i][j] before entering the loop for k. So if i and j are not connected, we skip the rest. That's an optimization.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But for j and k, when j < k, the code is correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But in the code above, when i < j < k, the code checks for (i,j), (i,k), (j,k) edges. Because adj[j][k] is equivalent to adj[k][j] due to the matrix being symmetric. But in the code, since k is in j+1 to n-1, and j is in i+1 to n-1, then j < k. So the code checks adj[j][k], which is the same as adj[k][j], but since the adjacency is symmetric, it's okay.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So the code works.
+    print('Tests passed 😎')
 
-Testing the second example where there's no triangle:
 
-n=3, m=2. Edges are 1-2 (0-based 0 and 1) and 2-3 (1-based 2 and 1, which is 0-based 1 and 0). Wait, no, the input edges are 2 3 and 2 1. So after conversion, for the second example:
+if __name__ == '__main__':
+    test()
 
-Edges are 2-3 (1-based) becomes 1 and 2 (0-based). And 2-1 (1-based) becomes 1 and 0 (0-based). So adj[1][2] = True, adj[0][1] = True. Now, the triplet (0,1,2). Check adj[0][1] is True, adj[0][2] is False. So in the code, when i=0, j=1, the code checks adj[0][1] which is True. Then k loops from j+1=2 to 2 (since n=3). So k=2. Check adj[i][k] (adj[0][2]) which is False, so the condition is not met. So the code doesn't consider this triplet. Hence, min_sum remains infinity, and output is -1. Which is correct.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So the code works.
 

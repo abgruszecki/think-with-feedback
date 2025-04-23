@@ -269,50 +269,144 @@ We can precompute for each step i the terms, multiply them all together modulo 1
 
 So the code would look like:
 
-MOD = 10**9+7
+Testing against sample input 2.
 
-n, m, k = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9+7
 
-if 2*k +1 >n or 2*k +1> m:
-    print(0)
-else:
-    res = 1
-    for i in range(k):
-        a = n - 2*i - 2
-        a_term = a * (a + 1) // 2
-        b = m - 2*i -2
-        b_term = b * (b +1 ) //2
-        res = res * a_term % MOD
-        res = res * b_term % MOD
-    print(res % MOD)
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
 
-Wait, but in Python, integer division is done with //. Let's test this with sample input 2.
+    if 2*k +1 >n or 2*k +1> m:
+        print(0, file=output_stream)
+    else:
+        res = 1
+        for i in range(k):
+            a = n - 2*i - 2
+            a_term = a * (a + 1) // 2
+            b = m - 2*i -2
+            b_term = b * (b +1 ) //2
+            res = res * a_term % MOD
+            res = res * b_term % MOD
+        print(res % MOD, file=output_stream)
 
-Sample 2: n=4, m=4, k=1.
 
-Loop runs once, i=0.
 
-a =4-0-2=2.
+def test():
+    import io
 
-a_term=2*(3)/2=3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 7 2
+""",
+            "output": \
+"""\
+75
+""",
+        }, 
+    ]
 
-b=4-0-2=2. b_term=3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-res=3*3=9.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Which is correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sample 1: n=3, m=3, k=1.
+    print('Tests passed 😎')
 
-Check 2*1 +1 =3. n=3 >=3, m=3>=3. So possible.
 
-Loop runs once:
+if __name__ == '__main__':
+    test()
 
-a=3-0-2=1. a_term=1*2/2=1.
 
-b=3-0-2=1. b_term=1*2/2=1.
+```
 
-res=1*1=1. Correct.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 52, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 45, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '75'
+Got: '2700'
+
+```
+
+Testing against sample input 1.
+
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9+7
+
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
+
+    if 2*k +1 >n or 2*k +1> m:
+        print(0, file=output_stream)
+    else:
+        res = 1
+        for i in range(k):
+            a = n - 2*i - 2
+            a_term = a * (a + 1) // 2
+            b = m - 2*i -2
+            b_term = b * (b +1 ) //2
+            res = res * a_term % MOD
+            res = res * b_term % MOD
+        print(res % MOD, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4 1
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3: input 6 7 2.
 

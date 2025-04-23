@@ -1963,105 +1963,89 @@ But in Python, with 1e6 iterations, each involving a few operations, it's possib
 
 Thus, the code is as follows:
 
-mod = 10**18 + 3
+Testing against sample input 1.
 
-base = 911382629
+```python
+def main(input_stream, output_stream):
+    mod = 10**18 + 3
 
-n, k = map(int, input().split())
+    base = 911382629
 
-s = input().strip()
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-pre_hash = [0] * (n+1)
+    s = input_stream.readline().rstrip("\n").strip()
 
-pow_base = [1] * (n+1)
+    pre_hash = [0] * (n+1)
 
-for i in range(n):
+    pow_base = [1] * (n+1)
 
-    pre_hash[i+1] = (pre_hash[i] * base + ord(s[i])) % mod
+    for i in range(n):
 
-    pow_base[i+1] = (pow_base[i] * base) % mod
+        pre_hash[i+1] = (pre_hash[i] * base + ord(s[i])) % mod
 
-result = []
+        pow_base[i+1] = (pow_base[i] * base) % mod
 
-for i in range(1, n+1):
+    result = []
 
-    res = 0
+    for i in range(1, n+1):
 
-    r = i % k
+        res = 0
 
-    max_a = i // (k+1)
+        r = i % k
 
-    a = r
+        max_a = i // (k+1)
 
-    while a <= max_a:
+        a = r
 
-        remainder = i - (k+1)*a
+        while a <= max_a:
 
-        if remainder < 0:
+            remainder = i - (k+1)*a
 
-            a += k
+            if remainder < 0:
 
-            continue
+                a += k
 
-        if remainder % k != 0:
+                continue
 
-            a += k
+            if remainder % k != 0:
 
-            continue
+                a += k
 
-        b = remainder // k
+                continue
 
-        if b < 0:
+            b = remainder // k
 
-            a += k
+            if b < 0:
 
-            continue
+                a += k
 
-        m = a + b
+                continue
 
-        if m == 0:
+            m = a + b
 
-            a += k
+            if m == 0:
 
-            continue
+                a += k
 
-        if (k+1)*a + k*b != i:
+                continue
 
-            a += k
+            if (k+1)*a + k*b != i:
 
-            continue
+                a += k
 
-        valid = True
+                continue
 
-        if a > 0:
+            valid = True
 
-            # Compute hash of A
+            if a > 0:
 
-            hash_A = (pre_hash[a] - pre_hash[0] * pow_base[a]) % mod
+                # Compute hash of A
 
-            # Check second A
+                hash_A = (pre_hash[a] - pre_hash[0] * pow_base[a]) % mod
 
-            start = m
+                # Check second A
 
-            end = start + a
-
-            if end > i:
-
-                valid = False
-
-            else:
-
-                current_hash = (pre_hash[end] - pre_hash[start] * pow_base[a]) % mod
-
-                if current_hash != hash_A:
-
-                    valid = False
-
-            # Check last A
-
-            if valid:
-
-                start = k * m
+                start = m
 
                 end = start + a
 
@@ -2077,197 +2061,128 @@ for i in range(1, n+1):
 
                         valid = False
 
-        if valid and b > 0:
+                # Check last A
 
-            # Compute hash of B
+                if valid:
 
-            hash_B = (pre_hash[a + b] - pre_hash[a] * pow_base[b]) % mod
+                    start = k * m
 
-            # Check second B if k >= 2
+                    end = start + a
 
-            if k >= 2:
-
-                start = a + m
-
-                end = start + b
-
-                if end > i:
-
-                    valid = False
-
-                else:
-
-                    current_hash = (pre_hash[end] - pre_hash[start] * pow_base[b]) % mod
-
-                    if current_hash != hash_B:
+                    if end > i:
 
                         valid = False
 
-            # Check last B
+                    else:
 
-            if valid and k >= 1:
+                        current_hash = (pre_hash[end] - pre_hash[start] * pow_base[a]) % mod
 
-                start = a + (k-1)*m
+                        if current_hash != hash_A:
 
-                end = start + b
+                            valid = False
 
-                if end > i:
+            if valid and b > 0:
 
-                    valid = False
+                # Compute hash of B
 
-                else:
+                hash_B = (pre_hash[a + b] - pre_hash[a] * pow_base[b]) % mod
 
-                    current_hash = (pre_hash[end] - pre_hash[start] * pow_base[b]) % mod
+                # Check second B if k >= 2
 
-                    if current_hash != hash_B:
+                if k >= 2:
+
+                    start = a + m
+
+                    end = start + b
+
+                    if end > i:
 
                         valid = False
 
-        if valid:
+                    else:
 
-            res = 1
+                        current_hash = (pre_hash[end] - pre_hash[start] * pow_base[b]) % mod
 
-            break
+                        if current_hash != hash_B:
 
-        a += k
+                            valid = False
 
-    result.append(str(res))
+                # Check last B
 
-print(''.join(result))
+                if valid and k >= 1:
 
-This code should handle all cases correctly.
+                    start = a + (k-1)*m
 
-Let's test the first sample input.
+                    end = start + b
 
-Sample Input 1:
+                    if end > i:
 
-7 2
+                        valid = False
 
-bcabcab
+                    else:
 
-The output is 0000011.
+                        current_hash = (pre_hash[end] - pre_hash[start] * pow_base[b]) % mod
 
-For i=6:
+                        if current_hash != hash_B:
 
-The code should find a=0, b=3.
+                            valid = False
 
-Check B's:
+            if valid:
 
-hash_B is s[0..2] = 'bca'.
+                res = 1
 
-Second B is at 3..5, which is 'bca'.
+                break
 
-Last B is also 3..5.
+            a += k
 
-Thus, valid is True.
+        result.append(str(res))
 
-Thus, res=1.
+    print(''.join(result), file=output_stream)
 
-For i=7:
 
-The code should find a=1, b=2.
 
-m=3.
+def test():
+    import io
 
-Check A's:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+21 2
+ababaababaababaababaa
+""",
+            "output": \
+"""\
+000110000111111000011
+""",
+        }, 
+    ]
 
-hash_A is s[0..0] = 'b'.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Second A: start=3, end=4 → s[3] is 'b'.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Last A: start=2*3=6, end=7 → s[6] is 'b'.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Check B's:
+    print('Tests passed 😎')
 
-hash_B is s[1..3] = 'ca'.
 
-Second B: a=1, m=3. start=1 +3 =4. B is s[4..5] → 'ab'.
+if __name__ == '__main__':
+    test()
 
-Hash of B is 'ca' (s[1..3]?), wait wait.
 
-Wait, a=1, b=2. m=3.
+```
 
-B is s[a..a +b -1] = s[1..3-1=2], which is s[1..2] → 'ca'.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Check second B:
-
-start = a +m =1 +3 =4.
-
-B is s[4..4+2-1] = s[4..5] → 'ab' → hash differs. So code should mark this as invalid.
-
-But in the sample, i=7 is valid.
-
-Hmm. This indicates a problem.
-
-Wait, sample says for i=7, a=1, b=2.
-
-Structure is A B A B A.
-
-A is 'b', B is 'ca'.
-
-The structure is 'b' + 'ca' + 'b' + 'ca' + 'b' → 'bca bcab'.
-
-Wait, the first A is 'b' (a=1).
-
-First B is 'ca' (b=2).
-
-Second A is 'b' (starts at 3, a=1).
-
-Second B is 'ca' (starts at 4, b=2).
-
-Third A is 'b' (starts at 6, a=1).
-
-Total length is 1 +2 +1 +2 +1 =7.
-
-Yes.
-
-Thus, the code should find this valid.
-
-But in the code, when a=1, b=2:
-
-Check A's:
-
-hash_A is 'b'.
-
-Second A: start=3, end=4. s[3] is 'b'.
-
-current_hash = pre_hash[4] - pre_hash[3] * pow_base[1] → ord('b') - ord('b') * base^1?
-
-Wait, pre_hash[3] is hash of first 3 characters: 'bca'.
-
-pre_hash[4] is hash of first 4 characters: 'bca' followed by 'b'.
-
-pow_base[1] is base.
-
-So:
-
-pre_hash[4] = pre_hash[3] * base + ord('b').
-
-pre_hash[4] - pre_hash[3] * base = ord('b') → which is hash of the single character 'b'.
-
-Which matches hash_A.
-
-Thus, valid.
-
-Last A: start=2*3=6, end=7. s[6] is 'b'.
-
-current_hash is hash of s[6..6], which is 'b' → matches hash_A.
-
-Check B's:
-
-hash_B is s[1..2], 'ca'.
-
-Check second B:
-
-start = a +m =1+3=4. B is s[4..5], 'ab' → hash is different.
-
-Thus, code marks valid=False.
-
-Thus, the code would not find this pair as valid.
-
-But according to the sample, this pair should be valid.
-
-Thus, the code is incorrect.
+```
 
 Ah, here's the problem.
 

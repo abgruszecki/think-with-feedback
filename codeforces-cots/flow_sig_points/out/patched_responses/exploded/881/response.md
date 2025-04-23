@@ -95,17 +95,64 @@ Yes.
 
 So the code is straightforward.
 
-Testing against the examples:
+Testing against sample input 1.
 
-First example:
+```python
+def main(input_stream, output_stream):
+    nA, nB = map(int, input_stream.readline().rstrip("\n").split())
+    k, m = map(int, input_stream.readline().rstrip("\n").split())
+    A = list(map(int, input_stream.readline().rstrip("\n").split()))
+    B = list(map(int, input_stream.readline().rstrip("\n").split()))
+    max_a = A[k-1]
+    min_b = B[-m]
+    print("YES" if max_a < min_b else "NO", file=output_stream)
 
-nA=3, nB=3.
 
-k=2, m=1.
 
-A = [1,2,3], so A[1] is 2.
+def test():
+    import io
 
-B = [3,4,5], B[3-1=2] is 5. 2 <5: yes.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 3
+3 3
+1 2 3
+3 4 5
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

@@ -251,181 +251,137 @@ So the steps for the code:
 
    So in code:
 
-   MOD = 10**9 +7
+Testing against sample input 1.
 
-   n, k = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-   a = list(map(int, input().split()))
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-   # Precompute the imbalances
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-   n_students = len(a)
+    # Precompute the imbalances
 
-   pre = [[0]*n_students for _ in range(n_students)]
+    n_students = len(a)
 
-   for l in range(n_students):
+    pre = [[0]*n_students for _ in range(n_students)]
 
-       current_max = a[l]
+    for l in range(n_students):
 
-       current_min = a[l]
+        current_max = a[l]
 
-       pre[l][l] = 0
+        current_min = a[l]
 
-       for r in range(l+1, n_students):
+        pre[l][l] = 0
 
-           current_max = max(current_max, a[r])
+        for r in range(l+1, n_students):
 
-           current_min = min(current_min, a[r])
+            current_max = max(current_max, a[r])
 
-           pre[l][r] = current_max - current_min
+            current_min = min(current_min, a[r])
 
-   # Now DP
+            pre[l][r] = current_max - current_min
 
-   dp = [ [0]*(k+1) for _ in range(n_students +1) ]
+    # Now DP
 
-   dp[0][0] =1
+    dp = [ [0]*(k+1) for _ in range(n_students +1) ]
 
-   for i in range(1, n_students +1):
+    dp[0][0] =1
 
-       # i is the number of students processed (0..i-1)
+    for i in range(1, n_students +1):
 
-       for j in range(0, i):
+        # i is the number of students processed (0..i-1)
 
-           # group is from j to i-1 (inclusive)
+        for j in range(0, i):
 
-           if j < i-1:
+            # group is from j to i-1 (inclusive)
 
-               imbalance = pre[j][i-1]
+            if j < i-1:
 
-           else:
+                imbalance = pre[j][i-1]
 
-               # single student, imbalance 0
+            else:
 
-               imbalance =0
+                # single student, imbalance 0
 
-           # Now, for each possible sum_prev in dp[j]
+                imbalance =0
 
-           for s_prev in range(k+1):
+            # Now, for each possible sum_prev in dp[j]
 
-               if dp[j][s_prev] ==0:
+            for s_prev in range(k+1):
 
-                   continue
+                if dp[j][s_prev] ==0:
 
-               s_new = s_prev + imbalance
+                    continue
 
-               if s_new >k:
+                s_new = s_prev + imbalance
 
-                   continue
+                if s_new >k:
 
-               dp[i][s_new] = (dp[i][s_new] + dp[j][s_prev]) % MOD
+                    continue
 
-   # The answer is the sum of dp[n_students][s] for s in 0..k
+                dp[i][s_new] = (dp[i][s_new] + dp[j][s_prev]) % MOD
 
-   total = sum(dp[n_students][s] for s in range(k+1)) % MOD
+    # The answer is the sum of dp[n_students][s] for s in 0..k
 
-   print(total)
+    total = sum(dp[n_students][s] for s in range(k+1)) % MOD
 
-Wait, but in the precomputed array pre[j][i-1], j is the start index of the group (since the group is j to i-1). For example, if i=3 students (indices 0,1,2), j can be 0,1,2. For j=0, the group is 0-2 (3 students), j=1 is group 1-2, j=2 is group 2 (single student, imbalance 0).
+    print(total, file=output_stream)
 
-So this approach should work.
 
-Let's test the first sample input:
 
-Sample 1:
+def test():
+    import io
 
-3 2
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 3
+7 8 9 10
+""",
+            "output": \
+"""\
+13
+""",
+        }, 
+    ]
 
-2 4 5
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-precompute for all l and r:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-For l=0 (student 0):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-r=0: 0
+    print('Tests passed 😎')
 
-r=1: max(2,4) - min(2,4) =4-2=2.
 
-r=2: max(2,4,5) - min(2,4,5) =5-2=3.
+if __name__ == '__main__':
+    test()
 
-For l=1:
 
-r=1: 0.
+```
 
-r=2: 5-4=1.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 110, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 103, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '13'
+Got: '8'
 
-For l=2:
-
-r=2:0.
-
-So pre[0][0] =0, pre[0][1] =2, pre[0][2] =3.
-
-pre[1][1]=0, pre[1][2] =1.
-
-pre[2][2]=0.
-
-Now, the DP steps:
-
-Initialize dp[0][0] =1.
-
-For i=1 (processed first student, index 0):
-
-j can be 0 (previous students 0, which is j=0, but j ranges from 0 to i-1=0.
-
-j=0: group is j=0 to i-1=0 (student 0). Imbalance is pre[0][0] =0.
-
-s_prev can be 0 (since dp[0][0] is 1).
-
-s_new=0+0=0. So dp[1][0] +=1. Now dp[1][0] =1.
-
-For i=2 (students 0 and 1):
-
-j can be 0 or 1.
-
-j=0: group is 0-1. Imbalance is pre[0][1] =2.
-
-Check s_prev in dp[0][s_prev]. dp[0][0] is 1.
-
-s_new=0+2=2 <=k=2. So dp[2][2] +=1.
-
-j=1: group is 1-1. Imbalance 0.
-
-Check dp[1][s_prev] (s_prev can be 0).
-
-s_new=0+0=0. So dp[2][0] +=1.
-
-So after i=2, dp[2][0] =1, dp[2][2] =1.
-
-For i=3 (students 0,1,2):
-
-j can be 0,1,2.
-
-j=0: group 0-2. Imbalance pre[0][2] =3. 3 + any s_prev <=k=2 is possible only if s_prev <= -1, which is impossible. So no contribution.
-
-j=1: group 1-2. Imbalance pre[1][2] =1.
-
-Check s_prev in dp[1][s_prev], which is only s_prev=0.
-
-s_new=0+1=1 <=2. So dp[3][1] += dp[1][0] =1.
-
-j=2: group 2-2. Imbalance 0.
-
-Check dp[2][s_prev] can be 0 or 2.
-
-s_prev=0: s_new=0+0=0 → add 1 → dp[3][0] +=1.
-
-s_prev=2: s_new=2+0=2 → add 1 → dp[3][2] +=1.
-
-So after i=3, the dp[3] has:
-
-dp[3][0] =1 (from j=2, s_prev=0).
-
-dp[3][1] =1 (from j=1, s_prev=0).
-
-dp[3][2] =1 (from j=2, s_prev=2).
-
-So the sum from 0 to 2 is 1+1+1=3, which matches the sample.
-
-So this approach works for the first sample.
+```
 
 Another sample: sample 3:
 

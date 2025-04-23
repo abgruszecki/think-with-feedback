@@ -841,75 +841,105 @@ Then build output.
 
 Putting all together:
 
-s = input().strip()  # remove leading/trailing spaces
+Testing against sample input 1.
 
-tokens = []
-current_word = []
-for c in s:
-    if c.isalpha():
-        current_word.append(c)
-    elif c in {',', '.'}:
-        if current_word:
-            tokens.append(''.join(current_word))
-            current_word = []
-        tokens.append(c)
-    else:  # space
-        if current_word:
-            tokens.append(''.join(current_word))
-            current_word = []
-# Add remaining current_word if any
-if current_word:
-    tokens.append(''.join(current_word))
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()  # remove leading/trailing spaces
 
-processed_tokens = []
-new_sentence = True
+    tokens = []
+    current_word = []
+    for c in s:
+        if c.isalpha():
+            current_word.append(c)
+        elif c in {',', '.'}:
+            if current_word:
+                tokens.append(''.join(current_word))
+                current_word = []
+            tokens.append(c)
+        else:  # space
+            if current_word:
+                tokens.append(''.join(current_word))
+                current_word = []
+    # Add remaining current_word if any
+    if current_word:
+        tokens.append(''.join(current_word))
 
-for token in tokens:
-    if token in {',', '.'}:
-        processed_tokens.append(token)
-        if token == '.':
-            new_sentence = True
-    else:
-        # it's a word
-        if new_sentence:
-            processed_word = token[0].upper() + token[1:].lower() if token else ''
-            processed_tokens.append(processed_word)
-            new_sentence = False
+    processed_tokens = []
+    new_sentence = True
+
+    for token in tokens:
+        if token in {',', '.'}:
+            processed_tokens.append(token)
+            if token == '.':
+                new_sentence = True
         else:
-            processed_tokens.append(token.lower())
+            # it's a word
+            if new_sentence:
+                processed_word = token[0].upper() + token[1:].lower() if token else ''
+                processed_tokens.append(processed_word)
+                new_sentence = False
+            else:
+                processed_tokens.append(token.lower())
 
-output = []
-for i in range(len(processed_tokens)):
-    current = processed_tokens[i]
-    output.append(current)
-    if i < len(processed_tokens) - 1:
-        next_token = processed_tokens[i+1]
-        if current in {',', '.'}:
-            output.append(' ')
-        else:
-            if next_token not in {',', '.'}:
+    output = []
+    for i in range(len(processed_tokens)):
+        current = processed_tokens[i]
+        output.append(current)
+        if i < len(processed_tokens) - 1:
+            next_token = processed_tokens[i+1]
+            if current in {',', '.'}:
                 output.append(' ')
+            else:
+                if next_token not in {',', '.'}:
+                    output.append(' ')
 
-result = ''.join(output)
-print(result)
+    result = ''.join(output)
+    print(result, file=output_stream)
 
-Testing this code with the examples.
 
-First sample input:
 
-hello ,i AM veRy GooD.Boris → tokens after processing:
+def test():
+    import io
 
-['hello', ',', 'i', 'AM', 'veRy', 'GooD', '.', 'Boris']
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+a. b,   C  .
+""",
+            "output": \
+"""\
+A. B, c.
+""",
+        }, 
+    ]
 
-processed_tokens after case:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-['Hello', ',', 'i', 'am', 'very', 'good', '.', 'Boris']
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-output list becomes:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-['Hello', ',', ' ', 'i', ' ', 'am', ' ', 'very', ' ', 'good', '.', ' ', 'Boris']
+    print('Tests passed 😎')
 
-joined → "Hello, i am very good. Boris"
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

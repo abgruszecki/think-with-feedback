@@ -132,33 +132,67 @@ Yes. So yes.
 
 So code:
 
-s = input().strip()
+Testing against sample input 1.
 
-k = len(s)
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-sum_prev = (2 ** k) - 2
+    k = len(s)
 
-binary_str = s.replace('4','0').replace('7','1')
+    sum_prev = (2 ** k) - 2
 
-bin_val = int(binary_str, 2)
+    binary_str = s.replace('4','0').replace('7','1')
 
-result = sum_prev + bin_val + 1
+    bin_val = int(binary_str, 2)
 
-print(result)
+    result = sum_prev + bin_val + 1
 
-Wait, but why add 1? Because sum_prev is the total numbers before the current group, and each number in the group is ordered from 0 to 2^k -1. So for the first number in the group, bin_val is 0 → sum_prev + 0 +1 = sum_prev +1 → which is the first index in the group. For example, 44 (sum_prev=2) → bin_val 0 → 2+0+1=3. Correct.
+    print(result, file=output_stream)
 
-Yes, the code is correct.
 
-Testing sample input 1:
 
-input is 4 → len 1.
+def test():
+    import io
 
-sum_prev=0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-binary_str is '0' → bin_val=0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-0+0+1=1. Correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2:7 → binary_str '1' →1. sum_prev 0 →0+1+1=2. Correct.
 

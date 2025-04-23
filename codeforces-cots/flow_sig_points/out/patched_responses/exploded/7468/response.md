@@ -457,81 +457,103 @@ else → Mike.
 
 Thus, code:
 
-s = input().strip()
+Testing against sample input 1.
 
-n = len(s)
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-pse = [ -1 ] * n
+    n = len(s)
 
-stack = []
+    pse = [ -1 ] * n
 
-for i in range(n):
+    stack = []
 
-    # current char is s[i]
+    for i in range(n):
 
-    while stack and s[ stack[-1] ] >= s[i]:
+        # current char is s[i]
 
-        stack.pop()
+        while stack and s[ stack[-1] ] >= s[i]:
 
-    if stack:
+            stack.pop()
 
-        pse[i] = stack[-1]
+        if stack:
 
-    else:
+            pse[i] = stack[-1]
 
-        pse[i] = -1
+        else:
 
-    stack.append(i)
+            pse[i] = -1
 
-chain = [0]*n
+        stack.append(i)
 
-for i in range(n):
+    chain = [0]*n
 
-    if pse[i] == -1:
+    for i in range(n):
 
-        chain[i] =0
+        if pse[i] == -1:
 
-    else:
+            chain[i] =0
 
-        chain[i] = chain[ pse[i] ] +1
+        else:
 
-for c in chain:
+            chain[i] = chain[ pse[i] ] +1
 
-    if c ==0:
+    for c in chain:
 
-        print("Mike")
+        if c ==0:
 
-    else:
+            print("Mike", file=output_stream)
 
-        print("Ann" if c %2 ==1 else "Mike")
+        else:
 
-But let's test this code on the first sample.
+            print("Ann" if c %2 ==1 else "Mike", file=output_stream)
 
-Sample1:
 
-s = 'abba'
 
-chain for each index:
+def test():
+    import io
 
-0: pse[0] is -1 → chain[0] =0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+cba
+""",
+            "output": \
+"""\
+Mike
+Mike
+Mike
+""",
+        }, 
+    ]
 
-1: pse[1] is0 → chain[0] +1 → 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-2: pse[2] is0 → chain[0] +1 → 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-3: pse[3] is-1 → 0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Outputs:
+    print('Tests passed 😎')
 
-0 → Mike.
 
-1 → Ann.
+if __name__ == '__main__':
+    test()
 
-1 → Ann.
 
-0 → Mike.
+```
 
-Which is correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample2:
 

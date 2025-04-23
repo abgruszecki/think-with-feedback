@@ -261,99 +261,127 @@ Alternatively, in the code, we can have a loop that alternates between players.
 
 Let me draft the code.
 
-x, y = map(int, input().split())
+Testing against sample input 1.
 
-turn = 0 # 0 for Ciel's turn, 1 for Hanako's.
+```python
+def main(input_stream, output_stream):
+    x, y = map(int, input_stream.readline().rstrip("\n").split())
 
-while True:
+    turn = 0 # 0 for Ciel's turn, 1 for Hanako's.
 
-    if turn % 2 == 0: # Ciel's turn.
+    while True:
 
-        a = 0
+        if turn % 2 == 0: # Ciel's turn.
 
-        b =0
+            a = 0
 
-        # find her move.
+            b =0
 
-        if x >=2 and y >=2:
+            # find her move.
 
-            a =2
+            if x >=2 and y >=2:
 
-            b=2
+                a =2
 
-        elif x >=1 and y >=12:
+                b=2
 
-            a =1
+            elif x >=1 and y >=12:
 
-            b=12
+                a =1
 
-        elif y >=22:
+                b=12
 
-            a=0
+            elif y >=22:
 
-            b=22
+                a=0
 
-        else:
+                b=22
 
-            print("Hanako")
+            else:
 
-            exit()
+                print("Hanako", file=output_stream)
 
-    else: # Hanako's turn.
+                return
 
-        a=0
-
-        b=0
-
-        if y >=22:
+        else: # Hanako's turn.
 
             a=0
 
-            b=22
+            b=0
 
-        elif x >=1 and y >=12:
+            if y >=22:
 
-            a=1
+                a=0
 
-            b=12
+                b=22
 
-        elif x >=2 and y >=2:
+            elif x >=1 and y >=12:
 
-            a=2
+                a=1
 
-            b=2
+                b=12
 
-        else:
+            elif x >=2 and y >=2:
 
-            print("Ciel")
+                a=2
 
-            exit()
+                b=2
 
-    x -= a
+            else:
 
-    y -= b
+                print("Ciel", file=output_stream)
 
-    turn +=1
+                return
 
-But wait, in Python, using exit() may not be the best, but in code submission, it's okay. Alternatively, return after print.
+        x -= a
 
-But code needs to read input, compute, and print.
+        y -= b
 
-But in code submission, this code structure would work.
+        turn +=1
 
-But let's test with the first sample.
 
-Sample 1:
 
-x=2, y=2.
+def test():
+    import io
 
-Ciel's turn: a=2, b=2. x becomes 0, y 0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 22
+""",
+            "output": \
+"""\
+Hanako
+""",
+        }, 
+    ]
 
-turn increments to 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Next loop: Hanako's turn.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Check if y >=22? 0 >=22? No. Then check x >=1 and y >=12: x is 0. No. Then check x >=2 and y >=2: 0 >=2? No. So else clause: print "Ciel" and exit. Which is correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

@@ -91,61 +91,82 @@ But wait, what if all numbers are odd? Then max_exp is 0, so r is 1, and count i
 
 So the code would look like:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-exponents = []
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for num in a:
+    exponents = []
 
-    cnt =0
+    for num in a:
 
-    x = num
+        cnt =0
 
-    while x %2 ==0:
+        x = num
 
-        cnt +=1
+        while x %2 ==0:
 
-        x = x//2
+            cnt +=1
 
-    exponents.append(cnt)
+            x = x//2
 
-max_exp = max(exponents)
+        exponents.append(cnt)
 
-r = 2 ** max_exp
+    max_exp = max(exponents)
 
-count = exponents.count(max_exp)
+    r = 2 ** max_exp
 
-print(r, count)
+    count = exponents.count(max_exp)
 
-Yes, that's the code.
+    print(r, count, file=output_stream)
 
-Wait, but wait. What if two numbers have exponents higher than others, but the maximum exponent is correct. For example, if one has exponent 5, another 4. Then max_exp is 5, count is 1.
 
-Yes.
 
-Testing the first example:
+def test():
+    import io
 
-Numbers: 80,7,16,4,48.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+21 5 3 33
+""",
+            "output": \
+"""\
+1 4
+""",
+        }, 
+    ]
 
-exponents:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-80: 4
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-7:0
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-16:4
+    print('Tests passed 😎')
 
-4:2
 
-48:4
+if __name__ == '__main__':
+    test()
 
-max_exp is 4.
 
-count is 3.
+```
 
-So output 16 3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: 21,5,3,33. All are odd. exponents are 0 for all. max_exp is 0. r=1, count=4.
 

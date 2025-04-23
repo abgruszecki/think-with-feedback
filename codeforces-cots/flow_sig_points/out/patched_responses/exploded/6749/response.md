@@ -611,36 +611,69 @@ Yes.
 
 So the code should be:
 
-n = int(input())
+Testing against sample input 1.
 
-MOD = 10**9 +7
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-even = 0
-odd =0
+    MOD = 10**9 +7
 
-for i in range(1, n+1):
-    if i %2 ==0:
-        even = (even + odd +1) % MOD
-    else:
-        odd = (odd + even +1) % MOD
+    even = 0
+    odd =0
 
-print( (even + odd) % MOD )
+    for i in range(1, n+1):
+        if i %2 ==0:
+            even = (even + odd +1) % MOD
+        else:
+            odd = (odd + even +1) % MOD
 
-This should work.
+    print( (even + odd) % MOD , file=output_stream)
 
-Testing for the first sample (n=3):
 
-Loop for i=1: odd becomes 0 +0+1=1.
 
-i=2: even becomes 0+1+1=2.
+def test():
+    import io
 
-i=3: odd becomes 1 +2 +1=4.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+""",
+            "output": \
+"""\
+11
+""",
+        }, 
+    ]
 
-sum 2+4=6.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-This code should be correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

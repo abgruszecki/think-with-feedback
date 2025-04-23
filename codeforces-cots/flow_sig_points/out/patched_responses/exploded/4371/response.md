@@ -305,13 +305,74 @@ Yes.
 
 So the code should work.
 
-Testing sample 3:
+Testing against sample input 3.
 
-n=3, m=993244853.
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-sum is 18 +8 +6=32 → 32 mod m is 32. Which matches the sample.
+    if n == 0:
+        print(0 % m, file=output_stream)
+        return
 
-So the code is correct.
+    # Precompute factorial modulo m
+    fact = [1] * (n + 1)
+    for i in range(1, n + 1):
+        fact[i] = fact[i-1] * i % m
+
+    total = 0
+    for k in range(1, n + 1):
+        a = (n + 1 - k) % m
+        a_sq = a * a % m
+        term = a_sq * fact[k] % m
+        term = term * fact[n - k] % m
+        total = (total + term) % m
+
+    print(total % m, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2019 993244853
+""",
+            "output": \
+"""\
+923958830
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Now, implement this in Python.
 </think>

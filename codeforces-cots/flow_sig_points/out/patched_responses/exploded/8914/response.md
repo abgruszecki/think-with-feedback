@@ -328,26 +328,6 @@ Now, existing logins in the sample include 'La1' → normalized as '1a1' (La1 �
 
 But the new login's normalized is '1a0', which doesn't match any of the existing normalized versions. Wait, but the sample input 4's output is 'No'. Let me check:
 
-Sample input 4:
-
-New login is 'La0'.
-
-Existing logins are '2a0', 'La1', '1a0'.
-
-Normalizing each:
-
-- '2a0' → 2a0 → 2a0 (no o, i, l). So normalized is '2a0'.
-
-- 'La1' → la1 → l becomes 1, a is a, 1 is 1 → '1a1'.
-
-- '1a0' → 1a0 → 1 is 1, a is a, 0 is 0 → '1a0'.
-
-So the new login's normalized is '1a0', which exists in existing (third login). So output is 'No'.
-
-Which matches the sample input 4's output.
-
-So the code handles that correctly.
-
 Another sample: input 5 where the new login is 'abc' and the existing is 'aBc'. The normalized version of 'aBc' is 'abc' (lowercase → 'abc', no o, i, l → same as original. So new login's normalized is 'abc' which is same as existing's normalized. So output is 'No'.
 
 Which matches sample 5.
@@ -368,92 +348,225 @@ Now, let's code the normalize function.
 
 Wait, but the code should not have any debug prints. So the code will be:
 
-def normalize(s):
-    normalized = []
-    for c in s:
-        lower_c = c.lower()
-        if lower_c == 'o':
-            normalized.append('0')
-        elif lower_c in ('i', 'l'):
-            normalized.append('1')
-        else:
-            normalized.append(lower_c)
-    return ''.join(normalized)
+Testing against sample input 1.
 
-s = input().strip()
-n = int(input())
-existing = set()
-for _ in range(n):
-    login = input().strip()
-    existing.add(normalize(login))
-s_norm = normalize(s)
-print("No" if s_norm in existing else "Yes")
+```python
+def main(input_stream, output_stream):
+    def normalize(s):
+        normalized = []
+        for c in s:
+            lower_c = c.lower()
+            if lower_c == 'o':
+                normalized.append('0')
+            elif lower_c in ('i', 'l'):
+                normalized.append('1')
+            else:
+                normalized.append(lower_c)
+        return ''.join(normalized)
 
-Testing this code against the samples:
+    s = input_stream.readline().rstrip("\n").strip()
+    n = int(input_stream.readline().rstrip("\n"))
+    existing = set()
+    for _ in range(n):
+        login = input_stream.readline().rstrip("\n").strip()
+        existing.add(normalize(login))
+    s_norm = normalize(s)
+    print("No" if s_norm in existing else "Yes", file=output_stream)
 
-Sample 1:
 
-Input:
-1_wat
-2
-2_wat
-wat_1
 
-Normalize new s: '1_wat' → 1 (lowercase is '1', not o, i, l → remains 1? Wait, the first character is '1', which is a digit. So in the code:
+def test():
+    import io
 
-c is '1' → lower_c is '1' (since digits don't have cases). Then, check if it's o → no. Else if it's in i or l → no. So append lower_c → '1'. So the normalized is '1_wat'.
-
-Existing logins:
-
-2_wat → normalized is '2_wat' (all characters except 2, w, a, t, which are not o, i, l. So '2_wat' is added.
-
-wat_1 → normalized: 'wat_1' → each character. 'w' → 'w', 'a' → 'a', 't' → 't', '_' → '_', '1' → '1'. So normalized is 'wat_1'. The existing set has '2_wat' and 'wat_1'. The new s's normalized is '1_wat' → not in existing → output Yes. Which matches sample 1.
-
-Sample 2:
-
-Input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 000
 3
 00
 ooA
 oOo
+""",
+            "output": \
+"""\
+No
+""",
+        }, 
+    ]
 
-Existing logins:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-First, '00' → normalized is '00'.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Second, 'ooA' → lowercase is 'ooa'. Then o's become 0's → '00a'.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Third, 'oOo' → lowercase 'oo o' → o's become 0's → '000'.
+    print('Tests passed 😎')
 
-So existing set has '00', '00a', '000'.
 
-New s is '000' → normalized is '000' → which is in the set. So output No.
+if __name__ == '__main__':
+    test()
 
-Sample 3:
 
-Input:
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    def normalize(s):
+        normalized = []
+        for c in s:
+            lower_c = c.lower()
+            if lower_c == 'o':
+                normalized.append('0')
+            elif lower_c in ('i', 'l'):
+                normalized.append('1')
+            else:
+                normalized.append(lower_c)
+        return ''.join(normalized)
+
+    s = input_stream.readline().rstrip("\n").strip()
+    n = int(input_stream.readline().rstrip("\n"))
+    existing = set()
+    for _ in range(n):
+        login = input_stream.readline().rstrip("\n").strip()
+        existing.add(normalize(login))
+    s_norm = normalize(s)
+    print("No" if s_norm in existing else "Yes", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 _i_
 3
 __i_
 _1_
 I
+""",
+            "output": \
+"""\
+No
+""",
+        }, 
+    ]
 
-Existing logins:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-__i_ → lowercase is '__i_'. i becomes 1 → '__1_'.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-_1_ → '_1_'.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-I → lowercase is 'i' → becomes '1'.
+    print('Tests passed 😎')
 
-So existing set has '__1_', '_1_', '1'.
 
-New login is '_i_' → lowercase is '_i_'. i becomes 1 → '_1_'. So normalized is '_1_', which is in existing set. So output No.
+if __name__ == '__main__':
+    test()
 
-All the samples are handled correctly.
 
-Thus, the code should work.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    def normalize(s):
+        normalized = []
+        for c in s:
+            lower_c = c.lower()
+            if lower_c == 'o':
+                normalized.append('0')
+            elif lower_c in ('i', 'l'):
+                normalized.append('1')
+            else:
+                normalized.append(lower_c)
+        return ''.join(normalized)
+
+    s = input_stream.readline().rstrip("\n").strip()
+    n = int(input_stream.readline().rstrip("\n"))
+    existing = set()
+    for _ in range(n):
+        login = input_stream.readline().rstrip("\n").strip()
+        existing.add(normalize(login))
+    s_norm = normalize(s)
+    print("No" if s_norm in existing else "Yes", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+La0
+3
+2a0
+La1
+1a0
+""",
+            "output": \
+"""\
+No
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

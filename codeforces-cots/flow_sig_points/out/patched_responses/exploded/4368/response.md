@@ -35,55 +35,119 @@ But given that the problem allows for n up to 100, the O(n) approach using a has
 
 So for example, in code:
 
-n = int(input())
-p = list(map(int, input().split()))
-inverse = [0] * (n+1)  # since friends are 1-based, indexes 1..n
-for i in range(n):
-    j = p[i]
-    inverse[j] = i+1  # because i is 0-based, the friend is i+1
-print(' '.join(map(str, inverse[1:n+1])))
+Testing against sample input 1.
 
-Yes, this should work. Let's test with the first sample input.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
+    inverse = [0] * (n+1)  # since friends are 1-based, indexes 1..n
+    for i in range(n):
+        j = p[i]
+        inverse[j] = i+1  # because i is 0-based, the friend is i+1
+    print(' '.join(map(str, inverse[1:n+1])), file=output_stream)
 
-Sample 1:
 
-n=4
 
-p = [2,3,4,1]
+def test():
+    import io
 
-Processing each element:
-
-i=0 (friend 1 gives to 2): j=2, inverse[2] = 1.
-
-i=1 (friend 2 gives to 3): j=3, inverse[3] =2.
-
-i=2 (friend3 gives to4): j=4, inverse[4] =3.
-
-i=3 (friend4 gives to1): j=1, inverse[1]=4.
-
-So inverse list is [0,4,1,2,3]. So the output is inverse[1], inverse[2], inverse[3], inverse[4] → 4 1 2 3, which matches the sample.
-
-Yes. So this approach is O(n) time and O(n) space, which is optimal.
-
-This code should handle all test cases efficiently. The constraints are very small (n=100), so even if n was up to 1e5, this code would work, but here it's overkill. But since the problem requires the optimal approach, this is the correct way.
-
-So the code is straightforward: read the input, create an inverse array, loop through p, and for each position i, set inverse[p[i]] to i+1. Then print the inverse array from 1 to n.
-
-Another example: second sample input.
-
-Sample 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
+1 3 2
+""",
+            "output": \
+"""\
+1 3 2
+""",
+        }, 
+    ]
 
-1 3 2 → p = [1,3,2] (0-based). So:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=0: j=1 → inverse[1] =1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=1: j=3 → inverse[3] =2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=2: j=2 → inverse[2] =3.
+    print('Tests passed 😎')
 
-So inverse array is [0,1,3,2]. Output is 1,3,2 → which matches the sample.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
+    inverse = [0] * (n+1)  # since friends are 1-based, indexes 1..n
+    for i in range(n):
+        j = p[i]
+        inverse[j] = i+1  # because i is 0-based, the friend is i+1
+    print(' '.join(map(str, inverse[1:n+1])), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+1 2
+""",
+            "output": \
+"""\
+1 2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

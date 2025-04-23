@@ -183,125 +183,88 @@ So, code steps:
 
 Read n, a, b.
 
-s = input().strip()
+Testing against sample input 1.
 
-if a == b:
+```python
+def main(input_stream, output_stream):
+    n, a, b = map(int, input_stream.readline().rstrip("\n").split())
+    s = input_stream.readline().rstrip("\n").strip()
 
-    print(0)
-
-else:
-
-    company_a = s[a-1]
-
-    company_b = s[b-1]
-
-    if company_a == company_b:
-
-        print(0)
-
+    if a == b:
+        print(0, file=output_stream)
     else:
+        company_a = s[a-1]
+        company_b = s[b-1]
+        if company_a == company_b:
+            print(0, file=output_stream)
+        else:
+            A = []
+            B = []
+            for i in range(n):
+                if s[i] == company_a:
+                    A.append(i+1)
+                if s[i] == company_b:
+                    B.append(i+1)
+            i = j = 0
+            min_diff = float('inf')
+            lenA = len(A)
+            lenB = len(B)
+            while i < lenA and j < lenB:
+                current = abs(A[i] - B[j])
+                if current < min_diff:
+                    min_diff = current
+                    if min_diff == 0:
+                        break
+                if A[i] < B[j]:
+                    i += 1
+                else:
+                    j += 1
+            print(min_diff, file=output_stream)
 
-        # generate A and B
 
-        A = [i+1 for i in range(n) if s[i] == company_a]
 
-        B = [i+1 for i in range(n) if s[i] == company_b]
+def test():
+    import io
 
-        # now find minimal |i - j| between A and B
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5 2
+10110
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-        i = 0
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-        j = 0
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-        min_diff = float('inf')
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-        lenA = len(A)
+    print('Tests passed 😎')
 
-        lenB = len(B)
 
-        while i < lenA and j < lenB:
+if __name__ == '__main__':
+    test()
 
-            current = abs(A[i] - B[j])
 
-            if current < min_diff:
+```
 
-                min_diff = current
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-                if min_diff ==0:
-
-                    break # can't get better
-
-            if A[i] < B[j]:
-
-                i +=1
-
-            else:
-
-                j +=1
-
-        print(min_diff)
-
-Wait, but what if after the loop ends, there are remaining elements in A or B? For example, after i reaches lenA, but j is still less than lenB. Then, the last element of A may be compared with the remaining elements of B. But in the two-pointer approach, once one of the pointers reaches the end, we can break. Because the remaining elements in the other list are larger than the last element of the finished list, so any further comparisons would have larger differences.
-
-Alternatively, we might have to check the remaining elements, but the two-pointer approach as written does not. Let's see.
-
-Suppose A is [1,3,5], B is [4,6,7].
-
-After i=0, j=0: 1 vs4 →3. i moves.
-
-i=1 (3) vs j=0 (4) →1. i is less than B[j], so move i. i=2 (5) vs4. 5-4=1. min is 1. Then B[j] is 4, which is less than 5. So j increments to 1 (6). 5 vs6 →1. min is 1. Then 5 <6 →i increments, loop ends. The minimal is 1.
-
-So the two-pointer approach finds the minimal. But what about if there's a better pair after the pointers have passed?
-
-Wait, let's take A = [10, 20], B = [5, 15, 25].
-
-The two-pointer approach steps:
-
-i=0 (10), j=0 (5). 10-5=5. Since 10>5, j increments to 1 (15). 10-15=5. Since 10<15, i increments to 1 (20). 20-15=5. Then 20 <15 → no. So j increments to 2 (25). 20 vs25:5. So min is 5.
-
-But the actual minimal is 5 (between 15 and 20, which is 5), but perhaps between 15 and 10 (5) as well. Wait, no, 10 and 15 have a difference of 5. So the code finds the minimal correctly.
-
-Another example where the minimal is in the trailing elements:
-
-A = [5, 15], B = [10, 20].
-
-The two-pointer approach steps:
-
-i=0 (5), j=0 (10). Diff 5. i < j → i increments to 1 (15). Now compare 15 vs10: j increments to 1 (20). 15 vs20:5. So minimal is 5. But the actual minimal is 5 (between 5 and10, and between 15 and20). So code is correct.
-
-Another example where the minimal is between elements after the pointers have passed:
-
-A = [1, 3, 5], B = [2,4,6]. The minimal is 1 (between 3 and4, or 5 and4, but no). Wait:
-
-The pairs are (1,2) →1, (3,2)→1, (3,4)→1, (5,4)→1, (5,6)→1. So the minimal is 1.
-
-The code would process:
-
-i=0, j=0: 1 vs2 →1. min=1. Since 1<2, i increments. i=1 (3). Compare with j=0 (2). 3-2=1. min remains 1. Since 3>2, j increments. j=1 (4). 3 vs4 →1. min remains. 3<4 →i increments. i=2 (5). 5 vs4 →1. j increments. Now j=2 (6). 5 vs6 →1. So the code returns 1.
-
-Which is correct.
-
-So the code seems to handle all cases.
-
-Thus, the code should work.
-
-Let's test the first example:
-
-Input:
-
-4 1 4
-
-1010
-
-A is [1,3], since company of a (1) is '1' (s[0] is '1'). B is [2,4], company of b (4) is s[3] = '0'.
-
-So A = [1,3], B = [2,4]. The two pointers:
-
-i=0, j=0 → 1 vs2 →1. i increments.
-
-i=1 (3) vs j=0 (2) →1. j increments.
-
-i=1 (3) vs j=1 (4) →1. i increments. Loop ends. So min_diff is 1. Correct.
+```
 
 Second example:
 

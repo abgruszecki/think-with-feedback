@@ -205,39 +205,68 @@ After all, output current_day.
 
 This should work.
 
-Let's test the first sample input.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    current_day = 0
+    for _ in range(n):
+        s, d = map(int, input_stream.readline().rstrip("\n").split())
+        delta = (current_day + 1) - s
+        if delta <= 0:
+            t = s
+        else:
+            k = (delta + d - 1) // d
+            t = s + k * d
+        current_day = t
+    print(current_day, file=output_stream)
 
-3
 
-2 2 → doctor 1.
 
-current_day starts at 0.
+def test():
+    import io
 
-delta = 0+1 -2 = -1 → delta <=0. So t =2. current_day becomes 2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+10 1
+6 5
+""",
+            "output": \
+"""\
+11
+""",
+        }, 
+    ]
 
-Next doctor: 1 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-current_day is 2 → delta = 2+1 -1=2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So delta is 2, which is positive.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-d_i=2. So k=(2 +2-1)/2 → (3)/2=1.5 → floor is 1. So k=1.
+    print('Tests passed 😎')
 
-t=1 + 1*2 =3. current_day is 3.
 
-Next doctor: 2 2.
+if __name__ == '__main__':
+    test()
 
-current_day+1=4.
 
-delta=4-2=2. d_i=2.
+```
 
-k=(2 +2-1)/2 =3/2=1.5 → 1.5 → floor is 1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-t=2 +2*1=4. current_day=4.
-
-Which matches the sample output.
+```
 
 Second sample input:
 

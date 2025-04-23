@@ -1269,51 +1269,219 @@ Which is correct.
 
 So the code should work.
 
-Testing the first sample input:
+Testing against sample input 1.
 
-After processing three trees, the prev_dp for j=2 will have the minimal cost of 10.
+```python
+import sys
+import math
 
-The code should output that.
 
-Now, handling the case where the trees are pre-colored. For example, in the second sample input:
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().split())
+    c = list(map(int, input_stream.readline().split()))
+    p = [list(map(int, input_stream.readline().split())) for _ in range(n)]
+    
+    INF = math.inf
+    # Initialize DP: previous[j][color] = min cost
+    prev_dp = [[INF] * (m + 1) for _ in range(k + 1)]
+    prev_dp[0][0] = 0  # Starting state: 0 trees processed, 0 groups, dummy color 0
+    
+    for i in range(n):
+        current_dp = [[INF] * (m + 1) for _ in range(k + 1)]
+        ci = c[i]
+        if ci != 0:
+            # Tree is colored, only color ci is allowed
+            curr_color = ci
+            for j_prev in range(k + 1):
+                for prev_color in range(m + 1):
+                    if prev_dp[j_prev][prev_color] == INF:
+                        continue
+                    if prev_color == curr_color:
+                        j_new = j_prev
+                    else:
+                        j_new = j_prev + 1
+                    if j_new > k:
+                        continue
+                    new_cost = prev_dp[j_prev][prev_color]
+                    if new_cost < current_dp[j_new][curr_color]:
+                        current_dp[j_new][curr_color] = new_cost
+        else:
+            # Tree is uncolored, can choose any color
+            for j_prev in range(k + 1):
+                for prev_color in range(m + 1):
+                    if prev_dp[j_prev][prev_color] == INF:
+                        continue
+                    for curr_color in range(1, m + 1):
+                        cost = p[i][curr_color - 1]
+                        if prev_color == curr_color:
+                            j_new = j_prev
+                        else:
+                            j_new = j_prev + 1
+                        if j_new > k:
+                            continue
+                        total_cost = prev_dp[j_prev][prev_color] + cost
+                        if total_cost < current_dp[j_new][curr_color]:
+                            current_dp[j_new][curr_color] = total_cost
+        prev_dp = current_dp
+    
+    # Find the minimal cost in prev_dp[k][color], for color 1..m
+    min_cost = min(prev_dp[k][color] for color in range(1, m + 1))
+    print(int(min_cost) if min_cost != INF else -1, file=output_stream)
 
-All trees are colored. The code checks if the beauty is exactly k. But how?
 
-In the code, the beauty is determined by the number of groups in the final color sequence. So the code's DP will compute the beauty as the minimal groups.
 
-But the problem requires the beauty to be exactly k. So in the code, we have to take the prev_dp[k][c] for some c. So if the pre-colored trees have a beauty different than k, the code will output -1.
+def test():
+    import io
 
-In the second sample input, the colors are 2, 1, 2. The beauty is 3 (groups are {2}, {1}, {2}), but k=2, so the code will output -1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2 2
+2 1 2
+1 3
+2 4
+3 5
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-Yes.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Thus, the code should handle all cases correctly.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Now, optimizing the code for speed in Python.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-In Python, nested loops are slow. To speed up, we can represent the DP tables using lists, and precompute allowed_colors for uncolored trees. Also, using local variables and avoiding repeated lookups can help.
+    print('Tests passed 😎')
 
-For example, for each tree i:
 
-   current_dp is a list of lists.
+if __name__ == '__main__':
+    test()
 
-   prev_dp is a list of lists.
 
-   when accessing prev_dp[j_prev][c_prev], use local variables.
+```
 
-Also, for uncolored trees, precompute allowed_colors = list(range(1, m+1)).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-But in Python, for loops are still going to be slow.
+```
 
-Another optimization: when processing uncolored trees, loop over j_prev first, then c_prev, and for each, iterate over c_curr.
+Testing against sample input 2.
 
-But the code already does this.
+```python
+import sys
+import math
 
-Another idea: precompute the p[i] array for each tree, so that for uncolored trees, the cost for color j is p[i][j-1].
 
-But in the code, this is handled as p[i][c_curr-1].
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().split())
+    c = list(map(int, input_stream.readline().split()))
+    p = [list(map(int, input_stream.readline().split())) for _ in range(n)]
+    
+    INF = math.inf
+    # Initialize DP: previous[j][color] = min cost
+    prev_dp = [[INF] * (m + 1) for _ in range(k + 1)]
+    prev_dp[0][0] = 0  # Starting state: 0 trees processed, 0 groups, dummy color 0
+    
+    for i in range(n):
+        current_dp = [[INF] * (m + 1) for _ in range(k + 1)]
+        ci = c[i]
+        if ci != 0:
+            # Tree is colored, only color ci is allowed
+            curr_color = ci
+            for j_prev in range(k + 1):
+                for prev_color in range(m + 1):
+                    if prev_dp[j_prev][prev_color] == INF:
+                        continue
+                    if prev_color == curr_color:
+                        j_new = j_prev
+                    else:
+                        j_new = j_prev + 1
+                    if j_new > k:
+                        continue
+                    new_cost = prev_dp[j_prev][prev_color]
+                    if new_cost < current_dp[j_new][curr_color]:
+                        current_dp[j_new][curr_color] = new_cost
+        else:
+            # Tree is uncolored, can choose any color
+            for j_prev in range(k + 1):
+                for prev_color in range(m + 1):
+                    if prev_dp[j_prev][prev_color] == INF:
+                        continue
+                    for curr_color in range(1, m + 1):
+                        cost = p[i][curr_color - 1]
+                        if prev_color == curr_color:
+                            j_new = j_prev
+                        else:
+                            j_new = j_prev + 1
+                        if j_new > k:
+                            continue
+                        total_cost = prev_dp[j_prev][prev_color] + cost
+                        if total_cost < current_dp[j_new][curr_color]:
+                            current_dp[j_new][curr_color] = total_cost
+        prev_dp = current_dp
+    
+    # Find the minimal cost in prev_dp[k][color], for color 1..m
+    min_cost = min(prev_dp[k][color] for color in range(1, m + 1))
+    print(int(min_cost) if min_cost != INF else -1, file=output_stream)
 
-So, the code seems correct.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2 2
+2 0 0
+1 3
+2 4
+3 5
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Now, the final code.
 </think>

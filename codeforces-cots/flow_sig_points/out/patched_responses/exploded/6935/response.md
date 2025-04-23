@@ -903,12 +903,16 @@ But I need to implement the segment tree.
 
 Wait, here's a possible implementation:
 
+Testing against sample input 1.
+
+```python
 import bisect
 from collections import deque
 
-def main():
+
+def main(input_stream, output_stream):
     import sys
-    input = sys.stdin.read
+    input = input_stream.read
     data = input().split()
     idx = 0
     n = int(data[idx])
@@ -980,7 +984,7 @@ def main():
         total_edges += cnt
 
     if total_edges != n-1:
-        print("NO")
+        print("NO", file=output_stream)
         return
 
     # Collect edges
@@ -1038,102 +1042,57 @@ def main():
                 count +=1
                 q.append(v)
 
-    print("YES" if count ==n else "NO")
+    print("YES" if count ==n else "NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 3
+2 4
+5 9
+6 8
+7 10
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
 
 if __name__ == '__main__':
-    main()
+    test()
 
-This code reads the input, sorts the segments by L, builds the segment tree, computes the total edges, checks if it's n-1, collects the edges if so, builds the adjacency list, and checks connectivity.
 
-But there are potential optimizations:
+```
 
-- The segment tree merge function can be optimized using list extensions and pointer moves.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-- The query functions are iterative and should be efficient.
+```
 
-Testing this code against the given examples.
-
-First example:
-
-Input:
-
-6
-
-9 12
-
-2 11
-
-1 3
-
-6 10
-
-5 7
-
-4 8
-
-After sorting by L:
-
-1 3 (index 2)
-
-2 11 (index 1)
-
-4 8 (index 5)
-
-5 7 (index 4)
-
-6 10 (index 3)
-
-9 12 (index 0)
-
-sorted_l = [1,2,4,5,6,9]
-
-sorted_r_idx = [ (3,0), (11,1), (8,5), (7,4), (10,3), (12,0) ]? Wait, no.
-
-Wait, the sorted_r_idx is built as follows:
-
-sorted_r_idx = [ (seg[1], i) for i, seg in enumerate(segments) ]
-
-segments after sorting:
-
-indexes 0 to 5:
-
-segments[0] = (1,3,2)
-
-segments[1] = (2,11,1)
-
-segments[2] = (4,8,5)
-
-segments[3] = (5,7,4)
-
-segments[4] = (6,10,3)
-
-segments[5] = (9,12,0)
-
-so sorted_r_idx is:
-
-(3,0), (11,1), (8,2), (7,3), (10,4), (12,5)
-
-So for each i in the sorted list (0 to 5), sorted_r_idx[i] is (r, i), where i is the index in the sorted list.
-
-Thus, the segment tree is built with these tuples.
-
-When processing the first segment (i=0, L=1, R=3), k is bisect_left in sorted_l for 3. The sorted_l is [1,2,4,5,6,9]. The value 3 is between 2 and 4, so k=2. The start is i+1=1, end=2-1=1. So range [1,1].
-
-Query the segment tree for the count of R > 3 in the range [1,1]. The R at position 1 is 11, which is >3. So count +=1.
-
-Similarly, other segments are processed.
-
-In the end, total_edges is 5, which is 6-1. Then edges are collected, and connectivity is checked.
-
-This should output YES.
-
-The other examples should be handled similarly.
-
-But in practice, there might be bugs. For example, the indices in the segment tree are the indexes in the sorted list, and when collecting edges, the code uses segments[j][2], which is the original index.
-
-Thus, the code should correctly collect edges between the original indices.
-
-Overall, this code should work.
 </think>
 
 ```python

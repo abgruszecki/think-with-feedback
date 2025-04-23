@@ -971,12 +971,16 @@ The code will:
 
 Now, the code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import defaultdict
 
-def main():
-    n, k = map(int, sys.stdin.readline().split())
-    a = list(map(int, sys.stdin.readline().split()))
+
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
     initial_hand = a[:k]
     deck = a[k:]
     count = defaultdict(int)
@@ -1021,86 +1025,255 @@ def main():
     for card in count:
         remaining += count[card] //2
     coins += remaining
-    print(coins)
+    print(coins, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 2
+2 1 2 2 1 2 1 2
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
 
 if __name__ == '__main__':
-    main()
+    test()
 
-Wait, but in the code, when processing the deck, for each step i, the next two cards are deck[2*i] and deck[2*i+1]. This is correct because the deck is processed in order, two per step.
 
-Testing this code with the first sample:
+```
 
-Sample 1:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-4 2
+```
 
-1 2 1 2
+Testing against sample input 3.
 
-initial_hand = [1,2], deck = [1,2]
+```python
+import sys
+from collections import defaultdict
 
-m = (4-2)/2=1 step.
 
-For i=0:
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
+    initial_hand = a[:k]
+    deck = a[k:]
+    count = defaultdict(int)
+    for card in initial_hand:
+        count[card] +=1
+    coins =0
+    m = (n -k) // 2
+    for i in range(m):
+        # Try to find a pair
+        pair_type = None
+        for card in count:
+            if count[card] >=2:
+                pair_type = card
+                break
+        if pair_type is not None:
+            coins +=1
+            count[pair_type] -=2
+            if count[pair_type] ==0:
+                del count[pair_type]
+        else:
+            # find two different cards
+            keys = [card for card in count if count[card] >0]
+            if len(keys) <2:
+                # impossible, but just in case
+                pass
+            else:
+                count[keys[0]] -=1
+                if count[keys[0]] ==0:
+                    del count[keys[0]]
+                count[keys[1]] -=1
+                if count[keys[1]] ==0:
+                    del count[keys[1]]
+        # Add next two cards from deck
+        if 2*i < len(deck):
+            card1 = deck[2*i]
+            count[card1] +=1
+        if 2*i +1 < len(deck):
+            card2 = deck[2*i +1]
+            count[card2] +=1
+    # Process the remaining hand
+    remaining =0
+    for card in count:
+        remaining += count[card] //2
+    coins += remaining
+    print(coins, file=output_stream)
 
-pair_type = None (count is {1:1, 2:1}).
 
-So subtract 1 from two different types.
 
-count becomes {1:0, 2:0}, then add deck[0] and deck[1]: 1 and 2. count is {1:1, 2:1}.
+def test():
+    import io
 
-After deck processing, remaining coins are 0.
-
-Total coins 0.
-
-Which is correct.
-
-Sample 3:
-
-4 4
-
-1 2 1 2.
-
-initial_hand is all 4 cards. deck is empty. m=0.
-
-No steps in drawing phase.
-
-remaining coins: (2//2 + 2//2) = 1+1=2.
-
-Output 2.
-
-Which is correct.
-
-Another sample:
-
-Sample 4:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 6 4
+3 2 3 1 2 1
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-3 2 3 1 2 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-initial_hand: [3,2,3,1], deck [2,1].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-m= (6-4)/2=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Step i=0:
+    print('Tests passed 😎')
 
-count after initial_hand is {3:2, 2:1, 1:1}.
 
-Pair_type=3 is found. coins +=1. count[3] becomes 0 (removed). count is {2:1,1:1}.
+if __name__ == '__main__':
+    test()
 
-Add deck[0] (2) and deck[1] (1). count becomes {2:2,1:2}.
 
-After deck processing, remaining coins are (2//2 + 2//2) = 1+1=2. Total coins 1+2=3.
+```
 
-Which matches the sample.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Thus, the code works.
+```
 
-But wait, during the step processing, after subtracting the pair, the code adds the next two cards. So after step i=0, the deck's two cards are added.
+Testing against sample input 4.
 
-Yes.
+```python
+import sys
+from collections import defaultdict
 
-Thus, the code should work.
+
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
+    initial_hand = a[:k]
+    deck = a[k:]
+    count = defaultdict(int)
+    for card in initial_hand:
+        count[card] +=1
+    coins =0
+    m = (n -k) // 2
+    for i in range(m):
+        # Try to find a pair
+        pair_type = None
+        for card in count:
+            if count[card] >=2:
+                pair_type = card
+                break
+        if pair_type is not None:
+            coins +=1
+            count[pair_type] -=2
+            if count[pair_type] ==0:
+                del count[pair_type]
+        else:
+            # find two different cards
+            keys = [card for card in count if count[card] >0]
+            if len(keys) <2:
+                # impossible, but just in case
+                pass
+            else:
+                count[keys[0]] -=1
+                if count[keys[0]] ==0:
+                    del count[keys[0]]
+                count[keys[1]] -=1
+                if count[keys[1]] ==0:
+                    del count[keys[1]]
+        # Add next two cards from deck
+        if 2*i < len(deck):
+            card1 = deck[2*i]
+            count[card1] +=1
+        if 2*i +1 < len(deck):
+            card2 = deck[2*i +1]
+            count[card2] +=1
+    # Process the remaining hand
+    remaining =0
+    for card in count:
+        remaining += count[card] //2
+    coins += remaining
+    print(coins, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 4
+3 2 3 3 2 1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

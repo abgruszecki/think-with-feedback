@@ -1219,93 +1219,72 @@ For example, in the example where i=0 and i=1 are both valid. The largest i is s
 
 So this code should work.
 
-Let's test the previous example where it wasn't working:
+Testing against sample input 1.
 
-Sample input1:
+```python
+def main(input_stream, output_stream):
+    n, k, l = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a.sort()
+    m = len(a)
+    max_i = -1
+    required = (k - 1) * n
+    for i in range(m - n + 1):
+        if a[i + n - 1] - a[i] > l:
+            continue
+        available = m - (i + n)
+        if available >= required:
+            max_i = i
+    if max_i == -1:
+        print(0, file=output_stream)
+    else:
+        total = sum(a[max_i : max_i + n])
+        print(total, file=output_stream)
 
-4 2 1
 
-Staves sorted as [1,2,2,2,2,2,3,3].
 
-m=8.
+def test():
+    import io
 
-Iterate i from 0 to 4:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 1 0
+10 10
+""",
+            "output": \
+"""\
+20
+""",
+        }, 
+    ]
 
-i=0:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-a[3] -a[0] =2-1=1 <=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-available=8-0-4=4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-needed= (2-1)*4=4.
+    print('Tests passed 😎')
 
-4 >=4 → yes. max_i=0.
 
-i=1:
+if __name__ == '__main__':
+    test()
 
-a[4] -a[1] =2-2=0 <=1.
 
-available=8-1-4=3.
+```
 
-3 <4 → no.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=2:
-
-a[5] -a[2] =2-2=0 <=1.
-
-available=8-2-4=2 <4 → no.
-
-i=3:
-
-a[6] -a[3] =3-2=1 <=1.
-
-available=8-3-4=1 <4 → no.
-
-i=4:
-
-a[7] -a[4] =3-2=1 <=1.
-
-available=8-4-4=0 <4 → no.
-
-So max_i=0. Sum a[0..3] =1+2+2+2=7.
-
-Which matches the sample.
-
-Another example where i=1 is valid:
-
-n=2, k=3, l=1.
-
-Staves: [1,2,3,4,5,6].
-
-m=6.
-
-n=2, k=3, l=1.
-
-We need groups of 2 elements.
-
-m-n=4.
-
-Iterate i from 0 to4:
-
-i=0:
-
-a[1]-a[0] =2-1=1 <=1.
-
-available=6-0-2=4.
-
-needed= (3-1)*2=4 → yes. max_i=0.
-
-i=1:
-
-a[2]-a[1]=3-2=1 <=1.
-
-available=6-1-2=3 >=4? No.
-
-So sum is a[0] +a[1] =3.
-
-But the group is [1,2], sum3.
-
-So code works.
+```
 
 Another example:
 

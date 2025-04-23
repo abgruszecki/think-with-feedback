@@ -435,85 +435,410 @@ So code handles all cases.
 
 Now, code:
 
-s = input().strip()
+Testing against sample input 1.
 
-dot_pos = s.index('.')
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-integer_part = s[:dot_pos]
+    dot_pos = s.index('.')
 
-fractional_part = s[dot_pos+1:]
+    integer_part = s[:dot_pos]
 
-if integer_part[-1] == '9':
+    fractional_part = s[dot_pos+1:]
 
-    print("GOTO Vasilisa.")
+    if integer_part[-1] == '9':
 
-else:
-
-    if fractional_part[0] >= '5':
-
-        int_list = list(integer_part)
-
-        carry = 1
-
-        i = len(int_list) -1
-
-        while carry and i >=0:
-
-            current = ord(int_list[i]) - ord('0') + carry
-
-            carry = current //10
-
-            new_digit = current %10
-
-            int_list[i] = str(new_digit)
-
-            i -=1
-
-        if carry:
-
-            int_list = ['1'] + int_list
-
-        new_integer = ''.join(int_list).lstrip('0')
-
-        print(new_integer if new_integer else '0')
+        print("GOTO Vasilisa.", file=output_stream)
 
     else:
 
-        stripped = integer_part.lstrip('0')
+        if fractional_part[0] >= '5':
 
-        print(stripped if stripped else '0')
+            int_list = list(integer_part)
 
-Yes.
+            carry = 1
 
-So this code should handle all the cases correctly.
+            i = len(int_list) -1
 
-Testing the sample inputs:
+            while carry and i >=0:
 
-Sample 1: 0.0 → integer_part is '0', last digit is '0'. fractional first is '0' <5. So output stripped '0'.
+                current = ord(int_list[i]) - ord('0') + carry
 
-Sample 7: 123456789123456789.999 → integer_part ends with '9', so output GOTO.
+                carry = current //10
 
-Sample6: 12345678901234567890.1 → fractional first is 1 <5 → output the integer_part stripped (no leading zeros).
+                new_digit = current %10
 
-Sample3: 1.50 → fractional first is '5', add 1 to '1' → '2', output '2'.
+                int_list[i] = str(new_digit)
 
-Sample4: 2.718... → fractional first is 7, add 1 to 2 →3.
+                i -=1
 
-Sample5: 3.1415... → fractional first is 1 → output 3.
+            if carry:
 
-Sample2: 1.49 → fractional first is 4 → output 1.
+                int_list = ['1'] + int_list
 
-So all samples pass.
+            new_integer = ''.join(int_list).lstrip('0')
 
-Another test case: input '9.9' → integer_part is '9' → output GOTO.
+            print(new_integer if new_integer else '0', file=output_stream)
 
-Input '8.9' → integer_part ends with 8. fractional first is '9' >=5. So add 1 to 8 →9. Output '9'.
+        else:
 
-Input '8.5000' → fractional first is 5 → add 1 →9.
+            stripped = integer_part.lstrip('0')
 
-Input '89.9999' → integer_part ends with 9 → output GOTO.
+            print(stripped if stripped else '0', file=output_stream)
 
-So code seems correct.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1.49
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 6.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    dot_pos = s.index('.')
+
+    integer_part = s[:dot_pos]
+
+    fractional_part = s[dot_pos+1:]
+
+    if integer_part[-1] == '9':
+
+        print("GOTO Vasilisa.", file=output_stream)
+
+    else:
+
+        if fractional_part[0] >= '5':
+
+            int_list = list(integer_part)
+
+            carry = 1
+
+            i = len(int_list) -1
+
+            while carry and i >=0:
+
+                current = ord(int_list[i]) - ord('0') + carry
+
+                carry = current //10
+
+                new_digit = current %10
+
+                int_list[i] = str(new_digit)
+
+                i -=1
+
+            if carry:
+
+                int_list = ['1'] + int_list
+
+            new_integer = ''.join(int_list).lstrip('0')
+
+            print(new_integer if new_integer else '0', file=output_stream)
+
+        else:
+
+            stripped = integer_part.lstrip('0')
+
+            print(stripped if stripped else '0', file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+123456789123456789.999
+""",
+            "output": \
+"""\
+GOTO Vasilisa.
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample inputs 3, 4, 5.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    dot_pos = s.index('.')
+
+    integer_part = s[:dot_pos]
+
+    fractional_part = s[dot_pos+1:]
+
+    if integer_part[-1] == '9':
+
+        print("GOTO Vasilisa.", file=output_stream)
+
+    else:
+
+        if fractional_part[0] >= '5':
+
+            int_list = list(integer_part)
+
+            carry = 1
+
+            i = len(int_list) -1
+
+            while carry and i >=0:
+
+                current = ord(int_list[i]) - ord('0') + carry
+
+                carry = current //10
+
+                new_digit = current %10
+
+                int_list[i] = str(new_digit)
+
+                i -=1
+
+            if carry:
+
+                int_list = ['1'] + int_list
+
+            new_integer = ''.join(int_list).lstrip('0')
+
+            print(new_integer if new_integer else '0', file=output_stream)
+
+        else:
+
+            stripped = integer_part.lstrip('0')
+
+            print(stripped if stripped else '0', file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2.71828182845904523536
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+        {
+            "input": \
+"""\
+3.14159265358979323846
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+        {
+            "input": \
+"""\
+12345678901234567890.1
+""",
+            "output": \
+"""\
+12345678901234567890
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    dot_pos = s.index('.')
+
+    integer_part = s[:dot_pos]
+
+    fractional_part = s[dot_pos+1:]
+
+    if integer_part[-1] == '9':
+
+        print("GOTO Vasilisa.", file=output_stream)
+
+    else:
+
+        if fractional_part[0] >= '5':
+
+            int_list = list(integer_part)
+
+            carry = 1
+
+            i = len(int_list) -1
+
+            while carry and i >=0:
+
+                current = ord(int_list[i]) - ord('0') + carry
+
+                carry = current //10
+
+                new_digit = current %10
+
+                int_list[i] = str(new_digit)
+
+                i -=1
+
+            if carry:
+
+                int_list = ['1'] + int_list
+
+            new_integer = ''.join(int_list).lstrip('0')
+
+            print(new_integer if new_integer else '0', file=output_stream)
+
+        else:
+
+            stripped = integer_part.lstrip('0')
+
+            print(stripped if stripped else '0', file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1.50
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

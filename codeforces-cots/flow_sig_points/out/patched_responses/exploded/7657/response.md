@@ -591,41 +591,138 @@ But in Python, even with this, the loops are slow. However, this code will pass 
 
 But given the problem's constraints, this is the only feasible approach.
 
-Testing this code on the sample input:
+Testing against sample input 1.
 
-Sample 1:
+```python
+import bisect
 
-After sorting items by ti:
 
-Item 2 (ti=1), item 1 (ti=2), item 3 (ti=2), item 4 (ti=5).
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    ptr = 0
+    n, p = int(input[ptr]), int(input[ptr+1])
+    ptr += 2
+    items = []
+    for _ in range(n):
+        c = int(input[ptr])
+        h = int(input[ptr+1])
+        ti = int(input[ptr+2])
+        items.append((c, h, ti))
+        ptr +=3
+    
+    # Sort items by ti
+    items.sort(key=lambda x: x[2])
+    tis = [item[2] for item in items]
+    
+    q = int(input[ptr])
+    ptr +=1
+    queries = []
+    max_b = 4000
+    dp = [0] * (max_b + 1)
+    
+    for _ in range(q):
+        a = int(input[ptr])
+        b = int(input[ptr+1])
+        ptr +=2
+        
+        L = max(1, a - p + 1)
+        R = a
+        
+        # Find left and right indices
+        left = bisect.bisect_left(tis, L)
+        right = bisect.bisect_right(tis, R) - 1
+        
+        if left > right:
+            print(0, file=output_stream)
+            continue
+        
+        active = items[left:right+1]
+        current_b = min(b, max_b)
+        
+        # Reset dp
+        for i in range(current_b +1):
+            dp[i] = 0
+        
+        for c, h, _ in active:
+            if c > current_b:
+                continue
+            # Update dp in reverse
+            for j in range(current_b, c-1, -1):
+                if dp[j - c] + h > dp[j]:
+                    dp[j] = dp[j - c] + h
+        
+        max_h = max(dp[:current_b+1])
+        print(max_h, file=output_stream)
 
-tis = [1, 2, 2, 5]
 
-For query 1: a=1, b=3.
 
-L = 1-4+1= -2 → L=1. R=1.
+def test():
+    import io
 
-left = bisect.bisect_left(tis, 1) → index 0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 4
+3 2 1
+7 4 4
+2 1 2
+6 3 5
+3 2 2
+10
+1 5
+2 5
+4 8
+4 9
+4 10
+5 8
+5 9
+5 10
+8 4
+7 9
+""",
+            "output": \
+"""\
+2
+3
+5
+5
+6
+4
+5
+6
+0
+4
+""",
+        }, 
+    ]
 
-right = bisect.bisect_right(tis, 1) -1 → index 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-active_items = [item 2 (c=3, h=5)].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The DP is for budget 3:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Initialized to 0.
+    print('Tests passed 😎')
 
-Processing item 3:
 
-c=3, h=5.
+if __name__ == '__main__':
+    test()
 
-Loop j from 3 down to 3-1=2 (j=3):
 
-dp[3] = max(0, dp[0]+5=5) → dp[3] =5.
+```
 
-max is 5.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Sample output is correct.
+```
 
 Another query: a=2, b=6.
 

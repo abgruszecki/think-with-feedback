@@ -261,70 +261,83 @@ Yes.
 
 Now, in code:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-grid = [input().strip() for _ in range(n)]
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-from collections import Counter
+    grid = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
 
-row_counts = [Counter(row) for row in grid]
+    from collections import Counter
 
-columns = []
-for j in range(m):
-    column = []
-    for i in range(n):
-        column.append(grid[i][j])
-    columns.append(column)
-column_counts = [Counter(col) for col in columns]
+    row_counts = [Counter(row) for row in grid]
 
-result = []
-for i in range(n):
+    columns = []
     for j in range(m):
-        c = grid[i][j]
-        if row_counts[i][c] == 1 and column_counts[j][c] == 1:
-            result.append(c)
+        column = []
+        for i in range(n):
+            column.append(grid[i][j])
+        columns.append(column)
+    column_counts = [Counter(col) for col in columns]
 
-print(''.join(result))
+    result = []
+    for i in range(n):
+        for j in range(m):
+            c = grid[i][j]
+            if row_counts[i][c] == 1 and column_counts[j][c] == 1:
+                result.append(c)
 
-Wait, but for the code, let's test with the first sample input.
+    print(''.join(result), file=output_stream)
 
-Sample Input 1:
 
-3 3
 
-cba
+def test():
+    import io
 
-bcd
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5
+fcofd
+ooedo
+afaoa
+rdcdf
+eofsf
+""",
+            "output": \
+"""\
+codeforces
+""",
+        }, 
+    ]
 
-cbc
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-row_counts:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-row 0: Counter({'c':1, 'b':1, 'a':1})
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-row 1: Counter({'b':1, 'c':1, 'd':1})
+    print('Tests passed 😎')
 
-row 2: Counter({'c':2, 'b':1})
 
-column_counts:
+if __name__ == '__main__':
+    test()
 
-column 0: ['c', 'b', 'c'] → Counter {'c':2, 'b':1}
 
-column 1: ['b', 'c', 'b'] → Counter {'b':2, 'c':1}
+```
 
-column 2: ['a', 'd', 'c'] → Counter {'a':1, 'd':1, 'c':1}
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So, for cell (1,0), c is 'b':
-
-row_counts[1]['b'] is 1.
-
-column_counts[0]['b'] is 1 (because in column 0, 'b' appears once). Because column 0's Counter is {'c':2, 'b':1}.
-
-So both are 1 → included.
-
-Similarly, other cells.
-
-So code should produce 'abcd' as expected.
+```
 
 Now, another sample input:
 

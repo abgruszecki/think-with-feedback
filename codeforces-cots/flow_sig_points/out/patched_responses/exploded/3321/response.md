@@ -216,91 +216,159 @@ Loop over each line and p_i.
 
 In code:
 
-n = int(input())
-p = list(map(int, input().split()))
-if len(p) != n:
-    print("NO")
-    exit()
+Testing against sample input 1.
 
-vowels = {'a', 'e', 'i', 'o', 'u', 'y'}
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
+    if len(p) != n:
+        print("NO", file=output_stream)
+        return
 
-for i in range(n):
-    line = input().strip()
-    words = line.split()
-    total = 0
-    for word in words:
-        cnt = 0
-        for c in word:
-            if c in vowels:
-                cnt +=1
-        if cnt >0:
-            total += cnt
-    if total != p[i]:
-        print("NO")
-        exit()
-print("YES")
+    vowels = {'a', 'e', 'i', 'o', 'u', 'y'}
 
-Wait, but what if the input for p is not of length n? The problem statement says that the second line contains the verse pattern p1 ... pn. So the code should check that. For example, if the input has n=3, but the second line has 4 numbers, then it's invalid. But according to the problem constraints, it's guaranteed. So perhaps the code can proceed without checking. But in practice, the code should check. For example, in code, if len(p) !=n, then output NO.
+    for i in range(n):
+        line = input_stream.readline().rstrip("\n").strip()
+        words = line.split()
+        total = 0
+        for word in words:
+            cnt = 0
+            for c in word:
+                if c in vowels:
+                    cnt +=1
+            if cnt >0:
+                total += cnt
+        if total != p[i]:
+            print("NO", file=output_stream)
+            return
+    print("YES", file=output_stream)
 
-But according to the problem statement's input format:
 
-The second line contains integers p1 ... pn. So it's guaranteed that there are exactly n numbers. So perhaps we can skip checking. But to be safe, perhaps the code can check. Because if the input is invalid (like the user providing less or more numbers), the code will process lines and p's index out of range, leading to error. So perhaps in code, after reading p, check if len(p) ==n, else output NO.
 
-So the code includes this check.
+def test():
+    import io
 
-In the code above, we have:
-
-if len(p) !=n:
-
-    print("NO")
-
-    exit()
-
-Which is correct.
-
-Otherwise, proceed.
-
-So that's the code.
-
-Testing the first sample:
-
-Sample 1:
-
-3
-
-2 2 3
-
-Lines:
-
-intel → split into ['intel']
-
-word 'intel' → vowels: i, e → count 2. So total for first line is 2. pi is 2. okay.
-
-Second line: 'code' → o, e → 2. pi is 2. okay.
-
-Third line: 'ch allenge' → split into 'ch' and 'allenge'.
-
-'ch' has no vowels → 0.
-
-'allenge' → a, e, e → 3. So total 3. pi is 3. All lines match. Output YES.
-
-Which is correct.
-
-Sample 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
-
 1 2 3 1
+a
+bcdefghi
+jklmnopqrstu
+vwxyz
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-Lines:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-a → vowels 1 → sum 1. pi is 1. okay.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Second line: 'bcdefghi' → word. vowels are e, i → count 2. pi is 2. okay.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Third line: 'jklmnopqrstu' → vowels o and u → count 2. pi is 3 → mismatch. So output NO.
+    print('Tests passed 😎')
 
-Which is correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
+    if len(p) != n:
+        print("NO", file=output_stream)
+        return
+
+    vowels = {'a', 'e', 'i', 'o', 'u', 'y'}
+
+    for i in range(n):
+        line = input_stream.readline().rstrip("\n").strip()
+        words = line.split()
+        total = 0
+        for word in words:
+            cnt = 0
+            for c in word:
+                if c in vowels:
+                    cnt +=1
+            if cnt >0:
+                total += cnt
+        if total != p[i]:
+            print("NO", file=output_stream)
+            return
+    print("YES", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+13 11 15 15
+to be or not to be that is the question
+whether tis nobler in the mind to suffer
+the slings and arrows of outrageous fortune
+or to take arms against a sea of troubles
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

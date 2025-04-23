@@ -1101,41 +1101,127 @@ Thus, the prefix sums are correctly computed.
 
 Now, the code should work. 
 
-Testing against the first example:
+Testing against sample input 1.
 
-Input:
-1 3
-aba
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    matrix = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
 
-For j1=0, j2=0 (column 0):
+    # Precompute prefix sums for each row and character
+    prefix = [[[0] * (m + 1) for _ in range(26)] for __ in range(n)]
+    for r in range(n):
+        row = matrix[r]
+        for c in range(26):
+            char = chr(ord('a') + c)
+            current = 0
+            for j in range(m):
+                prefix[r][c][j + 1] = current + (1 if row[j] == char else 0)
+                current = prefix[r][c][j + 1]
 
-counts for row 0 are [1, 0, 0, ..., ...], since 'a' is the first character. 
+    ans = 0
 
-length is 1. odd is 1, so valid. 
+    for j1 in range(m):
+        for j2 in range(j1, m):
+            valid = [False] * n
+            signatures = [0] * n
+            for r in range(n):
+                counts = []
+                for c in range(26):
+                    cnt = prefix[r][c][j2 + 1] - prefix[r][c][j1]
+                    counts.append(cnt)
+                length = j2 - j1 + 1
+                odd = 0
+                for cnt in counts:
+                    if cnt % 2 != 0:
+                        odd += 1
+                if (length % 2 == 0 and odd == 0) or (length % 2 == 1 and odd == 1):
+                    valid[r] = True
+                    sig = 0
+                    for cnt in counts:
+                        sig = (sig << 8) | cnt
+                    signatures[r] = sig
+                else:
+                    valid[r] = False
+            
+            intervals = []
+            current_start = None
+            for i in range(n):
+                if valid[i]:
+                    if current_start is None:
+                        current_start = i
+                else:
+                    if current_start is not None:
+                        intervals.append((current_start, i - 1))
+                        current_start = None
+            if current_start is not None:
+                intervals.append((current_start, n - 1))
+            
+            for (s, e) in intervals:
+                sigs = [signatures[i] for i in range(s, e + 1)]
+                count = 0
+                for i in range(len(sigs)):
+                    l = i
+                    r = i
+                    while l >= 0 and r < len(sigs) and sigs[l] == sigs[r]:
+                        count += 1
+                        l -= 1
+                        r += 1
+                    l = i
+                    r = i + 1
+                    while l >= 0 and r < len(sigs) and sigs[l] == sigs[r]:
+                        count += 1
+                        l -= 1
+                        r += 1
+                ans += count
 
-signature is 1 followed by 25 zeros, packed as an integer. 
+    print(ans, file=output_stream)
 
-For j1=0, j2=2 (columns 0-2):
 
-counts are a:2, b:1. 
 
-length is 3, which is odd. odd counts are 1 (a has even count 2, b has count 1). So valid. 
+def test():
+    import io
 
-Thus, the valid vertical range is (0,0) (assuming 0-based rows), which has a signature array of [signature], which is a palindrome. 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 3
+aca
+aac
+""",
+            "output": \
+"""\
+11
+""",
+        }, 
+    ]
 
-So the count for this interval is 1 (for the single element) plus expanding for even length (but no), so total 1. 
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But according to the first example, there are 4 beautiful submatrices, which includes (1,1) and (1,3) as well. 
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Wait, perhaps there are some errors in the code. 
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But in any case, the code needs to be tested. 
+    print('Tests passed 😎')
 
-The main issue is to correctly handle the rows and columns, and the prefix sums. 
 
-Another possible optimization is to precompute all the prefix sums correctly. 
+if __name__ == '__main__':
+    test()
 
-But given the time constraints, perhaps this code is correct. 
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 The code reads the matrix, computes the prefix sums for each character, then for each j1, j2 pair, computes the valid rows and their signatures. For each contiguous valid interval, it counts the number of palindromic subarrays using expansion around the center. 
 

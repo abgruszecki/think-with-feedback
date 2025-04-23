@@ -144,91 +144,113 @@ Thus, the steps are:
 
 So the code outline:
 
-n, k = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-b = list(map(int, input().split()))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-sum_a = 0
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-sum_b = 0
+    sum_a = 0
 
-group_b_diff = []
+    sum_b = 0
 
-m = 0
+    group_b_diff = []
 
-for ai, bi in zip(a, b):
+    m = 0
 
-    if ai < bi:
+    for ai, bi in zip(a, b):
 
-        sum_a += ai
+        if ai < bi:
 
-        m +=1
+            sum_a += ai
+
+            m +=1
+
+        else:
+
+            sum_b += bi
+
+            group_b_diff.append(ai - bi)
+
+    if m >=k:
+
+        print(sum_a + sum_b, file=output_stream)
 
     else:
 
-        sum_b += bi
+        need = k - m
 
-        group_b_diff.append(ai - bi)
+        # need to choose need elements from group_b_diff with smallest (ai - bi)
 
-if m >=k:
+        # but group_b_diff contains (ai - bi) where ai >= bi, so >=0
 
-    print(sum_a + sum_b)
+        group_b_diff.sort()
 
-else:
+        # take the first 'need' elements
 
-    need = k - m
+        # but if group_b_diff has less than 'need' elements?
 
-    # need to choose need elements from group_b_diff with smallest (ai - bi)
+        # No, because group B's size is n - m. So when m <k, need =k -m. But if group B's size is (n -m), and since k can be up to n, then (n -m) >= (k -m) since k <=n.
 
-    # but group_b_diff contains (ai - bi) where ai >= bi, so >=0
+        # Because m <k, so k -m is positive. Also, (n -m) >= k -m because m <k => m <=k-1 => n -m >= n - (k-1). But k can be up to n. For example, if k=n and m=0, then group B's size is n, need is n-0 =n. So group B's list has exactly n elements, which is >= need.
 
-    group_b_diff.sort()
+        # So group_b_diff has enough elements.
 
-    # take the first 'need' elements
+        additional = sum(group_b_diff[:need])
 
-    # but if group_b_diff has less than 'need' elements?
+        total = sum_a + sum_b + additional
 
-    # No, because group B's size is n - m. So when m <k, need =k -m. But if group B's size is (n -m), and since k can be up to n, then (n -m) >= (k -m) since k <=n.
+        print(total, file=output_stream)
 
-    # Because m <k, so k -m is positive. Also, (n -m) >= k -m because m <k => m <=k-1 => n -m >= n - (k-1). But k can be up to n. For example, if k=n and m=0, then group B's size is n, need is n-0 =n. So group B's list has exactly n elements, which is >= need.
 
-    # So group_b_diff has enough elements.
 
-    additional = sum(group_b_diff[:need])
+def test():
+    import io
 
-    total = sum_a + sum_b + additional
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 3
+3 4 7 10 3
+4 5 5 12 5
+""",
+            "output": \
+"""\
+25
+""",
+        }, 
+    ]
 
-    print(total)
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Wait, that's the code. Let's test the first sample.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sample 1:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-3 1
+    print('Tests passed 😎')
 
-a:5 4 6
 
-b:3 1 5
+if __name__ == '__main__':
+    test()
 
-For each item:
 
-item 0: a=5, b=3. 5 >=3. So add 3 to sum_b, and group_b_diff adds 5-3=2.
+```
 
-item 1: a=4, b=1. 4 >=1. sum_b +=1. group_b_diff adds 4-1=3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-item 2: a=6, b=5. 6 >=5. sum_b +=5. group_b_diff adds 6-5=1.
-
-So group A has m=0, since all items are a >=b.
-
-sum_a is 0, sum_b is 3+1+5=9.
-
-since m=0 <k=1, need =1.
-
-group_b_diff is [2,3,1], sorted becomes [1,2,3]. sum first 1 elements:1.
-
-total is 0 +9 +1=10. Which matches the sample.
+```
 
 Another sample:
 

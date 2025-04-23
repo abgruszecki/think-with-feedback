@@ -191,35 +191,72 @@ But wait, what if remaining is negative? No, because sum_t <=d, so remaining is 
 
 So code:
 
-n, d = map(int, input().split())
+Testing against sample input 1.
 
-t = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, d = map(int, input_stream.readline().rstrip("\n").split())
 
-sum_t = sum(t) + 10*(n-1)
+    t = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-if sum_t > d:
+    sum_t = sum(t) + 10*(n-1)
 
-    print(-1)
+    if sum_t > d:
 
-else:
+        print(-1, file=output_stream)
 
-    remaining = d - sum_t
+    else:
 
-    jokes = 2*(n-1) + (remaining //5)
+        remaining = d - sum_t
 
-    print(jokes)
+        jokes = 2*(n-1) + (remaining //5)
 
-Testing the first sample:
+        print(jokes, file=output_stream)
 
-Sample 1:
 
-n=3, d=30.
 
-t = [2,2,1]
+def test():
+    import io
 
-sum_t=2+2+1 +10*(2) =5 +20=25. 25<=30. remaining 5.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 20
+2 1 1
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-jokes=2*2 +5//5=4+1=5. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

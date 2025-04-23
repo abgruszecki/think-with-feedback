@@ -1196,57 +1196,131 @@ Sort candidates.
 
 Output.
 
-Now, let's test this code with the sample inputs.
+Testing against sample input 1.
 
-Sample input 1: ABACABA.
+```python
+def main(input_stream, output_stream):
+    import sys
+    s = input_stream.readline().strip()
+    n = len(s)
+    if n == 0:
+        print(0, file=output_stream)
+        return
 
-The candidates are 1,3,7.
+    # KMP failure function (pi array)
+    pi = [0] * n
+    for i in range(1, n):
+        j = pi[i-1]
+        while j > 0 and s[i] != s[j]:
+            j = pi[j-1]
+        if s[i] == s[j]:
+            j += 1
+        pi[i] = j
 
-For li=1:
+    # Collect all candidates
+    candidates = set()
+    j = pi[-1]
+    while j > 0:
+        candidates.add(j)
+        j = pi[j-1]
+    candidates.add(n)
+    sorted_candidates = sorted(candidates)
 
-sum_cnt[1] is the number of i>=1 where Z[i] >=1.
+    # Compute Z-array
+    Z = [0] * n
+    l, r = 0, 0
+    for i in range(1, n):
+        if i > r:
+            l = r = i
+            while r < n and s[r - l] == s[r]:
+                r += 1
+            Z[i] = r - l
+            r -= 1
+        else:
+            k = i - l
+            if Z[k] < r - i + 1:
+                Z[i] = Z[k]
+            else:
+                l = i
+                while r < n and s[r - l] == s[r]:
+                    r += 1
+                Z[i] = r - l
+                r -= 1
 
-The Z-array for ABACABA is:
+    # Compute frequency array and sum_cnt
+    max_li = n
+    freq = [0] * (max_li + 2)
+    for z in Z[1:]:  # Z[0] is not considered
+        if z > 0:
+            if z > max_li:
+                freq[max_li] += 1
+            else:
+                freq[z] += 1
 
-index 0:0
+    sum_cnt = [0] * (max_li + 2)
+    sum_cnt[max_li] = freq[max_li]
+    for li in range(max_li - 1, 0, -1):
+        sum_cnt[li] = sum_cnt[li + 1] + freq[li]
 
-index1:0 (s[1] is B, compare to s[0] (A) → 0.
+    # Prepare the results
+    results = []
+    for li in sorted_candidates:
+        if li > n:
+            continue
+        cnt = sum_cnt[li] + 1
+        results.append((li, cnt))
 
-index2:1 (s[2] is A, matches s[0], Z[2] =1.
+    # Output
+    print(len(results), file=output_stream)
+    for li, cnt in results:
+        print(li, cnt, file=output_stream)
 
-index3:0 (s[3] is C, no match.
 
-index4:3 (s[4] is A, compare to s[0], s[4], s[5], s[6] → "ABA" matches "ABA" → Z[4] =3.
 
-index5:0 (s[5] is B, no match.
+def test():
+    import io
 
-index6:1 (s[6] is A, matches s[0].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+AAA
+""",
+            "output": \
+"""\
+3
+1 3
+2 2
+3 1
+""",
+        }, 
+    ]
 
-So Z = [0,0,1,0,3,0,1].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The Z-values for i>=1 are [0,1,0,3,0,1].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So for li=1:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-sum_cnt[1] is the number of Z[i] >=1 where i >=1.
+    print('Tests passed 😎')
 
-The Z-values >=1 are Z[2] =1, Z[4]=3, Z[6]=1. So three times. sum_cnt[1] =3.
 
-count=3+1=4.
+if __name__ == '__main__':
+    test()
 
-For li=3:
 
-sum_cnt[3] is the number of Z[i] >=3 where i>=1.
+```
 
-Z[i] >=3 is only Z[4]=3. sum_cnt[3] =1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-count=1+1=2.
-
-For li=7:
-
-sum_cnt[7] =0. count=0+1=1.
-
-Which matches the sample.
+```
 
 Sample input 2: AAA.
 

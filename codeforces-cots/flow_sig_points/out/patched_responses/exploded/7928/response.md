@@ -59,21 +59,117 @@ But also, we need to make sure that required is at least 0, but since n and y ar
 
 So, the code can be written as:
 
-n, x, y = map(int, input().split())
+Testing against sample input 1.
 
-required = (y * n + 99) // 100
+```python
+def main(input_stream, output_stream):
+    n, x, y = map(int, input_stream.readline().rstrip("\n").split())
 
-clones = max(0, required - x)
+    required = (y * n + 99) // 100
 
-print(clones)
+    clones = max(0, required - x)
 
-Wait, but let's test the first sample:
+    print(clones, file=output_stream)
 
-Input: 10 1 14
 
-y*n=140 → 140+99=239 →239//100=2.39 →2. So required is 2. Clones is 2-1=1. Correct.
 
-Second sample: 20 10 50. 20*50=1000 → 1000+99=1099 →1099//100=10.99 →10. So required is 10. Clones 10-10=0. Correct.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+20 10 50
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, x, y = map(int, input_stream.readline().rstrip("\n").split())
+
+    required = (y * n + 99) // 100
+
+    clones = max(0, required - x)
+
+    print(clones, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1000 352 146
+""",
+            "output": \
+"""\
+1108
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample: 1000*146=146000. 146000+99=146099 →146099//100=1460.99 →1460. So required is 1460. 1460-352=1108. Correct.
 

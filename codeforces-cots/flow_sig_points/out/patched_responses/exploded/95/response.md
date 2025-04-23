@@ -522,119 +522,199 @@ Similarly for the other conditions.
 
 So the code in Python could be:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-s = input().strip()
 
-ab_indices = []
-ba_indices = []
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-n = len(s)
-for i in range(n-1):
-    if s[i] == 'A' and s[i+1] == 'B':
-        ab_indices.append(i)
-    elif s[i] == 'B' and s[i+1] == 'A':
-        ba_indices.append(i)
+    ab_indices = []
+    ba_indices = []
 
-if not ab_indices or not ba_indices:
-    print("NO")
-    exit()
+    n = len(s)
+    for i in range(n-1):
+        if s[i] == 'A' and s[i+1] == 'B':
+            ab_indices.append(i)
+        elif s[i] == 'B' and s[i+1] == 'A':
+            ba_indices.append(i)
 
-# Check condition a: earliest AB followed by BA
-ab_earliest = ab_indices[0]
-pos = bisect.bisect_left(ba_indices, ab_earliest + 2)
-if pos < len(ba_indices):
-    print("YES")
-    exit()
+    if not ab_indices or not ba_indices:
+        print("NO", file=output_stream)
+        return
 
-# Check condition b: earliest BA followed by AB
-ba_earliest = ba_indices[0]
-pos = bisect.bisect_left(ab_indices, ba_earliest + 2)
-if pos < len(ab_indices):
-    print("YES")
-    exit()
+    # Check condition a: earliest AB followed by BA
+    ab_earliest = ab_indices[0]
+    pos = bisect.bisect_left(ba_indices, ab_earliest + 2)
+    if pos < len(ba_indices):
+        print("YES", file=output_stream)
+        return
 
-# Check condition c: latest AB has BA before
-ab_latest = ab_indices[-1]
-pos = bisect.bisect_right(ba_indices, ab_latest - 2)
-if pos > 0:
-    print("YES")
-    exit()
+    # Check condition b: earliest BA followed by AB
+    ba_earliest = ba_indices[0]
+    pos = bisect.bisect_left(ab_indices, ba_earliest + 2)
+    if pos < len(ab_indices):
+        print("YES", file=output_stream)
+        return
 
-# Check condition d: latest BA followed by AB
-ba_latest = ba_indices[-1]
-pos = bisect.bisect_left(ab_indices, ba_latest + 2)
-if pos < len(ab_indices):
-    print("YES")
-    exit()
+    # Check condition c: latest AB has BA before
+    ab_latest = ab_indices[-1]
+    pos = bisect.bisect_right(ba_indices, ab_latest - 2)
+    if pos > 0:
+        print("YES", file=output_stream)
+        return
 
-print("NO")
+    # Check condition d: latest BA followed by AB
+    ba_latest = ba_indices[-1]
+    pos = bisect.bisect_left(ab_indices, ba_latest + 2)
+    if pos < len(ab_indices):
+        print("YES", file=output_stream)
+        return
 
-Wait, but for condition c: BA_indices <= ab_latest -2.
+    print("NO", file=output_stream)
 
-So ab_latest -2 is the maximum allowed BA start index.
 
-We need to find if there is any BA in BA_indices that is <= ab_latest -2.
 
-So using bisect_right on ba_indices to find the insertion point of ab_latest-2 +1. Wait, no.
+def test():
+    import io
 
-Wait, bisect.bisect_right returns the insertion point which comes after (to the right of) any existing entries of x in the list. So for example, in a list [1,3,5], bisect_right(3) returns 2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+BACFAB
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
 
-But if we want to check if any element is <= x, then the insertion point is after all elements <=x. So if insertion point is >0, then there is at least one element <=x.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So for x = ab_latest -2, using bisect_right(ba_indices, x) gives the position where x would be inserted to keep the list sorted. If that position is greater than 0, then there are elements <=x.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So for condition c, if bisect.bisect_right(ba_indices, ab_latest -2) > 0 → there's at least one BA with start <= ab_latest -2 → yes.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So the code for condition c is:
+    print('Tests passed 😎')
 
-pos = bisect.bisect_right(ba_indices, ab_latest - 2)
 
-if pos >0 → yes.
+if __name__ == '__main__':
+    test()
 
-Yes.
 
-So in code:
+```
 
-For condition a: check if there's a BA >= ab_earliest +2 → use bisect_left to find first occurrence >= that value. If found, then yes.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For condition b: check AB >= ba_earliest +2 → bisect_left on ab_indices.
+```
 
-Condition c: check BA <= ab_latest -2 → bisect_right returns the insertion point after all elements <= x. So if pos>0, then there exists elements.
+Testing against sample input 2.
 
-Condition d: check AB >= ba_latest +2 → bisect_left on ab_indices.
+```python
+import bisect
 
-If any of these four conditions is true, output yes.
 
-So this code should cover all possible cases.
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-Let's test the sample inputs.
+    ab_indices = []
+    ba_indices = []
 
-Sample input 1: ABA → length 3.
+    n = len(s)
+    for i in range(n-1):
+        if s[i] == 'A' and s[i+1] == 'B':
+            ab_indices.append(i)
+        elif s[i] == 'B' and s[i+1] == 'A':
+            ba_indices.append(i)
 
-ab_indices: i=0 (A and B).
+    if not ab_indices or not ba_indices:
+        print("NO", file=output_stream)
+        return
 
-ba_indices: i=1 (B and A).
+    # Check condition a: earliest AB followed by BA
+    ab_earliest = ab_indices[0]
+    pos = bisect.bisect_left(ba_indices, ab_earliest + 2)
+    if pos < len(ba_indices):
+        print("YES", file=output_stream)
+        return
 
-Check condition a: ab_earliest=0. Check BA_indices >=0+2=2. BA_indices is [1]. bisect_left finds position 1 (since 1 is <2). pos=1, len(ba_indices)=1 → 1<1 is False. So no.
+    # Check condition b: earliest BA followed by AB
+    ba_earliest = ba_indices[0]
+    pos = bisect.bisect_left(ab_indices, ba_earliest + 2)
+    if pos < len(ab_indices):
+        print("YES", file=output_stream)
+        return
 
-Condition b: ba_earliest=1. Check AB >=1+2=3. AB_indices has 0. bisect_left returns 0 for 3. pos=0 < len(ab_indices) (1). But the element is 0 <3. So no.
+    # Check condition c: latest AB has BA before
+    ab_latest = ab_indices[-1]
+    pos = bisect.bisect_right(ba_indices, ab_latest - 2)
+    if pos > 0:
+        print("YES", file=output_stream)
+        return
 
-Condition c: ab_latest=0. ab_latest-2 =-2. So looking for BA <=-2. BA_indices is [1]. bisect_right returns 0. So pos=0>0 is false.
+    # Check condition d: latest BA followed by AB
+    ba_latest = ba_indices[-1]
+    pos = bisect.bisect_left(ab_indices, ba_latest + 2)
+    if pos < len(ab_indices):
+        print("YES", file=output_stream)
+        return
 
-Condition d: ba_latest=1. Check AB >=1+2=3. AB_indices has 0. No.
+    print("NO", file=output_stream)
 
-So output NO. Correct.
 
-Sample input2: BACFAB → s is B A C F A B.
 
-ab_indices: i=4 (A and B at 4,5).
+def test():
+    import io
 
-ba_indices: i=0 (B and A at 0,1).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+AXBYBXA
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-Condition a: ab_earliest=4. Check BA_indices >=4+2=6. BA_indices is [0]. bisect_left returns 1 (since 0<6). 1 < len(ba_indices) (1) → no.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Condition b: ba_earliest=0. Check AB >=0+2=2. AB_indices is [4]. bisect_left finds first element >=2. pos=0 (since 4 >=2). So 0 <1 → yes. So condition b is true. Output yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input3: AXBYBXA → no AB or BA.
 

@@ -443,59 +443,187 @@ Yes, that's the code.
 
 So the code would look like:
 
+Testing against sample input 1.
+
+```python
 from collections import Counter
 
-s = input().strip()
 
-freq = Counter(s)
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-counts = list(freq.values())
+    freq = Counter(s)
 
-k = len(counts)
+    counts = list(freq.values())
 
-if k >4:
+    k = len(counts)
 
-    print("No")
+    if k >4:
 
-elif k ==4:
+        print("No", file=output_stream)
 
-    print("Yes")
+    elif k ==4:
 
-elif k ==3:
+        print("Yes", file=output_stream)
 
-    if any(c >=2 for c in counts):
+    elif k ==3:
 
-        print("Yes")
+        if any(c >=2 for c in counts):
+
+            print("Yes", file=output_stream)
+
+        else:
+
+            print("No", file=output_stream)
+
+    elif k ==2:
+
+        if all(c >=2 for c in counts):
+
+            print("Yes", file=output_stream)
+
+        else:
+
+            print("No", file=output_stream)
 
     else:
 
-        print("No")
+        print("No", file=output_stream)
 
-elif k ==2:
 
-    if all(c >=2 for c in counts):
 
-        print("Yes")
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+zzcxx
+""",
+            "output": \
+"""\
+Yes
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+from collections import Counter
+
+
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    freq = Counter(s)
+
+    counts = list(freq.values())
+
+    k = len(counts)
+
+    if k >4:
+
+        print("No", file=output_stream)
+
+    elif k ==4:
+
+        print("Yes", file=output_stream)
+
+    elif k ==3:
+
+        if any(c >=2 for c in counts):
+
+            print("Yes", file=output_stream)
+
+        else:
+
+            print("No", file=output_stream)
+
+    elif k ==2:
+
+        if all(c >=2 for c in counts):
+
+            print("Yes", file=output_stream)
+
+        else:
+
+            print("No", file=output_stream)
 
     else:
 
-        print("No")
+        print("No", file=output_stream)
 
-else:
 
-    print("No")
 
-Wait, but in the case where k is 3, the code checks if any count is >=2. Since for k=3, each character occurs at least once (since they are present in the original), so the other two conditions (others are >=1) are already satisfied.
+def test():
+    import io
 
-Yes.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+yeee
+""",
+            "output": \
+"""\
+No
+""",
+        }, 
+    ]
 
-So this code should handle all cases.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Testing the sample inputs:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sample 1: ababa → counts a:3, b:2 → k=2 → check all(c >=2 → 3 and 2 are >=2 → Yes.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sample 2: zzcxx → counts z:2, c:1, x:2 → k=3. any count >=2 → yes (z and x). So output Yes.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3: yeee → counts y:1, e:3 → k=2. all(c >=2 → 1 <2 → No.
 

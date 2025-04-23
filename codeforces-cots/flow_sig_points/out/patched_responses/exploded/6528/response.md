@@ -157,59 +157,78 @@ That's straightforward.
 
 So code in Python:
 
-n = int(input())
+Testing against sample input 2.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-max_len = 1
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-current = 1
+    max_len = 1
 
-for i in range(1, n):
+    current = 1
 
-    if a[i] <= 2 * a[i-1]:
+    for i in range(1, n):
 
-        current +=1
+        if a[i] <= 2 * a[i-1]:
 
-    else:
+            current +=1
 
-        current = 1
+        else:
 
-    if current > max_len:
+            current = 1
 
-        max_len = current
+        if current > max_len:
 
-print(max_len)
+            max_len = current
 
-Wait, let's test this with the third sample:
+    print(max_len, file=output_stream)
 
-Input is 4,7,12,100,150,199.
 
-Loop:
 
-i=1: 7 <= 8 → yes. current 2 → max 2.
+def test():
+    import io
 
-i=2: 12 <= 14 → yes. current 3 → max 3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+4 7 12 100 150 199
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-i=3: 100 <= 24? No. current becomes 1. max remains 3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=4: 150 <= 200 → yes. current 2. max still 3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=5: 199 <= 300 → yes. current 3 → max remains 3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So output 3. Correct.
+    print('Tests passed 😎')
 
-Second sample: all pairs after 2,10 are invalid. So the maximum is 1.
 
-Yes.
+if __name__ == '__main__':
+    test()
 
-So the code works for the samples.
 
-What about edge cases?
+```
 
-Case n=1: output 1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Case where all pairs are valid. For example, a list where each a[i] is exactly 2*a[i-1]. Then the code returns n. Which is correct.
+```
 
 Another case where the list is 1,3,6,12,24. Each step is valid. So the code returns 5. Which is correct.
 

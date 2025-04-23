@@ -277,52 +277,74 @@ Yes.
 
 So the code in Python would look like this:
 
-n = int(input())
-a = input().strip()
-b = input().strip()
+Testing against sample input 1.
 
-cost = 0
-i = 0
-while i < n:
-    if a[i] == b[i]:
-        i += 1
-        continue
-    # Current is a mismatch
-    if i + 1 < n and a[i] != a[i+1] and a[i+1] != b[i+1]:
-        cost += 1
-        i += 2
-    else:
-        cost += 1
-        i += 1
-print(cost)
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = input_stream.readline().rstrip("\n").strip()
+    b = input_stream.readline().rstrip("\n").strip()
 
-Wait, but why check a[i] != a[i+1] and a[i+1] != b[i+1]? Because the next character must also be a mismatch. Because if a[i+1] is a match, then even if a[i] != a[i+1], swapping would not help. For example, a[i] is 0, a[i+1] is 1. But if b[i+1] is 1, then a[i+1] is correct, so swapping would make a[i+1] 0 (correct) but a[i] would be 1 (incorrect). So the condition a[i+1] != b[i+1] is necessary.
+    cost = 0
+    i = 0
+    while i < n:
+        if a[i] == b[i]:
+            i += 1
+            continue
+        # Current is a mismatch
+        if i + 1 < n and a[i] != a[i+1] and a[i+1] != b[i+1]:
+            cost += 1
+            i += 2
+        else:
+            cost += 1
+            i += 1
+    print(cost, file=output_stream)
 
-So the code's condition is correct.
 
-Yes.
 
-So this code should handle all cases correctly.
+def test():
+    import io
 
-Let's test the sample inputs.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+0101
+0011
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-First sample:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-3
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-100
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-001
+    print('Tests passed 😎')
 
-Processing:
 
-i=0: a[0] is '1' != '0' (b[0]). Check i+1 is 1, a[1] is '0' (a[0] != a[1] is true). But a[1] == b[1] (0). So a[i+1] != b[i+1] is false. So take else path: cost +=1 (cost=1), i becomes 1.
+if __name__ == '__main__':
+    test()
 
-i=1: a[1] == b[1], so i becomes 2.
 
-i=2: a[2] is '0' != '1'. Check i+1=3 which is out of bounds. So cost +=1 (total 2). i becomes 3.
+```
 
-Output 2. Correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

@@ -677,66 +677,86 @@ s[0] is not '?', so q_count=10^1=10. total=10*10=100.
 
 Now, code in Python:
 
-s = input().strip()
+Testing against sample input 1.
 
-letters = set()
-for c in s:
-    if 'A' <= c <= 'J':
-        letters.add(c)
-K = len(letters)
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-first_in_letters = s[0] in letters if s else False
+    letters = set()
+    for c in s:
+        if 'A' <= c <= 'J':
+            letters.add(c)
+    K = len(letters)
 
-letters_count = 1
+    first_in_letters = s[0] in letters if s else False
 
-if first_in_letters:
-    if K == 0:
-        letters_count = 0
+    letters_count = 1
+
+    if first_in_letters:
+        if K == 0:
+            letters_count = 0
+        else:
+            letters_count = 9
+            for i in range(1, K):
+                letters_count *= (9 - (i-1))
     else:
-        letters_count = 9
-        for i in range(1, K):
-            letters_count *= (9 - (i-1))
-else:
-    for i in range(K):
-        letters_count *= (10 - i)
+        for i in range(K):
+            letters_count *= (10 - i)
 
-count_q = s.count('?')
+    count_q = s.count('?')
 
-if s and s[0] == '?':
-    q_count = 9 * (10 ** (count_q - 1)) if count_q != 0 else 0
-else:
-    q_count = 10 ** count_q
+    if s and s[0] == '?':
+        q_count = 9 * (10 ** (count_q - 1)) if count_q != 0 else 0
+    else:
+        q_count = 10 ** count_q
 
-total = letters_count * q_count
-print(total)
+    total = letters_count * q_count
+    print(total, file=output_stream)
 
-Wait, but when K is zero and first_in_letters is True, which is impossible because if K is zero, there are no letters. So first_in_letters can only be True if K is at least 1. So code can skip checking K==0 in first_in_letters case.
 
-But the code has that check. But in reality, when first_in_letters is True, s[0] is a letter, which is in letters. So K cannot be zero. So the code's 'if K ==0' in that block is redundant. But to avoid errors in code (like empty string), perhaps the code should proceed as written.
 
-But given that the problem states that the first character is not zero. So the input s is not empty, and the first character is either a digit (non-zero), '?', or a letter.
+def test():
+    import io
 
-So the code is safe.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1?AA
+""",
+            "output": \
+"""\
+100
+""",
+        }, 
+    ]
 
-Testing the code on the samples.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample 1:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Input: AJ
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-letters = {'A', 'J'}
+    print('Tests passed 😎')
 
-K=2.
 
-first_in_letters is True.
+if __name__ == '__main__':
+    test()
 
-letters_count is 9 * (9) =81.
 
-count_q=0.
+```
 
-s[0] is 'A' not '?', so q_count is 0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-total =81 *1=81. Correct.
+```
 
 Sample 2:
 

@@ -206,21 +206,67 @@ Once loop ends, print a and b.
 
 Yes, that's the code.
 
-Testing the code with sample inputs.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    a, b = map(int, input_stream.readline().rstrip("\n").split())
+    while True:
+        if a == 0 or b == 0:
+            break
+        if a >= 2 * b:
+            k = a // (2 * b)
+            a -= 2 * b * k
+        elif b >= 2 * a:
+            k = b // (2 * a)
+            b -= 2 * a * k
+        else:
+            break
+    print(a, b, file=output_stream)
 
-Input: 12 5
 
-Loop:
 
-a=12, b=5. a >=10. k=1. a=2. Next iteration.
+def test():
+    import io
 
-a=2, b=5. Check b >=2*2=4. yes. k=5//4=1. b=5-4=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+31 12
+""",
+            "output": \
+"""\
+7 12
+""",
+        }, 
+    ]
 
-Next iteration: a=2, b=1. a >=2*1=2. yes. k=2//2=1. a=0. Now a is 0. break.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Output: 0 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2: 31 12.
 

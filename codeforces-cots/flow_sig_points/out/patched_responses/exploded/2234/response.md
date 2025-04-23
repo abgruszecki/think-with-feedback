@@ -901,41 +901,158 @@ Now, code:
 
 The code as outlined above should work. Let's write it in Python, handling all cases.
 
-Testing the code with the samples.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    goals = [[None for _ in range(m)] for _ in range(n)]
+    players = {}
+    quaffle_pos = None
+    quaffle_holder = None
 
-Input:
+    for i in range(n):
+        line = input_stream.readline().rstrip("\n").split()
+        for j in range(m):
+            cell = line[j]
+            if cell == 'RG':
+                goals[i][j] = 'RG'
+            elif cell == 'BG':
+                goals[i][j] = 'BG'
+            elif cell == '.Q':
+                quaffle_pos = (i, j)
+            elif cell[0] in ('R', 'B') and cell[1].isdigit():
+                players[cell] = (i, j)
 
-5 5
+    T = int(input_stream.readline().rstrip("\n"))
+    steps = [input_stream.readline().rstrip("\n").strip() for _ in range(T)]
 
-.. R1 .. B1 ..
+    red_score = 0
+    blue_score = 0
+    events = []
+    middle_x = (n - 1) // 2
+    middle_y = (m - 1) // 2
 
-RG .. .. .. BG
+    for step_idx in range(T):
+        parts = steps[step_idx].split()
+        entity = parts[0]
+        action = parts[1]
+        
+        if entity == '.Q':
+            if quaffle_holder is None:
+                x, y = quaffle_pos
+                if action == 'U':
+                    x -= 1
+                elif action == 'D':
+                    x += 1
+                elif action == 'L':
+                    y -= 1
+                elif action == 'R':
+                    y += 1
+                quaffle_pos = (x, y)
+        else:
+            current_x, current_y = players[entity]
+            if action in ('U', 'D', 'L', 'R'):
+                dx, dy = 0, 0
+                if action == 'U':
+                    dx = -1
+                elif action == 'D':
+                    dx = 1
+                elif action == 'L':
+                    dy = -1
+                elif action == 'R':
+                    dy = 1
+                new_x, new_y = current_x + dx, current_y + dy
+                players[entity] = (new_x, new_y)
+                if quaffle_holder == entity:
+                    quaffle_pos = (new_x, new_y)
+            elif action == 'C':
+                ball = parts[2]
+                if ball == '.Q' and (current_x, current_y) == quaffle_pos:
+                    quaffle_holder = entity
+                    quaffle_pos = (current_x, current_y)
+            elif action == 'T':
+                quaffle_holder = None
+                quaffle_pos = players[entity]
+        
+        if quaffle_holder is None:
+            x, y = quaffle_pos
+            goal = goals[x][y]
+            if goal is not None:
+                if goal == 'RG':
+                    blue_score += 1
+                    team = 'BLUE'
+                else:
+                    red_score += 1
+                    team = 'RED'
+                events.append((step_idx, team))
+                quaffle_pos = (middle_x, middle_y)
 
-RG R0 .Q B0 BG
+    for t, team in events:
+        print(f"{t} {team} GOAL", file=output_stream)
+    print(f"FINAL SCORE: {red_score} {blue_score}", file=output_stream)
 
-RG .. .. .. BG
 
-.. R2 .. B2 ..
 
-13 steps.
+def test():
+    import io
 
-Sample Output:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 5
+.. .. R0 .. ..
+RG .. .Q .. BG
+.. .. B0 .. ..
+12
+R0 D
+R0 C .Q
+R0 R
+R0 T
+R0 D
+B0 R
+B0 U
+B0 C .Q
+B0 L
+B0 L
+B0 L
+B0 T
+""",
+            "output": \
+"""\
+11 BLUE GOAL
+FINAL SCORE: 0 1
+""",
+        }, 
+    ]
 
-6 BLUE GOAL
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-12 RED GOAL
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-FINAL SCORE: 1 1
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-In this case, after step 6 (t=6), B2 throws the Quaffle into a RG cell. So Blue scores. Then, the Quaffle is moved to the middle (position 2,2). Then, R0 moves, catches, etc. Then, step 12 (t=12), R0 throws into BG, so Red scores.
+    print('Tests passed 😎')
 
-But according to the code, after step 6, the Quaffle is at B2's position when thrown. Let's see.
 
-But code should handle this.
+if __name__ == '__main__':
+    test()
 
-Thus, the code should be correct.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

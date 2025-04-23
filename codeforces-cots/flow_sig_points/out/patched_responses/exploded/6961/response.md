@@ -1119,117 +1119,163 @@ Now, putting it all together.
 
 The code:
 
-class SegmentTree:
-    def __init__(self, size, m_sets):
-        self.n = size
-        self.m = m_sets
-        self.inf = float('inf')
-        self.size = 1
-        while self.size < self.n:
-            self.size <<= 1
-        self.tree = [ [self.inf] * self.m for _ in range(2 * self.size) ]
+Testing against sample inputs 1, 2.
 
-    def update(self, pos, s, value):
-        pos += self.size - 1  # convert to 0-based index in the tree array
-        if self.tree[pos][s] > value:
-            self.tree[pos][s] = value
-            pos >>= 1
-            while pos >= 1:
-                new_val = [
-                    min(self.tree[2*pos][i], self.tree[2*pos+1][i])
-                    for i in range(self.m)
-                ]
-                if self.tree[pos] == new_val:
-                    break
-                self.tree[pos] = new_val.copy()
+```python
+def main(input_stream, output_stream):
+    class SegmentTree:
+        def __init__(self, size, m_sets):
+            self.n = size
+            self.m = m_sets
+            self.inf = float('inf')
+            self.size = 1
+            while self.size < self.n:
+                self.size <<= 1
+            self.tree = [ [self.inf] * self.m for _ in range(2 * self.size) ]
+
+        def update(self, pos, s, value):
+            pos += self.size - 1  # convert to 0-based index in the tree array
+            if self.tree[pos][s] > value:
+                self.tree[pos][s] = value
                 pos >>= 1
+                while pos >= 1:
+                    new_val = [
+                        min(self.tree[2*pos][i], self.tree[2*pos+1][i])
+                        for i in range(self.m)
+                    ]
+                    if self.tree[pos] == new_val:
+                        break
+                    self.tree[pos] = new_val.copy()
+                    pos >>= 1
 
-    def query_range(self, l, r):
-        res = [self.inf] * self.m
-        l += self.size - 1
-        r += self.size - 1
-        while l <= r:
-            if l % 2 == 1:
-                for i in range(self.m):
-                    res[i] = min(res[i], self.tree[l][i])
-                l += 1
-            if r % 2 == 0:
-                for i in range(self.m):
-                    res[i] = min(res[i], self.tree[r][i])
-                r -= 1
-            l >>= 1
-            r >>= 1
-        return res
+        def query_range(self, l, r):
+            res = [self.inf] * self.m
+            l += self.size - 1
+            r += self.size - 1
+            while l <= r:
+                if l % 2 == 1:
+                    for i in range(self.m):
+                        res[i] = min(res[i], self.tree[l][i])
+                    l += 1
+                if r % 2 == 0:
+                    for i in range(self.m):
+                        res[i] = min(res[i], self.tree[r][i])
+                    r -= 1
+                l >>= 1
+                r >>= 1
+            return res
 
-n, m, d = map(int, input().split())
-s = [0] * (n + 1)  # s[1..n] are valid
-for i in range(m):
-    parts = list(map(int, input().split()))
-    si = parts[0]
-    elements = parts[1:]
-    for x in elements:
-        s[x] = i
+    n, m, d = map(int, input_stream.readline().rstrip("\n").split())
+    s = [0] * (n + 1)  # s[1..n] are valid
+    for i in range(m):
+        parts = list(map(int, input_stream.readline().rstrip("\n").split()))
+        si = parts[0]
+        elements = parts[1:]
+        for x in elements:
+            s[x] = i
 
-st = SegmentTree(n, m)
-dp = [float('inf')] * (n + 2)  # dp[1..n]
+    st = SegmentTree(n, m)
+    dp = [float('inf')] * (n + 2)  # dp[1..n]
 
-for x in range(1, n + 1):
-    a = max(1, x - d)
-    b = x - 1
-    if a > b:
-        if x <= d:
-            dp[x] = 1
-    else:
-        # query [a, b]
-        res = st.query_range(a, b)
-        current_set = s[x]
-        min_same = res[current_set]
-        min_diff = float('inf')
-        for i in range(m):
-            if i != current_set:
-                if res[i] < min_diff:
-                    min_diff = res[i]
-        current_min = min(min_same, min_diff + 1 if min_diff != float('inf') else float('inf'))
-        if x <= d:
-            current_min = min(current_min, 1)
-        dp[x] = current_min
-    if dp[x] != float('inf'):
-        st.update(x, s[x], dp[x])
+    for x in range(1, n + 1):
+        a = max(1, x - d)
+        b = x - 1
+        if a > b:
+            if x <= d:
+                dp[x] = 1
+        else:
+            # query [a, b]
+            res = st.query_range(a, b)
+            current_set = s[x]
+            min_same = res[current_set]
+            min_diff = float('inf')
+            for i in range(m):
+                if i != current_set:
+                    if res[i] < min_diff:
+                        min_diff = res[i]
+            current_min = min(min_same, min_diff + 1 if min_diff != float('inf') else float('inf'))
+            if x <= d:
+                current_min = min(current_min, 1)
+            dp[x] = current_min
+        if dp[x] != float('inf'):
+            st.update(x, s[x], dp[x])
 
-# Find the answer: minimal dp[x] where x >= n -d +1
-answer = float('inf')
-target = n - d + 1
-for x in range(1, n + 1):
-    if x >= target:
-        if dp[x] < answer:
-            answer = dp[x]
+    # Find the answer: minimal dp[x] where x >= n -d +1
+    answer = float('inf')
+    target = n - d + 1
+    for x in range(1, n + 1):
+        if x >= target:
+            if dp[x] < answer:
+                answer = dp[x]
 
-print(answer if answer != float('inf') else -1)
+    print(answer if answer != float('inf') else -1, file=output_stream)
 
-Wait, but in some cases, it's possible that no valid chain exists. However, the problem states that it's guaranteed that the sets form a partition of 1..n. So there must be a valid chain.
 
-But in the code, if answer is infinity, it would print 'inf', but the problem requires to print the minimal k. However, according to the problem statement, the input sets are a partition, so there's a way to select all m sets, which would include all elements, which would form a chain from 1 to n. So the answer will always exist.
 
-Thus, in code, we can assume that answer is not infinity.
+def test():
+    import io
 
-Testing this code with the sample inputs.
-
-Sample 1:
-
-Input:
-3 2 2
-1 2
-2 1 3
-
-The code should output 1.
-
-Sample 2:
-
-Input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5 1 1
 5 4 5 3 2 1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+        {
+            "input": \
+"""\
+7 3 1
+4 1 3 5 7
+2 2 6
+1 4
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-The code should output 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 136, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 129, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 1 failed.
+Expected: '3'
+Got: '7'
+
+```
 
 Sample 3:
 

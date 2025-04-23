@@ -897,67 +897,68 @@ Therefore, the correct solution is to use a min-heap and follow the algorithm of
 
 So the Python code for this approach would be:
 
+Testing against sample input 1.
+
+```python
 import heapq
 
-n = int(input())
-p = list(map(int, input().split()))
-heap = []
-total = 0
-for price in p:
-    if heap and price > heap[0]:
-        total += price - heapq.heappop(heap)
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
+    heap = []
+    total = 0
+    for price in p:
+        if heap and price > heap[0]:
+            total += price - heapq.heappop(heap)
+            heapq.heappush(heap, price)
         heapq.heappush(heap, price)
-    heapq.heappush(heap, price)
-print(total)
+    print(total, file=output_stream)
 
-Wait, but in this code, after selling, we push the current price into the heap again. Let's test this code with the first sample.
 
-Sample input 1:
 
-9
-10 5 4 7 9 12 6 2 10
+def test():
+    import io
 
-Processing:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+20
+3 1 4 1 5 9 2 6 5 3 5 8 9 7 9 3 2 3 8 4
+""",
+            "output": \
+"""\
+41
+""",
+        }, 
+    ]
 
-Day0 (10):
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-heap is empty. push 10. heap [10].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Day1 (5):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-push5. heap [5,10].
+    print('Tests passed 😎')
 
-Day2 (4):
 
-push4. heap [4,5,10].
+if __name__ == '__main__':
+    test()
 
-Day3 (7):
 
-7>4. sell4. total +=3. push7. heap [5,7,10].
+```
 
-Day4 (9):
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-9>5. sell5. total +=4. push9. heap [7,9,10].
-
-Day5 (12):
-
-12>7. sell7. total +=5. push12. heap [9,12,10].
-
-Day6 (6):
-
-6 <9. push6. heap [6,9,12,10].
-
-Day7 (2):
-
-push2. heap [2,6,9,12,10].
-
-Day8 (10):
-
-10>2. sell2. total +=8. push10. heap [6,9,10,10,12].
-
-Final total: 3+4+5+8=20. Which matches the sample.
-
-So the code works for the first sample.
+```
 
 Another test case: sample input2.
 

@@ -511,71 +511,82 @@ But need to handle the MOD correctly.
 
 Now, code:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-n, k = map(int, input().split())
-t = input().strip()
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-dp = 1
-last = [0] * k
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    t = input_stream.readline().rstrip("\n").strip()
 
-for c in t:
-    idx = ord(c) - ord('a')
-    old_dp = dp
-    dp = (dp * 2 - last[idx]) % MOD
-    last[idx] = old_dp
+    dp = 1
+    last = [0] * k
 
-for _ in range(n):
-    # Find the index with the minimal last value
-    min_idx = 0
-    min_val = last[0]
-    for i in range(1, k):
-        if last[i] < min_val:
-            min_val = last[i]
-            min_idx = i
-    new_dp = (dp * 2 - min_val) % MOD
-    last[min_idx] = dp
-    dp = new_dp
+    for c in t:
+        idx = ord(c) - ord('a')
+        old_dp = dp
+        dp = (dp * 2 - last[idx]) % MOD
+        last[idx] = old_dp
 
-print(dp % MOD)
+    for _ in range(n):
+        # Find the index with the minimal last value
+        min_idx = 0
+        min_val = last[0]
+        for i in range(1, k):
+            if last[i] < min_val:
+                min_val = last[i]
+                min_idx = i
+        new_dp = (dp * 2 - min_val) % MOD
+        last[min_idx] = dp
+        dp = new_dp
 
-But wait, in the code, when we compute new_dp, we subtract min_val (last[min_idx]), and then assign last[min_idx] to the current dp (before the step).
+    print(dp % MOD, file=output_stream)
 
-Yes.
 
-Yes, this should be correct.
 
-Testing the first sample:
+def test():
+    import io
 
-Sample 1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0 2
+aaba
+""",
+            "output": \
+"""\
+10
+""",
+        }, 
+    ]
 
-Input:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-1 3
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-ac
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Processing the initial t 'ac':
+    print('Tests passed 😎')
 
-After 'a', dp=2, last[0] =1.
 
-After 'c', dp=4, last[2] =2.
+if __name__ == '__main__':
+    test()
 
-Then, n=1.
 
-In the loop:
+```
 
-Check last for indices 0,1,2 (k=3). last[0] is 1, last[1] is 0, last[2] is 2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So min_val is 0 at index 1.
-
-new_dp =4*2 -0=8.
-
-last[1] is updated to 4.
-
-dp becomes 8.
-
-Output 8 mod MOD is 8.
+```
 
 Sample 2:
 

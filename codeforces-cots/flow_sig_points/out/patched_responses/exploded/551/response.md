@@ -131,83 +131,152 @@ We need to read the first line, then read n lines.
 
 In Python:
 
+Testing against sample input 2.
+
+```python
 import sys
 
-n, L, a = map(int, input().split())
 
-prev_end =0
+def main(input_stream, output_stream):
+    n, L, a = map(int, input_stream.readline().rstrip("\n").split())
 
-count =0
+    prev_end =0
 
-for _ in range(n):
+    count =0
 
-    ti, li = map(int, input().split())
+    for _ in range(n):
 
-    available = ti - prev_end
+        ti, li = map(int, input_stream.readline().rstrip("\n").split())
 
-    count += available // a
+        available = ti - prev_end
 
-    prev_end = ti + li
+        count += available // a
 
-available = L - prev_end
+        prev_end = ti + li
 
-count += available //a
+    available = L - prev_end
 
-print(count)
+    count += available //a
 
-Wait, but when n is zero, the loop doesn't run, and then the available is L -0, which is L. So count += L//a. So even if n is zero, the code works.
+    print(count, file=output_stream)
 
-Wait, let's test for the second sample input:
 
-Sample 2:
 
-Input:
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 3 2
+1 2
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 1.
+
+```python
+import sys
+
+
+def main(input_stream, output_stream):
+    n, L, a = map(int, input_stream.readline().rstrip("\n").split())
+
+    prev_end =0
+
+    count =0
+
+    for _ in range(n):
+
+        ti, li = map(int, input_stream.readline().rstrip("\n").split())
+
+        available = ti - prev_end
+
+        count += available // a
+
+        prev_end = ti + li
+
+    available = L - prev_end
+
+    count += available //a
+
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 0 5 2
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-The code:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-n=0, L=5, a=2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-prev_end is 0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The loop runs 0 times.
+    print('Tests passed 😎')
 
-available =5-0=5.
 
-count =5//2 =2. So output is 2. Correct.
+if __name__ == '__main__':
+    test()
 
-Another sample:
 
-Sample 1:
+```
 
-Input:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-2 11 3
-
-0 1
-
-1 1
-
-So:
-
-prev_end starts at 0.
-
-First customer: ti=0, li=1.
-
-available is 0-0=0. So count +=0.
-
-prev_end becomes 0+1=1.
-
-Second customer: ti=1, li=1.
-
-available is 1-1=0. count +=0.
-
-prev_end becomes 1+1=2.
-
-After loop:
-
-available is 11-2=9. 9//3=3. So total count is 0+0+3=3. Correct.
+```
 
 Third sample:
 

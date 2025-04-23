@@ -391,213 +391,179 @@ But wait, the initial deque after the first step is a[2:] plus the loser.
 
 So:
 
+Testing against sample input 1.
+
+```python
 from collections import deque
-
-n, k = map(int, input().split())
-
-a = list(map(int, input().split()))
-
-max_p = max(a)
-
-if k ==0:
-
-   print(current_champion) # but k >=2, per problem statement.
-
-But proceed.
-
-if n ==2:
-
-   # after first step, deque has [loser], current_streak is 1.
-
-   # next step: process the loser.
-
-   # but after first step, the deque is [loser].
-
-   # next step: challenger is loser.
-
-   # compare with current_champion (max of a[0], a[1])
-
-   # if current_champion is max_p (which it is), then in the next step:
-
-   # streak becomes 2, which for k=2, returns.
-
-   # but in code, after initial step, current_streak is 1. Then, check if it's >=k. If k=2, no. Then check if current_champion is max_p. If yes, return max_p. But wait, in the first sample input, the code would process:
-
-Sample 1:
-
-n=2, k=2.
-
-a = [1,2]
-
-max_p =2.
-
-Initial step:
-
-current_champion is 2, streak 1.
-
-deque is [1].
-
-Then, enter loop.
-
-Check streak 1 <2.
-
-current_champion is 2 == max_p. So return 2. So sample input 1 outputs 2, which is correct.
-
-But according to the sample input 1, after two wins in a row. So in the code, the check for current_champion == max_p is done before processing the next challenger. So in the first step after initial step, the current_champion is already the max_p, so the code returns it. But in reality, the next challenger is the loser (1) in the deque. So the code would return 2, but according to the simulation, after the first game, the streak is 1. Then, the next challenger is 1, which is played. 2 wins, streak is 2. So code would not check that?
-
-Wait, let's re-examine.
-
-After the initial step (a[0] and a[1] are 1 and 2):
-
-current_champion =2, streak=1.
-
-deque is [1] (since a[2:] is empty, and the loser is 1, which is added to deque).
-
-Now, enter the loop.
-
-Check if streak >=k (k=2). 1 <2 → no.
-
-Check if current_champion is max_p (2). Yes. So return 2.
-
-But according to the sample input 1, the correct output is 2. But in reality, the second game is played (challenger 1), and streak becomes 2. So why does the code not process that?
-
-Ah, because in the code, the current_champion is already max_p (2), so the code returns it immediately, without processing the next challenger.
-
-But that's wrong. Because the sample input 1 requires that after the second game, the streak is 2. So why is the code returning early?
-
-Wait, the code's logic is: once the current champion is the max_p, return it. Because once that happens, the streak will keep increasing. But in the case where the current streak is 1, and the current champion is the max_p, then after processing the next challenger, the streak becomes 2, which meets k=2. So why does the code not process that step?
-
-Ah, this is a problem.
-
-The code in this approach would return the max_p as soon as it becomes the current champion, but in the sample input 1, the current champion is already the max_p (after the first game), but the required k is 2, which is not yet reached (streak is 1). So the code would return the max_p, but according to the sample, the answer is 2, which is correct. However, in the sample input 1, the code would return 2 after the first game, but the streak is 1. So why is that correct?
-
-Because after the first game, the current champion is the max_p. So according to the code's logic, once the current champion is the max_p, the answer is the max_p. Because in the next games, the streak will increase by 1 each time, which for k=2, the next game would make the streak 2, but since the code returns immediately when the current champion is the max_p, it's possible that the code returns the max_p even if the current streak is less than k, but since the max_p cannot lose, the streak will eventually reach k. So in that case, it's sufficient to return the max_p as soon as he becomes the current champion, because even if the current streak is 1, the streak will increment to k after (k - current_streak) games. But since k can be 1e12, which is way larger than the current streak, it's impossible to process those steps. So the code is correct in returning the max_p as soon as he is the current champion.
-
-But in the sample input 1, the code returns 2 after the first game (current streak 1). But according to the sample, the required output is 2, which is correct. Because once the current champion is 2, the next challenger (1) would lose, making the streak 2, which meets k=2. However, according to the code's logic, since the current champion is already the max_p, the code returns it immediately, without processing the next step.
-
-But this is a problem. Because in that case, the code would return 2 even if k=1. But according to the problem statement, when k=1, the answer would be 2 after the first game. So the code's logic is correct.
-
-Wait, the code's logic is: if the current champion is the max_p, then regardless of the current streak, return it. Because once the max_p is the current champion, he will win all subsequent games, so the streak will increase by 1 each game until it reaches k. So even if the current streak is s, the total number of games required to reach k is (k - s) more games. But since those games are all won by the max_p, the answer is max_p regardless.
-
-So, the code can return max_p as soon as he becomes the current champion, even if the current streak is less than k. Because after that, it's guaranteed that he will win all games and reach the required streak.
-
-So, in the sample input 1, even though after the first game the streak is 1, the code returns the max_p, which is correct.
-
-But according to the sample input 1's explanation, the second game is played and the streak becomes 2. So why is the code's output correct?
-
-Because even though the code returns the max_p before processing the second game, the code's logic is correct. Because once the max_p is the current champion, all subsequent games are wins. So even if k is 2, the max_p will eventually reach that streak. So the code can return the max_p as soon as he is the current champion, regardless of the current streak.
-
-This is a crucial insight. So the code's logic is correct.
-
-Thus, in the code, once the current champion is the max_p, return him, regardless of the current streak. Because after that, the streak will keep increasing and eventually reach k.
-
-Thus, the code is correct.
-
-So, implementing this in Python.
-
-Now, code steps:
-
-Read n, k.
-
-Read a as a list.
-
-max_p = max(a)
-
-if n ==0:
-
-   pass (but n >=2).
-
-Initialize deque.
-
-But the first step is to process the first two elements.
-
-if len(a) <2:
-
-   pass (but n >=2).
-
-x = a[0]
-
-y = a[1]
-
-current_champion = max(x, y)
-
-loser = min(x, y)
-
-q = deque(a[2:])
-
-q.append(loser)
-
-current_streak = 1
-
-Then, loop:
-
-while True:
-
-   if current_streak >=k:
-
-       print(current_champion)
-
-       exit()
-
-   if current_champion == max_p:
-
-       print(max_p)
-
-       exit()
-
-   if not q:
-
-       print(current_champion)
-
-       exit()
-
-   challenger = q.popleft()
-
-   if current_champion > challenger:
-
-       current_streak +=1
-
-       q.append(challenger)
-
-   else:
-
-       q.append(current_champion)
-
-       current_champion = challenger
-
-       current_streak = 1
-
-This code should handle all cases.
-
-Testing sample input 1:
-
-n=2, k=2.
-
-a = [1,2]
-
-max_p =2.
-
-Initial step: current_champion is 2, streak 1.
-
-Check if streak >=2 → no.
-
-Check if current_champion is 2 → yes. Print 2. Correct.
-
-Sample input 2:
-
+import sys
+
+
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
+    max_p = max(a)
+    
+    if n == 1:
+        print(a[0], file=output_stream)
+        return
+    
+    x, y = a[0], a[1]
+    current = max(x, y)
+    loser = min(x, y)
+    q = deque(a[2:])
+    q.append(loser)
+    streak = 1
+    
+    while True:
+        if streak >= k:
+            print(current, file=output_stream)
+            return
+        if current == max_p:
+            print(max_p, file=output_stream)
+            return
+        if not q:
+            print(current, file=output_stream)
+            return
+        challenger = q.popleft()
+        if current > challenger:
+            streak += 1
+            q.append(challenger)
+        else:
+            q.append(current)
+            current = challenger
+            streak = 1
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4 2
-
 3 1 2 4
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-max_p is 4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Initial step: first two are 3 and 1. current_champion is 3, streak 1. q is [2,4,1].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Loop:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-current_streak is 1 <2. current_champion is not max_p. q is not empty.
+    print('Tests passed 😎')
 
-challenger is 2. 3>2 → streak 2. q appends 2. Now check streak >=2 → yes. Output 3. Correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+from collections import deque
+import sys
+
+
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
+    max_p = max(a)
+    
+    if n == 1:
+        print(a[0], file=output_stream)
+        return
+    
+    x, y = a[0], a[1]
+    current = max(x, y)
+    loser = min(x, y)
+    q = deque(a[2:])
+    q.append(loser)
+    streak = 1
+    
+    while True:
+        if streak >= k:
+            print(current, file=output_stream)
+            return
+        if current == max_p:
+            print(max_p, file=output_stream)
+            return
+        if not q:
+            print(current, file=output_stream)
+            return
+        challenger = q.popleft()
+        if current > challenger:
+            streak += 1
+            q.append(challenger)
+        else:
+            q.append(current)
+            current = challenger
+            streak = 1
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 2
+6 5 3 1 2 4
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 4:
 

@@ -146,47 +146,66 @@ But since 1+8n is a perfect square (given the problem statement), this will work
 
 So in Python:
 
-n = int(input())
-t = input().strip()
+Testing against sample input 1.
 
-m = int( ( (1 + 8*n)**0.5 -1 ) // 2 )
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    t = input_stream.readline().rstrip("\n").strip()
 
-s = []
-for k in range(1, m+1):
-    pos = (k-1)*(k +2) // 2
-    s.append(t[pos])
+    m = int( ( (1 + 8*n)**0.5 -1 ) // 2 )
 
-print(''.join(s))
+    s = []
+    for k in range(1, m+1):
+        pos = (k-1)*(k +2) // 2
+        s.append(t[pos])
 
-Wait, let's test this with the first example:
+    print(''.join(s), file=output_stream)
 
-n=6, t='baabbb'
 
-m= (sqrt(49)-1)/2= (7-1)/2=3.
 
-Loop k=1,2,3:
+def test():
+    import io
 
-k=1: pos=(0)*(3)/2=0 → 'b'
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10
+ooopppssss
+""",
+            "output": \
+"""\
+oops
+""",
+        }, 
+    ]
 
-k=2: (1)*(4)/2= 4/2=2 → t[2]='a' ?
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Wait, wait. Wait the encrypted string is 'baabbb'. Let's index it:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-0: b
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-1: a
+    print('Tests passed 😎')
 
-2: a
 
-3: b
+if __name__ == '__main__':
+    test()
 
-4: b
 
-5: b
+```
 
-So for k=2, pos= (1)*(4)/2= 4/2=2 → t[2] is 'a'. So s would be 'b' + 'a' + next for k=3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-k=3: (2)*(5)/2=10/2=5 → t[5] is 'b'. So s is 'bab', which is correct.
+```
 
 Another test case:
 

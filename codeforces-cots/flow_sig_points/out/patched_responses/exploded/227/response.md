@@ -157,27 +157,66 @@ Else, after loop, print n.
 
 So code:
 
-n = int(input())
-s = input().strip()
+Testing against sample input 1.
 
-max_k = n // 2
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-for k in range(max_k, 0, -1):
-    if s[:k] == s[k:2*k]:
-        print(n - k +1)
-        exit()
+    max_k = n // 2
 
-print(n)
+    for k in range(max_k, 0, -1):
+        if s[:k] == s[k:2*k]:
+            print(n - k +1, file=output_stream)
+            return
 
-Wait, but in the code, the loop is from max_k down to 1, inclusive. So for all k in that range. For each, check if the first k and next k characters are the same. If so, return the steps.
+    print(n, file=output_stream)
 
-Yes.
 
-Testing the first example: n=7, s=abcabca.
 
-max_k =7//2=3.
+def test():
+    import io
 
-Check k=3: s[0:3] is 'abc', s[3:6] is 'abc'. Then 2*3=6 <=7. So yes. So the answer is 7-3+1=5, which is correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+abcdefgh
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: n=8, s=abcdefgh.
 

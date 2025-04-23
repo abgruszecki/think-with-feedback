@@ -1861,53 +1861,154 @@ Then, merge the segments and sum.
 
 Thus, the code should work.
 
-Testing this code with the sample input:
+Testing against sample input 1.
 
-Sample input 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-8
+    # Check if the number of '(' and ')' are equal
+    if s.count('(') != s.count(')'):
+        print(-1, file=output_stream)
+        return
 
-))((())(
+    balance = [0] * n
+    current_balance = 0
+    for i in range(n):
+        current_balance += 1 if s[i] == '(' else -1
+        balance[i] = current_balance
 
- balance array: [-1, -2, -1, 0, 1, 0, -1, 0]
+    # Check if the balance is always non-negative
+    all_non_negative = all(b >= 0 for b in balance)
+    if all_non_negative:
+        print(0, file=output_stream)
+        return
 
-regions:
+    # Precompute left_zeros and right_zeros
+    left_zeros = [-1] * n
+    last_zero = -1
+    for i in range(n):
+        if balance[i] == 0:
+            last_zero = i
+        left_zeros[i] = last_zero
 
-(0,2), (6,6)
+    right_zeros = [n] * n
+    last_zero = n  # indicates no zero found yet; balance after array is zero
+    for i in range(n-1, -1, -1):
+        if balance[i] == 0:
+            last_zero = i
+        right_zeros[i] = last_zero
 
-For region (0,2):
+    # Collect all negative regions
+    regions = []
+    current_start = None
+    for i in range(n):
+        if balance[i] < 0:
+            if current_start is None:
+                current_start = i
+        else:
+            if current_start is not None:
+                regions.append((current_start, i-1))
+                current_start = None
+    if current_start is not None:
+        regions.append((current_start, n-1))
 
-s=0, e=2.
+    segments = []
+    for s_reg, e_reg in regions:
+        # Compute left_zero
+        if s_reg == 0:
+            left_zero = -1
+        else:
+            left_zero = left_zeros[s_reg - 1]
+        
+        # Compute right_zero
+        if e_reg == n-1:
+            right_zero = n
+        else:
+            right_zero = right_zeros[e_reg + 1]
+        
+        start = left_zero + 1
+        if right_zero < n:
+            end = right_zero
+        else:
+            end = n - 1
+        
+        if start <= end:
+            segments.append((start, end))
 
-left_zero =-1.
+    # Merge overlapping segments
+    if not segments:
+        print(0, file=output_stream)
+        return
 
-right_zero = right_zeros[3] =3.
+    segments.sort()
+    merged = []
+    for seg in segments:
+        if not merged:
+            merged.append(seg)
+        else:
+            last_start, last_end = merged[-1]
+            curr_start, curr_end = seg
+            if curr_start <= last_end:
+                # Overlapping or adjacent, merge them
+                new_start = last_start
+                new_end = max(last_end, curr_end)
+                merged[-1] = (new_start, new_end)
+            else:
+                merged.append(seg)
 
-start =0.
+    # Calculate total cost
+    total_cost = 0
+    for (s, e) in merged:
+        total_cost += e - s + 1
 
-end =3.
+    print(total_cost, file=output_stream)
 
-segment (0,3).
 
-For region (6,6):
 
-s=6, e=6.
+def test():
+    import io
 
-left_zero = left_zeros[5] =5.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+(()
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-right_zero = right_zeros[7] =7.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-start=6.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-end=7.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-segment (6,7).
+    print('Tests passed 😎')
 
-merged segments: [(0,3), (6,7)].
 
-Total cost 4+2=6.
+if __name__ == '__main__':
+    test()
 
-Which is correct.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2:
 

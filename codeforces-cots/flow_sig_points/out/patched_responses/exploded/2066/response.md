@@ -181,67 +181,87 @@ If none of the '1's satisfy this, output 'no'.
 
 So the code would look like:
 
-s = input().strip()
+Testing against sample input 1.
 
-if len(s) <7:
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-    print('no')
+    if len(s) <7:
 
-else:
+        print('no', file=output_stream)
 
-    for i in range(len(s)):
+    else:
 
-        if s[i] == '1':
+        for i in range(len(s)):
 
-            # check if there are 6 zeros after this position
+            if s[i] == '1':
 
-            zeros_needed =6
+                # check if there are 6 zeros after this position
 
-            j = i+1
+                zeros_needed =6
 
-            while j < len(s) and zeros_needed >0:
+                j = i+1
 
-                if s[j] == '0':
+                while j < len(s) and zeros_needed >0:
 
-                    zeros_needed -=1
+                    if s[j] == '0':
 
-                j +=1
+                        zeros_needed -=1
 
-            if zeros_needed ==0:
+                    j +=1
 
-                print('yes')
+                if zeros_needed ==0:
 
-                exit()
+                    print('yes', file=output_stream)
 
-    print('no')
+                    return
 
-This code should handle all cases correctly.
+        print('no', file=output_stream)
 
-Testing the examples:
 
-First example input: 100010001 → length 9.
 
-Check each '1' in positions 0,4,8.
+def test():
+    import io
 
-For i=0:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+100
+""",
+            "output": \
+"""\
+no
+""",
+        }, 
+    ]
 
-zeros_needed=6. Check from position 1 onwards.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-s[1] is '0' → 5 left.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-s[2] '0' →4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-s[3] '0' →3.
+    print('Tests passed 😎')
 
-s[4] '1' → no change.
 
-s[5] '0' →2.
+if __name__ == '__main__':
+    test()
 
-s[6] '0' →1.
 
-s[7] '0' →0. So zeros_needed becomes 0. So return 'yes'.
+```
 
-So code outputs yes.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example input: '100' → len 3 <7 → output 'no'.
 

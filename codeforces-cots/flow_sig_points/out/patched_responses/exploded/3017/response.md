@@ -247,13 +247,62 @@ So the code can be written as:
 
 Read the input, compute the sum, then apply the formula.
 
-Now, let's test this approach against the samples.
+Testing against sample input 1.
 
-First sample:
+```python
+def main(input_stream, output_stream):
+    n, A, B, C, T = map(int, input_stream.readline().rstrip("\n").split())
+    ti = list(map(int, input_stream.readline().rstrip("\n").split()))
+    if C > B:
+        total = n * A + (C - B) * sum(T - t for t in ti)
+    else:
+        total = n * A
+    print(total, file=output_stream)
 
-n=4, A=5, B=5, C=3, T=5. ti's are [1,5,5,4].
 
-C-B= -2. So code chooses else case. Total is 4*5=20. Correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 3 1 1 3
+2 2 2 1 1
+""",
+            "output": \
+"""\
+15
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

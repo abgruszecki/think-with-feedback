@@ -201,31 +201,73 @@ Read the input string. Iterate through each character. Keep track of the current
 
 So code steps:
 
-s = input().strip()
+Testing against sample input 1.
 
-total =0
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-current =0
+    total =0
 
-for c in s:
+    current =0
 
-    target = ord(c) - ord('a')
+    for c in s:
 
-    delta = abs(current - target)
+        target = ord(c) - ord('a')
 
-    add = min(delta, 26 - delta)
+        delta = abs(current - target)
 
-    total += add
+        add = min(delta, 26 - delta)
 
-    current = target
+        total += add
 
-print(total)
+        current = target
 
-Yes. That should work.
+    print(total, file=output_stream)
 
-Testing the first sample input 'zeus':
 
-z is 25. steps from 0 to25: delta 25. min(25,1) →1. Then e is4. current is25. delta is21. min(21,5) →5. Then u is20. current is4. delta 16 → min(16,10) →10. Then s is18. current is20. delta is 2 → min(2,24) →2. Total 1+5+10+2=18. Correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+map
+""",
+            "output": \
+"""\
+35
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So this code should handle all cases correctly. The code is O(n) time, where n is the length of the string. Since the maximum input is 100 characters, this is trivial for the time constraints. Memory usage is O(1) variables. So it's optimal.
 

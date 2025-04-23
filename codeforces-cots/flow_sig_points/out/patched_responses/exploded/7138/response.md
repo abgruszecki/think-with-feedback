@@ -225,11 +225,102 @@ Then union 1 and2: find(1) is 0, find(2) is 2. So union 0 and 2. Parent of 2 bec
 
 So the root is 0, size 3. So sum_k is 3-1 =2. 2^2=4. Correct.
 
-Sample 2: 2 1.
+Testing against sample inputs 2, 1.
 
-Nodes 0 and1. After union, size is 2. sum_k 1. 2^1=2.
+```python
+def main(input_stream, output_stream):
+    class DSU:
+        def __init__(self, n):
+            self.parent = list(range(n))
+            self.size = [1] * n
+        
+        def find(self, x):
+            if self.parent[x] != x:
+                self.parent[x] = self.find(self.parent[x])
+            return self.parent[x]
+        
+        def union(self, x, y):
+            x_root = self.find(x)
+            y_root = self.find(y)
+            if x_root == y_root:
+                return
+            if self.size[x_root] < self.size[y_root]:
+                x_root, y_root = y_root, x_root
+            self.parent[y_root] = x_root
+            self.size[x_root] += self.size[y_root]
 
-Sample1: 1 0. No edges. Each node is its own component. sum_k 0. 2^0=1.
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    dsu = DSU(n)
+    for _ in range(m):
+        x, y = map(int, input_stream.readline().rstrip("\n").split())
+        dsu.union(x-1, y-1)
+
+    roots = set()
+    sum_k = 0
+    for i in range(n):
+        root = dsu.find(i)
+        if root not in roots:
+            roots.add(root)
+            sum_k += dsu.size[root] - 1
+
+    print(2 ** sum_k, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2
+1 2
+2 3
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+        {
+            "input": \
+"""\
+2 1
+1 2
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case: 4 nodes, edges 0-1, 0-2, 1-3. All connected. So sum_k is 3. 2^3=8.
 

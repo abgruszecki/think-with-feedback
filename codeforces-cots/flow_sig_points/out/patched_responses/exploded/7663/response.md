@@ -743,103 +743,93 @@ So the Python code would be:
 
 Read n.
 
-a = list(map(int, input().split()))
+Testing against sample input 2.
 
-count = [0] * 20
+```python
+def main(input_stream, output_stream):
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for num in a:
+    count = [0] * 20
 
-   for b in range(20):
+    for num in a:
 
-       if num & (1 << b):
+       for b in range(20):
 
-           count[b] +=1
+           if num & (1 << b):
 
-max_count = max(count) if count else 0
+               count[b] +=1
 
-res =0
+    max_count = max(count) if count else 0
 
-for i in range(max_count):
+    res =0
 
-   current =0
+    for i in range(max_count):
 
-   for b in range(20):
+       current =0
 
-       if count[b] >i:
+       for b in range(20):
 
-           current += (1 << b)
+           if count[b] >i:
 
-   res += current * current
+               current += (1 << b)
 
-print(res)
+       res += current * current
 
-But wait, in the code, the loop runs for i in range(max_count). Since the max_count is the maximum number of times any bit is set. For example, if max_count is 3, then the loop runs for i=0,1,2. Which corresponds to levels 0,1,2. Because the maximum count is 3, so levels are 0 to 3-1=2.
+    print(res, file=output_stream)
 
-Yes.
 
-This code should handle all cases correctly.
 
-Testing the sample input 2:
+def test():
+    import io
 
-a = [1,3,5]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+349525 699050
+""",
+            "output": \
+"""\
+1099509530625
+""",
+        }, 
+    ]
 
-count after processing:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-bit 0: 1 appears in 1,3,5 → count[0] =3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-bit 1: 3 has bit 1, 5 does not. So count[1] =1 (since 3 is 0b11, which has bit 1 set. 5 is 0b101, which does not). Wait, 3 is 0b11, bits 0 and 1 set. So in the code, for num=3:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-for b in 0..19:
+    print('Tests passed 😎')
 
-if 3 has bit b set → bits 0 and 1. So count[0] +=1, count[1] +=1.
 
-num=5 (101) has bits 0 and 2 set. So count[0] +=1 (now count[0] =3), count[2] +=1 (count[2] =1).
+if __name__ == '__main__':
+    test()
 
-Other bits are 0.
 
-Thus, count array is:
+```
 
-count[0] =3, count[1] =1, count[2] =1, others 0.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 66, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 59, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '1099509530625'
+Got: '4'
 
-max_count=3.
-
-Loop i=0,1,2.
-
-For i=0:
-
-current=0.
-
-check each bit:
-
-bit0: count[0] >0 → 3>0 → yes. add 1<<0=1.
-
-bit1: count[1] >0 → yes. add 2.
-
-bit2: count[2] >0 → yes. add4.
-
-sum=7. squared 49.
-
-i=1:
-
-check count[b]>1:
-
-bit0:3>1 → yes. add1.
-
-bit1:1>1 → no.
-
-bit2:1>1 → no.
-
-sum=1. squared 1.
-
-i=2:
-
-bit0:3>2 → yes. sum 1. squared 1.
-
-Total 49+1+1=51.
-
-Yes.
-
-Thus, this code works.
+```
 
 Another sample: input3.
 

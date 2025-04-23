@@ -633,80 +633,108 @@ But in the sample input 1, which is n=3 and a = [1,3,1], the initial call would 
 
 Thus, the code should be:
 
-n = int(input())
-a = list(map(int, input().split()))
-prefix = [0]*(n+1)
-for i in range(n):
-    prefix[i+1] = prefix[i] + a[i]
+Testing against sample input 1.
 
-memo = {}
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    prefix = [0]*(n+1)
+    for i in range(n):
+        prefix[i+1] = prefix[i] + a[i]
 
-def dfs(l, r, k_prev, is_igor):
-    if l > r:
-        return 0
-    key = (l, r, k_prev, is_igor)
-    if key in memo:
+    memo = {}
+
+    def dfs(l, r, k_prev, is_igor):
+        if l > r:
+            return 0
+        key = (l, r, k_prev, is_igor)
+        if key in memo:
+            return memo[key]
+        if is_igor:
+            possible = []
+            for k in [k_prev, k_prev +1]:
+                if l +k > r+1:
+                    continue
+                new_l = l +k
+                sum_k = prefix[new_l] - prefix[l]
+                res = sum_k + dfs(new_l, r, k, False)
+                possible.append(res)
+            if not possible:
+                memo[key] =0
+            else:
+                memo[key] = max(possible)
+        else:
+            possible = []
+            for k in [k_prev, k_prev +1]:
+                if r -k +1 < l:
+                    continue
+                new_r = r -k
+                sum_k = prefix[r+1] - prefix[new_r]
+                res = -sum_k + dfs(l, new_r, k, True)
+                possible.append(res)
+            if not possible:
+                memo[key] =0
+            else:
+                memo[key] = min(possible)
         return memo[key]
-    if is_igor:
-        possible = []
-        for k in [k_prev, k_prev +1]:
-            if l +k > r+1:
-                continue
-            new_l = l +k
-            sum_k = prefix[new_l] - prefix[l]
-            res = sum_k + dfs(new_l, r, k, False)
-            possible.append(res)
-        if not possible:
-            memo[key] =0
-        else:
-            memo[key] = max(possible)
-    else:
-        possible = []
-        for k in [k_prev, k_prev +1]:
-            if r -k +1 < l:
-                continue
-            new_r = r -k
-            sum_k = prefix[r+1] - prefix[new_r]
-            res = -sum_k + dfs(l, new_r, k, True)
-            possible.append(res)
-        if not possible:
-            memo[key] =0
-        else:
-            memo[key] = min(possible)
-    return memo[key]
 
-result = dfs(0, n-1, 1, True)
-print(result)
+    result = dfs(0, n-1, 1, True)
+    print(result, file=output_stream)
 
-Wait, but the initial required_k for Igor is 1. So he can take 1 or 2 papers. The code handles this correctly.
 
-Testing this code against the first sample:
 
-Sample 1:
-3
-1 3 1
+def test():
+    import io
 
-The initial call is dfs(0, 2, 1, True).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+-1 -2 -1 -2 -1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-In the first call, Igor can take 1 or 2 papers.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Option 1: k=1:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-new_l = 1, sum_k=1. Then Zhenya's turn, k=1. She must take 1 or 2 papers from the right.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But the remaining papers are 3-1=2 (index 1 and 2).
+    print('Tests passed 😎')
 
-Zhenya's options:
 
-k_prev is 1. So she can take 1 or 2 papers from the right.
+if __name__ == '__main__':
+    test()
 
-Taking 1 from the right (paper index 2), sum is 1. Then new_r=1. Igor's turn, k=1.
 
-In Igor's turn, he can take 1 or 2 papers from the left (index 1). He takes 1 paper (sum 3). Then Zhenya's turn, k=1. She has to take 1 or 2 papers from the right (no papers left). So difference is 1 (Igor's) +3 (Igor's) -1 (Zhenya's) = 3.
+```
 
-Option 2: Igor takes 2 papers (sum 1+3=4). Then Zhenya's turn, k_prev=2. She must take 2 or 3 papers from the right. But there's only 1 paper left (index 2). So she can't take any. So the difference is 4.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 81, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 74, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '0'
+Got: '1'
 
-Thus, the maximum is 4, which is correct.
+```
 
 So the code would return 4.
 

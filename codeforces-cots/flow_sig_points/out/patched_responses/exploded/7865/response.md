@@ -684,161 +684,156 @@ Putting it all together:
 
 The code:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-def get_runs(arr):
 
-    runs = []
+def main(input_stream, output_stream):
+    def get_runs(arr):
 
-    current = 0
+        runs = []
 
-    for num in arr:
+        current = 0
 
-        if num ==1:
+        for num in arr:
 
-            current +=1
+            if num ==1:
 
-        else:
+                current +=1
 
-            if current >0:
+            else:
 
-                runs.append(current)
+                if current >0:
 
-                current =0
+                    runs.append(current)
 
-    if current >0:
+                    current =0
 
-        runs.append(current)
+        if current >0:
 
-    return runs
+            runs.append(current)
 
-def compute_suffixes(sorted_runs):
+        return runs
 
-    n = len(sorted_runs)
+    def compute_suffixes(sorted_runs):
 
-    suffix_sum = [0]*(n+1)
+        n = len(sorted_runs)
 
-    suffix_count = [0]*(n+1)
+        suffix_sum = [0]*(n+1)
 
-    for i in reversed(range(n)):
+        suffix_count = [0]*(n+1)
 
-        suffix_sum[i] = suffix_sum[i+1] + (sorted_runs[i] +1)
+        for i in reversed(range(n)):
 
-        suffix_count[i] = suffix_count[i+1] +1
+            suffix_sum[i] = suffix_sum[i+1] + (sorted_runs[i] +1)
 
-    return suffix_sum, suffix_count
+            suffix_count[i] = suffix_count[i+1] +1
 
-def get_divisors(k):
+        return suffix_sum, suffix_count
 
-    divisors = set()
+    def get_divisors(k):
 
-    for i in range(1, int(k**0.5)+1):
+        divisors = set()
 
-        if k %i ==0:
+        for i in range(1, int(k**0.5)+1):
 
-            divisors.add(i)
+            if k %i ==0:
 
-            divisors.add(k//i)
+                divisors.add(i)
 
-    return divisors
+                divisors.add(k//i)
 
-n, m, k = map(int, input().split())
+        return divisors
 
-a = list(map(int, input().split()))
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
 
-b = list(map(int, input().split()))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-runs_a = get_runs(a)
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-runs_b = get_runs(b)
+    runs_a = get_runs(a)
 
-sorted_runs_a = sorted(runs_a)
+    runs_b = get_runs(b)
 
-sorted_runs_b = sorted(runs_b)
+    sorted_runs_a = sorted(runs_a)
 
-suffix_sum_a, suffix_count_a = compute_suffixes(sorted_runs_a)
+    sorted_runs_b = sorted(runs_b)
 
-suffix_sum_b, suffix_count_b = compute_suffixes(sorted_runs_b)
+    suffix_sum_a, suffix_count_a = compute_suffixes(sorted_runs_a)
 
-divisors = get_divisors(k)
+    suffix_sum_b, suffix_count_b = compute_suffixes(sorted_runs_b)
 
-result =0 
+    divisors = get_divisors(k)
 
-for h in divisors:
+    result =0 
 
-    w = k // h 
+    for h in divisors:
 
-    # compute count_a for h
+        w = k // h 
 
-    idx_a = bisect.bisect_left(sorted_runs_a, h)
+        # compute count_a for h
 
-    sum_a = suffix_sum_a[idx_a] - h * suffix_count_a[idx_a]
+        idx_a = bisect.bisect_left(sorted_runs_a, h)
 
-    # compute count_b for w 
+        sum_a = suffix_sum_a[idx_a] - h * suffix_count_a[idx_a]
 
-    idx_b = bisect.bisect_left(sorted_runs_b, w)
+        # compute count_b for w 
 
-    sum_b = suffix_sum_b[idx_b] - w * suffix_count_b[idx_b]
+        idx_b = bisect.bisect_left(sorted_runs_b, w)
 
-    result += sum_a * sum_b 
+        sum_b = suffix_sum_b[idx_b] - w * suffix_count_b[idx_b]
 
-print(result)
+        result += sum_a * sum_b 
 
-Wait, but this code will process each pair (h, w) once. For example, for k=6, the code will process h=1, w=6, and then h=6, w=1. 
+    print(result, file=output_stream)
 
-But in this case, when h=6, the code will check the runs in a for h=6 and sum_a is computed as the sum of (l_i -6 +1) for all runs in a >=6. sum_b is computed as (l_j -1 +1) for runs in b >=1. 
 
-Thus, the code correctly counts all possible pairs. 
 
-But what about when k is a square? For example, k=4. Then, the divisors are 1,2,4. 
+def test():
+    import io
 
-Processing h=1, w=4: sum_a for h=1 and sum_b for w=4. 
-
-Processing h=2, w=2: sum_a for h=2 and sum_b for w=2. 
-
-Processing h=4, w=1: sum_a for h=4 and sum_b for w=1. 
-
-So the code adds all three possibilities. 
-
-But for h=2 and w=2, it's processed once, which is correct. 
-
-Thus, the code should be correct. 
-
-Testing the first sample input:
-
-Sample input 1:
-
-3 3 2
-
-1 0 1
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 5 4
 1 1 1
+1 1 1 1 1
+""",
+            "output": \
+"""\
+14
+""",
+        }, 
+    ]
 
-So array a is [1,0,1], which has two runs of 1: lengths 1 and 1. 
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Thus, runs_a = [1,1]. sorted_runs_a is [1,1]. 
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So for h=1, sum_a is:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For each run >=1: both runs. 
+    print('Tests passed 😎')
 
-Each contributes (1-1+1)=1. So total sum_a =1 +1=2. 
 
-For h=2: runs >=2: none. sum_a=0. 
+if __name__ == '__main__':
+    test()
 
-For array b, the runs are [3]. sorted_runs_b is [3]. 
 
-For w=2 (since k=2, divisors are 1,2. So for h=1, w=2:
+```
 
-sum_a for h=1 is 2. sum_b for w=2 is (3-2 +1) =2. So 2*2=4. 
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For h=2, w=1:
-
-sum_a for h=2 is 0. sum_b for w=1 is (3-1 +1) =3. 0*3=0. 
-
-So total result is 4. Which matches the sample output. 
-
-Thus, the code works for this case. 
+```
 
 The second sample input:
 

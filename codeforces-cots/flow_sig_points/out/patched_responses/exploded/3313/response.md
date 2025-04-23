@@ -504,90 +504,106 @@ But for n=35 and c0=5, the number of combinations is 324,632, which is manageabl
 
 Now, code example:
 
+Testing against sample input 1.
+
+```python
 import itertools
 
-n, m = map(int, input().split())
 
-s_masks = []
-c_list = []
-for _ in range(m):
-    s, c = input().split()
-    c = int(c)
-    mask = int(s, 2)
-    s_masks.append(mask)
-    c_list.append(c)
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-if m ==0:
-    print(0)
-    exit()
+    s_masks = []
+    c_list = []
+    for _ in range(m):
+        s, c = input_stream.readline().rstrip("\n").split()
+        c = int(c)
+        mask = int(s, 2)
+        s_masks.append(mask)
+        c_list.append(c)
 
-s0 = s_masks[0]
-c0 = c_list[0]
+    if m ==0:
+        print(0, file=output_stream)
+        return
 
-full_mask = (1 << n) - 1
+    s0 = s_masks[0]
+    c0 = c_list[0]
 
-result =0
+    full_mask = (1 << n) - 1
 
-from itertools import combinations
+    result =0
 
-for bits in combinations(range(n), c0):
-    subset_mask = 0
-    for bit in bits:
-        subset_mask |= 1 << bit
-    
-    # compute x_mask
-    x = (s0 & subset_mask) | (~s0 & (full_mask ^ subset_mask))
-    x &= full_mask  # mask to n bits
-    
-    valid = True
-    for i in range(1, m):
-        s_i = s_masks[i]
-        required = c_list[i]
-        xor = x ^ s_i
-        cnt = xor.bit_count()
-        if (n - cnt) != required:
-            valid = False
-            break
-    if valid:
-        result +=1
+    from itertools import combinations
 
-print(result)
+    for bits in combinations(range(n), c0):
+        subset_mask = 0
+        for bit in bits:
+            subset_mask |= 1 << bit
+        
+        # compute x_mask
+        x = (s0 & subset_mask) | (~s0 & (full_mask ^ subset_mask))
+        x &= full_mask  # mask to n bits
+        
+        valid = True
+        for i in range(1, m):
+            s_i = s_masks[i]
+            required = c_list[i]
+            xor = x ^ s_i
+            cnt = xor.bit_count()
+            if (n - cnt) != required:
+                valid = False
+                break
+        if valid:
+            result +=1
 
-Wait, but wait. Let's test the first sample input.
+    print(result, file=output_stream)
 
-Sample 1:
 
-Input:
 
-6 2
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 3
 000000 2
-
 010100 4
+111100 0
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-So, s0 is 0, c0 is 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The code generates all combinations of 2 bits (positions) from 6 bits (0-5).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Each subset_mask has 2 bits set.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Then, x is (0 & subset_mask) | ( ~0 & (full_mask ^ subset_mask) )
+    print('Tests passed 😎')
 
-~0 is all 1's, but in Python, it's negative, so we need to mask.
 
-Wait, in Python, ~0 is -1 (binary ...11111111). But when we do (full_mask ^ subset_mask), for 6 bits, full_mask is 0b111111.
+if __name__ == '__main__':
+    test()
 
-So, full_mask ^ subset_mask is subset_mask XOR 0b111111.
 
-But subset_mask has exactly 2 bits set. So full_mask ^ subset_mask will have 6-2=4 bits set.
+```
 
-Then, ~0 is -1, but when we compute (~0) & (full_mask ^ subset_mask), since (full_mask ^ subset_mask) is 0b111111 ^ subset_mask, and subset_mask is 2 bits, then this is 4 bits set. But when & with ~0 (all bits set), it's same as (full_mask ^ subset_mask). So:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-x = (0 & subset_mask) | ( (full_mask ^ subset_mask) )
-
-But 0 & subset_mask is 0. So x is (full_mask ^ subset_mask). For example, subset_mask is 0b000011 (bits 0 and 1), then full_mask ^ subset_mask is 0b111100. So x is 0b111100.
-
-Which is 111100. The number of matches with s0 (000000) is 2 (positions 0 and 1 are 0 in x), correct.
+```
 
 Then, for the second attempt, s_i is 010100 (binary 20), and required c_i is 4.
 

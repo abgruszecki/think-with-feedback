@@ -398,235 +398,141 @@ But in Python, how to handle -inf.
 
 So the code would look like:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n, m, k = map(int, input().split())
 
-p = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
 
-# Compute the s array
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-s = []
+    # Compute the s array
 
-for i in range(n - m + 1):
+    s = []
 
-    s.append(sum(p[i:i+m]))
+    for i in range(n - m + 1):
 
-s_len = len(s)
+        s.append(sum(p[i:i+m]))
 
-if k ==0:
+    s_len = len(s)
 
-    print(0)
+    if k ==0:
 
-    sys.exit()
+        print(0, file=output_stream)
 
-# Initialize DP
+        sys.exit()
 
-prev_dp = [0] * s_len
+    # Initialize DP
 
-for i in range(s_len):
-
-    prev_dp[i] = s[i]
-
-prev_max = [0]*s_len
-
-prev_max[0] = prev_dp[0]
-
-for i in range(1, s_len):
-
-    prev_max[i] = max(prev_max[i-1], prev_dp[i])
-
-for j in range(2, k+1):
-
-    current_dp = [-float('inf')] * s_len
+    prev_dp = [0] * s_len
 
     for i in range(s_len):
 
-        # For current j-th interval, can only start at i if there's j-1 intervals before
+        prev_dp[i] = s[i]
 
-        # which requires that i >= m*(j-1)
+    prev_max = [0]*s_len
 
-        # but how to check this?
-
-        # Alternatively, since j-th interval must have j-1 intervals before, each of length m.
-
-        # So the earliest possible i for j-th interval is (j-1)*m.
-
-        if i < m*(j-1):
-
-            continue
-
-        if i >= m:
-
-            current_dp[i] = s[i] + prev_max[i -m]
-
-        else:
-
-            # i >=m*(j-1) but i <m: possible only if m=0, which is not allowed.
-
-            # So this case can't happen.
-
-            current_dp[i] = -float('inf')
-
-    # Compute new prev_max
-
-    new_prev_max = [-float('inf')] * s_len
-
-    new_prev_max[0] = current_dp[0]
+    prev_max[0] = prev_dp[0]
 
     for i in range(1, s_len):
 
-        new_prev_max[i] = max(new_prev_max[i-1], current_dp[i])
+        prev_max[i] = max(prev_max[i-1], prev_dp[i])
 
-    prev_max = new_prev_max
+    for j in range(2, k+1):
 
-    prev_dp = current_dp
+        current_dp = [-float('inf')] * s_len
 
-print(max(prev_dp))
+        for i in range(s_len):
 
-But wait, for j=2, the code checks i >= m*(j-1). For j=2, it's m*1. So i >=m.
+            # For current j-th interval, can only start at i if there's j-1 intervals before
 
-Which aligns with the previous reasoning.
+            # which requires that i >= m*(j-1)
 
-But for j=3, i >= 2m.
+            # but how to check this?
 
-But when m=1 and j=3, i >= 2.
+            # Alternatively, since j-th interval must have j-1 intervals before, each of length m.
 
-So in code, for each j >=2, the current_dp is only filled for i >= m*(j-1). This ensures that the intervals are spaced properly.
+            # So the earliest possible i for j-th interval is (j-1)*m.
 
-But in the code above, the code loops over all i in 0..s_len-1, but for i < m*(j-1), current_dp[i] is skipped (set to -inf). Then, when computing new_prev_max, the prefix maximum would ignore those.
+            if i < m*(j-1):
 
-But then, for j=2, the code loops through all i, but only processes i >= m.
+                continue
 
-Yes.
+            if i >= m:
 
-But how to handle the case where m*(j-1) > s_len-1? For example, if s has length 5, m=3, j=2. Then m*(j-1) =3*1=3. So i must be >=3. So the code would process i=3,4 (assuming s_len is 5).
+                current_dp[i] = s[i] + prev_max[i -m]
 
-But this is correct.
+            else:
 
-So the code should work.
+                # i >=m*(j-1) but i <m: possible only if m=0, which is not allowed.
 
-But let's test it against sample input 2.
+                # So this case can't happen.
 
-Sample input 2:
+                current_dp[i] = -float('inf')
 
+        # Compute new prev_max
+
+        new_prev_max = [-float('inf')] * s_len
+
+        new_prev_max[0] = current_dp[0]
+
+        for i in range(1, s_len):
+
+            new_prev_max[i] = max(new_prev_max[i-1], current_dp[i])
+
+        prev_max = new_prev_max
+
+        prev_dp = current_dp
+
+    print(max(prev_dp), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 7 1 3
+2 10 7 18 5 33 0
+""",
+            "output": \
+"""\
+61
+""",
+        }, 
+    ]
 
-p = [2,10,7,18,5,33,0]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-s is the same as p, since m=1. s_len is7.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-k=3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Let's step through the code.
+    print('Tests passed 😎')
 
-Initialize prev_dp as [2,10,7,18,5,33,0].
 
-prev_max is [2,10,10,18,18,33,33].
+if __name__ == '__main__':
+    test()
 
-j=2:
 
-loop over i from 0 to6.
+```
 
-For j=2, m*(j-1) =1*1=1. So i >=1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For each i >=1:
-
-current_dp[i] = s[i] + prev_max[i-1].
-
-prev_max[i-1] for i=1 is prev_max[0] =2 → current_dp[1] =10 +2=12.
-
-i=2: s[i]7 + prev_max[1]10 →17.
-
-i=3:18 + prev_max[2]10 →28.
-
-i=4:5 + prev_max[3]18 →23.
-
-i=5:33 + prev_max[4]18 →51.
-
-i=6:0 + prev_max[5]33 →33.
-
-current_dp is [ -inf, 12,17,28,23,51,33 ].
-
-prev_max is built as:
-
-new_prev_max[0] = -inf.
-
-But wait, for i=0, current_dp is -inf.
-
-new_prev_max[0] is current_dp[0] →-inf.
-
-Then i=1: max(-inf,12) →12.
-
-i=2: max(12,17) →17.
-
-i=3:28.
-
-i=4:28.
-
-i=5:51.
-
-i=6:51.
-
-prev_max becomes [ -inf, 12,17,28,28,51,51 ].
-
-Then j=3:
-
-m*(j-1) =1*2=2. So i >=2.
-
-For each i >=2:
-
-i=2: s[2]=7. prev_max[i-1] is prev_max[1] =12. So current_dp[2] =7+12=19.
-
-i=3: s[3]=18 + prev_max[2]=17 →35.
-
-i=4:5 + prev_max[3]=28 →33.
-
-i=5:33 + prev_max[4]=28 →61.
-
-i=6:0 + prev_max[5]=51 →51.
-
-current_dp is [ -inf, -inf, 19,35,33,61,51 ].
-
-prev_max is built as:
-
-i=0: -inf
-
-i=1: -inf
-
-i=2:19
-
-i=3:35
-
-i=4:35
-
-i=5:61
-
-i=6:61.
-
-The maximum of current_dp is 61, which is the answer.
-
-So this code works for the sample.
-
-Now, the code needs to handle the cases where m is 1 and k is up to 5000. But given that in each step j, we process O(n) elements and compute the prefix max, the time complexity is O(k * n), which for n=5000 and k=5000 would be 25 million operations. Which is acceptable for 1 second.
-
-But wait, for each j in 2 to k:
-
-We loop through all i in 0 to s_len-1, but for i < m*(j-1), we skip.
-
-But if m is 1 and j is 5000, then m*(j-1) is 4999. So for i >=4999, but s_len is 5000 (if n=5000, m=1). So the loop would process i from 4999 to 4999 (if s_len is 5000). So each j step for large j would be O(1) time.
-
-Thus, the total time complexity is O(k*n), but in practice, it's O(n^2) in the worst case (if k is O(n/m), and m=1, then k=O(n)), leading to O(n^2) time. For n=5000, 5000^2 is 25 million, which should be acceptable.
-
-Now, regarding space: for each j, we only need to keep track of the previous prev_max and current_dp. So using two arrays (prev_dp and current_dp) is manageable.
-
-In Python, lists are dynamic, so even for n=5000, creating a list of 5000 elements is feasible.
-
-So the code should work.
-
-Now, some edge cases.
-
-Edge case 1: n= m*k. So we have to select exactly k intervals of m elements, non-overlapping. So the sum is the sum of all elements. For example, n=4, m=2, k=2. The array is [1,2,3,4]. The intervals are [0,1] and [2,3]. Sum is 1+2 +3+4=10. The code should output 10.
+```
 
 Another edge case: k=0, but according to constraints, k is at least 1. Wait, the problem statement says k is given as input. But according to the input constraints, m*k >=1? No, according to the constraints, (m×k) ≤n. But k can be zero? Let's check the problem statement. The problem says: "choose k pairs". So k can be zero? But the first sample has k=1. The input constraints are 1 ≤ (m ×k) ≤n ≤5000. Wait, the input constraints for m and k are (m ×k) ≤n, but the problem statement's sample has 2×1=2 ≤5. So k can be zero? Or no. Wait, the input constraints are (m ×k) ≤n. So if m=0, but according to the problem statement, m is part of the input. Wait, the problem statement's constraints are:
 

@@ -1309,14 +1309,18 @@ Then process as per the algorithm.
 
 So, the code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import deque
 
-def main():
-    s = sys.stdin.readline().strip()
+
+def main(input_stream, output_stream):
+    s = input_stream.readline().strip()
     n = len(s)
     if n ==0:
-        print(0)
+        print(0, file=output_stream)
         return
     color = list(s)
     left = [-1]*n
@@ -1382,18 +1386,52 @@ def main():
             if has_diff_y and not scheduled[y]:
                 scheduled[y] = True
                 q.append( (y, step +1) )
-    print(max_step)
+    print(max_step, file=output_stream)
 
-if __name__ == "__main__":
-    main()
 
-Testing this code on sample input1:
 
-Input "aabb" → output 2.
+def test():
+    import io
 
-Sample input2 "aabcaa" → output 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+aabcaa
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-So the code should work.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

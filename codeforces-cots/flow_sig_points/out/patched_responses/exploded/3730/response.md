@@ -923,209 +923,142 @@ Now, putting this together.
 
 In code:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-strings = [input().strip() for _ in range(n)]
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-# Precompute for each string the minimal steps for each type.
+    strings = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
 
-steps_list = []
+    # Precompute for each string the minimal steps for each type.
 
-for s in strings:
+    steps_list = []
 
-    d_steps = float('inf')
+    for s in strings:
 
-    l_steps = float('inf')
+        d_steps = float('inf')
 
-    s_steps = float('inf')
+        l_steps = float('inf')
 
-    for j in range(1, m+1):
+        s_steps = float('inf')
 
-        char = s[j-1]
+        for j in range(1, m+1):
 
-        steps = min(j-1, m - (j-1))
+            char = s[j-1]
 
-        if char.isdigit():
+            steps = min(j-1, m - (j-1))
 
-            if steps < d_steps:
+            if char.isdigit():
 
-                d_steps = steps
+                if steps < d_steps:
 
-        elif char.islower():
+                    d_steps = steps
 
-            if steps < l_steps:
+            elif char.islower():
 
-                l_steps = steps
+                if steps < l_steps:
 
-        elif char in {'#', '*', '&'}:
+                    l_steps = steps
 
-            if steps < s_steps:
+            elif char in {'#', '*', '&'}:
 
-                s_steps = steps
+                if steps < s_steps:
 
-    # Now, collect the available types and their steps.
+                    s_steps = steps
 
-    steps_info = []
+        # Now, collect the available types and their steps.
 
-    if d_steps != float('inf'):
+        steps_info = []
 
-        steps_info.append( (1, d_steps) )
+        if d_steps != float('inf'):
 
-    if l_steps != float('inf'):
+            steps_info.append( (1, d_steps) )
 
-        steps_info.append( (2, l_steps) )
+        if l_steps != float('inf'):
 
-    if s_steps != float('inf'):
+            steps_info.append( (2, l_steps) )
 
-        steps_info.append( (4, s_steps) )
+        if s_steps != float('inf'):
 
-    steps_list.append(steps_info)
+            steps_info.append( (4, s_steps) )
 
-# Initialize DP.
+        steps_list.append(steps_info)
 
-dp = {0: 0}
+    # Initialize DP.
 
-for steps_info in steps_list:
+    dp = {0: 0}
 
-    new_dp = {}
+    for steps_info in steps_list:
 
-    for mask in dp:
+        new_dp = {}
 
-        current_sum = dp[mask]
+        for mask in dp:
 
-        for (type_bit, steps) in steps_info:
+            current_sum = dp[mask]
 
-            new_mask = mask | type_bit
+            for (type_bit, steps) in steps_info:
 
-            new_sum = current_sum + steps
+                new_mask = mask | type_bit
 
-            if new_mask not in new_dp or new_sum < new_dp[new_mask]:
+                new_sum = current_sum + steps
 
-                new_dp[new_mask] = new_sum
+                if new_mask not in new_dp or new_sum < new_dp[new_mask]:
 
-    dp = new_dp
+                    new_dp[new_mask] = new_sum
 
-print(dp[7])
+        dp = new_dp
 
-This code should work.
+    print(dp[7], file=output_stream)
 
-Let's test it against the first sample input.
 
-Sample input 1:
 
-3 4
+def test():
+    import io
 
-1**2 → steps for digit is 0, special is 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5
+#*&#*
+*a1c&
+&q2w*
+#a3c#
+*&#*&
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-a3*0 → digit steps 1, lowercase steps 0, special steps 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-c4** → digit steps 1, lowercase steps 0, special steps 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Steps_list will be for each string:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-1st string: [(1,0), (4,1)].
+    print('Tests passed 😎')
 
-2nd string: [(1,1), (2,0), (4,2)].
 
-3rd string: [(1,1), (2,0), (4,1)].
+if __name__ == '__main__':
+    test()
 
-Processing first string:
 
-new_dp has mask 0 |1=1 (sum0+0=0), and mask0 |4=4 (sum0+1=1). So dp is {1:0, 4:1}.
+```
 
-Processing second string:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For each mask in dp:
-
-mask1 (sum0):
-
-steps_info is [(1,1), (2,0), (4,2)].
-
-So for each type_bit:
-
-1: new_mask 1 |1=1. sum 0+1=1. new_dp[1] = 1.
-
-2: new_mask 1|2=3. sum0+0=0. new_dp[3] =0.
-
-4: new_mask 1|4=5. sum0+2=2. new_dp[5] =2.
-
-mask4 (sum1):
-
-steps_info same.
-
-type_bit 1: new_mask 4|1=5. sum1+1=2. So new_dp[5] is min(2, previous 2) → 2.
-
-type_bit 2: new_mask4|2=6. sum1+0=1. new_dp[6] =1.
-
-type_bit4: new_mask4|4=4. sum1+2=3. new_dp[4] =3.
-
-So new_dp after second string is:
-
-mask3:0, mask6:1, mask5:2, mask1:1, mask4:3.
-
-Processing third string:
-
-steps_info is [(1,1), (2,0), (4,1)].
-
-For each mask in dp:
-
-mask3 (sum0):
-
-process each type_bit:
-
-1: new_mask3 |1=3. sum0+1=1. new_dp[3] is 1.
-
-2: new_mask3 |2=3. sum0+0=0. new_dp[3] =0.
-
-4: new_mask3 |4=7. sum0+1=1. new_dp[7] =1.
-
-mask6 (sum1):
-
-process each type_bit:
-
-1: new_mask6 |1=7. sum1+1=2. new_dp[7] is min(1,2) → 1.
-
-2: new_mask6 |2=6. sum1+0=1. new_dp[6] =1.
-
-4: new_mask6 |4=6 |4=6. sum1+1=2. new_dp[6] =1 (original sum1).
-
-mask5 (sum2):
-
-process each type_bit:
-
-1: new_mask5 |1=5. sum2+1=3.
-
-2: new_mask5 |2=7. sum2+0=2. new_dp[7] is min(1,2) →1.
-
-4: new_mask5 |4=5 |4=5. sum2+1=3.
-
-mask1 (sum1):
-
-process each type_bit:
-
-1: new_mask1 |1=1. sum1+1=2.
-
-2: new_mask1 |2=3. sum1+0=1. new_dp[3] =0 (existing sum0 is better).
-
-4: new_mask1 |4=5. sum1+1=2.
-
-mask4 (sum3):
-
-process each type_bit:
-
-1: new_mask4 |1=5. sum3+1=4.
-
-2: new_mask4 |2=6. sum3+0=3.
-
-4: new_mask4 |4=4. sum3+1=4.
-
-So after processing the third string, the new_dp will have:
-
-mask7:1 (from mask3 choosing 4), and other masks.
-
-The minimal sum is 1.
-
-Which matches the sample.
+```
 
 The second sample input:
 

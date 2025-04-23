@@ -1345,166 +1345,145 @@ For example, after processing all possible splits, any steps beyond the total po
 
 Thus, the code can be written as:
 
+Testing against sample input 1.
+
+```python
 import heapq
 
-n = int(input())
-a = list(map(int, input().split()))
 
-# Compute initial shields
-shields = [i for i, val in enumerate(a) if val == 1]
-m = len(shields)
-segments = []
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-# Add segment before the first shield
-if shields:
-    first = shields[0]
-    if first > 0:
-        segments.append(first)
-else:
-    # all are 0s
-    segments.append(n)
-    # but if there are no shields, all 0s are unsegmented, so sum is (n*(n-1))//2. But according to the problem, each 0s must have a shield between them to be protected. So if no shields, all pairs are unprotected. Thus, sum is (n*(n-1))//2.
+    # Compute initial shields
+    shields = [i for i, val in enumerate(a) if val == 1]
+    m = len(shields)
+    segments = []
 
-if not segments:
-    # if no shields and no 0s (unlikely)
-    pass
+    # Add segment before the first shield
+    if shields:
+        first = shields[0]
+        if first > 0:
+            segments.append(first)
+    else:
+        # all are 0s
+        segments.append(n)
+        # but if there are no shields, all 0s are unsegmented, so sum is (n*(n-1))//2. But according to the problem, each 0s must have a shield between them to be protected. So if no shields, all pairs are unprotected. Thus, sum is (n*(n-1))//2.
 
-# Add segments between shields
-for i in range(1, m):
-    prev = shields[i-1]
-    curr = shields[i]
-    length = curr - prev - 1
-    if length >0:
-        segments.append(length)
+    if not segments:
+        # if no shields and no 0s (unlikely)
+        pass
 
-# Add segment after the last shield
-if shields:
-    last = shields[-1]
-    if last < n-1:
-        segments.append(n-1 - last)
+    # Add segments between shields
+    for i in range(1, m):
+        prev = shields[i-1]
+        curr = shields[i]
+        length = curr - prev - 1
+        if length >0:
+            segments.append(length)
 
-# Compute initial_sum
-initial_sum = sum( (L * (L-1)) // 2 for L in segments )
+    # Add segment after the last shield
+    if shields:
+        last = shields[-1]
+        if last < n-1:
+            segments.append(n-1 - last)
 
-# Compute total_0
-total_0 = sum(segments)
-total_0_pairs = total_0 * (total_0 -1) // 2
+    # Compute initial_sum
+    initial_sum = sum( (L * (L-1)) // 2 for L in segments )
 
-# Initialize the max-heap
-heap = []
-for L in segments:
-    if L >0:
-        heapq.heappush(heap, (- (L-1), L))  # using negative for max-heap
+    # Compute total_0
+    total_0 = sum(segments)
+    total_0_pairs = total_0 * (total_0 -1) // 2
 
-max_steps = n * (n-1) // 2
-gain = [0] * (max_steps +1)
-current_gain = 0
+    # Initialize the max-heap
+    heap = []
+    for L in segments:
+        if L >0:
+            heapq.heappush(heap, (- (L-1), L))  # using negative for max-heap
 
-for k in range(1, max_steps +1):
-    if not heap:
+    max_steps = n * (n-1) // 2
+    gain = [0] * (max_steps +1)
+    current_gain = 0
+
+    for k in range(1, max_steps +1):
+        if not heap:
+            gain[k] = current_gain
+            continue
+        neg_g, L = heapq.heappop(heap)
+        g = L-1
+        current_gain += g
         gain[k] = current_gain
-        continue
-    neg_g, L = heapq.heappop(heap)
-    g = L-1
-    current_gain += g
-    gain[k] = current_gain
-    new_L = L -2
-    if new_L >0:
-        heapq.heappush(heap, (- (new_L-1), new_L))
+        new_L = L -2
+        if new_L >0:
+            heapq.heappush(heap, (- (new_L-1), new_L))
 
-# Compute running max
-running_max = [0]*(max_steps +1)
-current_max = 0
-for k in range(max_steps +1):
-    if k <= len(gain)-1:
-        current_max = max(current_max, gain[k])
-    running_max[k] = current_max
+    # Compute running max
+    running_max = [0]*(max_steps +1)
+    current_max = 0
+    for k in range(max_steps +1):
+        if k <= len(gain)-1:
+            current_max = max(current_max, gain[k])
+        running_max[k] = current_max
 
-# Compute the results
-initial_protection = total_0_pairs - initial_sum
-result = [initial_protection + running_max[k] for k in range(max_steps +1)]
+    # Compute the results
+    initial_protection = total_0_pairs - initial_sum
+    result = [initial_protection + running_max[k] for k in range(max_steps +1)]
 
-print(' '.join(map(str, result)))
+    print(' '.join(map(str, result)), file=output_stream)
 
-But wait, the code has a mistake in how the segments are computed.
 
-Let's re-examine the code for computing segments:
 
-When shields is empty (no shields), the code appends n to the segments. But in this case, all lemmings are 0s. So the segment is of length n. The initial_sum is (n*(n-1))//2. The initial_protection is total_0_pairs - initial_sum = (n*(n-1)/2) - (n*(n-1)/2) =0. But according to the problem's description, if there are no shields, there are no protected pairs. So the code is correct in this case.
+def test():
+    import io
 
-Another case: when there are shields. The code computes segments between shields, before the first shield, and after the last shield.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+12
+0 0 0 0 1 1 1 1 0 1 1 0
+""",
+            "output": \
+"""\
+9 12 13 14 14 14 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15
+""",
+        }, 
+    ]
 
-But in the code, the segments for before the first shield is computed as shields[0]. But shields are 0-based indices. For example, if shields are at position 0 (0-based), then the segment before is 0-length.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Wait, the code for adding the segment before the first shield:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-if shields is not empty:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-    first = shields[0]
+    print('Tests passed 😎')
 
-    if first >0:
 
-        segments.append(first)
+if __name__ == '__main__':
+    test()
 
-This is correct. For example, if shields are at position 0 (0-based), then the segment before has length 0. If first is 5 (0-based), then the segment before is 0-4 (length 5).
 
-Similarly, between shields i-1 and i:
+```
 
-prev = shields[i-1], curr = shields[i]
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 118, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 111, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '9 12 13 14 14 14 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15 15'
+Got: '9 12 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13 13'
 
-length = curr - prev -1.
-
-For example, if prev is 0 and curr is 4, the length is 4-0-1=3, which is correct (positions 1, 2, 3).
-
-The segment after the last shield:
-
-last = shields[-1]
-
-if last <n-1:
-
-    segments.append(n-1 - last)
-
-For example, last is 4 (0-based), n-1 is 4. So no segment after. If last is 3, n-1 is 4, then the segment is 1 (position 4).
-
-This is correct.
-
-Thus, the code for generating segments is correct.
-
-Testing the first sample:
-
-Input:5 1 0 0 0 1 → a is [1,0,0,0,1] (0-based).
-
-Shields are at 0 and 4.
-
-Segments:
-
-Before first shield: shields[0] is 0 → 0>0 is false → no.
-
-Between shields: 0 and4 → 4-0-1=3 → segment of length 3.
-
-After last shield: 4 is last → 4 <4 (n-1 is 4) → no.
-
-Thus, segments is [3].
-
-The heap is initialized with (-(3-1), 3) → (-2,3).
-
-Steps:
-
-max_steps=5*4//2=10.
-
-gain array is initialized to 0 for 0 steps.
-
-Step 1: pop (-2,3) → g=2. current_gain=2. gain[1]=2. new_L=3-2=1 → push (-0,1).
-
-Step 2: pop (-0,1) → g=0. current_gain=2+0=2. gain[2]=2. new_L=1-2= -1 → not pushed.
-
-Thus, for k=1, gain is 2. For k=2, gain is 2.
-
-But according to the sample, after 2 steps, gain is 3.
-
-Thus, there's a mistake here.
-
-Ah, this indicates that the code is incorrect. What's wrong?
+```
 
 Wait, in the sample, the correct steps after 2 steps gives a gain of 3. But according to the code's approach, the second step would process the new segment of length 1.
 

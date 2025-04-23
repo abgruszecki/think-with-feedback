@@ -599,109 +599,97 @@ Make sure that per_cell is a defaultdict or a normal dictionary. For each cycle,
 
 In Python, for the code:
 
-n, m, k = map(int, input().split())
+Testing against sample input 2.
 
-instructions = [list(map(int, input().split())) for _ in range(n)]
+```python
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
 
-locked_cores = [False] * n
+    instructions = [list(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n)]
 
-lock_time = [0] * n
+    locked_cores = [False] * n
 
-locked_cells = [False] * (k + 1)  # index 0 unused
+    lock_time = [0] * n
 
-for t in range(1, m + 1):
-    per_cell = {}
-    # Phase 1: check already locked cells
-    for core in range(n):
-        if locked_cores[core]:
-            continue
-        instr = instructions[core][t-1]
-        if instr == 0:
-            continue
-        cell = instr
-        if locked_cells[cell]:
-            # Lock the core now
-            locked_cores[core] = True
-            lock_time[core] = t
-        else:
-            # Add to per_cell
-            if cell not in per_cell:
-                per_cell[cell] = []
-            per_cell[cell].append(core)
-    # Phase 2: check for conflicts
-    for cell in per_cell:
-        cores_list = per_cell[cell]
-        if len(cores_list) >= 2:
-            locked_cells[cell] = True
-            for c in cores_list:
-                if not locked_cores[c]:
-                    locked_cores[c] = True
-                    lock_time[c] = t
+    locked_cells = [False] * (k + 1)  # index 0 unused
 
-for time in lock_time:
-    print(time)
+    for t in range(1, m + 1):
+        per_cell = {}
+        # Phase 1: check already locked cells
+        for core in range(n):
+            if locked_cores[core]:
+                continue
+            instr = instructions[core][t-1]
+            if instr == 0:
+                continue
+            cell = instr
+            if locked_cells[cell]:
+                # Lock the core now
+                locked_cores[core] = True
+                lock_time[core] = t
+            else:
+                # Add to per_cell
+                if cell not in per_cell:
+                    per_cell[cell] = []
+                per_cell[cell].append(core)
+        # Phase 2: check for conflicts
+        for cell in per_cell:
+            cores_list = per_cell[cell]
+            if len(cores_list) >= 2:
+                locked_cells[cell] = True
+                for c in cores_list:
+                    if not locked_cores[c]:
+                        locked_cores[c] = True
+                        lock_time[c] = t
 
-This should work. Let me check for possible errors.
+    for time in lock_time:
+        print(time, file=output_stream)
 
-Wait, in the code for per_cell, initially, per_cell is a normal dict. So, when we process each core, for a new cell, we check if the cell is in per_cell. If not, we add it as a key with an empty list. Then append the core.
 
-Yes.
 
-Testing with sample 3:
+def test():
+    import io
 
-Input 1 1 1:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 1 1 1
-
 0
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-So, lock_time is [0]. The code prints 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Another test case:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sample 2 input:
+    print('Tests passed 😎')
 
-3 2 2
 
-1 2
+if __name__ == '__main__':
+    test()
 
-1 2
 
-2 2
+```
 
-Which outputs 1,1,0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-The code would process cycle 1:
+```
 
-phase1:
-
-cores 0,1,2.
-
-core0: cell1, per_cell[1] = [0]
-
-core1: cell1, per_cell[1] becomes [0,1]
-
-core2: cell2, per_cell[2] = [2]
-
-phase2:
-
-cell1's cores 0,1: lock them. cell1 is locked.
-
-core2's cell2: 1 core, no action.
-
-So lock_time[0] and 1 are 1. core2 not locked.
-
-cycle2:
-
-core2's instruction is 2. cell2 is not locked. add to per_cell[2] = [2]. phase2: cell2 has 1 core. no action.
-
-so lock_time[2] is 0.
-
-Yes.
-
-Thus, the code should work.
 </think>
 
 ```python

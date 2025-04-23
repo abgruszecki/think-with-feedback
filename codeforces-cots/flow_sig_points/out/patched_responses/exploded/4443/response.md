@@ -588,121 +588,139 @@ Now, code:
 
 First, handle the possible condition.
 
-m, s = map(int, input().split())
+Testing against sample input 1.
 
-if s ==0:
+```python
+def main(input_stream, output_stream):
+    m, s = map(int, input_stream.readline().rstrip("\n").split())
 
-    if m ==1:
+    if s ==0:
 
-        print("0 0")
+        if m ==1:
 
-    else:
+            print("0 0", file=output_stream)
 
-        print("-1 -1")
+        else:
 
-else:
-
-    if s >9*m or (m>1 and s <1):
-
-        print("-1 -1")
+            print("-1 -1", file=output_stream)
 
     else:
 
-        # compute minimal and maximal.
+        if s >9*m or (m>1 and s <1):
 
-        # minimal.
+            print("-1 -1", file=output_stream)
 
-        minimal = []
+        else:
 
-        # compute first digit.
+            # compute minimal and maximal.
 
-        d1 = max(1, s -9*(m-1))
+            # minimal.
 
-        minimal.append(d1)
+            minimal = []
 
-        remaining = s -d1
+            # compute first digit.
 
-        for i in range(m-1):
+            d1 = max(1, s -9*(m-1))
 
-            remaining_digits_after = (m-1 -1) -i # m-1-1 is (m-2), then subtract i?
+            minimal.append(d1)
 
-            # wait, remaining digits after current is (m-1) - (i+1) ?
+            remaining = s -d1
 
-            # because for each step i (starting from 0 to m-2), the current is the (i+1)th digit after the first.
+            for i in range(m-1):
 
-            # after the current digit, there are (m-1) - (i+1) digits left.
+                remaining_digits_after = (m-1 -1) -i # m-1-1 is (m-2), then subtract i?
 
-            remaining_digits_after = (m-1) - (i+1)
+                # wait, remaining digits after current is (m-1) - (i+1) ?
 
-            digit = max(0, remaining - 9 * remaining_digits_after)
+                # because for each step i (starting from 0 to m-2), the current is the (i+1)th digit after the first.
 
-            minimal.append(digit)
+                # after the current digit, there are (m-1) - (i+1) digits left.
 
-            remaining -= digit
+                remaining_digits_after = (m-1) - (i+1)
 
-        # check sum is s?
+                digit = max(0, remaining - 9 * remaining_digits_after)
 
-        # assert sum(minimal) == s, "Minimal sum failed"
+                minimal.append(digit)
 
-        # maximal.
+                remaining -= digit
 
-        maximal = []
+            # check sum is s?
 
-        d1_max = min(9, s)
+            # assert sum(minimal) == s, "Minimal sum failed"
 
-        maximal.append(d1_max)
+            # maximal.
 
-        remaining_max = s - d1_max
+            maximal = []
 
-        for _ in range(m-1):
+            d1_max = min(9, s)
 
-            digit = min(9, remaining_max)
+            maximal.append(d1_max)
 
-            maximal.append(digit)
+            remaining_max = s - d1_max
 
-            remaining_max -= digit
+            for _ in range(m-1):
 
-        # check sum.
+                digit = min(9, remaining_max)
 
-        # assert sum(maximal) ==s, "Maximal sum failed"
+                maximal.append(digit)
 
-        # convert to strings.
+                remaining_max -= digit
 
-        min_str = ''.join(map(str, minimal))
+            # check sum.
 
-        max_str = ''.join(map(str, maximal))
+            # assert sum(maximal) ==s, "Maximal sum failed"
 
-        print(f"{min_str} {max_str}")
+            # convert to strings.
 
-Testing the first example:
+            min_str = ''.join(map(str, minimal))
 
-input: 2 15
+            max_str = ''.join(map(str, maximal))
 
-minimal:
+            print(f"{min_str} {max_str}", file=output_stream)
 
-d1 = max(1, 15 -9*(2-1)) →15-9=6. So 6.
 
-remaining:15-6=9.
 
-loop runs once (m-1=1).
+def test():
+    import io
 
-i=0:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 0
+""",
+            "output": \
+"""\
+-1 -1
+""",
+        }, 
+    ]
 
-remaining_digits_after = (2-1) - (0+1) →1-1=0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-digit = max(0,9 -9*0) →9.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-remaining becomes 0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-minimal is [6,9] →69.
+    print('Tests passed 😎')
 
-maximal:
 
-d1_max = min(9,15) →9. remaining_max=6.
+if __name__ == '__main__':
+    test()
 
-loop once, digit is 6. maximal is [9,6] →96.
 
-So output is 69 96.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: 3 0 → output is -1 -1.
 

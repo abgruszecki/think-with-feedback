@@ -369,15 +369,114 @@ We need to handle the initial case when the string has length 1 (so no pairs, su
 
 But the code should handle it.
 
-Testing the code with the sample input:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    import sys
+    from math import inf
 
-s = 'winner' (len 6)
+    # Read input
+    s, k = input_stream.readline().split()
+    k = int(k)
+    n = int(input_stream.readline())
+    bonus = [[0]*26 for _ in range(26)]
+    for _ in range(n):
+        x, y, c = input_stream.readline().split()
+        x_ord = ord(x) - ord('a')
+        y_ord = ord(y) - ord('a')
+        bonus[x_ord][y_ord] = int(c)
 
-k=4.
+    original = [ord(c) - ord('a') for c in s]
+    length = len(original)
+    if length == 0:
+        print(0, file=output_stream)
+        return
 
-bonus entries for 's e' etc. The code correctly tracks the best transitions.
+    # Initialize DP for the first character
+    prev_dp = [[-inf]*(k+1) for _ in range(26)]
+    first_char = original[0]
+    for c in range(26):
+        changes = 0 if c == first_char else 1
+        if changes > k:
+            continue
+        prev_dp[c][changes] = 0
+
+    # Process remaining characters
+    for i in range(1, length):
+        current_dp = [[-inf]*(k+1) for _ in range(26)]
+        current_char_orig = original[i]
+        for prev_c in range(26):
+            for prev_used in range(k+1):
+                if prev_dp[prev_c][prev_used] == -inf:
+                    continue
+                for curr_c in range(26):
+                    changes = 0 if curr_c == current_char_orig else 1
+                    new_used = prev_used + changes
+                    if new_used > k:
+                        continue
+                    current_sum = prev_dp[prev_c][prev_used] + bonus[prev_c][curr_c]
+                    if current_sum > current_dp[curr_c][new_used]:
+                        current_dp[curr_c][new_used] = current_sum
+        prev_dp = current_dp
+
+    # Find the maximum sum across all possibilities
+    max_sum = -inf
+    for c in range(26):
+        for used in range(k+1):
+            if prev_dp[c][used] > max_sum:
+                max_sum = prev_dp[c][used]
+    print(max_sum, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+abcdef 1
+5
+a b -10
+b c 5
+c d 5
+d e 5
+e f 5
+""",
+            "output": \
+"""\
+20
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

@@ -1039,65 +1039,92 @@ But when we sort the x_centers, it's sorted as floats.
 
 The code:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n, k = map(int, input().split())
 
-m = n - k
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-x = []
-y = []
+    m = n - k
 
-for _ in range(n):
-    x1, y1, x2, y2 = map(int, input().split())
-    cx = (x1 + x2) / 2.0
-    cy = (y1 + y2) / 2.0
-    x.append(cx)
-    y.append(cy)
+    x = []
+    y = []
 
-x.sort()
-y.sort()
+    for _ in range(n):
+        x1, y1, x2, y2 = map(int, input_stream.readline().rstrip("\n").split())
+        cx = (x1 + x2) / 2.0
+        cy = (y1 + y2) / 2.0
+        x.append(cx)
+        y.append(cy)
 
-min_x_range = float('inf')
-for i in range(len(x) - m + 1):
-    current = x[i + m -1] - x[i]
-    if current < min_x_range:
-        min_x_range = current
+    x.sort()
+    y.sort()
 
-min_y_range = float('inf')
-for i in range(len(y) - m + 1):
-    current = y[i + m -1] - y[i]
-    if current < min_y_range:
-        min_y_range = current
+    min_x_range = float('inf')
+    for i in range(len(x) - m + 1):
+        current = x[i + m -1] - x[i]
+        if current < min_x_range:
+            min_x_range = current
 
-area = math.ceil(min_x_range) * math.ceil(min_y_range)
-print(area)
+    min_y_range = float('inf')
+    for i in range(len(y) - m + 1):
+        current = y[i + m -1] - y[i]
+        if current < min_y_range:
+            min_y_range = current
 
-Yes.
+    area = math.ceil(min_x_range) * math.ceil(min_y_range)
+    print(area, file=output_stream)
 
-Testing the first sample:
 
-x = [1.5, 2.5, 3.5]
 
-sorted x.
+def test():
+    import io
 
-m=2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 1
+1 1 2 2
+1 9 2 10
+9 9 10 10
+9 1 10 2
+""",
+            "output": \
+"""\
+64
+""",
+        }, 
+    ]
 
-Possible windows:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=0: 2.5-1.5=1.0
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=1:3.5-2.5=1.0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-min_x_range = 1.0.
+    print('Tests passed 😎')
 
-Similarly for y.
 
-ceil(1.0) = 1.0.
+if __name__ == '__main__':
+    test()
 
-Product 1*1=1.
 
-Correct.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

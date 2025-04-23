@@ -250,21 +250,70 @@ At the end, output min_total.
 
 This should work.
 
-Testing sample 1:
+Testing against sample input 1.
 
-n=3, a=[0,2,1].
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    min_total = float('inf')
 
-For x=2:
+    for x in range(1, n + 1):
+        current_sum = 0
+        for i in range(1, n + 1):
+            ai = a[i - 1]
+            term = ai * (abs(x - i) + abs(x - 1) + (i - 1))
+            current_sum += term
+        total_cost = 2 * current_sum
+        if total_cost < min_total:
+            min_total = total_cost
 
-sum_terms:
+    print(min_total, file=output_stream)
 
-i=1: a[0] =0. term is 0*( |2-1| + |2-1| + 0 ) → 0.
 
-i=2: a[1]=2. term is 2*(0 +1 +1) → 2*2=4.
 
-i=3: a[2]=1. term is 1*(1 +1 +2) → 4*1=4.
+def test():
+    import io
 
-sum_terms=8. total_cost=16 → which matches.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+1 1
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

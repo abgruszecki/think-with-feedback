@@ -443,53 +443,188 @@ In Python, this can be done with a list's count method.
 
 For example:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-ones = a.count(1)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-twos = a.count(2)
+    ones = a.count(1)
 
-teams = min(twos, ones) + (max(ones - twos, 0) //3)
+    twos = a.count(2)
 
-print(teams)
+    teams = min(twos, ones) + (max(ones - twos, 0) //3)
 
-Wait, no. Wait, (max(ones - twos, 0) //3) is correct. Because if ones >= twos, then the remaining ones after pairing is (ones - twos), which is divided by 3. Else, it's zero.
+    print(teams, file=output_stream)
 
-Yes.
 
-So the code should work.
 
-Testing all the samples:
+def test():
+    import io
 
-Sample 1:
-
-Input:
-
-4
-
-1 1 2 1 → ones=3, twos=1.
-
-teams =1 + (3-1=2, max(2,0)=2 //3=0). total 1.
-
-Sample 3:
-
-Input:
-
-7
-
-2 2 2 1 1 1 1 → twos=3, ones=4.
-
-teams=3 + (4-3=1 → 0). total 3.
-
-Sample 2:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2
+2 2
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-2 2 → ones=0. min(0, 2)=0. (0-2 is negative → max(0,0) → 0). 0+0=0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    ones = a.count(1)
+
+    twos = a.count(2)
+
+    teams = min(twos, ones) + (max(ones - twos, 0) //3)
+
+    print(teams, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 1 1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    ones = a.count(1)
+
+    twos = a.count(2)
+
+    teams = min(twos, ones) + (max(ones - twos, 0) //3)
+
+    print(teams, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+2 2 2 1 1 1 1
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample4:
 

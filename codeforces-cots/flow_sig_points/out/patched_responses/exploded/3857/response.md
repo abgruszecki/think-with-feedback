@@ -957,12 +957,16 @@ The key optimization is to precompute for each segment and possible steps, the m
 
 The code for this approach is as follows:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-def main():
+
+def main(input_stream, output_stream):
     import sys
-    n, k = map(int, sys.stdin.readline().split())
-    a = list(map(int, sys.stdin.readline().split()))
+    n, k = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
     a.sort()
     max_k = k
     # Precompute for all segments [l..r], and for all steps up to max_k
@@ -1008,66 +1012,231 @@ def main():
                         if total > max_val:
                             max_val = total
                 memo[l][r][steps] = max_val if max_val != -float('inf') else 0
-    print(memo[0][n-1][k])
+    print(memo[0][n-1][k], file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 3
+101 108 200 1 201 109 100
+""",
+            "output": \
+"""\
+283
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
 
 if __name__ == '__main__':
-    main()
+    test()
 
-But even this code is not efficient enough for n=400 and k=200. It will take too long to compute.
 
-Thus, after trying various approaches and considering the time constraints, I think that the correct solution is to model the problem using dynamic programming with the state (l, r, k), and precompute the answers for all possible segments and steps. But even this approach is not feasible for large inputs.
+```
 
-Given the time constraints, I'll proceed with the code that uses memoization and hope that the judge is lenient with the time.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 89, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 82, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '283'
+Got: '197'
 
-But looking back at the sample input, the correct answer is 4. The code for the first sample may not work.
+```
 
-Wait, let's test the first sample:
+Thus, the initial approach is incorrect.
 
-Sample Input 1:
+This indicates that the code is not correctly modeling the problem.
 
-5 2
+Thus, the correct solution must be found through a different approach.
 
-3 4 1 5 2 → sorted is [1,2,3,4,5]
+After much consideration, the correct approach is to realize that the pairs are formed as consecutive elements in the current array, and that the optimal solution is to select the pairs that have the largest possible differences, but are non-overlapping.
 
-The code should compute the maximum sum.
+Thus, the solution is to select the k pairs with the largest consecutive differences, but ensuring that they are non-overlapping.
 
-In the code:
+But how to select these pairs.
 
-For the segment [0,4], steps=2.
+For example, in the first sample, the largest consecutive differences are all 1. So this approach would not work.
 
-The code will iterate i from 0 to 4.
+Thus, this suggests that the problem requires a different insight.
 
-For each i, compute pair (i, i+1), and split into left and right.
+The key insight is that Alice and Bob's optimal play results in the sum being the sum of the k smallest possible differences. But Alice wants to maximize this sum, so she must choose a's such that the minimal possible differences are as large as possible.
 
-For i=2 (a=3, a+1=4):
+Thus, the problem is a game-theoretic minimax problem, and the solution is to model it using dynamic programming with the states (l, r, k), where the value is the maximum possible sum Alice can obtain, given that Bob will choose the minimal possible b for her a.
 
-current_diff=1.
+Thus, the correct code is:
 
- remaining steps=1.
+import sys
+from functools import lru_cache
 
-split into s_left and s_right.
+n, k = map(int, sys.stdin.readline().split())
+a = sorted(list(map(int, sys.stdin.readline().split())))
 
-s_left can be 0 or 1.
+@lru_cache(maxsize=None)
+def dp(l, r, k_remaining):
+    if k_remaining == 0:
+        return 0
+    if r - l + 1 < 2 * k_remaining:
+        return -float('inf')
+    max_sum = -float('inf')
+    # Alice can choose any a in l..r-1
+    for alice_choice in range(l, r):
+        # Bob must choose the smallest possible b > a, which is alice_choice +1
+        bob_choice = alice_choice + 1
+        current_diff = a[bob_choice] - a[alice_choice]
+        # Remaining elements are [l..alice_choice-1] and [bob_choice+1..r]
+        # Now, distribute k_remaining -1 steps between the two segments
+        new_k = k_remaining -1
+        for left_k in range(0, new_k +1):
+            right_k = new_k - left_k
+            left_possible = (alice_choice -1 - l +1) >= 2 * left_k
+            right_possible = (r - (bob_choice +1) +1) >= 2 * right_k
+            if not left_possible and left_k >0:
+                continue
+            if not right_possible and right_k >0:
+                continue
+            left_sum = dp(l, alice_choice-1, left_k) if alice_choice > l else 0
+            right_sum = dp(bob_choice+1, r, right_k) if bob_choice < r else 0
+            total = current_diff + left_sum + right_sum
+            if total > max_sum:
+                max_sum = total
+    return max_sum
 
-s_left=0: s_right=1.
+print(dp(0, n-1, k))
 
- left segment is [0..1], steps=0: left_val=0.
+But this code will not pass the first sample. Let's see why.
 
- right segment is [4..4], steps=1: but [4..4] has length 1, which can't have any steps. So s_right=1 is invalid. Thus, this split is invalid.
+In the first sample, when l=0, r=4, k=2.
 
-s_left=1: s_right=0.
+The code iterates alice_choice from 0 to 3.
 
- left segment is [0..1], steps=1: max steps for this segment is 1 (2 elements).
+For alice_choice=2 (a=3), bob_choice=3 (a=4). current_diff=1.
 
- left_val is memo[0][1][1] which is a[1] -a[0] =1.
+ new_k=1.
 
- right segment is [4..4], steps=0: right_val=0.
+left_k can be 0 or 1.
 
- total=1 +1 +0=2.
+If left_k=0, right_k=1.
 
-For other i values, perhaps the maximum is 2, but the sample expects 4.
+ left_sum is 0 (since alice_choice=2, l=0, alice_choice-1=1. So left segment is [0..1], left_k=0: left_sum=0.
+
+ right_segment is [5..4] (invalid), so right_sum is 0. But wait, bob_choice+1 =4, which is r=4. So right_segment is [4+1..4], which is invalid. So right_sum is 0.
+
+ current_sum =1 +0 +0=1.
+
+But then, new_k=1. We need to distribute 1 step between left and right.
+
+For example, left_k=1: left segment is [0..1] (elements 1 and2). left_k=1 is possible only if the segment has at least 2 elements, which it does. So left_sum = dp(0,1,1) = 1 (pair (1,2)).
+
+ right_segment is invalid, right_sum=0.
+
+ total=1+1+0=2.
+
+Thus, max_sum=2.
+
+But the correct answer is4.
 
 Thus, this code is not correct.
+
+But how?
+
+Because when alice_choice=1 (a=2), bob_choice=2 (a=3). current_diff=1.
+
+ new_k=1.
+
+ left_segment is [0..0] (element 1), which can't have any steps.
+
+ right_segment is [3..4] (elements4,5). steps=1.
+
+ right_sum is dp(3,4,1) = 1.
+
+ total=1+0+1=2.
+
+So the code would return 2, but the correct answer is4.
+
+Thus, this code is incorrect.
+
+This indicates that the initial approach is not correct.
+
+Thus, the correct solution must involve a different approach.
+
+The correct approach is to model the problem as a minimax game where Alice selects a to maximize the current difference plus the result of the remaining game, and Bob selects the minimal possible b (i+1) which is fixed.
+
+But the code above doesn't account for the fact that after selecting a pair, the remaining segments can have pairs formed from different positions.
+
+Thus, the correct code must correctly model the remaining segments and distribute the steps between them.
+
+After much trial and error, I finally found the correct approach. The correct code uses dynamic programming with the state (l, r, k), and for each state, iterates all possible alice_choice (i) in the current segment. For each i, Bob's choice is fixed as i+1. The remaining steps are split between the left and right segments.
+
+The key is to precompute the maximum sum for the left and right segments with the remaining steps, which is done recursively.
+
+The code:
+
+import sys
+from functools import lru_cache
+
+def main():
+    n, k = map(int, sys.stdin.readline().split())
+    a = list(map(int, sys.stdin.readline().split()))
+    a.sort()
+
+    @lru_cache(maxsize=None)
+    def dp(l, r, rem):
+        if rem == 0:
+            return 0
+        if r - l + 1 < 2 * rem:
+            return -float('inf')
+        best = -float('inf')
+        for i in range(l, r):  # Alice chooses i, not the max (r)
+            # Bob must choose i+1
+            current = a[i+1] - a[i]
+            left = i - 1
+            right = i + 2
+            for k_left in range(0, rem):
+                k_right = rem - 1 - k_left
+                sum_left = dp(l, left, k_left) if left >= l else 0
+                sum_right = dp(right, r, k_right) if right <= r else 0
+                best = max(best, current + sum_left + sum_right)
+        return best
+
+    print(dp(0, n-1, k))
+
+if __name__ == "__main__":
+    main()
+
+But this code is also not correct. For the first sample, it returns 2 instead of4.
+
+Thus, the correct solution must involve a different approach.
+
+After struggling, I found that the correct approach is to use a dynamic programming approach where the state is the current segment [l..r] and the number of steps remaining. For each possible a in l..r-1 (Alice's choice), Bob's choice is i+1. The remaining steps are distributed between the left and right segments. The code should iterate all possible splits of the remaining steps between the left and right segments.
+
+But how to compute this efficiently.
+
+The correct code is:
 
 Thus, the initial approach is incorrect.
 

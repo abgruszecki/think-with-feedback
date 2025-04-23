@@ -247,17 +247,88 @@ for x, px in result:
 
 This should work.
 
-Testing the sample input:
+Testing against sample input 1.
 
-First sample:
+```python
+from collections import defaultdict
+import sys
 
-n=1, a=[2]
 
-pos_dict[2] = [0]
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    a = list(map(int, input_stream.readline().split()))
+    pos_dict = defaultdict(list)
+    for idx, num in enumerate(a):
+        pos_dict[num].append(idx)
+    
+    result = []
+    for x in sorted(pos_dict.keys()):
+        positions = pos_dict[x]
+        k = len(positions)
+        if k == 1:
+            result.append((x, 0))
+        else:
+            d = positions[1] - positions[0]
+            valid = True
+            for i in range(2, k):
+                if positions[i] - positions[i-1] != d:
+                    valid = False
+                    break
+            if valid:
+                result.append((x, d))
+    
+    print(len(result), file=output_stream)
+    for x, px in result:
+        print(x, px, file=output_stream)
 
-k=1 → added to result as (2,0).
 
-Output is 1 followed by 2 0.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+1 2 1 3 1 2 1 5
+""",
+            "output": \
+"""\
+4
+1 2
+2 4
+3 0
+5 0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

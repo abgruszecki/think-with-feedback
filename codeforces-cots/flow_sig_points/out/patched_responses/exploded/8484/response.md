@@ -210,47 +210,67 @@ So for each button in the buttons list, which is given as b1, b2, ..., bm. We pr
 
 Now code.
 
-Testing the first sample:
+Testing against sample input 1.
 
-n=5, m=4, buttons [4,3,1,2].
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    buttons = list(map(int, input_stream.readline().rstrip("\n").split()))
+    ans = [0] * n
+    on = [True] * n
 
-ans starts as [0,0,0,0,0]
+    for b in buttons:
+        for i in range(b, n + 1):
+            if on[i - 1]:
+                ans[i - 1] = b
+                on[i - 1] = False
 
-on_flags [True, True, True, True, True]
+    print(' '.join(map(str, ans)), file=output_stream)
 
-Processing 4:
 
-i runs from 4 to 5:
 
-i=4: index 3. on_flags[3] is True. ans[3] =4. set to False.
+def test():
+    import io
 
-i=5: index4. on_flags[4] True. ans[4] =4. set to False.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5
+5 4 3 2 1
+""",
+            "output": \
+"""\
+1 2 3 4 5
+""",
+        }, 
+    ]
 
-Processing 3:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i runs from3 to5.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=3: index2. on True. ans[2] =3. set to False.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Processing1:
+    print('Tests passed 😎')
 
-i runs from1 to5:
 
-i=1: index0. True. ans[0]=1. False.
+if __name__ == '__main__':
+    test()
 
-i=2: index1. True. ans[1] =1. False.
 
-i=3: index2. already False.
+```
 
-i=4: etc. no.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Processing2:
-
-i runs from2 to5:
-
-index1: False (since set by 1). So nothing.
-
-Thus, ans is [1,1,3,4,4], which is correct.
+```
 
 Yes.
 

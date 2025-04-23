@@ -521,248 +521,165 @@ But in Python, the heapq module is a min-heap. So each time we extract the small
 
 Now, the code outline:
 
-s = input().strip()
-k = int(input())
+Testing against sample input 1.
 
-n = len(s)
-total = n * (n + 1) // 2
-if k > total:
-    print("No such line.")
-    exit()
-
-# Build SA, rank, LCP, and sparse table
-sa = build_sa(s)
-rank = [0]*n
-for i in range(n):
-    rank[sa[i]] = i
-lcp = build_lcp(s, sa, rank)
-lcp_st = SparseTable(lcp)
-
-# Initialize the heap
+```python
+import sys
 import heapq
 
-heap = []
-for i in range(n):
-    # Only add substrings that exist (i+1 <=n)
-    if i < n:
-        element = HeapElement(i, 1, s, sa, rank, lcp_st)
-        heapq.heappush(heap, element)
 
-# Extract the first k elements
-result = None
-for _ in range(k):
-    current = heapq.heappop(heap)
-    result = current.s[current.i : current.i + current.length]
-    # Push next substring if possible
-    next_length = current.length + 1
-    if current.i + next_length <= n:
-        next_element = HeapElement(current.i, next_length, s, sa, rank, lcp_st)
-        heapq.heappush(heap, next_element)
-
-print(result)
-
-But wait, this code will push the next substring for the current i (current.length +1) each time. But how do we handle the case where the next_length exceeds the string's length?
-
-The condition current.i + next_length <= n is checked.
-
-Yes.
-
-But this code has a few issues:
-
-1. The HeapElement's __lt__ method needs to correctly compare two elements. For example, when the two elements are from different i's, their ranks are compared, then their LCP is computed, etc.
-
-But what if i + l exceeds the string length? For example, if i=5 and length=10, but the string is only 6 characters long. The code should not create such elements, which is handled by the condition in the push step.
-
-Another potential issue is the comparison when one of the substrings extends beyond the string. But in the code, the HeapElement's length is always such that i + length <= n, since when pushing, we check if current.i + next_length <=n.
-
-So the comparison between two elements is valid.
-
-Another issue is that the HeapElement's __lt__ method may have incorrect logic. For example, when comparing two elements where the LCP is >= min(l, m), but l == m, then the two substrings are equal, so their order depends on the starting index. But according to the problem statement, the substrings are considered as separate entries if they are different in the original string. But the problem requires that even if two substrings are identical (same characters), but different starting or ending positions, they are considered separate.
-
-But according to the problem statement, the equal substrings are considered separate entries. For example, "aab" has two "a" substrings from positions 0 and 1.
-
-But in the __lt__ method, if two substrings are identical in characters, their order is determined by the starting position, but the problem statement's ordering does not specify how to order identical substrings. Wait, no. The problem says to sort all substrings in lex order. For two identical substrings (same characters), they are considered equal, but their order in the list depends on their occurrence in the original string.
-
-Wait, no. The problem statement says to write out all substrings, including equal ones, and sort them lex order. So when two substrings are lex equal, they are considered equal and their order in the sorted list is not determined by their positions. For example, in the first sample input "aa", the substrings are "a" (i=0), "a" (i=1), "aa". When sorted lex order, the two "a"s are considered equal and their order in the list is determined by the way they are generated. But according to the sample input, the first "a" comes before the second "a" because the first is generated first in the initial list. But when sorted lex order, the two "a"s are equal, but the problem requires that they are considered as separate entries. So their order in the sorted list is not determined by their position; they are considered equal and thus their order is arbitrary. However, the problem's examples suggest that when two substrings are lex equal, their order in the output list is determined by their position in the original string. For example, in the first sample input, the two "a" substrings are generated in order (i=0 first, then i=1), and the output is the second one when k=2.
-
-But this suggests that when two substrings are lex equal, their order in the sorted list is determined by their starting index. Or perhaps not?
-
-This is a critical point.
-
-According to the problem statement, the list is sorted in lex order. If two substrings are lex equal, how are they ordered?
-
-In the first sample input, the two "a" substrings (i=0 and i=1) are considered equal in lex order, but they are both present in the list. When sorted, they are both first, but the order between them is not specified. However, the sample input's output for k=2 is "a", which suggests that the two "a"s are ordered as per their occurrence in the original list. But according to the problem statement, when two strings are equal, their order in the list is the same as their occurrence in the original string.
-
-But how does the lex order define their order when the substrings are equal? The problem's definition of lex order does not specify this. For example, the lex order between two equal strings is not defined, as they are equal. Thus, when two substrings are equal, their relative order in the list could be arbitrary. However, the problem's sample input shows that for the first case, the two "a"s are considered as two separate entries in the list, and the second one is chosen when k=2.
-
-This implies that the order between equal substrings is determined by their position in the original string. For example, the first occurrence comes before the second occurrence in the sorted list. But according to the lex order, these two are equal, so their order is not determined by the lex order. So the problem's examples suggest that the order between equal substrings is determined by their starting position and length.
-
-But according to the problem statement, the substrings are sorted lex, and if two are equal, they are considered equal. But the problem requires to output the k-th entry in the list, which includes all possible substrings, including duplicates. So the order between equal substrings must be determined in some way.
-
-But the problem statement does not specify how to order equal substrings. However, the sample inputs indicate that the order between two equal substrings is determined by their starting index and/or their length.
-
-For example, in the first sample input:
-
-substrings are:
-
-i=0, length 1: "a"
-
-i=1, length 1: "a"
-
-i=0, length 2: "aa"
-
-When sorted lex, the two "a"s are considered equal and thus can appear in any order. But the sample shows that the first "a" (i=0) is the first entry, and the second "a" (i=1) is the second entry. Thus, their order in the list is determined by their starting positions. So when two substrings are lex equal, their order in the list is determined by the order in which they are generated. But according to the problem statement, the list is sorted lex. But how can lex order determine the order of two equal substrings? It can't. So the problem must have an implicit rule that when two substrings are equal, the one that starts earlier in the original string comes first. Or perhaps the one with a smaller starting index, and if they start at the same index, the shorter comes first.
-
-But according to the problem statement, when two substrings are equal, their order in the sorted list is not specified, but the sample indicates that the order is determined by their starting index. For example, the first sample input's two "a"s are in order i=0, then i=1. Thus, the code must enforce this order.
-
-But in the current heap approach, the order of two equal substrings is determined by their starting index and length. For example, when two substrings are equal, the heap compares their starting index and length. But according to the __lt__ method in the HeapElement class, if the two substrings are equal, then the one with smaller length comes first, but if the lengths are the same, the comparison returns False (which is equivalent to considering them equal, but Python's heapq would then compare other fields of the object, but HeapElement doesn't have any other fields to compare.
-
-This is a problem. Because when two substrings are equal (same characters), but different starting positions and/or lengths, the heap comparison must order them in a way that reflects their order in the list.
-
-But according to the problem statement, all substrings are considered, including equal ones. So the order between two lex equal substrings must be determined by their position in the original list of all possible substrings. However, the problem doesn't specify this order.
-
-But the sample input shows that for the two "a" substrings in the first sample, the one starting at i=0 is first, then i=1. So the code must generate the list of all possible substrings sorted lex, and when two are equal, they are ordered according to their starting index, then their length.
-
-But how to model this in the comparison function.
-
-In the current __lt__ method, when two substrings are equal, the code returns l < m. But if l == m, then the code returns False, which means that in the heap, the elements are considered equal. But in Python, when two elements are considered equal, the heapq module may compare other attributes, like the starting index, which may not be considered in the __lt__ method.
-
-This is a critical issue.
-
-For example, when two HeapElements are considered equal (their substrings are lex equal), then the __lt__ method returns False for both a < b and b < a. This leads to the elements being considered equal, and the heapq module will then compare other attributes of the HeapElement instances. But HeapElement instances have other attributes like i and length, which are not considered in the __lt__ method. So the default comparison in Python for objects without a defined __lt__ is based on their memory addresses, which is undefined.
-
-Thus, the current code does not properly order equal substrings, which could lead to incorrect ordering in the heap and thus incorrect results.
-
-So, to fix this, the comparison function must explicitly define the order between equal substrings. That is, when two substrings are equal lex, their order is determined by their starting index. If starting indices are the same, then by their length. But since a starting index and length uniquely define a substring (i and l), and each HeapElement is for a different substring, it's possible that two different HeapElements have the same substring, but different i and l. For example, s = "abxab", and two substrings starting at i=0, l=2 ("ab") and i=3, l=2 ("ab"). These are lex equal and must be ordered in the list. According to the problem's examples, the order between them is determined by their starting indices and length. But how?
-
-In the problem's first sample, the two "a" substrings are ordered by their starting indices. So the one with the smaller starting index comes first.
-
-Thus, the comparison function must be modified to order equal lex substrings by their starting index. If the starting indices are the same, then by length (but since i and l uniquely define a substring, this is not possible. So, when two substrings are lex equal, the one with the smaller starting index comes first. If starting indices are the same, then the one with shorter length comes first.
-
-Wait, no. If two substrings start at the same index, they cannot be of the same lex order unless their lengths are the same. So, two different substrings starting at the same index must have different lengths, and thus cannot be lex equal.
-
-So, the order between lex equal substrings must be determined by their starting index, and then their length.
-
-Thus, in the __lt__ method, when two substrings are lex equal, we compare their starting indices. If the starting indices are the same, compare their lengths. This way, the order between equal lex substrings is determined by their starting index and length.
-
-So, modifying the __lt__ method:
-
-In the case where h >= min_len and l == m:
-
-We compare the starting indices. The substring with the smaller starting index is considered smaller. If the starting indices are the same, then the substrings are the same (same i and l), but this can't happen since the HeapElements are unique in the heap.
-
-Wait, but in the heap, there can be multiple elements with the same i and l. For example, when pushing (i, l) multiple times, but that's impossible because each element is pushed once for each i and l. So, each HeapElement is unique.
-
-But when two different HeapElements are lex equal but have different starting indices or lengths, we need to order them.
-
-Thus, in the __lt__ method:
-
-After determining that the two substrings are lex equal (h >= min_len and l == m), we compare the starting indices. If the starting indices are the same, then compare the lengths (but this can't happen). Otherwise, the one with the smaller starting index is considered smaller.
-
-Thus, modifying the __lt__ method:
-
-In the step where h >= min_len:
-
-if l == m:
-    # compare starting indices
-    return self.i < other.i
-else:
-    return l < m
-
-But wait, the lex order of the substrings is already determined, but for two lex equal substrings, the problem requires that their order is determined by their starting index and length.
-
-Wait, no. According to the problem statement, the substrings are sorted in lex order. So, two substrings that are lex equal will be considered equal in the sorted list. But since the problem requires to output the k-th entry, including duplicates, the order between lex equal substrings must be handled.
-
-But the problem's examples suggest that the order between lex equal substrings is determined by their starting index. For example, in the first sample, the two "a" substrings are ordered as (i=0, l=1) followed by (i=1, l=1). Since they are lex equal, their order is determined by their starting indices.
-
-Thus, the __lt__ method must compare the starting indices when the substrings are lex equal and have the same length. If the substrings are lex equal and have different lengths, the shorter one comes first.
-
-But in the case where two substrings are lex equal but have different lengths, this is impossible. Because if their lengths are different, then one is a prefix of the other. For example, "a" and "aa". But "a" is lex smaller than "aa". So, two lex equal substrings must have the same length.
-
-Wait, no. For example, the substrings "a" and "a" are lex equal and have the same length. Substrings "a" and "aa" are not lex equal. So, the only way two lex equal substrings can have different lengths is if they are the same up to the shorter length, and the longer one has no additional characters. For example, "a" and "a"—same length. Or, if one is a prefix of the other but the other has extra characters. But in that case, the shorter one is lex smaller. So two substrings of different lengths can't be lex equal.
-
-Thus, when two substrings are lex equal, their lengths must be the same. So, in the case where h >= min_len and l == m, we have lex equal substrings. But according to the problem's examples, their order in the list is determined by their starting index.
-
-Thus, the __lt__ method must return True if self.i < other.i, otherwise False.
-
-But what about when two substrings have the same starting index and length? That's impossible, since each (i, l) is unique.
-
-Thus, the __lt__ method should be modified as follows:
-
-In the case where h >= min_len and l == m:
-
-return self.i < other.i
-
-Thus, the __lt__ method becomes:
-
+def build_sa(s):
+    n = len(s)
+    sa = list(range(n))
+    sa.sort(key=lambda x: s[x:])
+    return sa
+
+def build_lcp(s, sa, rank):
+    n = len(s)
+    lcp = [0] * n
+    k = 0
+    for i in range(n):
+        if rank[i] == 0:
+            continue
+        j = sa[rank[i] - 1]
+        while i + k < n and j + k < n and s[i+k] == s[j+k]:
+            k += 1
+        lcp[rank[i]] = k
+        if k > 0:
+            k -= 1
+    return lcp
+
+class SparseTable:
+    def __init__(self, data):
+        self.n = len(data)
+        self.log_table = [0] * (self.n + 1)
+        for i in range(2, self.n + 1):
+            self.log_table[i] = self.log_table[i//2] + 1
+        self.size = self.log_table[self.n] + 1
+        self.table = [[0]*self.n for _ in range(self.size)]
+        self.table[0] = data
+        for j in range(1, self.size):
+            for i in range(self.n - (1 << j) + 1):
+                self.table[j][i] = min(self.table[j-1][i], self.table[j-1][i + (1 << (j-1))])
+    
+    def query_min(self, l, r):
+        if l > r:
+            return 0
+        length = r - l + 1
+        k = self.log_table[length]
+        return min(self.table[k][l], self.table[k][r - (1 << k) + 1])
+
+class HeapElement:
+    def __init__(self, i, length, s, rank, lcp_st):
+        self.i = i
+        self.length = length
+        self.s = s
+        self.rank = rank
+        self.lcp_st = lcp_st
+    
     def __lt__(self, other):
         i = self.i
         l = self.length
         j = other.i
         m = other.length
-
+        
+        if i == j and l == m:
+            return False
+        
         r_i = self.rank[i]
         r_j = other.rank[j]
         if r_i > r_j:
-            return not (other < self)
-        # Now r_i <= r_j
-        if r_j == r_i:
+            return not other.__lt__(self)
+        if r_i == r_j:
             h = len(self.s) - i
         else:
-            # LCP is the min in LCP[r_i+1 ... r_j]
             h = self.lcp_st.query_min(r_i + 1, r_j)
         min_len = min(l, m)
         if h >= min_len:
-            # The substrings are equal up to min_len
             if l == m:
-                # Lex equal and same length: compare starting indices
                 return i < j
             else:
                 return l < m
         else:
-            c_i = self.s[i + h]
-            c_j = other.s[j + h]
+            c_i = self.s[i + h] if (i + h) < len(self.s) else ''
+            c_j = other.s[j + h] if (j + h) < len(other.s) else ''
             return c_i < c_j
 
-This way, when two substrings are lex equal and of the same length, the one with the smaller starting index is considered smaller. This aligns with the first sample input.
+def main(input_stream, output_stream):
+    s = input_stream.readline().strip()
+    k = int(input_stream.readline())
+    n = len(s)
+    total = n * (n + 1) // 2
+    if k > total:
+        print("No such line.", file=output_stream)
+        return
+    
+    sa = build_sa(s)
+    rank = [0] * n
+    for idx, pos in enumerate(sa):
+        rank[pos] = idx
+    lcp = build_lcp(s, sa, rank)
+    lcp_st = SparseTable(lcp)
+    
+    heap = []
+    for i in range(n):
+        element = HeapElement(i, 1, s, rank, lcp_st)
+        heapq.heappush(heap, element)
+    
+    result = None
+    for _ in range(k):
+        current = heapq.heappop(heap)
+        result = s[current.i:current.i + current.length]
+        if current.i + current.length + 1 <= n:
+            new_element = HeapElement(current.i, current.length + 1, s, rank, lcp_st)
+            heapq.heappush(heap, new_element)
+    
+    print(result, file=output_stream)
 
-With this change, the heap will order the two "a" substrings (i=0 and i=1) as the one with i=0 comes first.
 
-Now, the code should handle the sample inputs correctly.
 
-But let's test the first sample:
+def test():
+    import io
 
-Input:
-aa
-2
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+abc
+5
+""",
+            "output": \
+"""\
+bc
+""",
+        }, 
+    ]
 
-The substrings are:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=0, l=1 → "a" (first)
-i=1, l=1 → "a" (second)
-i=0, l=2 → "aa" (third)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The heap will first push (0,1) and (1,1). The initial heap will compare them. Their rank is 0 and 1 (since the suffix array for "aa" is [0,1], assuming the doubling algorithm orders them correctly).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For comparing (0,1) and (1,1):
+    print('Tests passed 😎')
 
-r_i = rank[0] = 0, r_j = rank[1] = 1.
 
-h is the LCP between suffix 0 and suffix 1. For "aa", the suffix 0 is "aa", suffix 1 is "a". The LCP between them is 1.
+if __name__ == '__main__':
+    test()
 
-min_len = min(1,1) = 1. h >= min_len (1 >=1). l == m (1 ==1). So compare i=0 and i=1: 0 <1 → returns True. So (0,1) is considered smaller than (1,1). So the first extraction is (0,1), then (1,1), then (0,2).
 
-So for k=2, the second extraction is (1,1), which gives the substring "a" as expected.
+```
 
-Thus, the code should work.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Now, the code also needs to handle the case where the heap elements have varying lengths and starting indices.
-
-But the main challenge is to correctly implement the SA, rank, LCP, and the comparison logic.
-
-Another potential issue is the sparse table implementation. For example, if the LCP array is zero-based, and the RMQ is built correctly.
-
-Now, after implementing all this, the code should be correct.
+```
 
 But there's one more thing to check: in the HeapElement's __lt__ method, when comparing two elements, the code uses the rank array and the sparse table.
 

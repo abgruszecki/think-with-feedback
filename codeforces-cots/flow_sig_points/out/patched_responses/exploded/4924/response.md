@@ -394,75 +394,98 @@ Then process each element in b.
 
 Thus, the code would be:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n, m, k = map(int, sys.stdin.readline().split())
 
-a = list(map(int, sys.stdin.readline().split()))
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().split())
 
-b = list(map(int, sys.stdin.readline().split()))
+    a = list(map(int, input_stream.readline().split()))
 
-apps = [0] * (n + 1)
+    b = list(map(int, input_stream.readline().split()))
 
-pos = [0] * (n + 1)
+    apps = [0] * (n + 1)
 
-for i in range(1, n+1):
+    pos = [0] * (n + 1)
 
-    apps[i] = a[i-1]
+    for i in range(1, n+1):
 
-    pos[apps[i]] = i
+        apps[i] = a[i-1]
 
-total = 0
+        pos[apps[i]] = i
 
-for x in b:
+    total = 0
 
-    p = pos[x]
+    for x in b:
 
-    screen = (p-1) // k + 1
+        p = pos[x]
 
-    total += screen
+        screen = (p-1) // k + 1
 
-    if p > 1:
+        total += screen
 
-        prev_app = apps[p-1]
+        if p > 1:
 
-        # swap x and prev_app
+            prev_app = apps[p-1]
 
-        pos[prev_app] = p
+            # swap x and prev_app
 
-        pos[x] = p-1
+            pos[prev_app] = p
 
-        apps[p-1], apps[p] = x, prev_app
+            pos[x] = p-1
 
-print(total)
+            apps[p-1], apps[p] = x, prev_app
 
-Yes, this code should work.
+    print(total, file=output_stream)
 
-Testing with the first sample:
 
-The first line:
 
-8 3 3
+def test():
+    import io
 
-a becomes [1,2,3,4,5,6,7,8]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 4 2
+3 1 5 2 4
+4 4 4 4
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
 
-apps[1] =1, etc.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-b becomes [7,8,1]
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-7's p is7. screen 3. total=3.
+    print('Tests passed 😎')
 
-swap with apps[6]=6. So apps[6] becomes7, apps[7]=6. pos[6]=7, pos[7]=6.
 
-Next 8: p=8. screen3. total 6.
+if __name__ == '__main__':
+    test()
 
-swap with apps[7]=6. apps[7]=8, apps[8]=6. pos[6]=8, pos[8]=7.
 
-Next 1: p=1. screen1. total7. no swap.
+```
 
-Thus, correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

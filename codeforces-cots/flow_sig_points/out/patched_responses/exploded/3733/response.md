@@ -761,83 +761,95 @@ Then, sum all terms.
 
 Now, code:
 
-MOD = 10**9+7
+Testing against sample input 1.
 
-N, k = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9+7
 
-# Compute Stirling numbers S(k, m) for m from 0 to k.
-prev_row = [1]  # i=0
-for i in range(1, k+1):
-    curr_row = [0]*(i+1)
-    for j in range(1, i+1):
-        term1 = j * (prev_row[j] if j < len(prev_row) else 0)
-        term2 = prev_row[j-1] if (j-1) < len(prev_row) else 0
-        curr_row[j] = (term1 + term2) % MOD
-    prev_row = curr_row
+    N, k = map(int, input_stream.readline().rstrip("\n").split())
 
-stirling_k = prev_row  # S(k, m) is stirling_k[m] for m in 0..k
+    # Compute Stirling numbers S(k, m) for m from 0 to k.
+    prev_row = [1]  # i=0
+    for i in range(1, k+1):
+        curr_row = [0]*(i+1)
+        for j in range(1, i+1):
+            term1 = j * (prev_row[j] if j < len(prev_row) else 0)
+            term2 = prev_row[j-1] if (j-1) < len(prev_row) else 0
+            curr_row[j] = (term1 + term2) % MOD
+        prev_row = curr_row
 
-# Compute P[m] for m from 1 to k.
-P = [0]*(k+1)
-P[0] = 1
-for m in range(1, k+1):
-    term = (N - (m-1)) % MOD
-    P[m] = (P[m-1] * term) % MOD
+    stirling_k = prev_row  # S(k, m) is stirling_k[m] for m in 0..k
 
-# Compute pow_2_N and inv_2_pows
-pow_2_N = pow(2, N, MOD)
-inv_2 = pow(2, MOD-2, MOD)
-inv_2_pows = [1]*(k+1)
-for m in range(1, k+1):
-    inv_2_pows[m] = (inv_2_pows[m-1] * inv_2) % MOD
+    # Compute P[m] for m from 1 to k.
+    P = [0]*(k+1)
+    P[0] = 1
+    for m in range(1, k+1):
+        term = (N - (m-1)) % MOD
+        P[m] = (P[m-1] * term) % MOD
 
-# Compute the sum
-result = 0
-for m in range(1, k+1):
-    s = stirling_k[m]
-    p = P[m]
-    pow_term = (pow_2_N * inv_2_pows[m]) % MOD
-    term = (s * p) % MOD
-    term = (term * pow_term) % MOD
-    result = (result + term) % MOD
+    # Compute pow_2_N and inv_2_pows
+    pow_2_N = pow(2, N, MOD)
+    inv_2 = pow(2, MOD-2, MOD)
+    inv_2_pows = [1]*(k+1)
+    for m in range(1, k+1):
+        inv_2_pows[m] = (inv_2_pows[m-1] * inv_2) % MOD
 
-print(result)
+    # Compute the sum
+    result = 0
+    for m in range(1, k+1):
+        s = stirling_k[m]
+        p = P[m]
+        pow_term = (pow_2_N * inv_2_pows[m]) % MOD
+        term = (s * p) % MOD
+        term = (term * pow_term) % MOD
+        result = (result + term) % MOD
 
-Now, let's test the code with the sample inputs.
+    print(result, file=output_stream)
 
-Sample input 1:
 
-1 1
 
-Stirling numbers for k=1:
+def test():
+    import io
 
-prev_row starts as [1].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2
+""",
+            "output": \
+"""\
+24
+""",
+        }, 
+    ]
 
-For i=1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-curr_row has length 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-j=1:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-term1 =1 * prev_row[1] (prev_row is [1], so j=1 >= len(prev_row) (1). So term1 is 0.
+    print('Tests passed 😎')
 
-term2 = prev_row[0] =1.
 
-curr_row[1] =1.
+if __name__ == '__main__':
+    test()
 
-So stirling_k is [0,1].
 
-Then P[1] = (1-0) mod MOD =1.
+```
 
-pow_2_N is 2^1 mod MOD=2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-inv_2_pows[1] is 500000004.
-
-pow_term for m=1: 2 * 500000004 mod MOD = (2 * 500,000,004) mod 1e9+7.
-
-Which is 1,000,000,008 mod 1e9+7 = 1.
-
-So term is 1 *1 *1 =1. Output is 1.
+```
 
 Sample input 2:
 

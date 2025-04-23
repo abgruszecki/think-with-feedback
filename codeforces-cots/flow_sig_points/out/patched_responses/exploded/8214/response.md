@@ -101,33 +101,71 @@ But in the sample input, the first line is a long string, perhaps with leading o
 
 In code:
 
+Testing against sample input 1.
+
+```python
 import collections
 
-s1 = input().strip()
-s2 = input().strip()
 
-# count s1's characters except spaces
-count_s1 = collections.Counter(c for c in s1 if c != ' ')
-count_s2 = collections.Counter(c for c in s2 if c != ' ')
+def main(input_stream, output_stream):
+    s1 = input_stream.readline().rstrip("\n").strip()
+    s2 = input_stream.readline().rstrip("\n").strip()
 
-for char, cnt in count_s2.items():
-    if count_s1.get(char, 0) < cnt:
-        print("NO")
-        exit()
+    # count s1's characters except spaces
+    count_s1 = collections.Counter(c for c in s1 if c != ' ')
+    count_s2 = collections.Counter(c for c in s2 if c != ' ')
 
-print("YES")
+    for char, cnt in count_s2.items():
+        if count_s1.get(char, 0) < cnt:
+            print("NO", file=output_stream)
+            return
 
-Yes. That's the code.
+    print("YES", file=output_stream)
 
-Testing the first sample input:
 
-s1: "Instead of dogging Your footsteps it disappears but you dont notice anything" 
 
-In s1, 'Your' has 'Y', which is present once.
+def test():
+    import io
 
-s2: "where is your dog"
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+Instead of dogging Your footsteps it disappears but you dont notice anything
+Your dog is upstears
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
 
-In s2's count for 'y' (lowercase), count is 1. s1 has no 'y's (assuming the 'your' in s2 is lowercase). So in s1's count, 'y' is not present. So count_s1.get('y', 0) is 0, which is less than 1. So output is NO.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case:
 

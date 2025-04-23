@@ -137,58 +137,80 @@ Yes.
 
 So code:
 
-n = int(input())
-min_l = float('inf')
-max_r = -float('inf')
-segments = []
-for idx in range(n):
-    l, r = map(int, input().split())
-    segments.append( (l, r) )
-    if l < min_l:
-        min_l = l
-    if r > max_r:
-        max_r = r
+Testing against sample input 1.
 
-found = -1
-for i in range(n):
-    l, r = segments[i]
-    if l == min_l and r == max_r:
-        found = i + 1  # 1-based index
-        break
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    min_l = float('inf')
+    max_r = -float('inf')
+    segments = []
+    for idx in range(n):
+        l, r = map(int, input_stream.readline().rstrip("\n").split())
+        segments.append( (l, r) )
+        if l < min_l:
+            min_l = l
+        if r > max_r:
+            max_r = r
 
-print(found)
+    found = -1
+    for i in range(n):
+        l, r = segments[i]
+        if l == min_l and r == max_r:
+            found = i + 1  # 1-based index
+            break
 
-Wait, but in the code above, I'm storing the segments as a list of (l, r), not the index. Then, when looping through, the index is i+1.
+    print(found, file=output_stream)
 
-Yes, because the first segment is index 0 in the list, but original position is 1.
 
-So in the second example, the third segment (i=2) in the list is (1,10), so found would be 3.
 
-Yes.
+def test():
+    import io
 
-But why not track during the initial reading? Like, during the first loop, track both min_l and max_r, and also track the candidate segment. However, since the min_l and max_r could be updated as we read the segments, the candidate can only be determined after all segments are read.
-
-So the code as written is correct.
-
-Yes.
-
-This approach is O(n) time and O(n) space, which is acceptable for n=1e5. Because 1e5 integers in a list are manageable.
-
-But in Python, even with 1e5 elements, this is okay. So this should pass.
-
-Testing the first example:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+1 5
+2 3
+1 10
+7 10
+7 7
+10 10
+""",
+            "output": \
+"""\
 3
+""",
+        }, 
+    ]
 
-1 1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-2 2
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-3 3
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-min_l is 1, max_r is 3. The segments are (1,1), (2,2), (3,3). None has l=1 and r=3. So found is -1.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

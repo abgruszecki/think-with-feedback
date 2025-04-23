@@ -535,143 +535,111 @@ Each list of 26 integers takes, say, 26 * 4 bytes = 104 bytes. For 1e6+1 rows, t
 
 So the code will be:
 
-s = input().strip()
-q = int(input())
-queries = [input().strip() for _ in range(q)]
+Testing against sample input 1.
 
-# Compute prefix function for s
-n = len(s)
-pi = [0]*n
-for i in range(1, n):
-    j = pi[i-1]
-    while j > 0 and s[i] != s[j]:
-        j = pi[j-1]
-    if s[i] == s[j]:
-        j += 1
-    pi[i] = j
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    q = int(input_stream.readline().rstrip("\n"))
+    queries = [input_stream.readline().rstrip("\n").strip() for _ in range(q)]
 
-# Build transition table
-trans = [[0]*26 for _ in range(n+1)]
-for j in range(n+1):
-    for c_num in range(26):
-        c = chr(ord('a') + c_num)
-        if j < n and s[j] == c:
-            trans[j][c_num] = j + 1
-        else:
-            if j == 0:
-                trans[j][c_num] = 0
+    # Compute prefix function for s
+    n = len(s)
+    pi = [0]*n
+    for i in range(1, n):
+        j = pi[i-1]
+        while j > 0 and s[i] != s[j]:
+            j = pi[j-1]
+        if s[i] == s[j]:
+            j += 1
+        pi[i] = j
+
+    # Build transition table
+    trans = [[0]*26 for _ in range(n+1)]
+    for j in range(n+1):
+        for c_num in range(26):
+            c = chr(ord('a') + c_num)
+            if j < n and s[j] == c:
+                trans[j][c_num] = j + 1
             else:
-                trans[j][c_num] = trans[pi[j-1]][c_num]
+                if j == 0:
+                    trans[j][c_num] = 0
+                else:
+                    trans[j][c_num] = trans[pi[j-1]][c_num]
 
-# Process each query
-res = []
-for t in queries:
-    current_j = pi[-1] if n > 0 else 0
-    output = []
-    for c in t:
-        c_num = ord(c) - ord('a')
-        current_j = trans[current_j][c_num]
-        output.append(str(current_j))
-    res.append(' '.join(output))
+    # Process each query
+    res = []
+    for t in queries:
+        current_j = pi[-1] if n > 0 else 0
+        output = []
+        for c in t:
+            c_num = ord(c) - ord('a')
+            current_j = trans[current_j][c_num]
+            output.append(str(current_j))
+        res.append(' '.join(output))
 
-print('\n'.join(res))
+    print('\n'.join(res), file=output_stream)
 
-Wait, but when n is 0 (s is empty?), but according to the problem statement, s is non-empty. So n >=1.
 
-But in code, for the case when s is empty, but the problem states that s is non-empty.
 
-So the code is safe.
+def test():
+    import io
 
-Now, let's test with the first sample input.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+aacba
+4
+aaca
+cbbb
+aab
+ccaca
+""",
+            "output": \
+"""\
+2 2 3 1 
+0 0 0 0 
+2 2 0 
+0 0 1 0 1
+""",
+        }, 
+    ]
 
-Sample Input 1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-aba
-6
-caba
-aba
-bababa
-aaaa
-b
-forces
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing s 'aba' gives pi = [0,0,1]. Then, the transition table is built.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For j=0:
+    print('Tests passed 😎')
 
-s[0] is 'a'. So for c=0 ('a'), trans[0][0] =1. For other c's, trans[0][c] =0.
 
-For j=1:
+if __name__ == '__main__':
+    test()
 
-s[1] is 'b'. For c=1 ('b'), trans[1][1] =2. For other c's, trans[1][c] = trans[pi[0] (0)][c]. So for c=0, trans[0][0] is 1.
 
-For j=2:
+```
 
-s[2] is 'a'. For c=0, trans[2][0] =3. For other c's, trans[2][c] = trans[pi[1] (0)][c].
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 84, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 77, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '2 2 3 1 \n0 0 0 0 \n2 2 0 \n0 0 1 0 1'
+Got: '2 2 3 1\n0 0 0 0\n2 2 0\n0 0 1 0 1'
 
-For j=3 (n=3, so j ==n):
-
-trans[3][c] = trans[pi[2] (1)][c].
-
-So, for example, for j=3 and c=0 ('a'):
-
-trans[3][0] = trans[1][0]. Looking at j=1, trans[1][0] is trans[pi[0]][0] = trans[0][0] =1.
-
-So for j=3, c='a', the transition is 1.
-
-But when processing a query, the current_j starts at 1 (pi[-1] is 1 for s of length 3).
-
-So for the first query 'caba', the steps are:
-
-current_j =1.
-
-First character 'c' (c_num=2):
-
-trans[1][2] = trans[pi[0] (0)][2] = trans[0][2] =0. So current_j becomes 0. Output 0.
-
-Second character 'a' (c_num=0):
-
-trans[0][0] =1. Output 1.
-
-Third 'b' (c_num=1):
-
-trans[1][1] =2. Output 2.
-
-Fourth 'a' (c_num=0):
-
-trans[2][0] =3. Output 3.
-
-Which matches the sample.
-
-Now, the code should work.
-
-But what about when j is larger than n?
-
-Well, j can be up to n + m, where m is up to 10. But in the transition table, j can be up to n. But when processing the t part, j can potentially reach up to n + len(t). But since the transition table is built up to j =n, for j >=n, the transitions would be handled as follows:
-
-For j >=n, when processing a character c, the code will check:
-
-if j <n → no. So it uses the else clause. Then, for j !=0, it uses trans[pi[j-1]][c_num].
-
-But j-1 would be >=n-1. But when j was set to n (the initial j after processing s), then for the first character of t, j is n. Then, since j >=n, the code uses the else clause. pi[j-1] is pi[n-1], which is the last element of pi_s.
-
-So the code correctly handles j up to n + len(t), but the transition table is built only up to j =n. However, when j exceeds n, the code's else clause will use pi[j-1], which is for s's prefix function, but j-1 is up to n-1 (since j starts at n and can increase by 1 for each character in t, but only up to n + len(t)).
-
-Wait, no. Because for the combined string s + t, the j can't exceed len(s) + len(t), but the transition table is built for j up to len(s). So when j exceeds len(s), how does the transition work?
-
-Ah, here's the problem. Because the transition table is built for j up to len(s), but during processing the t part, j can go up to len(s) + len(t).
-
-But how? Because during processing the t characters, the j can increase by 1 for each character, but only if the character matches the next character in s. But since s is of length len(s), after j reaches len(s), any further characters in t can't match s[j], because j would be out of bounds. So for j >= len(s), the code in the transition table for j >= len(s) is not built. Wait, no. Because when we build the transition table, j ranges from 0 to len(s). For j = len(s), which is the state after processing the entire s, the transitions are computed as follows: since j >= len(s), the first condition (j <n) is false. So for each character c, we look up trans[pi[j-1]][c]. But j-1 is len(s)-1, which is valid. So the transitions for j = len(s) are handled correctly.
-
-But what about when j is len(s) +1 (for example)? How does the code handle this?
-
-Wait, during processing the t part, j can be up to len(s) + len(t). But the transition table is built only up to j = len(s). However, when processing the t part, the code uses the transition table for the current j, which can be up to len(s) + m (m is len(t)), but the trans table only has entries up to len(s). So this would cause an index error.
-
-But wait, j can't exceed len(s) + m, because each character in t can increase j by at most 1. But len(s) is up to 1e6, and m is up to 10. So j can be up to 1e6 + 10.
-
-But the trans array is only built up to j = len(s). So for j = len(s) +1, the code will access trans[j][c_num], which is out of bounds.
-
-So this is a mistake in the approach. Oh no! So the code as written is incorrect.
+```
 
 But wait, how can j reach len(s) +1?
 

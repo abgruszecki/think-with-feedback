@@ -305,17 +305,20 @@ So the code should be optimized to read the input quickly.
 
 So the code would be:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-def main():
 
-    n = int(sys.stdin.readline())
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
     last_occurrence = {}
 
     for idx in range(n):
 
-        name = sys.stdin.readline().strip()
+        name = input_stream.readline().strip()
 
         last_occurrence[name] = idx + 1  # 1-based index
 
@@ -325,57 +328,62 @@ def main():
 
     # Print the names in order
 
-    print('\n'.join(sorted_names))
+    print('\n'.join(sorted_names), file=output_stream)
 
-if __name__ == "__main__":
 
-    main()
 
-Wait, but in the second sample, when printed with '\n'.join, the output is:
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
 alina
-
 maria
-
 ekaterina
-
 darya
+darya
+ekaterina
+maria
+alina
+""",
+            "output": \
+"""\
+alina
+maria
+ekaterina
+darya
+""",
+        }, 
+    ]
 
-Which is correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But the code would output all in one print, which is efficient.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But for very large m (number of unique names), building the list and then joining may take memory. But given that m can be up to 2e5, and each name is up to 10 characters, the total size is acceptable.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So this code should work.
+    print('Tests passed 😎')
 
-Testing the first sample:
 
-Input:
+if __name__ == '__main__':
+    test()
 
-4
 
-alex
+```
 
-ivan
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-roman
-
-ivan
-
-Processing:
-
-After each line, last_occurrence is:
-
-alex:1
-
-ivan:2
-
-roman:3
-
-Then ivan:4.
-
-So sorted in -last_occurrence order: 4,3,1 → ivan, roman, alex. Which is correct.
+```
 
 Yes.
 

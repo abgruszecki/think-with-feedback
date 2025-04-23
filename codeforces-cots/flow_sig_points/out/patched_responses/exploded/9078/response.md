@@ -197,17 +197,66 @@ print(total)
 
 Which is even more concise and efficient. Because (num - current) %n directly gives the steps, regardless of sign.
 
-Testing with the first example:
+Testing against sample input 1.
 
-n=4, a=[3,2,3].
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    current = 1
+    total = 0
+    for num in a:
+        delta = num - current
+        if delta < 0:
+            delta += n
+        total += delta
+        current = num
+    print(total, file=output_stream)
 
-current starts at 1.
 
-First num=3: (3-1) mod4 = 2. total=2. current=3.
 
-Second num=2: (2-3) mod4= (-1) mod4=3. total=5. current=2.
+def test():
+    import io
 
-Third num=3: (3-2) mod4=1. total=6. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 3
+2 3 3
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Yes. So the code is correct.
 

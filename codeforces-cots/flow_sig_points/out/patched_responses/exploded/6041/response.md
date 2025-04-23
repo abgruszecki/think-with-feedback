@@ -1861,23 +1861,74 @@ while current_sides[0] > y:
 
 print(steps)
 
-Testing this code on sample1:
+Testing against sample input 1.
 
-Initial [6,6,6].
+```python
+def main(input_stream, output_stream):
+    x, y = map(int, input_stream.readline().rstrip("\n").split())
+    steps = 0
+    current = sorted([x, x, x], reverse=True)
+    while current[0] > y:
+        a, b, c = current
+        # Compute the maximum possible reduction for the largest side
+        new_a = min(a - 1, b + c - 1)
+        new_a = max(new_a, y)
+        current = sorted([new_a, b, c], reverse=True)
+        steps += 1
+    print(steps, file=output_stream)
 
-step1: new_a= max(3, min(5,6+6-1=11) →5. So new_a=5.
 
-current_sides [6,6,5] sorted as6,6,5.
 
-step2: new_a= max(3, min(5,6+5-1=10) →5. new_a=5.
+def test():
+    import io
 
-current_sides [6,5,5] sorted as6,5,5.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 5
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-step3: new_a= max(3, min(5,5+5-1=9) →5. new_a=5.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-current_sides [5,5,5]. steps3. output3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But sample requires4. Thus, the code is incorrect.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 47, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 40, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '3'
+Got: '9'
+
+```
 
 Thus, this approach is not correct.
 

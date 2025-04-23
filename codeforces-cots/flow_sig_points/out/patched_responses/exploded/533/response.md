@@ -467,199 +467,126 @@ But what if A - DEFM is zero? But A is >= DEFM +1, so A - DEFM >=1. So division 
 
 So in code:
 
+Testing against sample input 1.
+
+```python
 import math
 
-HPY, ATKY, DEFY = map(int, input().split())
 
-HPM, ATKM, DEFM = map(int, input().split())
+def main(input_stream, output_stream):
+    HPY, ATKY, DEFY = map(int, input_stream.readline().rstrip("\n").split())
 
-h, a, d = map(int, input().split())
+    HPM, ATKM, DEFM = map(int, input_stream.readline().rstrip("\n").split())
 
-# Check if initial is sufficient
+    h, a, d = map(int, input_stream.readline().rstrip("\n").split())
 
-if ATKY > DEFM:
+    # Check if initial is sufficient
 
-    t_initial = (HPM + (ATKY - DEFM) - 1) // (ATKY - DEFM)  # ceil division
+    if ATKY > DEFM:
 
-    dmg_initial = max(0, ATKM - DEFY)
+        t_initial = (HPM + (ATKY - DEFM) - 1) // (ATKY - DEFM)  # ceil division
 
-    if HPY > t_initial * dmg_initial:
+        dmg_initial = max(0, ATKM - DEFY)
 
-        print(0)
+        if HPY > t_initial * dmg_initial:
 
-        exit()
+            print(0, file=output_stream)
 
-# Now proceed to find minimal cost
+            return
 
-min_cost = float('inf')
+    # Now proceed to find minimal cost
 
-A_min = max(ATKY, DEFM + 1)
+    min_cost = float('inf')
 
-A_max = DEFM + HPM
+    A_min = max(ATKY, DEFM + 1)
 
-D_min = DEFY
+    A_max = DEFM + HPM
 
-D_max = max(DEFY, ATKM)
+    D_min = DEFY
 
-for A in range(A_min, A_max + 1):
+    D_max = max(DEFY, ATKM)
 
-    delta_A = A - ATKY
+    for A in range(A_min, A_max + 1):
 
-    cost_A = delta_A * a
+        delta_A = A - ATKY
 
-    if cost_A >= min_cost:  # pruning: if already cost_A exceeds current min, skip
+        cost_A = delta_A * a
 
-        continue
+        if cost_A >= min_cost:  # pruning: if already cost_A exceeds current min, skip
 
-    t = (HPM + (A - DEFM) - 1) // (A - DEFM)  # ceil division
+            continue
 
-    for D in range(D_min, D_max +1):
+        t = (HPM + (A - DEFM) - 1) // (A - DEFM)  # ceil division
 
-        delta_D = D - DEFY
+        for D in range(D_min, D_max +1):
 
-        cost_D = delta_D * d
+            delta_D = D - DEFY
 
-        if cost_A + cost_D >= min_cost:
+            cost_D = delta_D * d
 
-            continue  # pruning
+            if cost_A + cost_D >= min_cost:
 
-        dmg_per_round = max(0, ATKM - D)
+                continue  # pruning
 
-        required_H = max(HPY, t * dmg_per_round + 1)
+            dmg_per_round = max(0, ATKM - D)
 
-        cost_H = (required_H - HPY) * h
+            required_H = max(HPY, t * dmg_per_round + 1)
 
-        total = cost_A + cost_D + cost_H
+            cost_H = (required_H - HPY) * h
 
-        if total < min_cost:
+            total = cost_A + cost_D + cost_H
 
-            min_cost = total
+            if total < min_cost:
 
-print(min_cost)
+                min_cost = total
 
-Wait, but even if we don't prun, this code would work. However, pruning can help in cases where the cost accumulates quickly.
+    print(min_cost, file=output_stream)
 
-But let's see. For example, if a is very high (like 1e6), then even a small delta_A would make cost_A very large. So if the current min_cost is lower than cost_A, then further iterations for this A can be skipped.
 
-But how to implement this?
 
-In code, for each A:
+def test():
+    import io
 
-delta_A = A - ATKY
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+100 100 100
+1 1 1
+1 1 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-cost_A = a * delta_A
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-if cost_A >= min_cost:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-   continue
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Because even if the other costs (D and H) are zero, the total would be cost_A, which is >= min_cost. So no need to proceed.
+    print('Tests passed 😎')
 
-Similarly, when looping D, for each D, compute cost_D, and if cost_A + cost_D >= min_cost, then proceed to next D. Because even if cost_H is zero, the total would be cost_A + cost_D >= min_cost. So no need to check further.
 
-This can save some computation.
+if __name__ == '__main__':
+    test()
 
-But in Python, for loops are manageable even without pruning, but with the problem constraints, it's better to have pruning to speed things up.
 
-So adding pruning steps.
+```
 
-So, the code would have:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Initialize min_cost to infinity.
-
-Loop A from A_min to A_max:
-
-   cost_A = a * (A - ATKY)
-
-   if cost_A >= min_cost: continue
-
-   compute t.
-
-   Loop D from D_min to D_max:
-
-       cost_D = d * (D - DEFY)
-
-       if cost_A + cost_D >= min_cost: continue
-
-       compute dmg_per_round.
-
-       required_H = max(HPY, t * dmg_per_round +1)
-
-       cost_H = h*(required_H - HPY)
-
-       total = cost_A + cost_D + cost_H
-
-       if total < min_cost: update min_cost.
-
-So this way, we can skip some combinations that cannot possibly contribute to the minimal cost.
-
-Now, let's test this code against the first sample input.
-
-Sample Input 1:
-
-1 2 1
-
-1 100 1
-
-1 100 100
-
-Initial check: ATKY=2>DEFM=1 → proceed.
-
-t_initial = ceil(1/(2-1)) =1.
-
-dmg_initial = max(0, 100 -1) =99.
-
-HPY_initial is 1 → 1 -1*99= -98, which is not >0. So need to proceed.
-
-A_min is max(2, 1+1) → 2.
-
-A_max is 1+1=2. So A can be 2.
-
-So loop A=2:
-
-cost_A = 0 (since 2-2=0, a=100 → 0*100=0.
-
-D_min is DEFY=1.
-
-D_max is max(1,100)=100.
-
-Loop D from 1 to 100:
-
-   for each D, cost_D = d*(D-1), d=100.
-
-But d=100, so for D=1: cost_D=0. For D=2: 100*1=100. etc.
-
-But cost_A + cost_D for D=1 is 0+0=0. But let's see:
-
-t = ceil(1/(2-1))=1.
-
-dmg_per_round = max(0, 100 - D).
-
-required_H = max(1, 1*(100 - D) +1).
-
-So for D=1:
-
-dmg_per_round =99.
-
-required_H = max(1, 99*1+1) →100.
-
-cost_H = (100-1)*1=99.
-
-total =0+0+99=99.
-
-Which is the sample output.
-
-Other D values would have higher cost_D and possibly higher cost_H.
-
-For example, D=2:
-
-dmg_per_round=98 → required_H=98+1=99. So cost_H=99-1=98. cost_D=100*(2-1)=100. total is 0+100+98=198>99.
-
-So the minimal is achieved at D=1.
-
-So code would find this and return 99.
-
-Thus, the code should work.
+```
 
 Another example: sample input 2, which returns 0. The code would check the initial condition and print 0.
 

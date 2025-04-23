@@ -1369,157 +1369,181 @@ But for large k (up to 1e9), the code needs to handle the binary search efficien
 
 Now, the code:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n, q = map(int, input().split())
 
-a = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n, q = map(int, input_stream.readline().rstrip("\n").split())
 
-queries = list(map(int, input().split()))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for k in queries:
+    queries = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-    # Handle k=0 case
+    for k in queries:
 
-    if k ==0:
+        # Handle k=0 case
 
-        print(min(a), end=' ')
+        if k ==0:
 
-        continue
+            print(min(a), end=' ', file=output_stream)
 
-    low = min(a)
+            continue
 
-    # Compute high: maximum a_i + delta when assigned all k operations.
+        low = min(a)
 
-    max_delta_even = (k//2)**2
+        # Compute high: maximum a_i + delta when assigned all k operations.
 
-    max_delta_odd = ((k-1)//2)**2 + k
+        max_delta_even = (k//2)**2
 
-    max_delta = max(max_delta_even, max_delta_odd)
+        max_delta_odd = ((k-1)//2)**2 + k
 
-    high = max(a) + max_delta
+        max_delta = max(max_delta_even, max_delta_odd)
 
-    best = 0
+        high = max(a) + max_delta
 
-    while low <= high:
+        best = 0
 
-        mid = (low + high) //2
+        while low <= high:
 
-        sum_m =0
+            mid = (low + high) //2
 
-        possible =True
+            sum_m =0
 
-        for ai in a:
+            possible =True
 
-            D = mid - ai
+            for ai in a:
 
-            if D <=0:
+                D = mid - ai
 
-                continue
+                if D <=0:
 
-            # compute m_even
+                    continue
 
-            s = math.ceil(math.sqrt(D))
+                # compute m_even
 
-            m_even = 2*s
+                s = math.ceil(math.sqrt(D))
 
-            # compute m_odd
+                m_even = 2*s
 
-            E = D -k
+                # compute m_odd
 
-            if E <=0:
+                E = D -k
 
-                m_odd =1
+                if E <=0:
 
-            else:
-
-                t = math.ceil(math.sqrt(E))
-
-                m_odd = 2*t +1
-
-            required_m = min(m_even, m_odd)
-
-            if required_m >k:
-
-                # check if using all k operations is enough
-
-                if k %2 ==0:
-
-                    delta_k = (k//2)**2
+                    m_odd =1
 
                 else:
 
-                    delta_k = ((k-1)//2)**2 +k
+                    t = math.ceil(math.sqrt(E))
 
-                if ai + delta_k >=mid:
+                    m_odd = 2*t +1
 
-                    sum_m +=k
+                required_m = min(m_even, m_odd)
+
+                if required_m >k:
+
+                    # check if using all k operations is enough
+
+                    if k %2 ==0:
+
+                        delta_k = (k//2)**2
+
+                    else:
+
+                        delta_k = ((k-1)//2)**2 +k
+
+                    if ai + delta_k >=mid:
+
+                        sum_m +=k
+
+                    else:
+
+                        possible =False
+
+                        break
 
                 else:
+
+                    sum_m += required_m
+
+                if sum_m >k:
 
                     possible =False
 
                     break
 
+            if possible and sum_m <=k:
+
+                best = mid
+
+                low = mid +1
+
             else:
 
-                sum_m += required_m
+                high = mid -1
 
-            if sum_m >k:
+        print(best, end=' ', file=output_stream)
 
-                possible =False
+    print(file=output_stream)
 
-                break
 
-        if possible and sum_m <=k:
 
-            best = mid
+def test():
+    import io
 
-            low = mid +1
-
-        else:
-
-            high = mid -1
-
-    print(best, end=' ')
-
-print()
-
-But there is a problem with the code when k=0. The code prints min(a), which is correct. But the first sample input has queries starting from k=1. So for queries with k=0, the code is correct.
-
-But in the problem statement, queries have k_j >=1. Looking back at the problem statement:
-
-"1 ≤ k_j ≤ 10^9"
-
-So the code's handling of k=0 is not needed. So the code can remove that.
-
-Thus, the code can be modified to:
-
-for each query k in queries:
-
-   low = min(a)
-
-   ...
-
-Thus, the code should be correct.
-
-Testing this code with the first sample input:
-
-Sample Input 1:
-
-4 10
-
-5 2 8 4
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 10
+5 2 8 4 4
 1 2 3 4 5 6 7 8 9 10
+""",
+            "output": \
+"""\
+3 4 5 6 7 8 9 8 11 8
+""",
+        }, 
+    ]
 
-Sample Output:3 4 5 6 7 8 8 10 8 12
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For k=8:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The code should compute x=10.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-This should work.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 154, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 147, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '3 4 5 6 7 8 9 8 11 8'
+Got: '3 4 5 6 7 8 10 11 13 14'
+
+```
 
 Another test case: the second sample input.
 

@@ -252,33 +252,145 @@ print("Yes")
 
 Yes.
 
-Testing the examples.
+Testing against sample input 1.
 
-First example:
+```python
+import sys
+import math
 
-n=2, m=3. d=1.
 
-r can only be 0.
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    boys = list(map(int, input_stream.readline().split()))
+    girls = list(map(int, input_stream.readline().split()))
+    happy_boys = boys[1:] if boys[0] > 0 else []
+    happy_girls = girls[1:] if girls[0] > 0 else []
 
-Check if any boy has 0 mod 1=0. The boys list is empty (b=0) → no.
+    d = math.gcd(n, m)
 
-Check girls: initial girl is 0 mod 1=0. So yes. So all residues covered. Output yes.
+    for r in range(d):
+        boy_covered = any((x % d == r) for x in happy_boys)
+        girl_covered = any((y % d == r) for y in happy_girls)
+        if not (boy_covered or girl_covered):
+            print("No", file=output_stream)
+            return
+    print("Yes", file=output_stream)
 
-Second example:
 
-n=2, m=4. d=2.
 
-r can be 0 and 1.
+def test():
+    import io
 
-For r=0:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 4
+1 0
+1 2
+""",
+            "output": \
+"""\
+No
+""",
+        }, 
+    ]
 
-happy_boys: 0 → 0 mod 2=0 → yes. So covered.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For r=1:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Check happy_boys: none (happy_boys are [0], 0 mod 2=0. So no.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Check happy_girls: [2]. 2 mod 2=0. So no girls have mod 2=1. So residue 1 not covered. Output no.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import sys
+import math
+
+
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    boys = list(map(int, input_stream.readline().split()))
+    girls = list(map(int, input_stream.readline().split()))
+    happy_boys = boys[1:] if boys[0] > 0 else []
+    happy_girls = girls[1:] if girls[0] > 0 else []
+
+    d = math.gcd(n, m)
+
+    for r in range(d):
+        boy_covered = any((x % d == r) for x in happy_boys)
+        girl_covered = any((y % d == r) for y in happy_girls)
+        if not (boy_covered or girl_covered):
+            print("No", file=output_stream)
+            return
+    print("Yes", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 3
+1 0
+1 1
+""",
+            "output": \
+"""\
+Yes
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

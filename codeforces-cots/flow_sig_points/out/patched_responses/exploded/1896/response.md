@@ -241,66 +241,161 @@ Yes.
 
 So code:
 
-n, x, y = map(int, input().split())
-a = list(map(int, input().split()))
+Testing against sample input 1.
 
-for d in range(1, n+1):
-    # Check left
-    valid = True
-    # Left window: j from max(1, d -x) to d-1 inclusive
-    left_start = max(1, d - x)
-    left_end = d - 1
-    if x > 0 and left_start <= left_end:
-        for j in range(left_start, left_end + 1):
-            if a[j-1] <= a[d-1]:
-                valid = False
-                break
-        if not valid:
-            continue
-    # Check right
-    right_start = d + 1
-    right_end = min(n, d + y)
-    if y > 0 and right_start <= right_end:
-        for j in range(right_start, right_end +1):
-            if a[j-1] <= a[d-1]:
-                valid = False
-                break
-        if not valid:
-            continue
-    print(d)
-    exit()
+```python
+def main(input_stream, output_stream):
+    n, x, y = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-Yes.
+    for d in range(1, n+1):
+        # Check left
+        valid = True
+        # Left window: j from max(1, d -x) to d-1 inclusive
+        left_start = max(1, d - x)
+        left_end = d - 1
+        if x > 0 and left_start <= left_end:
+            for j in range(left_start, left_end + 1):
+                if a[j-1] <= a[d-1]:
+                    valid = False
+                    break
+            if not valid:
+                continue
+        # Check right
+        right_start = d + 1
+        right_end = min(n, d + y)
+        if y > 0 and right_start <= right_end:
+            for j in range(right_start, right_end +1):
+                if a[j-1] <= a[d-1]:
+                    valid = False
+                    break
+            if not valid:
+                continue
+        print(d, file=output_stream)
+        return
 
-This should handle all cases.
 
-Testing the sample inputs.
 
-Sample 1:
+def test():
+    import io
 
-Input:
-10 2 2
-10 9 6 7 8 3 2 1 4 5
-
-Processing days:
-
-d=1: left window is max(1, 1-2)=0 → 1. left_end is 0. So no left check. Right window is 2 to 3. Check if any of a[1], a[2] (9,6) <=10. Yes, 9 and 6 are <=10. So a_d=10, right check will check days 2 and 3. For j=2, a[j-1] is 9 <=10 → yes. So right check fails. So d=1 is invalid.
-
-d=2: left window is max(1, 2-2=0 → 1. left_end=1. Check a[0] (10) >9? 10>9: yes. So left check passes. Right window is 3-4. Check a[2] (6) and a[3] (7) <=9. 6 is less than 9 → right check fails. So d=2 invalid.
-
-d=3: left window is max(1,3-2=1) to 2. Check a[0] (10) and a[1] (9) → both >6. Left check passes. Right window 4-5. a[3]=7, a[4]=8. Both >6. So passes. So output 3.
-
-Which matches the sample.
-
-Sample 2:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 10 2 3
+10 9 6 7 8 3 2 1 4 5
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
 
-a is same as sample 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-d=3: check left (days 1-2: 10,9>6). Right window is days 4-6 (7,8,3). a[5] (3) is less than 6? 3 <6. So right check fails. So d=3 invalid.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, x, y = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    for d in range(1, n+1):
+        # Check left
+        valid = True
+        # Left window: j from max(1, d -x) to d-1 inclusive
+        left_start = max(1, d - x)
+        left_end = d - 1
+        if x > 0 and left_start <= left_end:
+            for j in range(left_start, left_end + 1):
+                if a[j-1] <= a[d-1]:
+                    valid = False
+                    break
+            if not valid:
+                continue
+        # Check right
+        right_start = d + 1
+        right_end = min(n, d + y)
+        if y > 0 and right_start <= right_end:
+            for j in range(right_start, right_end +1):
+                if a[j-1] <= a[d-1]:
+                    valid = False
+                    break
+            if not valid:
+                continue
+        print(d, file=output_stream)
+        return
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5 5
+100000 10000 1000 100 10
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Eventually, d=8. Check left days 6 and 7 (a[5], a[6] →3,2). Both >1. Right window is 9-10 (4,5). Both >1. So passes. So output 8.
 

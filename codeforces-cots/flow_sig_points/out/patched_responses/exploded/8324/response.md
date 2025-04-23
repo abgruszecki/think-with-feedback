@@ -72,21 +72,64 @@ Wait, but even if lcm is larger than z, z // lcm would be zero. So why check? Fo
 
 Yes. So the code can be written as:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n, m, z = map(int, input().split())
 
-gcd = math.gcd(n, m)
+def main(input_stream, output_stream):
+    n, m, z = map(int, input_stream.readline().rstrip("\n").split())
 
-lcm = (n * m) // gcd
+    gcd = math.gcd(n, m)
 
-print(z // lcm)
+    lcm = (n * m) // gcd
 
-Wait, but what if LCM is zero? But since n and m are at least 1, LCM is n*m / gcd, which for n and m >=1, gcd is at least 1, so LCM is at least 1. So division is safe.
+    print(z // lcm, file=output_stream)
 
-Testing the first sample input:
 
-Input: 1 1 10 → LCM is 1*1//1 =1. 10//1=10 → correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 2 5
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second input:1 2 5 → LCM is (1*2)/1=2. 5//2=2. Correct.
 

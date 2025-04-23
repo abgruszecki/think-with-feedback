@@ -461,41 +461,79 @@ Output.
 
 Now, code:
 
-n = int(input())
+Testing against sample input 1.
 
-def get_divisors(n):
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-    divisors = set()
+    def get_divisors(n):
 
-    i = 1
+        divisors = set()
 
-    while i*i <=n:
+        i = 1
 
-        if n%i ==0:
+        while i*i <=n:
 
-            divisors.add(i)
+            if n%i ==0:
 
-            divisors.add(n//i)
+                divisors.add(i)
 
-        i +=1
+                divisors.add(n//i)
 
-    return sorted(divisors)
+            i +=1
 
-divisors = get_divisors(n)
+        return sorted(divisors)
 
-result = [ (n * (m-1) // 2) + m for m in divisors ]
+    divisors = get_divisors(n)
 
-print(' '.join(map(str, result)))
+    result = [ (n * (m-1) // 2) + m for m in divisors ]
 
-Wait, but what about when n is 0? But the problem states that n is at least 2. So no problem.
+    print(' '.join(map(str, result)), file=output_stream)
 
-Testing this code with sample input 6:
 
-divisors are [1,2,3,6]. The results are 1,5,9,21. Correct.
 
-Sample input 16: output is 1,10,28,64,136. Correct.
+def test():
+    import io
 
-Another test case: n=2. Output 1 3. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+16
+""",
+            "output": \
+"""\
+1 10 28 64 136
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Yes, this should work.
 

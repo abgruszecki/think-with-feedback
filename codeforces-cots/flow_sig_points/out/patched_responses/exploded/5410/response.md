@@ -233,65 +233,77 @@ But in Python, loops can be a bit slow if n is large, but given the constraints 
 
 So code:
 
-n, m, a, b = map(int, input().split())
+Testing against sample input 1.
 
-max_k = (n + m -1) // m
+```python
+def main(input_stream, output_stream):
+    n, m, a, b = map(int, input_stream.readline().rstrip("\n").split())
 
-min_cost = float('inf')
+    max_k = (n + m -1) // m
 
-for k in range(max_k +1):
+    min_cost = float('inf')
 
-    rides_covered = k * m
+    for k in range(max_k +1):
 
-    if rides_covered >=n:
+        rides_covered = k * m
 
-        cost = k * b
+        if rides_covered >=n:
 
-    else:
+            cost = k * b
 
-        cost = k * b + (n - rides_covered) * a
+        else:
 
-    if cost < min_cost:
+            cost = k * b + (n - rides_covered) * a
 
-        min_cost = cost
+        if cost < min_cost:
 
-print(min_cost)
+            min_cost = cost
 
-Wait, but is there a smarter way to compute the possible k's without looping through all possibilities?
+    print(min_cost, file=output_stream)
 
-For example, when m is large compared to n.
 
-But given that the constraints are small, looping is acceptable.
 
-Another possible optimization is to consider only the possible k values around the floor and ceiling of n/m.
+def test():
+    import io
 
-For example, k = n//m, and k+1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 2 2 3
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
 
-But to cover all possible cases, maybe not. For example, in some cases, buying 0 m-tickets is better. Or perhaps when the m-ticket is cheaper per ride than a single, but buying more than k+1 is better.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But the code as written handles all possible k, so it's safe.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Thus, the code is correct and efficient.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Testing sample inputs:
+    print('Tests passed 😎')
 
-Sample 1:
 
-6 2 1 2.
+if __name__ == '__main__':
+    test()
 
-max_k = (6 +2-1)//2 =7//2=3.
 
-Loop k from 0 to 3.
+```
 
-k=0: 6*1=6.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-k=1: 2 +4=6.
-
-k=2:4+2=6.
-
-k=3:6.
-
-All 6, so output is 6.
+```
 
 Sample 2:
 

@@ -325,53 +325,84 @@ But in Python, sum(A) can be O(n), but for n up to 1e5, that's acceptable.
 
 So the code is:
 
-n, p = map(int, input().split())
+Testing against sample input 1.
 
-A = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, p = map(int, input_stream.readline().rstrip("\n").split())
 
-sum_total = sum(A)
+    A = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-sum_total_mod_p = sum_total % p
+    sum_total = sum(A)
 
-current_prefix = 0
+    sum_total_mod_p = sum_total % p
 
-max_S = 0
+    current_prefix = 0
 
-for j in range(n):
+    max_S = 0
 
-    current_prefix += A[j]
+    for j in range(n):
 
-    current_mod = current_prefix % p
+        current_prefix += A[j]
 
-    if j < n - 1:
+        current_mod = current_prefix % p
 
-        sum2_mod = (sum_total_mod_p - current_mod) % p
+        if j < n - 1:
 
-        current_S = current_mod + sum2_mod
+            sum2_mod = (sum_total_mod_p - current_mod) % p
 
-        if current_S > max_S:
+            current_S = current_mod + sum2_mod
 
-            max_S = current_S
+            if current_S > max_S:
 
-print(max_S)
+                max_S = current_S
 
-Yes. That should work.
+    print(max_S, file=output_stream)
 
-Testing the first example:
 
-input 4 10
 
-3 4 7 2
+def test():
+    import io
 
-sum_total is 3+4+7+2=16 mod10=6.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 12
+16 3 24 13 9 8 7 5 12 12
+""",
+            "output": \
+"""\
+13
+""",
+        }, 
+    ]
 
-The loop processes j from 0 to 3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For j=0,1,2 (since j<3 is false when j=3? Wait, n=4, so n-1 is 3. So j <3 is j=0,1,2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Yes.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Thus, the code works.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 The second example:
 

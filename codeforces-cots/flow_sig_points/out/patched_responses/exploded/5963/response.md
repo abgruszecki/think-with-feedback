@@ -527,17 +527,19 @@ Thus, recursion should not be a problem.
 
 So the code would look something like:
 
-def main():
+Testing against sample input 1.
 
+```python
+def main(input_stream, output_stream):
     import sys
 
-    s = sys.stdin.readline().strip()
+    s = input_stream.readline().strip()
 
-    t = sys.stdin.readline().strip()
+    t = input_stream.readline().strip()
 
     if len(s) != len(t):
 
-        print("NO")
+        print("NO", file=output_stream)
 
         return
 
@@ -561,23 +563,478 @@ def main():
 
     ct_t = canonical_tuple(t)
 
-    print("YES" if ct_s == ct_t else "NO")
+    print("YES" if ct_s == ct_t else "NO", file=output_stream)
 
-But wait, no. The canonical_tuple function returns a nested tuple. For example, for 'ab', it returns (('a',), ('b',)) but sorted. So the tuples are compared recursively.
 
-Yes.
 
-But for large strings, the nested tuples can be deep, but Python can handle comparing them.
+def test():
+    import io
 
-Testing this code with the sample inputs:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+aabb
+abab
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-Sample Input 1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-aaba
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-abaa
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The canonical tuples would be equal, so output is YES.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Sample Input 2:
+
+aabb
+
+abab
+
+Canonical tuples are different, so output is NO.
+
+Thus, the code works for the samples.
+
+But what about the time and memory constraints.
+
+For a string of length 2e5, each recursive call to canonical_tuple splits the string into two halves, and builds a tuple of two elements. Each split is O(k) time, where k is the current substring length. The total time is O(n log n). But in Python, string slicing (s[:half] and s[half:]) creates new strings, which for large k can be time-consuming. For example, splitting a string of length 1e5 into two 5e4-length strings requires copying 1e5 characters, which is O(k) time.
+
+Thus, the time complexity is O(n log n), which for n=2e5 is about 2e5 * 18 = 3.6e6 operations. But each split involves slicing, which is O(k) time. So the total time would be O(n log n) * O(n), which is O(n^2 log n), which is way too slow.
+
+Wait, no. The split into two halves for a string of length k takes O(k) time. So for each recursive call for a string of length k, the time is O(k) for the splits. The recurrence is T(k) = 2*T(k/2) + O(k). The solution to this recurrence is T(k) = O(k log k). So for a string of length n, the total time is O(n log n). But how does this fit with the split times?
+
+Yes. The recurrence is T(n) = 2*T(n/2) + O(n). This sums to O(n log n) time. So for n=2e5, it's 2e5 * 18 ≈ 3.6e6 operations. But each operation (splitting the string into two halves) is O(n) time. So for a string of length n, each split takes O(n) time, but this happens log n times. So the total time is O(n log n) time. 
+
+But in Python, string slicing is O(k) for a slice of length k. So for a string of length 2e5, the first split is O(2e5), then two splits of O(1e5) each, and so on. The total time is O(n log n) time, which is acceptable.
+
+But for 2e5, 2e5 * log2(2e5) ≈ 2e5 * 18 = 3.6e6. In Python, each operation is about 1e6 per second. So 3.6e6 operations would take about 3.6 seconds, which is over the 2-second time limit.
+
+So this approach may not be feasible for the largest inputs.
+
+Thus, we need a more optimized approach.
+
+Alternative Idea: Instead of creating new strings for each split, use indices to represent the substring. For example, pass the original string and start and end indices to the recursive function, avoiding creating new substrings. This way, splitting is O(1) time.
+
+But in Python, strings are immutable, so accessing a substring via indices is O(1) time? No, in Python, slicing creates a new string, which is O(k) time. So this approach would not help.
+
+Another Idea: Precompute all possible split positions and memoize the hashes, but this is not feasible for large n.
+
+Alternative Idea: Use a bottom-up approach. For each possible length (starting from 1, then 2, 4, etc.), compute the canonical form for all substrings of that length. For length 1, the canonical form is the character. For even lengths, combine the canonical forms of the two halves. But this requires storing the canonical forms for each position and length, which is O(n log n) space. For 2e5, this is feasible.
+
+But how to implement this.
+
+For example, for a string of length 8, we can process the canonical forms for length 1, 2, 4, 8.
+
+For each position i and length l, compute the canonical form for the substring s[i:i+l].
+
+This can be done in a dynamic programming manner.
+
+But for large n, storing all possible canonical forms is not feasible. For example, for length 2e5 and log2(n) levels, the total storage is O(n log n), which is manageable.
+
+But in practice, for each even length l, each substring of length l is formed by two substrings of length l/2. For each such substring, compute the canonical form by combining and sorting the canonical forms of the two halves.
+
+But this approach can be implemented using memoization with indices and lengths.
+
+Let's see:
+
+We can create a 2D array dp where dp[l][i] represents the canonical form of the substring starting at index i with length l.
+
+For l=1: dp[1][i] = s[i]
+
+For l even: dp[l][i] = sorted combination of dp[l/2][i] and dp[l/2][i + l/2]
+
+For l odd: dp[l][i] = s[i:i+l]
+
+But for l up to 2e5, and for each l, i ranges up to n - l, this requires O(n log n) space, which for 2e5 log(2e5) is about 2e5 * 18 = 3.6e6 entries. Each entry is a string, which can be up to l characters long. But for l=2e5, the string is 2e5 characters, leading to O(n^2) storage, which is impossible.
+
+Thus, this approach is not feasible.
+
+Thus, we need a way to compute the canonical form without generating the entire string or tuple, which brings us back to the recursive approach but with optimizations.
+
+Alternative Idea: Implement the recursive approach but with memoization of the canonical form for each substring. However, since the same substring may appear in multiple places, memoization can help. For example, for the input strings s and t, we can memoize the canonical form for each possible substring.
+
+But again, for large n, this is not feasible.
+
+Alternative Idea: Instead of using strings, use hashing at each step. For example, compute a hash for each substring that uniquely represents its canonical form. For even-length substrings, combine the hashes of the two halves (sorted) to compute the hash for the current substring. For odd-length, use the hash of the substring itself.
+
+This way, two equivalent substrings will have the same hash.
+
+But the problem is ensuring that hash collisions are unlikely. To mitigate this, use a combination of two hash values (e.g., using a tuple of two different hash functions) or a larger hash.
+
+But in practice, for the problem's constraints, using a single hash function with a good distribution may suffice.
+
+Implementing this:
+
+For each substring, compute its hash recursively:
+
+def compute_hash(s):
+
+    memo = {}
+
+    def helper(lo, hi):
+
+        if (lo, hi) in memo:
+
+            return memo[(lo, hi)]
+
+        n = hi - lo
+
+        if n % 2 != 0:
+
+            # odd length, hash of substring s[lo:hi]
+
+            res = hash(s[lo:hi])
+
+            memo[(lo, hi)] = res
+
+            return res
+
+        mid = lo + n // 2
+
+        left = helper(lo, mid)
+
+        right = helper(mid, hi)
+
+        res = hash(tuple(sorted((left, right))))
+
+        memo[(lo, hi)] = res
+
+        return res
+
+    return helper(0, len(s))
+
+But even with memoization, for a string of length 2e5, the number of possible (lo, hi) pairs is O(n^2), which is 4e10, which is impossible.
+
+Thus, this approach is not feasible.
+
+Thus, the only feasible approach seems to be the recursive canonical form approach with strings or tuples, but optimizing it to avoid unnecessary string copies.
+
+But in Python, string slicing is unavoidable and expensive for large strings.
+
+Alternative Idea: Use a different data structure to represent the string, such as a linked list, but this would complicate the code and may not provide a significant speedup.
+
+Thus, the best approach for this problem is to implement the canonical form approach using recursion with string slicing, but in Python, this may be too slow for the largest inputs.
+
+But according to the problem statement, the solution must read input from stdin, write to stdout, and be efficient.
+
+Alternative Idea: Precompute the canonical form for both strings using iterative dynamic programming, building up from the smallest substrings.
+
+For example:
+
+For each possible length l in increasing order:
+
+   for each possible starting index i:
+
+      compute the canonical form for the substring s[i:i+l].
+
+This way, we can compute canonical forms for all possible substrings, but again, this is O(n^2) time and space, which is impossible.
+
+Thus, back to the original recursive approach.
+
+Perhaps, in Python, the string slicing and concatenation can be optimized. For example, using mutable data structures like lists to build the canonical form.
+
+Let's try to reimplement the canonical form using lists.
+
+For example:
+
+def compute_canonical_list(s):
+
+    n = len(s)
+
+    if n % 2 != 0:
+
+        return list(s)
+
+    half = n // 2
+
+    left = compute_canonical_list(s[:half])
+
+    right = compute_canonical_list(s[half:])
+
+    if left <= right:
+
+        return left + right
+
+    else:
+
+        return right + left
+
+Then, compare the two lists.
+
+But converting the lists to a tuple for comparison may be more efficient. However, in Python, comparing lists is done element-wise, which is O(k) time for lists of length k. So for large lists, this is O(k) time.
+
+But for a string of length 2e5, the canonical list could have O(n log n) elements. For example, each split adds the two sublists, leading to O(n log n) elements. For 2e5, this could be up to 3.6e6 elements. Comparing two such lists would take O(3.6e6) time, which is expensive.
+
+Thus, this approach may not be better.
+
+Thus, the original approach using strings is the best possible, but perhaps can be optimized.
+
+Another Idea: Note that the order of processing the two halves (sorted) allows us to compare the canonical forms of the two halves directly. Thus, we can memoize the canonical form for a given string to avoid recomputing it multiple times. But for large strings, this is not feasible.
+
+But for the problem, we have two input strings. We need to compute their canonical forms. If we can find a way to compute them efficiently, perhaps by using a divide-and-conquer approach and avoiding unnecessary string operations.
+
+But in Python, even with the best optimizations, the recursive approach may not be feasible for the largest inputs.
+
+Thus, the only way to proceed is to implement the recursive approach and hope that it is efficient enough.
+
+But given the problem's constraints, the recursive approach with canonical forms may not be feasible for the largest inputs. So perhaps there's a smarter way to model the equivalence.
+
+Alternative Idea: The equivalence can be checked by comparing the strings' minimal forms, which can be computed by recursively splitting and sorting the halves. Thus, the minimal form is the lex smallest possible string that can be formed by recursively splitting and sorting the halves.
+
+Thus, for each string, compute its minimal form. If the minimal forms of the two strings are equal, they are equivalent.
+
+This is what the canonical form approach does. Thus, the minimal form approach is the same as the canonical form approach.
+
+Thus, the code must be written as efficiently as possible.
+
+Thus, the final code will be:
+
+Read the two input strings.
+
+If their lengths are different, return NO.
+
+Compute the canonical form of each string.
+
+Compare the canonical forms.
+
+Output YES or NO.
+
+Implementing this in Python.
+
+But how to compute the canonical form efficiently.
+
+In Python, string concatenation is expensive. So, perhaps using a different data structure, such as a deque, or a list, to accumulate the characters can help.
+
+Alternatively, represent the canonical form as a tuple of characters. But this would still require O(n log n) time and space.
+
+But the code is required to be in Python, which may not be the best language for this problem. However, the code must be written.
+
+But let's think about the following example: for a string of length 2^k, the canonical form is built by recursively splitting and sorting the halves. For example, each split combines the sorted sub canonical forms. But for a string of length 4, the canonical form is the sorted combination of the two halves' canonical forms.
+
+Thus, the code can be written as follows:
+
+def canonical(s):
+
+    n = len(s)
+
+    if n % 2 == 1:
+
+        return s
+
+    half = n // 2
+
+    a = canonical(s[:half])
+
+    b = canonical(s[half:])
+
+    if a <= b:
+
+        return a + b
+
+    else:
+
+        return b + a
+
+s = input().strip()
+
+t = input().strip()
+
+if len(s) != len(t):
+
+    print("NO")
+
+else:
+
+    print("YES" if canonical(s) == canonical(t) else "NO")
+
+But for large inputs, this code will be too slow.
+
+Thus, what can be done to optimize this code?
+
+Alternative Idea: Prune cases where the two strings are already equal. If the input strings are equal, return YES immediately.
+
+But this may not help for large inputs where the strings are not equal but have the same canonical form.
+
+Alternative Idea: Check if the two strings have the same multiset of characters. If not, return NO. This can be done quickly.
+
+Thus, adding this step can help in some cases.
+
+But the problem is that even if the multiset is the same, the strings may not be equivalent. But it's a quick check.
+
+Thus, the code can be modified as follows:
+
+from collections import Counter
+
+s = input().strip()
+
+t = input().strip()
+
+if len(s) != len(t):
+
+    print("NO")
+
+elif Counter(s) != Counter(t):
+
+    print("NO")
+
+else:
+
+    # proceed to compute canonical forms
+
+    pass
+
+But this adds O(n) time for the Counter, which is acceptable.
+
+But this is a necessary condition, not sufficient. So, in cases where the multiset is different, return NO. Otherwise, proceed.
+
+But in the worst case, this does not help.
+
+Thus, this optimization is worth adding.
+
+Thus, the code becomes:
+
+from collections import Counter
+
+def canonical(s):
+
+    n = len(s)
+
+    if n % 2 == 1:
+
+        return s
+
+    half = n // 2
+
+    a = canonical(s[:half])
+
+    b = canonical(s[half:])
+
+    return a + b if a <= b else b + a
+
+s = input().strip()
+
+t = input().strip()
+
+if len(s) != len(t):
+
+    print("NO")
+
+elif Counter(s) != Counter(t):
+
+    print("NO")
+
+else:
+
+    print("YES" if canonical(s) == canonical(t) else "NO")
+
+But even with this, for large inputs, the canonical function will take O(n log n) time and generate large strings.
+
+But in Python, even this may be too slow. For example, for n=2e5, the code will make 2e5 log 2e5 operations, which may not fit into the 2-second time limit.
+
+Thus, the problem requires a more efficient approach.
+
+Alternative Idea: Implement the canonical form using memoization with hashing, and compare the hashes.
+
+But even this may not help.
+
+Thus, perhaps the problem requires a different approach.
+
+Alternative Idea: The equivalence check can be done using a hash of the canonical form, computed in a way that avoids building the entire string. For example, compute a hash that combines the hashes of the two sorted sub-hashes. This way, the hash can be computed recursively without generating large strings.
+
+Thus, the code can compute a hash for each substring, which is based on the sorted hashes of the two halves. This approach uses integers for the hash values, which are faster to compute and compare.
+
+But to avoid hash collisions, use a tuple of two different hash functions. For example, for a string of length n, compute two hash values and combine them. This reduces the chance of collisions.
+
+But in practice, using a single hash may suffice for the problem's constraints.
+
+Thus, the code can be rewritten as follows:
+
+from collections import Counter
+
+def compute_hash(s):
+
+    def helper(lo, hi):
+
+        n = hi - lo
+
+        if n % 2 == 1:
+
+            # Use a hash of the substring
+
+            return hash(s[lo:hi])
+
+        mid = (lo + hi) // 2
+
+        left = helper(lo, mid)
+
+        right = helper(mid, hi)
+
+        if left <= right:
+
+            return hash((left, right))
+
+        else:
+
+            return hash((right, left))
+
+    return helper(0, len(s))
+
+s = input().strip()
+
+t = input().strip()
+
+if len(s) != len(t):
+
+    print("NO")
+
+elif Counter(s) != Counter(t):
+
+    print("NO")
+
+else:
+
+    hash_s = compute_hash(s)
+
+    hash_t = compute_hash(t)
+
+    print("YES" if hash_s == hash_t else "NO")
+
+But this approach uses Python's built-in hash function, which is not reliable for large data due to collision possibilities. For example, different canonical forms could hash to the same value.
+
+Thus, this approach may not be correct.
+
+Alternative Idea: Use a perfect hash. For example, use a tuple of the canonical form's structure. Thus, the hash is the canonical tuple itself. But comparing tuples may be expensive.
+
+Thus, the code must compute the canonical tuple and compare them.
+
+But for large inputs, this is the only way to ensure correctness.
+
+Thus, the final code would be:
 
 Sample Input 2:
 

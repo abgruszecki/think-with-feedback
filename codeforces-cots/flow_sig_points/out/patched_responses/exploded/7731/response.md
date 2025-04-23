@@ -959,61 +959,101 @@ Check conditions.
 
 Now, code:
 
-Let's test the code for the first sample.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    n = len(s)
+    prefix_opens = [0] * (n + 1)
+    prefix_closes = [0] * (n + 1)
 
-Input: ((?))
+    for i in range(n):
+        prefix_opens[i+1] = prefix_opens[i] + (s[i] == '(')
+        prefix_closes[i+1] = prefix_closes[i] + (s[i] == ')')
 
-s = ['(', '(', '?', ')', ')']
+    count = 0
 
-n=5.
+    for l in range(n):
+        current_min = 0
+        current_max = 0
+        for r in range(l, n):
+            c = s[r]
+            if c == '(':
+                current_min += 1
+                current_max += 1
+            elif c == ')':
+                current_min -= 1
+                current_max -= 1
+            else:
+                current_min -= 1
+                current_max += 1
+            
+            current_min = max(current_min, 0)
+            if current_max < 0:
+                break
+            
+            m = r - l + 1
+            if m % 2 != 0:
+                continue
+            
+            required_open = m // 2
+            opens = prefix_opens[r+1] - prefix_opens[l]
+            closes = prefix_closes[r+1] - prefix_closes[l]
+            q = m - opens - closes
+            
+            if opens > required_open or (opens + q) < required_open:
+                continue
+            
+            if current_min <= 0 <= current_max:
+                count += 1
 
-prefix_opens:
+    print(count, file=output_stream)
 
-[0,1,2,2,2,2]
 
-prefix_closes:
 
-[0,0,0,0,1,2]
+def test():
+    import io
 
-For l=0, r=1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+??()??
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
 
-m=2. required_open=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-opens=2-0=2>1 → skip.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Thus, not counted.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For l=0, r=3 (m=4):
+    print('Tests passed 😎')
 
-opens=2, closes=0 (from prefix_closes[4] - prefix_closes[0] → 1-0=1. So opens=2, closes=1.
 
-Wait, prefix_opens for r+1=4 (r=3) is 2. opens = 2 -0=2.
+if __name__ == '__main__':
+    test()
 
-closes = prefix_closes[4] - prefix_closes[0] → 1 -0 =1.
 
-q=4-2-1=1.
+```
 
-required_open=2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-opens=2 <=2, opens + q=3 >=2 → conditions met.
+```
 
-balance processing:
-
-char 0: '(', min and max=1.
-
-char 1: '(', min and max=2.
-
-char 2: '?', min=1, max=3 → adjusted to 1.
-
-char 3: ')', min=0, max=2.
-
-At end, 0 is in [0,2]. valid. count +=1.
-
-Similarly, other substrings are processed.
-
-So the code should work.
 </think>
 
 ```python

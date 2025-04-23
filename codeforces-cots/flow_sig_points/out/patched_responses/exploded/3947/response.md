@@ -1059,195 +1059,290 @@ But this can be done by converting the new string into a stack and then back to 
 
 Thus, the code would be:
 
-s = input().strip()
+Testing against sample input 1.
 
-# Process L=2 steps using a stack.
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-def process_stack(s):
+    # Process L=2 steps using a stack.
 
-    stack = []
+    def process_stack(s):
 
-    for char in s:
+        stack = []
 
-        if stack and stack[-1] == char:
+        for char in s:
 
-            stack.pop()
+            if stack and stack[-1] == char:
 
-        else:
+                stack.pop()
 
-            stack.append(char)
+            else:
 
-    return ''.join(stack)
+                stack.append(char)
 
-s = process_stack(s)
+        return ''.join(stack)
 
-while True:
+    s = process_stack(s)
 
-    found = False
+    while True:
 
-    min_L = None
+        found = False
 
-    leftmost_i = None
+        min_L = None
 
-    n = len(s)
+        leftmost_i = None
 
-    # Check for higher L steps.
+        n = len(s)
 
-    # Iterate L from 2 upwards.
+        # Check for higher L steps.
 
-    for L in range(2, n+1, 2):
+        # Iterate L from 2 upwards.
 
-        # Iterate i from 0 to n-L.
+        for L in range(2, n+1, 2):
 
-        for i in range(n - L + 1):
+            # Iterate i from 0 to n-L.
 
-            half = L // 2
+            for i in range(n - L + 1):
 
-            # Check if s[i:i+half] == s[i+half:i+L]
+                half = L // 2
 
-            is_repeating = True
+                # Check if s[i:i+half] == s[i+half:i+L]
 
-            for k in range(half):
+                is_repeating = True
 
-                if s[i + k] != s[i + half + k]:
+                for k in range(half):
 
-                    is_repeating = False
+                    if s[i + k] != s[i + half + k]:
+
+                        is_repeating = False
+
+                        break
+
+                if is_repeating:
+
+                    # Found a repeating block.
+
+                    min_L = L
+
+                    leftmost_i = i
+
+                    # Break the L loop.
 
                     break
 
-            if is_repeating:
-
-                # Found a repeating block.
-
-                min_L = L
-
-                leftmost_i = i
-
-                # Break the L loop.
+            if min_L is not None:
 
                 break
 
         if min_L is not None:
 
+            # Replace the substring.
+
+            new_s = s[:leftmost_i] + s[leftmost_i : leftmost_i + (min_L//2)] + s[leftmost_i + min_L :]
+
+            # Process L=2 steps again.
+
+            s = process_stack(new_s)
+
+            found = True
+
+        if not found:
+
             break
 
-    if min_L is not None:
+    print(s, file=output_stream)
 
-        # Replace the substring.
 
-        new_s = s[:leftmost_i] + s[leftmost_i : leftmost_i + (min_L//2)] + s[leftmost_i + min_L :]
 
-        # Process L=2 steps again.
+def test():
+    import io
 
-        s = process_stack(new_s)
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+aaaabaaab
+""",
+            "output": \
+"""\
+ab
+""",
+        }, 
+    ]
 
-        found = True
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-    if not found:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-        break
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-print(s)
+    print('Tests passed 😎')
 
-This code should handle all cases correctly.
 
-Testing the code with the sample inputs:
+if __name__ == '__main__':
+    test()
 
-Sample 1:
 
-Input: abccabc
+```
 
-Process L=2 steps: 'abccabc' → 'abcabc' (replacing 'cc').
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 125, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 118, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: 'ab'
+Got: 'bab'
 
-Then, check higher L steps:
+```
 
-L=2: No consecutive duplicates.
+Testing against sample input 2.
 
-Check L=4: 'abca' (0-3) → 'ab' vs 'ca' → no. 'bcab' (1-4) → 'bc' vs 'ab' → no. 'cabc' (2-5) → 'ca' vs 'bc' → no.
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-Check L=6: 'abcabc' → 'abc' vs 'abc' → yes. Replace with 'abc'. Now, no higher L steps. Output is 'abc'.
+    # Process L=2 steps using a stack.
 
-Sample 2:
+    def process_stack(s):
 
-Input: aaaabaaab
+        stack = []
 
-Processing L=2 steps:
+        for char in s:
 
-Initial string: 'aaaabaaab'
+            if stack and stack[-1] == char:
 
-After stack processing:
+                stack.pop()
 
-- a's are processed:
+            else:
 
-- 'aaaabaaab' → process pairs:
+                stack.append(char)
 
-- First two a's are popped, leaving 'aabaaab' → 'aaabaaab' → process first two a's → 'abaaab' → process first 'a' and 'b' → no change. Then 'a' and 'a' → pop, leaving 'abaaab' → 'abab' → process 'a' and 'b' → no change. Then 'a' and 'b' → no change. Then 'abab' → process 'a' and 'b' → no. Then 'b' and 'a' → no. Then 'ab' → no. Finally, 'abab' → no consecutive duplicates.
+        return ''.join(stack)
 
-Wait, but the sample output shows that after processing L=2 steps, the string becomes 'abab', which is then processed for L=4.
+    s = process_stack(s)
 
-Wait, but according to the code, after processing stack for L=2 steps, 'aaaabaaab' becomes 'ab'? No, let's re-examine.
+    while True:
 
-Wait, the stack processing for 'aaaabaaab':
+        found = False
 
-Let's step through the stack processing:
+        min_L = None
 
-Initial stack is empty.
+        leftmost_i = None
 
-Process characters:
+        n = len(s)
 
-a: stack becomes [a].
+        # Check for higher L steps.
 
-a: stack top is a, so pop. stack becomes empty.
+        # Iterate L from 2 upwards.
 
-a: stack is empty, push a.
+        for L in range(2, n+1, 2):
 
-a: stack top is a, pop. stack empty.
+            # Iterate i from 0 to n-L.
 
-a: stack empty, push a.
+            for i in range(n - L + 1):
 
-b: stack becomes [a, b].
+                half = L // 2
 
-a: stack becomes [a, b, a].
+                # Check if s[i:i+half] == s[i+half:i+L]
 
-a: stack top is a, pop → [a, b].
+                is_repeating = True
 
-a: stack top is b, push a. → [a, b, a].
+                for k in range(half):
 
-a: stack top is a, pop → [a, b].
+                    if s[i + k] != s[i + half + k]:
 
-b: stack top is a, push b → [a, b, b].
+                        is_repeating = False
 
-Wait, perhaps I'm getting confused here. Let's re-calculate:
+                        break
 
-Original string: 'aaaabaaab'
+                if is_repeating:
 
-Processing each character with the stack:
+                    # Found a repeating block.
 
-characters are 'a','a','a','a','b','a','a','a','b'.
+                    min_L = L
 
-Let's process each one:
+                    leftmost_i = i
 
-1. 'a' → stack is empty → push. stack: ['a']
+                    # Break the L loop.
 
-2. 'a' → stack[-1] == 'a' → pop. stack: []
+                    break
 
-3. 'a' → stack is empty → push. stack: ['a']
+            if min_L is not None:
 
-4. 'a' → stack[-1] == 'a' → pop. stack: []
+                break
 
-5. 'b' → stack is empty → push. stack: ['b']
+        if min_L is not None:
 
-6. 'a' → stack[-1] is 'b' → push. stack: ['b', 'a']
+            # Replace the substring.
 
-7. 'a' → stack[-1] is 'a' → pop. stack: ['b']
+            new_s = s[:leftmost_i] + s[leftmost_i : leftmost_i + (min_L//2)] + s[leftmost_i + min_L :]
 
-8. 'a' → stack[-1] is 'b' → push. stack: ['b', 'a']
+            # Process L=2 steps again.
 
-9. 'b' → stack[-1] is 'a' → push. stack: ['b', 'a', 'b']
+            s = process_stack(new_s)
 
-Thus, the resulting string is 'b a b' → 'bab' ?
+            found = True
 
-But according to the sample input, the output is 'ab'.
+        if not found:
+
+            break
+
+    print(s, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+birdbirdbirdistheword
+""",
+            "output": \
+"""\
+birdistheword
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 But according to the sample explanation, the transformation steps for the second sample are:
 

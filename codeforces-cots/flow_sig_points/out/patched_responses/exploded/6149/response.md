@@ -1059,73 +1059,239 @@ So this is the code structure.
 
 Now, implement this in Python.
 
-Testing this code against the samples.
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    n = int(input[0])
+    circles = []
+    idx = 1
+    for _ in range(n):
+        x = int(input[idx])
+        y = int(input[idx+1])
+        r = int(input[idx+2])
+        circles.append((x, y, r))
+        idx +=3
 
+    # Compute V
+    V = 0
+    pairs = []
+    for i in range(n):
+        for j in range(i+1, n):
+            x1, y1, r1 = circles[i]
+            x2, y2, r2 = circles[j]
+            dx = x2 - x1
+            dy = y2 - y1
+            d_sq = dx*dx + dy*dy
+            sum_r = r1 + r2
+            sum_r_sq = sum_r * sum_r
+            diff_r = abs(r1 - r2)
+            diff_r_sq = diff_r * diff_r
+
+            if d_sq > sum_r_sq:
+                points = 0
+            elif d_sq == sum_r_sq:
+                points = 1
+            else:
+                if d_sq < diff_r_sq:
+                    points = 0
+                elif d_sq == diff_r_sq:
+                    points = 1
+                else:
+                    points = 2
+            V += points
+            pairs.append((i, j, points))
+    
+    if V == 0:
+        print(n + 1, file=output_stream)
+        return
+
+    # Compute E
+    E = 0
+    for i in range(n):
+        cnt = 0
+        for j in range(n):
+            if i == j:
+                continue
+            # Find pair (min(i,j), max(i,j))
+            a, b = (i, j) if i < j else (j, i)
+            for p in pairs:
+                if p[0] == a and p[1] == b:
+                    cnt += p[2]
+                    break
+        if cnt == 0:
+            E += 1
+        else:
+            E += cnt
+
+    F = E - V + 2
+    print(F, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
-
-0 0 1
-
-2 0 1
-
-4 0 1
-
-Pairs:
-
-0 and 1: distance between centers is 2. sum_r=2. d == sum_r → 1 point.
-
-0 and 2: distance is 4. sum_r=2 →4>2 → 0.
-
-1 and 2: same as 0 and1: distance 2, sum_r=2 →1 point.
-
-Total V=1+0+1=2.
-
-Since V is not zero.
-
-For each circle:
-
-Circle 0: intersects with 1 (1 point) → count=1 → E +=1.
-
-Circle 1: intersects with 0 (1) and 2 (1) → count=2 → E +=2.
-
-Circle 2: intersects with 1 (1) → count=1 → E +=1.
-
-E =1+2+1=4.
-
-F=4-2+2=4 → correct.
-
-Sample Input 2:
-
-3
-
 0 0 2
-
 3 0 2
-
 6 0 2
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-Pairs:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-0 and1: centers are 3 units apart. sum_r=4. 3 <4 → check if contained. d=3, diff_r=0 → 3>0 → 2 points.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-0 and2: centers are 6 units apart. sum_r=4 → 6>4 → 0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-1 and 2: same as 0 and1 → 2 points.
+    print('Tests passed 😎')
 
-V=2+0+2=4.
 
-E:
+if __name__ == '__main__':
+    test()
 
-Circle0: intersects with 1 (2) → count=2. E +=2.
 
-Circle1: intersects with 0 (2) and 2 (2) → count=4 → E +=4.
+```
 
-Circle2: intersects with 1 (2) → count=2 → E +=2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-E=2+4+2=8.
+```
 
-F=8-4+2=6 → correct.
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    n = int(input[0])
+    circles = []
+    idx = 1
+    for _ in range(n):
+        x = int(input[idx])
+        y = int(input[idx+1])
+        r = int(input[idx+2])
+        circles.append((x, y, r))
+        idx +=3
+
+    # Compute V
+    V = 0
+    pairs = []
+    for i in range(n):
+        for j in range(i+1, n):
+            x1, y1, r1 = circles[i]
+            x2, y2, r2 = circles[j]
+            dx = x2 - x1
+            dy = y2 - y1
+            d_sq = dx*dx + dy*dy
+            sum_r = r1 + r2
+            sum_r_sq = sum_r * sum_r
+            diff_r = abs(r1 - r2)
+            diff_r_sq = diff_r * diff_r
+
+            if d_sq > sum_r_sq:
+                points = 0
+            elif d_sq == sum_r_sq:
+                points = 1
+            else:
+                if d_sq < diff_r_sq:
+                    points = 0
+                elif d_sq == diff_r_sq:
+                    points = 1
+                else:
+                    points = 2
+            V += points
+            pairs.append((i, j, points))
+    
+    if V == 0:
+        print(n + 1, file=output_stream)
+        return
+
+    # Compute E
+    E = 0
+    for i in range(n):
+        cnt = 0
+        for j in range(n):
+            if i == j:
+                continue
+            # Find pair (min(i,j), max(i,j))
+            a, b = (i, j) if i < j else (j, i)
+            for p in pairs:
+                if p[0] == a and p[1] == b:
+                    cnt += p[2]
+                    break
+        if cnt == 0:
+            E += 1
+        else:
+            E += cnt
+
+    F = E - V + 2
+    print(F, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+0 0 2
+2 0 2
+1 1 2
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample Input 3:
 

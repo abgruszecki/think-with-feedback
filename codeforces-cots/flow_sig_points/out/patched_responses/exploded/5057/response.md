@@ -683,89 +683,107 @@ Finally, sum all elements in prev_dp and output modulo 1e9+7.
 
 But in code:
 
-MOD = 10**9+7
+Testing against sample input 1.
 
-N = int(input())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9+7
 
-commands = [input().strip() for _ in range(N)]
+    N = int(input_stream.readline().rstrip("\n"))
 
-prev_dp = [1]
+    commands = [input_stream.readline().rstrip("\n").strip() for _ in range(N)]
 
-for i in range(1, N):
+    prev_dp = [1]
 
-    prev_cmd = commands[i-1]
+    for i in range(1, N):
 
-    if prev_cmd == 'f':
+        prev_cmd = commands[i-1]
 
-        # new level is k+1 for each previous k.
+        if prev_cmd == 'f':
 
-        current_dp = [0]*(len(prev_dp) +1)
+            # new level is k+1 for each previous k.
 
-        for k in range(len(prev_dp)):
+            current_dp = [0]*(len(prev_dp) +1)
 
-            if prev_dp[k]:
+            for k in range(len(prev_dp)):
 
-                current_dp[k+1] = prev_dp[k] % MOD
+                if prev_dp[k]:
 
-        prev_dp = current_dp
+                    current_dp[k+1] = prev_dp[k] % MOD
 
-    else:
+            prev_dp = current_dp
 
-        # Compute suffix sums.
+        else:
 
-        m = len(prev_dp)
+            # Compute suffix sums.
 
-        suffix = [0]*(m+1)
+            m = len(prev_dp)
 
-        for k in reversed(range(m)):
+            suffix = [0]*(m+1)
 
-            suffix[k] = (suffix[k+1] + prev_dp[k]) % MOD
+            for k in reversed(range(m)):
 
-        current_dp = [0]*m
+                suffix[k] = (suffix[k+1] + prev_dp[k]) % MOD
 
-        for k in range(m):
+            current_dp = [0]*m
 
-            current_dp[k] = suffix[k]
+            for k in range(m):
 
-        prev_dp = current_dp
+                current_dp[k] = suffix[k]
 
-# Sum all the values in prev_dp modulo MOD
+            prev_dp = current_dp
 
-print(sum(prev_dp) % MOD)
+    # Sum all the values in prev_dp modulo MOD
 
-But wait, in the code above, for the 'f' case, we can optimize by iterating only through non-zero elements. But in Python, for a list of 5000 elements, looping through all of them is manageable.
+    print(sum(prev_dp) % MOD, file=output_stream)
 
-Testing the code with the examples:
 
-First example:
 
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
-
-s
-
 f
-
-f
-
 s
+f
+s
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-prev_dp starts as [1].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=1 (prev_cmd is 's'):
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-   suffix sum for [1] is 1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-   current_dp is [1].
+    print('Tests passed 😎')
 
-i=2 (prev_cmd is 'f'):
 
-   current_dp is [0,1].
+if __name__ == '__main__':
+    test()
 
-i=3 (prev_cmd is 'f'):
 
-   current_dp is [0,0,1].
+```
 
-sum is 1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

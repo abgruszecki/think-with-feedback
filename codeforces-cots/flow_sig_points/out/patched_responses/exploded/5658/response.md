@@ -443,97 +443,165 @@ Similarly for vertical.
 
 So code:
 
-n, m = map(int, input().split())
+Testing against sample inputs 1, 2, 3.
 
-grid = [input().strip() for _ in range(n)]
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-def horizontal_ok():
+    grid = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
 
-    if n % 3 != 0:
+    def horizontal_ok():
 
-        return False
+        if n % 3 != 0:
 
-    h = n // 3
+            return False
 
-    colors = []
+        h = n // 3
 
-    for i in range(3):
+        colors = []
 
-        start = i * h
+        for i in range(3):
 
-        end = start + h
+            start = i * h
 
-        # Check all rows in this stripe are same color
+            end = start + h
 
-        first_color = grid[start][0]
+            # Check all rows in this stripe are same color
 
-        # Check all rows from start to end-1
+            first_color = grid[start][0]
 
-        for row in range(start, end):
+            # Check all rows from start to end-1
 
-            if any(c != first_color for c in grid[row]):
+            for row in range(start, end):
 
-                return False
-
-        colors.append(first_color)
-
-    return len(set(colors)) == 3
-
-def vertical_ok():
-
-    if m % 3 != 0:
-
-        return False
-
-    w = m // 3
-
-    colors = []
-
-    for i in range(3):
-
-        start = i * w
-
-        end = start + w
-
-        # Check all columns in this stripe for all rows
-
-        first_color = grid[0][start]
-
-        # Check each row and column in this stripe
-
-        for row in range(n):
-
-            for col in range(start, end):
-
-                if grid[row][col] != first_color:
+                if any(c != first_color for c in grid[row]):
 
                     return False
 
-        colors.append(first_color)
+            colors.append(first_color)
 
-    return len(set(colors)) == 3
+        return len(set(colors)) == 3
 
-if horizontal_ok() or vertical_ok():
+    def vertical_ok():
 
-    print("YES")
+        if m % 3 != 0:
 
-else:
+            return False
 
-    print("NO")
+        w = m // 3
 
-Yes, this should work.
+        colors = []
 
-Testing the examples.
+        for i in range(3):
 
-First example:
+            start = i * w
 
-horizontal_ok returns True.
+            end = start + w
 
-Second example:
+            # Check all columns in this stripe for all rows
 
-vertical_ok returns True.
+            first_color = grid[0][start]
 
-Third example: horizontal_ok returns False (stripe 0's rows have different colors). vertical_ok returns False (m=7 not divisible by 3). So output NO.
+            # Check each row and column in this stripe
+
+            for row in range(n):
+
+                for col in range(start, end):
+
+                    if grid[row][col] != first_color:
+
+                        return False
+
+            colors.append(first_color)
+
+        return len(set(colors)) == 3
+
+    if horizontal_ok() or vertical_ok():
+
+        print("YES", file=output_stream)
+
+    else:
+
+        print("NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 3
+BRG
+BRG
+BRG
+BRG
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+        {
+            "input": \
+"""\
+6 7
+RRRGGGG
+RRRGGGG
+RRRGGGG
+RRRBBBB
+RRRBBBB
+RRRBBBB
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+        {
+            "input": \
+"""\
+4 4
+RRRR
+RRRR
+BBBB
+GGGG
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Fourth example: n=4, not divisible by 3. vertical m=4 not divisible by 3. So output NO.
 

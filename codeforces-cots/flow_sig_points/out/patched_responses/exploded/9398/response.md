@@ -239,68 +239,83 @@ Let's code this.
 
 Sample code:
 
-n = int(input())
-a = list(map(int, input().split()))
-if n == 1:
-    print(360)
-    exit()
+Testing against sample input 1.
 
-doubled = a + a
-prefix = [0] * (len(doubled) + 1)
-for i in range(len(doubled)):
-    prefix[i+1] = prefix[i] + doubled[i]
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    if n == 1:
+        print(360, file=output_stream)
+        return
 
-max_sum = 0
-found_180 = False
+    doubled = a + a
+    prefix = [0] * (len(doubled) + 1)
+    for i in range(len(doubled)):
+        prefix[i+1] = prefix[i] + doubled[i]
 
-for start in range(n):
-    for length in range(1, n):
-        end = start + length
-        current_sum = prefix[end] - prefix[start]
-        if current_sum == 180:
-            max_sum = 180
-            found_180 = True
+    max_sum = 0
+    found_180 = False
+
+    for start in range(n):
+        for length in range(1, n):
+            end = start + length
+            current_sum = prefix[end] - prefix[start]
+            if current_sum == 180:
+                max_sum = 180
+                found_180 = True
+                break
+            if current_sum < 180 and current_sum > max_sum:
+                max_sum = current_sum
+        if found_180:
             break
-        if current_sum < 180 and current_sum > max_sum:
-            max_sum = current_sum
-    if found_180:
-        break
 
-print(360 - 2 * max_sum)
+    print(360 - 2 * max_sum, file=output_stream)
 
-Wait, but for the case where a sum is exactly 180, the code exits early, which is correct.
 
-Testing this code against the samples.
 
-Sample 1:
+def test():
+    import io
 
-Input: 4 90 90 90 90
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+100 100 160
+""",
+            "output": \
+"""\
+40
+""",
+        }, 
+    ]
 
-doubled is [90,90,90,90,90,90,90,90]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-prefix is computed as:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-prefix[0] =0
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-prefix[1] =90
+    print('Tests passed 😎')
 
-prefix[2] =180
 
-prefix[3] =270
+if __name__ == '__main__':
+    test()
 
-prefix[4] =360
 
-prefix[5] =450
+```
 
-prefix[6] =540
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-prefix[7] =630
-
-prefix[8] =720
-
-So for start in 0 to 3:
-
-start=0, length=2 → end=2 → sum is prefix[2] - prefix[0] =180. So current_sum is 180 → found_180 is True, code breaks. So the answer is 360-2*180=0.
+```
 
 Sample 3:
 

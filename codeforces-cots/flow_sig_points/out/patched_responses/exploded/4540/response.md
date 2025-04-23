@@ -311,95 +311,332 @@ But the code must handle leading and trailing 1s.
 
 So code:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-# Compute max run of 1s
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-max_run = 0
+    # Compute max run of 1s
 
-current = 0
+    max_run = 0
 
-for num in a:
+    current = 0
 
-    if num ==1:
+    for num in a:
 
-        current +=1
+        if num ==1:
 
-        if current > max_run:
+            current +=1
 
-            max_run = current
+            if current > max_run:
 
-    else:
+                max_run = current
 
-        current =0
+        else:
 
-# Compute leading_ones
+            current =0
 
-leading =0
+    # Compute leading_ones
 
-i =0
+    leading =0
 
-while i <n and a[i]==1:
+    i =0
 
-    leading +=1
+    while i <n and a[i]==1:
 
-    i +=1
+        leading +=1
 
-# Compute trailing_ones
+        i +=1
 
-trailing =0
+    # Compute trailing_ones
 
-j =n-1
+    trailing =0
 
-while j >=0 and a[j]==1:
+    j =n-1
 
-    trailing +=1
+    while j >=0 and a[j]==1:
 
-    j -=1
+        trailing +=1
 
-# Check if leading and trailing are both >0
+        j -=1
 
-if leading >0 and trailing >0:
+    # Check if leading and trailing are both >0
 
-    candidate = leading + trailing
+    if leading >0 and trailing >0:
 
-    if candidate > max_run:
+        candidate = leading + trailing
 
-        max_run = candidate
+        if candidate > max_run:
 
-print(max_run)
+            max_run = candidate
 
-Wait, but what if the entire array is 1s? Well, the problem states that the array has at least one 0. So this case is impossible, so the code is safe.
+    print(max_run, file=output_stream)
 
-Testing this code on the samples:
 
-Sample 1:
 
-5
+def test():
+    import io
 
-1 0 1 0 1
-
-max_run is 1 (each 1 is isolated).
-
-leading is 1, trailing is 1. sum is 2. So answer is 2. Correct.
-
-Sample 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 6
-
 0 1 0 1 1 0
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-max_run is 2. leading and trailing are 0. So answer is 2. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample 3:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    # Compute max run of 1s
+
+    max_run = 0
+
+    current = 0
+
+    for num in a:
+
+        if num ==1:
+
+            current +=1
+
+            if current > max_run:
+
+                max_run = current
+
+        else:
+
+            current =0
+
+    # Compute leading_ones
+
+    leading =0
+
+    i =0
+
+    while i <n and a[i]==1:
+
+        leading +=1
+
+        i +=1
+
+    # Compute trailing_ones
+
+    trailing =0
+
+    j =n-1
+
+    while j >=0 and a[j]==1:
+
+        trailing +=1
+
+        j -=1
+
+    # Check if leading and trailing are both >0
+
+    if leading >0 and trailing >0:
+
+        candidate = leading + trailing
+
+        if candidate > max_run:
+
+            max_run = candidate
+
+    print(max_run, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 7
-
 1 0 1 1 1 0 1
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-max_run is 3. leading is 1, trailing is 1. sum is 2. So answer remains 3. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    # Compute max run of 1s
+
+    max_run = 0
+
+    current = 0
+
+    for num in a:
+
+        if num ==1:
+
+            current +=1
+
+            if current > max_run:
+
+                max_run = current
+
+        else:
+
+            current =0
+
+    # Compute leading_ones
+
+    leading =0
+
+    i =0
+
+    while i <n and a[i]==1:
+
+        leading +=1
+
+        i +=1
+
+    # Compute trailing_ones
+
+    trailing =0
+
+    j =n-1
+
+    while j >=0 and a[j]==1:
+
+        trailing +=1
+
+        j -=1
+
+    # Check if leading and trailing are both >0
+
+    if leading >0 and trailing >0:
+
+        candidate = leading + trailing
+
+        if candidate > max_run:
+
+            max_run = candidate
+
+    print(max_run, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+0 0 0
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 4:
 

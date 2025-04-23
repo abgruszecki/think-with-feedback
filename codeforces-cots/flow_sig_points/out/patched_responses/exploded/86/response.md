@@ -151,63 +151,88 @@ Third line is m, then the fourth line has m integers in strictly increasing.
 
 So code:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-m = int(input())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-b = list(map(int, input().split()))
+    m = int(input_stream.readline().rstrip("\n"))
 
-max_ratio = 0
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-count = 0
+    max_ratio = 0
 
-for ai in a:
+    count = 0
 
-    for bj in b:
+    for ai in a:
 
-        if bj % ai == 0:
+        for bj in b:
 
-            ratio = bj // ai
+            if bj % ai == 0:
 
-            if ratio > max_ratio:
+                ratio = bj // ai
 
-                max_ratio = ratio
+                if ratio > max_ratio:
 
-                count = 1
+                    max_ratio = ratio
 
-            elif ratio == max_ratio:
+                    count = 1
 
-                count +=1
+                elif ratio == max_ratio:
 
-print(count)
+                    count +=1
 
-Yes, that's the code. Let's test against the samples.
+    print(count, file=output_stream)
 
-First sample:
 
-n=2, a=[4,5], m=3, b=[12,13,15]
 
-The code loops:
+def test():
+    import io
 
-ai=4:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 2 3 4
+5
+10 11 12 13 14
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-   bj=12 → 12%4=0 → ratio=3. Since 3>0, set max to 3, count=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-   bj=13 → 13%4=1 → no.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-   bj=15 →15%4=3 → no.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-ai=5:
+    print('Tests passed 😎')
 
-   bj=12 →12%5=2 → no.
 
-   bj=13 → 13%5=3 → no.
+if __name__ == '__main__':
+    test()
 
-   bj=15 →15%5=0 → ratio=3. Now ratio equals max_ratio (3). So count becomes 2.
 
-So code outputs 2, correct.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

@@ -529,42 +529,145 @@ But the code needs to be in a single code block. So let's code it.
 
 Putting it all together:
 
-n, m = map(int, input().split())
-x = int(input())
+Testing against sample input 1.
 
-k = x - 1
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    x = int(input_stream.readline().rstrip("\n"))
 
-def compute(k_val):
-    rows = n - 2 * k_val
-    cols = m - 2 * k_val
-    if rows <=0 or cols <=0:
-        return 0
-    total = rows * cols
-    if total % 2 == 0:
-        return total // 2
-    else:
-        return (total + 1) // 2
+    k = x - 1
 
-count_k = compute(k)
-count_k_plus_1 = compute(k + 1)
+    def compute(k_val):
+        rows = n - 2 * k_val
+        cols = m - 2 * k_val
+        if rows <=0 or cols <=0:
+            return 0
+        total = rows * cols
+        if total % 2 == 0:
+            return total // 2
+        else:
+            return (total + 1) // 2
 
-print(max(0, count_k - count_k_plus_1))
+    count_k = compute(k)
+    count_k_plus_1 = compute(k + 1)
 
-Yes, this code should work.
+    print(max(0, count_k - count_k_plus_1), file=output_stream)
 
-Testing the examples:
 
-First example:
 
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3 3
-
+2
+""",
+            "output": \
+"""\
 1
+""",
+        }, 
+    ]
 
-k=0. rows=3, cols=3. total=9. 9 is odd. (9+1)/2=5. count_k=5. k+1=1. rows=3-2=1, cols=3-2=1. total=1. (1+1)/2=1. 5-1=4. Output 4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Second example:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-3 3 2 → k=1. compute(1) returns 1. compute(2) returns 0. 1-0=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    x = int(input_stream.readline().rstrip("\n"))
+
+    k = x - 1
+
+    def compute(k_val):
+        rows = n - 2 * k_val
+        cols = m - 2 * k_val
+        if rows <=0 or cols <=0:
+            return 0
+        total = rows * cols
+        if total % 2 == 0:
+            return total // 2
+        else:
+            return (total + 1) // 2
+
+    count_k = compute(k)
+    count_k_plus_1 = compute(k + 1)
+
+    print(max(0, count_k - count_k_plus_1), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 1
+1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

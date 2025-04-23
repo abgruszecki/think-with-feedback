@@ -463,87 +463,97 @@ But in the problem statement, the code must read input via input(), not sys.stdi
 
 So, the code will be:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n, m = map(int, sys.stdin.readline().split())
 
-s = sys.stdin.readline().strip()
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
 
-mapping = list(range(26))  # 0 to 25
+    s = input_stream.readline().strip()
 
-for _ in range(m):
+    mapping = list(range(26))  # 0 to 25
 
-   x, y = sys.stdin.readline().split()
+    for _ in range(m):
 
-   x_ord = ord(x) - ord('a')
+       x, y = input_stream.readline().split()
 
-   y_ord = ord(y) - ord('a')
+       x_ord = ord(x) - ord('a')
 
-   for i in range(26):
+       y_ord = ord(y) - ord('a')
 
-       if mapping[i] == x_ord:
+       for i in range(26):
 
-           mapping[i] = y_ord
+           if mapping[i] == x_ord:
 
-       elif mapping[i] == y_ord:
+               mapping[i] = y_ord
 
-           mapping[i] = x_ord
+           elif mapping[i] == y_ord:
 
-result = []
+               mapping[i] = x_ord
 
-for c in s:
+    result = []
 
-   code = ord(c) - ord('a')
+    for c in s:
 
-   result.append(chr(mapping[code] + ord('a')))
+       code = ord(c) - ord('a')
 
-print(''.join(result))
+       result.append(chr(mapping[code] + ord('a')))
 
-But what if the input lines for swaps have leading/trailing whitespaces? Probably not, as per the problem statement. Also, for each swap line, x and y are two lowercase letters, space-separated.
+    print(''.join(result), file=output_stream)
 
-But in some cases, when reading via sys.stdin, after reading the first two lines, the remaining lines may include lines with empty strings if the input is not properly formatted. However, the problem says that there are exactly m lines.
 
-But using sys.stdin.readline() in a loop for m swaps can be slow. Because for m=2e5, each readline() is O(1) but in practice, it's better to read all the lines at once.
 
-Alternatively, read the entire input first.
+def test():
+    import io
 
-But in Python, the code above should be acceptable. Because even for 2e5 swaps, each loop is O(26) per swap. 2e5 * 26 is 5.2e6 operations, which is manageable.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+11 6
+abacabadaba
+a b
+b c
+a d
+e g
+f a
+b b
+""",
+            "output": \
+"""\
+cdcbcdcfcdc
+""",
+        }, 
+    ]
 
-But in practice, for Python, even 1e8 operations can be slow, but 5e6 is okay.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Now, let's test the code against the sample inputs.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sample 1:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Input:
+    print('Tests passed 😎')
 
-6 1
 
-police
+if __name__ == '__main__':
+    test()
 
-p m
 
-Processing:
+```
 
-mapping starts as [0..25].
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Swap p (15) and m (12):
-
-Loop i from 0 to 25:
-
-At i=15 (p), mapping[15] was 15 → becomes 12.
-
-At i=12 (m), mapping[12] was 12 → becomes 15.
-
-Other i's are unchanged.
-
-So after swap, mapping[15] is 12 (m), mapping[12] is 15 (p).
-
-So for the original 'p' (code 15), mapped to 12 → 'm'.
-
-Other letters are unchanged.
-
-So the output is 'molice', which is correct.
+```
 
 Sample 2:
 

@@ -228,43 +228,165 @@ But for the divisibility check, n is the integer. So n = int(s)
 
 So code:
 
-s = input().strip()
+Testing against sample input 1.
 
-n = int(s)
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-digits = [int(c) for c in s]
+    n = int(s)
 
-sum_div = 0
+    digits = [int(c) for c in s]
 
-for d in digits:
+    sum_div = 0
 
-    if d ==0:
+    for d in digits:
 
-        continue
+        if d ==0:
 
-    if n % d ==0:
+            continue
 
-        sum_div +=1
+        if n % d ==0:
 
-total_digits = len(digits)
+            sum_div +=1
 
-if sum_div == total_digits:
+    total_digits = len(digits)
 
-    print("happier")
+    if sum_div == total_digits:
 
-elif sum_div >0:
+        print("happier", file=output_stream)
 
-    print("happy")
+    elif sum_div >0:
 
-else:
+        print("happy", file=output_stream)
 
-    print("upset")
+    else:
 
-Yes. Let's test with the examples.
+        print("upset", file=output_stream)
 
-First example: 99 → digits [9,9]. sum_div is 2. total_digits 2 → print happier.
 
-Second example:29994. digits 2,9,9,9,4. 29994 divided by 2 → yes (since even). 29994 /9 → 29994 /9 is 3332.666… no. So sum_div is 1. So happy.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+29994
+""",
+            "output": \
+"""\
+happy
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    n = int(s)
+
+    digits = [int(c) for c in s]
+
+    sum_div = 0
+
+    for d in digits:
+
+        if d ==0:
+
+            continue
+
+        if n % d ==0:
+
+            sum_div +=1
+
+    total_digits = len(digits)
+
+    if sum_div == total_digits:
+
+        print("happier", file=output_stream)
+
+    elif sum_div >0:
+
+        print("happy", file=output_stream)
+
+    else:
+
+        print("upset", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+23
+""",
+            "output": \
+"""\
+upset
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:23 → digits 2,3. 23 mod 2 is 1, mod 3 is 2. sum_div 0 → upset.
 

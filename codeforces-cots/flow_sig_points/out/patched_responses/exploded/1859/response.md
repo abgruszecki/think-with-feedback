@@ -657,43 +657,113 @@ for pos in possible_positions:
 
     print(pos)
 
-Testing this code with the first example:
+Testing against sample input 1.
 
-Chains are [2,1], [4,3], [6,5]. x is 1, in the first chain, position 2. other_lengths are [2, 2].
+```python
+from collections import defaultdict
 
-max_sum is 4.
 
-dp starts as [True, False, False, False, False].
+def main(input_stream, output_stream):
+    n, x = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a = [0] + a  # 1-based indexing
 
-Processing first l=2:
+    # Build reverse map
+    rev = defaultdict(list)
+    for i in range(1, n + 1):
+        predecessor = a[i]
+        rev[predecessor].append(i)
 
-Loop i from 4 down to 2:
+    # Build chains
+    visited = set()
+    chains = []
+    for node in rev.get(0, []):
+        if node not in visited:
+            chain = []
+            current = node
+            while current is not None and current not in visited:
+                visited.add(current)
+                chain.append(current)
+                next_nodes = rev.get(current, [])
+                current = next_nodes[0] if next_nodes else None
+            chains.append(chain)
 
-i=4: dp[4-2=2] is False.
+    # Determine x's position in its chain
+    node_info = {}
+    for chain in chains:
+        for idx, node in enumerate(chain, 1):
+            node_info[node] = (chain, idx)
 
-i=3: dp[1] is False.
+    x_chain, x_pos = node_info[x]
 
-i=2: dp[0] is True. So set dp[2] to True.
+    # Collect lengths of other chains
+    other_lengths = [len(chain) for chain in chains if chain != x_chain]
 
-Now dp is [T, F, T, F, F].
+    # Compute possible subset sums using dynamic programming
+    max_sum = sum(other_lengths)
+    dp = [False] * (max_sum + 1)
+    dp[0] = True
+    for l in other_lengths:
+        for i in range(max_sum, l - 1, -1):
+            if dp[i - l]:
+                dp[i] = True
 
-Processing next l=2:
+    # Generate all possible positions
+    possible_positions = []
+    for s in range(max_sum + 1):
+        if dp[s]:
+            possible_positions.append(x_pos + s)
 
-Loop i from 4 down to 2:
+    # Sort and print
+    possible_positions.sort()
+    for pos in possible_positions:
+        print(pos, file=output_stream)
 
-i=4: i-l=2, dp[2] is True → set dp[4] to True.
 
-i=3: i-l=1, dp[1] is False.
 
-i=2: i-l=0 → dp[0] is True → set dp[2] to True (but already True).
+def test():
+    import io
 
-So after processing both 2's, possible sums are 0,2,4.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 2
+2 3 0 5 6 0
+""",
+            "output": \
+"""\
+2
+5
+""",
+        }, 
+    ]
 
-possible_positions: 2, 2+2=4, 2+4=6. Sorted as 2,4,6.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Which matches the first example.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The code should work.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case: the fourth example.
 

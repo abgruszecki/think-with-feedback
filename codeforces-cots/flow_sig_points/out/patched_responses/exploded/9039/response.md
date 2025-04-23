@@ -639,49 +639,85 @@ But wait, for n=3 and i=1: exponent=3-1-1=1. Which is correct.
 
 So the code would be:
 
-MOD =998244353
+Testing against sample input 1.
 
-n =int(input())
+```python
+def main(input_stream, output_stream):
+    MOD =998244353
 
-pow10 = [1]*(n+2)
+    n =int(input_stream.readline().rstrip("\n"))
 
-for k in range(1, n+2):
+    pow10 = [1]*(n+2)
 
-   pow10[k] = (pow10[k-1]*10) % MOD
+    for k in range(1, n+2):
 
-ans = []
+       pow10[k] = (pow10[k-1]*10) % MOD
 
-for i in range(1, n+1):
+    ans = []
 
-   if i ==n:
+    for i in range(1, n+1):
 
-      ans.append(10% MOD)
+       if i ==n:
 
-   else:
+          ans.append(10% MOD)
 
-      exponent =n -i -1
+       else:
 
-      part1 =20 +9 * exponent
+          exponent =n -i -1
 
-      total = (9 * part1) % MOD
+          part1 =20 +9 * exponent
 
-      total = (total * pow10[exponent]) % MOD
+          total = (9 * part1) % MOD
 
-      ans.append(total)
+          total = (total * pow10[exponent]) % MOD
 
-print(' '.join(map(str, ans)))
+          ans.append(total)
 
-But wait, let's test this against the examples.
+    print(' '.join(map(str, ans)), file=output_stream)
 
-First example: n=1.
 
-pow10 is [1, 10, ...]
 
-For i=1:
+def test():
+    import io
 
-since i==n, append 10 mod MOD. So output is 10.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+""",
+            "output": \
+"""\
+180 10
+""",
+        }, 
+    ]
 
-Which matches.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: n=2.
 

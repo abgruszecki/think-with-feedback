@@ -526,152 +526,129 @@ But for large mod values, we need to handle the modulus correctly. Python can ha
 
 So the code:
 
-mod1 = 10**18 + 3
-base1 = 911382629
+Testing against sample input 2.
 
-mod2 = 10**18 + 7
-base2 = 3571428571
+```python
+def main(input_stream, output_stream):
+    mod1 = 10**18 + 3
+    base1 = 911382629
 
-def compute_prefix_hash(s, base, mod):
-    n = len(s)
-    prefix = [0] * (n + 1)
-    power = [1] * (n + 1)
-    for i in range(n):
-        prefix[i+1] = (prefix[i] * base + ord(s[i])) % mod
-        power[i+1] = (power[i] * base) % mod
-    return prefix, power
+    mod2 = 10**18 + 7
+    base2 = 3571428571
 
-s1 = input().strip()
-s2 = input().strip()
+    def compute_prefix_hash(s, base, mod):
+        n = len(s)
+        prefix = [0] * (n + 1)
+        power = [1] * (n + 1)
+        for i in range(n):
+            prefix[i+1] = (prefix[i] * base + ord(s[i])) % mod
+            power[i+1] = (power[i] * base) % mod
+        return prefix, power
 
-min_len = min(len(s1), len(s2))
+    s1 = input_stream.readline().rstrip("\n").strip()
+    s2 = input_stream.readline().rstrip("\n").strip()
 
-if min_len == 0:
-    print(-1)
-    exit()
+    min_len = min(len(s1), len(s2))
 
-s1_prefix1, s1_power1 = compute_prefix_hash(s1, base1, mod1)
-s1_prefix2, s1_power2 = compute_prefix_hash(s1, base2, mod2)
+    if min_len == 0:
+        print(-1, file=output_stream)
+        return
 
-s2_prefix1, s2_power1 = compute_prefix_hash(s2, base1, mod1)
-s2_prefix2, s2_power2 = compute_prefix_hash(s2, base2, mod2)
+    s1_prefix1, s1_power1 = compute_prefix_hash(s1, base1, mod1)
+    s1_prefix2, s1_power2 = compute_prefix_hash(s1, base2, mod2)
 
-result = -1
+    s2_prefix1, s2_power1 = compute_prefix_hash(s2, base1, mod1)
+    s2_prefix2, s2_power2 = compute_prefix_hash(s2, base2, mod2)
 
-for l in range(1, min_len + 1):
-    # Process s1 for length l
-    s1_hash_counts = {}
-    for i in range(len(s1) - l + 1):
-        j = i + l
-        h1 = (s1_prefix1[j] - s1_prefix1[i] * s1_power1[l]) % mod1
-        h2 = (s1_prefix2[j] - s1_prefix2[i] * s1_power2[l]) % mod2
-        key = (h1, h2)
-        if key in s1_hash_counts:
-            s1_hash_counts[key] += 1
-        else:
-            s1_hash_counts[key] = 1
-    # Collect unique hashes in s1
-    unique_s1 = set()
-    for k, v in s1_hash_counts.items():
-        if v == 1:
-            unique_s1.add(k)
-    
-    # Process s2 for length l
-    s2_hash_counts = {}
-    for i in range(len(s2) - l + 1):
-        j = i + l
-        h1 = (s2_prefix1[j] - s2_prefix1[i] * s2_power1[l]) % mod1
-        h2 = (s2_prefix2[j] - s2_prefix2[i] * s2_power2[l]) % mod2
-        key = (h1, h2)
-        if key in s2_hash_counts:
-            s2_hash_counts[key] += 1
-        else:
-            s2_hash_counts[key] = 1
-    # Collect unique hashes in s2
-    unique_s2 = set()
-    for k, v in s2_hash_counts.items():
-        if v == 1:
-            unique_s2.add(k)
-    
-    # Check intersection
-    if unique_s1 & unique_s2:
-        result = l
-        break
+    result = -1
 
-print(result if result != -1 else -1)
+    for l in range(1, min_len + 1):
+        # Process s1 for length l
+        s1_hash_counts = {}
+        for i in range(len(s1) - l + 1):
+            j = i + l
+            h1 = (s1_prefix1[j] - s1_prefix1[i] * s1_power1[l]) % mod1
+            h2 = (s1_prefix2[j] - s1_prefix2[i] * s1_power2[l]) % mod2
+            key = (h1, h2)
+            if key in s1_hash_counts:
+                s1_hash_counts[key] += 1
+            else:
+                s1_hash_counts[key] = 1
+        # Collect unique hashes in s1
+        unique_s1 = set()
+        for k, v in s1_hash_counts.items():
+            if v == 1:
+                unique_s1.add(k)
+        
+        # Process s2 for length l
+        s2_hash_counts = {}
+        for i in range(len(s2) - l + 1):
+            j = i + l
+            h1 = (s2_prefix1[j] - s2_prefix1[i] * s2_power1[l]) % mod1
+            h2 = (s2_prefix2[j] - s2_prefix2[i] * s2_power2[l]) % mod2
+            key = (h1, h2)
+            if key in s2_hash_counts:
+                s2_hash_counts[key] += 1
+            else:
+                s2_hash_counts[key] = 1
+        # Collect unique hashes in s2
+        unique_s2 = set()
+        for k, v in s2_hash_counts.items():
+            if v == 1:
+                unique_s2.add(k)
+        
+        # Check intersection
+        if unique_s1 & unique_s2:
+            result = l
+            break
 
-Wait, but in Python, using dictionaries may be slower than using a defaultdict. But in this code, the code uses a regular dictionary, which is possibly faster than defaultdict for this case.
+    print(result if result != -1 else -1, file=output_stream)
 
-But for each l, the code processes s1 and s2's substrings, counts their hash pairs, collects those with count 1, then checks for intersection.
 
-But in Python, the 'set' operations are efficient. The code should work within the time constraints.
 
-But let's think about possible optimizations:
+def test():
+    import io
 
-1. Once we have unique_s1 and unique_s2, we can check if their intersection is non-empty. This can be done by iterating through the smaller set and checking for membership in the larger set. But in Python, the set intersection is optimized, so unique_s1 & unique_s2 is efficient.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+bidhan
+roy
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-2. For large l, len(s) - l + 1 could be small. For example, when l is 5000, len(s) is 5000, so only one substring. So processing is O(1) for each string.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Another optimization is to process the smaller set first. For example, if unique_s1 is smaller than unique_s2, iterate through unique_s1's elements and check if any are in unique_s2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But in Python, the 'intersection' operation is optimized, so it's better to use the built-in set operation.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Now, possible edge cases:
+    print('Tests passed 😎')
 
-- When l is 1 and there are common unique characters.
 
-- When the minimal l is the maximum possible.
+if __name__ == '__main__':
+    test()
 
-- When there's no common substring.
 
-Another edge case is when the minimal l is 1, which is handled correctly.
+```
 
-Testing the code for the sample inputs.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Sample 2:
+```
 
-Input:
-
-lover
-driver
-
-s1 is 'lover' → characters: l, o, v, e, r. So for l=1, each character's frequency:
-
-l: 1
-
-o: 1
-
-v: 1
-
-e: 1
-
-r: 1. So all are unique.
-
-s2 is 'driver' → characters: d, r, i, v, e, r. So frequencies:
-
-d: 1
-
-r: 2 (occurs at positions 1 and 5)
-
-i: 1
-
-v: 1
-
-e: 1
-
-So unique characters are d, i, v, e.
-
-So intersection of unique chars is 'v' and 'e', 'd', 'i' → but wait, s1's unique chars are all. So 'v' is present in both unique sets.
-
-Thus, l=1 is the answer.
-
-The code should detect that.
-
-Another edge case is when a substring is unique in s1 and s2, but same hash due to collision. But with two different hash functions, the probability is negligible.
-
-Thus, the code should handle all cases.
-
-Now, the code as written.
 </think>
 
 ```python

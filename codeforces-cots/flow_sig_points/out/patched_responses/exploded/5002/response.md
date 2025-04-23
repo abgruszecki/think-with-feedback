@@ -1312,15 +1312,19 @@ The find function uses path compression.
 
 In Python, it would look like this:
 
+Testing against sample input 1.
+
+```python
 import sys
 from sys import stdin
 
-def main():
-    q = int(stdin.readline())
+
+def main(input_stream, output_stream):
+    q = int(input_stream.readline())
     parent = {}
     arr = []
     for _ in range(q):
-        parts = stdin.readline().split()
+        parts = input_stream.readline().split()
         if parts[0] == '1':
             x = int(parts[1])
             # find x's root
@@ -1348,61 +1352,55 @@ def main():
         while current in parent:
             current = parent[current]
         output.append(str(current))
-    print(' '.join(output))
+    print(' '.join(output), file=output_stream)
 
-if __name__ == "__main__":
-    main()
 
-Let's test this code with the first sample input:
 
-Sample input:
+def test():
+    import io
 
-7
-1 3
-1 1
-2 1 2
-1 2
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
 1 1
 1 2
-2 1 3
+1 1
+2 2 2
+""",
+            "output": \
+"""\
+1 2 1
+""",
+        }, 
+    ]
 
-Processing the queries:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-1. Add 3: find(3) is 3. Append 3. parent is empty.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-2. Add 1: find(1) is 1. Append 1. parent is empty.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-3. Replace 1→2: find y=2. y's root is 2. x's root is 1. Set parent[1] =2. parent is {1:2}.
+    print('Tests passed 😎')
 
-4. Add 2: find(2) is 2 (since 2 is not in parent). Append 2.
 
-5. Add 1: find(1) → check parent[1]=2. 2 is not in parent. So append 2.
+if __name__ == '__main__':
+    test()
 
-6. Add 2: find(2)=2. Append 2.
 
-7. Replace 1→3: find y=3's root is 3. x's root is 1 → find(1) is 2 (since parent[1]=2, find(2)=2). So set parent[2] =3. parent is {1:2, 2:3}.
+```
 
-Processing the array:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-arr = [3,1,2,2,2].
-
-Now, output each element's find:
-
-3: find(3) is 3.
-
-1: find(1) → parent[1]=2 → parent[2]=3 → find(3)=3.
-
-2: find(2) → parent[2]=3 → find(3)=3.
-
-2: same as above.
-
-2: same as above.
-
-Output is 3 3 3 3 3.
-
-But sample output is 3 2 2 3 2.
-
-Thus, the code is not correct.
+```
 
 Thus, the initial approach is incorrect. This indicates that the problem's correct solution is different.
 
@@ -1445,58 +1443,6 @@ But in this model, to find the final value of x, you follow the mappings until t
 This approach requires for each element to follow the mappings until you reach a value not in the dictionary.
 
 Thus, the code would look like:
-
-current = {}
-array = []
-q = int(input())
-for _ in range(q):
-    parts = input().split()
-    if parts[0] == '1':
-        x = int(parts[1])
-        array.append(x)
-    else:
-        x = int(parts[1])
-        y = int(parts[2])
-        current[x] = y
-
-# Now, process each element in the array
-result = []
-for x in array:
-    while x in current:
-        x = current[x]
-    result.append(x)
-print(' '.join(map(str, result)))
-
-But this approach is incorrect for cases where there are replaces that form cycles or long chains.
-
-But let's test it with the first sample:
-
-Sample input:
-
-7
-1 3 → array [3]
-1 1 → array [3,1]
-2 1 2 → current {1:2}
-1 2 → array [3,1,2]
-1 1 → array [3,1,2,1]
-1 2 → array [3,1,2,1,2]
-2 1 3 → current {1:3, 2:3}
-
-Processing the array:
-
-element 3: not in current → 3.
-
-element 1: current[1] =3 → 3.
-
-element 2: current[2]=3 →3.
-
-element 1: current[1]=3 →3.
-
-element 2: current[2]=3 →3.
-
-So output is 3 3 3 3 3. But sample output is 3 2 2 3 2.
-
-Thus, this approach is also incorrect.
 
 But according to the sample explanation, the replaces are applied in the order they are given. For example, the replace 1→3 in step 7 would replace all 1's in the array to 3, but 1's added after step 3 are stored as 2.
 

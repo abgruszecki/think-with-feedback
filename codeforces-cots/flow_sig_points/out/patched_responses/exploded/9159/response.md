@@ -1069,25 +1069,70 @@ else:
 
         print("No")
 
-But let's test this with the first sample input.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
+    t = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-n=4.
+    if c[0] != t[0] or c[-1] != t[-1]:
+        print("No", file=output_stream)
+    else:
+        def compute_diffs(arr):
+            return [arr[i] - arr[i-1] for i in range(1, len(arr))]
+        
+        diffs_c = compute_diffs(c)
+        diffs_t = compute_diffs(t)
+        
+        print("Yes" if sorted(diffs_c) == sorted(diffs_t) else "No", file=output_stream)
 
-c: [7,2,4,12]
 
-t: [7,15,10,12]
 
-diffs_c = [2-7= -5,4-2=2, 12-4=8] → [-5,2,8]
+def test():
+    import io
 
-diffs_t = [15-7=8,10-15=-5, 12-10=2] → [8,-5,2]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+4 4 4
+1 2 3
+""",
+            "output": \
+"""\
+No
+""",
+        }, 
+    ]
 
-sorted(diffs_c) → [-5, 2, 8]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sorted(diffs_t) → [-5, 2, 8]
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So output "Yes".
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

@@ -1091,242 +1091,137 @@ We'll read all input at once using sys.stdin.read(), split into tokens, and proc
 
 The code:
 
+Testing against sample input 2.
+
+```python
 import sys
 
-def main():
-    data = list(map(int, sys.stdin.read().split()))
+
+def main(input_stream, output_stream):
+    data = list(map(int, input_stream.read().split()))
     ptr = 0
     n = data[ptr]
-    ptr +=1
+    ptr += 1
     polyA = []
     for _ in range(n):
         x = data[ptr]
-        y = data[ptr+1]
-        polyA.append( (x, y) )
-        ptr +=2
+        y = data[ptr + 1]
+        polyA.append((x, y))
+        ptr += 2
     m = data[ptr]
-    ptr +=1
+    ptr += 1
     polyB = []
     for _ in range(m):
         x = data[ptr]
-        y = data[ptr+1]
-        polyB.append( (x, y) )
-        ptr +=2
+        y = data[ptr + 1]
+        polyB.append((x, y))
+        ptr += 2
 
-    # Precompute polygon A's vertices for faster access
-    # Check each point in polyB
-
-    # If any point is not strictly inside A, output NO
     for point in polyB:
         if not is_inside(polyA, point):
-            print("NO")
+            print("NO", file=output_stream)
             return
-    print("YES")
-
+    print("YES", file=output_stream)
 def is_inside(poly, point):
     n = len(poly)
-    if n ==0:
+    if n < 3:
         return False
     v0 = poly[0]
-    if n ==1:
-        return False
-    v1 = poly[1]
-    if n ==2:
-        return False  # A polygon must have at least 3 vertices, so problem constraints ensure this.
-
-    # Check first edge v0 -> v1
-    ax, ay = v0
-    bx, by = v1
-    px, py = point
-    # cross = (bx - ax)*(py - ay) - (by - ay)*(px - ax)
-    cross = (bx - ax) * (py - ay) - (by - ay) * (px - ax)
-    if cross >=0:
-        return False
-
-    # Check edge v_{n-1} -> v0
-    vn_1 = poly[-1]
-    ax, ay = vn_1
-    bx, by = v0
-    # cross = (bx - ax)*(py - ay) - (by - ay)*(px - ax)
-    cross = (bx - ax) * (py - ay) - (by - ay) * (px - ax)
-    if cross >=0:
-        return False
-
-    # Binary search
-    low = 1
-    high = n-1
-
-    while high - low >1:
-        mid = (low + high) //2
-        # Compute cross product of (poly[mid] - v0) with (point - v0)
-        ax, ay = v0
-        bx, by = poly[mid]
-        px_p, py_p = point
-        cross_mid = (bx - ax) * (py_p - ay) - (by - ay) * (px_p - ax)
-        if cross_mid >0:
-            low = mid
-        else:
-            high = mid
-
-    # Check edge poly[low] -> poly[high]
-    ax, ay = poly[low]
-    bx, by = poly[high]
-    cross = (bx - ax) * (py - ay) - (by - ay) * (px - ax)
-    return cross <0
-
-if __name__ == "__main__":
-    main()
-
-But wait, in the binary search loop, the code uses 'px_p' and 'py_p', but in the code, these are the components of 'point' passed to the function.
-
-Wait, in the is_inside function, 'point' is a tuple (x, y), so px = point[0], py = point[1].
-
-In the code above, the variables px and py are used as follows:
-
-In the first two edge checks:
-
-px, py = point.
-
-In the binary search loop, when computing cross_mid, we have:
-
-ax, ay = v0
-
-bx, by = poly[mid]
-
-px_p, py_p = point.
-
-But then, cross_mid is computed using (bx - ax) * (py_p - ay) - (by - ay) * (px_p - ax).
-
-But wait, in the first edge checks, px and py are extracted from point. In the binary search loop, the code uses px_p and py_p, which are the same as px and py. So the code is correct.
-
-But in the code, the variables px and py are not used in the binary search loop. Let me check.
-
-Wait, in the code:
-
-def is_inside(poly, point):
-    # ...
-    px, py = point  # No, this is not in the code.
-
-Wait, no! The code as written in the is_inside function does not have a px, py = point. Instead, in the first two edge checks, px and py are taken from the point.
-
-But in the binary search loop, the code uses px_p and py_p, which are not defined.
-
-This is a bug.
-
-Ah! Here's a mistake in the code I wrote.
-
-In the is_inside function:
-
-The code checks the first two edges. For the first edge:
-
-ax, ay = v0
-bx, by = v1
-px, py = point  # Not present in the code.
-
-Then, cross is computed.
-
-But in the current code, px and py are taken from point in each step.
-
-But in the code, after the first two checks, in the binary search loop, the code computes cross_mid as:
-
-cross_mid = (bx - ax) * (py_p - ay) - (by - ay) * (px_p - ax)
-
-But px_p and py_p are not defined. So this is an error.
-
-The correct code should extract px and py once at the beginning of the is_inside function.
-
-So the code should be modified to:
-
-def is_inside(poly, point):
-    n = len(poly)
-    if n ==0:
-        return False
-    v0 = poly[0]
-    if n ==1:
-        return False
-    v1 = poly[1]
-    if n ==2:
-        return False
-
     px, py = point
 
-    # Check first edge v0 -> v1
     ax, ay = v0
-    bx, by = v1
+    bx, by = poly[1]
     cross = (bx - ax) * (py - ay) - (by - ay) * (px - ax)
-    if cross >=0:
+    if cross >= 0:
         return False
 
-    # Check edge v_{n-1} -> v0
-    vn_1 = poly[-1]
-    ax, ay = vn_1
+    ax, ay = poly[-1]
     bx, by = v0
     cross = (bx - ax) * (py - ay) - (by - ay) * (px - ax)
-    if cross >=0:
+    if cross >= 0:
         return False
 
-    # Binary search
     low = 1
-    high = n-1
-
-    while high - low >1:
-        mid = (low + high) //2
-        # Compute cross product of (poly[mid] - v0) with (point - v0)
+    high = n - 1
+    while high - low > 1:
+        mid = (low + high) // 2
         ax, ay = v0
         bx, by = poly[mid]
         cross_mid = (bx - ax) * (py - ay) - (by - ay) * (px - ax)
-        if cross_mid >0:
+        if cross_mid > 0:
             low = mid
         else:
             high = mid
 
-    # Check edge poly[low] -> poly[high]
     ax, ay = poly[low]
     bx, by = poly[high]
     cross = (bx - ax) * (py - ay) - (by - ay) * (px - ax)
-    return cross <0
+    return cross < 0
 
-This code extracts px and py from point once at the beginning, and uses them throughout.
 
-This should fix the variable reference error.
 
-Thus, the final code should be as above.
 
-Testing this code should now work.
+def test():
+    import io
 
-Another test case from the examples:
-
-Sample input 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
-
-1 2
-
-4 2
-
-3 -3
-
--2 -2
-
--2 1
-
-4
-
-0 1
-
-1 2
-
+-1 2
+2 3
 4 1
-
+3 -2
+0 -3
+5
+1 0
+1 1
+3 1
+5 -1
 2 -1
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-Sample output: NO
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-When checking the points in B, the second point (1,2) is a vertex of A. The cross product for the edges adjacent to this point may be zero, leading to a 'NO' output.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But according to the problem statement, the point must be strictly inside. So any point on the edge of A is considered outside.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Thus, the code should detect this and return NO.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 110, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 103, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: 'NO'
+Got: 'YES'
+
+```
 
 Another test case:
 

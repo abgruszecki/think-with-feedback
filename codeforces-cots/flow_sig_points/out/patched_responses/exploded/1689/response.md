@@ -729,61 +729,191 @@ print(total)
 
 Yes.
 
-Testing this code with the samples.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 + 7
 
-Input 5 2 4 1.
+    n, a, b, k = map(int, input_stream.readline().rstrip("\n").split())
 
-After step 1, next_dp is [0,1,0,1,0,0] (indices 0-5). sum is 1+1=2.
+    dp_prev = [0] * (n + 2)
+    dp_prev[a] = 1
 
-Sample 2:
+    for _ in range(k):
+        diff = [0] * (n + 2)
+        for x in range(1, n + 1):
+            cnt = dp_prev[x]
+            if cnt == 0:
+                continue
+            d = abs(x - b)
+            if d == 0:
+                continue
+            low = x - (d - 1)
+            high = x + (d - 1)
+            low = max(1, low)
+            high = min(n, high)
+            if low > high:
+                continue
+            if low <= x <= high:
+                a1, b1 = low, x - 1
+                if a1 <= b1:
+                    diff[a1] += cnt
+                    diff[b1 + 1] -= cnt
+                a2, b2 = x + 1, high
+                if a2 <= b2:
+                    diff[a2] += cnt
+                    diff[b2 + 1] -= cnt
+            else:
+                if low <= high:
+                    diff[low] += cnt
+                    diff[high + 1] -= cnt
+        next_dp = [0] * (n + 2)
+        current = 0
+        for y in range(1, n + 1):
+            current += diff[y]
+            next_dp[y] = current % MOD
+        dp_prev = next_dp
 
-After step 1: next_dp is [0,1,0,1,0,0].
+    total = sum(dp_prev[1:n+1]) % MOD
+    print(total, file=output_stream)
 
-Step 2:
 
-x=1 (cnt=1):
 
-d=3-4=1's abs is 3?
+def test():
+    import io
 
-Wait, x=1, b=4.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 2 4 2
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-d=abs(1-4) =3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-low=1 -2 =-1 → max(1, -1)=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-high=1+2=3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-x=1 is in [1,3]. Split into left (low=1 to x-1=0 → invalid) and right (x+1=2 to high=3).
+    print('Tests passed 😎')
 
-So add ranges [2,3]. So diff[2] +=1, diff[4] -=1.
 
-x=3 (cnt=1):
+if __name__ == '__main__':
+    test()
 
-d=abs(3-4)=1.
 
-low=3-0=3, high=3+0=3.
+```
 
-x is in [3,3]. Split into left (3 to 2 → invalid) and right (4 to 3 → invalid). So no ranges. So no contributions.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Then, next_dp:
+```
 
-current starts at 0.
+Testing against sample input 2.
 
-y=1: 0.
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 + 7
 
-y=2: current +=1 →1.
+    n, a, b, k = map(int, input_stream.readline().rstrip("\n").split())
 
-y=3: current +=0 (diff[3] is 0) →1.
+    dp_prev = [0] * (n + 2)
+    dp_prev[a] = 1
 
-y=4: current +=-1 →0.
+    for _ in range(k):
+        diff = [0] * (n + 2)
+        for x in range(1, n + 1):
+            cnt = dp_prev[x]
+            if cnt == 0:
+                continue
+            d = abs(x - b)
+            if d == 0:
+                continue
+            low = x - (d - 1)
+            high = x + (d - 1)
+            low = max(1, low)
+            high = min(n, high)
+            if low > high:
+                continue
+            if low <= x <= high:
+                a1, b1 = low, x - 1
+                if a1 <= b1:
+                    diff[a1] += cnt
+                    diff[b1 + 1] -= cnt
+                a2, b2 = x + 1, high
+                if a2 <= b2:
+                    diff[a2] += cnt
+                    diff[b2 + 1] -= cnt
+            else:
+                if low <= high:
+                    diff[low] += cnt
+                    diff[high + 1] -= cnt
+        next_dp = [0] * (n + 2)
+        current = 0
+        for y in range(1, n + 1):
+            current += diff[y]
+            next_dp[y] = current % MOD
+        dp_prev = next_dp
 
-y=5: 0.
+    total = sum(dp_prev[1:n+1]) % MOD
+    print(total, file=output_stream)
 
-So sum is 1+1=2.
 
-Yes.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 3 4 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

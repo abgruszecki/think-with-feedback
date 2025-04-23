@@ -1389,6 +1389,9 @@ Now, implementing the code.
 
 Putting it all together:
 
+Testing against sample input 4.
+
+```python
 class ParserError(Exception):
     pass
 
@@ -1507,51 +1510,61 @@ def evaluate(node):
     else:
         raise ValueError("Unknown node type")
 
-def main():
-    input_line = input().strip()
+def main(input_stream, output_stream):
+    input_line = input_stream.readline().rstrip("\n").strip()
     tokens = tokenize(input_line)
     try:
         ast = parse(tokens)
     except ParserError as e:
-        print(f"Error during parsing: {e}")
+        print(f"Error during parsing: {e}", file=output_stream)
         return
     result = evaluate(ast)
-    print(f'"{result}"')
+    print(f'"{result}"', file=output_stream)
 
-if __name__ == "__main__":
-    main()
 
-This code should handle all cases correctly.
 
-Testing sample input 4:
+def test():
+    import io
 
-input_line is 'reversE(concAT(substr("hello",1,2),sUbstr("world",1,5,1)))'.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+suBstr("Noruz",1,4,2)
+""",
+            "output": \
+"""\
+"Nr"
+""",
+        }, 
+    ]
 
-The tokenizer will generate tokens:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-['reverse', '(', 'concat', '(', 'substr', '(', '"hello"', ',', '1', ',', '2', ')', ',', 'substr', '(', '"world"', ',', '1', ',', '5', ',', '1', ')', ')', ')'].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Parsing this:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The root is 'reverse' function with one argument: concat(...).
+    print('Tests passed 😎')
 
-concat has two arguments: substr("hello",1,2) and substr("world",1,5,1).
 
-Evaluating substr("hello",1,2) → 'he'.
+if __name__ == '__main__':
+    test()
 
-Evaluating substr("world",1,5,1) → 'world'.
 
-concat gives 'heworld'.
+```
 
-Reverse → 'dlrow eh' → 'dlroweh' when written as a single string.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Thus, the code produces "dlroweh", which matches the sample output.
+```
 
-Other samples should also work.
-
-The code reads the input, tokenizes, parses into the AST, evaluates, and prints the result enclosed in quotes.
-
-Thus, this should be the correct solution.
 </think>
 
 ```python

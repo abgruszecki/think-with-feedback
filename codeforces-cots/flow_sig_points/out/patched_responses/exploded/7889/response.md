@@ -334,99 +334,100 @@ Yes.
 
 So code:
 
-n = int(input())
+Testing against sample input 1.
 
-trees = [tuple(map(int, input().split())) for _ in range(n)]
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-last = -float('inf')
+    trees = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n)]
 
-count = 0
+    last = -float('inf')
 
-for i in range(n):
+    count = 0
 
-    x, h = trees[i]
+    for i in range(n):
 
-    next_x = trees[i+1][0] if i <n-1 else float('inf')
+        x, h = trees[i]
 
-    # Try left
+        next_x = trees[i+1][0] if i <n-1 else float('inf')
 
-    left = x - h
+        # Try left
 
-    if left > last:
+        left = x - h
 
-        count +=1
+        if left > last:
 
-        last = x
+            count +=1
 
-        continue
+            last = x
 
-    # Try right
+            continue
 
-    right = x + h
+        # Try right
 
-    if x > last and right < next_x:
+        right = x + h
 
-        count +=1
+        if x > last and right < next_x:
 
-        last = right
+            count +=1
 
-        continue
+            last = right
 
-    # else, do nothing. last remains as it was.
+            continue
 
-print(count)
+        # else, do nothing. last remains as it was.
 
-Wait, but for the next tree after i, when i is the last one (i =n-1), next_x is infinity, so right < next_x is True.
+    print(count, file=output_stream)
 
-So for the last tree, cutting right is allowed if x > last.
 
-Yes.
 
-Testing sample input 1:
+def test():
+    import io
 
-Sample 1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 2
+2 1
+5 10
+10 9
+20 1
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-trees = [(1,2), (2,1), (5,10), (10,9), (19,1)]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=0:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-x=1, h=2. next_x=2.
+    print('Tests passed 😎')
 
-left =1-2=-1. -1 > -inf → yes. count=1. last=1.
 
-i=1:
+if __name__ == '__main__':
+    test()
 
-x=2, h=1. next_x=5.
 
-left=2-1=1. 1>1? No.
+```
 
-Check right: x=2>1. right=3 <5 → yes. count=2. last=3.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=2:
-
-x=5. h=10. next_x=10.
-
-left=5-10=-5. >3? No.
-
-Check right: x=5>3. right=5+10=15 <10? No. So no. count remains 2. last remains 3.
-
-i=3:
-
-x=10, h=9. next_x=19.
-
-left=10-9=1. >3? No.
-
-Check right: x=10>3. right=19 <19? No. So no.
-
-i=4:
-
-x=19, h=1. next_x is infinity.
-
-left=19-1=18>3 → yes. count=3. last=19.
-
-So output 3.
+```
 
 Sample 2:
 

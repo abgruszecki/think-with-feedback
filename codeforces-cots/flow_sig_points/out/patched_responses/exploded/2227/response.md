@@ -455,96 +455,87 @@ In Python, the code can use flags and break loops with 'break' statements.
 
 Now, code:
 
-s = input().strip()
+Testing against sample input 1.
 
-n = len(s)
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-total = n * (n + 1) // 2
+    n = len(s)
 
-bad = 0
+    total = n * (n + 1) // 2
 
-for l in range(n):
-    # For each l, check all r from l to min(l+7, n-1)
-    max_r = min(l + 7, n - 1)
-    for r in range(l, max_r + 1):
-        has_triple = False
-        # Check all possible k and x in [l, r]
-        length = r - l + 1
-        max_k = (length - 1) // 2
-        for k in range(1, max_k + 1):
-            # x can be from l to r - 2*k
-            start_x = l
-            end_x = r - 2 * k
-            if start_x > end_x:
-                continue
-            for x in range(start_x, end_x + 1):
-                if s[x] == s[x + k] == s[x + 2 * k]:
-                    has_triple = True
+    bad = 0
+
+    for l in range(n):
+        # For each l, check all r from l to min(l+7, n-1)
+        max_r = min(l + 7, n - 1)
+        for r in range(l, max_r + 1):
+            has_triple = False
+            # Check all possible k and x in [l, r]
+            length = r - l + 1
+            max_k = (length - 1) // 2
+            for k in range(1, max_k + 1):
+                # x can be from l to r - 2*k
+                start_x = l
+                end_x = r - 2 * k
+                if start_x > end_x:
+                    continue
+                for x in range(start_x, end_x + 1):
+                    if s[x] == s[x + k] == s[x + 2 * k]:
+                        has_triple = True
+                        break
+                if has_triple:
                     break
-            if has_triple:
-                break
-        if not has_triple:
-            bad += 1
+            if not has_triple:
+                bad += 1
 
-print(total - bad)
+    print(total - bad, file=output_stream)
 
-Now, let's test this code with the examples.
 
-First example input:
 
-Input: '010101'
+def test():
+    import io
 
-The code loops l from 0 to 5.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+11001100
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-For l=0, r ranges from 0 to 5 (since l+7=7, but n-1=5). For each r in 0-5:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Check if the interval has any triplet.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-For example, r=5 (l=0):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-length =6. max_k is (6-1)//2=2. So k=1 and 2.
+    print('Tests passed 😎')
 
-k=1:
 
-x ranges from 0 to 5-2=3.
+if __name__ == '__main__':
+    test()
 
-x=0: s[0], s[1], s[2] → 0,1,0 → no.
 
-x=1:1,0,1 → no.
+```
 
-x=2:0,1,0 → no.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-x=3:1,0,1 → no.
+```
 
-k=2:
-
-x can be up to 5-4=1.
-
-x=0: s[0], s[2], s[4] → 0,0,0 → yes. So has_triple is True. So this interval is not counted as bad.
-
-Thus, for r=5, has_triple is True, so not added to bad.
-
-Other intervals: for example, l=0, r=4 (length 5):
-
-max_k=2.
-
-k=1: x up to 4-2=2.
-
-x=0,1,2: check.
-
-x=0: 0,1,0 → no.
-
-x=1:1,0,1 → no.
-
-x=2:0,1,0 → no.
-
-k=2: x can be up to 4-4=0.
-
-x=0: 0, s[2], s[4] → 0,0,0 → yes. So triplet found. So interval [0,4] is not bad.
-
-Thus, the code counts all bad intervals correctly.
-
-The code should work.
 </think>
 
 ```python

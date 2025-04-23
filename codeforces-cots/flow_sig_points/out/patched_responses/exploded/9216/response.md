@@ -841,163 +841,107 @@ Initialize a 2D array dp with dimensions (k) for m and (k) for c. But in practic
 
 So in code:
 
-k, pa, pb = map(int, input().split())
+Testing against sample input 1.
 
-MOD = 10**9+7
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 + 7
 
-if k ==0:
+    k, pa, pb = map(int, input_stream.readline().rstrip("\n").split())
 
-   print(0)
+    if k == 0:
+        print(0, file=output_stream)
+        return
 
-   exit()
+    sum_p = pa + pb
+    inv_pa_pb = pow(sum_p, MOD-2, MOD)
+    prob_a = pa * inv_pa_pb % MOD
+    prob_b = pb * inv_pa_pb % MOD
+    inv_pb = pow(pb, MOD-2, MOD)
+    formula_val = pa * inv_pb % MOD
 
-inv_pa_pb = pow(pa + pb, MOD-2, MOD)
+    dp = [[0] * k for _ in range(k)]
 
-prob_a = pa * inv_pa_pb % MOD
-
-prob_b = pb * inv_pa_pb % MOD
-
-inv_pb = pow(pb, MOD-2, MOD)
-
-formula_val = pa * inv_pb % MOD
-
-# Initialize DP table
-
-dp = [[0]*(k) for _ in range(k)]
-
-for c in range(k-1, -1, -1):
-
-    max_m = k - c -1
-
-    if max_m <0:
-
-        continue
-
-    for m in range(max_m, -1, -1):
-
-        # Compute a_val
-
-        a_val = 0
-
-        m_plus_1 = m +1
-
-        if m_plus_1 >= (k - c):
-
-            a_val = (m_plus_1 + formula_val) % MOD
-
-        else:
-
-            a_val = dp[m_plus_1][c]
-
-        # Compute term_b
-
-        new_ab = c + m
-
-        if new_ab >=k:
-
-            term_b = m % MOD
-
-        else:
-
-            if m ==0 and new_ab ==c:
-
-                # Self-loop case
-
-                numerator = (prob_a * a_val + prob_b * m) % MOD
-
-                denominator = prob_a % MOD
-
-                inv_denominator = pow(denominator, MOD-2, MOD)
-
-                dp_val = (numerator * inv_denominator) % MOD
-
-                dp[m][c] = dp_val
-
-                continue
-
+    for c in range(k-1, -1, -1):
+        max_m = k - c - 1
+        if max_m < 0:
+            continue
+        for m in range(max_m, -1, -1):
+            m_plus_1 = m + 1
+            if m_plus_1 >= (k - c):
+                a_val = (m_plus_1 + formula_val) % MOD
             else:
+                a_val = dp[m_plus_1][c]
+            
+            new_ab = c + m
+            if new_ab >= k:
+                term_b = m % MOD
+                dp[m][c] = (prob_a * a_val + prob_b * term_b) % MOD
+            else:
+                if m == 0 and new_ab == c:
+                    numerator = (prob_a * a_val + prob_b * m) % MOD
+                    denominator = prob_a % MOD
+                    inv_denominator = pow(denominator, MOD-2, MOD)
+                    dp_val = (numerator * inv_denominator) % MOD
+                    dp[m][c] = dp_val
+                else:
+                    term_b = (m + dp[m][new_ab]) % MOD
+                    dp[m][c] = (prob_a * a_val + prob_b * term_b) % MOD
 
-                term_b = (m + dp[m][new_ab]) % MOD
+    print(dp[0][0] % MOD, file=output_stream)
 
-        # Compute dp[m][c]
 
-        dp[m][c] = (prob_a * a_val + prob_b * term_b) % MOD
 
-print(dp[0][0] % MOD)
+def test():
+    import io
 
-But wait, in the code above, when new_ab <k and m is not zero or new_ab !=c, then the code computes term_b and dp[m][c].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 1 4
+""",
+            "output": \
+"""\
+370000006
+""",
+        }, 
+    ]
 
-But what about when new_ab is <k and m is zero but new_ab !=c? For example, if m=0, c=1, new_ab=1. Then new_ab ==c is true, but m is zero, so the code enters the self-loop case. But in this case, new_ab = c =1, and m=0. So new_ab ==c +m (1=1+0). So the code would handle that as a self-loop, even though the transition is to (0,1) → which may not have been processed yet.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But according to the processing order, c is processed in reverse order from k-1 downto 0. For c=1, when processing m=0, new_ab is 1. So the state (0,1) is part of the current c=1. But wait, no. The state is (m, c). So in the case where c=1, m=0, new_ab =1. So new_ab_c=1. So the new state is (0,1). Which is part of c=1. But in the code, when processing c=1, the code loops m from max_m down to 0. For c=1, max_m is k -1 -1 =k-2. For example, if k=3, c=1, max_m=3-1-1=1. So m ranges from 1 downto 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But if in this case, new_ab is 1, which is >=k? No, for k=3, new_ab=0 +1=1 <3. So the code would compute term_b =0 + dp[0][1].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But when processing c=1 and m=0, the code is processing (0,1). So the code would have to have already computed dp[0][1] before? Or is this part of the same processing?
+    print('Tests passed 😎')
 
-Ah, no. For c=1, the code processes m from max_m downto 0. For example, for k=3 and c=1, max_m=3-1-1=1. So m=1 and 0 are processed. So when m=1 is processed, it's handled first, then m=0.
 
-When m=1 and c=1:
+if __name__ == '__main__':
+    test()
 
-new_ab =1 +1=2 <3. So term_b is 1 + dp[1][2]. But for c=2, the max_m is 3-2-1=0. So during processing c=2, m=0 is processed. So when processing c=1, m=1, new_ab=2, which is c=2, which was processed before c=1. Because c is processed in reverse order.
 
-So the code's processing order ensures that when processing a state (m, c), the states (m', c') where c' >c have already been processed. And for the same c, higher m's are processed first. So dependencies are handled correctly.
+```
 
-But in the self-loop case, when processing (0,0), the code has to compute the equation for dp[0][0], which depends on itself. But this is handled by the special case.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 80, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 73, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '370000006'
+Got: '250000004'
 
-Thus, the code should correctly compute all DP states.
-
-Let's test the first sample input:
-
-Sample Input 1:
-
-1 1 1
-
-Sample Output: 2.
-
-The code would compute:
-
-prob_a = 1/(1+1) mod MOD = 500000004.
-
-prob_b = 500000004.
-
-formula_val = 1 * inv(1) mod MOD =1.
-
-Processing c from 0 downto 0 (since k=1):
-
-For c=0:
-
-max_m =1 -0 -1=0. So process m=0.
-
-Compute a_val:
-
-m_plus_1 =0+1=1. Check if 1 >= (1 -0) →1 >=1 → yes. So a_val =1 +1=2.
-
-new_ab =0 +0=0 <1.
-
-Check if m=0 and new_ab ==c (0 ==0) → yes.
-
-So enter self-loop case.
-
-numerator = (prob_a * a_val + prob_b * m) mod MOD.
-
-prob_a=500000004, a_val=2 → 500000004 *2 mod MOD = 1.
-
-prob_b * m is 500000004 *0 =0.
-
-numerator is 1.
-
-denominator is prob_a=500000004.
-
-inv_denominator = 500000004^{MOD-2} mod MOD → which is 2.
-
-So dp_val =1 *2 mod MOD=2.
-
-So dp[0][0]=2.
-
-The code returns 2, which matches the sample.
-
-Thus, the code works for this case.
+```
 
 Another sample input:
 

@@ -593,31 +593,94 @@ So when BFS is run from r2, the code correctly finds all parents.
 
 So this code should work.
 
-Testing with sample inputs.
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+import sys
+from collections import deque
 
-3 2 3
 
-2 2
+def main(input_stream, output_stream):
+    n, r1, r2 = map(int, input_stream.readline().split())
+    p_old = list(map(int, input_stream.readline().split()))
 
-sorted_cities is [1,3]
+    # Build adjacency list
+    adj = [[] for _ in range(n + 1)]
+    index = 0
+    for city in range(1, n + 1):
+        if city == r1:
+            continue
+        pi = p_old[index]
+        adj[city].append(pi)
+        adj[pi].append(city)
+        index += 1
 
-p_old is [2,2]
+    # BFS to find new parents starting from r2
+    parent = [0] * (n + 1)
+    visited = [False] * (n + 1)
+    q = deque([r2])
+    visited[r2] = True
+    parent[r2] = 0  # No parent
 
-So for city 1: add edges 1-2.
+    while q:
+        u = q.popleft()
+        for v in adj[u]:
+            if not visited[v]:
+                visited[v] = True
+                parent[v] = u
+                q.append(v)
 
-city 3: add edges 3-2.
+    # Prepare output in order of city indices, excluding r2
+    output = []
+    for city in range(1, n + 1):
+        if city != r2:
+            output.append(str(parent[city]))
+    print(' '.join(output), file=output_stream)
 
-Adj list for 1: [2], 2: [1,3], 3: [2].
 
-BFS from 3:
 
-Process 3. Neighbors are 2. Mark 2 as visited, parent 3.
+def test():
+    import io
 
-Process 2. Neighbors are 1 and 3. 3 is visited. Process 1. Mark parent 2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 2 4
+6 1 2 4 2
+""",
+            "output": \
+"""\
+6 4 1 4 2
+""",
+        }, 
+    ]
 
-So output for cities 1 and 2: 2 and 3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample Input 2:
 

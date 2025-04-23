@@ -1499,203 +1499,200 @@ Now, let's put this all together.
 
 The code:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n, k = map(int, input().split())
 
-p = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-b = list(map(int, input().split()))
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-B_set = set(b)
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-pos_in_p = {val: idx for idx, val in enumerate(p)}
+    B_set = set(b)
 
-left_b = [-1] * n
+    pos_in_p = {val: idx for idx, val in enumerate(p)}
 
-stack = []
+    left_b = [-1] * n
 
-for i in range(n):
+    stack = []
 
-    val = p[i]
+    for i in range(n):
 
-    if val in B_set:
+        val = p[i]
 
-        # Update stack
+        if val in B_set:
 
-        while stack and stack[-1][0] >= val:
+            # Update stack
 
-            stack.pop()
+            while stack and stack[-1][0] >= val:
 
-        if stack:
+                stack.pop()
 
-            left_b[i] = stack[-1][1]
+            if stack:
 
-        else:
-
-            left_b[i] = -1
-
-        stack.append( (val, i) )
-
-    else:
-
-        # Binary search for the largest value < val in the stack
-
-        low = 0
-
-        high = len(stack) - 1
-
-        res = -1
-
-        while low <= high:
-
-            mid = (low + high) // 2
-
-            if stack[mid][0] < val:
-
-                res = mid
-
-                low = mid + 1
+                left_b[i] = stack[-1][1]
 
             else:
 
-                high = mid - 1
+                left_b[i] = -1
 
-        if res != -1:
-
-            left_b[i] = stack[res][1]
+            stack.append( (val, i) )
 
         else:
 
-            left_b[i] = -1
+            # Binary search for the largest value < val in the stack
 
-right_b = [n] * n
+            low = 0
 
-stack = []
+            high = len(stack) - 1
 
-for i in range(n-1, -1, -1):
+            res = -1
 
-    val = p[i]
+            while low <= high:
 
-    if val in B_set:
+                mid = (low + high) // 2
 
-        # Update stack
+                if stack[mid][0] < val:
 
-        while stack and stack[-1][0] >= val:
+                    res = mid
 
-            stack.pop()
+                    low = mid + 1
 
-        if stack:
+                else:
 
-            right_b[i] = stack[-1][1]
+                    high = mid - 1
 
-        else:
+            if res != -1:
 
-            right_b[i] = n
-
-        stack.append( (val, i) )
-
-    else:
-
-        # Binary search for the first element < val in the stack
-
-        low = 0
-
-        high = len(stack) - 1
-
-        res = -1
-
-        while low <= high:
-
-            mid = (low + high) // 2
-
-            if stack[mid][0] < val:
-
-                res = mid
-
-                high = mid - 1
+                left_b[i] = stack[res][1]
 
             else:
 
-                low = mid + 1
+                left_b[i] = -1
 
-        if res != -1:
+    right_b = [n] * n
 
-            right_b[i] = stack[res][1]
+    stack = []
+
+    for i in range(n-1, -1, -1):
+
+        val = p[i]
+
+        if val in B_set:
+
+            # Update stack
+
+            while stack and stack[-1][0] >= val:
+
+                stack.pop()
+
+            if stack:
+
+                right_b[i] = stack[-1][1]
+
+            else:
+
+                right_b[i] = n
+
+            stack.append( (val, i) )
 
         else:
 
-            right_b[i] = n
+            # Binary search for the first element < val in the stack
 
-total = 0
+            low = 0
 
-for i in range(n):
+            high = len(stack) - 1
 
-    if p[i] not in B_set:
+            res = -1
 
-        L = left_b[i]
+            while low <= high:
 
-        R = right_b[i]
+                mid = (low + high) // 2
 
-        contribution = R - L - 1
+                if stack[mid][0] < val:
 
-        total += contribution
+                    res = mid
 
-print(total)
+                    high = mid - 1
 
-But this code may have issues with the binary search in the stack for non-B elements.
+                else:
 
-Let's test it on the first sample.
+                    low = mid + 1
 
-Sample 1:
+            if res != -1:
 
-n=3, k=2.
+                right_b[i] = stack[res][1]
 
-p = [2,1,3]
+            else:
 
-b = [1,3]
+                right_b[i] = n
 
-B_set = {1,3}
+    total = 0
 
-Processing left_b:
+    for i in range(n):
 
-For i=0, val=2 (not in B).
+        if p[i] not in B_set:
 
-Stack is empty. So left_b[0] = -1.
+            L = left_b[i]
 
-For i=1, val=1 (in B):
+            R = right_b[i]
 
-Stack is empty. left_b[1] = -1. Push (1,1).
+            contribution = R - L - 1
 
-For i=2, val=3 (in B):
+            total += contribution
 
-Stack has (1,1). 1 <3. left_b[2] =1. Push (3,2).
+    print(total, file=output_stream)
 
-Processing right_b:
 
-i=2 (val=3, in B):
 
-Stack is empty. Push (3,2). right_b[2] =n=3.
+def test():
+    import io
 
-i=1 (val=1, in B):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 5
+1 2 3 4 5 6 7 8 9 10
+2 4 6 8 10
+""",
+            "output": \
+"""\
+30
+""",
+        }, 
+    ]
 
-Stack is [(3,2)]. 3 >=1. Pop. Stack is empty. right_b[1] =3. Push (1,1).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=0 (val=2, not in B):
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Stack is [(1,1)]. Binary search for val=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-low=0, high=0.
+    print('Tests passed 😎')
 
-mid=0: stack[0][0] =1 <2. res=0. high=-1.
 
-right_b[0] = stack[0][1] =1.
+if __name__ == '__main__':
+    test()
 
-Now, for each element not in B:
 
-i=0: p[0]=2, not in B. L=left_b[0]=-1, R=right_b[0]=1. contribution =1 - (-1) -1=1. Which matches the sample.
+```
 
-So code works.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

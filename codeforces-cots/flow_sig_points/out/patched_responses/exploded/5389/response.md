@@ -347,13 +347,70 @@ Find the minimum sum.
 
 Print it.
 
-Yes. Let's test this against the samples.
+Testing against sample input 1.
 
-First sample:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    k_list = list(map(int, input_stream.readline().rstrip("\n").split()))
+    min_time = float('inf')
 
-n=1, k=[1], then cashier's m_list is [1].
+    for i in range(n):
+        m = list(map(int, input_stream.readline().rstrip("\n").split()))
+        total = sum(5 * x + 15 for x in m)
+        if total < min_time:
+            min_time = total
 
-sum is 5*1 +15 =20. Output 20. Correct.
+    print(min_time, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 4 3 2
+100
+1 2 2 3
+1 9 1
+7 8
+""",
+            "output": \
+"""\
+100
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

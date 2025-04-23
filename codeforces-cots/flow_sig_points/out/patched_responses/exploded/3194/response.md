@@ -223,63 +223,145 @@ But what about leading zeros? Well, n is given as a positive integer, so no lead
 
 So code:
 
-n = int(input())
+Testing against sample input 1.
 
-m = len(str(n))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-same_digit_candidates = []
+    m = len(str(n))
 
-for d in range(1, 10):
+    same_digit_candidates = []
 
-    candidate = d * (10 ** (m-1))
+    for d in range(1, 10):
 
-    if candidate > n:
+        candidate = d * (10 ** (m-1))
 
-        same_digit_candidates.append(candidate)
+        if candidate > n:
 
-min_same = min(same_digit_candidates) if same_digit_candidates else float('inf')
+            same_digit_candidates.append(candidate)
 
-next_digit = 10 ** m
+    min_same = min(same_digit_candidates) if same_digit_candidates else float('inf')
 
-result = min(min_same, next_digit) - n
+    next_digit = 10 ** m
 
-print(result)
+    result = min(min_same, next_digit) - n
 
-Yes, this should work.
+    print(result, file=output_stream)
 
-But let's test the case when same_digit_candidates is empty, like n=999. Then min_same is infinity, so min(inf, 1000) is 1000. 1000-999=1. Correct.
 
-Another test case: n=100. same_digit_candidates are 200,300,...,900. min_same is200. next_digit is1000. So min is200. 200-100=100. So the answer is100.
 
-Yes.
+def test():
+    import io
 
-So the code should handle all cases.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+201
+""",
+            "output": \
+"""\
+99
+""",
+        }, 
+    ]
 
-But wait, what about numbers like 1999?
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-n=1999. m=4 digits.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-same_digit_candidates: d * 10^3 =d*1000. d can be 2-9. candidates 2000, 3000, etc. The minimal is2000. next_digit is10^4=10000. So the answer is2000-1999=1. Which is correct. Next lucky year after1999 is2000.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Another example: n=2000. same_digit_candidates are 3000,4000,...9000. next_digit is10000. So answer is3000-2000=1000.
+    print('Tests passed 😎')
 
-But wait, 2000 is already a lucky year. So the next one is 3000. So code correctly computes that.
 
-So yes, the code is correct.
+if __name__ == '__main__':
+    test()
 
-Now, think about the edge cases.
 
-Edge case 1: n=1. The same_digit_candidates are 2-9. min_same is2. next_digit is10. min(2,10)=2. 2-1=1. Correct.
+```
 
-Edge case 2: n=9. same_digit_candidates is empty (since 9 is the maximum for 1 digit, so all same-digit candidates (d*1 where d>9) are impossible). So next_digit is10. 10-9=1. Correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Another edge case: n=999999999 (the maximum input). m=9 digits. same_digit_candidates: d*10^8 where d>999999999 / 1e8. 1e8 is 100000000. 999,999,999 divided by 1e8 is 9.99999999. So d must be >=10, but d ranges from 1-9. So same_digit_candidates is empty. next_digit is1e9. So answer is 1e9 -999999999 =1.
+```
 
-But wait, 1e9 is 10^9, which is 1 followed by 9 zeros. So yes. The next lucky year after 999999999 is 1000000000, which is 1e9. So answer is1.
+Testing against sample input 2.
 
-So code handles that.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-Another edge case: n=500. same-digit candidates are 600,700,...900. next_digit is1000. min is600. 600-500=100. So answer is100. Correct.
+    m = len(str(n))
+
+    same_digit_candidates = []
+
+    for d in range(1, 10):
+
+        candidate = d * (10 ** (m-1))
+
+        if candidate > n:
+
+            same_digit_candidates.append(candidate)
+
+    min_same = min(same_digit_candidates) if same_digit_candidates else float('inf')
+
+    next_digit = 10 ** m
+
+    result = min(min_same, next_digit) - n
+
+    print(result, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4000
+""",
+            "output": \
+"""\
+1000
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So the code works.
 </think>

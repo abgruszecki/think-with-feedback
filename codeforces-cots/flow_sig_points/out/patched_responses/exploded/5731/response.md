@@ -480,37 +480,111 @@ j=2: R[j] is5. Binary search for elements less than 5. All elements (1,2,4) are 
 
 So total ans is 3+3=6. Which matches the first example.
 
-Second example:
+Testing against sample input 2.
 
-Input: ()()()
+```python
+def main(input_stream, output_stream):
+    MOD = 1e9+7
 
-String is index 0: '(', 1: ')', 2: '(', 3: ')', 4: '(', 5: ')'
+    s = input_stream.readline().rstrip("\n").strip()
 
-L is [0,2,4], R is [1,3,5].
+    L = []
+    R = []
+    for idx, c in enumerate(s):
+        if c == '(':
+            L.append(idx)
+        else:
+            R.append(idx)
+    a = len(L)
+    b = len(R)
+    if a ==0 or b ==0:
+        print(0, file=output_stream)
+        return
 
-For each j in R:
+    max_n = a + b
+    fact = [1]*(max_n+1)
+    for i in range(1, max_n+1):
+        fact[i] = fact[i-1] * i % MOD
+    inv_fact = [1]*(max_n+1)
+    inv_fact[max_n] = pow(fact[max_n], MOD-2, MOD)
+    for i in range(max_n-1, -1, -1):
+        inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
 
-j=0 (R[j] is 1):
+    def comb(n, k):
+        if n <0 or k <0 or n <k:
+            return 0
+        return fact[n] * inv_fact[k] % MOD * inv_fact[n -k] % MOD
 
-Binary search L for elements <1. L[0] is 0 <1. So i=0. term is comb(0 +3-0, 0) = comb(3,0) =1? Wait, no. Wait, j is 0, b=3. So b-j=3-0=3. So i + (b-j) =0 +3=3, k is 0. So C(3,0) is 1. So term is 1.
+    ans =0
+    for j in range(len(R)):
+        # find the number of '(' before R[j]
+        r_pos = R[j]
+        # find the largest i in L where L[i] < r_pos
+        # binary search
+        low = 0
+        high = a-1
+        res = -1
+        while low <= high:
+            mid = (low + high) //2
+            if L[mid] < r_pos:
+                res = mid
+                low = mid +1
+            else:
+                high = mid -1
+        if res == -1:
+            # no '(' before
+            continue
+        i = res
+        # compute C(i + (b - j), i)
+        n = i + (b - j)
+        k = i
+        term = comb(n, k)
+        ans = (ans + term) % MOD
+    print(ans, file=output_stream)
 
-Wait, but according to our code, j is the index in R, which for R of size 3, j ranges 0,1,2.
 
-For j=0, R[j] is 1. L is [0,2,4]. Binary search for elements <1: L[0]=0 is <1. The largest index is 0. So i=0.
 
-term is comb(0 + (3 -0), 0) → 3-0 is 3, so 0+3=3. comb(3,0) is 1.
+def test():
+    import io
 
-j=0 contributes 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+)))
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-j=1: R[j] is3. Find elements in L <3. L elements are 0,2,4. All elements less than3 are 0 and 2. Largest i is1 (L[1]=2). So i=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-term is comb(1 + (3-1), 1) → comb(1+2,1) = comb(3,1)=3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-j=1 contributes 3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-j=2: R[j]=5. All elements in L are <5. i=2. term is comb(2 + (3-2), 2) → 2+1=3, comb(3,2)=3.
+    print('Tests passed 😎')
 
-So sum is 1+3+3=7. Which matches the second example.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: input ))).
 

@@ -144,13 +144,62 @@ Now, for the implementation. Since n can be up to 3e5, the code needs to be effi
 
 So the code is straightforward.
 
-Testing on sample inputs:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a.sort()
+    total = 0
+    for i in range(n // 2):
+        total += (a[i] + a[-i-1]) ** 2
+    print(total, file=output_stream)
 
-4
 
-8 5 2 3 → sorted [2,3,5,8]. pairs (2+8)=10, (3+5)=8. sum 100+64=164.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+1 1 1 2 2 2
+""",
+            "output": \
+"""\
+27
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

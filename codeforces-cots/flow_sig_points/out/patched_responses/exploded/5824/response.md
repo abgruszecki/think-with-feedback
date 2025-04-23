@@ -1639,42 +1639,89 @@ At this point, I'm unable to proceed further and must conclude that the correct 
 
 The code for this is as follows:
 
-n, m = map(int, input().split())
-a = list(map(int, input().split()))
+Testing against sample inputs 1, 2.
 
-sum_original = sum(a)
-prev = 0
-sum_new = 0
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for x in a:
-    current = max(prev, 1)
-    current = min(current, x)
-    sum_new += current
-    prev = current
+    sum_original = sum(a)
+    prev = 0
+    sum_new = 0
 
-print(sum_original - sum_new)
+    for x in a:
+        current = max(prev, 1)
+        current = min(current, x)
+        sum_new += current
+        prev = current
 
-Let's test this against the samples:
+    print(sum_original - sum_new, file=output_stream)
 
-Sample 1:
 
-sum_original =15. 
 
-sum_new = 5*1=5. 
+def test():
+    import io
 
-Output is 10. Correct. 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 5
+1 2 4
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+        {
+            "input": \
+"""\
+5 5
+2 3 1 4 4
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
 
-Sample 2:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum_original=7. 
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sum_new=1+1+1=3. Output is 4. 
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But sample's output is 3. 
+    print('Tests passed 😎')
 
-Contradiction. 
 
-Thus, this code is incorrect. 
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 62, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 55, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '3'
+Got: '4'
+
+```
 
 But sample input 2's output is 3, which implies that the sum_new is 4. 
 

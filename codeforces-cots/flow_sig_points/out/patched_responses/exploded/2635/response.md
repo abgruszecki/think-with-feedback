@@ -831,33 +831,77 @@ But earlier analysis shows that when c0 is negative, there's no possible t that 
 
 Thus, the code will work.
 
-Let's test this against the sample inputs.
+Testing against sample input 1.
 
-Sample Input 1:1359257.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    h = 1234567
+    car = 123456
+    computer = 1234
 
-n=1359257.
+    max_a = n // h
+    found = False
+    for a in range(max_a + 1):
+        rem = n - a * h
+        if rem < 0:
+            break
+        if rem % 2 != 0:
+            continue
+        K = rem // 2
+        # Solve 61728b + 617c = K
+        # Compute b0 = (595*K) mod 617
+        b0 = (595 * K) % 617
+        c0 = (K - 61728 * b0) // 617
+        if c0 >= 0:
+            found = True
+            break
 
-h=1234567.
+    print("YES" if found else "NO", file=output_stream)
 
-We iterate a from 0 to 1,359,257//1,234,567=1.
 
-a=0:
 
-rem=1359257, which is even? 1359257 is odd. So rem is odd, skip.
+def test():
+    import io
 
-a=1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+17851817
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-rem=1359257 -1234567=124690. Even. K=124690/2=62345.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-b0=(595*62345) mod617.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-62345 mod617=62345//617=101*617=62317. 62345-62317=28. So 62345 mod617=28.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-595*28=16660 mod617.
+    print('Tests passed 😎')
 
-617*27=16659 →16660-16659=1 → mod617=1. So b0=1.
 
-c0=(62345-61728*1)/617= (62345-61728)=617 →617/617=1. c0=1 >=0 → return YES.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample Input 2:17851817.
 

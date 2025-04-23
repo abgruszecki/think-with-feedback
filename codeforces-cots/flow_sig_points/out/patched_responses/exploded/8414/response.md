@@ -667,263 +667,232 @@ Once that's done, proceed to process the remaining k's.
 
 Now, the code outline:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-n = int(sys.stdin.readline())
 
-s = sys.stdin.readline().strip()
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
-mod = 10**18 + 3
+    s = input_stream.readline().strip()
 
-base = 911382629
+    mod = 10**18 + 3
 
-# Precompute prefix_hash and power array
+    base = 911382629
 
-prefix_hash = [0] * (n+1)
+    # Precompute prefix_hash and power array
 
-power = [1] * (n+1)
+    prefix_hash = [0] * (n+1)
 
-for i in range(n):
+    power = [1] * (n+1)
 
-    prefix_hash[i+1] = (prefix_hash[i] * base + ord(s[i])) % mod
+    for i in range(n):
 
-    power[i+1] = (power[i] * base) % mod
+        prefix_hash[i+1] = (prefix_hash[i] * base + ord(s[i])) % mod
 
-def get_hash(l, r):
+        power[i+1] = (power[i] * base) % mod
 
-    # returns hash of s[l..r] (0-based, inclusive)
+    def get_hash(l, r):
 
-    if l > r:
+        # returns hash of s[l..r] (0-based, inclusive)
 
-        return 0
+        if l > r:
 
-    res = (prefix_hash[r+1] - prefix_hash[l] * power[r - l +1]) % mod
+            return 0
 
-    return res
+        res = (prefix_hash[r+1] - prefix_hash[l] * power[r - l +1]) % mod
 
-# Compute initial current_max for k=1
+        return res
 
-# Compute prefix function for s
+    # Compute initial current_max for k=1
 
-pi = [0] * n
+    # Compute prefix function for s
 
-for i in range(1, n):
+    pi = [0] * n
 
-    j = pi[i-1]
+    for i in range(1, n):
 
-    while j >0 and s[i] != s[j]:
+        j = pi[i-1]
 
-        j = pi[j-1]
+        while j >0 and s[i] != s[j]:
 
-    if s[i] == s[j]:
+            j = pi[j-1]
 
-        j +=1
+        if s[i] == s[j]:
 
-    pi[i] = j
+            j +=1
 
-# find maximum odd border for s
+        pi[i] = j
 
-current_max = 0
+    # find maximum odd border for s
 
-m = pi[-1]
+    current_max = 0
 
-while m >0:
+    m = pi[-1]
 
-    if m %2 ==1 and m < n:
+    while m >0:
 
-        current_max = m
+        if m %2 ==1 and m < n:
 
-        break
-
-    m = pi[m-1]
-
-else:
-
-    # check if m=1 is possible
-
-    if s[0] == s[-1]:
-
-        current_max =1
-
-    else:
-
-        current_max =-1
-
-result = [current_max]
-
-# Process k from 2 to ceil(n/2)
-
-ceil_n_over_2 = (n +1) //2
-
-for k in range(2, ceil_n_over_2 +1):
-
-    l = k-1
-
-    r = n -k
-
-    L = r - l +1
-
-    if L <=0:
-
-        result.append(-1)
-
-        continue
-
-    if L <1:
-
-        result.append(-1)
-
-        continue
-
-    previous_max = result[-1]
-
-    # candidate_m starts at previous_max -2
-
-    candidate_m = previous_max -2
-
-    # adjust candidate_m to be odd, less than L, >=1
-
-    while candidate_m >=1 and (candidate_m >= L or candidate_m %2 ==0):
-
-        candidate_m -=2
-
-    found = -1
-
-    while candidate_m >=1:
-
-        # compute hash of first candidate_m and last candidate_m of T_k
-
-        # first: s[l..l + candidate_m -1]
-
-        # last: s[r - candidate_m +1 ... r]
-
-        if l + candidate_m -1 > r or r - candidate_m +1 < l:
-
-            candidate_m -=2
-
-            continue
-
-        hash_first = get_hash(l, l + candidate_m -1)
-
-        hash_last = get_hash(r - candidate_m +1, r)
-
-        if hash_first == hash_last:
-
-            found = candidate_m
+            current_max = m
 
             break
 
-        candidate_m -=2
-
-    # if no found, check m=1
-
-    if found ==-1:
-
-        # check if first and last character of T_k are the same
-
-        if s[l] == s[r] and L >=2:
-
-            found =1
-
-    result.append(found if found !=0 else -1)
-
-# convert result to strings, replace any found ==0 with -1
-
-output = []
-
-for x in result:
-
-    if x <=0:
-
-        output.append(-1)
+        m = pi[m-1]
 
     else:
 
-        output.append(x)
+        # check if m=1 is possible
 
-print(' '.join(map(str, output)))
+        if s[0] == s[-1]:
 
-Wait, but there's a bug here. For the current_max in the first step, when the initial m computed from the failure function is not found, we need to check if m=1 is possible by comparing the first and last characters of the entire string.
+            current_max =1
 
-In the code above, after the loop, if current_max is 0, and the first and last characters are equal, then current_max is set to 1. Otherwise, -1.
+        else:
 
-But in the code for processing k=1, the code seems to handle this.
+            current_max =-1
 
-But when k=2, the T_k is the substring s[1..n-2], etc.
+    result = [current_max]
 
-Now, in the loop for k in range(2, ...):
+    # Process k from 2 to ceil(n/2)
 
-For each k, we start by checking candidate_m = previous_max -2.
+    ceil_n_over_2 = (n +1) //2
 
-But this candidate_m could be even, so we adjust it by subtracting 2 until it's odd and less than L.
+    for k in range(2, ceil_n_over_2 +1):
 
-Then, for each candidate_m, we check if the first and last m characters of T_k match.
+        l = k-1
 
-If not, subtract 2 and check again.
+        r = n -k
 
-But in the worst case, this could take O(L) steps for each k.
+        L = r - l +1
 
-But given that the candidate_m starts at previous_max -2, which is derived from the previous k's maximum, this could be efficient.
+        if L <=0:
 
-Now, let's test this code against the first sample input.
+            result.append(-1)
 
-Sample Input 1:
+            continue
 
-15
+        if L <1:
 
-bcabcabcabcabca
+            result.append(-1)
 
-The initial current_max for k=1 is 9.
+            continue
 
-For k=2, the substring is s[1..13] (length 13). The candidate_m is 9-2=7. Since 7 is odd and less than 13, we check if the first 7 characters and last 7 characters match.
+        previous_max = result[-1]
 
-The code computes hash_first and hash_last. If they match, then found=7.
+        # candidate_m starts at previous_max -2
 
-Assuming that they do match, then the current_max for k=2 is 7.
+        candidate_m = previous_max -2
 
-This proceeds similarly for k=3, etc.
+        # adjust candidate_m to be odd, less than L, >=1
 
-Which matches the sample output.
+        while candidate_m >=1 and (candidate_m >= L or candidate_m %2 ==0):
 
-Thus, the code should work.
+            candidate_m -=2
 
-But there's a problem when the previous_max is -1. For example, when the previous k's current_max is -1, then candidate_m is -1 -2 = -3, which is invalid. So in this case, the code should check from the maximum possible m for the current T.
+        found = -1
 
-But when previous_max is -1 (meaning no valid m), the code will start with candidate_m = -3, which is invalid, so the loop will not find any m and check m=1. If the first and last characters of the current T match, then m=1 is the answer.
+        while candidate_m >=1:
 
-So the code has a bug in this case. For example, when previous_max is -1, the code may not check m=1.
+            # compute hash of first candidate_m and last candidate_m of T_k
 
-For example, consider a k-substring where the previous_max is -1, but the current T has first and last characters equal. Then, the code should output 1.
+            # first: s[l..l + candidate_m -1]
 
-But in the code, candidate_m starts at -3, then enters the loop:
+            # last: s[r - candidate_m +1 ... r]
 
-candidate_m = previous_max -2 = -3.
+            if l + candidate_m -1 > r or r - candidate_m +1 < l:
 
-The while loop 'while candidate_m >=1 and ...' is not entered.
+                candidate_m -=2
 
-Then, found is -1. Then, after the loop, check if s[l] == s[r]. If yes, found=1.
+                continue
 
-Thus, the code handles this case.
+            hash_first = get_hash(l, l + candidate_m -1)
 
-Thus, the code should correctly handle cases where previous_max is -1.
+            hash_last = get_hash(r - candidate_m +1, r)
 
-Thus, the code should work.
+            if hash_first == hash_last:
 
-Now, considering the time constraints.
+                found = candidate_m
 
-The prefix_hash and power arrays are precomputed in O(n) time.
+                break
 
-The initial failure function is computed in O(n) time.
+            candidate_m -=2
 
-Then, for each k, the inner loop runs for O(1) steps on average, leading to O(n) total time.
+        # if no found, check m=1
 
-Thus, the code should run in O(n) time, which is acceptable for n=1e6.
+        if found ==-1:
 
-Memory usage:
+            # check if first and last character of T_k are the same
 
-The prefix_hash and power arrays are O(n) each, which for n=1e6 is 2MB each (each entry is a 64-bit integer), totaling 4MB. The prefix function array is O(n) (1e6 integers), which is 4MB. So total memory is around 8MB, well under the 256MB limit.
+            if s[l] == s[r] and L >=2:
 
-Thus, the code should work.
+                found =1
+
+        result.append(found if found !=0 else -1)
+
+    # convert result to strings, replace any found ==0 with -1
+
+    output = []
+
+    for x in result:
+
+        if x <=0:
+
+            output.append(-1)
+
+        else:
+
+            output.append(x)
+
+    print(' '.join(map(str, output)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+24
+abaaabaaaabaaabaaaabaaab
+""",
+            "output": \
+"""\
+15 13 11 9 7 5 3 1 1 -1 -1 1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

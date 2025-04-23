@@ -991,95 +991,98 @@ print(' '.join(map(str, count)))
 
 This should work.
 
-Testing the first sample:
+Testing against sample input 1.
 
-After simulation, steps for (0,1) is 1.
+```python
+def main(input_stream, output_stream):
+    x, y, x0, y0 = map(int, input_stream.readline().rstrip("\n").split())
+    x0 -= 1
+    y0 -= 1
+    s = input_stream.readline().rstrip("\n").strip()
 
-steps for (0,2) is 3.
+    INF = float('inf')
+    steps = [[INF] * y for _ in range(x)]
+    steps[x0][y0] = 0
 
-steps for (1,2) is4.
+    current_i, current_j = x0, y0
+    current_step = 1
 
-steps for (1,3) is5.
+    for cmd in s:
+        new_i, new_j = current_i, current_j
+        if cmd == 'L' and current_j > 0:
+            new_j -= 1
+        elif cmd == 'R' and current_j < y - 1:
+            new_j += 1
+        elif cmd == 'U' and current_i > 0:
+            new_i -= 1
+        elif cmd == 'D' and current_i < x - 1:
+            new_i += 1
+        
+        if steps[new_i][new_j] == INF:
+            steps[new_i][new_j] = current_step
+        
+        current_i, current_j = new_i, new_j
+        current_step += 1
 
-steps for (2,3) is6.
+    count = [0] * (len(s) + 1)
+    count[0] = 1  # starting cell
 
-steps for (2,2) is8.
+    for i in range(x):
+        for j in range(y):
+            if i == x0 and j == y0:
+                continue
+            if steps[i][j] == INF:
+                count[-1] += 1
+            else:
+                count[steps[i][j]] += 1
 
-Other cells are INF.
+    print(' '.join(map(str, count)), file=output_stream)
 
-So count[0] =1.
 
-count[1] +=1 (0,1).
 
-count[3] +=1 (0,2).
+def test():
+    import io
 
-count[4] +=1 (1,2).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 2 2 2
+ULD
+""",
+            "output": \
+"""\
+1 1 1 1
+""",
+        }, 
+    ]
 
-count[5] +=1 (1,3).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-count[6] +=1 (2,3).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-count[8] +=1 (2,2).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Other cells contribute to count[8] (the others are 6-1=5 cells? Wait, no. Let's see:
+    print('Tests passed 😎')
 
-Total cells:3x4=12. Starting cell is 1. Other cells are 11.
 
-In the code, count starts as [1, 0, 0, 0, 0, 0, 0, 0, 0, 0].
+if __name__ == '__main__':
+    test()
 
-Then, for each non-starting cell:
 
-- (0,0): INF → count[8] +=1.
+```
 
-- (0,1): steps 1 → count[1] +=1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-- (0,2):3 → count[3].
+```
 
-- (0,3):INF → count[8].
-
-- (1,0):INF → count[8].
-
-- (1,1): skipped.
-
-- (1,2):4 → count[4].
-
-- (1,3):5 → count[5].
-
-- (2,0):INF → count[8].
-
-- (2,1):INF → count[8].
-
-- (2,2):8 → count[8].
-
-- (2,3):6 → count[6].
-
-So:
-
-count[8] +=6 (0,0;0,3;1,0;2,0;2,1;2,2) → 6?
-
-Yes. So count[8] is 6.
-
-Other steps:
-
-count[1] is 1.
-
-count[3] is 1.
-
-count[4] is1.
-
-count[5] is1.
-
-count[6] is1.
-
-count[8] is6.
-
-Other steps (0,2, etc.) are zero.
-
-So the output is:
-
-1 1 0 1 1 1 1 0 6 → which matches the sample.
-
-So the code is correct.
 </think>
 
 ```python

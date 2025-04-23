@@ -475,41 +475,78 @@ print(0)
 
 Yes. This code should work.
 
-Testing the second example: 5 RRRUU.
+Testing against sample input 2.
 
-r=3, l=0, u=2, d=0.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+    r = s.count('R')
+    l = s.count('L')
+    u = s.count('U')
+    d = s.count('D')
 
-For k=5: odd, skip.
+    for k in range(n, -1, -1):
+        if k % 2 != 0:
+            continue
+        for x in range(0, k + 1, 2):
+            y = k - x
+            if y < 0 or y % 2 != 0:
+                continue
+            req_r = x // 2
+            req_l = req_r
+            req_u = y // 2
+            req_d = req_u
+            if r >= req_r and l >= req_l and u >= req_u and d >= req_d:
+                print(k, file=output_stream)
+                return
+    print(0, file=output_stream)
 
-k=4:
 
-x_moves can be 0, 2,4.
 
-x_moves=0: y_moves=4. req_u=2, req_d=2. d is 0 <2. No.
+def test():
+    import io
 
-x_moves=2: y_moves=2. req_u=1, req_d=1. d is 0 <1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+LLRRRR
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-x_moves=4: y_moves=0. req_r=2, l=0 <2. No.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-No solutions. So k=4 no.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-k=3: odd.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-k=2:
+    print('Tests passed 😎')
 
-x_moves 0: y_moves=2. req_u=1, d=0 <1.
 
-x_moves 2: req_r=1, l=0 <1.
+if __name__ == '__main__':
+    test()
 
-k=0: returns 0.
 
-Yes.
+```
 
-So the code works.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-This approach is O(n^2) in the worst case. For n=100, it's 100 iterations (k from 100 to 0). For each even k, the inner loop runs up to k/2 steps. For k=100, that's 50 steps. So total steps are around sum_{k even} (k/2 +1) ) for k from 0 to 100. Which is sum 0, 2 steps (k=2), ..., 50 steps (k=100). So total steps is sum_{i=0 to 50} (i*2 steps) → sum from i=0 to 50 of i*2 → 2*(50*51)/2 = 2550 steps. Which is acceptable.
+```
 
-Thus, the code is efficient enough for n up to 100.
 </think>
 
 ```python

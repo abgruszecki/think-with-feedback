@@ -860,16 +860,20 @@ Thus, the code can proceed with a deque and process nodes in FIFO order.
 
 Thus, the code would be:
 
+Testing against sample input 1.
+
+```python
 import math
 from collections import deque
+
 
 def get_digits(x):
     return len(str(x)) if x !=0 else 1
 
-def main():
-    n, x = map(int, input().split())
+def main(input_stream, output_stream):
+    n, x = map(int, input_stream.readline().rstrip("\n").split())
     if get_digits(x) == n:
-        print(0)
+        print(0, file=output_stream)
         return
     best_steps = {}
     queue = deque()
@@ -889,7 +893,7 @@ def main():
             continue
         # Check if current state is the target
         if current_digits == n:
-            print(steps)
+            print(steps, file=output_stream)
             found = True
             break
         # Generate next states
@@ -908,49 +912,149 @@ def main():
                 best_steps[next_key] = next_steps
                 queue.append( (next_x, next_steps) )
     if not found:
-        print(-1)
+        print(-1, file=output_stream)
 
-But this code may have some issues. For example, the best_steps dictionary is updated for each possible next_key, but multiple entries can be added to the queue for the same next_key. However, when dequeued, the code checks if the steps stored in best_steps is less than the current steps, and skips processing if so. This ensures that only the minimal steps for each state are processed.
 
-Testing this code with the sample inputs:
 
-Sample 1:
+def test():
+    import io
 
-Input: 2 1 → output -1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-The code starts with x=1, current_digits=1, current_set={'1'}.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Multiplying by 1 is skipped (y=1 is skipped). So no next states. Queue becomes empty. Output -1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sample 2:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Input:3 2 → output 4.
+    print('Tests passed 😎')
 
-The code's BFS proceeds:
 
-Step 0: x=2 (digits=1, set {'2'}, steps=0).
+if __name__ == '__main__':
+    test()
 
-Multiply by 2: next_x=4 (digits=1, set {'4'}, steps=1.
 
-best_steps now has (1, {'4'}) → steps 1.
+```
 
-Step 1: process x=4, steps=1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Multiply by 4: next_x=16 (digits=2, set {'1','6'}, steps 2.
+```
 
-best_steps has (2, {'1','6'}) → steps 2.
+Testing against sample input 2.
 
-Step 2: process x=16, steps=2.
+```python
+import math
+from collections import deque
 
-Multiply by 1: skipped.
 
-Multiply by 6: next_x=96 (digits=2, set {'9','6'}, steps 3.
+def get_digits(x):
+    return len(str(x)) if x !=0 else 1
 
-best_steps has (2, {'9','6'}) → steps 3.
+def main(input_stream, output_stream):
+    n, x = map(int, input_stream.readline().rstrip("\n").split())
+    if get_digits(x) == n:
+        print(0, file=output_stream)
+        return
+    best_steps = {}
+    queue = deque()
+    initial_digits = get_digits(x)
+    initial_set = frozenset(str(x))
+    queue.append( (x, 0) )
+    best_steps_key = (initial_digits, initial_set)
+    best_steps[best_steps_key] = 0
+    found = False
+    while queue:
+        current_x, steps = queue.popleft()
+        current_digits = get_digits(current_x)
+        current_set = frozenset(str(current_x))
+        # Check if this state is the best one so far
+        key = (current_digits, current_set)
+        if best_steps.get(key, float('inf')) < steps:
+            continue
+        # Check if current state is the target
+        if current_digits == n:
+            print(steps, file=output_stream)
+            found = True
+            break
+        # Generate next states
+        for d_char in current_set:
+            y = int(d_char)
+            if y in (0, 1):
+                continue
+            next_x = current_x * y
+            next_digits = get_digits(next_x)
+            if next_digits > n:
+                continue
+            next_set = frozenset(str(next_x))
+            next_steps = steps + 1
+            next_key = (next_digits, next_set)
+            if next_key not in best_steps or next_steps < best_steps.get(next_key, float('inf')):
+                best_steps[next_key] = next_steps
+                queue.append( (next_x, next_steps) )
+    if not found:
+        print(-1, file=output_stream)
 
-Step 3: process x=96, steps=3.
 
-Multiply by 9: next_x=864 (digits=3 → steps 4. which meets n=3. So return 4.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+13 42
+""",
+            "output": \
+"""\
+12
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

@@ -519,171 +519,261 @@ The code will:
 
 Now, code:
 
-class DSU:
+Testing against sample input 1.
 
-    def __init__(self, size):
+```python
+def main(input_stream, output_stream):
+    class DSU:
 
-        self.parent = list(range(size))
+        def __init__(self, size):
 
-        self.rank = [1]*size
+            self.parent = list(range(size))
 
-    def find(self, x):
+            self.rank = [1]*size
 
-        if self.parent[x] != x:
+        def find(self, x):
 
-            self.parent[x] = self.find(self.parent[x])
+            if self.parent[x] != x:
 
-        return self.parent[x]
+                self.parent[x] = self.find(self.parent[x])
 
-    def union(self, x, y):
+            return self.parent[x]
 
-        x_root = self.find(x)
+        def union(self, x, y):
 
-        y_root = self.find(y)
+            x_root = self.find(x)
 
-        if x_root == y_root:
+            y_root = self.find(y)
 
-            return
+            if x_root == y_root:
 
-        if self.rank[x_root] < self.rank[y_root]:
+                return
 
-            self.parent[x_root] = y_root
+            if self.rank[x_root] < self.rank[y_root]:
 
-        else:
+                self.parent[x_root] = y_root
 
-            self.parent[y_root] = x_root
+            else:
 
-            if self.rank[x_root] == self.rank[y_root]:
+                self.parent[y_root] = x_root
 
-                self.rank[x_root] += 1
+                if self.rank[x_root] == self.rank[y_root]:
 
-n = int(input())
+                    self.rank[x_root] += 1
 
-dsu = DSU(26)
+    n = int(input_stream.readline().rstrip("\n"))
 
-passwords = []
+    dsu = DSU(26)
 
-for _ in range(n):
+    passwords = []
 
-    s = input().strip()
+    for _ in range(n):
 
-    unique_chars = sorted(list(set(s)))
+        s = input_stream.readline().rstrip("\n").strip()
 
-    passwords.append(unique_chars)
+        unique_chars = sorted(list(set(s)))
 
-    if not unique_chars:
+        passwords.append(unique_chars)
 
-        continue
+        if not unique_chars:
 
-    first = unique_chars[0]
+            continue
 
-    for c in unique_chars[1:]:
+        first = unique_chars[0]
 
-        dsu.union(ord(first) - ord('a'), ord(c) - ord('a'))
+        for c in unique_chars[1:]:
 
-roots = set()
+            dsu.union(ord(first) - ord('a'), ord(c) - ord('a'))
 
-for unique_chars in passwords:
+    roots = set()
 
-    if not unique_chars:
+    for unique_chars in passwords:
 
-        continue
+        if not unique_chars:
 
-    first = unique_chars[0]
+            continue
 
-    root = dsu.find(ord(first) - ord('a'))
+        first = unique_chars[0]
 
-    roots.add(root)
+        root = dsu.find(ord(first) - ord('a'))
 
-print(len(roots))
+        roots.add(root)
 
-But wait, the problem statement says that passwords are non-empty, so the 'if not unique_chars' check is redundant. But including it is safe.
+    print(len(roots), file=output_stream)
 
-Testing this code with the samples.
 
-Sample 1:
 
-4
+def test():
+    import io
 
-a
-
-b
-
-ab
-
-d
-
-Passwords:
-
-['a'], ['b'], ['a','b'], ['d']
-
-Processing unions:
-
-For ['a'], no other chars.
-
-For ['b'], no other.
-
-For ['a','b'], union a and b.
-
-For ['d'], no other.
-
-Then, for each password's unique_chars, take first and find root.
-
-For 'a' → root is a's root. After union, a and b are connected. So for the first password, the root is a's root. After union, when we find(a), since during the third password processing, we unioned a and b, but during the first two passwords, a and b were separate. But the code processes all unions first. So after all processing, 'a' and 'b' are in the same component.
-
-So for the first password, first char is 'a', root is find(a) → which after union, could be the same as a's root. Let's say the DSU's union by rank:
-
-Processing the third password:
-
-unique_chars is ['a', 'b'], sorted.
-
-First is 'a', then 'b'.
-
-dsu.union(a (0), b (1)):
-
-x_root = 0, y_root = 1.
-
-Ranks are 1 and 1. So x's rank is not less than y's. So y's parent becomes x's. So parent[1] = 0. rank[0] becomes 2.
-
-So when find(b) is called, it returns 0.
-
-Thus, for the second password (['b']), first char is 'b'. find(1) returns 0.
-
-So the roots set will have:
-
-For the first password: 0.
-
-Second: 0.
-
-Third: 0.
-
-Fourth: 3 (d is 3).
-
-So the roots set is {0,3} → size 2. Correct.
-
-Sample 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
+ab
+bc
+abc
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-ab → sorted unique ['a','b']
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-bc → sorted unique ['b','c']
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-abc → sorted unique ['a','b','c']
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Processing unions:
+    print('Tests passed 😎')
 
-First password: a and b are united.
 
-Second: b and c are united. So, in DSU:
+if __name__ == '__main__':
+    test()
 
-Initially, a and b are in same component (0).
 
-Processing second password: first char is 'b', which is in component 0. Then 'c' is added. So union(0, 2). Now, the component is 0 (a, b, c).
+```
 
-Third password: first char 'a'. Other chars are 'b' and 'c'. They are already in the same component.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So all three passwords are in component 0. Thus, the roots set is {0}, size 1.
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    class DSU:
+
+        def __init__(self, size):
+
+            self.parent = list(range(size))
+
+            self.rank = [1]*size
+
+        def find(self, x):
+
+            if self.parent[x] != x:
+
+                self.parent[x] = self.find(self.parent[x])
+
+            return self.parent[x]
+
+        def union(self, x, y):
+
+            x_root = self.find(x)
+
+            y_root = self.find(y)
+
+            if x_root == y_root:
+
+                return
+
+            if self.rank[x_root] < self.rank[y_root]:
+
+                self.parent[x_root] = y_root
+
+            else:
+
+                self.parent[y_root] = x_root
+
+                if self.rank[x_root] == self.rank[y_root]:
+
+                    self.rank[x_root] += 1
+
+    n = int(input_stream.readline().rstrip("\n"))
+
+    dsu = DSU(26)
+
+    passwords = []
+
+    for _ in range(n):
+
+        s = input_stream.readline().rstrip("\n").strip()
+
+        unique_chars = sorted(list(set(s)))
+
+        passwords.append(unique_chars)
+
+        if not unique_chars:
+
+            continue
+
+        first = unique_chars[0]
+
+        for c in unique_chars[1:]:
+
+            dsu.union(ord(first) - ord('a'), ord(c) - ord('a'))
+
+    roots = set()
+
+    for unique_chars in passwords:
+
+        if not unique_chars:
+
+            continue
+
+        first = unique_chars[0]
+
+        root = dsu.find(ord(first) - ord('a'))
+
+        roots.add(root)
+
+    print(len(roots), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+codeforces
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3: 1 password, "codeforces". The unique chars sorted would be ['c','d','e','f','o','r','s'].
 

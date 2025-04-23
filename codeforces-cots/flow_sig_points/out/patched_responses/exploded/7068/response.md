@@ -845,6 +845,9 @@ Now, putting it all together:
 
 The code will be as follows.
 
+Testing against sample input 1.
+
+```python
 MOD = 10**9 +7
 
 def subtract_one(s):
@@ -963,11 +966,10 @@ def count_valid(X_str, m, d, L):
 
     return (current_dp[0][0] + current_dp[0][1])%MOD
 
-def main():
-
+def main(input_stream, output_stream):
     import sys
 
-    input = sys.stdin.read().split()
+    input = input_stream.read().split()
 
     m = int(input[0])
 
@@ -997,69 +999,255 @@ def main():
 
     ans = (count_b - count_a) % MOD
 
-    print(ans)
+    print(ans, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 0
+1
+9
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
 
 if __name__ == '__main__':
+    test()
 
-    main()
 
-Let's test this code with the sample inputs.
+```
 
-First sample:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Input:
+```
 
-2 6
+Testing against sample input 2.
 
-10
+```python
+MOD = 10**9 +7
 
-99
+def subtract_one(s):
 
-L=2.
+    s_list = list(s)
 
-count_b: 8.
+    i = len(s_list) -1
 
-count_a_minus_1_str is '9' → len 1, so count_a_minus_1=0.
+    while i >=0 and s_list[i] == '0':
 
-Answer is 8-0=8.
+        s_list[i] = '9'
 
-Second sample:
+        i -=1
 
-Input:
+    if i <0:
 
-2 0
+        return '0'
 
-1
+    s_list[i] = str(int(s_list[i])-1)
 
-9
+    if s_list[i] == '0' and i ==0:
 
-L=1.
+        # leading zero, but only if all other digits are 9.
 
-count_b: count_valid('9', 2, 0, 1).
+        # Check if all digits after are 9.
 
-For L=1:
+        # For example, '1000' becomes '0999', which after lstrip becomes '999', which is len-1.
 
-pos=0 (even → must not be 0).
+        # So, after joining and lstrip, the length may be less than original.
 
-Allowed digits are 1-9.
+        new_s = ''.join(s_list).lstrip('0')
 
-The digits are even numbers (divisible by 2).
+        if not new_s:
 
-So allowed digits are 2,4,6,8 → 4 numbers.
+            return '0'
 
-count_a_minus_1 is subtract_one('1') → '0' → len 0 (but in code, '0' has len 1?), wait:
+        return new_s
 
-Wait, subtract_one('1') is '0', which has len 1. So count_a_minus_1 is count_valid('0', 2, 0, 1).
+    else:
 
-But in count_valid:
+        new_s = ''.join(s_list)
 
-pos=0 is even (0-based), allowed digits are 1-9 except 0 → since d=0.
+        if new_s[0] == '0':
 
-allowed digits are [1,2,3,4,5,6,7,8,9]. But X_str is '0' (L=1). So the code would check if digits are allowed and <= X_digits[0] (0).
+            new_s = new_s.lstrip('0')
 
-But for pos=0, allowed digits are 1-9. So no digits are allowed <=0. So count_a_minus_1 is zero.
+            return new_s if new_s else '0'
 
-So answer is 4-0=4.
+        return new_s
+
+def count_valid(X_str, m, d, L):
+
+    X_digits = list(map(int, X_str))
+
+    current_dp = [[0]*2 for _ in range(m)]
+
+    # Initial state: pos 0, mod 0, tight=True.
+
+    current_dp[0][1] = 1
+
+    for pos in range(L):
+
+        next_dp = [[0]*2 for _ in range(m)]
+
+        for current_mod in range(m):
+
+            for tight in [0,1]:
+
+                count = current_dp[current_mod][tight]
+
+                if count ==0:
+
+                    continue
+
+                # Determine allowed digits for current pos.
+
+                if pos %2 ==0:  # 0-based even → 1-based odd → not d.
+
+                    if pos ==0:
+
+                        allowed = [dig for dig in range(1,10) if dig !=d]
+
+                    else:
+
+                        allowed = [dig for dig in range(0,10) if dig !=d]
+
+                else:  # 0-based odd → 1-based even → must be d.
+
+                    allowed = [d]
+
+                # Iterate through allowed digits.
+
+                for dig in allowed:
+
+                    if tight:
+
+                        upper = X_digits[pos]
+
+                        if dig > upper:
+
+                            continue
+
+                        new_tight = 1 if (dig == upper) else 0
+
+                    else:
+
+                        new_tight =0
+
+                    new_mod = (current_mod *10 + dig) %m
+
+                    next_dp[new_mod][new_tight] = (next_dp[new_mod][new_tight] + count) % MOD
+
+        current_dp = next_dp
+
+    # Sum the counts where mod is 0.
+
+    return (current_dp[0][0] + current_dp[0][1])%MOD
+
+def main(input_stream, output_stream):
+    import sys
+
+    input = input_stream.read().split()
+
+    m = int(input[0])
+
+    d = int(input[1])
+
+    a_str = input[2]
+
+    b_str = input[3]
+
+    L = len(a_str)
+
+    # Compute count_b.
+
+    count_b = count_valid(b_str, m, d, L)
+
+    # Compute a_minus_1.
+
+    a_minus_1_str = subtract_one(a_str)
+
+    if len(a_minus_1_str) != L:
+
+        count_a =0
+
+    else:
+
+        count_a = count_valid(a_minus_1_str, m, d, L)
+
+    ans = (count_b - count_a) % MOD
+
+    print(ans, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+19 7
+1000
+9999
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

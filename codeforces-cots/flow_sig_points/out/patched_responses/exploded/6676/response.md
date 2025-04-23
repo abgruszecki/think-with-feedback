@@ -2137,53 +2137,112 @@ for sign, coeff, incr_type in sorted_summands:
 
 Thus, this correctly models the problem statement's rules.
 
-Let's test this with the first sample.
+Testing against sample input 1.
 
-Sample input 1:
+```python
+import re
 
-a=1.
 
-summands are:
+def main(input_stream, output_stream):
+    a = int(input_stream.readline().rstrip("\n"))
+    expression = input_stream.readline().rstrip("\n").strip()
 
-summand2 (sorted first): sign -1, coeff3, pre.
+    # Split the expression into summands with their signs
+    parts = re.split(r'([+-])', expression)
+    summand_list = []
+    if not parts[0]:
+        parts = parts[1:]
+    if parts:
+        summand_list.append((1, parts[0]))  # first summand has implicit '+'
+        for i in range(1, len(parts), 2):
+            op, summand = parts[i], parts[i+1]
+            sign = 1 if op == '+' else -1
+            summand_list.append((sign, summand))
 
-summand3: sign +1, coeff1, post.
+    # Parse each summand into coefficient and increment type
+    summands = []
+    for sign, summand_str in summand_list:
+        if '*' in summand_str:
+            coeff_part, incr_part = summand_str.split('*', 1)
+        else:
+            coeff_part = '1'
+            incr_part = summand_str
+        coeff = int(coeff_part) if coeff_part else 1
+        if incr_part == 'a++':
+            incr_type = 'post'
+        else:
+            incr_type = 'pre'
+        summands.append((sign, coeff, incr_type))
 
-summand1: sign +1, coeff5, post.
+    # Sort summands by s_i * c_i in ascending order
+    summands.sort(key=lambda x: x[0] * x[1])
 
-Processing order: summand2, summand3, summand1.
+    current_a = a
+    total = 0
+    for sign, coeff, incr_type in summands:
+        if incr_type == 'post':
+            contribution = sign * coeff * current_a
+            current_a += 1
+        else:
+            current_a += 1
+            contribution = sign * coeff * current_a
+        total += contribution
 
-Processing summand2 (pre):
+    print(total, file=output_stream)
 
-current_a starts at 1.
 
-incr_type is pre:
 
-current_a +=1 → 2.
+def test():
+    import io
 
-contribution = -1 *3*2 =-6.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+a+++++a
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
 
-total is-6.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-current_a is 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing summand3 (post):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-contribution =1 *1 *2 =2.
+    print('Tests passed 😎')
 
-current_a becomes3.
 
-total is-6+2=-4.
+if __name__ == '__main__':
+    test()
 
-Processing summand1 (post):
 
-contribution =1 *5 *3 =15.
+```
 
-current_a becomes4.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 85, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 78, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '8'
+Got: '39'
 
-total is-4+15=11.
-
-Which matches the sample output.
+```
 
 Sample input 2:
 

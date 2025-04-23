@@ -273,53 +273,74 @@ for j in 0 to n-1:
 
 return result
 
-But wait, let's test this with the first example.
+Testing against sample input 1.
 
-First example input:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-5
+    total = sum(a)
+    if total % 3 != 0:
+        print(0, file=output_stream)
+    else:
+        s = total // 3
+        current_sum = 0
+        count = 0
+        result = 0
+        for j in range(n):
+            current_sum += a[j]
+            if j < n - 1:
+                if current_sum == 2 * s:
+                    result += count
+            if current_sum == s:
+                count += 1
+        print(result, file=output_stream)
 
-1 2 3 0 3
 
-sum is 1+2+3+0+3=9. 9/3=3. So s=3.
 
-The array in 0-based:
+def test():
+    import io
 
-indexes 0:1, 1:2, 2:3, 3:0, 4:3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+0 1 -1 0
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-Processing each j:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-j=0: current_sum=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Check j <4 (yes). current_sum is 1, not 6 (2*3=6). So no addition.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Check if sum is 3: no. count remains 0.
+    print('Tests passed 😎')
 
-j=1: current_sum=1+2=3.
 
-Check j<4 (yes). sum is 3, not 6. So no addition.
+if __name__ == '__main__':
+    test()
 
-sum is 3: yes. count becomes 1.
 
-j=2: current_sum=3+3=6.
+```
 
-Check j=2 <4. sum is 6 (2*3). So add count (1) to result. result becomes 1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-sum is 6 !=3. count remains 1.
-
-j=3: current_sum=6+0=6.
-
-Check j=3 <4. sum is 6 again. add count (1) to result. result is 2.
-
-sum is 6 !=3. count remains 1.
-
-j=4: sum +=3 =9. j=4 is not less than 4 (since n-1 is 4). So no check.
-
-sum is 9, which is not s=3. So no change to count.
-
-So the total result is 2, which matches the example.
-
-Yes, this works.
+```
 
 Another example:
 

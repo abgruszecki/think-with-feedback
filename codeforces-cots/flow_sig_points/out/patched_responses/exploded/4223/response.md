@@ -322,35 +322,119 @@ weeks = (last_monday - first_monday) //7 +1
 
 print(weeks)
 
-Testing this code with the samples:
+Testing against sample input 1.
 
-Sample1:
+```python
+def main(input_stream, output_stream):
+    m, d = map(int, input_stream.readline().rstrip("\n").split())
+    days_in_month = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    L = days_in_month[m]
+    last_day_week = ((d - 1) + (L - 1)) % 7 + 1
+    first_monday = 1 - (d - 1)
+    last_monday = L - (last_day_week - 1)
+    columns = (last_monday - first_monday) // 7 + 1
+    print(columns, file=output_stream)
 
-m=1, d=7.
 
-L=31.
 
-last_day_week = (6 +30) mod7 +1 →36 mod7=1 →1+1=2.
+def test():
+    import io
 
-first_monday=1-6= -5.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 1
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-last_monday=31 - (2-1) =30.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-weeks= (30 - (-5))//7 +1 →35//7=5 →5+1=6. Correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sample2:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-m=1, d=1.
+    print('Tests passed 😎')
 
-L=31.
 
-last_day_week = (0 +30) mod7 +1 →30 mod7=2 →2+1=3.
+if __name__ == '__main__':
+    test()
 
-first_monday=1-0=1.
 
-last_monday=31 - (3-1)=31-2=29.
+```
 
-weeks: (29-1)//7 +1 →28//7=4 →5. Correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    m, d = map(int, input_stream.readline().rstrip("\n").split())
+    days_in_month = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    L = days_in_month[m]
+    last_day_week = ((d - 1) + (L - 1)) % 7 + 1
+    first_monday = 1 - (d - 1)
+    last_monday = L - (last_day_week - 1)
+    columns = (last_monday - first_monday) // 7 + 1
+    print(columns, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+11 6
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

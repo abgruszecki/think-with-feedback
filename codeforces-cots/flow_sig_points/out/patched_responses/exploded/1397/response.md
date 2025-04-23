@@ -957,31 +957,76 @@ else:
 
 print(ans)
 
-Testing this code with the sample inputs:
+Testing against sample input 1.
 
-Sample1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = int(input_stream.readline().rstrip("\n"))
+    b = int(input_stream.readline().rstrip("\n"))
+    c = int(input_stream.readline().rstrip("\n"))
 
+    if (b - c) < a:
+        if n < b:
+            print(n // a, file=output_stream)
+        else:
+            k = (n - b) // (b - c) + 1
+            remaining = n - k * (b - c)
+            print(k + (remaining // a), file=output_stream)
+    else:
+        case1 = n // a
+        case2 = 0
+        if n >= b:
+            remaining = n - b + c
+            case2 = 1 + (remaining // a)
+        print(max(case1, case2), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 10
+5
+6
+1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-11
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-9
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-8
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Process:
+    print('Tests passed 😎')
 
-(b -c)=1 <11.
 
-n=10 >=9.
+if __name__ == '__main__':
+    test()
 
-k=(10-9) //1 +1 →1//1=1 →1+1=2.
 
-remaining=10-2*1=8.
+```
 
-8//11=0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-ans=2+0=2. Correct.
+```
 
 Sample2:
 

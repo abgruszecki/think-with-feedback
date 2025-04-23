@@ -1022,183 +1022,181 @@ Given the current subtree root v and height h, check for each fixed node u:
 
    So here's the code:
 
-   MOD = 10**9 +7
+Testing against sample input 2.
 
-   colors = ['white', 'yellow', 'green', 'blue', 'red', 'orange']
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-   allowed_set = {
-       'white': {'green', 'red', 'blue', 'orange'},
-       'yellow': {'green', 'red', 'blue', 'orange'},
-       'green': {'white', 'yellow', 'red', 'orange'},
-       'blue': {'white', 'yellow', 'red', 'orange'},
-       'red': {'white', 'yellow', 'green', 'blue'},
-       'orange': {'white', 'yellow', 'green', 'blue'},
-   }
+    colors = ['white', 'yellow', 'green', 'blue', 'red', 'orange']
 
-   # Precompute dp
-   max_h = 60
-   dp = [{} for _ in range(max_h+1)]
-   for c in colors:
-       dp[1][c] = 1
+    allowed_set = {
+        'white': {'green', 'red', 'blue', 'orange'},
+        'yellow': {'green', 'red', 'blue', 'orange'},
+        'green': {'white', 'yellow', 'red', 'orange'},
+        'blue': {'white', 'yellow', 'red', 'orange'},
+        'red': {'white', 'yellow', 'green', 'blue'},
+        'orange': {'white', 'yellow', 'green', 'blue'},
+    }
 
-   for h in range(2, max_h+1):
-       for c in colors:
-           sum_children = 0
-           for child in allowed_set[c]:
-               sum_children += dp[h-1][child]
-               if sum_children >= MOD:
-                   sum_children -= MOD
-           sum_children %= MOD
-           dp[h][c] = (sum_children * sum_children) % MOD
+    # Precompute dp
+    max_h = 60
+    dp = [{} for _ in range(max_h+1)]
+    for c in colors:
+        dp[1][c] = 1
 
-   # Read input
-   k = int(input())
-   n = int(input())
-   fixed = {}
-   for _ in range(n):
-       v, s = input().split()
-       v = int(v)
-       fixed[v] = s.strip()
+    for h in range(2, max_h+1):
+        for c in colors:
+            sum_children = 0
+            for child in allowed_set[c]:
+                sum_children += dp[h-1][child]
+                if sum_children >= MOD:
+                    sum_children -= MOD
+            sum_children %= MOD
+            dp[h][c] = (sum_children * sum_children) % MOD
 
-   # Preprocess ancestors
-   ancestors = {}
-   for u in fixed:
-       current = u
-       while current > 0:
-           depth_current = current.bit_length()
-           depth_u = u.bit_length()
-           h_min = depth_u - depth_current + 1
-           if current not in ancestors:
-               ancestors[current] = []
-           ancestors[current].append( (u, h_min) )
-           current = current // 2
+    # Read input
+    k = int(input_stream.readline().rstrip("\n"))
+    n = int(input_stream.readline().rstrip("\n"))
+    fixed = {}
+    for _ in range(n):
+        v, s = input_stream.readline().rstrip("\n").split()
+        v = int(v)
+        fixed[v] = s.strip()
 
-   # Memoization for dfs? Not sure, but since Python has a limit on recursion depth, but for this problem, recursion is manageable.
+    # Preprocess ancestors
+    ancestors = {}
+    for u in fixed:
+        current = u
+        while current > 0:
+            depth_current = current.bit_length()
+            depth_u = u.bit_length()
+            h_min = depth_u - depth_current + 1
+            if current not in ancestors:
+                ancestors[current] = []
+            ancestors[current].append( (u, h_min) )
+            current = current // 2
 
-   from functools import lru_cache
+    # Memoization for dfs? Not sure, but since Python has a limit on recursion depth, but for this problem, recursion is manageable.
 
-   # But since the parameters are v (up to 2^60), h (up to 60), and parent_color (6 options + None), memoization with lru_cache is not feasible.
+    from functools import lru_cache
 
-   # So instead, we need to implement the dfs as a recursive function without memoization, relying on the fixed nodes to limit the recursion.
+    # But since the parameters are v (up to 2^60), h (up to 60), and parent_color (6 options + None), memoization with lru_cache is not feasible.
 
-   def dfs(v, h, parent_color):
-       # Check if any fixed nodes are in the subtree (v, h)
-       has_fixed = False
-       if v in ancestors:
-           for (u, h_min) in ancestors[v]:
-               if h >= h_min:
-                   has_fixed = True
-                   break
+    # So instead, we need to implement the dfs as a recursive function without memoization, relying on the fixed nodes to limit the recursion.
 
-       if not has_fixed:
-           # Use precomputed dp
-           if parent_color is None:
-               allowed = colors
-           else:
-               allowed = allowed_set[parent_color]
-           res = {}
-           for c in allowed:
-               res[c] = dp[h][c]
-           return res
-       else:
-           # Check if current node is fixed
-           if v in fixed:
-               c_fixed = fixed[v]
-               if parent_color is not None and c_fixed not in allowed_set.get(parent_color, set()):
-                   return {}
-               # Process children
-               if h == 1:
-                   return {c_fixed: 1}
-               left_v = 2 * v
-               right_v = 2 * v +1
-               left_h = h -1
-               left_res = dfs(left_v, left_h, c_fixed)
-               right_res = dfs(right_v, left_h, c_fixed)
-               sum_left = sum(left_res.values()) % MOD if left_res else 0
-               sum_right = sum(right_res.values()) % MOD if right_res else 0
-               total = (sum_left * sum_right) % MOD
-               return {c_fixed: total}
-           else:
-               # Current node is not fixed
-               if parent_color is None:
-                   allowed = colors
-               else:
-                   allowed = allowed_set[parent_color]
-               res = {}
-               for c in allowed:
-                   if h == 1:
-                       res[c] = 1
-                       continue
-                   left_v = 2 * v
-                   right_v = 2 * v +1
-                   left_h = h -1
-                   left_res = dfs(left_v, left_h, c)
-                   right_res = dfs(right_v, left_h, c)
-                   sum_left = sum(left_res.values()) % MOD if left_res else 0
-                   sum_right = sum(right_res.values()) % MOD if right_res else 0
-                   product = (sum_left * sum_right) % MOD
-                   if product > 0:
-                       res[c] = product
-               return res
+    def dfs(v, h, parent_color):
+        # Check if any fixed nodes are in the subtree (v, h)
+        has_fixed = False
+        if v in ancestors:
+            for (u, h_min) in ancestors[v]:
+                if h >= h_min:
+                    has_fixed = True
+                    break
 
-   # Main call
-   result = dfs(1, k, None)
-   total = sum(result.values()) % MOD
-   print(total)
+        if not has_fixed:
+            # Use precomputed dp
+            if parent_color is None:
+                allowed = colors
+            else:
+                allowed = allowed_set[parent_color]
+            res = {}
+            for c in allowed:
+                res[c] = dp[h][c]
+            return res
+        else:
+            # Check if current node is fixed
+            if v in fixed:
+                c_fixed = fixed[v]
+                if parent_color is not None and c_fixed not in allowed_set.get(parent_color, set()):
+                    return {}
+                # Process children
+                if h == 1:
+                    return {c_fixed: 1}
+                left_v = 2 * v
+                right_v = 2 * v +1
+                left_h = h -1
+                left_res = dfs(left_v, left_h, c_fixed)
+                right_res = dfs(right_v, left_h, c_fixed)
+                sum_left = sum(left_res.values()) % MOD if left_res else 0
+                sum_right = sum(right_res.values()) % MOD if right_res else 0
+                total = (sum_left * sum_right) % MOD
+                return {c_fixed: total}
+            else:
+                # Current node is not fixed
+                if parent_color is None:
+                    allowed = colors
+                else:
+                    allowed = allowed_set[parent_color]
+                res = {}
+                for c in allowed:
+                    if h == 1:
+                        res[c] = 1
+                        continue
+                    left_v = 2 * v
+                    right_v = 2 * v +1
+                    left_h = h -1
+                    left_res = dfs(left_v, left_h, c)
+                    right_res = dfs(right_v, left_h, c)
+                    sum_left = sum(left_res.values()) % MOD if left_res else 0
+                    sum_right = sum(right_res.values()) % MOD if right_res else 0
+                    product = (sum_left * sum_right) % MOD
+                    if product > 0:
+                        res[c] = product
+                return res
 
-   Now, let's test this code with the first example.
+    # Main call
+    result = dfs(1, k, None)
+    total = sum(result.values()) % MOD
+    print(total, file=output_stream)
 
-   Input:
 
-   3
 
-   2
+def test():
+    import io
 
-   5 orange
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10
+3
+1 blue
+4 red
+5 orange
+""",
+            "output": \
+"""\
+328925088
+""",
+        }, 
+    ]
 
-   2 white
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-   The fixed nodes are 5 and 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-   ancestors for 5:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-   ancestors[5] will have entries for 5, 2, 1.
+    print('Tests passed 😎')
 
-   For example, when u=5, current=5: depth_current is 3 (binary 101), depth_u=3. h_min=3-3+1=1. So when processing v=5, h>=1 will include u=5.
 
-   Similarly for current=2 (depth 2), h_min=3-2+1=2.
+if __name__ == '__main__':
+    test()
 
-   So when processing the subtree (2, 2), h=2 >= h_min=2. So the subtree (2, 2) includes u=5.
 
-   So the code should process this correctly.
+```
 
-   The code's output is 1024, which matches the example.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-   The second example:
-
-   Input:
-
-   2
-
-   2
-
-   1 white
-
-   2 white
-
-   The root (1) is fixed to white. Its left child (2) is fixed to white.
-
-   Processing the root:
-
-   parent_color is None. Current node is fixed to white. Check compatibility with parent (no parent). Allowed.
-
-   Then, process left and right children (h=1).
-
-   Left child is 2, fixed to white. Parent color is white. But white is not allowed as a child of white. So left_res is empty. sum_left is 0. Total is 0.
-
-   So the output is 0.
-
-   The code should return 0.
+```
 
    Third example:
 

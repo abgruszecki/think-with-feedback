@@ -439,147 +439,238 @@ print(max_length)
 
 This should work.
 
-Testing sample 1:
+Testing against sample input 1.
 
-Sample 1:
+```python
+import sys
 
-4
 
-1 3
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    l = []
+    r = []
+    for _ in range(n):
+        a, b = map(int, input_stream.readline().split())
+        l.append(a)
+        r.append(b)
+    
+    # Precompute prefix and suffix max for left endpoints
+    prefix_max_left = [0] * n
+    prefix_max_left[0] = l[0]
+    for i in range(1, n):
+        prefix_max_left[i] = max(prefix_max_left[i-1], l[i])
+    
+    suffix_max_left = [0] * n
+    suffix_max_left[-1] = l[-1]
+    for i in range(n-2, -1, -1):
+        suffix_max_left[i] = max(l[i], suffix_max_left[i+1])
+    
+    # Precompute prefix and suffix min for right endpoints
+    prefix_min_right = [0] * n
+    prefix_min_right[0] = r[0]
+    for i in range(1, n):
+        prefix_min_right[i] = min(prefix_min_right[i-1], r[i])
+    
+    suffix_min_right = [0] * n
+    suffix_min_right[-1] = r[-1]
+    for i in range(n-2, -1, -1):
+        suffix_min_right[i] = min(r[i], suffix_min_right[i+1])
+    
+    max_length = 0
+    for j in range(n):
+        # Calculate current_max_left excluding j
+        if j == 0:
+            left_max = -float('inf')
+        else:
+            left_max = prefix_max_left[j-1]
+        if j == n-1:
+            right_max = -float('inf')
+        else:
+            right_max = suffix_max_left[j+1]
+        current_max_left = max(left_max, right_max)
+        
+        # Calculate current_min_right excluding j
+        if j == 0:
+            left_min = float('inf')
+        else:
+            left_min = prefix_min_right[j-1]
+        if j == n-1:
+            right_min = float('inf')
+        else:
+            right_min = suffix_min_right[j+1]
+        current_min_right = min(left_min, right_min)
+        
+        current_length = max(0, current_min_right - current_max_left)
+        if current_length > max_length:
+            max_length = current_length
+    
+    print(max_length, file=output_stream)
 
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
 2 6
-
+1 3
 0 4
+1 20
+0 4
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-3 3
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-l = [1, 2, 0, 3]
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-r = [3,6,4,3]
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-prefix_max_left:
+    print('Tests passed 😎')
 
-index 0:1
 
-index1: max(1,2)=2
+if __name__ == '__main__':
+    test()
 
-index2: max(2,0)=2
 
-index3: max(2,3)=3
+```
 
-suffix_max_left:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-index3:3
-
-index2: max(0,3)=3
-
-index1: max(2,3)=3
-
-index0: max(1,3)=3
-
-prefix_min_right:
-
-index0:3
-
-index1: min(3,6)=3
-
-index2: min(3,4)=3
-
-index3: min(3,3)=3
-
-suffix_min_right:
-
-index3:3
-
-index2: min(4,3)=3
-
-index1: min(6,3)=3
-
-index0: min(3,3)=3
-
-Now, for j=3 (the fourth segment):
-
-current_max_left:
-
-j=3, so j is 3 (0-based). Since j is n-1 (n=4), left_max is prefix_max_left[2] =2. right_max is -inf. So current_max_left is 2.
-
-current_min_right: left_min is prefix_min_right[2] =3. j is 3, so j+1 is 4 which is out of bounds. So right_min is inf. current_min_right is min(3, inf) →3.
-
-current_length =3-2=1. Which is correct.
+```
 
 So the code would select this as part of the max.
 
 Yes.
 
-Another test case, sample 3:
+Testing against sample input 3.
 
-3
+```python
+import sys
 
-4 5
 
-1 2
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    l = []
+    r = []
+    for _ in range(n):
+        a, b = map(int, input_stream.readline().split())
+        l.append(a)
+        r.append(b)
+    
+    # Precompute prefix and suffix max for left endpoints
+    prefix_max_left = [0] * n
+    prefix_max_left[0] = l[0]
+    for i in range(1, n):
+        prefix_max_left[i] = max(prefix_max_left[i-1], l[i])
+    
+    suffix_max_left = [0] * n
+    suffix_max_left[-1] = l[-1]
+    for i in range(n-2, -1, -1):
+        suffix_max_left[i] = max(l[i], suffix_max_left[i+1])
+    
+    # Precompute prefix and suffix min for right endpoints
+    prefix_min_right = [0] * n
+    prefix_min_right[0] = r[0]
+    for i in range(1, n):
+        prefix_min_right[i] = min(prefix_min_right[i-1], r[i])
+    
+    suffix_min_right = [0] * n
+    suffix_min_right[-1] = r[-1]
+    for i in range(n-2, -1, -1):
+        suffix_min_right[i] = min(r[i], suffix_min_right[i+1])
+    
+    max_length = 0
+    for j in range(n):
+        # Calculate current_max_left excluding j
+        if j == 0:
+            left_max = -float('inf')
+        else:
+            left_max = prefix_max_left[j-1]
+        if j == n-1:
+            right_max = -float('inf')
+        else:
+            right_max = suffix_max_left[j+1]
+        current_max_left = max(left_max, right_max)
+        
+        # Calculate current_min_right excluding j
+        if j == 0:
+            left_min = float('inf')
+        else:
+            left_min = prefix_min_right[j-1]
+        if j == n-1:
+            right_min = float('inf')
+        else:
+            right_min = suffix_min_right[j+1]
+        current_min_right = min(left_min, right_min)
+        
+        current_length = max(0, current_min_right - current_max_left)
+        if current_length > max_length:
+            max_length = current_length
+    
+    print(max_length, file=output_stream)
 
-9 20
 
-Segments: [4,5], [1,2], [9,20]
 
-If we remove any segment, the remaining two segments' intersection is empty. Because:
+def test():
+    import io
 
-remove first segment → remaining are [1,2] and [9,20]. Their left_max is max(1,9) =9, right_min is min(2,20)=2. So 9>2 → length 0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+3 10
+1 5
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
 
-Similarly for others.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So code should output 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-In code:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-n=3.
+    print('Tests passed 😎')
 
-l = [4,1,9]
 
-r = [5,2,20]
+if __name__ == '__main__':
+    test()
 
-prefix_max_left:
 
-[4,4,9]
+```
 
-suffix_max_left:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-[9,9,9]
-
-prefix_min_right:
-
-[5,2,2]
-
-suffix_min_right:
-
-[2,2,20]
-
-For j=0:
-
-current_max_left is suffix_max_left[1] =9.
-
-current_min_right is min(prefix_min_right[j-1] (invalid, so left_min is inf) and suffix_min_right[1] (2). →2.
-
-So 2-9= -7 →0.
-
-For j=1:
-
-current_max_left is max(prefix_max_left[0] (4) and suffix_max_left[2] (9)) →9.
-
-current_min_right is min(prefix_min_right[0] (5) and suffix_min_right[2] (20)) →5.
-
-9>5 →0.
-
-For j=2:
-
-current_max_left is prefix_max_left[1] =4.
-
-current_min_right is min(prefix_min_right[1] (2) and suffix_min_right[3] (invalid, inf) →2.
-
-4>2 →0.
-
-So all options give 0. So code returns 0. Correct.
+```
 
 Thus, the code should work.
 </think>

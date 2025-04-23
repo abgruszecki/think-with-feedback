@@ -305,83 +305,126 @@ So, for the code:
 
 Read n, k.
 
-cards = list(map(int, input().split()))
+Testing against sample input 1.
 
-favorites = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    cards = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-h = list(map(int, input().split()))
+    favorites = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-from collections import Counter
+    h = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-cnt_c = Counter(cards)
+    from collections import Counter
 
-cnt_f = Counter(favorites)
+    cnt_c = Counter(cards)
 
-total =0
+    cnt_f = Counter(favorites)
 
-for f in cnt_f:
+    total =0
 
-    m = cnt_f[f]
+    for f in cnt_f:
 
-    s = cnt_c.get(f, 0)
+        m = cnt_f[f]
 
-    if s ==0:
+        s = cnt_c.get(f, 0)
 
-        continue
+        if s ==0:
 
-    # Compute DP for (m, s)
+            continue
 
-    # h_0 is 0, h_1 is h[0], h_2 is h[1], etc.
+        # Compute DP for (m, s)
 
-    # For each player, possible t is 0 to min(k, s).
+        # h_0 is 0, h_1 is h[0], h_2 is h[1], etc.
 
-    # Initialize DP array.
+        # For each player, possible t is 0 to min(k, s).
 
-    dp_prev = [-float('inf')] * (s +1)
+        # Initialize DP array.
 
-    dp_prev[s] = 0
+        dp_prev = [-float('inf')] * (s +1)
 
-    for _ in range(m):
+        dp_prev[s] = 0
 
-        dp_next = [-float('inf')] * (s +1)
+        for _ in range(m):
 
-        for r in range(s+1):
+            dp_next = [-float('inf')] * (s +1)
 
-            if dp_prev[r] == -float('inf'):
+            for r in range(s+1):
 
-                continue
-
-            max_t = min(k, r)
-
-            for t in range(0, max_t+1):
-
-                new_r = r - t
-
-                if new_r <0:
+                if dp_prev[r] == -float('inf'):
 
                     continue
 
-                current_h = 0 if t ==0 else h[t-1]
+                max_t = min(k, r)
 
-                if dp_next[new_r] < dp_prev[r] + current_h:
+                for t in range(0, max_t+1):
 
-                    dp_next[new_r] = dp_prev[r] + current_h
+                    new_r = r - t
 
-        dp_prev = dp_next
+                    if new_r <0:
 
-    max_group = max(dp_prev)
+                        continue
 
-    total += max_group
+                    current_h = 0 if t ==0 else h[t-1]
 
-print(total)
+                    if dp_next[new_r] < dp_prev[r] + current_h:
 
-But wait, in the case where all possible entries in dp_prev are -inf except those that are reachable. For example, if m is larger than possible, like s=0, but that's already handled.
+                        dp_next[new_r] = dp_prev[r] + current_h
 
-Wait, but for s=0, the code skips the group. So in the code above, for each group, if s is zero, it's skipped.
+            dp_prev = dp_next
 
-So this should work.
+        max_group = max(dp_prev)
 
-Testing the first example:
+        total += max_group
+
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 3
+9 9 9 9 9 9 9 9 9
+1 2 3
+1 2 3
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample Input 1:
 

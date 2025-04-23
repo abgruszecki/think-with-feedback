@@ -1107,113 +1107,135 @@ But wait, in Python, when current_high is 1e18, but when m=0, current_low is 1.
 
 So code:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-current_low = 1
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-current_high = 10**18
+    current_low = 1
 
-for _ in range(m):
+    current_high = 10**18
 
-    ki, fi = map(int, input().split())
+    for _ in range(m):
 
-    if fi ==1:
+        ki, fi = map(int, input_stream.readline().rstrip("\n").split())
 
-        new_low = ki
+        if fi ==1:
 
-        new_high = 10**18
+            new_low = ki
 
-    else:
+            new_high = 10**18
 
-        new_low = (ki + fi -1) // fi  # ceil(ki/fi)
+        else:
 
-        new_high = (ki -1) // (fi-1)
+            new_low = (ki + fi -1) // fi  # ceil(ki/fi)
 
-    current_low = max(current_low, new_low)
+            new_high = (ki -1) // (fi-1)
 
-    current_high = min(current_high, new_high)
+        current_low = max(current_low, new_low)
 
-possible_floors = set()
+        current_high = min(current_high, new_high)
 
-if current_high == 10**18:
+    possible_floors = set()
 
-    # handle infinite case
+    if current_high == 10**18:
 
-    if current_low > n:
+        # handle infinite case
 
-        possible_floors.add(1)
-
-    else:
-
-        # add all k from current_low to n, and add 1.
-
-        for k in range(current_low, n+1):
-
-            floor = (n-1) //k +1
-
-            possible_floors.add(floor)
-
-        possible_floors.add(1)
-
-else:
-
-    # finite case
-
-    if current_low <= current_high:
-
-        # collect k from current_low to min(current_high, n)
-
-        upper = min(current_high, n)
-
-        for k in range(current_low, upper +1):
-
-            floor = (n-1) //k +1
-
-            possible_floors.add(floor)
-
-        # check if current_high >n
-
-        if current_high >n:
+        if current_low > n:
 
             possible_floors.add(1)
 
-if len(possible_floors) ==1:
+        else:
 
-    print(possible_floors.pop())
+            # add all k from current_low to n, and add 1.
 
-else:
+            for k in range(current_low, n+1):
 
-    print(-1)
+                floor = (n-1) //k +1
 
-This should handle all cases.
+                possible_floors.add(floor)
 
-Testing the code with the examples.
+            possible_floors.add(1)
 
-First example:
+    else:
 
-Input:
+        # finite case
 
-10 3
+        if current_low <= current_high:
 
+            # collect k from current_low to min(current_high, n)
+
+            upper = min(current_high, n)
+
+            for k in range(current_low, upper +1):
+
+                floor = (n-1) //k +1
+
+                possible_floors.add(floor)
+
+            # check if current_high >n
+
+            if current_high >n:
+
+                possible_floors.add(1)
+
+    if len(possible_floors) ==1:
+
+        print(possible_floors.pop(), file=output_stream)
+
+    else:
+
+        print(-1, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 4
+3 1
 6 2
-
+5 2
 2 1
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-7 3
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-current_low=3, current_high=3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-possible_floors is finite.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-current_high=3 <=10.
+    print('Tests passed 😎')
 
-k ranges 3-3.
 
-floor for k=3: (10-1)//3 +1= 3 +1=4.
+if __name__ == '__main__':
+    test()
 
-possible_floors={4}.
 
-output 4.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

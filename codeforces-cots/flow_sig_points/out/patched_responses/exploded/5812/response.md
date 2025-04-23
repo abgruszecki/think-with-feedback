@@ -297,101 +297,128 @@ Then the next line is s (length k). Then n lines of potential addresses.
 
 But the code must read s correctly. So:
 
-import bisect
+Testing against sample input 1.
 
+```python
+import bisect
 from collections import defaultdict
 
-n, k = map(int, input().split())
 
-s = input().strip()
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-s_dict = defaultdict(list)
+    s = input_stream.readline().rstrip("\n").strip()
 
-for idx, ch in enumerate(s, 1):
+    s_dict = defaultdict(list)
 
-    s_dict[ch].append(idx)
+    for idx, ch in enumerate(s, 1):
 
-for _ in range(n):
+        s_dict[ch].append(idx)
 
-    c = input().strip()
+    for _ in range(n):
 
-    len_c = len(c)
+        c = input_stream.readline().rstrip("\n").strip()
 
-    total = 0
+        len_c = len(c)
 
-    for i, ch in enumerate(c, 1):
+        total = 0
 
-        if ch not in s_dict:
+        for i, ch in enumerate(c, 1):
 
-            total += len_c
+            if ch not in s_dict:
 
-        else:
+                total += len_c
 
-            positions = s_dict[ch]
+            else:
 
-            idx = bisect.bisect_left(positions, i)
+                positions = s_dict[ch]
 
-            min_dist = float('inf')
+                idx = bisect.bisect_left(positions, i)
 
-            # Check if idx is within the list
+                min_dist = float('inf')
 
-            if idx < len(positions):
+                # Check if idx is within the list
 
-                min_dist = positions[idx] - i
+                if idx < len(positions):
 
-            # Check previous index
+                    min_dist = positions[idx] - i
 
-            if idx > 0:
+                # Check previous index
 
-                current = i - positions[idx-1]
+                if idx > 0:
 
-                if current < min_dist:
+                    current = i - positions[idx-1]
 
-                    min_dist = current
+                    if current < min_dist:
 
-            total += min_dist
+                        min_dist = current
 
-    print(total)
+                total += min_dist
 
-This should be the code.
+        print(total, file=output_stream)
 
-Testing the first sample:
 
-Input:
 
-2 10
+def test():
+    import io
 
-codeforces
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+9 9
+vkontakte
+vcontacte
+vkontrakte
+vkollapse
+vkrokodile
+vtopke
+vkapuste
+vpechke
+vk
+vcodeforcese
+""",
+            "output": \
+"""\
+18
+14
+36
+47
+14
+29
+30
+0
+84
+""",
+        }, 
+    ]
 
-codeforces
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-codehorses
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing the first potential address, 'codeforces':
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Each character is present in s_dict.
+    print('Tests passed 😎')
 
-For each position i in 1-10:
 
-In codeforces, s_dict for each character:
+if __name__ == '__main__':
+    test()
 
-For 'c', positions are [1, 8]. So for i=1: bisect_left finds index 0. So check positions[0] (1) and nothing before. So min_dist is 0. Same for all other characters.
 
-So the sum is 0.
+```
 
-The second address, 'codehorses':
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-The 'h' is not in s_dict, so adds 10.
+```
 
-The 's' in position 8: in s_dict['s'], positions are [10]. So i=8, bisect_left returns 0. So check positions[0] (10). min_dist is 2. So total is 10+2=12.
-
-Other characters are handled properly.
-
-So the code works.
-
-Now, considering the constraints. The code should run within 2 seconds. For 2e5 characters, each with a binary search, in Python, it's tight but manageable. The code uses the fastest possible methods, like using the bisect module and defaultdict, which should be efficient.
-
-But in Python, using enumerate is efficient. The code does not have any unnecessary steps. So this should be the optimal solution.
 </think>
 
 ```python

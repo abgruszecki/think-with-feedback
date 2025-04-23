@@ -261,39 +261,73 @@ Then compute min_k and max_k as per the logic.
 
 So code in Python:
 
-n = int(input())
-m = int(input())
-a = [int(input()) for _ in range(n)]
-max_initial = max(a)
-required = sum(max_initial - x for x in a)
+Testing against sample input 3.
 
-if m <= required:
-    min_k = max_initial
-else:
-    remaining = m - required
-    min_k = max_initial + (remaining // n) + (1 if remaining % n !=0 else 0)
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    m = int(input_stream.readline().rstrip("\n"))
+    a = [int(input_stream.readline().rstrip("\n")) for _ in range(n)]
+    max_initial = max(a)
+    required = sum(max_initial - x for x in a)
 
-max_k = max_initial + m
+    if m <= required:
+        min_k = max_initial
+    else:
+        remaining = m - required
+        min_k = max_initial + (remaining // n) + (1 if remaining % n !=0 else 0)
 
-print(f"{min_k} {max_k}")
+    max_k = max_initial + m
 
-Wait, but in the code, the sum for required is sum(max_initial -x for x in a). That's correct.
+    print(f"{min_k} {max_k}", file=output_stream)
 
-Testing this against the third sample input:
 
-Sample input 3:
 
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
-
-6
-
+7
 1
-
 6
-
 5
+""",
+            "output": \
+"""\
+7 13
+""",
+        }, 
+    ]
 
-a is [1,6,5]. sum(max_initial -x) is (6-1)+(6-6)+(6-5) =5+0+1=6. m=6 == required. So min_k is 6. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Yes.
 

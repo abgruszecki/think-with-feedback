@@ -1251,40 +1251,6 @@ Total cost 1+0=1. But the sample output is 0.
 
 Thus, this approach is incorrect.
 
-Ah, this shows that the code is not correct. The reason is that the maxima set only contains (2,2), but the correct maxima set should include (1,1) and (2,2).
-
-Thus, the algorithm for building the maxima set is incorrect.
-
-The error lies in how the maxima set is computed. The current algorithm only adds points that are not dominated by any point with higher x. But (1,1) is not dominated by any point with higher x (only (2,2)), but (2,2) has x=2>1 and y=2>1, so (1,1) is dominated by (2,2).
-
-Thus, (1,1) should not be in the maxima set. So the code correctly omits it.
-
-But in the first sample, the correct answer is achieved by including (1,1) in the path.
-
-This indicates that the maxima set approach is not sufficient. The path must include points that are not in the maxima set.
-
-Thus, the correct solution must include points that are not maxima but are needed to minimize the total cost.
-
-This suggests that the previous approach is incorrect.
-
-Thus, this problem requires a different approach.
-
-Alternative Idea:
-
-The correct approach is to sort the potatoes by x_i + y_i and process them in that order, greedily extending X and Y to cover the current potato. This approach was suggested earlier but failed the first sample. But perhaps we need to sort the potatoes in non-decreasing order of (x_i - y_i) and process them in that order.
-
-Let's try the first sample sorted by (x_i - y_i):
-
-Both potatoes have x_i - y_i = 0. Process in any order.
-
-Processing (1,1):
-
-dx=1-0=1, dy=1-0=1 → cost 1. X=1, Y=1.
-
-Processing (2,2):
-
-dx=1, dy=1 → cost 1. Total 2. Still wrong.
-
 Thus, this approach is incorrect.
 
 Another Idea: The correct solution is to use the greedy algorithm of processing the potatoes in the order of non-decreasing x_i and non-increasing y_i. This is inspired by the problem of scheduling jobs on two machines to minimize the makespan.
@@ -1425,74 +1391,167 @@ But I'm not certain.
 
 Given the time constraints, I think the correct solution is to sort the potatoes in non-decreasing order of (x_i - y_i), and process them, tracking the current X and Y. The code for this is as follows:
 
-n = int(input())
-potatoes = []
-for _ in range(n):
-    x, y = map(int, input().split())
-    potatoes.append( (x, y) )
+Testing against sample input 1.
 
-potatoes.sort(key=lambda p: (p[0] - p[1]))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    potatoes = []
+    for _ in range(n):
+        x, y = map(int, input_stream.readline().rstrip("\n").split())
+        potatoes.append( (x, y) )
 
-current_x = 0
-current_y = 0
-total_cost = 0
+    potatoes.sort(key=lambda p: (p[0] - p[1]))
 
-for x, y in potatoes:
-    dx = max(x - current_x, 0)
-    dy = max(y - current_y, 0)
-    cost = max(dx, dy)
-    total_cost += cost
-    current_x += dx
-    current_y += dy
+    current_x = 0
+    current_y = 0
+    total_cost = 0
 
-print(total_cost)
+    for x, y in potatoes:
+        dx = max(x - current_x, 0)
+        dy = max(y - current_y, 0)
+        cost = max(dx, dy)
+        total_cost += cost
+        current_x += dx
+        current_y += dy
 
-Testing this code on the first sample:
+    print(total_cost, file=output_stream)
 
-Sample Input 1:
 
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2
-
 1 1
-
-2 2
-
-Sorted by (x - y) → both are 0.
-
-Processing (1,1):
-
-dx=1-0=1, dy=1-0=1 → cost 1. current_x=1, current_y=1.
-
-Processing (2,2):
-
-dx=2-1=1, dy=2-1=1 → cost 1. Total 2.
-
-But the correct answer is 0. So this code is incorrect.
-
-Thus, this approach is incorrect.
-
-Finally, I think that the correct approach is to sort the potatoes by x + y, and then process them, but this also fails the first sample.
-
-Given that I'm unable to find the correct approach, I'll refer to the official solution or a correct code.
-
-After checking the sample input 2:
-
-Input:
-
-2
-
-1 1
-
 2 0
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-Sorted by x + y:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-(2,0) has x+y=2, (1,1) has x+y=2. So order can be either.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing (2,0):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-dx=2-0=2, dy=0-0=0 → cost 2. current_x=2, current_y=0.
+    print('Tests passed 😎')
 
-Processing (1,1):
 
-dx=0, dy=1-0=1 → cost 1. Total 3. But
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 59, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 52, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '1'
+Got: '2'
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    potatoes = []
+    for _ in range(n):
+        x, y = map(int, input_stream.readline().rstrip("\n").split())
+        potatoes.append( (x, y) )
+
+    potatoes.sort(key=lambda p: (p[0] - p[1]))
+
+    current_x = 0
+    current_y = 0
+    total_cost = 0
+
+    for x, y in potatoes:
+        dx = max(x - current_x, 0)
+        dy = max(y - current_y, 0)
+        cost = max(dx, dy)
+        total_cost += cost
+        current_x += dx
+        current_y += dy
+
+    print(total_cost, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+5 5
+7 7
+4 9
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 60, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 53, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '2'
+Got: '12'
+
+```
+
+

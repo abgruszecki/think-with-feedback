@@ -853,175 +853,166 @@ But also, the code must handle the case when a=0.
 
 Now, code:
 
-n, a_total, b_total = map(int, input().split())
+Testing against sample input 1.
 
-base =0
+```python
+def main(input_stream, output_stream):
+    n, a_total, b_total = map(int, input_stream.readline().rstrip("\n").split())
 
-gains = []
+    base =0
 
-for _ in range(n):
+    gains = []
 
-    hp, dmg = map(int, input().split())
+    for _ in range(n):
 
-    base += dmg
+        hp, dmg = map(int, input_stream.readline().rstrip("\n").split())
 
-    max_g = 0
+        base += dmg
 
-    best_k =0
-
-    current_hp = hp
-
-    current_g = current_hp - dmg
-
-    if current_g > max_g:
-
-        max_g = current_g
+        max_g = 0
 
         best_k =0
 
-    temp_hp = hp
+        current_hp = hp
 
-    for k in range(1, a_total +1):
-
-        temp_hp *=2
-
-        current_g = temp_hp - dmg
+        current_g = current_hp - dmg
 
         if current_g > max_g:
 
             max_g = current_g
 
-            best_k =k
+            best_k =0
 
-    if max_g >0:
+        temp_hp = hp
 
-        gains.append( (max_g, best_k) )
+        for k in range(1, a_total +1):
 
-# Sort gains in descending order of max_g
+            temp_hp *=2
 
-gains.sort(reverse=True, key=lambda x: x[0])
+            current_g = temp_hp - dmg
 
-prefix_ks = [0]
+            if current_g > max_g:
 
-prefix_gains = [0]
+                max_g = current_g
 
-for g, k in gains:
+                best_k =k
 
-    prefix_ks.append( prefix_ks[-1] + k )
+        if max_g >0:
 
-    prefix_gains.append( prefix_gains[-1] + g )
+            gains.append( (max_g, best_k) )
 
-max_total = base
+    # Sort gains in descending order of max_g
 
-for a_used in range(0, a_total +1):
+    gains.sort(reverse=True, key=lambda x: x[0])
 
-    # The total a_used is the sum of k's allowed.
+    prefix_ks = [0]
 
-    # Find the largest m where sum of k's <=a_used, and m <=b_total.
+    prefix_gains = [0]
 
-    max_possible_m = min(b_total, len(gains))
+    for g, k in gains:
 
-    left =0
+        prefix_ks.append( prefix_ks[-1] + k )
 
-    right = max_possible_m
+        prefix_gains.append( prefix_gains[-1] + g )
 
-    best_m =0
+    max_total = base
 
-    while left <= right:
+    for a_used in range(0, a_total +1):
 
-        mid = (left + right) //2
+        # The total a_used is the sum of k's allowed.
 
-        if mid > len(prefix_ks) -1:
+        # Find the largest m where sum of k's <=a_used, and m <=b_total.
 
-            # Handle cases where mid exceeds prefix_ks length (but max_possible_m is up to len(gains) which is <= len(prefix_ks)-1)
+        max_possible_m = min(b_total, len(gains))
 
-            # Because len(prefix_ks) = len(gains) +1.
+        left =0
 
-            # So mid can be up to len(gains).
+        right = max_possible_m
 
-            # But prefix_ks has len(gains)+1 elements (0..len(gains)).
+        best_m =0
 
-            right = mid -1
+        while left <= right:
 
-            continue
+            mid = (left + right) //2
 
-        if prefix_ks[mid] <= a_used:
+            if mid > len(prefix_ks) -1:
 
-            best_m = mid
+                # Handle cases where mid exceeds prefix_ks length (but max_possible_m is up to len(gains) which is <= len(prefix_ks)-1)
 
-            left = mid +1
+                # Because len(prefix_ks) = len(gains) +1.
 
-        else:
+                # So mid can be up to len(gains).
 
-            right = mid -1
+                # But prefix_ks has len(gains)+1 elements (0..len(gains)).
 
-    current_total = base + prefix_gains[best_m]
+                right = mid -1
 
-    if current_total > max_total:
+                continue
 
-        max_total = current_total
+            if prefix_ks[mid] <= a_used:
 
-print(max_total)
+                best_m = mid
 
-Wait, but what if a_used exceeds the sum of k's in the first m elements, but there are enough a_used left to include more gains?
+                left = mid +1
 
-No, because the code is considering each a_used (from 0 to a_total) and for each, the maximum possible m is the largest such that sum of k's up to m <=a_used, and m <=b_total.
+            else:
 
-Thus, the code should handle all possibilities.
+                right = mid -1
 
-Testing sample input 1:
+        current_total = base + prefix_gains[best_m]
 
-After processing, gains is [(11,1), (5,1)].
+        if current_total > max_total:
 
-prefix_ks is [0,1,2].
+            max_total = current_total
 
-prefix_gains is [0,11,16].
+    print(max_total, file=output_stream)
 
-Loop a_used from 0 to 1.
 
-For a_used=0:
 
-max_possible_m is min(1, 2) =1.
+def test():
+    import io
 
-binary search between 0 and 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 0 3
+10 8
+7 11
+5 2
+""",
+            "output": \
+"""\
+26
+""",
+        }, 
+    ]
 
-Check mid=0.5 → mid=0: prefix_ks[0] is 0 <=0. best_m=0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-left becomes 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-mid= (0+1)//2=0.5 → mid=0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Wait, perhaps the binary search code should start with left=0 and right= max_possible_m.
+    print('Tests passed 😎')
 
-Wait, in the code:
 
-max_possible_m is min(b_total, len(gains)).
+if __name__ == '__main__':
+    test()
 
-For sample input 1, len(gains) is 2, b_total=1. So max_possible_m=1.
 
-So for a_used=0:
+```
 
-left=0, right=1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-mid=0 ( (0+1)//2=0).
-
-prefix_ks[0] is 0 <=0 → best_m=0. left becomes 1.
-
-mid= (1+1)//2=1. Check prefix_ks[1]=1 <=0? No. So right=0. Loop ends. Best_m is 0.
-
-sum_gain=0.
-
-For a_used=1:
-
-max_possible_m=1.
-
-left=0, right=1.
-
-mid=0: prefix_ks[0] <=1 → yes. best_m=0, left=1.
-
-mid=1: prefix_ks[1]=1 <=1 → yes. best_m=1, left=2. Exit. sum_gain=11.
-
-Thus, the code returns 27.
+```
 
 Sample 2: a_total=0.
 

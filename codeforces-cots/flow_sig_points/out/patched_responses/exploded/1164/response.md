@@ -168,57 +168,73 @@ Yes.
 
 So code in Python:
 
-n = int(input())
-students = []
-for i in range(n):
-    a, b, c, d = map(int, input().split())
-    s = a + b + c + d
-    students.append( (-s, i+1) )
+Testing against sample input 1.
 
-students.sort()
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    students = []
+    for i in range(n):
+        a, b, c, d = map(int, input_stream.readline().rstrip("\n").split())
+        s = a + b + c + d
+        students.append( (-s, i+1) )
 
-for idx in range(len(students)):
-    if students[idx][1] == 1:
-        print(idx + 1)
-        break
+    students.sort()
 
-Wait, but when we sort the list, the tuples are compared first by -s (so higher s comes first). Then for same s, the id is compared. Since the tuple is (-s, id), when sorted in ascending order, tuples with lower -s (i.e., higher s) come first. For same -s, tuples are ordered by id in ascending order. So the sorted list is as required.
+    for idx in range(len(students)):
+        if students[idx][1] == 1:
+            print(idx + 1, file=output_stream)
+            break
 
-Yes.
 
-Testing this code with the first sample:
 
-Sample input 1:
+def test():
+    import io
 
-5
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+100 80 90 99
+60 60 60 60
+90 60 100 60
+60 100 60 80
+100 100 0 100
+0 0 0 0
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-100 98 100 100 → sum 398 → id 1 → tuple (-398,1)
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-100 100 100 100 → sum 400 → id2 → (-400,2)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-100 100 99 99 → sum 398 → id3 → (-398,3)
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-90 99 90 100 → sum 379 → id4 → (-379,4)
+    print('Tests passed 😎')
 
-100 98 60 99 → sum 357 → id5 → (-357,5)
 
-The students list before sorting is:
+if __name__ == '__main__':
+    test()
 
-[ (-398,1), (-400,2), (-398,3), (-379,4), (-357,5) ]
 
-After sorting, the list becomes sorted in ascending order of the tuples.
+```
 
-Comparing the first elements:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
--400 is less than -398, so (-400,2) comes first.
-
-Then come the elements with -398: (-398,1) and (-398,3). Comparing their ids: 1 <3, so (-398,1) comes before (-398,3).
-
-So sorted list is:
-
-[ (-400,2), (-398,1), (-398,3), (-379,4), (-357,5) ]
-
-Looping through, the index of id 1 is 1 (0-based), so rank is 2. Correct.
+```
 
 Sample 2:
 

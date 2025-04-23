@@ -1333,66 +1333,149 @@ Otherwise, continue.
 
 So the code would be:
 
-n = int(input())
-a = list(map(int, input().split()))
+Testing against sample input 1.
 
-start = None
-for i in range(n):
-    if a[i] ==1:
-        start = i
-        break
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-if start is None:
-    print(0)
-    exit()
+    start = None
+    for i in range(n):
+        if a[i] ==1:
+            start = i
+            break
 
-count =0
-i = start
-while i <n:
-    count +=1
-    if a[i] ==0 and i+1 <n and a[i+1] ==0:
-        break
-    i +=1
+    if start is None:
+        print(0, file=output_stream)
+        return
 
-print(count)
+    count =0
+    i = start
+    while i <n:
+        count +=1
+        if a[i] ==0 and i+1 <n and a[i+1] ==0:
+            break
+        i +=1
 
-Testing this code on the samples:
+    print(count, file=output_stream)
 
-Sample1:
 
-n=5, a=[0,1,0,1,1].
 
-start is1.
+def test():
+    import io
 
-i=1, count1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+1 0 1 0 0 1 0
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-a[1] is1. i becomes2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-count2 (a[2] is0). Check if a[3] is0? No. i becomes3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-count3. a[3] is1. i becomes4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-count4. a[4] is1. i becomes5.
+    print('Tests passed 😎')
 
-exit. count4. correct.
 
-Sample2:
+if __name__ == '__main__':
+    test()
 
-n=7, a=[1,0,1,0,0,1,0].
 
-start is0.
+```
 
-i=0, count1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-a[0] is1. i=1.
+```
 
-count2. a[1] is0. check a[2] is1. no. i=2.
+Testing against sample input 2.
 
-count3. a[2] is1. i=3.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-count4. a[3] is0. check a[4] is0. yes. break. count4. exit.
+    start = None
+    for i in range(n):
+        if a[i] ==1:
+            start = i
+            break
 
-correct.
+    if start is None:
+        print(0, file=output_stream)
+        return
+
+    count =0
+    i = start
+    while i <n:
+        count +=1
+        if a[i] ==0 and i+1 <n and a[i+1] ==0:
+            break
+        i +=1
+
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+0
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

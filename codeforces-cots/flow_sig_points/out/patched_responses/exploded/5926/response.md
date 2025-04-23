@@ -113,39 +113,72 @@ Yes.
 
 So the code would be:
 
-n, m = map(int, input().split())
-containers = []
-for _ in range(m):
-    a, b = map(int, input().split())
-    containers.append( (b, a) )  # storing as (bi, ai)
-containers.sort(reverse=True)  # sorts by first element (bi) descending
-total = 0
-remaining = n
-for b, a in containers:
-    if remaining <=0:
-        break
-    take = min(a, remaining)
-    total += take * b
-    remaining -= take
-print(total)
+Testing against sample input 1.
 
-Wait, but the order in the input is ai then bi. So when we read a line as a, b, the a is ai (number of boxes in the container), and b is bi (matches per box). So yes, the container has ai boxes, each with bi matches.
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    containers = []
+    for _ in range(m):
+        a, b = map(int, input_stream.readline().rstrip("\n").split())
+        containers.append( (b, a) )  # storing as (bi, ai)
+    containers.sort(reverse=True)  # sorts by first element (bi) descending
+    total = 0
+    remaining = n
+    for b, a in containers:
+        if remaining <=0:
+            break
+        take = min(a, remaining)
+        total += take * b
+        remaining -= take
+    print(total, file=output_stream)
 
-So the code is correct.
 
-Testing first sample:
 
-Input line 2 is 5 10. So a=5, b=10. So in the containers list, it's stored as (10,5). Then the third line is 2 5, stored as (5,2). Third line 3 6 is (6,3).
+def test():
+    import io
 
-Sorting the list in reverse order: (10,5), (6,3), (5,2). Then for each:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 3
+1 3
+2 2
+3 1
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
 
-First container: take min(5,7) →5. total +=5*10=50. remaining=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Second container (6,3): take min(3,2) →2. total +=12. remaining 0. Break. Total 62.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Yes.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So the code works.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: second input.
 

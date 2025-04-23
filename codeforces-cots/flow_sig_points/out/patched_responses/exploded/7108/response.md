@@ -671,45 +671,101 @@ sum counts and output.
 
 Now, code.
 
-Testing the second example:
+Testing against sample input 2.
 
-n=2, m=5.
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    grid = [list(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n)]
+    A, B, C = map(int, input_stream.readline().rstrip("\n").split())
 
-row_sums = [5, 10]
+    row_sums = [sum(row) for row in grid]
+    col_sums = [sum(col) for col in zip(*grid)]
+    total = sum(row_sums)
 
-column_sums = [3,3,3,3,3]
+    if A + B + C != total:
+        print(0, file=output_stream)
+        return
 
-row_prefix: [0,5,15]
+    sorted_target = sorted([A, B, C])
 
-For horizontal splits, n=2. So i can be from 0 to n-3=0-3= -1. So loop does not run. So count_horiz=0.
+    count = 0
 
-Vertical splits: m=5. i ranges from 0 to m-3=2.
+    # Process vertical splits (columns)
+    col_prefix = [0] * (m + 1)
+    for i in range(m):
+        col_prefix[i+1] = col_prefix[i] + col_sums[i]
 
-As before.
+    for i in range(m-2):
+        for j in range(i+1, m-1):
+            sum1 = col_prefix[i+1]
+            sum2 = col_prefix[j+1] - col_prefix[i+1]
+            sum3 = col_prefix[m] - col_prefix[j+1]
+            if sorted([sum1, sum2, sum3]) == sorted_target:
+                count += 1
 
-Now, code for vertical:
+    # Process horizontal splits (rows)
+    row_prefix = [0] * (n + 1)
+    for i in range(n):
+        row_prefix[i+1] = row_prefix[i] + row_sums[i]
 
-i in 0,1,2 (since m-2=3 → range(3) is 0,1,2).
+    for i in range(n-2):
+        for j in range(i+1, n-1):
+            sum1 = row_prefix[i+1]
+            sum2 = row_prefix[j+1] - row_prefix[i+1]
+            sum3 = row_prefix[n] - row_prefix[j+1]
+            if sorted([sum1, sum2, sum3]) == sorted_target:
+                count += 1
 
-j ranges from i+1 to m-1=4 (but j can be up to m-2=3). So for j in range(i+1, m-1) → m-1=4. So j ranges from i+1 to 3 (since 4 is exclusive).
+    print(count, file=output_stream)
 
-So for i=0:
 
-j can be 1,2,3.
 
-sum1 = column_prefix[1] (0+1=1 → sum of columns 0) →3.
+def test():
+    import io
 
-sum2 = column_prefix[j+1] - column_prefix[1].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 3
+1 2 3
+3 1 2
+2 3 1
+5 6 7
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-For j=2: j+1=3 → sum2 = column_prefix[3] - column_prefix[1] = (3+3) -3 =3 →6.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum3= column_prefix[5] - column_prefix[3] → (3*5) - (3*3) →15-9=6.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So yes.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Similarly, other j's.
+    print('Tests passed 😎')
 
-Thus, code is correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So the code should handle all cases.
 

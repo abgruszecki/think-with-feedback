@@ -175,77 +175,108 @@ Then, for each even length starting from minimal:
 
 So the code would look like:
 
+Testing against sample input 1.
+
+```python
 import itertools
 
-n = int(input().strip())
 
-original_n = n
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n").strip())
 
-n_str = str(n)
+    original_n = n
 
-m = len(n_str)
+    n_str = str(n)
 
-# Determine the possible even lengths to check.
+    m = len(n_str)
 
-current_length = m if (m % 2 ==0) else m+1
+    # Determine the possible even lengths to check.
 
-while True:
+    current_length = m if (m % 2 ==0) else m+1
 
-    k = current_length // 2
+    while True:
 
-    # Generate all combinations of k positions from 0 to current_length -1
+        k = current_length // 2
 
-    candidates = []
+        # Generate all combinations of k positions from 0 to current_length -1
 
-    positions = itertools.combinations(range(current_length), k)
+        candidates = []
 
-    for pos in positions:
+        positions = itertools.combinations(range(current_length), k)
 
-        num_list = ['7'] * current_length
+        for pos in positions:
 
-        for idx in pos:
+            num_list = ['7'] * current_length
 
-            num_list[idx] = '4'
+            for idx in pos:
 
-        num_str = ''.join(num_list)
+                num_list[idx] = '4'
 
-        num = int(num_str)
+            num_str = ''.join(num_list)
 
-        candidates.append(num)
+            num = int(num_str)
 
-    # sort the candidates and check
+            candidates.append(num)
 
-    candidates.sort()
+        # sort the candidates and check
 
-    for candidate in candidates:
+        candidates.sort()
 
-        if candidate >= original_n:
+        for candidate in candidates:
 
-            print(candidate)
+            if candidate >= original_n:
 
-            exit()
+                print(candidate, file=output_stream)
 
-    # if not found, try the next even length.
+                return
 
-    current_length +=2
+        # if not found, try the next even length.
 
-So this code would generate for each even length the possible candidates, sorted, and return the first candidate that is >=n.
+        current_length +=2
 
-But wait, for the first length that has a candidate >=n, the code returns the first such in the sorted list, which is the minimal candidate of that length. Since we are checking lengths in order, the first candidate found is the minimal possible.
 
-But let's test with the first example:
 
-Input:4500 → 4 digits. The code starts with current_length =4.
+def test():
+    import io
 
-k=2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+47
+""",
+            "output": \
+"""\
+47
+""",
+        }, 
+    ]
 
-Generate all combinations of 2 positions from 0,1,2,3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Each combination creates a 4-digit number with two 4s and two 7s.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-These candidates include 4477,4747,4774,7447,7474,7744. When sorted, they are 4477, 4747,4774,7447,7474,7744. The original n is4500. So 4477 is 4477 <4500. Next is4747 ≥4500 → output 4747.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Which is correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 In the second example, input 47 → the code checks current_length=2 (since 47 is two digits). The candidates are 47 (positions 0 and 1: 4 and 7? Wait, no. Wait for current_length=2, k=1. So the combinations are [0], [1]. For [0], the number is 47. For [1], the number is 74. So the candidates are [47,74]. Sorted as 47,74. So the first candidate is 47 which is equal to n. So output is 47.
 

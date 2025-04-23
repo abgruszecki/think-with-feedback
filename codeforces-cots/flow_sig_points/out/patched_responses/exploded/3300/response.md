@@ -421,19 +421,105 @@ new_a is [1,2,3,4,5,6,7], which is strictly increasing. Since k=7 >=2, output ye
 
 Yes, correct.
 
-Sample 2:
+Testing against sample inputs 2, 3, 1.
 
-new_a is [2,3,5,8,9,10], strictly increasing. k=1, output no.
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
+    sorted_b = sorted(b)
 
-Sample3:
+    new_a = []
+    b_idx = 0
+    for num in a:
+        if num == 0:
+            new_a.append(sorted_b[b_idx])
+            b_idx += 1
+        else:
+            new_a.append(num)
 
-new_a is [8,94,89,4]. 94>89: not increasing. So output yes.
+    is_increasing = True
+    for i in range(len(new_a) - 1):
+        if new_a[i] >= new_a[i+1]:
+            is_increasing = False
+            break
 
-Sample1: new_a is [11,4,5,14]. 11>4: not increasing. So output yes.
+    if not is_increasing:
+        print("Yes", file=output_stream)
+    else:
+        print("Yes" if k >= 2 else "No", file=output_stream)
 
-Thus, code works.
 
-So the code seems correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 1
+8 94 0 4
+89
+""",
+            "output": \
+"""\
+Yes
+""",
+        }, 
+        {
+            "input": \
+"""\
+7 7
+0 0 0 0 0 0 0
+1 2 3 4 5 6 7
+""",
+            "output": \
+"""\
+Yes
+""",
+        }, 
+        {
+            "input": \
+"""\
+6 1
+2 3 0 8 9 10
+5
+""",
+            "output": \
+"""\
+No
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

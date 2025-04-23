@@ -1044,91 +1044,86 @@ For each character in s:
 
        Now, code:
 
-       n = int(input())
-       s = input().strip()
+Testing against sample input 1.
 
-       max_x0 = [0] * (n + 1)
-       max_x1 = [0] * (n + 1)
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-       for i in range(n-1, -1, -1):
-           # Compute max_x0
-           if s[i] == '0' or s[i] == '?':
-               max_x0[i] = max_x0[i+1] + 1
-           else:
-               max_x0[i] = 0
-           # Compute max_x1
-           if s[i] == '1' or s[i] == '?':
-               max_x1[i] = max_x1[i+1] + 1
-           else:
-               max_x1[i] = 0
+    max_x0 = [0] * (n + 1)
+    max_x1 = [0] * (n + 1)
 
-       ans = []
-       for x in range(1, n+1):
-           cnt = 0
-           i = 0
-           while i <= n - x:
-               if max_x0[i] >= x or max_x1[i] >= x:
-                   cnt += 1
-                   i += x
-               else:
-                   i += 1
-           ans.append(str(cnt))
+    for i in range(n-1, -1, -1):
+        # Compute max_x0
+        if s[i] == '0' or s[i] == '?':
+            max_x0[i] = max_x0[i+1] + 1
+        else:
+            max_x0[i] = 0
+        # Compute max_x1
+        if s[i] == '1' or s[i] == '?':
+            max_x1[i] = max_x1[i+1] + 1
+        else:
+            max_x1[i] = 0
 
-       print(' '.join(ans))
+    ans = []
+    for x in range(1, n+1):
+        cnt = 0
+        i = 0
+        while i <= n - x:
+            if max_x0[i] >= x or max_x1[i] >= x:
+                cnt += 1
+                i += x
+            else:
+                i += 1
+        ans.append(str(cnt))
 
-       This should work.
+    print(' '.join(ans), file=output_stream)
 
-       Let's test against the first sample input:
 
-       Input:
-       6
-       11?000
 
-       The max_x0 for each i:
+def test():
+    import io
 
-       i=5: '0' → max_x0[5] =1 +0=1
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+01?01
+""",
+            "output": \
+"""\
+5 1 0 0 0
+""",
+        }, 
+    ]
 
-       i=4: '0' →1+1=2
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-       i=3: '0' →3
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-       i=2: '?', →1 +3=4
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-       i=1: '1' →0
+    print('Tests passed 😎')
 
-       i=0: '1' →0
 
-       So max_x0 is [0,0,4,3,2,1].
+if __name__ == '__main__':
+    test()
 
-       max_x1:
 
-       i=5: '0' →0.
+```
 
-       i=4: '0' →0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-       i=3: '0' →0.
-
-       i=2: '?', →1 +0=1.
-
-       i=1: '1' →1 +1=2.
-
-       i=0: '1' →1 +2=3.
-
-       So max_x1 is [3,2,1,0,0,0].
-
-       For x=1:
-
-           i starts at 0:
-
-               check 0: max_x0[0] >=1 (0 >=1 →no). max_x1[0] >=1 (3 >=1 →yes). cnt +=1, i +=1 →i=1.
-
-               i=1: check max_x1[1] >=1 (2 >=1 →yes). cnt +=1, i=2.
-
-               and so on. So cnt=6.
-
-       Which matches the first sample.
-
-       So the code is correct.
+```
 
        Now, the code should handle all cases.
 </think>

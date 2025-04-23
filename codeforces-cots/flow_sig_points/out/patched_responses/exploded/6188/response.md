@@ -357,125 +357,138 @@ Now, code structure.
 
 In Python:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-n, k = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-segments = []
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-events = []
+    segments = []
 
-for _ in range(n):
+    events = []
 
-    l, r = map(int, input().split())
+    for _ in range(n):
 
-    events.append( (l, 1) )
+        l, r = map(int, input_stream.readline().rstrip("\n").split())
 
-    events.append( (r+1, -1) )
+        events.append( (l, 1) )
 
-events.sort()
+        events.append( (r+1, -1) )
 
-# Precompute factorial and inv factorial
+    events.sort()
 
-max_m = n
+    # Precompute factorial and inv factorial
 
-fact = [1]*(max_m +1)
+    max_m = n
 
-for i in range(1, max_m +1):
+    fact = [1]*(max_m +1)
 
-    fact[i] = fact[i-1] * i % MOD
+    for i in range(1, max_m +1):
 
-inv_fact = [1]*(max_m +1)
+        fact[i] = fact[i-1] * i % MOD
 
-inv_fact[max_m] = pow(fact[max_m], MOD-2, MOD)
+    inv_fact = [1]*(max_m +1)
 
-for i in range(max_m-1, -1, -1):
+    inv_fact[max_m] = pow(fact[max_m], MOD-2, MOD)
 
-    inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
+    for i in range(max_m-1, -1, -1):
 
-# Compute comb array
+        inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
 
-comb = [0]*(max_m +1)
+    # Compute comb array
 
-for m in range(0, max_m+1):
+    comb = [0]*(max_m +1)
 
-    if m <k:
+    for m in range(0, max_m+1):
 
-        comb[m] =0
+        if m <k:
 
-    else:
-
-        comb[m] = fact[m] * inv_fact[k] % MOD
-
-        comb[m] = comb[m] * inv_fact[m -k] % MOD
-
-# Sweep
-
-current_coverage =0
-
-prev_x = None
-
-ans =0
-
-for x, delta in events:
-
-    if prev_x is not None and x > prev_x:
-
-        length = x - prev_x
-
-        if current_coverage >=0 and current_coverage <= max_m:
-
-            c = comb[current_coverage]
+            comb[m] =0
 
         else:
 
-            c=0
+            comb[m] = fact[m] * inv_fact[k] % MOD
 
-        ans = (ans + length * c) % MOD
+            comb[m] = comb[m] * inv_fact[m -k] % MOD
 
-    current_coverage += delta
+    # Sweep
 
-    prev_x = x
+    current_coverage =0
 
-print(ans % MOD)
+    prev_x = None
 
-Wait, but in the code, during the loop, for each (x, delta) in events:
+    ans =0
 
-If the current x is greater than prev_x (which is initially None, so first iteration skips), then compute the contribution.
+    for x, delta in events:
 
-But for the first iteration, prev_x is None, so no contribution. Then, process the event (add delta to current coverage), set prev_x to x.
+        if prev_x is not None and x > prev_x:
 
-This should be correct.
+            length = x - prev_x
 
-Let's test with the first sample.
+            if current_coverage >=0 and current_coverage <= max_m:
 
-In the first sample, the events are:
+                c = comb[current_coverage]
 
-After sorting:
+            else:
 
-(1,1), (1,1), (2,1), (3,-1), (4,-1), (4,-1).
+                c=0
 
-Processing:
+            ans = (ans + length * c) % MOD
 
-First event x=1, delta=1. prev_x is None → no contribution. current_coverage becomes 1. prev_x is 1.
+        current_coverage += delta
 
-Second event x=1, delta=1. x is not > prev_x (1 vs 1). So no contribution. current_coverage becomes 2. prev_x 1.
+        prev_x = x
 
-Third event x=2, delta=1. x is 2>1. length is 2-1=1. current coverage is 2. comb[2] is 1. ans +=1*1=1.
+    print(ans % MOD, file=output_stream)
 
-current_coverage becomes 3. prev_x is 2.
 
-Fourth event x=3, delta=-1. x>2 → length 3-2=1. coverage is 3. comb[3] for k=2 is C(3,2)=3. ans +=1*3=4.
 
-current_coverage becomes 2. prev_x is 3.
+def test():
+    import io
 
-Fifth event x=4, delta=-1. x>3 → length 4-3=1. coverage is 2. comb[2] is 1. ans +=1*1=5.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 3
+1 3
+1 3
+1 3
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-current_coverage becomes 1. prev_x is 4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sixth event x=4, delta=-1. x=4 is same as prev. No contribution. current_coverage becomes 0. prev_x 4.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-No more events. ans is 5, correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample:
 

@@ -667,120 +667,275 @@ Implementing bisect for M.
 
 So code:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-MOD = 998244353
 
-class FenwickTree:
-    def __init__(self, size):
-        self.n = size
-        self.tree = [0] * (self.n + 2)  # 1-based indexing
-    
-    def update(self, idx, delta):
-        while idx <= self.n:
-            self.tree[idx] += delta
-            idx += idx & -idx
-    
-    def get_sum(self, idx):
-        res = 0
-        while idx > 0:
-            res += self.tree[idx]
-            idx -= idx & -idx
-        return res
-    
-    def query_gt(self, x):
-        return self.get_sum(self.n) - self.get_sum(x)
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-n = int(input())
-p = list(map(int, input().split()))
+    class FenwickTree:
+        def __init__(self, size):
+            self.n = size
+            self.tree = [0] * (self.n + 2)  # 1-based indexing
+        
+        def update(self, idx, delta):
+            while idx <= self.n:
+                self.tree[idx] += delta
+                idx += idx & -idx
+        
+        def get_sum(self, idx):
+            res = 0
+            while idx > 0:
+                res += self.tree[idx]
+                idx -= idx & -idx
+            return res
+        
+        def query_gt(self, x):
+            return self.get_sum(self.n) - self.get_sum(x)
 
-known = [x for x in p if x != -1]
-m = n - len(known)
-M = []
-if m > 0:
-    s = set(known)
-    for x in range(1, n+1):
-        if x not in s:
-            M.append(x)
-    M.sort()
+    n = int(input_stream.readline().rstrip("\n"))
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-# Compute case1
-case1 = 0
-fen = FenwickTree(n)
-for x in p:
-    if x == -1:
-        continue
-    cnt = fen.query_gt(x)
-    case1 = (case1 + cnt) % MOD
-    fen.update(x, 1)
+    known = [x for x in p if x != -1]
+    m = n - len(known)
+    M = []
+    if m > 0:
+        s = set(known)
+        for x in range(1, n+1):
+            if x not in s:
+                M.append(x)
+        M.sort()
 
-# Compute prefix array pre
-pre = [0] * (n + 1)
-for i in range(1, n+1):
-    pre[i] = pre[i-1] + (1 if p[i-1] == -1 else 0)
+    # Compute case1
+    case1 = 0
+    fen = FenwickTree(n)
+    for x in p:
+        if x == -1:
+            continue
+        cnt = fen.query_gt(x)
+        case1 = (case1 + cnt) % MOD
+        fen.update(x, 1)
 
-# Compute case2a and case2b
-case2a = 0
-case2b = 0
-for i in range(n):
-    if p[i] == -1:
-        continue
-    x = p[i]
-    pos = i + 1  # 1-based
-    # case2a
-    unknowns_before = pre[pos -1]
-    cnt_gt = len(M) - bisect.bisect_right(M, x) if m else 0
-    case2a = (case2a + unknowns_before * cnt_gt) % MOD
-    # case2b
-    unknowns_after = pre[n] - pre[pos]
-    cnt_lt = bisect.bisect_left(M, x) if m else 0
-    case2b = (case2b + unknowns_after * cnt_lt) % MOD
+    # Compute prefix array pre
+    pre = [0] * (n + 1)
+    for i in range(1, n+1):
+        pre[i] = pre[i-1] + (1 if p[i-1] == -1 else 0)
 
-sum_2 = 0
-if m != 0:
-    sum_2 = (case2a + case2b) * pow(m, MOD-2, MOD) % MOD
+    # Compute case2a and case2b
+    case2a = 0
+    case2b = 0
+    for i in range(n):
+        if p[i] == -1:
+            continue
+        x = p[i]
+        pos = i + 1  # 1-based
+        # case2a
+        unknowns_before = pre[pos -1]
+        cnt_gt = len(M) - bisect.bisect_right(M, x) if m else 0
+        case2a = (case2a + unknowns_before * cnt_gt) % MOD
+        # case2b
+        unknowns_after = pre[n] - pre[pos]
+        cnt_lt = bisect.bisect_left(M, x) if m else 0
+        case2b = (case2b + unknowns_after * cnt_lt) % MOD
 
-# Compute case3
-u = pre[n]
-case3 = 0
-if u >= 2:
-    term = u * (u -1) % MOD
-    inv2 = pow(2, MOD-2, MOD)
-    case3 = term * inv2 % MOD
-    case3 = case3 * inv2 % MOD
+    sum_2 = 0
+    if m != 0:
+        sum_2 = (case2a + case2b) * pow(m, MOD-2, MOD) % MOD
 
-total = (case1 + sum_2 + case3) % MOD
-print(total)
+    # Compute case3
+    u = pre[n]
+    case3 = 0
+    if u >= 2:
+        term = u * (u -1) % MOD
+        inv2 = pow(2, MOD-2, MOD)
+        case3 = term * inv2 % MOD
+        case3 = case3 * inv2 % MOD
 
-Testing this code against the examples.
+    total = (case1 + sum_2 + case3) % MOD
+    print(total, file=output_stream)
 
-First example:
 
-Input:
 
-3
+def test():
+    import io
 
-3 -1 -1
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+1 2
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-known is [3], m=2. M = [1,2].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-case1: the Fenwick Tree is initialized with size 3. Processing elements:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-First element is 3. query_gt(3) returns 0. case1=0. Add 3 to the tree.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Second and third elements are -1. So no contribution.
+    print('Tests passed 😎')
 
-pre array:
 
-pre[0] =0
+if __name__ == '__main__':
+    test()
 
-pre[1] =0 (position 1 is 3, not -1)
 
-pre[2] =1 (position 2 is -1)
+```
 
-pre[3] =2 (position 3 is -1)
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-case2a: for the known element at i=0 (pos 1), unknowns_before=pre[0] =0 → case2a +=0.
+```
+
+Testing against sample input 2.
+
+```python
+import bisect
+
+
+def main(input_stream, output_stream):
+    MOD = 998244353
+
+    class FenwickTree:
+        def __init__(self, size):
+            self.n = size
+            self.tree = [0] * (self.n + 2)  # 1-based indexing
+        
+        def update(self, idx, delta):
+            while idx <= self.n:
+                self.tree[idx] += delta
+                idx += idx & -idx
+        
+        def get_sum(self, idx):
+            res = 0
+            while idx > 0:
+                res += self.tree[idx]
+                idx -= idx & -idx
+            return res
+        
+        def query_gt(self, x):
+            return self.get_sum(self.n) - self.get_sum(x)
+
+    n = int(input_stream.readline().rstrip("\n"))
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    known = [x for x in p if x != -1]
+    m = n - len(known)
+    M = []
+    if m > 0:
+        s = set(known)
+        for x in range(1, n+1):
+            if x not in s:
+                M.append(x)
+        M.sort()
+
+    # Compute case1
+    case1 = 0
+    fen = FenwickTree(n)
+    for x in p:
+        if x == -1:
+            continue
+        cnt = fen.query_gt(x)
+        case1 = (case1 + cnt) % MOD
+        fen.update(x, 1)
+
+    # Compute prefix array pre
+    pre = [0] * (n + 1)
+    for i in range(1, n+1):
+        pre[i] = pre[i-1] + (1 if p[i-1] == -1 else 0)
+
+    # Compute case2a and case2b
+    case2a = 0
+    case2b = 0
+    for i in range(n):
+        if p[i] == -1:
+            continue
+        x = p[i]
+        pos = i + 1  # 1-based
+        # case2a
+        unknowns_before = pre[pos -1]
+        cnt_gt = len(M) - bisect.bisect_right(M, x) if m else 0
+        case2a = (case2a + unknowns_before * cnt_gt) % MOD
+        # case2b
+        unknowns_after = pre[n] - pre[pos]
+        cnt_lt = bisect.bisect_left(M, x) if m else 0
+        case2b = (case2b + unknowns_after * cnt_lt) % MOD
+
+    sum_2 = 0
+    if m != 0:
+        sum_2 = (case2a + case2b) * pow(m, MOD-2, MOD) % MOD
+
+    # Compute case3
+    u = pre[n]
+    case3 = 0
+    if u >= 2:
+        term = u * (u -1) % MOD
+        inv2 = pow(2, MOD-2, MOD)
+        case3 = term * inv2 % MOD
+        case3 = case3 * inv2 % MOD
+
+    total = (case1 + sum_2 + case3) % MOD
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+-1 -1
+""",
+            "output": \
+"""\
+499122177
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 case2b: for the same element, pos 1. unknowns_after = pre[3] - pre[1] = 2-0=2. cnt_lt is bisect_left([1,2],3) → 2. So case2b += 2 * 2 =4.
 

@@ -107,37 +107,77 @@ Then, iterate through the list to compute consecutive differences.
 
 So code steps:
 
-s = input().strip()
+Testing against sample input 1.
 
-vowel_positions = [0]
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-for i in range(len(s)):
+    vowel_positions = [0]
 
-    if s[i] in {'A','E','I','O','U','Y'}:
+    for i in range(len(s)):
 
-        vowel_positions.append(i+1)
+        if s[i] in {'A','E','I','O','U','Y'}:
 
-vowel_positions.append(len(s)+1)
+            vowel_positions.append(i+1)
 
-max_diff = 0
+    vowel_positions.append(len(s)+1)
 
-for i in range(1, len(vowel_positions)):
+    max_diff = 0
 
-    diff = vowel_positions[i] - vowel_positions[i-1]
+    for i in range(1, len(vowel_positions)):
 
-    if diff > max_diff:
+        diff = vowel_positions[i] - vowel_positions[i-1]
 
-        max_diff = diff
+        if diff > max_diff:
 
-print(max_diff)
+            max_diff = diff
 
-Yes. That's the code.
+    print(max_diff, file=output_stream)
 
-Testing the first example:
 
-Input is ABABBBACFEYUKOTT (length 16). The vowels are at positions 0 (added), then 1,3,7,10,11,12,14 (from the vowels in the string), then 17. The differences are 1,2,4,3,1,1,2,3. Max is 4.
 
-So code would output 4.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+AAA
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: input "AAA" (length 3). vowel_positions is [0,1,2,3,4]. differences are 1,1,1,1. Max is 1.
 

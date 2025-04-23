@@ -440,121 +440,172 @@ But in Python, using integers (like 1,2,3,4) as node identifiers is manageable.
 
 So code:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-n, m, k = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-c = list(map(int, input().split()))
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
 
-from collections import defaultdict
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-groups = defaultdict(list)
+    from collections import defaultdict
 
-for _ in range(m):
+    groups = defaultdict(list)
 
-    u, v = map(int, input().split())
+    for _ in range(m):
 
-    u -=1  # converting to 0-based for c array.
+        u, v = map(int, input_stream.readline().rstrip("\n").split())
 
-    v -=1
+        u -=1  # converting to 0-based for c array.
 
-    d = c[u] ^ c[v]
+        v -=1
 
-    groups[d].append( (u+1, v+1) )  # store edges as 1-based.
+        d = c[u] ^ c[v]
 
-sum_terms = 0
+        groups[d].append( (u+1, v+1) )  # store edges as 1-based.
 
-pow_2n = pow(2, n, MOD)
+    sum_terms = 0
 
-for d, edges in groups.items():
+    pow_2n = pow(2, n, MOD)
 
-    # collect all unique nodes in edges
+    for d, edges in groups.items():
 
-    nodes = set()
+        # collect all unique nodes in edges
 
-    for u, v in edges:
+        nodes = set()
 
-        nodes.add(u)
+        for u, v in edges:
 
-        nodes.add(v)
+            nodes.add(u)
 
-    unique_nodes = list(nodes)
+            nodes.add(v)
 
-    size = len(unique_nodes)
+        unique_nodes = list(nodes)
 
-    if size ==0:
+        size = len(unique_nodes)
 
-        continue  # but edges are non-empty? No.
+        if size ==0:
 
-    # create DSU
+            continue  # but edges are non-empty? No.
 
-    node_to_idx = {u: i for i, u in enumerate(unique_nodes)}
+        # create DSU
 
-    parent = list(range(size))
+        node_to_idx = {u: i for i, u in enumerate(unique_nodes)}
 
-    rank = [1]*size
+        parent = list(range(size))
 
-    count = size
+        rank = [1]*size
 
-    for u, v in edges:
+        count = size
 
-        u_idx = node_to_idx[u]
+        for u, v in edges:
 
-        v_idx = node_to_idx[v]
+            u_idx = node_to_idx[u]
 
-        # find roots
+            v_idx = node_to_idx[v]
 
-        root_u = u_idx
+            # find roots
 
-        while parent[root_u] != root_u:
+            root_u = u_idx
 
-            parent[root_u] = parent[parent[root_u]]
+            while parent[root_u] != root_u:
 
-            root_u = parent[root_u]
+                parent[root_u] = parent[parent[root_u]]
 
-        root_v = v_idx
+                root_u = parent[root_u]
 
-        while parent[root_v] != root_v:
+            root_v = v_idx
 
-            parent[root_v] = parent[parent[root_v]]
+            while parent[root_v] != root_v:
 
-            root_v = parent[root_v]
+                parent[root_v] = parent[parent[root_v]]
 
-        if root_u != root_v:
+                root_v = parent[root_v]
 
-            if rank[root_u] > rank[root_v]:
+            if root_u != root_v:
 
-                parent[root_v] = root_u
+                if rank[root_u] > rank[root_v]:
 
-            else:
+                    parent[root_v] = root_u
 
-                parent[root_u] = root_v
+                else:
 
-                if rank[root_u] == rank[root_v]:
+                    parent[root_u] = root_v
 
-                    rank[root_v] +=1
+                    if rank[root_u] == rank[root_v]:
 
-            count -=1
+                        rank[root_v] +=1
 
-    term = (pow_2n - pow(2, count, MOD)) % MOD
+                count -=1
 
-    sum_terms = (sum_terms + term) % MOD
+        term = (pow_2n - pow(2, count, MOD)) % MOD
 
-total = (pow(2, n +k, MOD) - sum_terms) % MOD
+        sum_terms = (sum_terms + term) % MOD
 
-print(total)
+    total = (pow(2, n +k, MOD) - sum_terms) % MOD
 
-But wait, for the case when n=0, but according to the problem constraints, n>=1.
+    print(total, file=output_stream)
 
-But in code, when n is 1, m can be 0.
 
-Another thing: pow(2, n +k, MOD) is computed as pow(2, n, MOD) * pow(2, k, MOD) mod MOD, but since n and k can be up to 5e5 and 60, respectively, the sum n +k is up to 5e5+60, which is manageable with pow(2, n +k, MOD).
 
-But Python's pow can handle exponents up to 1e18 efficiently.
+def test():
+    import io
 
-So the code should work.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 5 3
+7 1 7 2
+1 2
+2 3
+3 4
+4 1
+2 4
+""",
+            "output": \
+"""\
+96
+""",
+        }, 
+    ]
 
-Let's test the first sample:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 145, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 138, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '96'
+Got: '86'
+
+```
 
 Sample 1:
 

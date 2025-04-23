@@ -629,95 +629,125 @@ But the problem says to read via input() and write via print().
 
 So the code would be:
 
+Testing against sample input 2.
+
+```python
 import sys
 
-n, m, k = map(int, sys.stdin.readline().split())
 
-a = list(map(int, sys.stdin.readline().split()))
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().split())
 
-ops = []
+    a = list(map(int, input_stream.readline().split()))
 
-for _ in range(m):
+    ops = []
 
-    l_i, r_i, d_i = map(int, sys.stdin.readline().split())
+    for _ in range(m):
 
-    l = l_i -1
+        l_i, r_i, d_i = map(int, input_stream.readline().split())
 
-    r = r_i -1
+        l = l_i -1
 
-    ops.append( (l, r, d_i) )
+        r = r_i -1
 
-delta = [0]*(m+2)
+        ops.append( (l, r, d_i) )
 
-for _ in range(k):
+    delta = [0]*(m+2)
 
-    x, y = map(int, sys.stdin.readline().split())
+    for _ in range(k):
 
-    delta[x] +=1
+        x, y = map(int, input_stream.readline().split())
 
-    delta[y+1] -=1
+        delta[x] +=1
 
-cnt = [0]*(m+1)
+        delta[y+1] -=1
 
-current =0
+    cnt = [0]*(m+1)
 
-for i in range(1, m+1):
+    current =0
 
-    current += delta[i]
+    for i in range(1, m+1):
 
-    cnt[i] = current
+        current += delta[i]
 
-diff_adds = [0]*(n+1)
+        cnt[i] = current
 
-for i in range(1, m+1):
+    diff_adds = [0]*(n+1)
 
-    l, r, d = ops[i-1]
+    for i in range(1, m+1):
 
-    effective_d = d * cnt[i]
+        l, r, d = ops[i-1]
 
-    diff_adds[l] += effective_d
+        effective_d = d * cnt[i]
 
-    diff_adds[r+1] -= effective_d
+        diff_adds[l] += effective_d
 
-current_add =0
+        diff_adds[r+1] -= effective_d
 
-for i in range(n):
+    current_add =0
 
-    current_add += diff_adds[i]
+    for i in range(n):
 
-    a[i] += current_add
+        current_add += diff_adds[i]
 
-print(' '.join(map(str, a)))
+        a[i] += current_add
 
-Wait, but in the code, after processing the diff_adds, we need to compute the prefix sum of diff_adds, then add to a.
+    print(' '.join(map(str, a)), file=output_stream)
 
-In the code above:
 
-diff_adds is [0]*(n+1). Then, for each i from 0 to m-1 (since ops is 0-based), and for each i in 1..m (operation index), we process.
 
-Wait, the code for the diff_adds is correct.
+def test():
+    import io
 
-Yes. Then, the code computes current_add as the sum of diff_adds[0...i], and adds to a[i].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 3 6
+1 2 3 4
+1 2 1
+2 3 2
+3 4 4
+1 2
+1 3
+2 3
+1 2
+1 3
+2 3
+""",
+            "output": \
+"""\
+5 18 31 20
+""",
+        }, 
+    ]
 
-Yes.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Testing the code.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The code should work.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But what about when n=1, m=1, etc.?
+    print('Tests passed 😎')
 
-Sample 2: code works.
 
-So yes.
+if __name__ == '__main__':
+    test()
 
-Another possible edge case: when all queries are overlapping.
 
-But the code should handle it.
+```
 
-Another point: the data structures are all O(n) or O(m), which is acceptable for 1e5.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So this code should work.
+```
+
 </think>
 
 ```python

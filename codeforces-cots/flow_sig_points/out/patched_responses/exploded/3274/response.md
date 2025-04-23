@@ -1040,57 +1040,95 @@ for v in 1 to k:
 
 After processing all v, answer is (previous[m] * fact[m]) % MOD.
 
-Now, let's test this code.
+Testing against sample input 1.
 
-Sample Input 1: 3 2.
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-m=2.
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    m = n - 1
 
-fact = [1,1,2]
+    # Precompute factorials and inverse factorials up to m
+    fact = [1] * (m + 1)
+    for i in range(1, m + 1):
+        fact[i] = fact[i-1] * i % MOD
 
-inv_fact[0] =1, inv_fact[1]=1, inv_fact[2] =499122177.
+    inv_fact = [1] * (m + 1)
+    inv_fact[m] = pow(fact[m], MOD-2, MOD)
+    for i in range(m-1, -1, -1):
+        inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
 
-Processing v=1:
+    # Initialize DP
+    previous = [0] * (m + 1)
+    previous[0] = 1
 
-base=2.
+    for v in range(1, k+1):
+        current = [0] * (m + 1)
+        for s in range(m + 1):
+            if previous[s] == 0:
+                continue
+            max_c = m - s
+            for c in range(0, max_c + 1):
+                exponent = c * s + c * (c - 1) // 2
+                base = k - v + 1
+                if base < 0:
+                    term = 0
+                else:
+                    term = pow(base, exponent, MOD)
+                term = term * inv_fact[c] % MOD
+                new_s = s + c
+                if new_s > m:
+                    continue
+                current[new_s] = (current[new_s] + previous[s] * term) % MOD
+        previous = current.copy()
 
-For s=0:
+    answer = previous[m] * fact[m] % MOD
+    print(answer, file=output_stream)
 
-c=0: term=1 * 1=1 → new_s=0 → current[0] +=1.
 
-c=1: exponent=0 → term=1 *1=1 → new_s=1 → current[1] +=1.
 
-c=2: exponent=2*0 +1 →1 → term=2^1=2 * inv_fact[2] →2 *499122177 mod MOD = 998244354 mod MOD =1 → new_s=2 → current[2] +=1.
+def test():
+    import io
 
-Thus, current after v=1 is [1,1,1].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4
+""",
+            "output": \
+"""\
+571
+""",
+        }, 
+    ]
 
-Processing v=2:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-base=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-For s=0:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-c=0: term=1 → new_s=0 → current[0] +=1.
+    print('Tests passed 😎')
 
-c=1: exponent=0 → term=1 *1=1 → new_s=1 → current[1] +=1.
 
-c=2: exponent=2*0 +1=1 → term=1^1 * inv_fact[2] →1 *499122177 → new_s=2 → current[2] +=1 *499122177 =499122177.
+if __name__ == '__main__':
+    test()
 
-For s=1:
 
-c=0: term=1 → new_s=1 → current[1] +=1 (now 1+1=2).
+```
 
-c=1: exponent=1*1 +0=1 → term=1^1 *1=1 → new_s=2 → current[2] +=1 →499122177+1=499122178.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For s=2:
-
-c=0 → new_s=2 → current[2] +=1 →499122178+1=499122179.
-
-Thus, after v=2, previous[2] is499122179.
-
-Multiply by fact[2]=2 →499122179 *2 mod MOD = 998244358 mod MOD=5.
-
-Which is correct.
+```
 
 Thus, the code should work.
 
@@ -1100,27 +1138,96 @@ Edge Cases:
 
 If n=2 (m=1), and k=1. Then, the only possible graph is a single edge between 1 and 2 with weight 1. The sum of edges incident to 1 is 1. The MST is that edge, sum is 1. So the answer is 1.
 
-Another sample input:
+Testing against sample input 2.
 
-Sample Input 2:
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-4 4 → output 571.
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    m = n - 1
 
-But with the code, it should compute correctly.
+    # Precompute factorials and inverse factorials up to m
+    fact = [1] * (m + 1)
+    for i in range(1, m + 1):
+        fact[i] = fact[i-1] * i % MOD
 
-Now, code:
+    inv_fact = [1] * (m + 1)
+    inv_fact[m] = pow(fact[m], MOD-2, MOD)
+    for i in range(m-1, -1, -1):
+        inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
 
-Read n and k.
+    # Initialize DP
+    previous = [0] * (m + 1)
+    previous[0] = 1
 
-m =n-1.
+    for v in range(1, k+1):
+        current = [0] * (m + 1)
+        for s in range(m + 1):
+            if previous[s] == 0:
+                continue
+            max_c = m - s
+            for c in range(0, max_c + 1):
+                exponent = c * s + c * (c - 1) // 2
+                base = k - v + 1
+                if base < 0:
+                    term = 0
+                else:
+                    term = pow(base, exponent, MOD)
+                term = term * inv_fact[c] % MOD
+                new_s = s + c
+                if new_s > m:
+                    continue
+                current[new_s] = (current[new_s] + previous[s] * term) % MOD
+        previous = current.copy()
 
-Precompute factorial and inv_fact.
+    answer = previous[m] * fact[m] % MOD
+    print(answer, file=output_stream)
 
-Handle the DP.
 
-Finally, print (current[m] * fact[m]) % MOD.
 
-Now, the code in Python.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 9
+""",
+            "output": \
+"""\
+310640163
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

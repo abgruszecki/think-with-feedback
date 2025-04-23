@@ -51,47 +51,70 @@ Then, process each day in order, checking the sets.
 
 So the code in Python would be something like:
 
-n = int(input())
+Testing against sample input 1.
 
-schedule = [tuple(map(int, input().split())) for _ in range(n*n)]
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-h_asphalt = set()
-v_asphalt = set()
-result = []
+    schedule = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n*n)]
 
-for day, (h, v) in enumerate(schedule, 1):
-    if h not in h_asphalt and v not in v_asphalt:
-        result.append(day)
-        h_asphalt.add(h)
-        v_asphalt.add(v)
+    h_asphalt = set()
+    v_asphalt = set()
+    result = []
 
-print(' '.join(map(str, result)))
+    for day, (h, v) in enumerate(schedule, 1):
+        if h not in h_asphalt and v not in v_asphalt:
+            result.append(day)
+            h_asphalt.add(h)
+            v_asphalt.add(v)
 
-Wait, but let's test this with the sample input.
+    print(' '.join(map(str, result)), file=output_stream)
 
-First sample input:
 
-2
 
-1 1 → day 1
+def test():
+    import io
 
-1 2 → day 2
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+1 1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-2 1 → day3
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-2 2 → day4
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Day 1: h=1 not in set, v=1 not in set. So add day 1. h_asphalt now {1}, v_asphalt {1}.
+    print('Tests passed 😎')
 
-Day2: h=1 is in h_asphalt. So do nothing.
 
-Day3: v=1 is in v_asphalt. Do nothing.
+if __name__ == '__main__':
+    test()
 
-Day4: h=2 not in h_asphalt, v=2 not in v_asphalt. Add day4. h_asphalt {1,2}, v_asphalt {1,2}.
 
-Output is 1 4. Which matches the sample.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample input:
 

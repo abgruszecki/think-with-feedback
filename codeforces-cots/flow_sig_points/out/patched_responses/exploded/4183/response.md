@@ -1077,39 +1077,74 @@ m_i=2 <=k-1=2. Check i <n (no). So no add. sum +=3 →11.
 
 sum_s=11. sum(m)=0+1+1+2+2=6. answer=11-6-5=0. Correct.
 
-Sample1:
+Testing against sample input 1.
 
-max_future for i=1 is3.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    m = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-Processing:
+    max_future = [0] * (n + 2)  # 1-based to n
+    for i in range(n, 0, -1):
+        if i == n:
+            max_future[i] = m[i-1]
+        else:
+            max_future[i] = max(m[i-1], max_future[i+1])
 
-k=0.
+    k = 0
+    total = 0
+    for i in range(1, n + 1):
+        if m[i-1] > k - 1 or (i < n and max_future[i+1] > k):
+            k += 1
+        total += k
 
-day1:
+    sum_m = sum(m)
+    print(total - sum_m - n, file=output_stream)
 
-0>k-1 (no). i <n. max_future[2]=3>0 →yes. add new. k=1. sum=1.
 
-day2:
 
-1>1-1=0 → yes. add new. k=2. sum=3.
+def test():
+    import io
 
-day3:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+0 1 2 1 2
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-0>2-1=1 →no. i <n. max_future[4]=3>2 → yes. add new. k=3. sum=6.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-day4:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-3>3-1=2 → yes. add new. k=4. sum=10.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-day5:
+    print('Tests passed 😎')
 
-0>4-1=3 → no. i <n. max_future[6]=2 <=4. no add. sum=14.
 
-day6:
+if __name__ == '__main__':
+    test()
 
-2>4-1=3 → no. i >=n. no add. sum=17. sum(m)=6. 17-6-6=5. But sample1's answer is6. Wait, this is conflicting.
 
-Wait sample1's sum of s_i according to the correct solution is18. But according to this approach, the sum is1+2+3+4+4+4=1+2=3+3=6+4=10+4=14+4=18.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Ah, yes. So day4:
 

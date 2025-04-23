@@ -1400,69 +1400,96 @@ But for large arrays (1e5 elements), this is O(k), which is acceptable.
 
 So, the code:
 
-k = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    k = int(input_stream.readline().rstrip("\n"))
 
-MOD = 10**9 +7
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-phi = MOD -1
+    MOD = 10**9 +7
 
-even = False
+    phi = MOD -1
 
-for num in a:
+    even = False
 
-    if num %2 ==0:
+    for num in a:
 
-        even = True
+        if num %2 ==0:
 
-product_mod_phi = 1
+            even = True
 
-for num in a:
+    product_mod_phi = 1
 
-    product_mod_phi = (product_mod_phi * (num % phi)) % phi
+    for num in a:
 
-exponent_for_2 = (product_mod_phi -1) % phi
+        product_mod_phi = (product_mod_phi * (num % phi)) % phi
 
-pow_2 = pow(2, exponent_for_2, MOD)
+    exponent_for_2 = (product_mod_phi -1) % phi
 
-inv3 = pow(3, MOD-2, MOD)
+    pow_2 = pow(2, exponent_for_2, MOD)
 
-if even:
+    inv3 = pow(3, MOD-2, MOD)
 
-    p = (pow_2 +1) * inv3 % MOD
+    if even:
 
-    q = pow_2 % MOD
+        p = (pow_2 +1) * inv3 % MOD
 
-else:
+        q = pow_2 % MOD
 
-    p = (pow_2 -1) * inv3 % MOD
+    else:
 
-    q = pow_2 % MOD
+        p = (pow_2 -1) * inv3 % MOD
 
-print(f"{p}/{q}")
+        q = pow_2 % MOD
 
-This code should handle all cases.
+    print(f"{p}/{q}", file=output_stream)
 
-Testing the first example:
 
-Input:
 
-1
+def test():
+    import io
 
-2
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 1 1
+""",
+            "output": \
+"""\
+0/1
+""",
+        }, 
+    ]
 
-even is True.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-product_mod_phi: 2 mod phi →2. product_mod_phi =2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-exponent_for_2: 2-1=1 mod phi →1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-pow_2 =2^1=2.
+    print('Tests passed 😎')
 
-p = (2+1)*inv3 →3*333333336 mod 1e9+7 → (3*333333336) = 1000000008 → mod 1e9+7 →1.
 
-q=2 →1/2.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

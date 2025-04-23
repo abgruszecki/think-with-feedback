@@ -944,53 +944,98 @@ However, given that the problem's time limit is 6 seconds and Python is relative
 
 But given that this is the only solution I can think of, I'll proceed to implement this.
 
-But wait, there's a mistake in the code. Let's test it with the first sample input.
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+import sys
 
-abbd
 
-4
+def main(input_stream, output_stream):
+    s = input_stream.readline().strip()
+    q = int(input_stream.readline())
+    queries = [tuple(map(int, input_stream.readline().split())) for _ in range(q)]
+    
+    for l, r in queries:
+        L = l - 1  # convert to 0-based
+        R = r - 1
+        m = R - L + 1
+        if m == 0:
+            print(0, file=output_stream)
+            continue
+        sum_z = m
+        left = right = L
+        for i in range(L + 1, R + 1):
+            if i > right:
+                left = right = i
+                while right <= R and s[right] == s[L + (right - i)]:
+                    right += 1
+                sum_z += right - i
+                right -= 1
+            else:
+                k = i - left
+                if k < (right - i + 1):
+                    sum_z += k
+                else:
+                    left = i
+                    while right <= R and s[right] == s[L + (right - i)]:
+                        right += 1
+                    sum_z += right - i
+                    right -= 1
+        print(sum_z, file=output_stream)
 
-2 3 → L=1, R=2 (0-based?), assuming the input is 1-based.
 
-Wait, the input queries are given as 1-based indices.
 
-So for the first query, the substring is from 2 to 3 in 1-based, which is indexes 1 and 2 in 0-based (assuming the string is 'a', 'b', 'b', 'd').
+def test():
+    import io
 
-The substring is 'bb' → indexes 1 and 2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+bbaaa
+5
+2 4
+1 5
+1 5
+3 3
+1 2
+""",
+            "output": \
+"""\
+3
+6
+6
+1
+3
+""",
+        }, 
+    ]
 
-The Z-array for 'bb' is [2,1], sum 3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Let's see what the code returns.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-In the code:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-L = 1, R=2.
+    print('Tests passed 😎')
 
-m = 2.
 
-sum_z starts at 2.
+if __name__ == '__main__':
+    test()
 
-Then, i ranges from 2 to 2 (since i starts at L+1 = 2):
 
-i=2.
+```
 
-At i=2, in the original string's index.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Initially, r=1, i=2> r.
-
-So l = r = 2.
-
-Then, compare s[r] (s[2] = 'b') with s[L + (r - i)] = s[1 + (2-2)] = s[1] = 'b'.
-
-Yes, so r increments to 3, but R=2, so loop stops.
-
-current_z = r -i = 3-2 =1.
-
-sum_z becomes 2 +1 =3.
-
-Thus, the code returns 3, which is correct.
+```
 
 Another sample:
 

@@ -925,63 +925,99 @@ sum = 22*1 + 11*2 = 22 + 22=44.
 
 Correct.
 
-Another example, sample input 2:
+Testing against sample input 2.
 
-5
+```python
+from collections import defaultdict
 
-abcdef
 
-ghij
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    weight = defaultdict(int)
+    leading = set()
 
-bdef
+    for _ in range(n):
+        s = input_stream.readline().rstrip("\n").strip()
+        if s:
+            leading.add(s[0])
+        l = len(s)
+        for i, c in enumerate(s):
+            contribution = 10 ** (l - i - 1)
+            weight[c] += contribution
 
-accbd
+    sorted_chars = sorted(weight.keys(), key=lambda x: (-weight[x], x))
+    has_non_leading = any(c not in leading for c in sorted_chars)
 
-g
+    digit_map = {}
+    if has_non_leading:
+        # Find the first non-leading character in sorted_chars
+        zero_char = next(c for c in sorted_chars if c not in leading)
+        digit_map[zero_char] = 0
+        current = 1
+        for c in sorted_chars:
+            if c != zero_char:
+                digit_map[c] = current
+                current += 1
+    else:
+        # All are leading, assign 1 to 9
+        current = 1
+        for c in sorted_chars:
+            digit_map[c] = current
+            current += 1
 
-Leading characters: a, g, b, a, g.
+    total_sum = 0
+    for char in weight:
+        total_sum += weight[char] * digit_map[char]
 
-Wait, first characters of each string:
+    print(total_sum, file=output_stream)
 
-- "abcdef" → a.
 
-- "ghij" → g.
 
-- "bdef" → b.
+def test():
+    import io
 
-- "accbd" → a.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+aa
+jj
+aa
+""",
+            "output": \
+"""\
+44
+""",
+        }, 
+    ]
 
-- "g" → g.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So leading set is {a, g, b}.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The characters in the sorted list would be those with highest weight.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But let's not go into details. The code's approach will handle this.
+    print('Tests passed 😎')
 
-Thus, the code now handles all cases.
 
-So the final code in Python would be:
+if __name__ == '__main__':
+    test()
 
-Read n.
 
-Read n strings.
+```
 
-For each string, add the first character to leading.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For each character in each string, compute the weight.
+```
 
-Sort characters in descending order of weight, breaking ties by character.
-
-Check if any character is non-leading.
-
-If yes, assign 0 to the first such character.
-
-Else, assign 1-9 to all characters.
-
-Compute the sum.
-
-Now, the code.
 </think>
 
 ```python

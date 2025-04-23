@@ -738,79 +738,82 @@ Initialize dp and max_suffix as lists of size n+2.
 
 But since in Python lists are dynamic, we can build them as follows:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-prefix = [0] * (n +1)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for i in range(1, n+1):
+    prefix = [0] * (n +1)
 
-    prefix[i] = prefix[i-1] + a[i-1]
+    for i in range(1, n+1):
 
-dp = [0] * (n+2)  # index from 0 to n
+        prefix[i] = prefix[i-1] + a[i-1]
 
-max_suffix = [0] * (n+2)
+    dp = [0] * (n+2)  # index from 0 to n
 
-dp[n] =0
+    max_suffix = [0] * (n+2)
 
-max_suffix[n] = prefix[n] - dp[n]
+    dp[n] =0
 
-for i in range(n-1, -1, -1):
+    max_suffix[n] = prefix[n] - dp[n]
 
-    dp[i] = max_suffix[i+1]
+    for i in range(n-1, -1, -1):
 
-    current = prefix[i] - dp[i]
+        dp[i] = max_suffix[i+1]
 
-    max_suffix[i] = max(current, max_suffix[i+1])
+        current = prefix[i] - dp[i]
 
-print(max_suffix[2])
+        max_suffix[i] = max(current, max_suffix[i+1])
 
-Wait, but what if n is 2?
+    print(max_suffix[2], file=output_stream)
 
-Then i ranges down to 0.
 
-But when i=1:
 
-dp[1] =max_suffix[2} = prefix[2} - dp[2} (since max_suffix[2} is prefix[2} -0 =10 in previous example.
+def test():
+    import io
 
-But this code should work.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 -7 -2 3
+""",
+            "output": \
+"""\
+-3
+""",
+        }, 
+    ]
 
-Testing sample 2:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-prefix is [0,1, -6, -8, -5]
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-max_suffix[4} = prefix[4} -0 =-5.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=3: dp[3} = max_suffix[4} =-5. current = prefix[3} - dp[3} =-8 - (-5) =-3. max_suffix[3} =max(-3, -5) =-3.
+    print('Tests passed 😎')
 
-i=2: dp[2} = max_suffix[3} =-3. current =prefix[2} - (-3) =-6 +3 =-3. max_suffix[2} =max(-3, -3) =-3.
 
-i=1: dp[1} = max_suffix[2} =-3. current =1 - (-3)=4. max_suffix[1} =max(4, -3) =4.
+if __name__ == '__main__':
+    test()
 
-i=0: dp[0} =max_suffix[1} =4. current =0-4 =-4. max_suffix[0} =max(-4,4) =4.
 
-So max_suffix[2} is-3. Which is correct.
+```
 
-Thus, the code works.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Another test case:
-
-Sample 1:
-
-prefix[3}=14.
-
-max_suffix[3}=14-0=14.
-
-i=2: dp[2}=14. current=6-14= -8. max_suffix[2} =max(-8,14) =14.
-
-i=1: dp[1}=14. current=2-14= -12. max_suffix[1} =max(-12,14)=14.
-
-i=0: dp[0}=14. current=0-14=-14. max_suffix[0} =max(-14,14)=14.
-
-max_suffix[2} is14.
-
-Which is correct.
+```
 
 Thus, the code works.
 </think>

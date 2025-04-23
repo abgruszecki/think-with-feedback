@@ -769,246 +769,159 @@ But in Python, building the pre_parents_set for all x and u may take some time, 
 
 The code:
 
+Testing against sample input 1.
+
+```python
 import sys
-MOD = 998244353
 
-n, m = map(int, sys.stdin.readline().split())
 
-adj = [[] for _ in range(n+1)]  # 1-based
-for _ in range(m):
-    a, b = map(int, sys.stdin.readline().split())
-    adj[a].append(b)
-    adj[b].append(a)
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-# Precompute distances from each x to all nodes.
-dist = [[0]*(n+1) for _ in range(n+1)]
-for x in range(1, n+1):
-    q = [x]
-    d = [-1]*(n+1)
-    d[x] =0
-    q_ptr =0
-    while q_ptr < len(q):
-        u = q[q_ptr]
-        q_ptr +=1
-        for v in adj[u]:
-            if d[v] ==-1:
-                d[v] = d[u]+1
-                q.append(v)
-    for u in range(1, n+1):
-        dist[x][u] = d[u]
+    n, m = map(int, input_stream.readline().split())
 
-# Precompute parent sets.
-pre_parents_set = [[set() for _ in range(n+1)] for _ in range(n+1)]
-for x in range(1, n+1):
-    for u in range(1, n+1):
-        s = set()
-        for v in adj[u]:
-            if dist[x][v] == dist[x][u] -1:
-                s.add(v)
-        pre_parents_set[x][u] = s
+    adj = [[] for _ in range(n+1)]  # 1-based
+    for _ in range(m):
+        a, b = map(int, input_stream.readline().split())
+        adj[a].append(b)
+        adj[b].append(a)
 
-# Precompute answers for all pairs (x,y)
-ans = [[0]*(n+1) for _ in range(n+1)]  # ans[x][y]
+    # Precompute distances from each x to all nodes.
+    dist = [[0]*(n+1) for _ in range(n+1)]
+    for x in range(1, n+1):
+        q = [x]
+        d = [-1]*(n+1)
+        d[x] = 0
+        q_ptr = 0
+        while q_ptr < len(q):
+            u = q[q_ptr]
+            q_ptr += 1
+            for v in adj[u]:
+                if d[v] == -1:
+                    d[v] = d[u] + 1
+                    q.append(v)
+        for u in range(1, n+1):
+            dist[x][u] = d[u]
 
-for x in range(1, n+1):
-    for y in range(1, n+1):
-        if x == y:
-            res =1
-            for u in range(1, n+1):
-                if u ==x:
-                    continue
-                cnt = len(pre_parents_set[x][u])
-                if cnt ==0:
-                    res=0
-                    break
-                res = res * cnt % MOD
-            ans[x][y] = res
-        else:
-            if dist[x][y] !=1:
-                ans[x][y] =0
-            else:
-                res =1
-                dy = dist[y]
+    # Precompute parent sets.
+    pre_parents_set = [[set() for _ in range(n+1)] for _ in range(n+1)]
+    for x in range(1, n+1):
+        for u in range(1, n+1):
+            s = set()
+            for v in adj[u]:
+                if dist[x][v] == dist[x][u] - 1:
+                    s.add(v)
+            pre_parents_set[x][u] = s
+
+    # Precompute answers for all pairs (x,y)
+    ans = [[0]*(n+1) for _ in range(n+1)]  # ans[x][y]
+
+    for x in range(1, n+1):
+        for y in range(x, n+1):
+            if x == y:
+                res = 1
                 for u in range(1, n+1):
-                    if u ==x or u ==y:
+                    if u == x:
                         continue
-                    # Compute the intersection of pre_parents_set[x][u] and pre_parents_set[y][u]
-                    common = pre_parents_set[x][u] & pre_parents_set[y][u]
-                    cnt = len(common)
-                    if cnt ==0:
-                        res =0
+                    cnt = len(pre_parents_set[x][u])
+                    if cnt == 0:
+                        res = 0
                         break
                     res = res * cnt % MOD
                 ans[x][y] = res
-
-# Output the answers.
-for x in range(1, n+1):
-    row = []
-    for y in range(1, n+1):
-        row.append(str(ans[x][y] % MOD))
-    print(' '.join(row))
-
-But this code will have time issues for n=400, as the nested loops for x and y take O(n^2) iterations, and for each x != y, the inner loop is O(n) steps. For 400^3 = 64 million steps, this is likely to be too slow in Python.
-
-To optimize further, we can precompute all the y's BFS distances once and reuse them. But that's already done.
-
-Another optimization: precompute for each x, the pre_parents_set for x once, and reuse it for all y pairs.
-
-But the code is already doing that.
-
-Alternative idea: precompute for all x and u, the list of parents, and then for each x and y, compute the product for u not x or y by multiplying the counts of the intersections.
-
-But this is already the case.
-
-Another possible optimization is to precompute for each pair (x, y) where x < y and dx[y] =1, the product, and then use symmetry. But the problem requires output for all pairs (i,j), and the answer for (x,y) and (y,x) may differ. For example, if x and y are connected, but their BFS trees are different.
-
-But according to the problem statement, the graph is undirected. So the answer for (x,y) and (y,x) should be the same. Because the conditions are symmetric. Because the problem asks for the number of spanning trees that are BFS trees for both x and y. Since the tree is undirected, the answer for (x,y) and (y,x) is the same. So we can compute ans[x][y] once and assign it to ans[y][x], thereby saving half the computations.
-
-But in the sample input, the first sample's output is symmetric. The second sample's output also shows symmetry for some pairs. So perhaps this is correct.
-
-But wait, in the first sample, the output is:
-
-2 1 0 1
-
-1 2 1 0
-
-0 1 2 1
-
-1 0 1 2
-
-Which is symmetric. So ans[x][y] = ans[y][x].
-
-Thus, the problem's answer is symmetric. So we can compute ans[x][y] once and assign it to ans[y][x}.
-
-This optimization can reduce the number of pairs to compute by half.
-
-Thus, in the code:
-
-for x in range(1, n+1):
-
-   for y in range(x, n+1):
-
-      compute ans[x][y], then assign ans[y][x] = ans[x][y}
-
-But how to determine if this is valid.
-
-Yes, because f(x,y) is the number of spanning trees that are BFS trees for both x and y. Since the tree is undirected, the presence of such trees is the same for x and y. Thus, f(x,y) = f(y,x).
-
-Thus, this symmetry can be used to save time.
-
-Thus, modifying the code to compute only for x <= y and then mirroring the result.
-
-This would reduce the number of pairs to 400 * 401 / 2 = 80,200 pairs instead of 160,000.
-
-This would significantly reduce the computation time.
-
-So adjusting the code:
-
-for x in range(1, n+1):
-
-   for y in range(x, n+1):
-
-      compute ans[x][y], then set ans[y][x] = ans[x][y]
-
-This should reduce the time by half.
-
-Thus, the code becomes:
-
-...
-
-ans = [[0]*(n+1) for _ in range(n+1)]  # ans[x][y]
-
-for x in range(1, n+1):
-    for y in range(x, n+1):
-        if x == y:
-            res =1
-            for u in range(1, n+1):
-                if u ==x:
-                    continue
-                cnt = len(pre_parents_set[x][u])
-                if cnt ==0:
-                    res=0
-                    break
-                res = res * cnt % MOD
-            ans[x][y] = res
-        else:
-            if dist[x][y] !=1 and dist[y][x] !=1:
-                ans[x][y] =0
             else:
-                # Either x to y is 1 or y to x is 1, but since the graph is undirected, dist[x][y] = dist[y][x}.
-                # So if dist[x][y] !=1, then ans is 0.
-                if dist[x][y] !=1:
-                    ans[x][y] =0
+                if dist[x][y] != 1:
+                    ans[x][y] = 0
                 else:
-                    res =1
-                    dy = dist[y]
+                    res = 1
                     for u in range(1, n+1):
-                        if u ==x or u ==y:
+                        if u == x or u == y:
                             continue
                         # Compute the intersection of pre_parents_set[x][u] and pre_parents_set[y][u]
                         common = pre_parents_set[x][u] & pre_parents_set[y][u]
                         cnt = len(common)
-                        if cnt ==0:
-                            res =0
+                        if cnt == 0:
+                            res = 0
                             break
                         res = res * cnt % MOD
                     ans[x][y] = res
-        # Mirror the result
-        ans[y][x] = ans[x][y]
+            ans[y][x] = ans[x][y]
 
-...
+    # Output the answers.
+    for x in range(1, n+1):
+        row = []
+        for y in range(1, n+1):
+            row.append(str(ans[x][y] % MOD))
+        print(' '.join(row), file=output_stream)
 
-This optimization should help reduce the runtime.
 
-Additionally, we can precompute for all y, the dist[y] array, but since it's already precomputed, this is not necessary.
 
-Another possible optimization is to precompute all the dist[y] arrays before entering the loops.
+def test():
+    import io
 
-Thus, the code should now be efficient enough.
-
-Testing this code on the sample inputs:
-
-Sample Input 1:
-
-4 4
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 9
 1 2
+1 3
+1 4
+2 7
+3 5
+3 6
+4 8
 2 3
 3 4
-1 4
+""",
+            "output": \
+"""\
+1 0 0 0 0 0 0 0
+0 2 0 0 0 0 2 0
+0 0 1 0 1 1 0 0
+0 0 0 2 0 0 0 2
+0 0 1 0 1 1 0 0
+0 0 1 0 1 1 0 0
+0 2 0 0 0 0 2 0
+0 0 0 2 0 0 0 2
+""",
+        }, 
+    ]
 
-After precomputing dist:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-dist[1][2] =1, dist[1][3] =2, dist[1][4] =1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-dist[2][1] =1, dist[2][3] =1, dist[2][4] =2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-When x=1, y=2:
+    print('Tests passed 😎')
 
-dx[y] =1, so proceed.
 
-For u=3:
+if __name__ == '__main__':
+    test()
 
-pre_parents_set[1][3] is {2}.
 
-pre_parents_set[2][3] is {2}.
+```
 
-common is {2} → count=1.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 132, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 125, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '1 0 0 0 0 0 0 0\n0 2 0 0 0 0 2 0\n0 0 1 0 1 1 0 0\n0 0 0 2 0 0 0 2\n0 0 1 0 1 1 0 0\n0 0 1 0 1 1 0 0\n0 2 0 0 0 0 2 0\n0 0 0 2 0 0 0 2'
+Got: '1 0 0 0 0 0 0 0\n0 2 0 0 0 0 2 0\n0 0 1 0 1 1 0 0\n0 0 0 2 0 0 0 2\n0 0 1 0 1 0 0 0\n0 0 1 0 0 1 0 0\n0 2 0 0 0 0 2 0\n0 0 0 2 0 0 0 2'
 
-For u=4:
-
-pre_parents_set[1][4] is {1}.
-
-pre_parents_set[2][4] is {1,3}.
-
-common is {1} → count=1.
-
-For u=2 (y): skipped.
-
-For u=1 (x): skipped.
-
-So product is 1*1=1. So ans[1][2] =1.
-
-Which matches the sample.
+```
 
 Sample Input 2:
 

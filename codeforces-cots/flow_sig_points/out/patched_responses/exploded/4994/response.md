@@ -391,117 +391,80 @@ Return count.
 
 So code:
 
-n = int(input())
-s = input().strip()
+Testing against sample input 2.
 
-dx_dict = {'U':0, 'D':0, 'R':1, 'L':-1}
-dy_dict = {'U':1, 'D':-1, 'R':0, 'L':0}
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-prefix_x = [0]
-prefix_y = [0]
+    dx_dict = {'U':0, 'D':0, 'R':1, 'L':-1}
+    dy_dict = {'U':1, 'D':-1, 'R':0, 'L':0}
 
-for c in s:
-    dx = dx_dict[c]
-    dy = dy_dict[c]
-    prefix_x.append( prefix_x[-1] + dx )
-    prefix_y.append( prefix_y[-1] + dy )
+    prefix_x = [0]
+    prefix_y = [0]
 
-count =0
+    for c in s:
+        dx = dx_dict[c]
+        dy = dy_dict[c]
+        prefix_x.append( prefix_x[-1] + dx )
+        prefix_y.append( prefix_y[-1] + dy )
 
-for a in range(n):
-    for b in range(a, n):
-        dx = prefix_x[b+1] - prefix_x[a]
-        dy = prefix_y[b+1] - prefix_y[a]
-        if dx ==0 and dy ==0:
-            count +=1
+    count =0
 
-print(count)
+    for a in range(n):
+        for b in range(a, n):
+            dx = prefix_x[b+1] - prefix_x[a]
+            dy = prefix_y[b+1] - prefix_y[a]
+            if dx ==0 and dy ==0:
+                count +=1
 
-This should handle all cases.
+    print(count, file=output_stream)
 
-Testing the third example, it gives 12.
 
-Another sample:
 
-Second sample input:
+def test():
+    import io
 
-4 DLUU.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+RLRLRLR
+""",
+            "output": \
+"""\
+12
+""",
+        }, 
+    ]
 
-Commands D, L, U, U.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Compute dx and dy for each:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-D: dx 0, dy-1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-L: dx-1, dy0.
+    print('Tests passed 😎')
 
-U: dx0, dy+1.
 
-U: dx0, dy+1.
+if __name__ == '__main__':
+    test()
 
-prefix_x:
 
-[0, 0, -1, -1, -1]
+```
 
-prefix_y:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-[0, -1, -1, 0, 1]
-
-Now, check all a and b:
-
-For a=0 to 3:
-
-a=0:
-
-Check all b from 0 to3.
-
-b=0: dx=0, dy-1. So no.
-
-b=1: dx= -1-0= -1; dy: -1 - (-1) =0. So dx is -1. So no.
-
-b=2: dx-1-0=-1. dy 0 - (-1) =1. Not zero.
-
-b=3: dx-1, dy 1 - (-1)=2. No.
-
-a=1:
-
-b=1: dx -1 - (-1) =0. dy: -1 - (-1) =0. So yes. So count +=1.
-
-Wait, prefix_x for a=1 is prefix_x[1] =0 (from the initial array).
-
-Wait no. Wait, the prefix_x is [0,0,-1,-1,-1]. Let me recheck:
-
-Original s is "DLUU".
-
-First character is D: dx is 0, dy is -1. So prefix_x after first step is [0,0]. Then next is L: dx is -1. So prefix_x becomes [0,0, -1]. Then U: dx is 0. prefix_x remains [0,0,-1,-1]. Next U: same, so [0,0,-1,-1,-1].
-
-Similarly, prefix_y: starts at 0. D adds -1 → [0,-1]. Then L (dy 0) → [0,-1,-1]. Then U adds +1 → [0,-1,-1,0]. Then U adds +1 → [0,-1,-1,0,1].
-
-So for a=1, which is the second position (0-based a starts at 0). So the original string's indexes are 0 (D), 1 (L), 2 (U), 3 (U).
-
-a=1 refers to starting at the L command.
-
-So for a=1, the prefix_x[a] is prefix_x[1] =0 (from the array).
-
-b=1: the substring is just L. So the delta_x is prefix_x[2] - prefix_x[1] = -1 -0 = -1. Delta y is prefix_y[2] - prefix_y[1] = -1 - (-1) =0. So dx is -1, not zero. So this is not counted.
-
-Wait, that's a problem. Wait, according to the code, for a=1 and b=1 (substring is L), the code would compute:
-
-prefix_x[b+1] = prefix_x[2] = -1.
-
-prefix_x[a] = prefix_x[1] =0.
-
-dx = -1-0 =-1.
-
-Similarly, dy: prefix_y[2] - prefix_y[1] = (-1) - (-1) =0.
-
-So dx is -1, dy 0 → not counted.
-
-So the code would not count this substring.
-
-But in the sample input 2, the output is 0. So the code's output is 0, which matches.
-
-So the code is correct.
+```
 
 Thus, the code works for all the sample cases.
 

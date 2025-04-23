@@ -631,59 +631,230 @@ But wait, in the code, x_max is the maximum xi in the batch. So sorted_xis is a 
 
 Yes.
 
-Testing the code.
+Testing against sample input 3.
 
-Sample input 3:
+```python
+import sys
+from collections import defaultdict
 
+
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    students = []
+    for _ in range(n):
+        ti, xi = map(int, input_stream.readline().split())
+        students.append((ti, xi))
+    
+    result = [0] * n
+    T_available = 0
+    
+    for start in range(0, n, m):
+        end = start + m
+        if end > n:
+            end = n
+        batch = students[start:end]
+        batch_last_ti = batch[-1][0]
+        T_depart = max(T_available, batch_last_ti)
+        
+        xi_to_students = defaultdict(list)
+        for idx_in_batch, (ti, xi) in enumerate(batch):
+            xi_to_students[xi].append(idx_in_batch)
+        
+        sorted_xis = sorted(xi_to_students.keys())
+        if not sorted_xis:
+            continue
+        
+        x_max = sorted_xis[-1]
+        current_time = T_depart
+        prev_pos = 0
+        
+        for xi in sorted_xis:
+            distance = xi - prev_pos
+            current_time += distance
+            # Assign times to students at this xi
+            for idx_in_batch in xi_to_students[xi]:
+                global_idx = start + idx_in_batch
+                result[global_idx] = current_time
+            # Calculate unloading time
+            k = len(xi_to_students[xi])
+            unloading_time = 1 + (k // 2)
+            current_time += unloading_time
+            prev_pos = xi
+        
+        # Add return time
+        current_time += x_max
+        T_available = current_time
+    
+    print(' '.join(map(str, result)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+20 4
+28 13
+31 13
+35 6
+36 4
+52 6
+53 4
+83 2
+84 4
+87 1
+93 6
+108 4
+113 6
+116 1
+125 2
+130 2
+136 13
+162 2
+166 4
+184 1
+192 2
+""",
+            "output": \
+"""\
+51 51 43 40 93 89 86 89 114 121 118 121 137 139 139 152 195 199 193 195
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import sys
+from collections import defaultdict
+
+
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    students = []
+    for _ in range(n):
+        ti, xi = map(int, input_stream.readline().split())
+        students.append((ti, xi))
+    
+    result = [0] * n
+    T_available = 0
+    
+    for start in range(0, n, m):
+        end = start + m
+        if end > n:
+            end = n
+        batch = students[start:end]
+        batch_last_ti = batch[-1][0]
+        T_depart = max(T_available, batch_last_ti)
+        
+        xi_to_students = defaultdict(list)
+        for idx_in_batch, (ti, xi) in enumerate(batch):
+            xi_to_students[xi].append(idx_in_batch)
+        
+        sorted_xis = sorted(xi_to_students.keys())
+        if not sorted_xis:
+            continue
+        
+        x_max = sorted_xis[-1]
+        current_time = T_depart
+        prev_pos = 0
+        
+        for xi in sorted_xis:
+            distance = xi - prev_pos
+            current_time += distance
+            # Assign times to students at this xi
+            for idx_in_batch in xi_to_students[xi]:
+                global_idx = start + idx_in_batch
+                result[global_idx] = current_time
+            # Calculate unloading time
+            k = len(xi_to_students[xi])
+            unloading_time = 1 + (k // 2)
+            current_time += unloading_time
+            prev_pos = xi
+        
+        # Add return time
+        current_time += x_max
+        T_available = current_time
+    
+    print(' '.join(map(str, result)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5 4
-
 3 5
-
 4 5
-
 5 5
-
 6 5
-
 7 1
+""",
+            "output": \
+"""\
+11 11 11 11 20
+""",
+        }, 
+    ]
 
-Batch 1: 4 students. x_max is 5. sorted_xis [5].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-T_depart is max(0,6) =6.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-current_time starts at6.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-distance 5-0=5 → current_time 11.
+    print('Tests passed 😎')
 
-unloading_time for 4 students:1 +4//2=3 → current_time 14.
 
-return time 14 +5=19.
+if __name__ == '__main__':
+    test()
 
-Batch 2: student 4 (7,1). T_available is19. T_depart is max(19,7) =19.
 
-x_max=1. sorted_xis [1].
+```
 
-distance 1-0=1 → current_time 20.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-unloading_time 1+0=1 → current_time 21.
-
-return time 21 +1=22.
-
-So the exit times for the first four students are 11, and the fifth is 20. Which matches the sample.
-
-Sample input 2:
-
-2 1:
-
-Batch 0: student 0 (3,5). T_depart 3. x_max 5. sorted_xis [5]. current_time=3+5=8. unloading time 1. current_time 9. return time 9+5=14.
-
-Batch 1: student 1 (4,5). T_available=14. T_depart max(14,4)=14. x_max=5. current_time=14+5=19. unloading time 1. current_time 20. return time 20+5=25.
-
-So the exit times are 8 and 19.
-
-Which matches sample 2.
-
-So code should be correct.
+```
 
 Now, the code uses defaultdict for xi_to_students. But for speed, perhaps using a regular dict and checking for existence.
 

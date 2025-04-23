@@ -263,117 +263,137 @@ print(remaining)
 
 Wait, but when s is 0, which can't happen because n >=1. So s is at least 1. So the code is:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-s = n * (n + 1) // 2
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-remaining = m % s
+    s = n * (n + 1) // 2
 
-for i in range(1, n+1):
+    remaining = m % s
 
-    if remaining >= i:
+    for i in range(1, n+1):
 
-        remaining -= i
+        if remaining >= i:
 
-    else:
+            remaining -= i
 
-        break
+        else:
 
-print(remaining)
+            break
 
-Testing the first sample:
+    print(remaining, file=output_stream)
 
-n=4, m=11. s=10. remaining=11%10=1.
 
-Loop i from 1 to4:
 
-i=1: remaining >=1 → subtract 1 → 0.
+def test():
+    import io
 
-i=2: 0 >=2 → no. Break. So answer is 0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+17 107
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-Which matches.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Third sample:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-n=3, m=8. s=6. remaining=8%6=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Loop i=1: 2-1=1.
+    print('Tests passed 😎')
 
-i=2: 1 >=2? No. Break. Answer is1.
 
-Second sample:
+if __name__ == '__main__':
+    test()
 
-n=17, m=107. s=17*18//2=153. remaining=107%153=107.
 
-Loop i from 1 to17:
+```
 
-i=1: 107-1=106.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=2: 106-2=104.
+```
 
-i=3: 104-3=101.
+Testing against sample input 2.
 
-i=4: 101-4=97.
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-i=5:97-5=92.
+    s = n * (n + 1) // 2
 
-i=6:92-6=86.
+    remaining = m % s
 
-i=7:86-7=79.
+    for i in range(1, n+1):
 
-i=8:79-8=71.
+        if remaining >= i:
 
-i=9:71-9=62.
+            remaining -= i
 
-i=10:62-10=52.
+        else:
 
-i=11:52-11=41.
+            break
 
-i=12:41-12=29.
+    print(remaining, file=output_stream)
 
-i=13:29-13=16.
 
-i=14:16-14=2.
 
-i=15: 2 >=15? No. Break. So remaining is 2. Which matches the sample.
+def test():
+    import io
 
-So this code works for all samples.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 8
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-So this code is O(n) time, which for n up to 50 is acceptable, even with multiple test cases. The modulus operation is O(1), and the loop is O(n), which is very efficient.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So the code should handle all possible inputs within the constraints, including the largest possible n=50 and m=1e4. For example, if m=1e4, s=50*51/2=1275. Then m_remaining=1e4 %1275.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But 1e4 /1275 is 7*1275=8925, 1e4-7*1275= 1e4-8925=1075. Then remaining=1075.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Then, the loop would run up to i where sum 1+2+...+i <=1075. Let's compute:
+    print('Tests passed 😎')
 
-The maximum x where x(x+1)/2 ≤1075.
 
-Solving x² +x - 2150=0.
+if __name__ == '__main__':
+    test()
 
-x ≈ sqrt(2150*4 +1)/2 -0.5 → sqrt(8601)≈92.75. So x=92. 92*93/2= 92*46.5=4278. So no, that's way larger than 1075. Wait, maybe I made a mistake. Wait 1075 is 1075. Let's see:
 
-x(x+1)/2 ≤1075.
+```
 
-Let's compute for x=45: 45*46/2=1035. 1035 ≤1075. x=45: 1035.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-x=46: 46*47/2=1081. 1081>1075. So x=45.
-
-sum is 1035. remaining=1075-1035=40. Then next i is 46, but in the code, the loop runs from 1 to n (50). So in this case, the remaining is 40, but after the loop runs i=1 to 50.
-
-Wait, wait, no. Because in the code, after the modulus, the remaining is 1075. Then the loop runs i from 1 to 50.
-
-But in each iteration, it checks if remaining >=i.
-
-So for i=1: 1075 >=1 → subtract 1 → 1074.
-
-i=2: subtract 2 →1072.
-
-... and so on, until i=45: subtract 45 →1075 - sum(1..45) =1075-1035=40.
-
-Then i=46: 40 >=46? No. So break. The remaining is 40. But according to the code's logic, after the full cycles (k=7), remaining is 1075, then subtract 1,2,...,45 → sum 1035, remaining becomes 40. Then i=46: 40 <46 → break. So the answer is 40.
-
-But according to the problem statement, each step in the next cycle after the full cycles is walrus 1,2,...,n. So the code is correct.
+```
 
 So the code is correct and efficient.
 </think>

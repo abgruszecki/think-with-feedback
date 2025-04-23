@@ -533,92 +533,104 @@ We need to use bisect module.
 
 So the code will be:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n = int(input())
-color1 = []
-color2 = []
-for _ in range(n):
-    l, r, t = map(int, input().split())
-    if t == 1:
-        color1.append( (l, r) )
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    color1 = []
+    color2 = []
+    for _ in range(n):
+        l, r, t = map(int, input_stream.readline().rstrip("\n").split())
+        if t == 1:
+            color1.append( (l, r) )
+        else:
+            color2.append( (l, r) )
+
+    max_all_color1 = len(color1)
+    max_all_color2 = len(color2)
+
+    # Case 1: color1 left (r <= T), color2 right (l >= T)
+    if color1 and color2:
+        sorted_left_r = sorted(r for l, r in color1)
+        sorted_right_l = sorted(l for l, r in color2)
+        candidates_case1 = sorted_left_r + sorted_right_l
+        max_case1 = 0
+        for T in candidates_case1:
+            count_left = bisect.bisect_right(sorted_left_r, T)
+            count_right = len(sorted_right_l) - bisect.bisect_left(sorted_right_l, T)
+            max_case1 = max(max_case1, count_left + count_right)
     else:
-        color2.append( (l, r) )
+        max_case1 = 0
 
-max_all_color1 = len(color1)
-max_all_color2 = len(color2)
+    # Case 2: color2 left (r <= T), color1 right (l >= T)
+    if color2 and color1:
+        sorted_left_r2 = sorted(r for l, r in color2)
+        sorted_right_l1 = sorted(l for l, r in color1)
+        candidates_case2 = sorted_left_r2 + sorted_right_l1
+        max_case2 = 0
+        for T in candidates_case2:
+            count_left = bisect.bisect_right(sorted_left_r2, T)
+            count_right = len(sorted_right_l1) - bisect.bisect_left(sorted_right_l1, T)
+            max_case2 = max(max_case2, count_left + count_right)
+    else:
+        max_case2 = 0
 
-# Case 1: color1 left (r <= T), color2 right (l >= T)
-if color1 and color2:
-    sorted_left_r = sorted(r for l, r in color1)
-    sorted_right_l = sorted(l for l, r in color2)
-    candidates_case1 = sorted_left_r + sorted_right_l
-    max_case1 = 0
-    for T in candidates_case1:
-        count_left = bisect.bisect_right(sorted_left_r, T)
-        count_right = len(sorted_right_l) - bisect.bisect_left(sorted_right_l, T)
-        max_case1 = max(max_case1, count_left + count_right)
-else:
-    max_case1 = 0
+    result = max(max_all_color1, max_all_color2, max_case1, max_case2)
+    print(result, file=output_stream)
 
-# Case 2: color2 left (r <= T), color1 right (l >= T)
-if color2 and color1:
-    sorted_left_r2 = sorted(r for l, r in color2)
-    sorted_right_l1 = sorted(l for l, r in color1)
-    candidates_case2 = sorted_left_r2 + sorted_right_l1
-    max_case2 = 0
-    for T in candidates_case2:
-        count_left = bisect.bisect_right(sorted_left_r2, T)
-        count_right = len(sorted_right_l1) - bisect.bisect_left(sorted_right_l1, T)
-        max_case2 = max(max_case2, count_left + count_right)
-else:
-    max_case2 = 0
 
-result = max(max_all_color1, max_all_color2, max_case1, max_case2)
-print(result)
 
-But wait, in cases where one of the color groups is empty. For example, if color1 is empty, then case1 and case2 will have 0. So the code handles it.
+def test():
+    import io
 
-But in the code for case1, if color1 is empty or color2 is empty, then the candidates_case1 is not generated. For example, if color1 is empty, then case1's max_case1 is 0 (as initialized). Similarly for case2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+5 8 1
+1 3 2
+3 4 2
+6 6 1
+2 10 2
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-So the code should handle all possibilities.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Testing this code against the samples.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Yes, it should work.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Now, for the third sample input:
+    print('Tests passed 😎')
 
-7
-19 20 1
-13 15 2
-6 11 2
-4 10 1
-14 17 1
-13 13 2
-5 9 1
 
-Segments:
+if __name__ == '__main__':
+    test()
 
-Color1:
 
-(19,20), (4,10), (14,17), (5,9) → sorted r_i for case1 would be 10,9,17,20 → sorted becomes 9,10,17,20.
+```
 
-Wait, no. The code collects r_i for color1 in case1. The color1's r_i are 20,10,17,9. When sorted, it's 9,10,17,20.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-sorted_right_l for color2 in case1: color2's l_i are 13,6,13. sorted becomes 6,13,13.
+```
 
-So candidates_case1 would be all elements in [9,10,17,20] and [6,13,13]. So all the r's of color1 and l's of color2.
-
-But when processing each T in these candidates, the sum is computed.
-
-But perhaps the optimal T here is somewhere between color1's maximum r and color2's minimum l.
-
-But the code will process all candidates.
-
-In any case, the code's approach should find the maximum.
-
-Thus, the code is correct.
 </think>
 
 ```python

@@ -824,243 +824,217 @@ Yes.
 
 So code:
 
-n, m, x, y, vx, vy = map(int, input().split())
+Testing against sample input 1.
 
-if vx ==0 or vy ==0:
+```python
+import math
 
-   # handle zero cases
 
-   if vx ==0:
+def main(input_stream, output_stream):
+    n, m, x, y, vx, vy = map(int, input_stream.readline().rstrip("\n").split())
 
-       if x !=0 and x !=n:
+    if vx == 0 or vy == 0:
+        if vx == 0:
+            if x != 0 and x != n:
+                print(-1, file=output_stream)
+            else:
+                if vy == 1:
+                    print(f"{x} {m}", file=output_stream)
+                else:
+                    print(f"{x} 0", file=output_stream)
+        else:
+            if y != 0 and y != m:
+                print(-1, file=output_stream)
+            else:
+                if vx == 1:
+                    print(f"{n} {y}", file=output_stream)
+                else:
+                    print(f"0 {y}", file=output_stream)
+        return
 
-           print(-1)
+    a1 = (-x * vx) % n
+    a2 = (-y * vy) % m
+    d = math.gcd(n, m)
+
+    if (a2 - a1) % d != 0:
+        print(-1, file=output_stream)
+        return
+
+    n_prime = n // d
+    m_prime = m // d
+    delta = (a2 - a1) // d
+
+    try:
+        inv = pow(n_prime, -1, m_prime)
+    except ValueError:
+        print(-1, file=output_stream)
+        return
+
+    k = (delta * inv) % m_prime
+    t_candidate = a1 + k * n
+    lcm = (n * m) // d
+    t = t_candidate % lcm
+
+    if t == 0:
+        t = lcm
+
+    a = (x + vx * t) // n
+    b = (y + vy * t) // m
+
+    x_pocket = 0 if a % 2 == 0 else n
+    y_pocket = 0 if b % 2 == 0 else m
+
+    print(f"{x_pocket} {y_pocket}", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4 2 0 1 1
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-           exit()
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
 
-       # x is 0 or n. Moving in y direction.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-       # determine if y will reach 0 or m.
+```
 
-       if vy ==1:
+Testing against sample input 2.
 
-           # moving up. Y will reach m.
+```python
+import math
 
-           print(f"{x} {m}")
 
-       else:
+def main(input_stream, output_stream):
+    n, m, x, y, vx, vy = map(int, input_stream.readline().rstrip("\n").split())
 
-           # moving down. Y will reach 0.
+    if vx == 0 or vy == 0:
+        if vx == 0:
+            if x != 0 and x != n:
+                print(-1, file=output_stream)
+            else:
+                if vy == 1:
+                    print(f"{x} {m}", file=output_stream)
+                else:
+                    print(f"{x} 0", file=output_stream)
+        else:
+            if y != 0 and y != m:
+                print(-1, file=output_stream)
+            else:
+                if vx == 1:
+                    print(f"{n} {y}", file=output_stream)
+                else:
+                    print(f"0 {y}", file=output_stream)
+        return
 
-           print(f"{x} 0")
+    a1 = (-x * vx) % n
+    a2 = (-y * vy) % m
+    d = math.gcd(n, m)
 
-       exit()
+    if (a2 - a1) % d != 0:
+        print(-1, file=output_stream)
+        return
 
-   if vy ==0:
+    n_prime = n // d
+    m_prime = m // d
+    delta = (a2 - a1) // d
 
-       if y !=0 and y !=m:
+    try:
+        inv = pow(n_prime, -1, m_prime)
+    except ValueError:
+        print(-1, file=output_stream)
+        return
 
-           print(-1)
+    k = (delta * inv) % m_prime
+    t_candidate = a1 + k * n
+    lcm = (n * m) // d
+    t = t_candidate % lcm
 
-           exit()
+    if t == 0:
+        t = lcm
 
-       # y is 0 or m. Moving in x direction.
+    a = (x + vx * t) // n
+    b = (y + vy * t) // m
 
-       if vx ==1:
+    x_pocket = 0 if a % 2 == 0 else n
+    y_pocket = 0 if b % 2 == 0 else m
 
-           print(f"{n} {y}")
+    print(f"{x_pocket} {y_pocket}", file=output_stream)
 
-       else:
 
-           print(f"0 {y}")
 
-       exit()
+def test():
+    import io
 
-# handle non-zero vx and vy
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 10 10 1 -1 0
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-# compute a1 and a2
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-a1 = (-x * vx) % n
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-a2 = (-y * vy) % m
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-d = math.gcd(n, m)
+    print('Tests passed 😎')
 
-if (a2 - a1) %d !=0:
 
-   print(-1)
+if __name__ == '__main__':
+    test()
 
-   exit()
 
-# solve CRT
+```
 
-n_prime = n //d
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-m_prime = m //d
-
-delta = (a2 - a1) //d
-
-try:
-
-   inv = pow(n_prime, -1, m_prime)
-
-except ValueError:
-
-   # no inverse, but this can't happen since n_prime and m_prime are coprime
-
-   print(-1)
-
-   exit()
-
-k = (delta * inv) % m_prime
-
-t_candidate = a1 + k * n
-
-lcm = (n * m) //d
-
-t = t_candidate % lcm
-
-if t ==0:
-
-   t = lcm
-
-# compute a and b
-
-a = (x + vx * t) //n
-
-b = (y + vy * t) //m
-
-# check parity
-
-x_pocket = 0 if a %2 ==0 else n
-
-y_pocket = 0 if b %2 ==0 else m
-
-print(f"{x_pocket} {y_pocket}")
-
-But wait, in the code for the non-zero cases, after solving for t, there is a possibility that a or b could be negative. For example, if t is negative. But the code checks for t being positive, but how?
-
-In the code, after solving for t_candidate, we take t_candidate mod lcm. So t is in [0, lcm-1]. If it's zero, then we set t to lcm. So t is always positive.
-
-But what if a1 is 0, k is 0, and n=1. Then t_candidate is 0 + 0*1=0. mod lcm is zero. Then set t to lcm. So a = (x + vx * lcm)/n.
-
-But since vx can be -1, is x + vx * t could be negative?
-
-No, because the initial position is x between 0 and n. But with velocity -1 and t is large, x can decrease below zero. But that's possible. But according to the congruence, the code computes a1 = (-x * vx) mod n. For vx=-1, a1 = x mod n. For x in [0, n], x mod n is x, unless x is n, which mod n is 0.
-
-Wait, but if x is n and vx is -1, then a1 = (-n * (-1)) mod n = n mod n = 0.
-
-But then t ≡0 mod n. So t is a multiple of n. So x + vx *t =n + (-1)*t.
-
-If t is multiple of n: t =k*n.
-
-So x + vx * t =n -k*n =n(1 -k).
-
-But if k is positive, then for k=1: 0.
-
-k=2: -n.
-
-So a would be (n -k*n)/n = (1 -k) → which is negative.
-
-But this would imply that a is negative. But then the parity of a is even or odd, but the code uses a%2. But negative numbers mod 2 are 0 or 1 as well. For example, -1 %2 is 1.
-
-But how can a be negative?
-
-For example, if x=4, n=4, vx=-1, and t=4:
-
-x + vx * t =4 -4 =0 → a=0/4=0 (even)
-
-But if t=8:
-
-x + vx * t=4 -8 =-4 → a= -4/4= -1 (odd)
-
-So x_pocket is n=4.
-
-But how does this make sense?
-
-In this case, the ball starts at x=4 (n=4) and moves left with velocity -1. After t=8, the ball's position in the extended grid is x=4 -8 =-4. But according to the extended grid model, this is equivalent to a ball that has reflected multiple times. The parity of a is -1, which is odd. So x_pocket is n.
-
-But how does the ball reach the pocket in this scenario?
-
-Hmm, perhaps this indicates a mistake in the approach.
-
-But according to the extended grid model, the ball's path is a straight line. The point (a*n, b*m) is in the extended grid, and the parity of a and b (even/odd) determines which pocket it is in the original table.
-
-But a can be negative. For example, a=-1. Which parity (even/odd) would that be?
-
-Negative even/odd is same as positive even/odd. So a=-1 is odd.
-
-So x_pocket is n.
-
-But in this case, the ball's path in the extended grid would reach the point (-4, ...), which is a mirrored grid. So the original pocket is at x=4 (n=4), which is a valid pocket.
-
-But how to ensure that the ball's path in the extended grid would reach such a point?
-
-But according to the code, even if a is negative, the parity is determined by a%2. So for a=-1, a%2 is 1, so x_pocket is n.
-
-But is this correct?
-
-Yes. Because a is the number of times the ball has crossed the x boundary (n or 0) in the extended grid. For example, a=-1 means crossed once to the left (reflected once), which would be equivalent to x=n in the original grid.
-
-So the code is correct in considering the parity of a and b, regardless of their sign.
-
-Thus, the code is correct.
-
-Now, let's test the code against the examples.
-
-First example:
-
-Input:4 3 2 2 -1 1
-
-vx=-1, vy=1 (both non-zero).
-
-Compute a1 = (-2*(-1)) mod4 = 2 mod4 = 2.
-
-a2= (-2*1) mod3 → (-2 mod3) → 1.
-
-d= gcd(4,3)=1.
-
-Check (a2 -a1) mod1 → (1-2) =-1 mod1=0. So proceed.
-
-n_prime=4/1=4.
-
-m_prime=3/1=3.
-
-delta= (1-2)/1 =-1.
-
-inv= pow(4, -1, 3). Since 4 ≡1 mod3. Inverse of 1 mod3 is 1.
-
-k= (-1 *1) mod3 → 2 mod3=2.
-
-t_candidate=2 + 2*4=10.
-
-t=10 mod (4*3)=12 →10.
-
-Since 10>0.
-
-a= (2 + (-1)*10)/4 → (2-10)/4= (-8)/4= -2. a%2=0.
-
-x_pocket=0.
-
-b= (2 +1*10)/3 →12/3=4. b%2=0.
-
-y_pocket=0.
-
-Output 0 0. Which matches the sample.
-
-Second example:
-
-Input:4 4 2 0 1 1.
-
-vx=1, vy=1.
-
-Compute a1 = (-2 *1) mod4 →-2 mod4=2.
-
-a2= (-0 *1) mod4 →0 mod4=0.
-
-d= gcd(4,4)=4.
-
-Check (0-2) mod4 →-2 mod4=2 mod4=2. Not divisible by 4. So no solution. Output -1. Which matches the sample.
+```
 
 Third example:
 

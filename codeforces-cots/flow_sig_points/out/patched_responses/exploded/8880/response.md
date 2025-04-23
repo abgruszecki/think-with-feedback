@@ -358,150 +358,81 @@ But for n=1e3, and each step taking O(n) time, the total time is O(n^2), which i
 
 So the code outline is:
 
-n = int(input())
-a = list(map(int, input().split()))
+Testing against sample input 1.
 
-sum_total = 0
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-# Find the minimal a and its index
-min_a = min(a)
-sum_total += min_a
-current_b = min_a
-a.remove(min_a)
+    sum_total = 0
 
-# Process the remaining n-1 elements
-for _ in range(n-1):
-    min_next_b = float('inf')
-    selected_a = -1
-    for num in a:
-        # compute next_b
-        next_b = num * ((current_b + 1 + num -1) // num)  # ceiling division
-        if next_b < min_next_b or (next_b == min_next_b and num > selected_a):
-            min_next_b = next_b
-            selected_a = num
-    sum_total += min_next_b
-    current_b = min_next_b
-    a.remove(selected_a)
+    # Find the minimal a and its index
+    min_a = min(a)
+    sum_total += min_a
+    current_b = min_a
+    a.remove(min_a)
 
-print(sum_total)
+    # Process the remaining n-1 elements
+    for _ in range(n-1):
+        min_next_b = float('inf')
+        selected_a = -1
+        for num in a:
+            # compute next_b
+            next_b = num * ((current_b + 1 + num -1) // num)  # ceiling division
+            if next_b < min_next_b or (next_b == min_next_b and num > selected_a):
+                min_next_b = next_b
+                selected_a = num
+        sum_total += min_next_b
+        current_b = min_next_b
+        a.remove(selected_a)
 
-But wait, the code has a problem: when there are multiple elements with the same minimal next_b, and the same a_i. For example, if there are two a's of 3, and both have next_b of 6. In that case, selecting any of them is fine, since they are the same. 
+    print(sum_total, file=output_stream)
 
-But in the code, the for loop iterates over the a list, which is unordered. So if there are multiple candidates with the same next_b, but the same a_i, the code will pick the first one encountered. However, the code selects the a_i with the largest value in case of ties. So if two a's have the same next_b and the same a_i, selecting any is fine. 
 
-But in the code, the 'a' list after the first step is modified each time. The code removes the selected_a from the list. 
 
-But when there are multiple copies of the same a_i (like multiple 3s), the code will correctly handle them by removing the one that is selected. 
+def test():
+    import io
 
-For example, in the case of a list [3,3], after the first step (selecting 3 as the minimal a_i), but wait no. Wait, in the first step, the minimal a_i is selected. If the list is [3,3], the first step removes one 3. Then the next step processes the remaining 3. 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10
+5 6 5 6 5 6 5 6 5 6
+""",
+            "output": \
+"""\
+165
+""",
+        }, 
+    ]
 
-But in the code, the first step selects the minimal a_i (3), sum is 3, and current_b is3. Then, in the next step, the code iterates over the remaining a list (which has one 3). The next_b is computed as 3 * ceil( (3+1)/3 ) = 3 * 2 =6. sum becomes 3+6=9. 
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So the code handles duplicates correctly.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Now, let's test the code with the first sample input.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sample Input 1:
+    print('Tests passed 😎')
 
-7
 
-1 8 2 3 2 2 3
+if __name__ == '__main__':
+    test()
 
-The code first selects the 1, sum=1. current_b=1. a becomes [8,2,3,2,2,3]. 
 
-Then for each step:
+```
 
-Next step:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For each a in [8,2,3,2,2,3]:
-
-compute next_b:
-
-for 8: (1+1)/8 → ceil(2/8) is 1 → 8*1=8. next_b=8.
-
-for 2: ceil(2/2) =1 →2*1=2. next_b=2.
-
-for 3: ceil(2/3)=1 →3*1=3.
-
-etc.
-
-The code selects the a with next_b=2 (the minimal), which is 2. sum +=2 →3. current_b=2. remove 2 from the a list. a becomes [8,3,2,2,3]. 
-
-Next step:
-
-current_b=2. For each a in [8,3,2,2,3]:
-
-8: ceil(3/8)=1 →8. next_b=8.
-
-3: ceil(3/3)=1 →3. next_b=3.
-
-2: ceil(3/2)=2 →2*2=4. next_b=4.
-
-The minimal next_b is 3. So selected_a is 3. sum +=3 →6. current_b=3. a becomes [8,2,2,3]. 
-
-Next step:
-
-current_b=3. For each a in [8,2,2,3]:
-
-8: ceil(4/8) →1 →8.
-
-2: ceil(4/2)=2 →4. next_b=4.
-
-3: ceil(4/3)=2 →6. 
-
-So minimal next_b is4. So selected_a is 2. sum +=4 →10. current_b=4. a becomes [8,2,3]. 
-
-Next step:
-
-current_b=4. For each a in [8,2,3]:
-
-8: ceil(5/8)=1 →8.
-
-2: ceil(5/2)=3 →6.
-
-3: ceil(5/3)=2 →6.
-
-The minimal next_b is6. Two a's have next_b=6: 2 and3. The code selects the one with larger a_i (3). So selected_a is3. sum +=6 →16. current_b=6. a becomes [8,2]. 
-
-Next step:
-
-current_b=6. For a=8: ceil(7/8)=1 →8. next_b=8.
-
-a=2: ceil(7/2)=4 →8. next_b=8.
-
-Both have next_b=8. So select the larger a_i (8). sum +=8 →24. current_b=8. a becomes [2]. 
-
-Next step:
-
-current_b=8. For a=2: ceil(9/2)=5 →10. sum +=10 →34. current_b=10. 
-
-Wait, but according to the sample, the sum is 33. 
-
-Wait, there's a discrepancy here. Let's re-examine the sample's steps. 
-
-The sample's order is [1,6,7,5,3,2,4]. The a_i's in this order are [1,2,3,2,2,8,3]. The b's are 1,2,3,4,6,8,9. Sum is 1+2+3+4+6+8+9=33. 
-
-But according to the code's steps:
-
-After the first step, sum is 1. Then the code selects 2 (from the original a list). Let's see. The a list after removing 1 is [8,2,3,2,2,3]. So the first selection after 1 is the 2. Then sum becomes 3. 
-
-Next step selects the 3. sum becomes 6. 
-
-Then next step selects a 2. sum becomes 10. 
-
-Then next step selects 3. sum becomes 16. 
-
-Then next step selects 2. sum becomes 24. 
-
-Then next step selects 8. sum becomes 32. 
-
-Then next step selects 3. sum becomes 32 +9=41. 
-
-Wait, but this doesn't match. So there's a problem here. 
-
-Hmm, this suggests that the code's approach doesn't work for the first sample. 
-
-Wait, perhaps the code is not selecting the correct a_i in the steps.
+```
 
 Let me retrace the steps for the first sample:
 

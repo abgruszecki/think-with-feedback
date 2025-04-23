@@ -71,17 +71,70 @@ print(password)
 
 That's the code.
 
-Testing with the first example:
+Testing against sample input 1.
 
-Encrypted string is 80 characters. Split into 8 parts of 10. Each part is one of the codes in the next 10 lines. Then the digits are 1,2,3,4,5,6,7,8, hence output 12345678.
+```python
+def main(input_stream, output_stream):
+    encrypted = input_stream.readline().rstrip("\n").strip()
+    codes = [input_stream.readline().rstrip("\n").strip() for _ in range(10)]
+    code_map = {code: str(i) for i, code in enumerate(codes)}
+    password = ''.join(code_map[encrypted[i*10:(i+1)*10]] for i in range(8))
+    print(password, file=output_stream)
 
-So this approach should work.
 
-Now, for optimization. Since each code is 10 characters, comparing the parts with the codes is O(1) per lookup due to the hash table. So even for the maximum possible input, it's O(8) lookups. So no problem with time.
 
-In terms of memory: all data is stored as strings. For 80 characters and 10 codes of 10 characters each, that's 80 + 100 = 180 characters. So no problem with memory.
+def test():
+    import io
 
-Therefore, this approach is optimal. There's no way to get faster than O(1) per lookup here, since we can't do better than hash table lookups. The code is straightforward and efficient.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10101101111001000010100100011010101101110010110111011000100011011110010110001000
+1001000010
+1101111001
+1001000110
+1010110111
+0010110111
+1101001101
+1011000001
+1110010101
+1011011000
+0110001000
+""",
+            "output": \
+"""\
+30234919
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

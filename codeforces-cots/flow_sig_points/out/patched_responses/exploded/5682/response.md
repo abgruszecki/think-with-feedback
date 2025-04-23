@@ -393,25 +393,99 @@ Now, the code.
 
 But in Python, for handling large n (1e5), using BFS with deque is efficient. So the code should be optimized for speed.
 
-Testing edge cases:
+Testing against sample input 1.
 
-Edge case1: root is a leaf. But n=1? But constraints say n≥2. So n starts at 2.
+```python
+import sys
+from collections import deque
 
-Another edge case: m=0. So no consecutive cats allowed. So any path that has even a single cat in a row (current streak 1) is invalid.
 
-But according to the code, if m=0, then the maximum allowed is 0.
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
+    adj = [[] for _ in range(n + 1)]
+    for _ in range(n - 1):
+        x, y = map(int, input_stream.readline().split())
+        adj[x].append(y)
+        adj[y].append(x)
+    
+    count = 0
+    queue = deque()
+    root_cat = a[0]
+    current_cons = root_cat
+    max_cons = current_cons
+    if max_cons <= m:
+        queue.append((1, 0, current_cons, max_cons))
+    
+    while queue:
+        node, parent, curr, mx = queue.popleft()
+        is_leaf = True
+        for neighbor in adj[node]:
+            if neighbor != parent:
+                is_leaf = False
+                break
+        if is_leaf:
+            count += 1
+        else:
+            for neighbor in adj[node]:
+                if neighbor != parent:
+                    neighbor_cat = a[neighbor - 1]
+                    new_curr = curr + 1 if neighbor_cat else 0
+                    new_mx = max(mx, new_curr)
+                    if new_mx <= m:
+                        queue.append((neighbor, node, new_curr, new_mx))
+    print(count, file=output_stream)
 
-So if a node has a cat, the current_consecutive becomes parent's current_consecutive +1. For the root, if a[0] is 1, then current and max are 1. Which is >0. So the queue is empty. So count is 0.
 
-If the root has no cat (current_cons 0, max 0), then proceed.
 
-But m=0: the maximum allowed is 0. So any node with a cat in their path would have a streak of 1, which is invalid.
+def test():
+    import io
 
-So during traversal, for any node that has a cat, the new_curr would be 1 (since parent's current is 0, and this node has cat 1), new_max is 1. Which is >0. So not added to queue.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 1
+1 0 1 1 0 0 0
+1 2
+1 3
+2 4
+2 5
+3 6
+3 7
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-Thus, the code would only count leaves that have no cats in their path. But since the root has no cat, and each subsequent node must also have no cats. So leaves that are reachable via a path of all 0's.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So code handles that.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another case: m is larger than n. Then, any leaves are counted as long as the entire path doesn't have a streak longer than m. But since the maximum possible streak is n, if m is >=n, then all leaves are counted as long as all nodes in the path are cats. Wait, no: the maximum streak is the maximum of the current streaks. So if the entire path is all cats, then the max streak is the length of the path (n nodes), but m is >=n. So allowed.
 

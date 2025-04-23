@@ -1594,65 +1594,167 @@ Thus, the loop would run for m in 0 to (n.bit_length() -1) -1. Wait, n.bit_lengt
 
 Thus, the code:
 
+Testing against sample input 3.
+
+```python
 import sys
 
-n = int(sys.stdin.readline())
 
-a = list(map(int, sys.stdin.readline().split()))
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
-if all(x == 0 for x in a):
-    print(0)
-    sys.exit()
+    a = list(map(int, input_stream.readline().split()))
 
-max_m = n.bit_length() -1  # since n is 2^k, log2(n) = max_m
-
-for m in range(max_m +1):
-    step = 1 << m
-    temp = []
-    for i in range(n):
-        j = (i + step) % n
-        temp.append(a[i] ^ a[j])
-    # Check if temp is all zeros
-    all_zero = all(x == 0 for x in temp)
-    if all_zero:
-        print(step)
-        sys.exit()
-    # Check if temp is uniform and not zero
-    first = temp[0]
-    all_same = all(x == first for x in temp)
-    if all_same and first !=0:
-        print(step +1)
+    if all(x == 0 for x in a):
+        print(0, file=output_stream)
         sys.exit()
 
-print(-1)
+    max_m = n.bit_length() -1  # since n is 2^k, log2(n) = max_m
 
-But this code may not handle the step=0 case, but since m starts from 0, step=1.
+    for m in range(max_m +1):
+        step = 1 << m
+        temp = []
+        for i in range(n):
+            j = (i + step) % n
+            temp.append(a[i] ^ a[j])
+        # Check if temp is all zeros
+        all_zero = all(x == 0 for x in temp)
+        if all_zero:
+            print(step, file=output_stream)
+            sys.exit()
+        # Check if temp is uniform and not zero
+        first = temp[0]
+        all_same = all(x == first for x in temp)
+        if all_same and first !=0:
+            print(step +1, file=output_stream)
+            sys.exit()
 
-Let's test the third example:
+    print(-1, file=output_stream)
 
-n=1, a=[14].
 
-In the loop, m=0:
 
-step=1 <<0 =1.
+def test():
+    import io
 
-For i=0, j=(0+1) mod1=0. So temp[0] =14^14=0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+0 1 2 3 4 5 6 7
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-temp is [0]. all_zero is True. So print step=1. Which is correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Fourth example:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-After m=2, step=4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-temp is [0^4=4, 1^5=4, etc.]. all_same is True, and first=4. So print 4+1=5.
+    print('Tests passed 😎')
 
-First example:
 
-After m=1, step=2.
+if __name__ == '__main__':
+    test()
 
-temp array is [1^1=0, 2^2=0, 1^1=0, 2^2=0]. So all_zero is True. print step=2.
 
-Thus, the code works.
+```
+
+<RUN_SNIPPET>
+```output
+
+```
+
+Testing against sample input 1.
+
+```python
+import sys
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+
+    a = list(map(int, input_stream.readline().split()))
+
+    if all(x == 0 for x in a):
+        print(0, file=output_stream)
+        sys.exit()
+
+    max_m = n.bit_length() -1  # since n is 2^k, log2(n) = max_m
+
+    for m in range(max_m +1):
+        step = 1 << m
+        temp = []
+        for i in range(n):
+            j = (i + step) % n
+            temp.append(a[i] ^ a[j])
+        # Check if temp is all zeros
+        all_zero = all(x == 0 for x in temp)
+        if all_zero:
+            print(step, file=output_stream)
+            sys.exit()
+        # Check if temp is uniform and not zero
+        first = temp[0]
+        all_same = all(x == first for x in temp)
+        if all_same and first !=0:
+            print(step +1, file=output_stream)
+            sys.exit()
+
+    print(-1, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+0 0
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+
+```
 
 Another test case: input 2, [0,0]. The code returns 0.
 

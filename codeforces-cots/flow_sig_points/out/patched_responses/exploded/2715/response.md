@@ -61,15 +61,73 @@ Then print deletions.
 
 Yes. Let's code this.
 
-Testing the examples:
+Testing against sample input 1.
 
-Sample 1: input is 6, 'xxxiii'
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-Loop:
+    current_x = 0
+    deletions = 0
 
-First three chars are 'x's. current_x becomes 3.
+    for char in s:
+        if char == 'x':
+            current_x += 1
+        else:
+            if current_x >= 3:
+                deletions += current_x - 2
+            current_x = 0
+    # Check the last group of x's
+    if current_x >= 3:
+        deletions += current_x - 2
 
-Then next char is 'i'. current_x is 3 >=3: deletions +=1. current_x resets. Then other 'i's do nothing. Then the last three 'i's. So total is 1. Correct.
+    print(deletions, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+xxoxx
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2: 'xxoxx' → groups of 2, 2. So no deletions. Output 0.
 

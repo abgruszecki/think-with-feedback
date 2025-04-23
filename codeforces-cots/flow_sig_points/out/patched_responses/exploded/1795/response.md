@@ -746,154 +746,198 @@ But the code for building the trie and computing 'win' must be efficient.
 
 Thus, the code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from sys import stdin
 
-n, k = map(int, stdin.readline().split())
-strings = [stdin.readline().strip() for _ in range(n)]
 
-# Build trie
-trie = {}
-for s in strings:
-    current = trie
-    for c in s:
-        if c not in current:
-            current[c] = {}
-        current = current[c]
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
+    strings = [input_stream.readline().strip() for _ in range(n)]
 
-# Compute win status using iterative post-order traversal
-stack = [(trie, False)]
-post_order = []
-while stack:
-    node, visited = stack.pop()
-    if visited:
-        post_order.append(node)
-        continue
-    stack.append( (node, True) )
-    # Push children in reverse order to process left to right in the stack
-    for c in reversed(list(node.keys())):
-        stack.append( (node[c], False) )
+    # Build trie
+    trie = {}
+    for s in strings:
+        current = trie
+        for c in s:
+            if c not in current:
+                current[c] = {}
+            current = current[c]
 
-for node in post_order:
-    win = False
-    for c in node:
-        # Check if any child has win=False
-        # node[c] is a child, which has been processed and has 'win' key
-        if not node[c].get('win', False):
-            win = True
-            break
-    node['win'] = win
+    # Compute win status using iterative post-order traversal
+    stack = [(trie, False)]
+    post_order = []
+    while stack:
+        node, visited = stack.pop()
+        if visited:
+            post_order.append(node)
+            continue
+        stack.append( (node, True) )
+        # Push children in reverse order to process left to right in the stack
+        for c in reversed(list(node.keys())):
+            stack.append( (node[c], False) )
 
-can_win = trie.get('win', False)
+    for node in post_order:
+        win = False
+        for c in node:
+            # Check if any child has win=False
+            # node[c] is a child, which has been processed and has 'win' key
+            if not node[c].get('win', False):
+                win = True
+                break
+        node['win'] = win
 
-if can_win:
-    print("First")
-else:
-    print("Second")
+    can_win = trie.get('win', False)
 
-Wait, but in the trie, the root node is trie, which is the initial empty dictionary. When building the trie, the root is built. Then, after processing the post_order list, the root node's 'win' is stored in trie['win'].
+    if can_win:
+        print("First", file=output_stream)
+    else:
+        print("Second", file=output_stream)
 
-Yes.
 
-So the code is:
 
-- Build the trie.
+def test():
+    import io
 
-- Perform post-order traversal, processing all nodes.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 1
+a
+b
+c
+""",
+            "output": \
+"""\
+First
+""",
+        }, 
+    ]
 
-- Each node's 'win' is computed and stored in the node's dictionary.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-- The root's 'win' is trie['win'].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Thus, this code should work.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Testing this code with the samples.
+    print('Tests passed 😎')
 
-Sample 1:
 
-n=2, k=3.
+if __name__ == '__main__':
+    test()
 
-strings are 'a' and 'b'.
 
-The trie has 'a' and 'b' as children of root.
+```
 
-Post_order processing:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Process 'a' (no children). 'win' is False.
+```
 
-Process 'b' (no children). 'win' is False.
+Testing against sample input 2.
 
-Process root. Check children 'a' and 'b'. Both have 'win' False. So root's 'win' is True.
+```python
+import sys
+from sys import stdin
 
-Thus, output "First".
 
-Sample 3:
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
+    strings = [input_stream.readline().strip() for _ in range(n)]
 
-n=1, k=2.
+    # Build trie
+    trie = {}
+    for s in strings:
+        current = trie
+        for c in s:
+            if c not in current:
+                current[c] = {}
+            current = current[c]
 
-string 'ab'.
+    # Compute win status using iterative post-order traversal
+    stack = [(trie, False)]
+    post_order = []
+    while stack:
+        node, visited = stack.pop()
+        if visited:
+            post_order.append(node)
+            continue
+        stack.append( (node, True) )
+        # Push children in reverse order to process left to right in the stack
+        for c in reversed(list(node.keys())):
+            stack.append( (node[c], False) )
 
-Trie: root → 'a' → 'b'.
+    for node in post_order:
+        win = False
+        for c in node:
+            # Check if any child has win=False
+            # node[c] is a child, which has been processed and has 'win' key
+            if not node[c].get('win', False):
+                win = True
+                break
+        node['win'] = win
 
-Post_order processing:
+    can_win = trie.get('win', False)
 
-Process 'b' → no children → 'win' is False.
+    if can_win:
+        print("First", file=output_stream)
+    else:
+        print("Second", file=output_stream)
 
-Process 'a' → has 'b' child. 'b' 'win' is False. So 'a' 'win' is True.
 
-Process root → has 'a' child. 'a' 'win' is True. So root's 'win' is False.
 
-Output "Second".
+def test():
+    import io
 
-Sample 2:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 2
+ab
+""",
+            "output": \
+"""\
+Second
+""",
+        }, 
+    ]
 
-n=3, k=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-strings 'a', 'b', 'c'.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Trie root has 'a', 'b', 'c' children. Each has no children.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Post_order processing:
+    print('Tests passed 😎')
 
-Process each of 'a', 'b', 'c' → 'win' False.
 
-Process root → any child with 'win' False → yes. So root 'win' True.
+if __name__ == '__main__':
+    test()
 
-Output "First".
 
-Thus, the code works.
+```
 
-Now, edge cases.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Edge case where all strings are of length 1. Then root's children are all leaves. So root's 'win' is True.
+```
 
-Another edge case: one string of length 2. The starting player can move to the first character, and the second player moves to the second. Then the first player can't move. So root's 'win' is True?
-
-Wait, no. Because for the root node, the starting player can choose to add the first character. Then the second player can add the second character. The first player can't move. So the starting player (root) wins if there's a child that leads to a losing position.
-
-Wait, the root's 'win' is True if any child is a losing position.
-
-In the case of a string of length 2:
-
-root's child is the first character (e.g., 'a').
-
-In the 'a' node, there is a child 'b' (if the string is 'ab').
-
-Then, when processing 'ab', the trie nodes are root → 'a' → 'b'.
-
-When computing 'win' for 'b' node: no children → 'win' is False.
-
-For 'a' node: child 'b' 'win' is False → 'a' 'win' is True.
-
-Root node's children: 'a' has 'win' True. So root's 'win' is whether any child has 'win' False.
-
-In this case, 'a' 'win' is True, so root's 'win' is False.
-
-Thus, for a string of length 2, the root's 'win' is False.
-
-Thus, the code handles this case correctly.
-
-Thus, the code is correct.
 </think>
 
 ```python

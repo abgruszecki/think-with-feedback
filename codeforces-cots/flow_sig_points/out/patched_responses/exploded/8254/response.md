@@ -60,19 +60,121 @@ But wait, is there any edge case where this approach might not work? Let's think
 
 So the code is straightforward.
 
-Testing the sample cases:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    s1 = input_stream.readline().rstrip("\n").strip().lower()
+    s2 = input_stream.readline().rstrip("\n").strip().lower()
+    if s1 < s2:
+        print(-1, file=output_stream)
+    elif s1 > s2:
+        print(1, file=output_stream)
+    else:
+        print(0, file=output_stream)
 
-Input:
-aaaa
-aaaA
 
-Converted to lowercase: aaaa and aaaa. Equal. Output 0.
 
-Sample 2:
+def test():
+    import io
 
-abs vs Abz. Lowercase: abs vs abz. 'abs' is less than 'abz' (since s < z). So output -1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+abs
+Abz
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s1 = input_stream.readline().rstrip("\n").strip().lower()
+    s2 = input_stream.readline().rstrip("\n").strip().lower()
+    if s1 < s2:
+        print(-1, file=output_stream)
+    elif s1 > s2:
+        print(1, file=output_stream)
+    else:
+        print(0, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+abcdefg
+AbCdEfF
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

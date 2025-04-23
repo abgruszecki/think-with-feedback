@@ -277,87 +277,100 @@ So for all nodes except 1, check if their subtree size is even. Sum those counts
 
 So the code would:
 
-n = int(input())
+Testing against sample input 3.
 
-if n % 2 != 0:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-    print(-1)
+    if n % 2 != 0:
 
-else:
+        print(-1, file=output_stream)
 
-    adj = [[] for _ in range(n+1)]
+    else:
 
-    for _ in range(n-1):
+        adj = [[] for _ in range(n+1)]
 
-        u, v = map(int, input().split())
+        for _ in range(n-1):
 
-        adj[u].append(v)
+            u, v = map(int, input_stream.readline().rstrip("\n").split())
 
-        adj[v].append(u)
+            adj[u].append(v)
 
-    subtree_sizes = [0]*(n+1)
+            adj[v].append(u)
 
-    def dfs(u, parent):
+        subtree_sizes = [0]*(n+1)
 
-        size = 1
+        def dfs(u, parent):
 
-        for v in adj[u]:
+            size = 1
 
-            if v != parent:
+            for v in adj[u]:
 
-                size += dfs(v, u)
+                if v != parent:
 
-        subtree_sizes[u] = size
+                    size += dfs(v, u)
 
-        return size
+            subtree_sizes[u] = size
 
-    dfs(1, -1)
+            return size
 
-    count = 0
+        dfs(1, -1)
 
-    for u in range(2, n+1):
+        count = 0
 
-        if subtree_sizes[u] % 2 == 0:
+        for u in range(2, n+1):
 
-            count +=1
+            if subtree_sizes[u] % 2 == 0:
 
-    print(count if count !=0 else 0)
+                count +=1
 
-Wait, no. The code for count is summing all nodes except the root (1) whose subtree size is even. So in the case of the first sample input, node 4 has subtree size 2. So that's counted once. So the code would output 1, which is correct.
+        print(count if count !=0 else 0, file=output_stream)
 
-In the sample input 4 (n=2), node 2 has subtree size 1. So count is 0. The code returns 0.
 
-But wait, the code as written would print count if count !=0 else 0. Wait, no. The code checks for u in 2 to n+1, but the code is:
 
-for u in range(2, n+1):
+def test():
+    import io
 
-    if subtree_sizes[u] is even.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+1 2
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-So if count is zero, then print 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So in sample input 4, the code would print 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But what about a case where the count is zero, but n is even, but the entire tree can be left as a single component. So the answer is 0. Which is correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So the code seems correct.
+    print('Tests passed 😎')
 
-Wait, but the code's final line is print(count). Because count is already the sum. So in sample input 4, the code would output 0. Which is correct.
 
-So the code is correct.
+if __name__ == '__main__':
+    test()
 
-But wait, let's test the sample input 3. The code returns 4. Let's see.
 
-Sample input 3:
+```
 
-n=10. So even.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-After building the tree, the code computes the subtree sizes for all nodes except 1, and counts how many have even size.
-
-Assuming that in the tree, there are 4 such nodes.
-
-So the code returns 4.
-
-Which matches the sample output.
+```
 
 Another test case: sample input 2, n=3 (odd), code returns -1. Correct.
 
@@ -509,109 +522,115 @@ So implementing this, the code can handle large trees without stack overflow.
 
 So the code would:
 
-n = int(input())
+Testing against sample input 1.
 
-if n % 2 !=0:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-    print(-1)
+    if n % 2 !=0:
 
-else:
+        print(-1, file=output_stream)
 
-    adj = [[] for _ in range(n+1)]
+    else:
 
-    for _ in range(n-1):
+        adj = [[] for _ in range(n+1)]
 
-        u, v = map(int, input().split())
+        for _ in range(n-1):
 
-        adj[u].append(v)
+            u, v = map(int, input_stream.readline().rstrip("\n").split())
 
-        adj[v].append(u)
+            adj[u].append(v)
 
-    subtree_sizes = [0]*(n+1)
+            adj[v].append(u)
 
-    stack = [ (1, -1, False) ]
+        subtree_sizes = [0]*(n+1)
 
-    while stack:
+        stack = [ (1, -1, False) ]
 
-        node, parent, processed = stack.pop()
+        while stack:
 
-        if not processed:
+            node, parent, processed = stack.pop()
 
-            stack.append( (node, parent, True) )
+            if not processed:
 
-            # Push children in reverse order to process them in order
+                stack.append( (node, parent, True) )
 
-            for neighbor in reversed(adj[node]):
+                # Push children in reverse order to process them in order
 
-                if neighbor != parent:
+                for neighbor in reversed(adj[node]):
 
-                    stack.append( (neighbor, node, False) )
+                    if neighbor != parent:
 
-        else:
+                        stack.append( (neighbor, node, False) )
 
-            size = 1
+            else:
 
-            for neighbor in adj[node]:
+                size = 1
 
-                if neighbor != parent:
+                for neighbor in adj[node]:
 
-                    size += subtree_sizes[neighbor]
+                    if neighbor != parent:
 
-            subtree_sizes[node] = size
+                        size += subtree_sizes[neighbor]
 
-    count = 0
+                subtree_sizes[node] = size
 
-    for u in range(2, n+1):
+        count = 0
 
-        if subtree_sizes[u] % 2 ==0:
+        for u in range(2, n+1):
 
-            count +=1
+            if subtree_sizes[u] % 2 ==0:
 
-    print(count)
+                count +=1
 
-Yes, this code should work.
+        print(count, file=output_stream)
 
-In the iterative DFS, for each node, when processed for the first time (processed=False), we push it back into the stack with processed=True, then push all its children (excluding parent) in reverse order. This way, when popped from the stack, the children are processed first. Then, when processed=True, the node's children have been processed, and their sizes are stored.
 
-Thus, the code correctly computes the subtree sizes.
 
-Testing this code with the sample inputs:
+def test():
+    import io
 
-Sample 1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 2
+1 3
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-Input:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-4
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-2 4
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-4 1
+    print('Tests passed 😎')
 
-3 1
 
-The tree structure is:
+if __name__ == '__main__':
+    test()
 
-1 is connected to 4 and 3.
 
-4 is connected to 2.
+```
 
-The code computes subtree sizes:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For 2: size 1.
-
-4: 1+2's size (1) = 2.
-
-3: size 1.
-
-1: 1 + 4's size (2) + 3's size (1) =4.
-
-So subtree_sizes for 4 is 2, which is even. So nodes 4 and 3 (u=2,3,4):
-
-u=2: size 1 (odd) → not counted.
-
-u=3: size 1 → not counted.
-
-u=4: size 2 → counted. So count is 1. Output is 1. Correct.
+```
 
 Sample 2:
 

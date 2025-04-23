@@ -429,63 +429,115 @@ Zoom → for each row in flipped, create two copies of the row where each charac
 
 So the code can be written as:
 
-w, h = map(int, input().split())
-matrix = [input().strip() for _ in range(h)]
+Testing against sample input 1.
 
-# Step 1: Rotate 90 degrees clockwise
-rotated = []
-for col in range(w):
-    new_row = []
-    for row in reversed(range(h)):
-        new_row.append(matrix[row][col])
-    rotated.append(''.join(new_row))
+```python
+def main(input_stream, output_stream):
+    w, h = map(int, input_stream.readline().rstrip("\n").split())
+    matrix = [input_stream.readline().rstrip("\n").strip() for _ in range(h)]
 
-# Step 2: Flip horizontally
-flipped = [row[::-1] for row in rotated]
+    # Step 1: Rotate 90 degrees clockwise
+    rotated = []
+    for col in range(w):
+        new_row = []
+        for row in reversed(range(h)):
+            new_row.append(matrix[row][col])
+        rotated.append(''.join(new_row))
 
-# Step 3: Zoom 2x
-zoomed = []
-for row in flipped:
-    expanded = ''.join([c * 2 for c in row])
-    zoomed.append(expanded)
-    zoomed.append(expanded)
+    # Step 2: Flip horizontally
+    flipped = [row[::-1] for row in rotated]
 
-# Output
-for line in zoomed:
-    print(line)
+    # Step 3: Zoom 2x
+    zoomed = []
+    for row in flipped:
+        expanded = ''.join([c * 2 for c in row])
+        zoomed.append(expanded)
+        zoomed.append(expanded)
 
-Wait, but in the first example, the rotated matrix is ['..', '**', '..'], then flipped becomes ['..', '**', '..'] (since reversing each row of '..' gives the same). Then zooming each row becomes '....' added twice. So the output is 6 rows of 4 characters each. Which matches the sample output.
+    # Output
+    for line in zoomed:
+        print(line, file=output_stream)
 
-Yes.
 
-Another example: let's take the second sample input. The code needs to process it correctly, but given the constraints are small (w and h up to 100), even a O(w*h) approach would be acceptable. So the code should be efficient enough.
 
-Testing for the first sample:
+def test():
+    import io
 
-Input:
-3 2
-.*.
-.*.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+9 20
+**.......
+****.....
+******...
+*******..
+..******.
+....****.
+......***
+*.....***
+*********
+*********
+*********
+*********
+....**...
+...****..
+..******.
+.********
+****..***
+***...***
+**.....**
+*.......*
+""",
+            "output": \
+"""\
+********......**********........********
+********......**********........********
+********........********......********..
+********........********......********..
+..********......********....********....
+..********......********....********....
+..********......********..********......
+..********......********..********......
+....********....****************........
+....********....****************........
+....********....****************........
+....********....****************........
+......******************..**********....
+......******************..**********....
+........****************....**********..
+........****************....**********..
+............************......**********
+............************......**********
+""",
+        }, 
+    ]
 
-After rotation, rotated is ['..', '**', '..'].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Flip: same as rotated.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Zooming: each row becomes '....', '****', '....' added twice. So output is six lines:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-....
+    print('Tests passed 😎')
 
-....
 
-****
+if __name__ == '__main__':
+    test()
 
-****
 
-....
+```
 
-....
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Which matches the sample.
+```
 
 Another test case: when a row is 'ab', after flip becomes 'ba'. Then zooming each character becomes 'aabb' and two rows of that.
 

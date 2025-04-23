@@ -149,31 +149,115 @@ Find the minimum of all these concatenations.
 
 Thus, the code will look something like:
 
-first, last = input().split()
+Testing against sample input 1.
 
-first_prefixes = [first[:i] for i in range(1, len(first)+1)]
+```python
+def main(input_stream, output_stream):
+    first, last = input_stream.readline().rstrip("\n").split()
 
-last_prefixes = [last[:i] for i in range(1, len(last)+1)]
+    first_prefixes = [first[:i] for i in range(1, len(first)+1)]
 
-min_login = min(f + l for f in first_prefixes for l in last_prefixes)
+    last_prefixes = [last[:i] for i in range(1, len(last)+1)]
 
-print(min_login)
+    min_login = min(f + l for f in first_prefixes for l in last_prefixes)
 
-That's the code. Let's test it against the sample.
+    print(min_login, file=output_stream)
 
-Sample 1: 'harry potter' → first_prefixes are h, ha, har, harr, harry. last_prefixes p, po, pot, pott, potte, potter.
 
-The concatenations:
 
-h + p → 'hp'
+def test():
+    import io
 
-h + po → 'hpo' → 'hp' is shorter and lex smaller than 'hpo' (since 'hp' is prefix and shorter, so 'hp' is lex smaller than 'hpo').
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+tom riddle
+""",
+            "output": \
+"""\
+tomr
+""",
+        }, 
+    ]
 
-But wait, 'hap' (ha + p) is 'hap', which when compared to 'hp':
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Compare 'h' vs 'h' → same. Then second character 'a' vs 'p' → 'a' is smaller. So 'hap' is lex smaller than 'hp'.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So the code would generate all possible combinations and choose the lex smallest, which is correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Sample 2: 'tom riddle' → output is 'tomr'.
+
+Let's see. first_prefixes are t, to, tom. last_prefixes are r, ri, rid, ridd, riddl, riddle.
+
+Combinations include:
+
+t + r → 'tr'
+
+t + ri → 'tri' → 'tr' is lex smaller than 'tri' (since shorter). So the minimum would be 'tr'? But the sample output is 'tomr'.
+
+Wait, but what's happening here. Wait, the sample input is 'tom riddle'. The first name is 'tom', possible first_prefixes are 't', 'to', 'tom'. The last name is 'riddle', possible prefixes are 'r', 'ri', 'rid', 'ridd', 'riddl', 'riddle'.
+
+Now, let's generate some combinations:
+
+t + r → 'tr'
+
+to + r → 'tor'
+
+tom + r → 'tomr'
+
+t + ri → 'tri' → 'tr' is smaller than 'tri'.
+
+to + ri → 'tori' → but 'tr' is smaller.
+
+tom + ri → 'tomri' → etc.
+
+So among all possible combinations, which is the lex smallest?
+
+Wait, let's compare 'tr' and 'tomr'. 
+
+Compare 't' vs 't' → same.
+
+Then 'r' (second character of 'tr') vs 'o' (second character of 'tomr'). 'o' is smaller than 'r', so 'tomr' is lex smaller than 'tr'? Wait no: 'tr' is length 2, 'tomr' is length 4. So the first two characters of 'tr' are 't' and 'r', while the first two of 'tomr' are 't' and 'o'. Since 'o' is lex smaller than 'r', the 'to' part is better. Wait, no. Wait, 'tr' is 'tr', 'tomr' is 't' + 'omr' → 'tomr'.
+
+So comparing 'tr' vs 'tomr':
+
+The first character is 't' in both.
+
+Second character: 'r' vs 'o' → 'o' is smaller. So 'tomr' is lex smaller than 'tr'.
+
+Thus, 'tomr' is the correct output.
+
+So the code would generate all possible combinations, including 'tomr' (tom + r) which is 'tomr' and is lex smaller than 'tr' (t + r) because the second character is 'o' which is smaller than 'r'.
+
+So the code's approach of checking all possible combinations and selecting the minimum is correct.
+
+Thus, the code is correct.
+
+Now, considering the code's efficiency, even for maximum input sizes (each name is 10 characters), there are 10 * 10 = 100 possible combinations. Generating all and finding the minimum is acceptable.
+
+Therefore, the code provided as:
 
 Sample 2: 'tom riddle' → output is 'tomr'.
 

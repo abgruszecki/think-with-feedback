@@ -149,49 +149,89 @@ Then i increments to 3, then step by 2.
 
 Wait, here's the code:
 
-n = int(input())
+Testing against sample input 1.
 
-res = 1
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-# Check 2 first
+    res = 1
 
-if n % 2 == 0:
+    # Check 2 first
 
-    res *=2
+    if n % 2 == 0:
 
-    while n %2 ==0:
+        res *=2
 
-        n = n//2
+        while n %2 ==0:
 
-# Check odd numbers from 3 up to sqrt(n)
+            n = n//2
 
-i =3
+    # Check odd numbers from 3 up to sqrt(n)
 
-while i*i <=n:
+    i =3
 
-    if n %i ==0:
+    while i*i <=n:
 
-        res *=i
+        if n %i ==0:
 
-        while n%i ==0:
+            res *=i
 
-            n =n//i
+            while n%i ==0:
 
-    i +=2
+                n =n//i
 
-if n>1:
+        i +=2
 
-    res *=n
+    if n>1:
 
-print(res)
+        res *=n
 
-Yes. Let's test this code.
+    print(res, file=output_stream)
 
-First example:
 
-Input:10
 
-After 2: 10%2 is 0. res becomes 2. Then divide by 2 once, n becomes5. Then check i=3: 3*3=9>5. So loop ends. Then n=5>1. Multiply by 5. res is 2*5=10. Correct.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+12
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: input 12.
 

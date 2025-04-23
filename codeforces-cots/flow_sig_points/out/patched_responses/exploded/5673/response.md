@@ -567,93 +567,115 @@ So code:
 
 In Python:
 
-a, b, c = map(int, input().split())
+Testing against sample input 3.
 
-k = min(a //3, b //2, c //2)
+```python
+def main(input_stream, output_stream):
+    a, b, c = map(int, input_stream.readline().rstrip("\n").split())
 
-a_rem = a - 3*k
+    k = min(a //3, b //2, c //2)
 
-b_rem = b - 2*k
+    a_rem = a - 3*k
 
-c_rem = c - 2*k
+    b_rem = b - 2*k
 
-food_order = [0, 1, 2, 0, 2, 1, 0]
+    c_rem = c - 2*k
 
-max_days = 0
+    food_order = [0, 1, 2, 0, 2, 1, 0]
 
-for s in range(7):
+    max_days = 0
 
-    current_a = a_rem
+    for s in range(7):
 
-    current_b = b_rem
+        current_a = a_rem
 
-    current_c = c_rem
+        current_b = b_rem
 
-    cnt =0
+        current_c = c_rem
 
-    for i in range(7):
+        cnt =0
 
-        day = (s + i) %7
+        for i in range(7):
 
-        ft = food_order[day]
+            day = (s + i) %7
 
-        if ft ==0:
+            ft = food_order[day]
 
-            if current_a ==0:
+            if ft ==0:
 
-                break
+                if current_a ==0:
 
-            current_a -=1
+                    break
 
-        elif ft ==1:
+                current_a -=1
 
-            if current_b ==0:
+            elif ft ==1:
 
-                break
+                if current_b ==0:
 
-            current_b -=1
+                    break
 
-        else:
+                current_b -=1
 
-            if current_c ==0:
+            else:
 
-                break
+                if current_c ==0:
 
-            current_c -=1
+                    break
 
-        cnt +=1
+                current_c -=1
 
-    max_days = max(max_days, cnt)
+            cnt +=1
 
-total = 7*k + max_days
+        max_days = max(max_days, cnt)
 
-print(total)
+    total = 7*k + max_days
 
-Yes, this should handle all cases.
+    print(total, file=output_stream)
 
-Testing the third example:
 
-Input:1 100 1 → k=0.
 
-a_rem=1, b_rem=100, c_rem=1.
+def test():
+    import io
 
-For s=1 (Tuesday):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+30 20 10
+""",
+            "output": \
+"""\
+39
+""",
+        }, 
+    ]
 
-order is 1,2,3,4,5,6,0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-days:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-1: rabbit (b_rem 100-1=99. cnt=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-2: chicken (c_rem 1-1=0. cnt=2.
+    print('Tests passed 😎')
 
-3: fish (a_rem 1-1=0. cnt=3.
 
-4: chicken (c_rem 0. break. total 3.
+if __name__ == '__main__':
+    test()
 
-So the code would return 3.
 
-Which matches the example.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case: input 30 20 10.
 

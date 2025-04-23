@@ -485,105 +485,119 @@ So the code would be:
 
 In Python:
 
-n = int(input())
+Testing against sample input 1.
 
-shows = []
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-for _ in range(n):
+    shows = []
 
-    l, r = map(int, input().split())
+    for _ in range(n):
 
-    shows.append( (l, r) )
+        l, r = map(int, input_stream.readline().rstrip("\n").split())
 
-# Sort by start time, then end time.
+        shows.append( (l, r) )
 
-shows.sort()
+    # Sort by start time, then end time.
 
-# Check for any group of 3 or more same start time.
+    shows.sort()
 
-prev_l = None
+    # Check for any group of 3 or more same start time.
 
-count = 0
+    prev_l = None
 
-for l, r in shows:
+    count = 0
 
-    if l == prev_l:
+    for l, r in shows:
 
-        count +=1
+        if l == prev_l:
 
-        if count >=3:
+            count +=1
 
-            print("NO")
+            if count >=3:
 
-            exit()
+                print("NO", file=output_stream)
 
-    else:
+                return
 
-        prev_l = l
+        else:
 
-        count =1
+            prev_l = l
 
-# Now assign to TVs.
+            count =1
 
-end1 = -1
+    # Now assign to TVs.
 
-end2 = -1
+    end1 = -1
 
-for l, r in shows:
+    end2 = -1
 
-    if l > end1:
+    for l, r in shows:
 
-        end1 = r
+        if l > end1:
 
-    elif l > end2:
+            end1 = r
 
-        end2 = r
+        elif l > end2:
 
-    else:
+            end2 = r
 
-        print("NO")
+        else:
 
-        exit()
+            print("NO", file=output_stream)
 
-print("YES")
+            return
 
-Wait, but in the code above, the initial values for end1 and end2 are set to -1. Because the intervals can have li >=0.
+    print("YES", file=output_stream)
 
-Wait, but in the code, when assigning the first interval (l=0, r=1), the code checks if 0 > end1 (which is -1). So 0 >-1 is true. Assign to end1.
 
-But wait, the problem states that shows cannot be placed on the same TV if the previous ends at the same time as the next starts. So, for example, if a TV's last end is 2, and the new show starts at 2, it cannot be placed there.
 
-But in the code, the condition is li > end.
+def test():
+    import io
 
-Thus, the code correctly checks whether the new show's start is strictly after the TV's last end.
-
-Thus, the initial values of end1 and end2 as -1 are correct. Because any interval with l >=0 will have l >-1, so the first interval can be assigned.
-
-Yes.
-
-Testing the code against the examples:
-
-First example:
-
-3
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
 1 2
-
 2 3
+2 3
+1 2
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-4 5
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sorted shows: [(1,2), (2,3), (4,5)].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Check same li groups: all have unique li. Then process:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-end1 and end2 start as -1.
+    print('Tests passed 😎')
 
-First interval (1,2): 1 >-1 → assign to end1 (now 2).
 
-Second (2,3): 2 is not > end1 (2) → check end2 (-1). 2 >-1 → assign to end2 (3).
+if __name__ == '__main__':
+    test()
 
-Third (4,5): 4>2 → assign to end1 (5). All processed. Output YES.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

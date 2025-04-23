@@ -281,179 +281,118 @@ But in Python, list.copy() is a shallow copy. So for each new element, we can cr
 
 So code steps:
 
-n, q = map(int, input().split())
-a = list(map(int, input().split()))
-MOD = 10**9 +7
+Testing against sample input 1.
 
-# Precompute prefix_bases and prefix_r
-prefix_bases = []
-prefix_r = []
-current_basis = [0]*20
-current_r =0
+```python
+def main(input_stream, output_stream):
+    n, q = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    MOD = 10**9 +7
 
-prefix_bases.append(current_basis.copy())  # for l=0 (but l starts from 1)
-prefix_r.append(0)
+    # Precompute prefix_bases and prefix_r
+    prefix_bases = []
+    prefix_r = []
+    current_basis = [0]*20
+    current_r =0
 
-for num in a:
-    # Copy the current basis
-    new_basis = current_basis.copy()
-    x = num
-    for i in reversed(range(20)):
-        if (x >> i) & 1:
-            if new_basis[i]:
-                x ^= new_basis[i]
-            else:
-                new_basis[i] = x
-                break
-    # Check if the new_basis is different from current_basis
-    # If x was added, then the new_r is current_r +1
-    # else, same as current_r
-    new_r = current_r
-    if x !=0:
-        new_r +=1
-    # Update current_basis and current_r
-    current_basis = new_basis
-    current_r = new_r
-    # Append to prefix_bases and prefix_r
-    prefix_bases.append(current_basis.copy())
-    prefix_r.append(current_r)
+    prefix_bases.append(current_basis.copy())  # for l=0 (but l starts from 1)
+    prefix_r.append(0)
 
-# Precompute pow2 up to n
-max_pow = n
-pow2 = [1]*(max_pow +1)
-for i in range(1, max_pow+1):
-    pow2[i] = (pow2[i-1] *2 ) % MOD
+    for num in a:
+        # Copy the current basis
+        new_basis = current_basis.copy()
+        x = num
+        for i in reversed(range(20)):
+            if (x >> i) & 1:
+                if new_basis[i]:
+                    x ^= new_basis[i]
+                else:
+                    new_basis[i] = x
+                    break
+        # Check if the new_basis is different from current_basis
+        # If x was added, then the new_r is current_r +1
+        # else, same as current_r
+        new_r = current_r
+        if x !=0:
+            new_r +=1
+        # Update current_basis and current_r
+        current_basis = new_basis
+        current_r = new_r
+        # Append to prefix_bases and prefix_r
+        prefix_bases.append(current_basis.copy())
+        prefix_r.append(current_r)
 
-# Process queries
-for _ in range(q):
-    l, x = map(int, input().split())
-    basis = prefix_bases[l]
-    # Check if x is in the basis
-    x_copy = x
-    for i in reversed(range(20)):
-        if (x_copy >> i) &1:
-            if basis[i]:
-                x_copy ^= basis[i]
-            else:
-                break
-    if x_copy !=0:
-        print(0)
-    else:
-        e = l - prefix_r[l]
-        print(pow2[e] % MOD)
+    # Precompute pow2 up to n
+    max_pow = n
+    pow2 = [1]*(max_pow +1)
+    for i in range(1, max_pow+1):
+        pow2[i] = (pow2[i-1] *2 ) % MOD
 
-Wait, but in the code above, when inserting the new element into the basis, the code for inserting is:
-
-x = num
-for i in reversed(range(20)):
-    if (x >> i) &1:
-        if new_basis[i]:
-            x ^= new_basis[i]
+    # Process queries
+    for _ in range(q):
+        l, x = map(int, input_stream.readline().rstrip("\n").split())
+        basis = prefix_bases[l]
+        # Check if x is in the basis
+        x_copy = x
+        for i in reversed(range(20)):
+            if (x_copy >> i) &1:
+                if basis[i]:
+                    x_copy ^= basis[i]
+                else:
+                    break
+        if x_copy !=0:
+            print(0, file=output_stream)
         else:
-            new_basis[i] =x
-            break
+            e = l - prefix_r[l]
+            print(pow2[e] % MOD, file=output_stream)
 
-But wait, the standard insertion process is:
 
-def insert(x, basis):
-    for i in reversed(range(20)):
-        if (x >> i) & 1:
-            if basis[i]:
-                x ^= basis[i]
-            else:
-                basis[i] = x
-                return
-    # if x becomes 0, it's not added
 
-So the code above is correct. For each new element, it is processed into the basis. So the code correctly builds the new basis.
+def test():
+    import io
 
-But in the code for precomputing the prefix_bases, when adding a new element, we make a copy of the previous basis, then modify the copy. Then current_basis is set to the new_basis. So each prefix_bases entry is a copy of the current_basis after processing each element.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2
+1 1 1
+3 1
+2 0
+""",
+            "output": \
+"""\
+4
+2
+""",
+        }, 
+    ]
 
-But this would take O(n*20) time and space, which is acceptable.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Testing this code against the sample inputs:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-First sample input:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-5 5
-0 1 2 3 4
-Queries.
+    print('Tests passed 😎')
 
-Let's process the array step by step.
 
-prefix_bases starts with [0,0,...0], prefix_r 0.
+if __name__ == '__main__':
+    test()
 
-Then for each element:
 
-element 0 (a[0] =0):
+```
 
-x=0. Inserting into new_basis (copy of previous, which is all zeros).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-x starts as 0. So in the loop, since x has no bits set, the loop does nothing. x is zero. So new_basis is same as previous. new_r is current_r (0) +0. So prefix_bases[1] is [0...0], prefix_r[1] is 0.
-
-element 1 (a[1]=1):
-
-x=1. For i in 19 downto 0:
-
-i=0: (1 >>0)&1 is 1. new_basis[0] is 0 (from previous step). So set new_basis[0] =1. break.
-
-so new_basis is [1,0,0,...]. new_r =0 +1=1.
-
-prefix_bases[2] is this new basis. prefix_r[2] =1.
-
-element 2 (a[2] =2, binary 10):
-
-x=2. For i from 19 downto 0:
-
-i=1: (2 >>1) is 1. new_basis[1] is 0. So set new_basis[1] =2. break.
-
-new_r=1+1=2.
-
-prefix_bases[3] has [1,2,0,...]. prefix_r[3]=2.
-
-element 3 (a[3]=3, binary 11):
-
-x=3. Process:
-
-i=1: 3>>1 is 1. new_basis[1] is 2. So x ^=2 → 1.
-
-i=0: 1>>0 is 1. new_basis[0] is 1. So x ^=1 →0. loop ends.
-
-So x becomes 0. No change to new_basis. new_r remains 2.
-
-prefix_bases[4] is same as previous. prefix_r[4]=2.
-
-element 4 (a[4]=4, binary 100):
-
-x=4. Process i from 19 downto 0:
-
-i=2: 4>>2 is 1. new_basis[2] is 0. So set new_basis[2] =4. break.
-
-new_r=2+1=3.
-
-prefix_bases[5] has [1,2,4,0...]. prefix_r[5]=3.
-
-Now, for query 4 3 (l=4, x=3):
-
-Check the basis for l=4 (prefix_bases[4] is [1,2,0...0]).
-
-Check x=3:
-
-x_copy=3.
-
-i=19 downto 0:
-
-i=1: 3>>1 is 1. new_basis[1] is 2. So x_copy ^=2 → 1.
-
-i=0: 1>>0 is 1. new_basis[0] is 1. x_copy ^=1 →0. So x_copy is 0. So returns True.
-
-e=4 - prefix_r[4] (which is 2). 4-2=2. 2^2=4. So output 4. Which matches the sample.
-
-Another query: 2 0 (l=2, x=0).
-
-Basis for l=2 is [1,0...]. So check x=0:
-
-x_copy=0. loop doesn't run. returns True. e=2 -1 =1. 2^1=2. Correct.
+```
 
 So the code seems to handle the first sample correctly.
 

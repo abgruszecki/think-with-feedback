@@ -471,63 +471,97 @@ But let's code the is_possible function as part of the binary search.
 
 So code:
 
-cnt1, cnt2, x, y = map(int, input().split())
+Testing against sample input 1.
 
-low = 1
+```python
+def main(input_stream, output_stream):
+    cnt1, cnt2, x, y = map(int, input_stream.readline().rstrip("\n").split())
 
-high = 2 * 10**18  # A very high value.
+    low = 1
 
-lcm_xy = x * y  # Since x and y are primes and x < y.
+    high = 2 * 10**18  # A very high value.
 
-while low < high:
+    lcm_xy = x * y  # Since x and y are primes and x < y.
 
-    mid = (low + high) // 2
+    while low < high:
 
-    # Compute A, B, C.
+        mid = (low + high) // 2
 
-    div_x = mid // x
+        # Compute A, B, C.
 
-    div_y = mid // y
+        div_x = mid // x
 
-    div_xy = mid // lcm_xy
+        div_y = mid // y
 
-    a = mid - div_x
+        div_xy = mid // lcm_xy
 
-    b = mid - div_y
+        a = mid - div_x
 
-    c = mid - (div_x + div_y - div_xy)
+        b = mid - div_y
 
-    a_minus_c = div_y - div_xy
+        c = mid - (div_x + div_y - div_xy)
 
-    b_minus_c = div_x - div_xy
+        a_minus_c = div_y - div_xy
 
-    required1 = max(0, cnt1 - a_minus_c)
+        b_minus_c = div_x - div_xy
 
-    required2 = max(0, cnt2 - b_minus_c)
+        required1 = max(0, cnt1 - a_minus_c)
 
-    if (a >= cnt1) and (b >= cnt2) and (required1 + required2 <= c):
+        required2 = max(0, cnt2 - b_minus_c)
 
-        high = mid
+        if (a >= cnt1) and (b >= cnt2) and (required1 + required2 <= c):
 
-    else:
+            high = mid
 
-        low = mid + 1
+        else:
 
-print(low)
+            low = mid + 1
 
-Wait, but in the code above, a_minus_c is computed as div_y - div_xy. Because a is mid - div_x. C is mid - (div_x + div_y - div_xy). So a - C = (mid - div_x) - (mid - (div_x + div_y - div_xy)) ) = (mid - div_x) - mid + div_x + div_y - div_xy = div_y - div_xy → which is correct.
+    print(low, file=output_stream)
 
-Similarly for b_minus_c.
 
-So this code should work.
 
-Testing the first sample:
+def test():
+    import io
 
-input:3 1 2 3
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 3 2 3
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-low starts at 1, high at 2e18.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-mid will eventually reach 5.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case:
 

@@ -271,256 +271,89 @@ Yes.
 
 So the code:
 
-n = int(input())
-juices = []
-for _ in range(n):
-    c, s = input().split()
-    c = int(c)
-    mask = 0
-    for char in s:
-        mask |= 1 << (ord(char) - ord('A'))
-    juices.append( (mask, c) )
-
-dp = {}
-
-for mask, cost in juices:
-    new_entries = {}
-    # Add the juice alone
-    if mask not in new_entries or cost < new_entries.get(mask, float('inf')):
-        new_entries[mask] = cost
-    # Combine with existing entries in dp
-    for existing_mask in list(dp.keys()):  # iterate over a copy to avoid modifying during iteration
-        combined_mask = existing_mask | mask
-        combined_cost = dp[existing_mask] + cost
-        if combined_cost < new_entries.get(combined_mask, float('inf')):
-            new_entries[combined_mask] = combined_cost
-    # merge new_entries into dp
-    for m in new_entries:
-        if m not in dp or new_entries[m] < dp[m]:
-            dp[m] = new_entries[m]
-
-print( dp.get(7, -1) if 7 in dp else -1 )
-
-Wait, but this code may have an issue. Because when we process a juice, we're adding all possible combinations of existing masks with the current juice. But the existing masks here are the ones that were present in dp before processing the current juice. So the order is correct.
-
-Wait, for each juice, we loop through all the existing entries in dp (before processing this juice), combine them with the current juice's mask, and add new entries. Then, merge the new_entries into dp after processing all existing entries.
-
-Yes. Because during the processing of a single juice, the new entries generated are based on the dp state before the juice was processed. Then, all new_entries are merged into dp, which will then be updated for the next juices.
-
-This should handle all possible combinations.
-
-But let's test the first example.
-
-Juices:
-
-4
-5 C → mask C (4), cost 5.
-
-6 B → mask 2, cost6.
-
-16 BAC → mask 1|2|4=7, cost16.
-
-4 A → mask1, cost4.
-
-Processing first juice (mask4, cost5):
-
-new_entries is {4:5}.
-
-dp becomes {4:5}.
-
-Second juice (mask2, cost6):
-
-new_entries starts as {2:6}.
-
-Then, combine with existing masks (4):
-
-4 | 2 =6, cost5+6=11. So new_entries now has 2:6, 6:11. Merge into dp. So dp is {4:5, 2:6, 6:11}.
-
-Third juice (mask7, cost16):
-
-new_entries starts as {7:16}.
-
-Then, combine with existing masks (4, 2, 6):
-
-4 |7 =7 → cost5+16=21. 2 |7=7 →6+16=22. 6 |7=7 →11+16=27. So new_entries for 7 is min(16, 21,22,27) →16.
-
-So after merging, dp[7] is 16.
-
-Fourth juice (mask1, cost4):
-
-new_entries starts as {1:4}.
-
-Then combine with existing masks (4,2,6,7):
-
-4 |1 →5 (A|C), cost5+4=9.
-
-2 |1 →3 (A|B), cost6+4=10.
-
-6 |1 →7 (A|B|C), cost11+4=15.
-
-7 |1 →7, cost16+4=20.
-
-So new_entries after combinations are:
-
-mask1:4, mask5:9, mask3:10, mask7:15.
-
-So when merging into dp:
-
-existing dp[7] is 16. The new entry for mask7 is 15, which is lower, so dp[7] becomes 15.
-
-Thus, the code would output 15.
-
-Which matches the first example.
-
-Another example: second input.
-
-2
-
-10 AB → mask3, cost10.
-
-15 BA → mask3, cost15.
-
-Processing first juice (mask3, cost10):
-
-new_entries is {3:10}.
-
-dp is {3:10}.
-
-Second juice (mask3, cost15):
-
-new_entries starts as {3:15}.
-
-Then, combine with existing mask3 →3 |3=3. cost10+15=25. So new_entries has {3:15, 3:25}. So the minimal is 15. So after merging, dp becomes {3:10} (since 15 is higher than 10, so new_entries would have 3:15 which is worse than existing 10, so no change).
-
-So dp remains {3:10}.
-
-Thus, mask7 is not present. Output is -1. Which matches the example.
-
-Third example:
-
-5
-
-10 A → mask1, cost10.
-
-9 BC → mask6, cost9.
-
-11 CA → mask5, cost11.
-
-4 A → mask1, cost4.
-
-5 B → mask2, cost5.
-
-Processing all these.
-
-Let's see how the code processes this.
-
-The fifth juice is B (mask2, cost5).
-
-But the minimal combination would be BC (mask6, cost9) + A (mask1, cost4) → total 13. Or maybe other combinations.
-
-But let's see.
-
-Let's see the steps.
-
-After processing all juices, the dp should have mask7 with cost 13.
-
-But how?
-
-Let's see:
-
-For example, the juice BC (mask6, cost9) and juice A (mask1, cost4). 6 |1 =7. So cost 9+4=13. So during processing the A juice (mask1, cost4), when combining with existing mask6 (cost9?), or is there another way.
-
-But let's think step by step.
-
-Processing first juice (mask1, cost10):
-
-dp is {1:10}.
-
-Second juice (mask6, cost9):
-
-new_entries has 6:9.
-
-Combine with existing mask1: 1 |6=7 → cost10+9=19. So new_entries now has 6:9, 7:19. Merge into dp. So dp is {1:10,6:9,7:19}.
-
-Third juice (mask5, cost11):
-
-mask5 is 1+4=5 (A and C? Wait, no. Wait, mask is built as follows:
-
-For 'CA', the characters are C and A. C is 1<<2=4, A is 1<<0=1. So mask is 5 (4+1=5). Cost11.
-
-Processing this juice:
-
-new_entries starts as {5:11}.
-
-Combine with existing masks (1,6,7):
-
-1 |5=5 → cost10+11=21.
-
-6 |5=7 → cost9+11=20.
-
-7 |5=7 → cost19+11=30.
-
-So new_entries after combining is 5:11, 5:21,7:20,7:30. The minimal for 7 is 19 (existing), but new 20 is worse. So after merging, the new_entries for 5 is 11 (since existing 5 was not in dp before). So dp becomes {1:10, 6:9,7:19, 5:11}.
-
-Fourth juice (mask1, cost4):
-
-new_entries starts as {1:4}.
-
-Combine with existing masks:
-
-1 | existing masks:
-
-1 |1=1 → cost10+4=14. (existing 1:10, new cost14 is higher, so no change.
-
-6 |1=7 → cost9+4=13. So combined_mask 7, cost13.
-
-7 |1=7 → cost19+4=23.
-
-5 |1=5 → cost11+4=15.
-
-So new_entries after combining:
-
-1:4, 7:13, 5:15.
-
-So when merging into dp:
-
-For mask7, existing cost19 vs new 13. So dp[7] becomes 13.
-
-The mask1 in dp is 10, which is higher than 4. So mask1 is updated to 4.
-
-So after this step, dp is {1:4, 6:9,7:13,5:11}.
-
-Fifth juice (mask2, cost5):
-
-Processing this:
-
-new_entries starts as {2:5}.
-
-Combine with existing masks:
-
-1 |2 →3 (cost4+5=9).
-
-6 |2 →6 (9+5=14. But existing 6 is 9, so this is worse).
-
-7 |2 →7 (13+5=18. Worse than 13).
-
-5 |2 → 7 (5 |2 =7? 5 is 101, 2 is 010 → 111 (7). So cost11+5=16. Which is worse than existing 13.
-
-So new_entries after combining:
-
-mask2:5, mask3:9 (from 1+2), mask7:16 (from 5+2).
-
-So when merging into dp:
-
-mask2:5 is added.
-
-mask3:9 is added (if not present before).
-
-mask7:16 is worse than existing 13.
-
-So the dp now includes mask3:9, but mask7 is still 13.
-
-Thus, the final dp[7] is 13, which is the correct answer for the third example.
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    juices = []
+    for _ in range(n):
+        c, s = input_stream.readline().rstrip("\n").split()
+        c = int(c)
+        mask = 0
+        for char in s:
+            mask |= 1 << (ord(char) - ord('A'))
+        juices.append( (mask, c) )
+
+    dp = {}
+
+    for mask, cost in juices:
+        new_entries = {}
+        # Add the juice alone
+        if mask not in new_entries or cost < new_entries.get(mask, float('inf')):
+            new_entries[mask] = cost
+        # Combine with existing entries in dp
+        for existing_mask in list(dp.keys()):  # iterate over a copy to avoid modifying during iteration
+            combined_mask = existing_mask | mask
+            combined_cost = dp[existing_mask] + cost
+            if combined_cost < new_entries.get(combined_mask, float('inf')):
+                new_entries[combined_mask] = combined_cost
+        # merge new_entries into dp
+        for m in new_entries:
+            if m not in dp or new_entries[m] < dp[m]:
+                dp[m] = new_entries[m]
+
+    print( dp.get(7, -1) if 7 in dp else -1 , file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+100 A
+355 BCA
+150 BC
+160 AC
+180 B
+190 CA
+""",
+            "output": \
+"""\
+250
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So the code works.
 

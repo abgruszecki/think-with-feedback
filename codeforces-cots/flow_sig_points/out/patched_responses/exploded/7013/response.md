@@ -61,91 +61,66 @@ Then the loop.
 
 Now, code:
 
-n = int(input())
-a = list(map(int, input().split()))
-if n ==0:
-    print(0)
-    exit()
-max_len = 1
-current =1
-for i in range(1, n):
-    if a[i] > a[i-1]:
-        current +=1
-        if current > max_len:
-            max_len = current
-    else:
-        current =1
-print(max_len)
+Testing against sample input 1.
 
-Wait, but in the code, when we increment current, we have to check if it's the new maximum each time, not just in the else. Because maybe the current could be increasing and reach a new max. For example, in the case where the entire array is increasing. So in the code above, when a[i] is larger than previous, current increases. Then, after incrementing, we check if it's larger than max_len. Wait, no. The code as written only updates the max_len if current is larger than max_len. But in the code I wrote, after incrementing current, we check if current is larger than max_len. Wait, in the code:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    max_len = current = 1
+    for i in range(1, n):
+        if a[i] > a[i-1]:
+            current += 1
+            if current > max_len:
+                max_len = current
+        else:
+            current = 1
+    print(max_len, file=output_stream)
 
-current +=1 → then we check if current > max_len → if yes, update. But in the code, this check is done every time after incrementing. Because the code inside the 'if' clause is:
 
-current +=1
 
-if current > max_len:
+def test():
+    import io
 
-    max_len = current
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+100 100 100 100 100 100
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-Wait, no. The code as written in the code I proposed earlier is:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-if a[i] > a[i-1]:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-    current +=1
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-    if current > max_len:
+    print('Tests passed 😎')
 
-        max_len = current
 
-Else:
+if __name__ == '__main__':
+    test()
 
-    current =1
 
-Wait, but that would check for max_len only when the current is increasing. But perhaps, after several increments, the current might have already passed the max_len. For example, consider a sequence where after a reset, the current increases again but not surpassing the previous max. Then, the code would not check after each increment.
+```
 
-Wait, no. Because in the code as written, after each increment, the code immediately checks if the current is larger than max_len. For example:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-current is 2, max is 2.
-
-Then, next element is larger: current becomes 3. Then, check if 3>2 → yes. Update max to 3.
-
-So that's correct.
-
-But what if the code didn't check after each increment? Let's see.
-
-Alternative approach: in each iteration where the current increases, after incrementing, compare and update the max. So, for example:
-
-current +=1
-
-if current > max_len:
-
-    max_len = current
-
-That's what the code does. So this is correct.
-
-But in other code structures, sometimes people update max_len in every iteration. Like:
-
-current = current +1 if a[i] > a[i-1] else 1
-
-then, compare current to max_len and update.
-
-But in the code I wrote, the check is only when the current is incremented. Which is correct. Because when the current is reset to 1, that's smaller than the current max_len (since max_len is at least 1). So in that case, the code only needs to check when current is increased.
-
-Wait, but suppose the current is 3, and the max_len is 3. Then, next element is larger: current becomes 4. So max_len is updated to 4.
-
-Yes. So in this code, whenever the current increases, it's checked against the max. So no problem.
-
-So the code should work correctly.
-
-Testing the examples:
-
-First example: 1,7,2,11,15.
-
-i=1:7>1 → current=2 → max becomes 2.
-
-i=2:2>7? No. current becomes 1. Max remains 2.
-
-i=3:11>2 → current=2. Current is 2, which is not larger than max (2). So max stays 2. Wait, but in the code, after current increments to 2, the code checks if 2 > current max (2). No. So max remains 2. Then i=4:15>11 → current becomes 3. Then check if 3>2 → yes. Max becomes 3. So output is 3. Correct.
+```
 
 So the code is correct.
 

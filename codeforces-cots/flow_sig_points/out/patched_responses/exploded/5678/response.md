@@ -116,35 +116,79 @@ Yes.
 
 So code:
 
-a, x, y = map(int, input().split())
+Testing against sample inputs 1, 2.
 
-if (x < 0) or (x > a) or (y <0) or (y >a):
+```python
+def main(input_stream, output_stream):
+    a, x, y = map(int, input_stream.readline().rstrip("\n").split())
 
-    print(2)
+    if (x < 0) or (x > a) or (y <0) or (y >a):
 
-else:
-
-    if x ==0 or x ==a or y ==0 or y ==a:
-
-        print(1)
+        print(2, file=output_stream)
 
     else:
 
-        print(0)
+        if x ==0 or x ==a or y ==0 or y ==a:
 
-Wait, but what about when a=0? But according to the constraints, a is at least 1, so a is 1 or larger. So no problem.
+            print(1, file=output_stream)
 
-Wait the constraints say 1 ≤ a ≤1000. So a is at least 1.
+        else:
 
-So the code is correct.
+            print(0, file=output_stream)
 
-Testing the examples:
 
-First example:
 
-Input: 2 1 1 → inside → output 0.
+def test():
+    import io
 
-Second example: 4 4 4 → x is 4 (equals a=4), y is 4 (equals a=4). So condition is met. Output 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4 4
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+        {
+            "input": \
+"""\
+10 5 -4
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: 10 5 -4 → y is -4 <0 → output 2.
 

@@ -926,156 +926,113 @@ Collect results.
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import deque
 
-n = int(sys.stdin.readline())
 
-adj_dict = [dict() for _ in range(n+1)]
-for _ in range(n-1):
-    s, t = map(int, sys.stdin.readline().split())
-    adj_dict[s][t] = 0
-    adj_dict[t][s] = 1
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
-parent = [0]*(n+1)
-parent_cost = [0]*(n+1)
-visited = [False]*(n+1)
-q = deque()
-q.append(1)
-visited[1] = True
-parent[1] = 0
-count = 0
+    adj_dict = [dict() for _ in range(n+1)]
+    for _ in range(n-1):
+        s, t = map(int, input_stream.readline().split())
+        adj_dict[s][t] = 0
+        adj_dict[t][s] = 1
 
-while q:
-    u = q.popleft()
-    for v in adj_dict[u]:
-        if not visited[v] and v != parent[u]:
-            visited[v] = True
-            parent[v] = u
-            cost = adj_dict[u][v]
-            parent_cost[v] = cost
-            count += cost
-            q.append(v)
+    parent = [0]*(n+1)
+    parent_cost = [0]*(n+1)
+    visited = [False]*(n+1)
+    q = deque()
+    q.append(1)
+    visited[1] = True
+    parent[1] = 0
+    count = 0
 
-# Now compute the counts for all nodes
-counts = [0]*(n+1)
-counts[1] = count
+    while q:
+        u = q.popleft()
+        for v in adj_dict[u]:
+            if not visited[v] and v != parent[u]:
+                visited[v] = True
+                parent[v] = u
+                cost = adj_dict[u][v]
+                parent_cost[v] = cost
+                count += cost
+                q.append(v)
 
-q = deque()
-q.append(1)
+    # Now compute the counts for all nodes
+    counts = [0]*(n+1)
+    counts[1] = count
 
-while q:
-    u = q.popleft()
-    for v in adj_dict[u]:
-        if parent[u] != v and parent[v] == u:  # v is a child in the initial tree
-            # compute cost_v_u
-            cost_v_u = adj_dict[v][u]
-            counts[v] = counts[u] - parent_cost[v] + cost_v_u
-            q.append(v)
+    q = deque()
+    q.append(1)
 
-# Now find the minimum count and collect the nodes
-min_count = min(counts[1:])
-result = [i for i in range(1, n+1) if counts[i] == min_count]
-result.sort()
+    while q:
+        u = q.popleft()
+        for v in adj_dict[u]:
+            if parent[u] != v and parent[v] == u:  # v is a child in the initial tree
+                # compute cost_v_u
+                cost_v_u = adj_dict[v][u]
+                counts[v] = counts[u] - parent_cost[v] + cost_v_u
+                q.append(v)
 
-print(min_count)
-print(' '.join(map(str, result)))
+    # Now find the minimum count and collect the nodes
+    min_count = min(counts[1:])
+    result = [i for i in range(1, n+1) if counts[i] == min_count]
+    result.sort()
 
-Wait, but wait. The line:
+    print(min_count, file=output_stream)
+    print(' '.join(map(str, result)), file=output_stream)
 
-if parent[u] != v and parent[v] == u:
 
-This is checking that v is a child of u in the initial tree (since parent[v] == u), and that v is not the parent of u (which is redundant since parent[v] == u implies u is parent of v, and parent[u] can't be v unless it's a cycle, which is impossible in a tree).
 
-But this line is trying to find the children of u in the initial tree.
+def test():
+    import io
 
-Yes. Because parent[v] == u implies that v is a child of u.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 4
+2 4
+3 4
+""",
+            "output": \
+"""\
+2
+1 2 3
+""",
+        }, 
+    ]
 
-So the code processes all children of u in the initial tree.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But for each child v, during the second BFS, the count is computed and the child is added to the queue.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-This way, all nodes are processed in BFS order.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Testing this code with the first sample:
+    print('Tests passed 😎')
 
-Sample Input 1:
 
-3
+if __name__ == '__main__':
+    test()
 
-2 1
 
-2 3
+```
 
-adj_dict is:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-adj_dict[2][1] =0, adj_dict[1][2]=1.
-
-adj_dict[2][3]=0, adj_dict[3][2]=1.
-
-Initial BFS:
-
-Process 1.
-
-Check its adj_dict entries: 2.
-
-parent[2] =1, parent_cost[2] = adj_dict[1][2] →1.
-
-count is 1.
-
-Then process 2.
-
-Check adj_dict[2] entries: 1 and 3.
-
-1 is parent. 3 is not visited.
-
-parent[3] =2, parent_cost[3] = adj_dict[2][3] →0.
-
-count increases by 0 → total 1.
-
-Then process 3.
-
-No children.
-
-Initial count is 1.
-
-counts[1] =1.
-
-Then, second BFS:
-
-Process 1.
-
-For v in adj_dict[1] (2).
-
-Check if parent[u] (0) != v (2) and parent[v] ==u (yes).
-
-cost_v_u = adj_dict[2][1] →0.
-
-counts[2] = counts[1] (1) - parent_cost[2] (1) +0 →0.
-
-Add 2 to queue.
-
-Process 2.
-
-Check adj_dict[2] entries 1 and 3.
-
-For v=1: parent[2] is 1, so v=1 is not child.
-
-For v=3: parent[3] is 2 → child.
-
-cost_v_u = adj_dict[3][2] →1.
-
-counts[3] =0 -0 +1 →1.
-
-Add 3 to queue.
-
-Process 3: no children.
-
-counts are 1,0,1.
-
-Sample 1's output is 0 and node 2.
-
-Correct.
+```
 
 Sample 2:
 

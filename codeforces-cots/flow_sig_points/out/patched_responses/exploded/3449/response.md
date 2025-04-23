@@ -395,137 +395,163 @@ But in code, the initial count_map is {(0,0):1}.
 
 So the code:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-prefix = 0
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-result = 0
+    prefix = 0
 
-count_map = dict()
+    result = 0
 
-count_map[(0, 0)] = 1
+    count_map = dict()
 
-for i in range(n):
+    count_map[(0, 0)] = 1
 
-    prefix ^= a[i]
+    for i in range(n):
 
-    current_parity = (i + 1) % 2  # r is i+1, parity is (i+1) mod2
+        prefix ^= a[i]
 
-    key = (prefix, current_parity)
+        current_parity = (i + 1) % 2  # r is i+1, parity is (i+1) mod2
 
-    # get the current count
+        key = (prefix, current_parity)
 
-    result += count_map.get(key, 0)
+        # get the current count
 
-    # update the count_map
+        result += count_map.get(key, 0)
 
-    count_map[key] = count_map.get(key, 0) + 1
+        # update the count_map
 
-print(result)
+        count_map[key] = count_map.get(key, 0) + 1
 
-Wait, but in the code, the count_map is a normal dictionary. So for each key (prefix, current_parity), we check the current count and add it to the result, then increment the count for that key.
+    print(result, file=output_stream)
 
-Yes, this should work.
 
-Testing this code against the examples.
 
-First example:
+def test():
+    import io
 
-Input:
-
-5
-
-1 2 3 4 5
-
-The code should process each element:
-
-i=0: prefix=1, current_parity=1. key=(1,1). count is 0. result=0. Then, add (1,1):1.
-
-i=1: prefix=3 (1^2), current_parity=0. key (3,0). count 0. result remains 0. add (3,0):1.
-
-i=2: prefix=0 (3^3), current_parity=1. key (0,1). count 0. result remains 0. add (0,1):1.
-
-i=3: prefix=4 (0^4), current_parity=0. key (4,0). count 0. add (4,0):1. result 0.
-
-i=4: prefix=1 (4^5), current_parity=1. key (1,1). count is 1. So result becomes 1. Then, (1,1) is incremented to 2.
-
-Total result is 1. Correct.
-
-Second example:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 6
-
 3 2 2 3 7 6
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-The code's a is [3,2,2,3,7,6].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Let's step through.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-prefix starts at 0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-count_map: {(0,0):1}.
+    print('Tests passed 😎')
 
-i=0:
 
-prefix = 3.
+if __name__ == '__main__':
+    test()
 
-current_parity =1.
 
-key (3,1). count is 0. result 0. add to count_map (3,1):1.
+```
 
-i=1:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-prefix =3^2=1.
+```
 
-current_parity=2 mod2=0.
+Testing against sample input 2.
 
-key (1,0). count 0. result remains 0. add (1,0):1.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-i=2:
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-prefix=1^2=3.
+    prefix = 0
 
-current_parity=3 mod2=1.
+    result = 0
 
-key (3,1). count is 1. result +=1 →1.
+    count_map = dict()
 
-add (3,1) → count becomes 2.
+    count_map[(0, 0)] = 1
 
-i=3:
+    for i in range(n):
 
-prefix=3^3=0.
+        prefix ^= a[i]
 
-current_parity=4 mod2=0.
+        current_parity = (i + 1) % 2  # r is i+1, parity is (i+1) mod2
 
-key (0,0). count is 1 (from initial (0,0)). result becomes 1+1=2.
+        key = (prefix, current_parity)
 
-add (0,0):2.
+        # get the current count
 
-i=4:
+        result += count_map.get(key, 0)
 
-prefix=0^7=7.
+        # update the count_map
 
-current_parity=5 mod2=1.
+        count_map[key] = count_map.get(key, 0) + 1
 
-key (7,1). count 0. result remains 2.
+    print(result, file=output_stream)
 
-add (7,1):1.
 
-i=5:
 
-prefix=7^6=1.
+def test():
+    import io
 
-current_parity=6 mod2=0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+42 4 2
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-key (1,0). count is 1 (from i=1). result becomes 2+1=3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-add (1,0) → count becomes 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So the result is 3, which matches the second example.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

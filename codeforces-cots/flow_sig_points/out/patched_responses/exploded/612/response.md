@@ -69,35 +69,69 @@ Thus, the code correctly appends primes in order.
 
 So in Python, the code would be:
 
-n = int(input())
+Testing against sample input 1.
 
-factors = []
-i = 2
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-while i * i <= n:
-    while n % i == 0:
-        factors.append(i)
-        n = n // i
-    i += 1
+    factors = []
+    i = 2
 
-if n > 1:
-    factors.append(n)
+    while i * i <= n:
+        while n % i == 0:
+            factors.append(i)
+            n = n // i
+        i += 1
 
-print(' '.join(map(str, factors)))
+    if n > 1:
+        factors.append(n)
 
-Wait, but let's test the sample input.
+    print(' '.join(map(str, factors)), file=output_stream)
 
-Sample 1: 245.
 
-245 divided by 2? No. i increments to 3. 245/3? No. i=4, which is sqrt(245) is about 15.6. So i goes up to 15.
 
-Wait, 245 = 5 * 7^2.
+def test():
+    import io
 
-So let's see:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+13
+""",
+            "output": \
+"""\
+13
+""",
+        }, 
+    ]
 
-i=2: 245%2 is 1, no division. i increments to 3. 245%3 is 245-3*81=245-243=2, no. i=4: 245%4=1. i=5: 245%5 ==0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So divide 245 by 5, add 5 to factors. n becomes 49. Then again check 5 divides 49? No. So i increments to 6. 6*6 is 36 <=49. 49%6=1. i=7. 7*7=49 <=49. 49%7=0. So append 7, n becomes 7. Again, divide by 7, append 7, n becomes 1. Then i increments to 8. The loop condition is i*i <= n. Now n is 1, so i*i is 64 >1, loop ends. Since n is now 1, no more factors. So factors are [5,7,7], which matches the sample output.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample: input 13. The code appends 13 directly.
 

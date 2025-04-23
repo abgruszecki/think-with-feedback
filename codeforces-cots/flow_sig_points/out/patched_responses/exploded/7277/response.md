@@ -1612,122 +1612,110 @@ Thus, the code for the next stop's possible m's is correct, using n_plus_1 =n +1
 
 Thus, the corrected code is:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n = int(input())
-stops = list(map(int, input().split()))
 
-if not stops:
-    pass
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    stops = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-# Initial alpha range after first stop
-k = 1  # number of fills up to first stop
-current_low = 10 * stops[0]
-current_high = 10 * (stops[0] + 1)
-
-for i in range(1, len(stops)):
-    s_prev = stops[i-1]
-    s_curr = stops[i]
-    k +=1  # each subsequent stop increases k by 1
-    # Compute new constraints
-    new_low = (10 * s_curr) / k
-    new_high = (10 * (s_curr +1)) / k
-    # Intersect with current range
-    current_low = max(current_low, new_low)
-    current_high = min(current_high, new_high)
-    if current_low >= current_high:
-        # Invalid, but input is valid
+    if not stops:
         pass
 
-s_last = stops[-1]
-n_plus_1 = k +1  # k is n (number of stops), n_plus_1 =n+1
+    # Initial alpha range after first stop
+    k = 1  # number of fills up to first stop
+    current_low = 10 * stops[0]
+    current_high = 10 * (stops[0] + 1)
 
-# Compute m_min and m_max for next stop
-m_min_candidate = math.ceil( (current_low * n_plus_1) / 10 - 1e-9 )
-m_min_candidate -=1  # because m+1 > ... → m >= ceil( ... ) -1
+    for i in range(1, len(stops)):
+        s_prev = stops[i-1]
+        s_curr = stops[i]
+        k +=1  # each subsequent stop increases k by 1
+        # Compute new constraints
+        new_low = (10 * s_curr) / k
+        new_high = (10 * (s_curr +1)) / k
+        # Intersect with current range
+        current_low = max(current_low, new_low)
+        current_high = min(current_high, new_high)
+        if current_low >= current_high:
+            # Invalid, but input is valid
+            pass
 
-m_min = max(s_last +1, m_min_candidate)
+    s_last = stops[-1]
+    n_plus_1 = k +1  # k is n (number of stops), n_plus_1 =n+1
 
-m_max = (current_high * n_plus_1 - 1e-9) //10
-m_max = int(m_max)
+    # Compute m_min and m_max for next stop
+    m_min_candidate = math.ceil( (current_low * n_plus_1) / 10 - 1e-9 )
+    m_min_candidate -=1  # because m+1 > ... → m >= ceil( ... ) -1
 
-possible_ms = []
+    m_min = max(s_last +1, m_min_candidate)
 
-current_m = m_min
-while current_m <= m_max:
-    a_m = (10 * current_m) / n_plus_1
-    b_m = (10 * (current_m +1)) / n_plus_1
-    if a_m < current_high and b_m > current_low:
-        possible_ms.append(current_m)
-    current_m +=1
+    m_max = (current_high * n_plus_1 - 1e-9) //10
+    m_max = int(m_max)
 
-if len(possible_ms) >1:
-    print("not unique")
-else:
-    print("unique")
-    print(possible_ms[0])
+    possible_ms = []
 
-Now, let's test this code with the first sample.
+    current_m = m_min
+    while current_m <= m_max:
+        a_m = (10 * current_m) / n_plus_1
+        b_m = (10 * (current_m +1)) / n_plus_1
+        if a_m < current_high and b_m > current_low:
+            possible_ms.append(current_m)
+        current_m +=1
 
-Sample 1:
+    if len(possible_ms) >1:
+        print("not unique", file=output_stream)
+    else:
+        print("unique", file=output_stream)
+        print(possible_ms[0], file=output_stream)
 
-Input: 3 stops [1,2,4].
 
-Processing stops:
 
-Initial stop 1: current_low=10*1=10, current_high=10*2=20. k=1.
+def test():
+    import io
 
-Processing stop 2 (i=1):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+1 2
+""",
+            "output": \
+"""\
+not unique
+""",
+        }, 
+    ]
 
-k=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-new_low=(10*2)/2=10.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-new_high= (10*3)/2=15.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-current_low=10, current_high=15.
+    print('Tests passed 😎')
 
-Processing stop4 (i=2):
 
-k=3.
+if __name__ == '__main__':
+    test()
 
-new_low= (10*4)/3 ≈13.333.
 
-new_high= (10*5)/3≈16.666.
+```
 
-current_low= max(15, 13.333) →15? No. Wait, the previous current_low is10, new_low is13.333. So current_low becomes 13.333.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-current_high is min(15, 16.666) →15.
-
-So current_low=40/3 ≈13.333, current_high=15.
-
-s_last=4.
-
-n_plus_1=3+1=4.
-
-m_min_candidate = ceil( (40/3 *4)/10 -1e-9 ) -1 → (160/3 /10) →160/30=5.333. ceil(5.333 -1e-9)=5. subtract 1 →4.
-
-m_min = max(4+1=5,4) →5.
-
-m_max= (15*4 -1e-9)//10 → (60-0.000...1)/10 →5.999... →5.
-
-So possible_ms is from5 to5. current_m=5.
-
-a_m= (10*5)/4=50/4=12.5.
-
-b_m= (10*6)/4=15.
-
-current_low=40/3≈13.333, current_high=15.
-
-Check if a_m < current_high →12.5 <15 → yes.
-
-b_m > current_low →15>13.333 → yes.
-
-So possible_ms = [5].
-
-Thus, output is unique 5.
-
-Which is correct.
+```
 
 Sample 2:
 

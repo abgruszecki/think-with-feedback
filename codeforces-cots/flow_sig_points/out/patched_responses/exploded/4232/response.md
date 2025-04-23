@@ -449,15 +449,72 @@ After all pairs are checked, print("NO").
 
 This is the correct approach.
 
-Let's test this with the first sample:
+Testing against sample input 1.
 
-A = [2,4,6], B = [1,5,7].
+```python
+def main(input_stream, output_stream):
+    n, L = map(int, input_stream.readline().rstrip("\n").split())
+    A = list(map(int, input_stream.readline().rstrip("\n").split()))
+    B = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-For a=2 and b=5: T = (2-5) mod8 = -3 mod8=5.
+    A_sorted = sorted(A)
+    B_sorted = sorted(B)
 
-Then shifted_B is 5+1=6 mod8=6, 5+5=10 mod8=2, 5+7=12 mod8=4 → [6,2,4] → sorted is [2,4,6], which matches A. So yes.
+    for a in A:
+        for b in B:
+            T = (a - b) % L
+            shifted = [(T + x) % L for x in B_sorted]
+            if sorted(shifted) == A_sorted:
+                print("YES", file=output_stream)
+                return
 
-So the code will find this pair and output YES.
+    print("NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 9
+2 3 5 8
+0 1 3 6
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: the second sample input:
 

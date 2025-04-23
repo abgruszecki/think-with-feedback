@@ -69,46 +69,139 @@ But in code submission, it's better to have the imports at the top. So let's adj
 
 So the code would be:
 
+Testing against sample input 1.
+
+```python
 from collections import Counter
 
-guest = input().strip()
-host = input().strip()
-pile = input().strip()
 
-combined = guest + host
+def main(input_stream, output_stream):
+    guest = input_stream.readline().rstrip("\n").strip()
+    host = input_stream.readline().rstrip("\n").strip()
+    pile = input_stream.readline().rstrip("\n").strip()
 
-if len(combined) != len(pile):
-    print("NO")
-else:
-    if Counter(combined) == Counter(pile):
-        print("YES")
+    combined = guest + host
+
+    if len(combined) != len(pile):
+        print("NO", file=output_stream)
     else:
-        print("NO")
+        if Counter(combined) == Counter(pile):
+            print("YES", file=output_stream)
+        else:
+            print("NO", file=output_stream)
 
-Yes. That should work.
 
-But wait, are there any possible issues with using Counter? Like, in cases where the counts are the same but the sum is the same but letters differ? No, because the Counter checks for each key's count. For example, if combined is "AB" and pile is "AA", the lengths are the same (2), but the counts differ. The len check passes but the Counter check would fail.
 
-So this code correctly handles all cases.
+def test():
+    import io
 
-Testing the sample inputs:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+PAPAINOEL
+JOULUPUKKI
+JOULNAPAOILELUPUKKI
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-First sample input:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Guest: SANTACLAUS (length 10)
-Host: DEDMOROZ (length 8) → combined length 18.
-Pile: SANTAMOROZDEDCLAUS → let's see length. Let's count:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-S A N T A M O R O Z D E D C L A U S → Let's count the letters. Wait, perhaps the code will handle it.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The code will combine guest and host, which is "SANTACLAUSDEDMOROZ" (length 10+8=18). The pile is 18 letters. Then Counter comparison will check if all letters and counts match.
+    print('Tests passed 😎')
 
-The sample output is YES.
 
-Second sample:
+if __name__ == '__main__':
+    test()
 
-Guest: PAPAINOEL (length 8)
-Host: JOULUPUKKI (length 10) → combined 18 letters. Pile is JOULNAPAOILELUPUKKI (let's count letters). Let's see: J O U L N A P A O I L E L U P U K K I → maybe length is 18? But the code checks the Counter. In this case, the host's name has two U's, perhaps. Or maybe in the pile, the counts don't match. The code's Counter will find that.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+from collections import Counter
+
+
+def main(input_stream, output_stream):
+    guest = input_stream.readline().rstrip("\n").strip()
+    host = input_stream.readline().rstrip("\n").strip()
+    pile = input_stream.readline().rstrip("\n").strip()
+
+    combined = guest + host
+
+    if len(combined) != len(pile):
+        print("NO", file=output_stream)
+    else:
+        if Counter(combined) == Counter(pile):
+            print("YES", file=output_stream)
+        else:
+            print("NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+BABBONATALE
+FATHERCHRISTMAS
+BABCHRISTMASBONATALLEFATHER
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample: combined length is len(BABBONATALE) = 10, len(FATHERCHRISTMAS) is 15 → combined is 25. Pile is BABCHRISTMASBONATALLEFATHER → let's see: BABCHRISTMASBONATALLEFATHER → how many letters? Well, the code checks the length. If the combined is 10+15=25, and the pile is 25, then proceed. But in the sample output, there's an extra L, so the counts would differ. So the code will output NO.
 

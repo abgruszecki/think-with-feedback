@@ -1637,91 +1637,95 @@ For each window, if the count is >=k, add (count -k +1) to total, and move the l
 
 Thus, the code is:
 
+Testing against sample input 3.
+
+```python
 import bisect
 
-n, m, k = map(int, input().split())
 
-a = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
 
-a.sort()
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-res =0
+    a.sort()
 
-i=0
+    res =0
 
-while i < len(a):
+    i=0
 
-    # find the maximum j where a[j] <= a[i] +m-1
+    while i < len(a):
 
-    max_time = a[i] + m -1
+        # find the maximum j where a[j] <= a[i] +m-1
 
-    j = bisect.bisect_right(a, max_time) -1
+        max_time = a[i] + m -1
 
-    count = j -i +1
+        j = bisect.bisect_right(a, max_time) -1
 
-    if count >=k:
+        count = j -i +1
 
-        need = count - (k-1)
+        if count >=k:
 
-        res += need
+            need = count - (k-1)
 
-        # remove the last 'need' elements in this window
+            res += need
 
-        # so, the next window starts after i + (count - need)
+            # remove the last 'need' elements in this window
 
-        i = j - need +1 +1
+            # so, the next window starts after i + (count - need)
 
-    else:
+            i = j - need +1 +1
 
-        i +=1
+        else:
 
-print(res)
+            i +=1
 
-Testing this code:
+    print(res, file=output_stream)
 
-Sample3:
 
-n=7, m=7, k=2.
 
-a sorted: [1,2,3,4,5,6,7].
+def test():
+    import io
 
-i=0:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 2 2
+1 3
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-max_time=1+7-1=7. j=6.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-count=7 >=2. need=7-1=6.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-res=6.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=6-6+1+1=1+1=2.
+    print('Tests passed 😎')
 
-i=2:
 
-max_time=3+7-1=9. j=6.
+if __name__ == '__main__':
+    test()
 
-count=5 >=2. need=5-1=4.
 
-res=6+4=10.
+```
 
-i=6-4+1+1=3+1=4.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-i=4:
-
-max_time=5+7-1=11. j=6.
-
-count=3 >=2. need=3-1=2.
-
-res=10+2=12.
-
-i=6-2+1+1=5+1=6.
-
-i=6:
-
-max_time=7+7-1=13. j=6.
-
-count=1 <2. i=7. done.
-
-res=12. Incorrect.
+```
 
 Thus, the code is incorrect.
 

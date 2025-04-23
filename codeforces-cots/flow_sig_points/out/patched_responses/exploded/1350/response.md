@@ -24,25 +24,62 @@ But wait, how about the initial input reading? The first line is four space-sepa
 
 So code outline:
 
-a = list(map(int, input().split()))
-s = input().strip()
-total = 0
-for c in s:
-    index = int(c) -1
-    total += a[index]
-print(total)
+Testing against sample input 1.
 
-That's the core part. But what about possible edge cases? Let's see. What if the string is empty? But according to the problem statement, the length is at least 1. So no problem. Also, the a values can be zero. For example, if a strip's calorie is zero, then touching it doesn't add anything, but we still need to count it if it's in the string.
+```python
+def main(input_stream, output_stream):
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    s = input_stream.readline().rstrip("\n").strip()
+    total = 0
+    for c in s:
+        index = int(c) -1
+        total += a[index]
+    print(total, file=output_stream)
 
-Wait, the problem says that each second a square appears on some of the strips. So the string s tells which strip to touch each second. So even if the a's value is zero, we have to add it. So the code correctly handles that.
 
-Testing the first example:
 
-Input:
-1 2 3 4
-123214
+def test():
+    import io
 
-The string is '1','2','3','2','1','4'. So the sum is 1+2+3+2+1+4= 13. Which matches the sample output.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 5 3 2
+11221
+""",
+            "output": \
+"""\
+13
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample input:
 

@@ -111,23 +111,71 @@ Sample3: input1 1 → returns1. Correct.
 
 What about edge cases?
 
-Edge case1: a=1, b=1. Returns1. Correct.
+Testing against sample inputs 1, 2.
 
-Edge case2: a=2, b=3. Let's see:
+```python
+def main(input_stream, output_stream):
+    a, b = map(int, input_stream.readline().rstrip("\n").split())
+    count = 0
+    while a <= b:
+        a *= 3
+        b *= 2
+        count += 1
+    print(count, file=output_stream)
 
-Year 0: 2 vs3 → no.
 
-Year1: 6 vs6 → no. Multiply again: 18 vs12 → yes. So count is2.
 
-Wait, let's compute step by step:
+def test():
+    import io
 
-Initial a=2, b=3 → a <=b.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 9
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+        {
+            "input": \
+"""\
+1 1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-Multiply a by3 →6, b by2 →6. count=1. Now a=6, b=6. So loop again.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Multiply a=18, b=12. count=2. Now 18>12 → exit loop. So answer is2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Another test: a=5, b=5. After first iteration, a=15, b=10. 15>10 → count1. So correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 So the code is correct.
 

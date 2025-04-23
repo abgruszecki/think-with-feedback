@@ -622,122 +622,251 @@ Now, the rest of the code remains the same.
 
 So the final code would be:
 
-s = input().strip()
+Testing against sample input 1.
 
-words = []
-current = []
-for c in s:
-    if c in ',;':
-        words.append(''.join(current))
-        current = []
-    else:
-        current.append(c)
-words.append(''.join(current))
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-a = []
-b = []
-
-for word in words:
-    if word.isdigit():
-        if word == '0':
-            a.append(word)
+    words = []
+    current = []
+    for c in s:
+        if c in ',;':
+            words.append(''.join(current))
+            current = []
         else:
-            if word[0] != '0':
+            current.append(c)
+    words.append(''.join(current))
+
+    a = []
+    b = []
+
+    for word in words:
+        if word.isdigit():
+            if word == '0':
                 a.append(word)
             else:
-                b.append(word)
-    else:
-        b.append(word)
+                if word[0] != '0':
+                    a.append(word)
+                else:
+                    b.append(word)
+        else:
+            b.append(word)
 
-a_output = '"{}"'.format(','.join(a)) if a else '-'
-b_output = '"{}"'.format(','.join(b)) if b else '-'
+    a_output = '"{}"'.format(','.join(a)) if a else '-'
+    b_output = '"{}"'.format(','.join(b)) if b else '-'
 
-print(a_output)
-print(b_output)
+    print(a_output, file=output_stream)
+    print(b_output, file=output_stream)
 
-Testing this code against the examples.
 
-First example:
 
-Input: aba,123;1a;0
+def test():
+    import io
 
-Processing the characters:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1;;01,a0,
+""",
+            "output": \
+"""\
+"1"
+",01,a0,"
+""",
+        }, 
+    ]
 
-- 'a' → current.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-- 'b' → current.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-- 'a' → current.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Then ',' → add 'aba' to words. current is reset.
+    print('Tests passed 😎')
 
-Then '1' → current.
 
-'2' → current.
+if __name__ == '__main__':
+    test()
 
-'3' → current.
 
-Then ';' → add '123' to words. current reset.
+```
 
-Then '1' → current.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-'a' → current.
+```
 
-Then ';' → add '1a' to words. current reset.
+Testing against sample input 2.
 
-Then '0' → current. No more characters. After loop, add '0' → words is ['aba', '123', '1a', '0'].
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-Processing words: same as before. Output as expected.
+    words = []
+    current = []
+    for c in s:
+        if c in ',;':
+            words.append(''.join(current))
+            current = []
+        else:
+            current.append(c)
+    words.append(''.join(current))
 
-Second example:
+    a = []
+    b = []
 
-Input: 1;;01,a0,
+    for word in words:
+        if word.isdigit():
+            if word == '0':
+                a.append(word)
+            else:
+                if word[0] != '0':
+                    a.append(word)
+                else:
+                    b.append(word)
+        else:
+            b.append(word)
 
-Processing:
+    a_output = '"{}"'.format(','.join(a)) if a else '-'
+    b_output = '"{}"'.format(','.join(b)) if b else '-'
 
-The input is '1;;01,a0,'.
+    print(a_output, file=output_stream)
+    print(b_output, file=output_stream)
 
-Processing each character:
 
-First '1' → current.
 
-Then ';' → add '1' to words. current reset.
+def test():
+    import io
 
-Next ';' → add '' to words. current reset.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+""",
+            "output": \
+"""\
+"1"
+-
+""",
+        }, 
+    ]
 
-Next '0' → current.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-'1' → current.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Then ',' → add '01' to words. current reset.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Then 'a' → current.
+    print('Tests passed 😎')
 
-'0' → current.
 
-Then ',' → add 'a0' to words. current reset.
+if __name__ == '__main__':
+    test()
 
-Then end of input. current is empty, add to words. So words are ['1', '', '01', 'a0', ''].
 
-Processing:
+```
 
-word '1' → isdigit. Not '0'. first char '1' → a.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-word '' → isdigit no → b.
+```
 
-word '01' → isdigit yes. first char '0' and not '0' → b.
+Testing against sample input 3.
 
-word 'a0' → isdigit no → b.
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-word '' → isdigit no → b.
+    words = []
+    current = []
+    for c in s:
+        if c in ',;':
+            words.append(''.join(current))
+            current = []
+        else:
+            current.append(c)
+    words.append(''.join(current))
 
-So a = ['1'], output "1".
+    a = []
+    b = []
 
-b is ['', '01', 'a0', ''] → joined as ",01,a0," → output as is.
+    for word in words:
+        if word.isdigit():
+            if word == '0':
+                a.append(word)
+            else:
+                if word[0] != '0':
+                    a.append(word)
+                else:
+                    b.append(word)
+        else:
+            b.append(word)
 
-Which matches the example.
+    a_output = '"{}"'.format(','.join(a)) if a else '-'
+    b_output = '"{}"'.format(','.join(b)) if b else '-'
 
-Third example: input '1' → split into ['1']. isdigit yes, not '0', first char '1' → a. a is ['1'], b is empty. Output "1" and '-'.
+    print(a_output, file=output_stream)
+    print(b_output, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+a
+""",
+            "output": \
+"""\
+-
+"a"
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Fourth example: input 'a' → split into ['a'] → isdigit no → a is empty, b has 'a'. Output '-' and "a".
 

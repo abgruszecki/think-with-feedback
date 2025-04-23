@@ -603,159 +603,184 @@ But in Python, the code may need to be optimized for speed. Let's proceed.
 
 The code:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n, m = map(int, input().split())
 
-edges = [[] for _ in range(n+1)]  # 1-based indexing
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-for _ in range(m):
+    edges = [[] for _ in range(n+1)]  # 1-based indexing
 
-    v, u, c = input().split()
+    for _ in range(m):
 
-    v = int(v)
+        v, u, c = input_stream.readline().rstrip("\n").split()
 
-    u = int(u)
+        v = int(v)
 
-    mapped = ord(c) - ord('a') + 1  # a->1, ..., z->26
+        u = int(u)
 
-    edges[v].append( (mapped, u) )
+        mapped = ord(c) - ord('a') + 1  # a->1, ..., z->26
 
-# Sort each node's edges by the mapped character
+        edges[v].append( (mapped, u) )
 
-for v in range(1, n+1):
+    # Sort each node's edges by the mapped character
 
-    edges[v].sort()
+    for v in range(1, n+1):
 
-# Initialize DP table. dp[i][j][cp][turn] is True if current player can win.
+        edges[v].sort()
 
-dp = [ [ [ [False]*2 for _ in range(27)] for __ in range(n+1)] for ___ in range(n+1) ]
+    # Initialize DP table. dp[i][j][cp][turn] is True if current player can win.
 
-for cp in reversed(range(27)):  # 26 down to 0
+    dp = [ [ [ [False]*2 for _ in range(27)] for __ in range(n+1)] for ___ in range(n+1) ]
 
-    for i in range(1, n+1):
+    for cp in reversed(range(27)):  # 26 down to 0
 
-        for j in range(1, n+1):
+        for i in range(1, n+1):
 
-            # Compute for both turns
+            for j in range(1, n+1):
 
-            for turn in [0, 1]:
+                # Compute for both turns
 
-                if turn == 0:
+                for turn in [0, 1]:
 
-                    # Max's turn: move i
+                    if turn == 0:
 
-                    current_node = i
+                        # Max's turn: move i
 
-                else:
-
-                    # Lucas's turn: move j
-
-                    current_node = j
-
-                if turn == 0 or turn == 1:
-
-                    # Find allowed edges for current_node and cp
-
-                    if cp == 0:
-
-                        allowed_edges = edges[current_node]
+                        current_node = i
 
                     else:
 
-                        # Find the first index with mapped >= cp
+                        # Lucas's turn: move j
 
-                        idx = bisect.bisect_left(edges[current_node], (cp, 0))
+                        current_node = j
 
-                        allowed_edges = edges[current_node][idx:]
+                    if turn == 0 or turn == 1:
 
-                    can_win = False
+                        # Find allowed edges for current_node and cp
 
-                    for c_edge, u_node in allowed_edges:
+                        if cp == 0:
 
-                        if turn == 0:
-
-                            # Max moves to u_node, new state is (u_node, j, c_edge, 1)
-
-                            next_i = u_node
-
-                            next_j = j
+                            allowed_edges = edges[current_node]
 
                         else:
 
-                            # Lucas moves to u_node, new state is (i, u_node, c_edge, 0)
+                            # Find the first index with mapped >= cp
 
-                            next_i = i
+                            idx = bisect.bisect_left(edges[current_node], (cp, 0))
 
-                            next_j = u_node
+                            allowed_edges = edges[current_node][idx:]
 
-                        next_cp = c_edge
+                        can_win = False
 
-                        next_turn = 1 - turn
+                        for c_edge, u_node in allowed_edges:
 
-                        # Check if the next state is a losing state for the next player.
+                            if turn == 0:
 
-                        if not dp[next_i][next_j][next_cp][next_turn]:
+                                # Max moves to u_node, new state is (u_node, j, c_edge, 1)
 
-                            can_win = True
+                                next_i = u_node
 
-                            break  # early exit if found a winning move
+                                next_j = j
 
-                    dp[i][j][cp][turn] = can_win
+                            else:
 
-# Now generate the output
+                                # Lucas moves to u_node, new state is (i, u_node, c_edge, 0)
 
-for i in range(1, n+1):
+                                next_i = i
 
-    line = []
+                                next_j = u_node
 
-    for j in range(1, n+1):
+                            next_cp = c_edge
 
-        if dp[i][j][0][0]:
+                            next_turn = 1 - turn
 
-            line.append('A')
+                            # Check if the next state is a losing state for the next player.
 
-        else:
+                            if not dp[next_i][next_j][next_cp][next_turn]:
 
-            line.append('B')
+                                can_win = True
 
-    print(''.join(line))
+                                break  # early exit if found a winning move
 
-But wait, there's a mistake here. The code for turn==0 and turn==1 is handled in the same loop. However, when turn is 0, current_node is i, and the allowed_edges are from i. For turn 1, current_node is j, allowed_edges are from j.
+                        dp[i][j][cp][turn] = can_win
 
-Yes, that's correct.
+    # Now generate the output
 
-Testing this code against the first sample input:
+    for i in range(1, n+1):
 
-Sample Input 1:
+        line = []
 
-4 4
+        for j in range(1, n+1):
 
-1 2 b
+            if dp[i][j][0][0]:
 
-1 3 a
+                line.append('A')
 
-2 4 c
+            else:
 
-3 4 b
+                line.append('B')
 
-After processing, the edges for each node:
+        print(''.join(line), file=output_stream)
 
-edges[1] = sorted by mapped character:
 
-a is mapped to 1, b is mapped to 2. So edges[1] = [(1,3), (2,2)]
 
-edges[2] = [(3,4)] (c is mapped to 3)
+def test():
+    import io
 
-edges[3] = [(2,4)] (b is mapped to 2)
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 8
+5 3 h
+1 2 c
+3 1 c
+3 2 r
+5 1 r
+4 3 z
+5 4 r
+5 2 h
+""",
+            "output": \
+"""\
+BABBB
+BBBBB
+AABBB
+AAABA
+AAAAB
+""",
+        }, 
+    ]
 
-edges[4] = empty.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For the initial state (i=1, j=1, cp=0, turn=0):
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Max's turn. She can move from 1 to 3 (a, 1) or 2 (b,2).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For each possible move:
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Case 1: move to 3, c=1. Next state is (3,1, 1, 1) (Lucas's turn). Check if dp[3][1][1][1] is False.
 

@@ -415,43 +415,147 @@ But wait, in the case where the sum of (v_i -m) is exactly s, then the answer is
 
 But the code is correct as per the binary search.
 
-Testing the sample inputs:
+Testing against sample input 2.
 
-Sample 2:
+```python
+def main(input_stream, output_stream):
+    n, s = map(int, input_stream.readline().rstrip("\n").split())
+    v = list(map(int, input_stream.readline().rstrip("\n").split()))
+    total = sum(v)
+    if total < s:
+        print(-1, file=output_stream)
+    else:
+        max_v = max(v)
+        left, right = 0, max_v
+        ans = 0
+        while left <= right:
+            mid = (left + right) // 2
+            current = 0
+            for vi in v:
+                if vi > mid:
+                    current += vi - mid
+            if current >= s:
+                ans = mid
+                left = mid + 1
+            else:
+                right = mid - 1
+        print(ans, file=output_stream)
 
-n=3, s=4, v=5,3,4.
 
-sum_v=12.
 
-sum >=s.
+def test():
+    import io
 
-max_v=5.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 7
+1 2 3
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-binary steps:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-left=0, right=5.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-mid=2: sum is 3+1+2=6 >=4. ans=2, left=3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-mid=3: sum=2+0+1=3 <4. right=2.
+    print('Tests passed 😎')
 
-loop ends. ans=2.
 
-Sample 1:
+if __name__ == '__main__':
+    test()
 
-n=3, s=3, v=4,3,5.
 
-sum=12.
+```
 
-max_v=5.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-mid=2, sum 6 >=3. ans=2, left=3.
+```
 
-mid=4: sum=0+0+1=1 <3. right=3.
+Testing against sample input 1.
 
-mid=3: sum=1+0+2=3 >=3. ans=3, left=4.
+```python
+def main(input_stream, output_stream):
+    n, s = map(int, input_stream.readline().rstrip("\n").split())
+    v = list(map(int, input_stream.readline().rstrip("\n").split()))
+    total = sum(v)
+    if total < s:
+        print(-1, file=output_stream)
+    else:
+        max_v = max(v)
+        left, right = 0, max_v
+        ans = 0
+        while left <= right:
+            mid = (left + right) // 2
+            current = 0
+            for vi in v:
+                if vi > mid:
+                    current += vi - mid
+            if current >= s:
+                ans = mid
+                left = mid + 1
+            else:
+                right = mid - 1
+        print(ans, file=output_stream)
 
-loop ends. ans=3.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 4
+5 3 4
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3: sum is 6 <7, output -1.
 

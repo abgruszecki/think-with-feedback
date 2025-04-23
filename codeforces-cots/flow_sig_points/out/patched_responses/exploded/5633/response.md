@@ -362,129 +362,88 @@ Let's see how to code the prefix and suffix arrays.
 
 Sample code:
 
-n = int(input())
-a = list(map(int, input().split()))
+Testing against sample input 1.
 
-prefix_even = [0] * (n + 2)
-prefix_odd = [0] * (n + 2)
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for j in range(1, n+1):
-    if j % 2 == 0:
-        prefix_even[j+1] = prefix_even[j] + a[j-1]
-        prefix_odd[j+1] = prefix_odd[j]
-    else:
-        prefix_odd[j+1] = prefix_odd[j] + a[j-1]
-        prefix_even[j+1] = prefix_even[j]
+    prefix_even = [0] * (n + 2)
+    prefix_odd = [0] * (n + 2)
 
-suffix_even = [0] * (n + 2)
-suffix_odd = [0] * (n + 2)
+    for j in range(1, n+1):
+        if j % 2 == 0:
+            prefix_even[j+1] = prefix_even[j] + a[j-1]
+            prefix_odd[j+1] = prefix_odd[j]
+        else:
+            prefix_odd[j+1] = prefix_odd[j] + a[j-1]
+            prefix_even[j+1] = prefix_even[j]
 
-for j in range(n, 0, -1):
-    if j % 2 == 0:
-        suffix_even[j] = suffix_even[j+1] + a[j-1]
-        suffix_odd[j] = suffix_odd[j+1]
-    else:
-        suffix_odd[j] = suffix_odd[j+1] + a[j-1]
-        suffix_even[j] = suffix_even[j+1]
+    suffix_even = [0] * (n + 2)
+    suffix_odd = [0] * (n + 2)
 
-count = 0
-for i in range(1, n+1):
-    even_sum = prefix_even[i] + suffix_odd[i+1]
-    odd_sum = prefix_odd[i] + suffix_even[i+1]
-    if even_sum == odd_sum:
-        count +=1
+    for j in range(n, 0, -1):
+        if j % 2 == 0:
+            suffix_even[j] = suffix_even[j+1] + a[j-1]
+            suffix_odd[j] = suffix_odd[j+1]
+        else:
+            suffix_odd[j] = suffix_odd[j+1] + a[j-1]
+            suffix_even[j] = suffix_even[j+1]
 
-print(count)
+    count = 0
+    for i in range(1, n+1):
+        even_sum = prefix_even[i] + suffix_odd[i+1]
+        odd_sum = prefix_odd[i] + suffix_even[i+1]
+        if even_sum == odd_sum:
+            count +=1
 
-Wait, but in the code above, j runs from 1 to n for the prefix arrays, and for each j, updates the prefix_even and prefix_odd for j+1.
+    print(count, file=output_stream)
 
-So for example, for j=1 (1-based), which is odd, the code adds a[0] to prefix_odd[2], which represents sum of odd j's <2. Because j=1 is the only j <2, which is odd.
 
-Yes, that seems correct.
 
-Testing the first example:
+def test():
+    import io
 
-Sample Input 1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+4 8 8 7 8 4 4 5
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-4
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-1 4 3 3
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Let's compute prefix_even and prefix_odd.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-n=4.
+    print('Tests passed 😎')
 
-j from 1 to4.
 
-j=1: odd. prefix_odd[2] = prefix_odd[1] + a[0] → 0 +1=1. prefix_even[2] remains 0.
+if __name__ == '__main__':
+    test()
 
-j=2: even. prefix_even[3] = prefix_even[2] (0) + a[1] (4) →4. prefix_odd[3] =1.
 
-j=3: odd. prefix_odd[4] = prefix_odd[3] (1) +a[2] (3) →4. prefix_even[4] =4.
+```
 
-j=4: even. prefix_even[5] =4 +a[3] (3) →7. prefix_odd[5] =4.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So prefix_even for i=1 to5:
-
-prefix_even[1]=0, prefix_even[2]=0, prefix_even[3]=4, prefix_even[4]=4, prefix_even[5]=7.
-
-prefix_odd[2]=1, prefix_odd[3]=1, prefix_odd[4]=4, prefix_odd[5]=4.
-
-Now suffix_even and suffix_odd:
-
-Loop j from 4 downto 1.
-
-j=4 (even):
-
-suffix_even[4] = suffix_even[5] (0) + a[3] (3) →3. suffix_odd[4] =0.
-
-j=3 (odd):
-
-suffix_odd[3] = suffix_odd[4] (0) +a[2] (3) →3. suffix_even[3] = suffix_even[4] (3).
-
-j=2 (even):
-
-suffix_even[2] = suffix_even[3] (3) +a[1] (4) →7. suffix_odd[2] =3.
-
-j=1 (odd):
-
-suffix_odd[1] = suffix_odd[2] (3) +a[0] (1) →4. suffix_even[1] =7.
-
-So the suffix arrays:
-
-suffix_even[1]=7, suffix_even[2]=7, suffix_even[3]=3, suffix_even[4]=3, suffix_even[5]=0.
-
-suffix_odd[1]=4, suffix_odd[2]=3, suffix_odd[3]=3, suffix_odd[4]=0, suffix_odd[5]=0.
-
-Now, for each i from 1 to4:
-
-i=1:
-
-even_sum = prefix_even[1] (0) + suffix_odd[2] (3) →3.
-
-odd_sum = prefix_odd[1] (0) + suffix_even[2] (7) →7. 3≠7 → no.
-
-i=2:
-
-even_sum = prefix_even[2] (0) + suffix_odd[3] (3) →3.
-
-odd_sum = prefix_odd[2] (1) + suffix_even[3] (3) →4. 3≠4 → no.
-
-i=3:
-
-even_sum = prefix_even[3] (4) + suffix_odd[4] (0) →4.
-
-odd_sum = prefix_odd[3] (1) + suffix_even[4] (3) →4. 4=4 → count +=1.
-
-i=4:
-
-even_sum = prefix_even[4] (4) + suffix_odd[5] (0) →4.
-
-odd_sum = prefix_odd[4] (4) + suffix_even[5] (0) →4. Equal → count +=1.
-
-Total count is 2, which matches the sample.
-
-Looks correct.
+```
 
 So the code should work.
 

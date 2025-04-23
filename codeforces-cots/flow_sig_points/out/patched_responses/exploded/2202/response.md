@@ -515,73 +515,100 @@ But wait, the prefix sum for a list of 1e5 elements is manageable.
 
 Sample code:
 
-n, l, r, Ql, Qr = map(int, input().split())
+Testing against sample input 1.
 
-w = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, l, r, Ql, Qr = map(int, input_stream.readline().rstrip("\n").split())
 
-prefix = [0]*(n+1)
+    w = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for i in range(n):
+    prefix = [0]*(n+1)
 
-    prefix[i+1] = prefix[i] + w[i]
+    for i in range(n):
 
-total = prefix[-1]
+        prefix[i+1] = prefix[i] + w[i]
 
-min_energy = float('inf')
+    total = prefix[-1]
 
-for k in range(n+1):
+    min_energy = float('inf')
 
-    m = n - k
+    for k in range(n+1):
 
-    sum_l = prefix[k] * l
+        m = n - k
 
-    sum_r = (total - prefix[k]) * r
+        sum_l = prefix[k] * l
 
-    if k > m:
+        sum_r = (total - prefix[k]) * r
 
-        excess = k - m
+        if k > m:
 
-        penalty = max(0, excess -1) * Ql
+            excess = k - m
 
-    elif m > k:
+            penalty = max(0, excess -1) * Ql
 
-        excess = m -k
+        elif m > k:
 
-        penalty = max(0, excess -1)* Qr
+            excess = m -k
 
-    else:
+            penalty = max(0, excess -1)* Qr
 
-        penalty =0
+        else:
 
-    total_cost = sum_l + sum_r + penalty
+            penalty =0
 
-    if total_cost < min_energy:
+        total_cost = sum_l + sum_r + penalty
 
-        min_energy = total_cost
+        if total_cost < min_energy:
 
-print(min_energy)
+            min_energy = total_cost
 
-Yes, this should work.
+    print(min_energy, file=output_stream)
 
-Testing against the samples:
 
-First sample:
 
-n=3.
+def test():
+    import io
 
-prefix is [0,42,45,144].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 7 2 3 9
+1 2 3 4
+""",
+            "output": \
+"""\
+34
+""",
+        }, 
+    ]
 
-k=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum_l=45*4=180.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sum_r= (144-45) *4=99*4=396.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-penalty: k=2, m=1. k>m. excess=1. penalty (1-1)*19=0.
+    print('Tests passed 😎')
 
-Total 180+396=576.
 
-Which is correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

@@ -80,31 +80,121 @@ Now, the code is straightforward. Read n as integer, process each denomination i
 
 In Python, the code would be:
 
-n = int(input())
-denominations = [100, 20, 10, 5, 1]
-count = 0
-for d in denominations:
-    count += n // d
-    n = n % d
-    if n ==0:
-        break
-print(count)
+Testing against sample input 1.
 
-Wait, but in the denominations list, 100,20,10,5,1. Let me check.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    denominations = [100, 20, 10, 5, 1]
+    count = 0
+    for d in denominations:
+        count += n // d
+        n = n % d
+        if n ==0:
+            break
+    print(count, file=output_stream)
 
-Yes.
 
-Testing the sample input:
 
-Sample 1:
+def test():
+    import io
 
-125 → 125//100 =1, count=1. Remainder 25.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+43
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-25//20=1 → count 2. Remainder 5.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-5//5=1 → count 3. Remainder 0. Break. So output 3. Correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sample 2:43 → 0 for 100. 2*20=40, count 2. 3 remains. 10:0. 5:0. 1:3. So total 2+3=5.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    denominations = [100, 20, 10, 5, 1]
+    count = 0
+    for d in denominations:
+        count += n // d
+        n = n % d
+        if n ==0:
+            break
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1000000000
+""",
+            "output": \
+"""\
+10000000
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3: 1e9 → 1e9//100=1e8? Wait, 1e9 is 1,000,000,000. Divided by 100 is 10,000,000. So count is 10,000,000. Then remainder is 0. So output 10^7.
 

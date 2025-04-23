@@ -773,81 +773,97 @@ if s[i-1] and s[i] form a pair, then we can take 1 + dp[i-2], or dp[i-1].
 
 Thus, the code should be:
 
-s = input().strip()
+Testing against sample input 1.
 
-n = len(s)
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-if n < 2:
+    n = len(s)
 
-    print(n)
+    if n < 2:
 
-else:
+        print(n, file=output_stream)
 
-    dp = [0]*n
+    else:
 
-    for i in range(1, n):
+        dp = [0]*n
 
-        pair = (s[i-1] != s[i])
+        for i in range(1, n):
 
-        if pair:
+            pair = (s[i-1] != s[i])
 
-            current = 1
+            if pair:
 
-            if i-2 >=0:
+                current = 1
 
-                current += dp[i-2]
+                if i-2 >=0:
 
-            dp[i] = max(dp[i-1], current)
+                    current += dp[i-2]
 
-        else:
+                dp[i] = max(dp[i-1], current)
 
-            dp[i] = dp[i-1]
+            else:
 
-    max_replace = dp[-1]
+                dp[i] = dp[i-1]
 
-    print(n - max_replace)
+        max_replace = dp[-1]
 
-Wait, let's test this code.
+        print(n - max_replace, file=output_stream)
 
-Sample 1: input is 5, "RUURU".
 
-n=5.
 
-s = ['R', 'U', 'U', 'R', 'U'].
+def test():
+    import io
 
-DP array initialized to [0, 0, 0, 0, 0].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+17
+UUURRRRRUUURURUUU
+""",
+            "output": \
+"""\
+13
+""",
+        }, 
+    ]
 
-i=1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-check s[0] and s[1] → R and U → pair. So pair is True.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-current = 1 + dp[i-2] (i-2 is -1 → 0). So current is 1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-dp[1] = max(dp[0]=0, 1) → 1.
+    print('Tests passed 😎')
 
-dp array now [0, 1, 0, 0, 0].
 
-i=2:
+if __name__ == '__main__':
+    test()
 
-check s[1] and s[2] → U and U → no pair. dp[2] = dp[1] =1.
 
-i=3:
+```
 
-s[2] and s[3] → U and R → pair.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 70, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 63, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '13'
+Got: '1'
 
-current = 1 + dp[1] → 1+1=2.
-
-dp[3] = max(dp[2]=1, 2) → 2.
-
-i=4:
-
-s[3] and s[4] → R and U → pair.
-
-current = 1 + dp[2] → 1+1=2.
-
-dp[4] = max(dp[3]=2, 2) → 2.
-
-max_replace is 2. 5-2=3. Correct.
+```
 
 Sample 2:
 

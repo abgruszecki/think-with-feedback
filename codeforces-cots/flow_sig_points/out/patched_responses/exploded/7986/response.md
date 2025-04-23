@@ -275,68 +275,85 @@ So in code:
 
 In Python, the code would be:
 
-n = int(input())
-initial = input().split()
-k = int(input())
-keys = list(map(int, input().split()))
+Testing against sample input 1.
 
-from collections import defaultdict
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    initial = input_stream.readline().rstrip("\n").split()
+    k = int(input_stream.readline().rstrip("\n"))
+    keys = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-freq = defaultdict(int)
-for key in keys:
-    freq[key] += 1
+    from collections import defaultdict
 
-S = [key for key in freq if freq[key] % 2 == 1]
+    freq = defaultdict(int)
+    for key in keys:
+        freq[key] += 1
 
-toggle = [0] * (n + 1)  # 1-based indexing
+    S = [key for key in freq if freq[key] % 2 == 1]
 
-for i in S:
-    for j in range(i, n+1, i):
-        toggle[j] ^= 1
+    toggle = [0] * (n + 1)  # 1-based indexing
 
-result = []
-for x in range(1, n+1):
-    if toggle[x]:
-        # flip the state
-        result.append('on' if initial[x-1] == 'off' else 'off')
-    else:
-        result.append(initial[x-1])
+    for i in S:
+        for j in range(i, n+1, i):
+            toggle[j] ^= 1
 
-print(' '.join(result))
+    result = []
+    for x in range(1, n+1):
+        if toggle[x]:
+            # flip the state
+            result.append('on' if initial[x-1] == 'off' else 'off')
+        else:
+            result.append(initial[x-1])
 
-But let's test this against the sample input.
+    print(' '.join(result), file=output_stream)
 
-Sample 1:
 
-Input:
 
-2
+def test():
+    import io
 
-off off
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+off off on
+6
+1 1 1 1 2 2
+""",
+            "output": \
+"""\
+off off on
+""",
+        }, 
+    ]
 
-2
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-1 2
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing keys: 1 and 2 each appear once. So S is [1,2].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Toggle array after processing:
+    print('Tests passed 😎')
 
-For i=1:
 
-j runs 1,2. So toggle[1] and 2 are flipped to 1.
+if __name__ == '__main__':
+    test()
 
-For i=2:
 
-j runs 2. So toggle[2] is flipped again (from 1 to 0).
+```
 
-So toggle[1] is 1, toggle[2] is 0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So for x=1: flip 'off' → 'on'.
-
-x=2: remains 'off'.
-
-Output: 'on off' which matches the sample.
+```
 
 Sample 2:
 

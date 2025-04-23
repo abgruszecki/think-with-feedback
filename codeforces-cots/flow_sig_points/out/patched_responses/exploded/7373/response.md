@@ -645,128 +645,115 @@ But for the code, need to handle the prefix sums and bisect.
 
 So the code:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n, m = map(int, input().split())
-a = list(map(int, input().split()))
-b = list(map(int, input().split()))
 
-a.sort()
-prefix_a = [0] * (n + 1)
-for i in range(n):
-    prefix_a[i+1] = prefix_a[i] + a[i]
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-b.sort()
-prefix_b = [0] * (m + 1)
-for i in range(m):
-    prefix_b[i+1] = prefix_b[i] + b[i]
-total_b = prefix_b[-1]
+    a.sort()
+    prefix_a = [0] * (n + 1)
+    for i in range(n):
+        prefix_a[i+1] = prefix_a[i] + a[i]
 
-a_min = a[0]
-b_max = b[-1]
+    b.sort()
+    prefix_b = [0] * (m + 1)
+    for i in range(m):
+        prefix_b[i+1] = prefix_b[i] + b[i]
+    total_b = prefix_b[-1]
 
-if a_min >= b_max:
-    print(0)
-else:
-    low = a_min
-    high = b_max
+    a_min = a[0]
+    b_max = b[-1]
 
-    while low < high:
-        mid = (low + high) // 2
-        # Compute cost(mid) and cost(mid+1)
-        # Compute cost for mid
-        num_less = bisect.bisect_left(a, mid)
-        sum_a = mid * num_less - prefix_a[num_less]
-        pos = bisect.bisect_right(b, mid)
+    if a_min >= b_max:
+        print(0, file=output_stream)
+    else:
+        low = a_min
+        high = b_max
+
+        while low < high:
+            mid = (low + high) // 2
+            # Compute cost(mid) and cost(mid+1)
+            # Compute cost for mid
+            num_less = bisect.bisect_left(a, mid)
+            sum_a = mid * num_less - prefix_a[num_less]
+            pos = bisect.bisect_right(b, mid)
+            num_greater = m - pos
+            sum_b = (prefix_b[m] - prefix_b[pos]) - mid * num_greater
+            cost_mid = sum_a + sum_b
+
+            # Compute cost for mid+1
+            num_less = bisect.bisect_left(a, mid+1)
+            sum_a = (mid+1)*num_less - prefix_a[num_less]
+            pos = bisect.bisect_right(b, mid+1)
+            num_greater = m - pos
+            sum_b = (prefix_b[m] - prefix_b[pos]) - (mid+1)* num_greater
+            cost_mid_plus_1 = sum_a + sum_b
+
+            if cost_mid < cost_mid_plus_1:
+                high = mid
+            else:
+                low = mid + 1
+
+        # Compute the cost for low
+        num_less = bisect.bisect_left(a, low)
+        sum_a = low * num_less - prefix_a[num_less]
+        pos = bisect.bisect_right(b, low)
         num_greater = m - pos
-        sum_b = (prefix_b[m] - prefix_b[pos]) - mid * num_greater
-        cost_mid = sum_a + sum_b
+        sum_b = (prefix_b[m] - prefix_b[pos]) - low * num_greater
+        total = sum_a + sum_b
+        print(total, file=output_stream)
 
-        # Compute cost for mid+1
-        num_less = bisect.bisect_left(a, mid+1)
-        sum_a = (mid+1)*num_less - prefix_a[num_less]
-        pos = bisect.bisect_right(b, mid+1)
-        num_greater = m - pos
-        sum_b = (prefix_b[m] - prefix_b[pos]) - (mid+1)* num_greater
-        cost_mid_plus_1 = sum_a + sum_b
 
-        if cost_mid < cost_mid_plus_1:
-            high = mid
-        else:
-            low = mid + 1
 
-    # Compute the cost for low
-    num_less = bisect.bisect_left(a, low)
-    sum_a = low * num_less - prefix_a[num_less]
-    pos = bisect.bisect_right(b, low)
-    num_greater = m - pos
-    sum_b = (prefix_b[m] - prefix_b[pos]) - low * num_greater
-    total = sum_a + sum_b
-    print(total)
+def test():
+    import io
 
-But wait, in the ternary search loop, we need to compare the cost at mid and mid+1. But calculating both each time could be expensive. So the code inside the loop does that.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2
+1 2 3
+3 4
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-But for each iteration, the code computes cost(mid) and cost(mid+1).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-This is O(log(max_x)) steps, and each step is O(log n + log m), which is acceptable for 1e5 elements.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But since the loop runs in O(log(1e9)) steps (since x can be up to 1e9), the code is efficient.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Testing this code with the sample inputs.
+    print('Tests passed 😎')
 
-Sample1:
 
-Input:
+if __name__ == '__main__':
+    test()
 
-2 2
 
-2 3
+```
 
-3 5
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-a sorted [2,3], prefix_a [0, 2,5]
-
-b sorted [3,5], prefix_b [0,3,8], total_b=8.
-
-a_min=2, b_max=5.
-
-Code enters else.
-
-low=2, high=5.
-
-mid=3.
-
-compute cost(3):
-
-num_less in a where a_i <3 → bisect_left finds index0 (since a[0]=2 <3, a[1]=3 is not <3). sum_a=3*1 -2=1.
-
-sum_b: bisect_right(3) in b is1 (since b[0]=3 <=3, b[1]=5>3). pos=1. num_greater=2-1=1. sum_b = (8-3) -3*1=5-3=2. total 1+2=3.
-
-cost_mid_plus_1: mid+1=4.
-
-sum_a: bisect_left(a,4) is2. sum_a=4*2 - (2+3) =8-5=3.
-
-sum_b: bisect_right(b,4) is1. num_greater=2-1=1. sum_b=5-4=1. total4.
-
-cost_mid=3 <4 → high=3.
-
-loop continues.
-
-low=2, high=3.
-
-mid=2.
-
-cost_mid=2.
-
-sum_a: bisect_left(a,2) →0 (since a[0]=2 is not <2). sum_a=0.
-
-sum_b: bisect_right(b,2)=0. num_greater=2. sum_b= (3+5) - 2*2 =8-4=4. total0+4=4.
-
-cost_mid_plus_1=3.
-
-cost_mid=4 >= cost_mid_plus_1=3 → low=mid+1=3.
-
-Now low=3 ==high. compute cost(3) which is3. output3. Correct.
+```
 
 Thus, code works.
 

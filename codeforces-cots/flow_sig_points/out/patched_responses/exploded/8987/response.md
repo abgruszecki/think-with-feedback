@@ -221,37 +221,80 @@ Else, sum remains the same.
 
 So the code:
 
-n = int(input())
-p = list(map(int, input().split()))
-p = [x-1 for x in p]
+Testing against sample input 1.
 
-visited = [False]*n
-cycles = []
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
+    p = [x-1 for x in p]
 
-for i in range(n):
-    if not visited[i]:
-        current = i
-        cycle = []
-        while not visited[current]:
-            visited[current] = True
-            cycle.append(current)
-            current = p[current]
-        cycles.append(len(cycle))
+    visited = [False]*n
+    cycles = []
 
-sum_sq = sum(c*c for c in cycles)
-if len(cycles) >=2:
-    cycles.sort(reverse=True)
-    a = cycles[0]
-    b = cycles[1]
-    sum_sq += 2*a*b
+    for i in range(n):
+        if not visited[i]:
+            current = i
+            cycle = []
+            while not visited[current]:
+                visited[current] = True
+                cycle.append(current)
+                current = p[current]
+            cycles.append(len(cycle))
 
-print(sum_sq)
+    sum_sq = sum(c*c for c in cycles)
+    if len(cycles) >=2:
+        cycles.sort(reverse=True)
+        a = cycles[0]
+        b = cycles[1]
+        sum_sq += 2*a*b
 
-Wait, but this is the case where we can merge the two largest cycles. So the code would compute sum_sq as the original sum, then add 2*a*b (the gain from merging the two cycles) and output that. 
+    print(sum_sq, file=output_stream)
 
-Testing the first example:
 
-Input 3, p = [2,1,3]. Converted to [1,0,2]. Cycles are of sizes 2 and 1. sum_sq is 4 + 1 =5. Then, adding 2*2*1=4, giving 9. Correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 5 4 3 2
+""",
+            "output": \
+"""\
+17
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

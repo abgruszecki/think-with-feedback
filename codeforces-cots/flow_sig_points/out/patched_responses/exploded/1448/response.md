@@ -695,45 +695,213 @@ So the code is correct.
 
 Now, code.
 
-Testing sample1:
+Testing against sample input 1.
 
-type1 books sorted: [1,2,7,8], prefix1 is [0,1,3,10,18].
+```python
+import sys
 
-type2 is empty → prefix2 is [0].
 
-type3 sorted: [1,1,4], prefix3 is [0,1,2,6].
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
+    type1 = []
+    type2 = []
+    type3 = []
+    for _ in range(n):
+        t, a, b = map(int, input_stream.readline().split())
+        if a == 1 and b == 1:
+            type1.append(t)
+        elif a == 1 and b == 0:
+            type2.append(t)
+        elif a == 0 and b == 1:
+            type3.append(t)
+    # Sort each type and compute prefix sums
+    type1.sort()
+    type2.sort()
+    type3.sort()
+    # Prefix sums
+    prefix1 = [0]
+    for t in type1:
+        prefix1.append(prefix1[-1] + t)
+    prefix2 = [0]
+    for t in type2:
+        prefix2.append(prefix2[-1] + t)
+    prefix3 = [0]
+    for t in type3:
+        prefix3.append(prefix3[-1] + t)
+    m1, m2, m3 = len(type1), len(type2), len(type3)
+    possible = []
+    x_min = max(0, k - m2, k - m3)
+    x_max = min(m1, k-1)
+    if x_min <= x_max:
+        for x in range(x_min, x_max + 1):
+            s2 = k - x
+            s3 = k - x
+            sum_total = prefix1[x]
+            if s2 > 0:
+                sum_total += prefix2[s2]
+            if s3 > 0:
+                sum_total += prefix3[s3]
+            possible.append(sum_total)
+    # Check case where x >= k
+    if m1 >= k:
+        possible.append(prefix1[k])
+    if not possible:
+        print(-1, file=output_stream)
+    else:
+        print(min(possible), file=output_stream)
 
-m1=4, m2=0, m3=3.
 
-x_min = max(0, 4-0=4, 4-3=1) →4.
 
-x_max = min(4, 4-1=3) →3.
+def test():
+    import io
 
-So x_min (4) >x_max (3) → no solution in this case.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 2
+6 0 0
+9 0 0
+1 0 1
+2 1 1
+5 1 0
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
 
-Check the x >=k case. k=4. m1=4 >=4 → sum1[4] =18. So possible is [18]. Output 18.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample2:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-type1: [2], prefix1 [0,2].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-type2: [5], prefix2 [0,5].
+    print('Tests passed 😎')
 
-type3: [1], prefix3 [0,1].
 
-x_min= max(0, 2-1, 2-1)=1.
+if __name__ == '__main__':
+    test()
 
-x_max= min(1, 2-1)=1.
 
-So x=1.
+```
 
-s2=2-1=1 → sum2=5.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-s3=1 → sum3=1.
+```
 
-sum1[1]=2. total 2+5+1=8.
+Testing against sample input 2.
 
-Also check x>=2 (k=2). m1=1 <2 → no. So possible is [8]. Output 8.
+```python
+import sys
+
+
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
+    type1 = []
+    type2 = []
+    type3 = []
+    for _ in range(n):
+        t, a, b = map(int, input_stream.readline().split())
+        if a == 1 and b == 1:
+            type1.append(t)
+        elif a == 1 and b == 0:
+            type2.append(t)
+        elif a == 0 and b == 1:
+            type3.append(t)
+    # Sort each type and compute prefix sums
+    type1.sort()
+    type2.sort()
+    type3.sort()
+    # Prefix sums
+    prefix1 = [0]
+    for t in type1:
+        prefix1.append(prefix1[-1] + t)
+    prefix2 = [0]
+    for t in type2:
+        prefix2.append(prefix2[-1] + t)
+    prefix3 = [0]
+    for t in type3:
+        prefix3.append(prefix3[-1] + t)
+    m1, m2, m3 = len(type1), len(type2), len(type3)
+    possible = []
+    x_min = max(0, k - m2, k - m3)
+    x_max = min(m1, k-1)
+    if x_min <= x_max:
+        for x in range(x_min, x_max + 1):
+            s2 = k - x
+            s3 = k - x
+            sum_total = prefix1[x]
+            if s2 > 0:
+                sum_total += prefix2[s2]
+            if s3 > 0:
+                sum_total += prefix3[s3]
+            possible.append(sum_total)
+    # Check case where x >= k
+    if m1 >= k:
+        possible.append(prefix1[k])
+    if not possible:
+        print(-1, file=output_stream)
+    else:
+        print(min(possible), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 3
+3 0 0
+2 1 0
+3 1 0
+5 0 1
+3 0 1
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

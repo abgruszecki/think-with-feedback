@@ -503,125 +503,132 @@ Then perform binary search between left=0 and right= max(v) - min(v).
 
 Now, code:
 
-n, k = map(int, input().split())
+Testing against sample input 1.
 
-v = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-v.sort()
+    v = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-if n ==0:
+    v.sort()
 
-   print(0)
+    if n ==0:
 
-   exit()
+       print(0, file=output_stream)
 
-left=0
+       return
 
-right = v[-1] -v[0]
+    left=0
 
-ans = right
+    right = v[-1] -v[0]
 
-def is_possible(D):
+    ans = right
 
-    last = len(v) -1
+    def is_possible(D):
 
-    while last >=0:
+        last = len(v) -1
 
-        s_max_candidate = last -k +1
+        while last >=0:
 
-        if s_max_candidate <0:
+            s_max_candidate = last -k +1
 
-            return False
+            if s_max_candidate <0:
 
-        target = v[last] - D
+                return False
 
-        # binary search in 0..s_max_candidate for first >= target
+            target = v[last] - D
 
-        left =0
+            # binary search in 0..s_max_candidate for first >= target
 
-        right =s_max_candidate
+            left =0
 
-        res = -1
+            right =s_max_candidate
 
-        while left <= right:
+            res = -1
 
-            mid = (left + right) //2
+            while left <= right:
 
-            if v[mid] >= target:
+                mid = (left + right) //2
 
-                res = mid
+                if v[mid] >= target:
 
-                right = mid -1
+                    res = mid
 
-            else:
+                    right = mid -1
 
-                left = mid +1
+                else:
 
-        if res ==-1:
+                    left = mid +1
 
-            return False
+            if res ==-1:
 
-        last = res -1
+                return False
 
-    return True
+            last = res -1
 
-while left <= right:
+        return True
 
-    mid = (left + right) //2
+    while left <= right:
 
-    if is_possible(mid):
+        mid = (left + right) //2
 
-        ans = mid
+        if is_possible(mid):
 
-        right = mid -1
+            ans = mid
 
-    else:
+            right = mid -1
 
-        left = mid +1
+        else:
 
-print(ans)
+            left = mid +1
 
-Testing this code with the first example:
+    print(ans, file=output_stream)
 
-Input:
 
-5 2
 
-50 110 130 40 120 → sorted as [40,50,110,120,130].
+def test():
+    import io
 
-binary search between 0 and 90 (130-40=90).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 1
+2 3 4 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Check mid=45:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-is_possible(45) ?
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-For each group:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-last=4, s_max_candidate=3. target=130-45=85.
+    print('Tests passed 😎')
 
-Find s in 0-3 where v[s] >=85. v[3]=120 >=85. So res=3. group 3-4. last becomes 2.
 
-Process last=2 (110):
+if __name__ == '__main__':
+    test()
 
-s_max_candidate=2-2+1=1. target=110-45=65.
 
-Find s in 0-1: v[0]=40 <65, v[1]=50 <65. res=-1. returns False. So mid=45 is not possible.
+```
 
-So binary search continues, left=0, right=90. mid=45 → not possible. left=46.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Eventually, when mid=20:
-
-Check is_possible(20):
-
-last=4 → s_max_candidate=3. target=130-20=110.
-
-binary search in 0-3 for s >=110. v[2]=110 is found. res=2. group 2-4. last becomes 1.
-
-last=1 (50). s_max_candidate=1-2+1=0. target=50-20=30. binary search in 0-0: v[0]=40 >=30. res=0. group 0-1. last becomes -1. returns True. So mid=20 is feasible. So ans=20. right=19.
-
-But then binary search continues until left>right.
-
-So the code returns 20.
+```
 
 The second example:
 

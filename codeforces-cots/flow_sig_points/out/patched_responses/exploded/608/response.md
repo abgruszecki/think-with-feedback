@@ -1076,171 +1076,187 @@ Loop steps up to 100:
 
 So, the code:
 
-b1, q, l, m = map(int, input().split())
-bad = set(map(int, input().split()))
+Testing against sample input 1.
 
-current = b1
-count = 0
-bad_set = bad
+```python
+def main(input_stream, output_stream):
+    b1, q, l, m = map(int, input_stream.readline().rstrip("\n").split())
+    bad = set(map(int, input_stream.readline().rstrip("\n").split()))
 
-if abs(current) > l:
-    print(0)
-    exit()
+    current = b1
+    count = 0
+    bad_set = bad
 
-steps = 0
-max_steps = 100  # Adjust this if needed.
-
-while steps < max_steps and abs(current) <= l:
-    if current not in bad_set:
-        count +=1
-
-    next_term = current * q
-
-    # Check for infinite conditions
-    if abs(next_term) <= l and next_term not in bad_set:
-        if q == 1:
-            print("inf")
-            exit()
-        elif q == -1 and next_term == -current:
-            if current not in bad_set:
-                print("inf")
-                exit()
-        elif next_term == 0:
-            print("inf")
-            exit()
-
-    current = next_term
-    steps +=1
-
-    # Check if current exceeds l after update
     if abs(current) > l:
-        break
+        print(0, file=output_stream)
+        return
 
-print(count)
+    steps = 0
+    max_steps = 100  # Adjust this if needed.
 
-But what about the following case: 
+    while steps < max_steps and abs(current) <= l:
+        if current not in bad_set:
+            count +=1
 
-q= -1, current term is 2, bad_set doesn't include 2 or -2. l is 3.
+        next_term = current * q
 
-The terms would be 2, -2, 2, -2, etc. 
+        # Check for infinite conditions
+        if abs(next_term) <= l and next_term not in bad_set:
+            if q == 1:
+                print("inf", file=output_stream)
+                return
+            elif q == -1 and next_term == -current:
+                if current not in bad_set:
+                    print("inf", file=output_stream)
+                    return
+            elif next_term == 0:
+                print("inf", file=output_stream)
+                return
 
-In the code:
+        current = next_term
+        steps +=1
 
-current = 2 (allowed, count +=1)
+        # Check if current exceeds l after update
+        if abs(current) > l:
+            break
 
-next_term = -2 (allowed and within l).
+    print(count, file=output_stream)
 
-Check for infinite conditions:
 
-q ==-1 and next_term ==-current (true).
 
-current is allowed (yes).
+def test():
+    import io
 
-so, code prints 'inf' and exits.
-
-Yes.
-
-Another example: q=1, current term is 5, allowed. l is 10.
-
-next_term is 5 (allowed). code checks q ==1 and next_term allowed. So code prints 'inf'.
-
-Yes.
-
-Another example: q=0, current term is 3. bad_set does not include 0. l is 10.
-
-next_term is 0 (allowed). code checks next_term is zero. So, prints 'inf'.
-
-Yes.
-
-So, the code works for these cases.
-
-Testing the sample inputs:
-
-Sample 1:
-
-Input:
-3 2 30 4
-6 14 25 48
-
-Progression terms: 3, 6, 12, 24, 48, ... 
-
-But l=30. So terms are 3 (allowed), 6 (bad), 12 (allowed?), 24 (allowed?), 48 (exceeds l). 
-
-But in the input, the bad numbers are 6,14,25,48. So:
-
-3: allowed. Count 1.
-
-next_term=6 (bad), but in code, the check for infinite conditions is not met. So code proceeds.
-
-current becomes 6. steps=1. 6's absolute value is 6 <=30. But since 6 is in bad_set, it's not counted. 
-
-next_term=6*2=12. Check if 12 is allowed and within l. 
-
-12 is not in bad_set (since bad numbers are 6,14,25,48). So yes. 
-
-Check for infinite conditions: q=2, next_term=12. So, no. So code continues.
-
-current becomes 12. steps=2. 
-
-12 is allowed. count becomes 2.
-
-next_term=24. allowed. Check infinite conditions. q=2, no. 
-
-current becomes 24. steps=3. 
-
-24 is allowed. count becomes 3.
-
-next_term=48. 48 is in bad_set. 
-
-Check infinite conditions: next_term is 48, which is not in bad_set? No, 48 is in bad_set. So code doesn't check. 
-
-current becomes 48. steps=4. 
-
-48's absolute value is 48 >30. So loop breaks. 
-
-Final count is 3. Which matches sample 1.
-
-Sample 2:
-
-Input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 123 1 2143435 4
 123 11 -5453 141245
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-q=1. So all terms are 123. 
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-current=123. allowed? Bad_set includes 123, so no. count remains 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-next_term=123. Check infinite conditions: q=1, next_term is 123. But next_term is in bad_set. So code does not print 'inf'. 
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-current becomes 123. steps=1. 
+    print('Tests passed 😎')
 
-Again, check if allowed: no. count remains 0. 
 
-This loop will continue. But in code, steps is limited to 100. 
+if __name__ == '__main__':
+    test()
 
-But after the first iteration:
 
-In the code:
+```
 
-current is 123. allowed? No. count remains 0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-next_term is 123.
+```
 
-check if next_term is allowed: 123 is in bad_set. So no.
+Testing against sample input 2.
 
-code proceeds. current is 123 again.
+```python
+def main(input_stream, output_stream):
+    b1, q, l, m = map(int, input_stream.readline().rstrip("\n").split())
+    bad = set(map(int, input_stream.readline().rstrip("\n").split()))
 
-steps increments to 1.
+    current = b1
+    count = 0
+    bad_set = bad
 
-In the next iteration, current is 123 again. steps=2.
+    if abs(current) > l:
+        print(0, file=output_stream)
+        return
 
-This would loop until steps reach 100. 
+    steps = 0
+    max_steps = 100  # Adjust this if needed.
 
-But since q=1, and next_term is 123, which is in bad_set, the code's infinite check is not triggered. 
+    while steps < max_steps and abs(current) <= l:
+        if current not in bad_set:
+            count +=1
 
-Thus, after 100 steps, the loop breaks and count is 0. 
+        next_term = current * q
 
-Sample 2's output is 0. Which is correct.
+        # Check for infinite conditions
+        if abs(next_term) <= l and next_term not in bad_set:
+            if q == 1:
+                print("inf", file=output_stream)
+                return
+            elif q == -1 and next_term == -current:
+                if current not in bad_set:
+                    print("inf", file=output_stream)
+                    return
+            elif next_term == 0:
+                print("inf", file=output_stream)
+                return
+
+        current = next_term
+        steps +=1
+
+        # Check if current exceeds l after update
+        if abs(current) > l:
+            break
+
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+123 1 2143435 4
+54343 -13 6 124
+""",
+            "output": \
+"""\
+inf
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

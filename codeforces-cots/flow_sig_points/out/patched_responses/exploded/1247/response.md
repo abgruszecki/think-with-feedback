@@ -222,23 +222,96 @@ else:
 
 This should handle all cases.
 
-Testing the first example:
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+import sys
+from collections import deque
 
-3 1
 
-Edges 2-3 and 3-1. The leaves are 2 and 1.
+def main(input_stream, output_stream):
+    n, t = map(int, input_stream.readline().split())
+    adj = [[] for _ in range(n + 1)]
+    degrees = [0] * (n + 1)
+    for _ in range(n - 1):
+        u, v = map(int, input_stream.readline().split())
+        adj[u].append(v)
+        adj[v].append(u)
+        degrees[u] += 1
+        degrees[v] += 1
+    
+    leaves = [i for i in range(1, n+1) if degrees[i] == 1]
+    a, b = leaves
+    
+    def bfs(start):
+        dist = [-1] * (n + 1)
+        q = deque([start])
+        dist[start] = 0
+        while q:
+            u = q.popleft()
+            for v in adj[u]:
+                if dist[v] == -1:
+                    dist[v] = dist[u] + 1
+                    q.append(v)
+        return dist
+    
+    dist_a = bfs(a)
+    dist_b = bfs(b)
+    
+    u = list(map(int, input_stream.readline().split()))[0]
+    if dist_a[u] % 2 == 1 or dist_b[u] % 2 == 1:
+        print("Ron", file=output_stream)
+    else:
+        print("Hermione", file=output_stream)
 
-distances from 2 (a) are:
 
-2: 0, 3:1, 1:2.
 
-distances from 1 (b) are:
+def test():
+    import io
 
-1:0, 3:1, 2:2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 1
+1 2
+2 3
+3 4
+4 5
+5
+""",
+            "output": \
+"""\
+Hermione
+""",
+        }, 
+    ]
 
-For u=3, both distances are 1, which is odd. So output Ron.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample Input 2:
 

@@ -433,47 +433,89 @@ But wait, in the case where x is 0? But according to the problem statement, ci >
 
 So the code is safe.
 
-Testing with sample input 1:
+Testing against sample input 1.
 
-3
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 + 7
+    max_fact = 1000
 
-2
+    # Precompute factorial and inverse factorial modulo MOD
+    fact = [1] * (max_fact + 1)
+    for i in range(1, max_fact + 1):
+        fact[i] = fact[i-1] * i % MOD
 
-2
+    inv_fact = [1] * (max_fact + 1)
+    inv_fact[max_fact] = pow(fact[max_fact], MOD-2, MOD)
+    for i in range(max_fact -1, -1, -1):
+        inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
 
+    k = int(input_stream.readline().rstrip("\n"))
+    c = [int(input_stream.readline().rstrip("\n")) for _ in range(k)]
+
+    result = 1
+    s_prev = 0
+
+    for x in c:
+        n = s_prev + x - 1
+        k_comb = x - 1
+        if n < 0 or k_comb < 0 or k_comb > n:
+            comb = 0
+        else:
+            comb = fact[n] * inv_fact[k_comb] % MOD
+            comb = comb * inv_fact[n - k_comb] % MOD
+        result = result * comb % MOD
+        s_prev += x
+
+    print(result, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
 1
+2
+3
+4
+""",
+            "output": \
+"""\
+1680
+""",
+        }, 
+    ]
 
-Processing:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-s_prev starts at 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-First x=2:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-n=0+2-1=1, k_choose=1.
+    print('Tests passed 😎')
 
-comb = fact[1] * inv_fact[1] * inv_fact[0] =1 * 1 *1 =1.
 
-res=1.
+if __name__ == '__main__':
+    test()
 
-s_prev=2.
 
-Second x=2:
+```
 
-n=2+2-1=3. k_choose=1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-comb = fact[3]/(1! 2! )= 6/(2) =3.
-
-res=3.
-
-s_prev=4.
-
-Third x=1:
-
-n=4+1-1=4. k_choose=0.
-
-comb = fact[4]/(0!4! )=24/(1*24) =1.
-
-res=3*1=3. Correct.
+```
 
 Sample 2:
 

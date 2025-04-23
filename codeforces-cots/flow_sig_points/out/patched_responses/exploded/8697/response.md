@@ -1483,23 +1483,118 @@ So, the algorithm steps are:
 
        7. The answer is total_sum - max_savings.
 
-       Now, let's test this code against the sample input 1:
+Testing against sample input 1.
 
-       Sample Input 1:
+```python
+import sys
+from sys import stdin
 
-       3 1
 
-       0001 5
+class TrieNode:
+    __slots__ = ['children', 'contribution']
+    def __init__(self):
+        self.children = dict()  # Maps character to TrieNode
+        self.contribution = 0
 
-       001 4
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
+    numbers = []
+    total_sum = 0
+    for _ in range(n):
+        s, m = input_stream.readline().split()
+        m = int(m)
+        numbers.append((s, m))
+        total_sum += len(s) * m
 
-       01 1
+    # Build the trie
+    root = TrieNode()
+    for s, m in numbers:
+        current = root
+        for i in range(len(s)):
+            c = s[i]
+            if c not in current.children:
+                current.children[c] = TrieNode()
+            current = current.children[c]
+            current.contribution += (i + 1) * m
 
-       The sum is 4*5 +3*4 +2*1 = 20+12+2=34.
+    # Compute DP
+    def dfs(node):
+        dp = [-float('inf')] * (k + 1)
+        dp[0] = 0  # Base case: select 0 nodes
 
-       The maximum savings is 20 (from node '0001').
+        # Merge children's DP
+        for child in node.children.values():
+            child_dp = dfs(child)
+            temp = [-float('inf')] * (k + 1)
+            for x in range(k + 1):
+                if dp[x] == -float('inf'):
+                    continue
+                for y in range(k + 1 - x):
+                    if child_dp[y] == -float('inf'):
+                        continue
+                    total = x + y
+                    if temp[total] < dp[x] + child_dp[y]:
+                        temp[total] = dp[x] + child_dp[y]
+            dp = temp
 
-       So 34-20=14.
+        # Consider taking this node
+        new_dp = [-float('inf')] * (k + 1)
+        for t in range(k + 1):
+            new_dp[t] = dp[t]
+        if k >= 1:
+            if node.contribution > new_dp[1]:
+                new_dp[1] = node.contribution
+        return new_dp
+
+    max_savings = max(dfs(root))
+    print(total_sum - max_savings, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 1
+0001 5
+001 6
+01 1
+""",
+            "output": \
+"""\
+18
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
        Sample Input 2:
 

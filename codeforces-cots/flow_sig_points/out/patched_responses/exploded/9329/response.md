@@ -1705,132 +1705,107 @@ Once we have j and k, the maximum a_i is prefix_max[j-1].
 
 Thus, the code becomes:
 
-n = int(input())
-a = list(map(int, input().split()))
-if n <3:
-    print(0)
-    exit()
+Testing against sample input 1.
 
-prefix_max = a.copy()
-for i in range(1, n):
-    prefix_max[i] = max(prefix_max[i-1], a[i])
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    if n <3:
+        print(0, file=output_stream)
+        return
 
-# Find maximum AND pair
-res = 0
-for bit in reversed(range(21)):
-    mask = res | (1 << bit)
-    # Check if there are at least two numbers with x & mask == mask
-    candidates = []
-    for x in a:
-        if (x & mask) == mask:
-            candidates.append(x)
-    if len(candidates) >=2:
-        res = mask
+    prefix_max = a.copy()
+    for i in range(1, n):
+        prefix_max[i] = max(prefix_max[i-1], a[i])
 
-# Collect indices of elements in the original array that have (x & res) == res
-filtered_indices = []
-for i in range(n):
-    if (a[i] & res) == res:
-        filtered_indices.append(i)
+    # Find maximum AND pair
+    res = 0
+    for bit in reversed(range(21)):
+        mask = res | (1 << bit)
+        # Check if there are at least two numbers with x & mask == mask
+        candidates = []
+        for x in a:
+            if (x & mask) == mask:
+                candidates.append(x)
+        if len(candidates) >=2:
+            res = mask
 
-# Find the earliest pair j <k in filtered_indices
-j = -1
-k = -1
-for i in range(len(filtered_indices)):
-    for jj in range(i+1, len(filtered_indices)):
-        if filtered_indices[i] < filtered_indices[jj]:
-            j = filtered_indices[i]
-            k = filtered_indices[jj]
+    # Collect indices of elements in the original array that have (x & res) == res
+    filtered_indices = []
+    for i in range(n):
+        if (a[i] & res) == res:
+            filtered_indices.append(i)
+
+    # Find the earliest pair j <k in filtered_indices
+    j = -1
+    k = -1
+    for i in range(len(filtered_indices)):
+        for jj in range(i+1, len(filtered_indices)):
+            if filtered_indices[i] < filtered_indices[jj]:
+                j = filtered_indices[i]
+                k = filtered_indices[jj]
+                break
+        if j != -1:
             break
-    if j != -1:
-        break
 
-if j == -1:
-    # No pair found (unlikely since res is the maximum AND)
-    print(0)
-else:
-    # Find the maximum a_i in the prefix up to j-1
-    if j ==0:
-        # no elements before j
-        print(0)
+    if j == -1:
+        # No pair found (unlikely since res is the maximum AND)
+        print(0, file=output_stream)
     else:
-        max_prefix = prefix_max[j-1]
-        answer = max_prefix | res
-        print(answer)
+        # Find the maximum a_i in the prefix up to j-1
+        if j ==0:
+            # no elements before j
+            print(0, file=output_stream)
+        else:
+            max_prefix = prefix_max[j-1]
+            answer = max_prefix | res
+            print(answer, file=output_stream)
 
-But this code may not handle all cases correctly.
 
-Let's test it on the second sample.
 
-Sample 2:
+def test():
+    import io
 
-a = [2,8,4,7]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+2 8 4 7
+""",
+            "output": \
+"""\
+12
+""",
+        }, 
+    ]
 
-res is computed as follows:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-bit 20 downto 0:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-start with res=0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-bit 20: mask=0 | (1 << 20) → very large, no candidates.
+    print('Tests passed 😎')
 
-...
 
-bit 3 (mask=8):
+if __name__ == '__main__':
+    test()
 
-candidates are elements with x & 8 ==8. a has 8,4,7. 8&8=8, 4&8=0, 7&8=0. So candidates = [8]. len(candidates) <2. So res remains 0.
 
-bit 2 (mask=4):
+```
 
-candidates are elements with x&4 ==4.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-8: 8 &4=0 → no.
-
-4: 4 &4=4 → yes.
-
-7:7 &4=4 → yes.
-
-So candidates = [4,7]. len >=2. res becomes 4.
-
-bit 1 (mask=4 | 2=6):
-
-candidates are elements with x&6 ==6.
-
-4 &6=4, 7&6=6. So candidates = [7]. len <2. So res remains 4.
-
-bit 0: mask=4 |1=5.
-
-candidates are elements with x&5 ==5.
-
-4 &5=4,7&5=5 → candidates = [7]. len <2.
-
-Thus, res is 4.
-
-filtered_indices includes indices of elements where a[i]&4 ==4. These are indices 2 (4), 3 (7).
-
-Thus, j=2, k=3.
-
-prefix_max[j-1] = prefix_max[1] =8.
-
-answer is 8 |4=12.
-
-Correct.
-
-Sample 1:
-
-a= [2,4,6]
-
-res=4&6=4.
-
-filtered_indices: 1 (4), 2 (6).
-
-j=1, k=2.
-
-prefix_max[j-1] =prefix_max[0]=2.
-
-2 |4=6.
-
-Correct.
+```
 
 Another test case:
 

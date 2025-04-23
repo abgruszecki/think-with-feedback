@@ -65,51 +65,96 @@ In Python, using a deque from collections for BFS. For each BFS, we need to trac
 
 So, here's the code outline:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import deque
 
-n, m = map(int, sys.stdin.readline().split())
 
-if n == 1:
-    print(0)
-    sys.exit()
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
 
-adj = [[] for _ in range(n+1)]
+    if n == 1:
+        print(0, file=output_stream)
+        sys.exit()
 
-for _ in range(m):
-    a, b = map(int, sys.stdin.readline().split())
-    adj[a].append(b)
-    adj[b].append(a)
+    adj = [[] for _ in range(n+1)]
 
-def bfs(start):
-    visited = [-1] * (n+1)
-    q = deque()
-    q.append(start)
-    visited[start] = 0
-    max_dist = 0
-    far_node = start
-    while q:
-        u = q.popleft()
-        for v in adj[u]:
-            if visited[v] == -1:
-                visited[v] = visited[u] + 1
-                q.append(v)
-                if visited[v] > max_dist:
-                    max_dist = visited[v]
-                    far_node = v
-    return far_node, max_dist
+    for _ in range(m):
+        a, b = map(int, input_stream.readline().split())
+        adj[a].append(b)
+        adj[b].append(a)
 
-u, _ = bfs(1)
-v, diameter = bfs(u)
-print(diameter)
+    def bfs(start):
+        visited = [-1] * (n+1)
+        q = deque()
+        q.append(start)
+        visited[start] = 0
+        max_dist = 0
+        far_node = start
+        while q:
+            u = q.popleft()
+            for v in adj[u]:
+                if visited[v] == -1:
+                    visited[v] = visited[u] + 1
+                    q.append(v)
+                    if visited[v] > max_dist:
+                        max_dist = visited[v]
+                        far_node = v
+        return far_node, max_dist
 
-Wait, but in the first BFS, we return the farthest node (u) from start. Then BFS again from u gives the diameter. That's correct.
+    u, _ = bfs(1)
+    v, diameter = bfs(u)
+    print(diameter, file=output_stream)
 
-Testing the sample inputs.
 
-First sample:
 
-4 nodes, 3 edges. The tree is a star with 1 connected to 2,3,4. The diameter is 2 (distance between 2 and 3, for example, is 2). So the first BFS from 1 gives u as any of 2,3,4 (distance 1). Then BFS from u gives the maximum distance as 2. So the code would output 2. Correct.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 4
+1 2
+2 3
+3 4
+3 5
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

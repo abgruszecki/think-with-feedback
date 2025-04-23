@@ -601,107 +601,118 @@ But since k can be up to 5000, we can precompute p_pows up to 5000.
 
 So in code:
 
-MOD = 998244353
+Testing against sample input 1.
 
-n, p, k = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-p_pows = [1] * (k+1)
+    n, p, k = map(int, input_stream.readline().rstrip("\n").split())
 
-for i in range(1, k+1):
+    p_pows = [1] * (k+1)
 
-    p_pows[i] = (p_pows[i-1] * p) % MOD
+    for i in range(1, k+1):
 
-pow_pn = pow(p, n, MOD)
+        p_pows[i] = (p_pows[i-1] * p) % MOD
 
-product_num = [1] * (k+1)
+    pow_pn = pow(p, n, MOD)
 
-for r in range(1, k+1):
+    product_num = [1] * (k+1)
 
-    i = r-1
+    for r in range(1, k+1):
 
-    if i >= len(p_pows):
+        i = r-1
 
-        # not possible since r <=k, and p_pows is up to k.
+        if i >= len(p_pows):
 
-        # but i is r-1 <=k-1 <k+1.
+            # not possible since r <=k, and p_pows is up to k.
 
-        pass
+            # but i is r-1 <=k-1 <k+1.
 
-    term = (pow_pn - p_pows[i]) % MOD
+            pass
 
-    product_num[r] = (product_num[r-1] * term) % MOD
+        term = (pow_pn - p_pows[i]) % MOD
 
-product_den = [1] * (k+1)
+        product_num[r] = (product_num[r-1] * term) % MOD
 
-for r in range(1, k+1):
+    product_den = [1] * (k+1)
 
-    pow_pr = pow(p, r, MOD)
+    for r in range(1, k+1):
 
-    den = 1
+        pow_pr = pow(p, r, MOD)
 
-    for i in range(r):
+        den = 1
 
-        term = (pow_pr - p_pows[i]) % MOD
+        for i in range(r):
 
-        den = (den * term) % MOD
+            term = (pow_pr - p_pows[i]) % MOD
 
-    product_den[r] = den
+            den = (den * term) % MOD
 
-result = []
+        product_den[r] = den
 
-for r in range(k+1):
+    result = []
 
-    if product_num[r] ==0:
+    for r in range(k+1):
 
-        result.append(0)
+        if product_num[r] ==0:
 
-    else:
+            result.append(0)
 
-        inv_den = pow(product_den[r], MOD-2, MOD)
+        else:
 
-        res = (product_num[r] * product_num[r] % MOD) * inv_den % MOD
+            inv_den = pow(product_den[r], MOD-2, MOD)
 
-        result.append(res)
+            res = (product_num[r] * product_num[r] % MOD) * inv_den % MOD
 
-print(' '.join(map(str, result)))
+            result.append(res)
 
-But wait, for r=0, product_den[r} is 1. So the code works.
+    print(' '.join(map(str, result)), file=output_stream)
 
-Testing this code with the first sample:
 
-Sample 1: n=3, p=2, k=3.
 
-p_pows is [1, 2,4,8] (for i from 0 to 3). But in the code, for r=3, i ranges up to 2, so p_pows[2} is 4.
+def test():
+    import io
 
-pow_pn is 8.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 51549919 2
+""",
+            "output": \
+"""\
+1 51549918 0
+""",
+        }, 
+    ]
 
-product_num[0}=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-product_num[1} =1 * (8-1) =7.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-product_num[2} =7 * (8-2)=7*6=42 mod MOD.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-product_num[3} =42 * (8-4)=42*4=168 mod MOD.
+    print('Tests passed 😎')
 
-product_den[0}=1.
 
-product_den[1} for r=1: pow_pr=2. term is 2-1=1. den=1.
+if __name__ == '__main__':
+    test()
 
-product_den[2} for r=2: pow_pr=4. terms 4-1=3, 4-2=2. den=3*2=6.
 
-product_den[3} for r=3: pow_pr=8. terms 8-1=7, 8-2=6, 8-4=4. den=7*6*4=168.
+```
 
-result for r=0: product_num[0}=1, product_den[0}=1. res = (1*1) *1 =1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-r=1: product_num=7. product_den=1. res=49 *1=49.
+```
 
-r=2: product_num=42. product_den=6. inv_den=pow(6, MOD-2, MOD). 6*166374059 mod MOD=1. 42^2=1764. 1764 *166374059 mod MOD = 1764//6 =294. 294 mod MOD is 294.
-
-r=3: product_num=168, product_den=168. inv_den=pow(168, MOD-2, MOD). 168*inv_den mod MOD=1. So res= (168^2) * inv_den mod MOD=168.
-
-Thus, output is as expected.
-
-Thus, the code should work.
 </think>
 
 ```python

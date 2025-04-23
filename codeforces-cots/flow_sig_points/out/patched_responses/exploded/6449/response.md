@@ -63,33 +63,64 @@ For the implementation:
 
 So, in code:
 
-n = int(input())
-b = list(map(int, input().split()))
-prev = 0
-steps = 0
-for num in b:
-    diff = num - prev
-    steps += abs(diff)
-    prev = num
-print(steps)
+Testing against sample input 1.
 
-Yes, this should work. Let's test with the samples.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
+    prev = 0
+    steps = 0
+    for num in b:
+        diff = num - prev
+        steps += abs(diff)
+        prev = num
+    print(steps, file=output_stream)
 
-First sample input:
 
-5
 
-1 2 3 4 5
+def test():
+    import io
 
-prev starts at 0. First diff is 1-0=1. steps +=1. prev becomes 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 2 2 1
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-Second num is 2. diff is 1. steps becomes 2. prev is 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Third num is 3. diff is 1. steps 3. prev 3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Fourth: 4-3=1. steps 4. prev 4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Fifth:5-4=1. steps 5. Correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample input:
 

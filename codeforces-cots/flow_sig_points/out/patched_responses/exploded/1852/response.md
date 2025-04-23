@@ -318,17 +318,79 @@ for t in range(l, r+1):
 
 print(count)
 
-Yes. Let's test this code with sample 1.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    p, q, l, r = map(int, input_stream.readline().rstrip("\n").split())
+    z_intervals = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(p)]
+    x_intervals = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(q)]
+    count = 0
 
-t ranges 0-4.
+    for t in range(l, r + 1):
+        valid = False
+        for (c, d) in x_intervals:
+            xs = c + t
+            xe = d + t
+            for (a, b) in z_intervals:
+                if max(a, xs) <= min(b, xe):
+                    valid = True
+                    break
+            if valid:
+                break
+        if valid:
+            count += 1
 
-For t=0: X's interval is [0,1]. Z's [2,3]. max(2,0)=2. min(3,1)=1. 2 <=1 is false. So no overlap.
+    print(count, file=output_stream)
 
-t=1: X's [1,2]. Z's [2,3]. max(2,1)=2. min(3,2)=2. 2<=2 → yes. So found is True. So count +=1.
 
-Similarly for t=2 and t=3. For t=4, X's interval is [4,5]. Z's [2,3]. max(2,4)=4. min(3,5)=3. 4 <=3 → no. So count is 3. Which matches.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 3 0 20
+15 17
+23 26
+1 4
+7 11
+15 17
+""",
+            "output": \
+"""\
+20
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2: output 20. So the code would compute that.
 

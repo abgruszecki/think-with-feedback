@@ -803,19 +803,144 @@ For example, in sample 2, S is 'aab'. The consecutive 'a's at positions 0 and 1 
 
 The correct formula is (m-1) * (n + the number of pairs of consecutive equal characters).
 
-Let's test this:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    s = input_stream.readline().rstrip("\n").strip()
 
-n=3, m=3. S='aaa' → pairs of consecutive equals: 2.
+    result = 0
 
-(m-1)*(3+2) = 2 *5=10. But sample's answer is 6. So this is incorrect.
+    for i in range(n):
+        if i > 0 and s[i] == s[i-1]:
+            continue
+        j = i
+        while j < n and s[j] == s[i]:
+            j += 1
+        same = j - i
+        result += (m - 1) * same
 
-Sample 2:
+    print(result, file=output_stream)
 
-n=3, m=3. S='aab' → consecutive pairs: 1 (the first two a's).
 
-(m-1)*(3+1) = 2*4=8. But sample's answer is 11. So this is also incorrect.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 3
+aab
+""",
+            "output": \
+"""\
+11
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 52, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 45, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '11'
+Got: '6'
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    s = input_stream.readline().rstrip("\n").strip()
+
+    result = 0
+
+    for i in range(n):
+        if i > 0 and s[i] == s[i-1]:
+            continue
+        j = i
+        while j < n and s[j] == s[i]:
+            j += 1
+        same = j - i
+        result += (m - 1) * same
+
+    print(result, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 2
+a
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, this approach is incorrect.
 

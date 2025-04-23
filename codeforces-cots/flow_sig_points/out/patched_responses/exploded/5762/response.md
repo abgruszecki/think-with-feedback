@@ -156,39 +156,79 @@ Now, code.
 
 But in Python, the bisect module's bisect_right function can take a lo parameter. So the code would be:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n = int(input())
 
-c = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-c.sort()
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-max_size = 0
+    c.sort()
 
-for i in range(n):
+    max_size = 0
 
-    target = 2 * c[i]
+    for i in range(n):
 
-    j = bisect.bisect_right(c, target, i) -1
+        target = 2 * c[i]
 
-    current_size = j - i +1
+        j = bisect.bisect_right(c, target, i) -1
 
-    if current_size > max_size:
+        current_size = j - i +1
 
-        max_size = current_size
+        if current_size > max_size:
 
-print(n - max_size)
+            max_size = current_size
 
-Wait, let's test the first example:
+    print(n - max_size, file=output_stream)
 
-Input 6, then [4,5,3,8,3,7]. After sorting: [3,3,4,5,7,8].
 
-For i=0:
 
-target=6. bisect_right finds the first element >6 starting at i=0. The array is 3,3,4,5,7,8. 7 is the first element >6 at index 4. So j=4-1=3. current_size is 3-0+1=4.
+def test():
+    import io
 
-For i=1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+4 3 2 4
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 target=6 again. bisect_right starts at i=1. The elements are 3,4,5,7,8 (starting from index 1). Wait, no. The entire array is [3,3,4,5,7,8]. Starting from index 1, the elements are 3,4,5,7,8. Wait, no: the list is the same. So for i=1, the elements from i onwards are 3,4,5,7,8. So target is 6 again. bisect_right(c,6,1) would look from index 1. The elements are 3,4,5,7,8. Wait, no, the entire array is the same. So when you start at i=1, the elements are [3,4,5,7,8], but wait, no. The original array after i=1 is the same as before. So for i=1, the element is 3. So target is 6 again. The elements starting from index 1 are 3,4,5,7,8. Wait, the original array is [3,3,4,5,7,8]. So the elements from index 1 are 3 (index 1), 4,5,7,8. So when we look for 6 starting at i=1, the bisect_right would find that the insertion point is 4 (since the elements at indices 1,2,3 are 3,4,5, which are <=6. Then 7 is at index 4 (since the list starts from i=1, the indices in the list are 1,2,3,4,5. Wait, no. The bisect_right function in Python uses the lo and hi parameters to specify the range. So when we call bisect.bisect_right(c, target, i), that's equivalent to looking in the slice c[i:hi], but since hi is not provided, it's up to len(c). So in the first example, for i=1, the target is 6. The elements from index 1 onwards are [3,4,5,7,8]. bisect_right for 6 in this subarray is the first position where elements are >6. The elements are 3,4,5,7,8. The 7 is the first element >6, which is at index 3 in the subarray. But in the original array, that's index 1+3=4. So the insertion point is 4. So j=4-1=3. current_size is 3-1+1=3. Which is 3 elements (indices 1,2,3: 3,4,5). So the subset size is 3, which is smaller than the previous 4.
 

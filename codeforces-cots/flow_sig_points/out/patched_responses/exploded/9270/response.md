@@ -741,19 +741,63 @@ ans = max(k1, k2)
 
 print(ans)
 
-Testing the sample inputs.
+Testing against sample input 1.
 
-First sample:
+```python
+def main(input_stream, output_stream):
+    n, x = map(int, input_stream.readline().rstrip("\n").split())
+    arr = list(map(int, input_stream.readline().rstrip("\n").split()))
+    arr.sort()
+    a = sum(1 for num in arr if num < x)
+    c = sum(1 for num in arr if num > x)
+    k1 = max(0, 2 * a + 1 - n)
+    k2 = max(0, 2 * c - n)
+    print(max(k1, k2), file=output_stream)
 
-3 10
 
-10 20 30 → sorted. a=0 (all elements are >=10. elements <10 is 0). Wait, wait: 10 is x. So elements <x is 0. elements >x is 2 (20 and 30). So a=0, c=2.
 
-k1=0+1-3= -2 →0.
+def test():
+    import io
 
-k2= 2*2 -3=4-3=1. Max(0,1) is 1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 4
+1 2 3
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-Which matches sample.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

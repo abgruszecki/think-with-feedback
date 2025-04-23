@@ -100,76 +100,80 @@ Then iterate through each cell (i, j) and check if column_sums[j] > row_sums[i].
 
 The code could look like this:
 
-n = int(input())
-grid = []
-for _ in range(n):
-    row = list(map(int, input().split()))
-    grid.append(row)
+Testing against sample input 2.
 
-row_sums = [sum(row) for row in grid]
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    grid = []
+    for _ in range(n):
+        row = list(map(int, input_stream.readline().rstrip("\n").split()))
+        grid.append(row)
 
-column_sums = []
-for j in range(n):
-    total = 0
-    for i in range(n):
-        total += grid[i][j]
-    column_sums.append(total)
+    row_sums = [sum(row) for row in grid]
 
-count = 0
-for i in range(n):
+    column_sums = []
     for j in range(n):
-        if column_sums[j] > row_sums[i]:
-            count +=1
+        total = 0
+        for i in range(n):
+            total += grid[i][j]
+        column_sums.append(total)
 
-print(count)
+    count = 0
+    for i in range(n):
+        for j in range(n):
+            if column_sums[j] > row_sums[i]:
+                count +=1
 
-Wait, but in the problem statement, the columns and rows are 1-based or 0-based? Let me check the input description.
+    print(count, file=output_stream)
 
-The input says: the j-th number on the i-th line represents the number on the square that belongs to the j-th column and the i-th row. So the grid is stored as rows, and each row has the numbers for columns 1 to n. So in code, grid[i][j] is the j-th column (0-based) of the i-th row (0-based). So when we compute column_sums[j], that's correct.
 
-Yes. So code is correct.
 
-Testing the code with the examples:
+def test():
+    import io
 
-First input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+5 7 8 4
+9 5 3 2
+1 6 6 4
+9 5 7 3
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-1
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-row_sums = [1]
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-column_sums = [1]
+    print('Tests passed 😎')
 
-Compare for i=0, j=0: 1 vs 1. Not greater. So count 0. Correct.
 
-Second example:
+if __name__ == '__main__':
+    test()
 
-n=2
 
-rows are [1,2] and [3,4]
+```
 
-row_sums = 3,7.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-columns:
-
-column 0: 1+3=4, column 1: 2+4=6.
-
-Then for each cell:
-
-i=0 (row sum 3):
-
-j=0: 4>3 → yes → count.
-
-j=1:6>3 → yes → count.
-
-i=1 (row sum 7):
-
-j=0:4>7 → no.
-
-j=1:6>7 → no.
-
-Total count 2. Correct.
+```
 
 Third example's code would process the grid and compute the correct row and column sums, leading to 6 winning squares.
 

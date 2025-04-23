@@ -222,47 +222,71 @@ else:
 
 So, code:
 
-cards = list(map(int, input().split()))
-total = sum(cards)
-from collections import Counter
-counts = Counter(cards)
+Testing against sample input 2.
 
-max_deduction = 0
+```python
+def main(input_stream, output_stream):
+    cards = list(map(int, input_stream.readline().rstrip("\n").split()))
+    total = sum(cards)
+    from collections import Counter
+    counts = Counter(cards)
 
-for num, cnt in counts.items():
-    if cnt >=2:
-        current = 2 * num
-        if cnt >=3:
-            current = max(current, 3 * num)
-        if current > max_deduction:
-            max_deduction = current
+    max_deduction = 0
 
-result = total - max_deduction
-print(result)
+    for num, cnt in counts.items():
+        if cnt >=2:
+            current = 2 * num
+            if cnt >=3:
+                current = max(current, 3 * num)
+            if current > max_deduction:
+                max_deduction = current
 
-Yes. That's the code.
+    result = total - max_deduction
+    print(result, file=output_stream)
 
-Testing the examples:
 
-First input:
 
-7 3 7 3 20
+def test():
+    import io
 
-counts are 7:2, 3:2, 20:1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 10 10 10 10
+""",
+            "output": \
+"""\
+20
+""",
+        }, 
+    ]
 
-For 7: current starts as 14. cnt is 2, so no check for 3. max_deduction becomes 14.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For 3: current is 6. Not larger than 14. No change.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Result: 40-14=26. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Third example: 10 10 10 10 10.
+    print('Tests passed 😎')
 
-counts 10:5. current starts as 20 (2*10). Since cnt >=3, compare with 30. So current is 30. max_deduction becomes 30. total is 50-30=20.
 
-Second example: all numbers unique. So counts are 1 for each. So no entries with cnt >=2. max_deduction remains 0. Sum is 28-0=28.
+if __name__ == '__main__':
+    test()
 
-Yes.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case: 2,2,2,2,5.
 

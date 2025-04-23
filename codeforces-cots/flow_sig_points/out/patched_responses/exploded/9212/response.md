@@ -794,195 +794,343 @@ Thus, the code can proceed.
 
 Thus, the code:
 
-n = int(input())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-prefix = [0]
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for num in a:
+    prefix = [0]
 
-    prefix.append(prefix[-1] + num)
+    for num in a:
 
-total = prefix[-1]
+        prefix.append(prefix[-1] + num)
 
-ans = {0}
+    total = prefix[-1]
 
-for k in range(1, 101):
+    ans = {0}
 
-    found = False
+    for k in range(1, 101):
 
-    for i in range(n):
+        found = False
 
-        sum_prev = prefix[i]
+        for i in range(n):
 
-        ai = a[i]
+            sum_prev = prefix[i]
 
-        # compute lower1, lower2, x_lower
+            ai = a[i]
 
-        lower1 = (k * ai + 99) // 100
+            # compute lower1, lower2, x_lower
 
-        numerator = k * total - 100 * sum_prev
+            lower1 = (k * ai + 99) // 100
 
-        lower2 = (numerator + 99) // 100
+            numerator = k * total - 100 * sum_prev
 
-        x_lower = max(lower1, lower2, 1)
+            lower2 = (numerator + 99) // 100
 
-        # compute upper1 and upper2
+            x_lower = max(lower1, lower2, 1)
 
-        upper1 = ((k+1) * ai - 1) // 100
+            # compute upper1 and upper2
 
-        upper2_numerator = (k+1)*total -1
+            upper1 = ((k+1) * ai - 1) // 100
 
-        upper2 = (upper2_numerator // 100) - sum_prev
+            upper2_numerator = (k+1)*total -1
 
-        x_upper = min(upper1, upper2, ai)
+            upper2 = (upper2_numerator // 100) - sum_prev
 
-        if x_lower <= x_upper and x_upper >= 1:
+            x_upper = min(upper1, upper2, ai)
 
-            found = True
+            if x_lower <= x_upper and x_upper >= 1:
 
-            break
+                found = True
 
-    if found:
+                break
 
-        ans.add(k)
+        if found:
 
-ans = sorted(ans)
+            ans.add(k)
 
-print('\n'.join(map(str, ans)))
+    ans = sorted(ans)
 
-Let's test this code against the first sample input:
+    print('\n'.join(map(str, ans)), file=output_stream)
 
-Sample 1:
 
-Input:
 
-1
+def test():
+    import io
 
-6
-
-prefix is [0,6]
-
-total is6.
-
-For k=16:
-
-i=0:
-
-sum_prev=0, ai=6.
-
-lower1 = (16 *6 +99)/100 → (96 +99)=195 →195//100=1.
-
-lower2 = (16*6*1 (total is6) -100*0 +99) → 96 +99=195 →195//100=1.
-
-x_lower=1.
-
-upper1 = (17*6-1)/100 →101//100=1.
-
-upper2 = (17*6-1)//100 -0 →101//100=1 →1-0=1.
-
-x_upper=1.
-
-So x_lower=1 <=x_upper=1 → found. So k=16 is added.
-
-Similarly, other k's in the sample are added.
-
-So the code should work.
-
-Another sample input:
-
-Sample 2:
-
-input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2
-
 100 500
+""",
+            "output": \
+"""\
+0
+95
+96
+97
+98
+99
+100
+""",
+        }, 
+    ]
 
-total=600.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-k=95:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-For file 1 (i=1):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-sum_prev=100, ai=500.
+    print('Tests passed 😎')
 
-lower1 = (95*500 +99)//100 → (47500 +99)=47599//100=475.99 →475.
 
-lower2 = (95*600 -100*100 +99) → 57000 -10000=47000 →47000+99=47099 →47099//100=470.99 →470.
+if __name__ == '__main__':
+    test()
 
-x_lower= max(475,470,1) →475.
 
-upper1 = (96 *500 -1) //100 →47999//100=479.
+```
 
-upper2 = (96*600-1) →57599 →57599//100=575 →575 - sum_prev=100 →475.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-x_upper= min(479,475,500) →475.
+```
 
-x_lower=475 <= x_upper=475 → yes.
+Testing against sample input 2.
 
-Thus, k=95 is added.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-This matches the sample.
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-Sample 3:
+    prefix = [0]
 
-input:
+    for num in a:
 
+        prefix.append(prefix[-1] + num)
+
+    total = prefix[-1]
+
+    ans = {0}
+
+    for k in range(1, 101):
+
+        found = False
+
+        for i in range(n):
+
+            sum_prev = prefix[i]
+
+            ai = a[i]
+
+            # compute lower1, lower2, x_lower
+
+            lower1 = (k * ai + 99) // 100
+
+            numerator = k * total - 100 * sum_prev
+
+            lower2 = (numerator + 99) // 100
+
+            x_lower = max(lower1, lower2, 1)
+
+            # compute upper1 and upper2
+
+            upper1 = ((k+1) * ai - 1) // 100
+
+            upper2_numerator = (k+1)*total -1
+
+            upper2 = (upper2_numerator // 100) - sum_prev
+
+            x_upper = min(upper1, upper2, ai)
+
+            if x_lower <= x_upper and x_upper >= 1:
+
+                found = True
+
+                break
+
+        if found:
+
+            ans.add(k)
+
+    ans = sorted(ans)
+
+    print('\n'.join(map(str, ans)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
-
 10000000000 2 2 9999999998
+""",
+            "output": \
+"""\
+0
+50
+99
+100
+""",
+        }, 
+    ]
 
-total is 10000000000 +2+2+9999999998 = (1e10 + 1e10) → 2e10.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For k=50:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Check files.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-File 0: sum_prev=0, ai=1e10.
+    print('Tests passed 😎')
 
-lower1 = (50 *1e10 +99)/100 → (5e11 +99)/100 →5e9 + 0.99 →5e9.
 
-lower2 = (50*2e10 - 100*0 +99 ) → (1e12 +99) →1e12//100 + 0.99 →1e10 →10000000000.
+if __name__ == '__main__':
+    test()
 
-x_lower = max(5e9,1e10,1) →1e10.
 
-But ai is 1e10 → x must be <=1e10.
+```
 
-upper1 = (51*1e10 -1)/100 →5100000000-1 →5099999999//100 →50999999.99 →50999999.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-upper2 = (51*2e10 -1 )//100 -0 → (1.02e12 -1 )//100 →10200000000-1=10199999999 →10199999999//100=101999999.99 →101999999 →101999999 -0=101999999.
+```
 
-x_upper = min(50999999, 101999999, 1e10) →50999999.
+Testing against sample input 3.
 
-x_lower=1e10 > x_upper=50999999 → no.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-So not in file 0.
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-File 1: sum_prev=1e10, ai=2.
+    prefix = [0]
 
-k=50:
+    for num in a:
 
-lower1 = (50 *2 +99)/100 →199//100=1.
+        prefix.append(prefix[-1] + num)
 
-lower2 = (50 *2e10 -100*1e10 +99) → (1e12 -1e12 +99) →99 →99//100=0.99 →0.
+    total = prefix[-1]
 
-x_lower = max(1,0,1) →1.
+    ans = {0}
 
-upper1 = (51*2 -1)/100 →101//100=1.
+    for k in range(1, 101):
 
-upper2 = (51*2e10 -1 )//100 -1e10 → (1.02e12 -1 )//100 →10200000000 -1 →10199999999//100=101999999.99 →101999999 →101999999 -1e10=1e10 +1999999 → but sum_prev is 1e10. So upper2 = 101999999 -1e10 → which would be negative. So x_upper is min(1, negative, 2) →negative →x_upper=1.
+        found = False
 
-So x_lower=1 <=x_upper=1 → yes.
+        for i in range(n):
 
-So k=50 is added.
+            sum_prev = prefix[i]
 
-Thus, sample 3's output includes 50.
+            ai = a[i]
 
-Thus, the code works.
+            # compute lower1, lower2, x_lower
 
-Thus, the code should correctly handle all cases.
+            lower1 = (k * ai + 99) // 100
+
+            numerator = k * total - 100 * sum_prev
+
+            lower2 = (numerator + 99) // 100
+
+            x_lower = max(lower1, lower2, 1)
+
+            # compute upper1 and upper2
+
+            upper1 = ((k+1) * ai - 1) // 100
+
+            upper2_numerator = (k+1)*total -1
+
+            upper2 = (upper2_numerator // 100) - sum_prev
+
+            x_upper = min(upper1, upper2, ai)
+
+            if x_lower <= x_upper and x_upper >= 1:
+
+                found = True
+
+                break
+
+        if found:
+
+            ans.add(k)
+
+    ans = sorted(ans)
+
+    print('\n'.join(map(str, ans)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+170 130 400 256 30 100
+""",
+            "output": \
+"""\
+0
+17
+43
+44
+84
+90
+99
+100
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

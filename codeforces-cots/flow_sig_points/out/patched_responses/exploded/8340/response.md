@@ -427,104 +427,211 @@ Wait, perhaps loop over the three possible group positions.
 
 So in code:
 
-sticks = list(map(int, input().split()))
-sticks.sort()
+Testing against sample input 1.
 
-def check_group(sticks, start):
-    # Check if four consecutive elements starting at 'start' are equal.
-    # start can be 0, 1, or 2 (since groups are 0-3, 1-4, 2-5)
-    # returns (is_group, remaining)
-    if start + 3 >=6:
-        return (False, [])
-    # check if sticks[start] to sticks[start+3] are same
-    val = sticks[start]
-    for i in range(start, start+4):
-        if sticks[i] != val:
+```python
+def main(input_stream, output_stream):
+    sticks = list(map(int, input_stream.readline().rstrip("\n").split()))
+    sticks.sort()
+
+    def check_group(sticks, start):
+        # Check if four consecutive elements starting at 'start' are equal.
+        # start can be 0, 1, or 2 (since groups are 0-3, 1-4, 2-5)
+        # returns (is_group, remaining)
+        if start + 3 >=6:
             return (False, [])
-    # group found. get remaining elements.
-    # remaining elements are all elements not in the group.
-    # since sorted, the group is start to start+3.
-    # the remaining elements are all elements before start, and after start+3.
-    # but since it's a sorted list, the group is a contiguous block.
-    # For example, if group is start=0, then the remaining elements are 4,5.
-    # if group is start=1, remaining are 0,5.
-    # if group is start=2, remaining are 0,1.
+        # check if sticks[start] to sticks[start+3] are same
+        val = sticks[start]
+        for i in range(start, start+4):
+            if sticks[i] != val:
+                return (False, [])
+        # group found. get remaining elements.
+        # remaining elements are all elements not in the group.
+        # since sorted, the group is start to start+3.
+        # the remaining elements are all elements before start, and after start+3.
+        # but since it's a sorted list, the group is a contiguous block.
+        # For example, if group is start=0, then the remaining elements are 4,5.
+        # if group is start=1, remaining are 0,5.
+        # if group is start=2, remaining are 0,1.
 
-    # collect the remaining elements.
-    remaining = []
-    for i in range(6):
-        if i < start or i >= start +4:
-            remaining.append(sticks[i])
-    # since the array is sorted, the remaining elements are sorted.
-    # but when group is start=1, remaining are 0,5. which are sorted.
-    # So the remaining list is [sticks[0], sticks[5]] when start=1.
+        # collect the remaining elements.
+        remaining = []
+        for i in range(6):
+            if i < start or i >= start +4:
+                remaining.append(sticks[i])
+        # since the array is sorted, the remaining elements are sorted.
+        # but when group is start=1, remaining are 0,5. which are sorted.
+        # So the remaining list is [sticks[0], sticks[5]] when start=1.
 
-    return (True, remaining)
+        return (True, remaining)
 
-groups_to_check = [0, 1, 2]
+    groups_to_check = [0, 1, 2]
 
-found = False
-for start in groups_to_check:
-    is_group, remaining = check_group(sticks, start)
-    if is_group:
-        # check the remaining two elements
-        a, b = remaining[0], remaining[1]
-        if a == b:
-            print("Elephant")
-            found = True
-            break
-        else:
-            # since the array is sorted, a <= b. So a < b.
-            print("Bear")
-            found = True
-            break
+    found = False
+    for start in groups_to_check:
+        is_group, remaining = check_group(sticks, start)
+        if is_group:
+            # check the remaining two elements
+            a, b = remaining[0], remaining[1]
+            if a == b:
+                print("Elephant", file=output_stream)
+                found = True
+                break
+            else:
+                # since the array is sorted, a <= b. So a < b.
+                print("Bear", file=output_stream)
+                found = True
+                break
 
-if not found:
-    print("Alien")
+    if not found:
+        print("Alien", file=output_stream)
 
-Wait, but what about the case where there are two possible groups. For example, five a's. Then group starts at 0 and 1.
 
-But the code checks start=0 first. It finds the group, processes, and returns. So even if there's another group, it's not checked. But since the problem says that the input can't form both, it's okay.
 
-But the code may miss a valid group if the first group is not in the group list. For example, if the four same elements are in positions 0-3, 1-4, etc.
+def test():
+    import io
 
-Wait, the code checks starts at 0, 1, 2. For group of four, the possible starts are 0,1,2. Because four elements can't start beyond 2 (since 2+3=5, which is the last index).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4 5 4 4 5
+""",
+            "output": \
+"""\
+Elephant
+""",
+        }, 
+    ]
 
-So for example, in the array [a,a,a,a,a,a], group starts at 0,1,2 would all be valid. The code checks start=0 first. Then returns elephant.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Yes.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Another example: [a,a,a,a,a,b]. The group starts at 0 (0-3), and 1-4 (since elements 1-4 are a's). The code checks start=0 first. The remaining elements are a and b. So bear is printed.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-But wait, the code would process start=0 first. The remaining elements are 4 and5 (elements[4] is a, elements[5] is b). So a <b → bear.
+    print('Tests passed 😎')
 
-But if start=1 is checked, then the group is elements 1-4 (a's), and the remaining elements are 0 and5 (a and b). Same as before. So the code would process the first group (start=0) and output bear, which is correct.
 
-But what if the array is [b,a,a,a,a,a]. After sorting, it's [a,a,a,a,a,b]. Then, group start=0 would be a's. remaining elements a and b → bear.
+if __name__ == '__main__':
+    test()
 
-Yes.
 
-Another case: [a,a,a,a,b,b]. After sorting, group starts at 0. remaining elements a and b? No. Wait, the array after sorting is [a,a,a,a,b,b]. So group start=0: 0-3 are a's. remaining elements are 4 and5 → b and b. So elephant.
+```
 
-Yes.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So the code seems to handle all cases.
+```
 
-Now, let's test the sample inputs.
+Testing against sample input 2.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    sticks = list(map(int, input_stream.readline().rstrip("\n").split()))
+    sticks.sort()
 
-Input:4 2 5 4 4 4 → sorted → [2,4,4,4,4,5]
+    def check_group(sticks, start):
+        # Check if four consecutive elements starting at 'start' are equal.
+        # start can be 0, 1, or 2 (since groups are 0-3, 1-4, 2-5)
+        # returns (is_group, remaining)
+        if start + 3 >=6:
+            return (False, [])
+        # check if sticks[start] to sticks[start+3] are same
+        val = sticks[start]
+        for i in range(start, start+4):
+            if sticks[i] != val:
+                return (False, [])
+        # group found. get remaining elements.
+        # remaining elements are all elements not in the group.
+        # since sorted, the group is start to start+3.
+        # the remaining elements are all elements before start, and after start+3.
+        # but since it's a sorted list, the group is a contiguous block.
+        # For example, if group is start=0, then the remaining elements are 4,5.
+        # if group is start=1, remaining are 0,5.
+        # if group is start=2, remaining are 0,1.
 
-Check start=0: elements 0-3 (2,4,4,4) → not same.
+        # collect the remaining elements.
+        remaining = []
+        for i in range(6):
+            if i < start or i >= start +4:
+                remaining.append(sticks[i])
+        # since the array is sorted, the remaining elements are sorted.
+        # but when group is start=1, remaining are 0,5. which are sorted.
+        # So the remaining list is [sticks[0], sticks[5]] when start=1.
 
-Next start=1: elements 1-4 (4,4,4,4) → same. So remaining elements are 0 (2) and5 (5). Check if 2 ==5 → no. So Bear. So code outputs Bear. Which matches sample.
+        return (True, remaining)
 
-Sample 2:
+    groups_to_check = [0, 1, 2]
 
-Input:4 4 5 4 4 5 → sorted → [4,4,4,4,5,5]
+    found = False
+    for start in groups_to_check:
+        is_group, remaining = check_group(sticks, start)
+        if is_group:
+            # check the remaining two elements
+            a, b = remaining[0], remaining[1]
+            if a == b:
+                print("Elephant", file=output_stream)
+                found = True
+                break
+            else:
+                # since the array is sorted, a <= b. So a < b.
+                print("Bear", file=output_stream)
+                found = True
+                break
 
-Check start=0: 4,4,4,4 → yes. Remaining are 5 and5. So elephant. So code outputs Elephant.
+    if not found:
+        print("Alien", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 2 3 4 5 6
+""",
+            "output": \
+"""\
+Alien
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

@@ -241,108 +241,137 @@ Now, in Python, the code would read n, then s. Then, loop through each i in rang
 
 So code:
 
-n = int(input())
-s = input().strip()
-max_count = 0
+Testing against sample input 1.
 
-for i in range(n):
-    current_chars = set()
-    for j in range(i, n):
-        c = s[j]
-        if c.isupper():
-            break
-        current_chars.add(c)
-        current_size = len(current_chars)
-        if current_size > max_count:
-            max_count = current_size
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+    max_count = 0
 
-print(max_count)
+    for i in range(n):
+        current_chars = set()
+        for j in range(i, n):
+            c = s[j]
+            if c.isupper():
+                break
+            current_chars.add(c)
+            current_size = len(current_chars)
+            if current_size > max_count:
+                max_count = current_size
 
-That's the code. Let's test the examples.
+    print(max_count, file=output_stream)
 
-First example:
 
-Input:
 
-11
+def test():
+    import io
 
-aaaaBaabAbA
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+12
+zACaAbbaazzC
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-Processing i from 0 to 10.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=0:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-j=0: 'a' → set size 1 → max 1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-j=1: 'a' → size 1.
+    print('Tests passed 😎')
 
-j=2: 'a' → same.
 
-j=3: 'a' → same.
+if __name__ == '__main__':
+    test()
 
-j=4: 'B' → break. So max remains 1.
 
-i=4 is 'B' → inner loop breaks immediately.
+```
 
-i=5 (s[5] is 'a'):
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-j=5: 'a' → size 1.
+```
 
-j=6: 'a' → size 1.
+Testing against sample input 2.
 
-j=7: 'b' → size 2 → max 2.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+    max_count = 0
 
-j=8: 'A' → break. So max becomes 2.
+    for i in range(n):
+        current_chars = set()
+        for j in range(i, n):
+            c = s[j]
+            if c.isupper():
+                break
+            current_chars.add(c)
+            current_size = len(current_chars)
+            if current_size > max_count:
+                max_count = current_size
 
-i=6 (s[6] is 'a'):
+    print(max_count, file=output_stream)
 
-j=6: 'a' → size 1.
 
-j=7: 'b' → size 2 → max remains 2.
 
-j=8: 'A' → break.
+def test():
+    import io
 
-i=7 (s[7] is 'b'):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+ABC
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-j=7: 'b' → size 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-j=8: 'A' → break.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=8 (s[8] is 'A') → break.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=9 (s[9] is 'b'):
+    print('Tests passed 😎')
 
-j=9: 'b' → size 1.
 
-j=10: 'A' → break.
+if __name__ == '__main__':
+    test()
 
-So the code returns 2, which matches the first example.
 
-Second example:
+```
 
-n=12, s = 'zACaAbbaazzC'
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Looking at the string:
-
-Indices 0: 'z', 1: 'A', 2: 'C', 3: 'a', 4: 'A', 5: 'b', 6: 'b', 7: 'a', 8: 'a', 9: 'z', 10: 'z', 11: 'C'.
-
-i=5 (s[5] is 'b'):
-
-j=5: 'b' → size 1.
-
-j=6: 'b' → size 1.
-
-j=7: 'a' → size 2.
-
-j=8: 'a' → size remains 2.
-
-j=9: 'z' → size 3 → new max.
-
-j=10: 'z' → size 3.
-
-j=11: 'C' → break.
-
-So the maximum becomes 3, which is correct.
+```
 
 Third example:
 

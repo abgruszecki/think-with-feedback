@@ -851,107 +851,110 @@ But for Python, appending to a list is O(1) per element, so building the prefix 
 
 Thus, the code becomes:
 
-n, k = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-prefix = [0]
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for num in a:
+    prefix = [0]
 
-    prefix.append(prefix[-1] + num)
+    for num in a:
 
-max_abs_sum = 10**14
+        prefix.append(prefix[-1] + num)
 
-targets = set()
+    max_abs_sum = 10**14
 
-current = 1
+    targets = set()
 
-targets.add(current)
+    current = 1
 
-while True:
+    targets.add(current)
 
-    next_val = current * k
+    while True:
 
-    if abs(next_val) > max_abs_sum:
+        next_val = current * k
 
-        break
+        if abs(next_val) > max_abs_sum:
 
-    if next_val in targets:
+            break
 
-        break
+        if next_val in targets:
 
-    targets.add(next_val)
+            break
 
-    current = next_val
+        targets.add(next_val)
 
-total =0
+        current = next_val
 
-for T in targets:
+    total =0
 
-    count_map = {0:1}
+    for T in targets:
 
-    res =0
+        count_map = {0:1}
 
-    for s in prefix[1:]:  # s is the sum up to current element
+        res =0
 
-        req = s - T
+        for s in prefix[1:]:  # s is the sum up to current element
 
-        res += count_map.get(req, 0)
+            req = s - T
 
-        # Update count_map for s
+            res += count_map.get(req, 0)
 
-        count_map[s] = count_map.get(s, 0) +1
+            # Update count_map for s
 
-    total += res
+            count_map[s] = count_map.get(s, 0) +1
 
-print(total)
+        total += res
 
-But in this code, the prefix list is built once, and for each T, we loop through the prefix list.
+    print(total, file=output_stream)
 
-This may save some time, as adding numbers in the loop is not needed for each T. But the time complexity is the same.
 
-But this code should work.
 
-Testing the sample input 1:
+def test():
+    import io
 
-prefix is [0, 2,4,6,8]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 -3
+3 -6 -3 12
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-For T=2:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-count_map starts with {0:1}
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing s=2:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-req =2-2=0 → count_map[0] =1 → res +=1.
+    print('Tests passed 😎')
 
-count_map[2] =1.
 
-Processing s=4:
+if __name__ == '__main__':
+    test()
 
-req=4-2=2 → count_map[2] is 1 → res +=1 → total res=2.
 
-count_map[4] =1.
+```
 
-Processing s=6:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-req=6-2=4 → count_map[4] is 1 → res +=1 → res=3.
-
-count_map[6] =1.
-
-Processing s=8:
-
-req=8-2=6 → count_map[6] is 1 → res +=1 → res=4.
-
-count_map[8] =1.
-
-So res=4.
-
-Similarly for other T's.
-
-Thus, code works.
-
-But what about the case where k is negative?
+```
 
 Sample input 2:
 

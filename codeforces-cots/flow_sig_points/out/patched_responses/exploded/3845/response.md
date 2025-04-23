@@ -58,15 +58,59 @@ print space-separated elements.
 
 So the code would be:
 
-data = list(map(int, input().split()))
-n = data[0]
-arr = data[1:n+1]
-arr.sort()
-print(' '.join(map(str, arr)))
+Testing against sample input 1.
 
-Testing the first example input:
+```python
+def main(input_stream, output_stream):
+    data = list(map(int, input_stream.readline().rstrip("\n").split()))
+    n = data[0]
+    arr = data[1:n+1]
+    arr.sort()
+    print(' '.join(map(str, arr)), file=output_stream)
 
-Input line is "3 3 1 2". data becomes [3,3,1,2]. n=3. arr is data[1:4] → [3,1,2]. After sorting → [1,2,3]. Output is "1 2 3".
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 12 2 3 44 5 60 2
+""",
+            "output": \
+"""\
+2 2 3 5 12 44 60
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example input: "7 12 2 3 44 5 60 2". data is [7, 12,2,3,44,5,60,2]. So arr is elements from index 1 to 8 (7+1=8), so indexes 1 to 7 inclusive. That gives [12,2,3,44,5,60,2]. After sorting: [2,2,3,5,12,44,60], which matches the output.
 

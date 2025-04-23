@@ -266,31 +266,75 @@ else:
 
 Yes.
 
-Testing all samples.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    lengths = []
+    for _ in range(4):
+        line = input_stream.readline().rstrip("\n").strip()
+        lengths.append(len(line) - 2)
 
-Inputs:
+    great = []
+    for i in range(4):
+        current = lengths[i]
+        others = [lengths[j] for j in range(4) if j != i]
+        cond1 = all(other >= 2 * current for other in others)
+        cond2 = all(current >= 2 * other for other in others)
+        if cond1 or cond2:
+            great.append(i)
 
-A.VFleaKing_is_the_author_of_this_problem → len after prefix is 39.
+    if len(great) == 1:
+        print('ABCD'[great[0]], file=output_stream)
+    else:
+        print('C', file=output_stream)
 
-B.Picks_is_the_author_of_this_problem → len 35.
 
-C.Picking_is_the_author_of_this_problem → len 37.
 
-D.Ftiasch_is_cute → len 15.
+def test():
+    import io
 
-Others for D (i=3):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+A.ab
+B.abcde
+C.ab
+D.abc
+""",
+            "output": \
+"""\
+C
+""",
+        }, 
+    ]
 
-current is 15.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-others are 39,35,37.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Check condition1: 15*2=30. Are 39,35,37 all >=30? Yes. So condition1 holds. So D is great.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Others for A (i=0):
+    print('Tests passed 😎')
 
-current 39. others 35,37,15. condition2: 39 >= 2*35 → 39 >=70? No. So not. So only D is in great. So output D.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2: output C.
 

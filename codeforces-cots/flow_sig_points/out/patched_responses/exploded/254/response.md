@@ -531,159 +531,193 @@ But the code for generating the third code is integer arithmetic, which is faste
 
 So the code would be:
 
-n, k = map(int, input().split())
+Testing against sample input 1.
 
-cards = [input().strip() for _ in range(n)]
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-char_to_code = {'S':0, 'E':1, 'T':2}
+    cards = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
 
-pre = [tuple([char_to_code[c] for c in card]) for card in cards]
+    char_to_code = {'S':0, 'E':1, 'T':2}
 
-card_tuples = set(pre)
+    pre = [tuple([char_to_code[c] for c in card]) for card in cards]
 
-count =0
+    card_tuples = set(pre)
 
-n_cards = len(pre)
+    count =0
 
-for i in range(n_cards):
+    n_cards = len(pre)
 
-    for j in range(i+1, n_cards):
+    for i in range(n_cards):
 
-        third = []
+        for j in range(i+1, n_cards):
 
-        for c in range(k):
+            third = []
 
-            a = pre[i][c]
+            for c in range(k):
 
-            b = pre[j][c]
+                a = pre[i][c]
 
-            if a == b:
+                b = pre[j][c]
 
-                third.append(a)
+                if a == b:
 
-            else:
+                    third.append(a)
 
-                third.append( (3 - a - b) %3 )
+                else:
 
-        third_tuple = tuple(third)
+                    third.append( (3 - a - b) %3 )
 
-        if third_tuple in card_tuples:
+            third_tuple = tuple(third)
 
-            count +=1
+            if third_tuple in card_tuples:
 
-print(count//3)
+                count +=1
 
-This should work and be more efficient.
+    print(count//3, file=output_stream)
 
-Now, let's test this code against the examples.
 
-First example:
 
-Input:
+def test():
+    import io
 
-3 3
-
-SET
-
-ETS
-
-TSE
-
-The code for each card:
-
-SET → S=0, E=1, T=2 → (0,1,2)
-
-ETS → E=1, T=2, S=0 → (1,2,0)
-
-TSE → T=2, S=0, E=1 → (2,0,1)
-
-Now, for pair (0,1):
-
-Compute third:
-
-For each feature:
-
-0 and 1 → 3-0-1 =2 mod3=2.
-
-0 and 2 → 3-0-2=1 mod3=1.
-
-1 and 0 → 3-1-0=2 mod3=2.
-
-Wait, but for each feature in the cards:
-
-card0: 0,1,2
-
-card1: 1,2,0
-
-feature 0: a=0, b=1 → third is (3-0-1)=2.
-
-feature1: a=1, b=2 → third is (3-1-2)=0.
-
-feature2: a=2, b=0 → (3-2-0) =1.
-
-So third_tuple is (2,0,1). Which is the third card (card2). So count increases by 1.
-
-Then, pairs (0,2) and (1,2) are processed.
-
-For pair (0,2):
-
-card0 is (0,1,2)
-
-card2 is (2,0,1)
-
-feature0: 0 vs 2 → third is (3-0-2)=1.
-
-feature1:1 vs0 → (3-1-0)=2.
-
-feature2:2 vs1 → (3-2-1)=0.
-
-third_tuple is (1,2,0), which is card1. So count increases by 1.
-
-For pair (1,2):
-
-card1 is (1,2,0)
-
-card2 is (2,0,1)
-
-feature0:1 vs2 → third is 0.
-
-feature1:2 vs0 → third is 1.
-
-feature2:0 vs1 → third is 2.
-
-third_tuple is (0,1,2), which is card0. So count increases by 1.
-
-Total count is 3 → 3//3=1, which matches the example.
-
-Yes.
-
-Second example:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3 4
+SETE
+ETSE
+TSES
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-SETE → S, E, T, E → codes 0,1,2,1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-ETSE → E, T, S, E → 1,2,0,1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-TSES → T, S, E, S → 2,0,1,0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-For each pair:
+    print('Tests passed 😎')
 
-pair (0,1):
 
-compute each feature's third.
+if __name__ == '__main__':
+    test()
 
-feature0: 0 vs1 → 2.
 
-feature1:1 vs2 → (3-1-2)=0.
+```
 
-feature2:2 vs0 → (3-2-0)=1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-feature3:1 vs1 → same as 1.
+```
 
-third_tuple is (2,0,1,1). Check if this is in card_tuples. The third card would have codes (2,0,1,1). Looking at the third card (TSES) which is (2,0,1,0). So not present. So no increment.
+Testing against sample input 2.
 
-Similarly, other pairs would also not form a triplet. So the count is zero.
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+
+    cards = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
+
+    char_to_code = {'S':0, 'E':1, 'T':2}
+
+    pre = [tuple([char_to_code[c] for c in card]) for card in cards]
+
+    card_tuples = set(pre)
+
+    count =0
+
+    n_cards = len(pre)
+
+    for i in range(n_cards):
+
+        for j in range(i+1, n_cards):
+
+            third = []
+
+            for c in range(k):
+
+                a = pre[i][c]
+
+                b = pre[j][c]
+
+                if a == b:
+
+                    third.append(a)
+
+                else:
+
+                    third.append( (3 - a - b) %3 )
+
+            third_tuple = tuple(third)
+
+            if third_tuple in card_tuples:
+
+                count +=1
+
+    print(count//3, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 4
+SETT
+TEST
+EEET
+ESTE
+STES
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

@@ -817,123 +817,809 @@ In Python, we can use math.floor.
 
 So code steps:
 
+Testing against sample input 1.
+
+```python
+import math
+
+
+def main(input_stream, output_stream):
+    m, b = map(int, input_stream.readline().rstrip("\n").split())
+
+    max_x = m * b 
+
+    candidates = set()
+
+    A = m -1 
+
+    B = - ( (m-1)*(2*m -1) - b*m )
+
+    C = -m * (m-1) * (b +1 )
+
+    D = B**2 -4*A*C 
+
+    if D >=0:
+
+        sqrtD = math.sqrt(D)
+
+        x1 = (-B + sqrtD)/(2*A)
+
+        x2 = (-B - sqrtD)/(2*A)
+
+        for x in [x1, x2]:
+
+            if x >=0 and x <= max_x:
+
+                candidates.add(math.floor(x))
+
+                candidates.add(math.ceil(x))
+
+                candidates.add(int(x))
+
+    candidates.add(0)
+
+    candidates.add(max_x)
+
+    max_bananas = 0 
+
+    for x in candidates:
+
+        if x <0 or x > max_x:
+
+            continue 
+
+        y = (b - x/m)
+
+        if y <0:
+
+            continue 
+
+        y_floor = int(y)
+
+        if y_floor <0:
+
+            continue 
+
+        # compute sum 
+
+        sum_x_part = (x * (x +1 ) // 2 ) * (y_floor +1 )
+
+        sum_y_part = (y_floor * (y_floor +1 ) // 2 ) * (x +1 )
+
+        total = sum_x_part + sum_y_part 
+
+        if total > max_bananas:
+
+            max_bananas = total 
+
+    print(max_bananas, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 3
+""",
+            "output": \
+"""\
+25
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 108, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 101, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '25'
+Got: '21'
+
+```
+
+So the code needs to handle the case when A=0.
+
+So the code should be adjusted to handle when m=1.
+
+Let's re-examine the code.
+
+In the code, when m=1:
+
+A = m-1 =0.
+
+Then, the code computes D = B² -4*A*C = B² -0 = B².
+
+But since A=0, the equation is linear: B x + C =0.
+
+So the code will compute x1 and x2 as roots, but since A is zero, division by zero occurs.
+
+So the code will crash.
+
+Thus, we need to handle the case when m=1 separately.
+
+When m=1:
+
+The line equation is y = -x +b.
+
+For x in [0, b], since m*b = 1*b =b.
+
+The sum S(x) is (x+1)(y+1)(x + y)/2, where y = (b -x).
+
+But since m=1, x is an integer, and y =b-x.
+
+So y is also integer.
+
+Thus, sum S(x) can be computed as:
+
+S(x) = (x+1)( (b -x)+1 ) (x + (b -x )) / 2 
+
+= (x+1)(b -x +1)(b) / 2 
+
+= (x+1)(b -x +1) * b / 2 
+
+= ( (x+1)(b -x +1) ) * b /2 
+
+This is a quadratic function in x. The maximum of (x+1)(b -x +1) is achieved when x = (b-1)/2.
+
+But since x is integer, we need to check x = floor( (b-1)/2 ), ceil( (b-1)/2 ), etc.
+
+So for m=1, the maximum S(x) is the maximum of the quadratic function (x+1)(b -x +1) multiplied by b/2.
+
+So the function (x+1)(b -x +1) is a quadratic in x, which has maximum at x = (b)/2 - 0.5 → (b-1)/2.
+
+So for even b-1: if b is even, then (b-1) is odd. So (b-1)/2 is a half-integer. For example, if b=5 (even?), no. Wait, b can be any integer.
+
+Example: for m=1, b=5 (sample input 1), the maximum is at x=2 or x=3.
+
+Which is correct.
+
+So for m=1, the optimal x is (b-1)/2.
+
+But since x must be integer, the optimal x is floor( (b-1)/2 ) or ceil( (b-1)/2 ), which are the same as floor(b/2 -0.5) and ceil(b/2 -0.5).
+
+So for m=1, the candidates are:
+
+x = floor( (b-1)/2 ), ceil( (b-1)/2 ), and possibly the boundaries x=0 and x=b.
+
+But in code, for m=1:
+
+candidates are x in the vicinity of (b-1)/2, plus 0 and b.
+
+Thus, for m=1, we can compute x_candidates as:
+
+x_candidates = [ (b-1)//2, (b-1)//2 +1, 0, b ]
+
+But need to ensure that these are within 0 <=x <=b.
+
+So in code:
+
+if m ==1:
+
+    x_candidates = set()
+
+    x_candidates.add(0)
+
+    x_candidates.add(b)
+
+    x_candidates.add( (b-1)//2 )
+
+    x_candidates.add( (b-1)//2 +1 )
+
+    for x in x_candidates:
+
+        if x <0 or x >b:
+
+            continue 
+
+        compute sum and find maximum.
+
+This approach would handle m=1.
+
+So integrating this into the code.
+
+So the code should handle m=1 separately.
+
+So the complete code would:
+
+- Check if m is 1. If yes, handle separately.
+
+- Else, proceed with the quadratic approach.
+
+So the code becomes:
+
+So the code needs to handle the case when A=0.
+
+So the code should be adjusted to handle when m=1.
+
+Let's re-examine the code.
+
+In the code, when m=1:
+
+A = m-1 =0.
+
+Then, the code computes D = B² -4*A*C = B² -0 = B².
+
+But since A=0, the equation is linear: B x + C =0.
+
+So the code will compute x1 and x2 as roots, but since A is zero, division by zero occurs.
+
+So the code will crash.
+
+Thus, we need to handle the case when m=1 separately.
+
+When m=1:
+
+The line equation is y = -x +b.
+
+For x in [0, b], since m*b = 1*b =b.
+
+The sum S(x) is (x+1)(y+1)(x + y)/2, where y = (b -x).
+
+But since m=1, x is an integer, and y =b-x.
+
+So y is also integer.
+
+Thus, sum S(x) can be computed as:
+
+S(x) = (x+1)( (b -x)+1 ) (x + (b -x )) / 2 
+
+= (x+1)(b -x +1)(b) / 2 
+
+= (x+1)(b -x +1) * b / 2 
+
+= ( (x+1)(b -x +1) ) * b /2 
+
+This is a quadratic function in x. The maximum of (x+1)(b -x +1) is achieved when x = (b-1)/2.
+
+But since x is integer, we need to check x = floor( (b-1)/2 ), ceil( (b-1)/2 ), etc.
+
+So for m=1, the maximum S(x) is the maximum of the quadratic function (x+1)(b -x +1) multiplied by b/2.
+
+So the function (x+1)(b -x +1) is a quadratic in x, which has maximum at x = (b)/2 - 0.5 → (b-1)/2.
+
+So for even b-1: if b is even, then (b-1) is odd. So (b-1)/2 is a half-integer. For example, if b=5 (even?), no. Wait, b can be any integer.
+
+Example: for m=1, b=5 (sample input 1), the maximum is at x=2 or x=3.
+
+Which is correct.
+
+So for m=1, the optimal x is (b-1)/2.
+
+But since x must be integer, the optimal x is floor( (b-1)/2 ) or ceil( (b-1)/2 ), which are the same as floor(b/2 -0.5) and ceil(b/2 -0.5).
+
+So for m=1, the candidates are:
+
+x = floor( (b-1)/2 ), ceil( (b-1)/2 ), and possibly the boundaries x=0 and x=b.
+
+But in code, for m=1:
+
+candidates are x in the vicinity of (b-1)/2, plus 0 and b.
+
+Thus, for m=1, we can compute x_candidates as:
+
+x_candidates = [ (b-1)//2, (b-1)//2 +1, 0, b ]
+
+But need to ensure that these are within 0 <=x <=b.
+
+So in code:
+
+if m ==1:
+
+    x_candidates = set()
+
+    x_candidates.add(0)
+
+    x_candidates.add(b)
+
+    x_candidates.add( (b-1)//2 )
+
+    x_candidates.add( (b-1)//2 +1 )
+
+    for x in x_candidates:
+
+        if x <0 or x >b:
+
+            continue 
+
+        compute sum and find maximum.
+
+This approach would handle m=1.
+
+So integrating this into the code.
+
+So the code should handle m=1 separately.
+
+So the complete code would:
+
+- Check if m is 1. If yes, handle separately.
+
+- Else, proceed with the quadratic approach.
+
+So the code becomes:
+
+So the code needs to handle the case when A=0.
+
+So the code should be adjusted to handle when m=1.
+
+Let's re-examine the code.
+
+In the code, when m=1:
+
+A = m-1 =0.
+
+Then, the code computes D = B² -4*A*C = B² -0 = B².
+
+But since A=0, the equation is linear: B x + C =0.
+
+So the code will compute x1 and x2 as roots, but since A is zero, division by zero occurs.
+
+So the code will crash.
+
+Thus, we need to handle the case when m=1 separately.
+
+When m=1:
+
+The line equation is y = -x +b.
+
+For x in [0, b], since m*b = 1*b =b.
+
+The sum S(x) is (x+1)(y+1)(x + y)/2, where y = (b -x).
+
+But since m=1, x is an integer, and y =b-x.
+
+So y is also integer.
+
+Thus, sum S(x) can be computed as:
+
+S(x) = (x+1)( (b -x)+1 ) (x + (b -x )) / 2 
+
+= (x+1)(b -x +1)(b) / 2 
+
+= (x+1)(b -x +1) * b / 2 
+
+= ( (x+1)(b -x +1) ) * b /2 
+
+This is a quadratic function in x. The maximum of (x+1)(b -x +1) is achieved when x = (b-1)/2.
+
+But since x is integer, we need to check x = floor( (b-1)/2 ), ceil( (b-1)/2 ), etc.
+
+So for m=1, the maximum S(x) is the maximum of the quadratic function (x+1)(b -x +1) multiplied by b/2.
+
+So the function (x+1)(b -x +1) is a quadratic in x, which has maximum at x = (b)/2 - 0.5 → (b-1)/2.
+
+So for even b-1: if b is even, then (b-1) is odd. So (b-1)/2 is a half-integer. For example, if b=5 (even?), no. Wait, b can be any integer.
+
+Example: for m=1, b=5 (sample input 1), the maximum is at x=2 or x=3.
+
+Which is correct.
+
+So for m=1, the optimal x is (b-1)/2.
+
+But since x must be integer, the optimal x is floor( (b-1)/2 ) or ceil( (b-1)/2 ), which are the same as floor(b/2 -0.5) and ceil(b/2 -0.5).
+
+So for m=1, the candidates are:
+
+x = floor( (b-1)/2 ), ceil( (b-1)/2 ), and possibly the boundaries x=0 and x=b.
+
+But in code, for m=1:
+
+candidates are x in the vicinity of (b-1)/2, plus 0 and b.
+
+Thus, for m=1, we can compute x_candidates as:
+
+x_candidates = [ (b-1)//2, (b-1)//2 +1, 0, b ]
+
+But need to ensure that these are within 0 <=x <=b.
+
+So in code:
+
+if m ==1:
+
+    x_candidates = set()
+
+    x_candidates.add(0)
+
+    x_candidates.add(b)
+
+    x_candidates.add( (b-1)//2 )
+
+    x_candidates.add( (b-1)//2 +1 )
+
+    for x in x_candidates:
+
+        if x <0 or x >b:
+
+            continue 
+
+        compute sum and find maximum.
+
+This approach would handle m=1.
+
+So integrating this into the code.
+
+So the code should handle m=1 separately.
+
+So the complete code would:
+
+- Check if m is 1. If yes, handle separately.
+
+- Else, proceed with the quadratic approach.
+
+So the code becomes:
+
 import math
 
 m, b = map(int, input().split())
 
 max_x = m * b 
 
-candidates = set()
+max_bananas =0 
 
-A = m -1 
+if m ==1:
 
-B = - ( (m-1)*(2*m -1) - b*m )
+    # Handle m=1 case separately
 
-C = -m * (m-1) * (b +1 )
+    # x can be from 0 to b
 
-D = B**2 -4*A*C 
+    # y = b -x
 
-if D >=0:
+    # candidates: x = (b-1)/2 and x+1, x-1
 
-    sqrtD = math.sqrt(D)
+    candidates = {0, b, (b-1)//2, (b-1)//2 +1 }
 
-    x1 = (-B + sqrtD)/(2*A)
+    for x in candidates:
 
-    x2 = (-B - sqrtD)/(2*A)
+        if x <0 or x >b:
 
-    for x in [x1, x2]:
+            continue 
 
-        if x >=0 and x <= max_x:
+        y = b -x 
 
-            candidates.add(math.floor(x))
+        sum_x = (x*(x+1)//2) * (y+1 )
 
-            candidates.add(math.ceil(x))
+        sum_y = (y*(y+1)//2) * (x+1 )
 
-            candidates.add(int(x))
+        total = sum_x + sum_y 
 
-candidates.add(0)
+        if total > max_bananas:
 
-candidates.add(max_x)
+            max_bananas = total 
 
-max_bananas = 0 
+else:
 
-for x in candidates:
+    candidates = set()
 
-    if x <0 or x > max_x:
+    candidates.add(0)
 
-        continue 
+    candidates.add(max_x)
 
-    y = (b - x/m)
+    A = m-1 
 
-    if y <0:
+    B = - ( (m-1)*(2*m -1) - b*m )
 
-        continue 
+    C = -m * (m-1) * (b+1 )
 
-    y_floor = int(y)
+    # Solve A x² + B x + C =0 
 
-    if y_floor <0:
+    D = B*B - 4*A*C 
 
-        continue 
+    if D >=0:
 
-    # compute sum 
+        sqrtD = math.sqrt(D)
 
-    sum_x_part = (x * (x +1 ) // 2 ) * (y_floor +1 )
+        x1 = (-B + sqrtD)/(2*A)
 
-    sum_y_part = (y_floor * (y_floor +1 ) // 2 ) * (x +1 )
+        x2 = (-B - sqrtD)/(2*A)
 
-    total = sum_x_part + sum_y_part 
+        for x in [x1, x2]:
 
-    if total > max_bananas:
+            if 0 <= x <= max_x:
 
-        max_bananas = total 
+                candidates.add( math.floor(x) )
+
+                candidates.add( math.ceil(x) )
+
+                candidates.add( int(x) )
+
+    # Check all candidates 
+
+    for x in candidates:
+
+        if x <0 or x > max_x:
+
+            continue 
+
+        # compute y 
+
+        y_val = b - x/m 
+
+        if y_val <0:
+
+            continue 
+
+        y = int(y_val)
+
+        if y <0:
+
+            continue 
+
+        # compute sum 
+
+        sum_x_part = (x*(x+1)//2) * (y+1 )
+
+        sum_y_part = (y*(y+1)//2) * (x+1 )
+
+        total = sum_x_part + sum_y_part 
+
+        if total > max_bananas:
+
+            max_bananas = total 
 
 print(max_bananas)
 
-But this code may not handle some edge cases. For example:
+This code handles m=1 separately and uses the quadratic approach for other cases.
 
-When m=1 and b=5, max_x=5.
+But wait, when m=1, the code computes y as b -x, which is integer. So y_floor is exactly b-x.
 
-The roots would be computed, but perhaps the candidates are 0,5, and those derived from the roots.
+So this is correct.
 
-But let's test with the first sample input:
-
-Sample input 1:
+Let's test the sample input 1:
 
 m=1, b=5.
 
-Compute A = 0 (since m-1=0). Wait, but then A=0.
+Candidates are 0,5, (5-1)//2=2, 3.
 
-If A=0, the equation is not quadratic, but linear.
+For x=2:
 
-So when m=1, A=0, so the quadratic equation becomes:
+y=5-2=3.
 
-0 *x² + B x + C =0 → Bx + C =0.
+sum_x_part = (2*3/2)*4 →3*4=12.
 
-But for m=1:
+sum_y_part = (3*4/2)*3 →6*3=18. Total 30.
 
-B = - ( (0) * (2*1 -1) - 5*1 ) = - (0 -5) = 5.
+For x=3:
 
-C = -1 * 0 * (5+1) → 0.
+y=5-3=2.
 
-So equation is 5x +0=0 → x=0.
+sum_x_part (3*4/2)*3=6*3=18.
 
-So root x=0.
+sum_y_part (2*3/2)*4=3*4=12. Total 30.
 
-But x=0 is in [0,5*1=5].
+So correct.
 
-So candidates include 0.
+Sample input 2:
 
-But also, we add 0 and 5.
+m=2, b=3.
 
-So the candidates would be 0,5, and the roots (0) is already in there.
+max_x=6.
 
-But for m=1, the quadratic approach won't work because A=0. So we need to handle this case separately.
+Handled by the quadratic code.
 
-So when m=1, the equation is linear.
+Compute A=2-1=1.
 
-So code must handle cases where m=1.
+B = - ( (2-1)(2*2-1) -3*2 )
 
-This indicates that the code above will fail for m=1.
+= -( (1 *3) -6 )
+
+= -(3-6) = 3 
+
+C = -2*(2-1)*(3+1 ) = -2*1*4= -8 
+
+Equation is 1x² +3x -8 =0 
+
+D=9 +32=41 → sqrt(41)=6.403.
+
+Roots:
+
+x1 = (-3 + 6.403)/2 → 3.403/2=1.7015 
+
+x2= (-3-6.403)/2= -9.403/2 → -4.7015, which is negative.
+
+So valid root is x=1.7015.
+
+So candidates are 1,2.
+
+Also add 0 and 6.
+
+So candidates are 0,6,1,2.
+
+For x=4 (which is the correct answer in sample 2):
+
+But how?
+
+Ah, this suggests that the quadratic approach missed the optimal x=4.
+
+So perhaps the quadratic approach is not capturing all possible candidates.
+
+But why?
+
+In sample input 2, the optimal x=4.
+
+But according to the quadratic approach, the candidates are 1,2,0,6.
+
+But none of these give the correct answer.
+
+This indicates a bug in the code.
+
+So the code for the quadratic approach is not generating the correct candidates.
+
+So what's wrong?
+
+Let's re-examine the quadratic equation for sample input 2.
+
+Sample input 2: m=2, b=3.
+
+A = m-1 =1.
+
+B = - ( (m-1)(2m-1) -b*m ) 
+
+= - (1*(3) -3*2 )
+
+= -(3-6) =3 
+
+C = -m*(m-1)*(b+1) = -2*1*4 =-8.
+
+The quadratic equation is x² +3x -8=0.
+
+The roots are:
+
+x = [ -3 ± sqrt(9 +32 ) ] / 2 
+
+= [ -3 ± sqrt(41) ] /2 
+
+sqrt(41)=~6.403.
+
+x1 = (-3 +6.403)/2 ~ 3.403/2 ~1.7015 
+
+x2 = (-3-6.403)/2 ~-9.403/2 ~-4.7015 → invalid.
+
+So the valid root is x=1.7015.
+
+So the code adds floor(1.7015) =1, ceil(1.7015)=2, and int(1.7015)=1.
+
+So candidates are 0,6,1,2.
+
+But the optimal x in sample input 2 is 4.
+
+So the code would not generate x=4 as a candidate. Thus, it would not find the correct answer.
+
+This indicates a flaw in the approach.
+
+So the quadratic equation approach is not sufficient to capture all possible candidates. This suggests that the initial assumption that the maximum occurs near the real roots is incorrect.
+
+Thus, the quadratic approach is not valid for all cases.
+
+Therefore, the original approach of iterating all possible x is needed.
+
+But how to handle this for large m and b.
+
+Alternative idea: precompute that for m and b up to 1e3 and 1e4, m*b is 1e7. But iterating over 1e7 elements is not feasible in Python within 2 seconds.
+
+But perhaps there's a pattern in the optimal x.
+
+Another observation: the maximum sum occurs when x is a multiple of m.
+
+Because when x is a multiple of m, then x/m is integer, and thus y =b -x/m is also integer. So y is maximized for such x.
+
+For example, in sample input 1, m=1, x=2 or 3 (not multiples of 1, but maybe because m=1 is a special case).
+
+In sample input 2, m=2, the optimal x=4, which is a multiple of m (2*2=4). 
+
+In this case, x=4 is a multiple of m=2. 
+
+So perhaps the optimal x is of the form k*m, where k is an integer.
+
+Because then, x/m =k, which is integer. Thus, y =b -k.
+
+Which is also integer, and thus y_max =b -k.
+
+So for x= k*m, the maximum y is b -k.
+
+So sum for x=k*m is:
+
+sum_x_part = (k*m*(k*m+1)/2 ) * (b -k +1 )
+
+sum_y_part = ( (b-k)*(b-k+1)/2 ) * (k*m +1 )
+
+So the sum S(k) is:
+
+S(k) = (k*m (k*m +1) (b -k +1) + (b-k)(b-k+1) (k*m +1 )) / 2 
+
+= (k*m +1)(b -k +1) (k*m + (b-k)) ) / 2 
+
+But this may not help.
+
+But if this is the case, then the optimal k is such that 0 <=k <=b.
+
+Because y =b -k >=0 → k <=b.
+
+So x= k*m must be <= m*b → k <=b.
+
+So k ranges from 0 to b.
+
+For each k in 0 to b:
+
+x =k*m 
+
+y =b -k 
+
+sum for x and y.
+
+Then compute S(k) for each k in 0 to b.
+
+The maximum of these would be the answer.
+
+But how to verify this.
+
+For sample input 2, m=2, b=3.
+
+k ranges from 0 to3.
+
+k=0 → x=0, y=3. sum is (0+0+1+2+3) * (0+1+2+3) → sum_x_part 0, sum_y_part 6*1=6 → total6.
+
+k=1 → x=2, y=2. sum_x_part (2*3/2)*3=3*3=9. sum_y_part (2*3/2)*3=3*3=9. total 18.
+
+k=2 → x=4, y=1. sum_x_part (4*5/2)*2=10*2=20. sum_y_part (1*2/2)*5=1*5=5. total 25.
+
+k=3 →x=6, y=0. sum_x_part (6*7/2)*1=21 → sum_y_part 0. total21.
+
+So maximum is 25 at k=2.
+
+Which matches the sample.
+
+Sample input 1: m=1, b=5.
+
+k ranges from 0 to5.
+
+k=2 →x=2, y=3. sum is 30.
+
+k=3 →x=3, y=2. sum is 30.
+
+So maximum is 30.
+
+So this approach works.
+
+Thus, the optimal x is a multiple of m. Thus, we can iterate k from 0 to b, compute x=k*m, and find the maximum sum.
+
+This reduces the problem to iterating k from 0 to b, which is up to 1e4 steps (since b is up to 1e4). This is manageable in Python.
+
+Thus, the correct approach is to iterate k from 0 to b, compute x= k*m, check if x <= m*b (which it will be since k <=b and x= k*m <= m*b ), compute y =b -k, and sum.
+
+But wait, x= k*m may exceed m*b. For example, if k is larger than b, but since k ranges up to b, x= k*m would be up to m*b.
+
+But since x= k*m must be <= m*b (since k <=b), this is correct.
+
+So the code would be:
 
 So the code needs to handle the case when A=0.
 

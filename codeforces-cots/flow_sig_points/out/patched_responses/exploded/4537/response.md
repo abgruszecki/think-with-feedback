@@ -537,13 +537,90 @@ for perm in permutations(s_list):
 
         exit()
 
-But this code may work. Let's test with the sample inputs.
+Testing against sample input 1.
 
-Sample input 1: 1 1 1.
+```python
+import math
+from itertools import permutations
 
-All permutations are the same. x=1, y=1, z=1.
 
-product_xy =1, product_xy//z=1. a=1. Similarly for b and c. Then check 1*1=1, 1*1=1, 1*1=1. Correct. Sum is 4*3=12.
+def main(input_stream, output_stream):
+    s = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    for perm in permutations(s):
+        x, y, z = perm
+        product_xy = x * y
+        if product_xy % z != 0:
+            continue
+        a_sq = product_xy // z
+        a = math.isqrt(a_sq)
+        if a * a != a_sq:
+            continue
+        
+        product_xz = x * z
+        if product_xz % y != 0:
+            continue
+        b_sq = product_xz // y
+        b = math.isqrt(b_sq)
+        if b * b != b_sq:
+            continue
+        
+        product_yz = y * z
+        if product_yz % x != 0:
+            continue
+        c_sq = product_yz // x
+        c = math.isqrt(c_sq)
+        if c * c != c_sq:
+            continue
+        
+        if a * b == x and a * c == y and b * c == z:
+            total = 4 * (a + b + c)
+            print(total, file=output_stream)
+            break
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 6 6
+""",
+            "output": \
+"""\
+28
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2:4 6 6.
 

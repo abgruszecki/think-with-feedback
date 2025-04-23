@@ -904,74 +904,173 @@ Now, let's code this.
 
 The code would look like this:
 
-n = int(input())
-s = input().strip()
+Testing against sample input 1.
 
-total_g = s.count('G')
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-if total_g == 0:
-    print(0)
-elif total_g == n:
-    print(n)
-else:
-    left = 0
-    s_count = 0
-    max_candidate = 0
-    for right in range(n):
-        if s[right] == 'S':
-            s_count +=1
-        # Shrink the window until s_count <=1
-        while s_count >1:
-            if s[left] == 'S':
-                s_count -=1
-            left +=1
-        current_len = right - left +1
-        current_s = s_count
-        if current_s ==0:
-            candidate = current_len
-        else:
-            if total_g >= current_len:
-                possible = current_len
+    total_g = s.count('G')
+
+    if total_g == 0:
+        print(0, file=output_stream)
+    elif total_g == n:
+        print(n, file=output_stream)
+    else:
+        left = 0
+        s_count = 0
+        max_candidate = 0
+        for right in range(n):
+            if s[right] == 'S':
+                s_count +=1
+            # Shrink the window until s_count <=1
+            while s_count >1:
+                if s[left] == 'S':
+                    s_count -=1
+                left +=1
+            current_len = right - left +1
+            current_s = s_count
+            if current_s ==0:
+                candidate = current_len
             else:
-                possible = current_len -1
-            candidate = min(possible, total_g)
-        if candidate > max_candidate:
-            max_candidate = candidate
-    print(max_candidate)
+                if total_g >= current_len:
+                    possible = current_len
+                else:
+                    possible = current_len -1
+                candidate = min(possible, total_g)
+            if candidate > max_candidate:
+                max_candidate = candidate
+        print(max_candidate, file=output_stream)
 
-Testing this code with the first sample:
 
-Sample input:
 
-10
+def test():
+    import io
 
-GGGSGGGSGG
-
-The code would compute total_g=8.
-
-Then the sliding window would process each character.
-
-When right is6 (index6), the window is0-6 (length7). s_count=1.
-
-Candidate is7 (since total_g >=7 →8 >=7. possible is7, min(7,8)=7).
-
-At this point, max_candidate is7.
-
-When right is7 (S), s_count becomes2. So the left is moved until s_count is1. The window becomes4-7 (length4). candidate is4 (possible=4, min(4,8)=4). max_candidate remains7.
-
-Other steps don't produce a higher candidate.
-
-So the code outputs7.
-
-Another test case:
-
-Sample input2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
-
 GGGG
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-total_g=4. So code outputs4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+
+    total_g = s.count('G')
+
+    if total_g == 0:
+        print(0, file=output_stream)
+    elif total_g == n:
+        print(n, file=output_stream)
+    else:
+        left = 0
+        s_count = 0
+        max_candidate = 0
+        for right in range(n):
+            if s[right] == 'S':
+                s_count +=1
+            # Shrink the window until s_count <=1
+            while s_count >1:
+                if s[left] == 'S':
+                    s_count -=1
+                left +=1
+            current_len = right - left +1
+            current_s = s_count
+            if current_s ==0:
+                candidate = current_len
+            else:
+                if total_g >= current_len:
+                    possible = current_len
+                else:
+                    possible = current_len -1
+                candidate = min(possible, total_g)
+            if candidate > max_candidate:
+                max_candidate = candidate
+        print(max_candidate, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+SSS
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input3:
 

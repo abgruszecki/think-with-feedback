@@ -1625,55 +1625,96 @@ track the x with minimal stress, and smallest in case of ties.
 
 Thus, the code is manageable.
 
-Testing with the first example:
+Testing against sample input 1.
 
-runs list is [1,2,3,2,3,1,3].
+```python
+import sys
+from collections import defaultdict
 
-For i=1 (runs[i] =2): runs[i-1]=1, runs[i+1]=3. Not same. No.
 
-i=2: runs[i] =3. runs[i-1] =2, runs[i+1] =2. Same (2 and 2). So x=3. same_pairs[3] +=1.
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().split())
+    a = list(map(int, input_stream.readline().split()))
+    
+    # Generate runs list
+    runs = []
+    prev = a[0]
+    runs.append(prev)
+    for num in a[1:]:
+        if num != prev:
+            runs.append(num)
+            prev = num
+    
+    m = len(runs)
+    count_runs = defaultdict(int)
+    for num in runs:
+        count_runs[num] += 1
+    
+    same_pairs = defaultdict(int)
+    for i in range(1, m - 1):
+        if runs[i - 1] == runs[i + 1] and runs[i] != runs[i - 1]:
+            x = runs[i]
+            same_pairs[x] += 1
+    
+    min_stress = float('inf')
+    best_x = k + 1  # start with a value higher than possible
+    
+    for x in range(1, k + 1):
+        s = m - count_runs[x]
+        if s == 0:
+            # This x cannot be chosen since each genre appears at least once, but s=0 would mean all runs are x
+            continue  # but the problem states each x is present at least once, so s >=1
+        stress = (s - 1) - same_pairs.get(x, 0)
+        if stress < min_stress or (stress == min_stress and x < best_x):
+            min_stress = stress
+            best_x = x
+    
+    print(best_x, file=output_stream)
 
-i=3: runs[i] =2. runs[i-1] =3, runs[i+1] =3. Same. x=2. same_pairs[2] +=1.
 
-i=4: runs[i] =3. runs[i-1] =2, runs[i+1] =1. No.
 
-i=5: runs[i] =1. runs[i-1] =3, runs[i+1] =3. Same. x=1. same_pairs[1] +=1.
+def test():
+    import io
 
-Thus, same_pairs[1]=1, 2=1, 3=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 3
+3 1 3 2 3 1 2
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-For x=1: s=7- count_runs[1] (count_runs[1]=3). So 7-3=4. stress =4-1 -1=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Wait, no:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-count_runs for x=1 is 3 (runs [0], [5], [6]? Wait, the runs list is [1,2,3,2,3,1,3]. So 1 appears at index 0, 5, and 6? Or index 5 is 1, index 6 is 3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Wait, no. The runs list after processing the input sequence:
+    print('Tests passed 😎')
 
-Input sequence is 1,1,2,3,2,3,3,1,1,3.
 
-Runs:
+if __name__ == '__main__':
+    test()
 
-1 (appears twice), 2 (once), 3 (once), 2 (once), 3 (twice), 1 (twice), 3 (once).
 
-Thus, runs list is [1, 2, 3, 2, 3, 1, 3].
+```
 
-count_runs[1] = 2 (indices 0 and 5).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-count_runs[2] = 2 (indices 1 and 3).
-
-count_runs[3] =3 (indices 2,4,6).
-
-Thus, for x=3:
-
-s = total_runs (7) - count_runs[3] (3) =4.
-
-same_pairs[3] is 1.
-
-stress_count = (4-1) -1 =3-1=2.
-
-Which matches the example.
-
-Thus, the code is correct.
+```
 
 Thus, this approach is correct and efficient.
 </think>

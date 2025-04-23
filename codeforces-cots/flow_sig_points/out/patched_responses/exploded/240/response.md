@@ -387,10 +387,14 @@ Process edges in order.
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-def main():
-    data = sys.stdin.read().split()
+
+def main(input_stream, output_stream):
+    data = input_stream.read().split()
     ptr = 0
     n = int(data[ptr])
     ptr +=1
@@ -453,106 +457,173 @@ def main():
             if count == n-1:
                 break
 
-    print(total)
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 0
+1 3 3 7
+""",
+            "output": \
+"""\
+16
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
 
 if __name__ == '__main__':
-    main()
+    test()
 
-Testing this code against the samples.
 
-Sample 1:
+```
 
-Input:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-3 2
+```
 
-1 3 3
+Testing against sample input 2.
 
-2 3 5
+```python
+import sys
 
-2 1 1
 
-Processing:
+def main(input_stream, output_stream):
+    data = input_stream.read().split()
+    ptr = 0
+    n = int(data[ptr])
+    ptr +=1
+    m = int(data[ptr])
+    ptr +=1
+    a = list(map(int, data[ptr:ptr+n]))
+    ptr +=n
 
-a = [1,3,3]
+    min_a = min(a)
+    min_node = a.index(min_a)
 
-min_node is 0.
+    edges = []
+    # Add edges to min_node
+    for i in range(n):
+        if i == min_node:
+            continue
+        edges.append( (a[i] + min_a, i, min_node) )
 
-Edges to min_node:
+    # Add special offers
+    for _ in range(m):
+        x = int(data[ptr])-1
+        y = int(data[ptr+1])-1
+        w = int(data[ptr+2])
+        ptr +=3
+        cost = min(w, a[x] + a[y])
+        edges.append( (cost, x, y) )
 
-i=0: skipped.
+    # Sort edges by cost
+    edges.sort()
 
-i=1: cost 3+1=4 → (4,1,0)
+    # DSU
+    parent = list(range(n))
+    rank = [1]*n
 
-i=2: cost 3+1=4 → (4,2,0)
+    def find(u):
+        while parent[u] != u:
+            parent[u] = parent[parent[u]]
+            u = parent[u]
+        return u
 
-Special offers:
+    def union(u, v):
+        u_root = find(u)
+        v_root = find(v)
+        if u_root == v_root:
+            return False
+        if rank[u_root] < rank[v_root]:
+            parent[u_root] = v_root
+            rank[v_root] += rank[u_root]
+        else:
+            parent[v_root] = u_root
+            rank[u_root] += rank[v_root]
+        return True
 
-First offer: x=2-1=1, y=3-1=2 → x=1, y=2. a[x]=3, a[y]=3. cost is min(5, 6) →5. Edge (5,1,2).
+    total = 0
+    count = 0
+    for cost, u, v in edges:
+        if union(u, v):
+            total += cost
+            count +=1
+            if count == n-1:
+                break
 
-Second offer: x=2-1=1, y=1-1=0. cost min(1, 3+1=4) →1. Edge (1,1,0).
+    print(total, file=output_stream)
 
-Edges list after adding:
 
-(4,1,0), (4,2,0), (5,1,2), (1,1,0).
 
-Sorting edges by cost:
+def test():
+    import io
 
-1: (1,1,0)
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 4
+1 2 3 4 5
+1 2 8
+1 3 10
+1 4 7
+1 5 15
+""",
+            "output": \
+"""\
+18
+""",
+        }, 
+    ]
 
-4: (4,1,0), (4,2,0)
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-5: (5,1,2)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-First edge (1,1,0): union(1,0). Now, count is 1, total is 1.
+    print('Tests passed 😎')
 
-Second edge (4,1,0): same set, no.
 
-Third edge (4,2,0): union(2,0). Now, count is 2. total 1+4=5. All nodes connected. Break.
+if __name__ == '__main__':
+    test()
 
-Output 5. Correct.
 
-Sample 2:
+```
 
-Input:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-4 0
-
-1 3 3 7
-
-Processing:
-
-n=4, m=0.
-
-a = [1,3,3,7]
-
-min_node is 0.
-
-Edges to min_node: 1,2,3.
-
-Edges:
-
-cost for 1 is 3+1=4 → (4,1,0)
-
-cost for 2 is 3+1=4 → (4,2,0)
-
-cost for 3 is7+1=8 → (8,3,0)
-
-No special offers.
-
-Sort edges by cost: 4,4,8.
-
-Processing:
-
-Take 4 (1 and 0): count 1, total 4.
-
-Take 4 (2 and 0): count 2, total 8.
-
-Take 8 (3 and 0): count3, total 16. Now count is 3 (n=4, 3 edges). Done.
-
-Output 16. Correct.
+```
 
 Sample3:
 

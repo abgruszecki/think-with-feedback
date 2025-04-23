@@ -75,44 +75,71 @@ But wait, for large n, reading the input efficiently is important. So using inpu
 
 So code:
 
-n = int(input())
-a = list(map(int, input().split()))
+Testing against sample input 1.
 
-if n ==0:
-    print(0)
-else:
-    max_len = 1
-    current =1
-    for i in range(1, n):
-        if a[i] >=a[i-1]:
-            current +=1
-            if current > max_len:
-                max_len = current
-        else:
-            current =1
-    print(max_len)
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-Wait, but in the code above, for each i, after incrementing current, we check if it's larger than max_len. That's correct. But what if the maximum is the last element in the array? Like the last elements form the longest sequence. For example, in the first sample, after the third element, the current is 1, then increases to 2, then 3, which is the max. So the code correctly captures that.
+    if n ==0:
+        print(0, file=output_stream)
+    else:
+        max_len = 1
+        current =1
+        for i in range(1, n):
+            if a[i] >=a[i-1]:
+                current +=1
+                if current > max_len:
+                    max_len = current
+            else:
+                current =1
+        print(max_len, file=output_stream)
 
-Yes. So this code should work.
 
-Testing the first sample:
 
-Input: 6 elements: 2 2 1 3 4 1
+def test():
+    import io
 
-Process:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+2 2 9
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-i=1 (a[1] =2 >=2 → current becomes 2, max is 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=2: 1 <2 → current 1. max remains 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=3: 3 >=1 → current 2. max not updated.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=4:4 >=3 → current 3 → max becomes 3.
+    print('Tests passed 😎')
 
-i=5:1 <4 → current 1. So output is 3.
 
-Which is correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample: 2 2 9.
 

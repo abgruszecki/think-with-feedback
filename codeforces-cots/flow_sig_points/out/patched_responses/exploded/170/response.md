@@ -591,11 +591,82 @@ print(sum_total)
 
 This code should handle all cases.
 
-Testing sample input3:
+Testing against sample input 3.
 
-groups is [[2,4,1,3,1000]]
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    s = input_stream.readline().rstrip("\n").strip()
 
-sorted: [1000,4,3,2,1]. take first4: sum 1000+4+3+2=1009.
+    groups = []
+    if n == 0:
+        print(0, file=output_stream)
+        return
+    current_char = s[0]
+    current_group = [a[0]]
+    for i in range(1, n):
+        if s[i] == current_char:
+            current_group.append(a[i])
+        else:
+            groups.append(current_group)
+            current_char = s[i]
+            current_group = [a[i]]
+    groups.append(current_group)
+
+    total = 0
+    for group in groups:
+        group.sort(reverse=True)
+        take = min(k, len(group))
+        total += sum(group[:take])
+
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 1
+10 15 2 1 4 8 15 16
+qqwweerr
+""",
+            "output": \
+"""\
+41
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input6:
 

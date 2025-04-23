@@ -525,122 +525,105 @@ Thus, proceed.
 
 The code:
 
+Testing against sample input 1.
+
+```python
 import heapq
 
-n, m = map(int, input().split())
-d = list(map(int, input().split()))
-d.sort()
-g, r = map(int, input().split())
 
-if d[0] != 0 or d[-1] != n:
-    print(-1)
-    exit()  # but according to the problem statement, 0 and n are present. So this is redundant.
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    d = list(map(int, input_stream.readline().rstrip("\n").split()))
+    d.sort()
+    g, r = map(int, input_stream.readline().rstrip("\n").split())
 
-cycle = g + r
-INF = float('inf')
-size = len(d)  # m is the input m, but len(d) is m. So size = m.
+    cycle = g + r
+    INF = float('inf')
+    size = len(d)
+    dist = [[INF] * cycle for _ in range(size)]
+    dist[0][0] = 0
+    heap = []
+    heapq.heappush(heap, (0, 0, 0))
+    found = False
 
-dist = [[INF] * (cycle) for _ in range(size)]
-dist[0][0] = 0
-
-heap = []
-heapq.heappush(heap, (0, 0, 0))  # (time, index, mod)
-
-found = False
-
-while heap:
-    current_time, idx, mod = heapq.heappop(heap)
-    if idx == size -1:
-        print(current_time)
-        found = True
-        break
-    if current_time > dist[idx][mod]:
-        continue
-    # Check neighbors
-    for delta in (-1, 1):
-        new_idx = idx + delta
-        if 0 <= new_idx < size:
-            k = abs(d[idx] - d[new_idx])
-            if mod + k > g:
-                continue  # can't move in this cycle
-            # Check if new_idx is the last one
-            if new_idx == size -1:
-                print(current_time + k)
-                found = True
-                heapq.heappush(heap, (0, 0, 0))  # to break the loop
-                break
-            new_mod = mod + k
-            if new_mod == g:
-                new_time = current_time + k + r
-                new_mod = 0
-            else:
+    while heap:
+        current_time, idx, mod = heapq.heappop(heap)
+        if idx == size - 1:
+            print(current_time, file=output_stream)
+            found = True
+            break
+        if current_time > dist[idx][mod]:
+            continue
+        for delta in (-1, 1):
+            new_idx = idx + delta
+            if 0 <= new_idx < size:
+                k = abs(d[idx] - d[new_idx])
+                if mod + k > g:
+                    continue
+                if new_idx == size - 1:
+                    print(current_time + k, file=output_stream)
+                    found = True
+                    heap = []
+                    break
+                new_mod = mod + k
                 new_time = current_time + k
-            if new_time < dist[new_idx][new_mod]:
-                dist[new_idx][new_mod] = new_time
-                heapq.heappush(heap, (new_time, new_idx, new_mod))
-    if found:
-        break
+                if new_mod == g:
+                    new_time += r
+                    new_mod = 0
+                if new_time < dist[new_idx][new_mod]:
+                    dist[new_idx][new_mod] = new_time
+                    heapq.heappush(heap, (new_time, new_idx, new_mod))
+        if found:
+            break
 
-if not found:
-    print(-1)
+    if not found:
+        print(-1, file=output_stream)
 
-Wait, but the code has a problem. When moving to new_idx == size-1 (the last island), it prints and breaks. But during the loop, after pushing (0,0,0) to the heap, which is a dummy, to break the loop. But this is not correct.
 
-Because in Python, the heappop will process the (0,0,0) entry after processing other entries, which might have higher priority. So this approach may not work.
 
-Alternatively, once the code finds a path to the last island, it should immediately exit. So in the code, when new_idx == size-1, it should print current_time +k and return.
+def test():
+    import io
 
-But the code is inside the for loop. So perhaps, after calling print, the code should exit. But how to break out of all loops.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+13 4
+0 3 7 13
+9 9
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-But in the code above, when new_idx is the last island, the code prints and sets found to True, and breaks the for loop. Then, the outer loop checks if found, and breaks.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Wait, but in the code:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Inside the for loop over delta:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-when new_idx is the last, then:
+    print('Tests passed 😎')
 
-print(current_time +k)
 
-found = True
+if __name__ == '__main__':
+    test()
 
-then breaks the for loop (the inner loop).
 
-Then, the code checks if found, and breaks the outer loop.
+```
 
-But there's a problem here. Because when the code is processing a state (current_time, idx, mod), and in the for loop, it finds a path to the last island. It prints the answer and returns. But other states might have shorter paths. For example, if the current state is not the minimal one.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-But according to Dijkstra's algorithm, the first time a node is popped from the heap is the minimal time. So if the code is correct, the first time the last island is processed, it's with the minimal time. So the code is correct.
-
-But the code checks if the current index is the last one (idx == size-1) at the beginning of the loop. And during processing neighbors, if moving to the last island, it returns current_time +k.
-
-So the code has two checks for reaching the last island: one when the state is processed (idx == size-1), which returns current_time (the time stored in the state), and another when moving to the last island (current_time +k).
-
-But when you move to the last island, the time is current_time +k. But according to the code, for example, if you reach the last island via a transition from the previous island, the code returns current_time +k. However, if the last island's state is processed (i.e., the code pops a state where idx is the last island), then it returns current_time.
-
-But when you reach the last island via a transition, the code returns the time of the transition. But how can the code have a state where idx is the last island?
-
-Because when you reach the last island via a transition (current_time +k), you don't add that state to the heap. Because in the code, when new_idx is the last island, the code returns immediately. So the only way the code can process a state where idx is the last is if the movement to the last island is via a transition that doesn't require adding to the heap.
-
-Wait, no. For example, suppose the last island is reachable via a movement that doesn't have to wait for red. For example, moving to the last island in a green phase. Then, the code would return current_time +k.
-
-But what if the movement to the last island requires waiting for red (i.e., new_mod ==g)? No, because when moving to the last island, the movement must be during green. So the arrival mod is <=g, so new_mod can be up to g. But even if new_mod ==g, the arrival is allowed, and the code returns current_time +k. The waiting for red is only needed if the movement is to a non-last island.
-
-So the code's approach of returning current_time +k when moving to the last island is correct.
-
-But when processing a state (current_time, last_idx, mod), the code returns current_time. How can that state be in the heap?
-
-Only if there's a transition to the last island where the arrival is during green, but then there's another movement possible. But that's impossible because once you reach the last island, the problem is solved. So the code should not have any state for the last island except when arriving via a transition.
-
-So the code's two checks are redundant. But perhaps it's possible to reach the last island via a movement that adds to the heap (but in reality, such a state would not be processed because once you reach the last island, the code returns.
-
-But in any case, the code is correct.
-
-Testing the first example:
-
-The code would process the movement from index3 (14) to index4 (15) with k=1. current_time is44 (when index3 has mod 0). mod +1=1 <=g (11). So new_time is44+1=45. Since new_idx is the last, the code prints 45 and returns.
-
-Which is correct.
+```
 
 The second example:
 

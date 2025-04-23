@@ -210,209 +210,107 @@ So for each segment, first check if it's a point → invalid. Then check if it's
 
 So for code:
 
-segments = [list(map(int, input().split())) for _ in range(4)]
+Testing against sample input 1.
 
-horizontal = []
-vertical = []
+```python
+def main(input_stream, output_stream):
+    segments = []
+    for _ in range(4):
+        x1, y1, x2, y2 = map(int, input_stream.readline().rstrip("\n").split())
+        segments.append((x1, y1, x2, y2))
 
-for seg in segments:
-    x1, y1, x2, y2 = seg
-    if x1 == x2 and y1 == y2:
-        print("NO")
-        exit()
-    if x1 == x2:
-        # vertical
-        vertical.append(seg)
-    elif y1 == y2:
-        horizontal.append(seg)
-    else:
-        print("NO")
-        exit()
+    horizontal = []
+    vertical = []
 
-if len(horizontal) != 2 or len(vertical) != 2:
-    print("NO")
-    exit()
+    for seg in segments:
+        x1, y1, x2, y2 = seg
+        if x1 == x2 and y1 == y2:
+            print("NO", file=output_stream)
+            return
+        if x1 == x2:
+            vertical.append(seg)
+        elif y1 == y2:
+            horizontal.append(seg)
+        else:
+            print("NO", file=output_stream)
+            return
 
-Then, process the horizontal and vertical segments.
+    if len(horizontal) != 2 or len(vertical) != 2:
+        print("NO", file=output_stream)
+        return
 
-For vertical segments, collect their x coordinates. So for each vertical segment, x1 is the x-coordinate. So x_v1 = vertical[0][0], x_v2 = vertical[1][0].
+    x_coords = [vertical[0][0], vertical[1][0]]
+    if x_coords[0] == x_coords[1]:
+        print("NO", file=output_stream)
+        return
+    x_min, x_max = min(x_coords), max(x_coords)
 
-x_min = min(x_v1, x_v2)
-x_max = max(x_v1, x_v2)
+    y_coords = [horizontal[0][1], horizontal[1][1]]
+    if y_coords[0] == y_coords[1]:
+        print("NO", file=output_stream)
+        return
+    y_min, y_max = min(y_coords), max(y_coords)
 
-Similarly, for horizontal segments:
+    for seg in horizontal:
+        x1, y1, x2, y2 = seg
+        if sorted([x1, x2]) != [x_min, x_max]:
+            print("NO", file=output_stream)
+            return
 
-y_h1 = horizontal[0][1]  # since horizontal, y1 == y2
-y_h2 = horizontal[1][1]
+    for seg in vertical:
+        x1, y1, x2, y2 = seg
+        if sorted([y1, y2]) != [y_min, y_max]:
+            print("NO", file=output_stream)
+            return
 
-y_min = min(y_h1, y_h2)
-y_max = max(y_h1, y_max)
+    print("YES", file=output_stream)
 
-Check if x_max -x_min <=0 → no. But wait, x_max is max of x_v1 and x_v2, which are two different numbers (since vertical segments are x1 and x2). Because in vertical segments, each has x1 == x2 (since they are vertical). So for vertical[0], x1 is same as x2, so the x coordinate is x_v1 = vertical[0][0]. Similarly vertical[1] has x_v2 = vertical[1][0].
 
-But since there are two vertical segments, their x coordinates must be different. Otherwise, x_min and x_max would be the same. For example, if both vertical segments are at x=5. Then x_min and x_max are 5. So x_max -x_min = 0. But the rectangle's width is zero. So area is zero. Which is invalid.
 
-So in code, after extracting x_v1 and x_v2:
+def test():
+    import io
 
-x_v1 = vertical[0][0]
-x_v2 = vertical[1][0]
-if x_v1 == x_v2:
-    print("NO")
-    exit()
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0 0 0 3
+2 0 0 0
+2 2 2 0
+0 2 2 2
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-x_min = min(x_v1, x_v2)
-x_max = max(x_v1, x_v2)
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Similarly for y:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-y_h1 = horizontal[0][1]
-y_h2 = horizontal[1][1]
-if y_h1 == y_h2:
-    print("NO")
-    exit()
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-y_min = min(y_h1, y_h2)
-y_max = max(y_h1, y_h2)
+    print('Tests passed 😎')
 
-So that's another check. So after collecting the vertical and horizontal segments, check that the two vertical x are different, and the two horizontal y are different. Otherwise, output NO.
 
-Then, check that (x_max - x_min) >0 and (y_max - y_min) >0. But since x_max is larger than x_min (since we have x_max and x_min from min and max), and y_max similarly, this is ensured.
+if __name__ == '__main__':
+    test()
 
-So then, for each horizontal segment, check that their x coordinates span x_min to x_max. Because a horizontal segment in the rectangle must be either the top or bottom edge, which runs from x_min to x_max.
 
-So for a horizontal segment, which is stored as (x1, y, x2, y), the x coordinates can be in any order. So the sorted x coordinates of the segment must be [x_min, x_max].
+```
 
-So for each horizontal segment in the horizontal list:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-s_x1, s_y, s_x2, _ = seg  # since it's horizontal, y is same for both points.
-
-sorted_x = sorted([s_x1, s_x2])
-if sorted_x != [x_min, x_max]:
-    print("NO")
-    exit()
-
-Similarly, for each vertical segment:
-
-seg is (x, y1, x, y2). So check that the sorted [y1, y2] is [y_min, y_max].
-
-So for vertical segments:
-
-x, y1, x, y2 = seg
-sorted_y = sorted([y1, y2])
-if sorted_y != [y_min, y_max]:
-    print("NO")
-    exit()
-
-If all checks pass, output YES.
-
-So putting all this together.
-
-Now, code steps:
-
-Read four segments.
-
-Check each segment is not a point, and is horizontal or vertical. Collect into horizontal and vertical lists.
-
-Check counts are two each.
-
-Check vertical x's are different, horizontal y's are different.
-
-Compute x_min and x_max from vertical x's.
-
-Compute y_min and y_max from horizontal y's.
-
-Check each horizontal segment's x spans from x_min to x_max.
-
-Check each vertical segment's y spans from y_min to y_max.
-
-If all pass, output YES. Else, NO.
-
-Now, code.
-
-Let's code this step by step.
-
-Read the segments:
-
-segments = []
-for _ in range(4):
-    x1, y1, x2, y2 = map(int, input().split())
-    segments.append( (x1, y1, x2, y2) )
-
-Check each segment:
-
-horizontal = []
-vertical = []
-for seg in segments:
-    x1, y1, x2, y2 = seg
-    # check if it's a point
-    if x1 == x2 and y1 == y2:
-        print("NO")
-        exit()
-    # check horizontal or vertical
-    if x1 == x2:
-        # vertical
-        vertical.append( seg )
-    elif y1 == y2:
-        horizontal.append( seg )
-    else:
-        print("NO")
-        exit()
-
-Check counts:
-
-if len(horizontal) != 2 or len(vertical) != 2:
-    print("NO")
-    exit()
-
-Check vertical x's are different:
-
-x_coords_vertical = [seg[0] for seg in vertical]  # x1 for vertical segments
-if x_coords_vertical[0] == x_coords_vertical[1]:
-    print("NO")
-    exit()
-x_min = min(x_coords_vertical)
-x_max = max(x_coords_vertical)
-
-Check horizontal y's are different:
-
-y_coords_horizontal = [seg[1] for seg in horizontal]  # y1 is same as y2
-if y_coords_horizontal[0] == y_coords_horizontal[1]:
-    print("NO")
-    exit()
-y_min = min(y_coords_horizontal)
-y_max = max(y_coords_horizontal)
-
-Now, check each horizontal segment's x span:
-
-for seg in horizontal:
-    x1, y1, x2, y2 = seg
-    sorted_x = sorted([x1, x2])
-    if sorted_x != [x_min, x_max]:
-        print("NO")
-        exit()
-
-Check each vertical segment's y span:
-
-for seg in vertical:
-    x1, y1, x2, y2 = seg
-    sorted_y = sorted([y1, y2])
-    if sorted_y != [y_min, y_max]:
-        print("NO")
-        exit()
-
-All checks passed:
-
-print("YES")
-
-So this is the code.
-
-Testing the first example:
-
-Vertical segments: two segments with x=6 and 1. x_min=1, x_max=6.
-
-Horizontal segments: y=1 and 0. y_min=0, y_max=1.
-
-Each horizontal segment's x's are 1 and 6 → sorted [1,6] → matches x_min and x_max. Vertical segments' y's sorted are 0 and 1 → which matches y_min and y_max. So YES.
+```
 
 Second example:
 

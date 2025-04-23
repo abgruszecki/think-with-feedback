@@ -446,216 +446,213 @@ Then, perform BFS starting with these nodes, but ensuring that the user is added
 
 So:
 
+Testing against sample input 1.
+
+```python
 from collections import deque
 
-n = int(input())
 
-f = [input().strip() for _ in range(n)]
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-user_index = n-1
+    f = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
 
-activated = set()
+    user_index = n-1
 
-# Get person 1's contacts (index 0)
-initial_contacts = [j for j in range(n) if f[0][j] == '1']
+    activated = set()
 
-activated = set(initial_contacts)
+    # Get person 1's contacts (index 0)
+    initial_contacts = [j for j in range(n) if f[0][j] == '1']
 
-queue = deque(initial_contacts)
+    activated = set(initial_contacts)
 
-while queue:
+    queue = deque(initial_contacts)
 
-    current = queue.popleft()
+    while queue:
 
-    # If current is the user, skip processing
-    if current == user_index:
-        continue
+        current = queue.popleft()
 
-    # Check all contacts of current
-    for contact in range(n):
+        # If current is the user, skip processing
+        if current == user_index:
+            continue
 
-        if f[current][contact] == '1':
+        # Check all contacts of current
+        for contact in range(n):
 
-            # If contact is not in activated and contact is not user (wait, no. Contact can be user, but we still add them to activated if they are not already)
-            if contact not in activated:
+            if f[current][contact] == '1':
 
-                activated.add(contact)
+                # If contact is not in activated and contact is not user (wait, no. Contact can be user, but we still add them to activated if they are not already)
+                if contact not in activated:
 
-                queue.append(contact)
+                    activated.add(contact)
 
-                # even if contact is user, add to activated but when processed, they are skipped.
+                    queue.append(contact)
 
-# Now, count the number of nodes in activated (excluding user) that have f[i][user_index] == '1'
+                    # even if contact is user, add to activated but when processed, they are skipped.
 
-count = 0
+    # Now, count the number of nodes in activated (excluding user) that have f[i][user_index] == '1'
 
-for node in activated:
+    count = 0
 
-    if node != user_index and f[node][user_index] == '1':
+    for node in activated:
 
-        count +=1
+        if node != user_index and f[node][user_index] == '1':
 
-print(count)
+            count +=1
 
-Let's test this code against the sample inputs.
+    print(count, file=output_stream)
 
-Sample Input 1:
 
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
-
-0111
-
-1011
-
-1101
-
-1110
-
-n=4, user_index=3.
-
-Initial contacts of person 1 (index 0) are j=0,1,2,3 where f[0][j] is '1'. So j=1,2,3. So initial_contacts is [1,2,3].
-
-activated = {1,2,3}
-
-queue = deque([1,2,3]).
-
-Processing 1:
-
-current is 1 (not user).
-
-Check contacts where f[1][j] == '1':
-
-j=0 (f[1][0] is '1'), j=1 (0), j=2 (f[1][2] is '1'), j=3 is '1'.
-
-For each contact:
-
-contact 0: not in activated (initial is {1,2,3}). So add 0 to activated, add to queue.
-
-contact 2: already in activated.
-
-contact 3: not in activated. So add 3 to activated (now activated is {0,1,2,3}), add to queue.
-
-So queue now has 2,3,0,3.
-
-Processing 2:
-
-current is 2.
-
-contacts are 0,1,3, which are in f[2][j] == '1'.
-
-contact 0: already in activated.
-
-contact 1: already in activated.
-
-contact 3: already in activated.
-
-No new nodes added.
-
-Processing 3 (current is 3):
-
-user_index is 3. So skip.
-
-Processing 0 (added from processing 1):
-
-current is 0.
-
-Check contacts: 0's contacts are j=0 (0),1,2,3. So j=1,2,3.
-
-contact 1: in activated.
-
-contact 2: in activated.
-
-contact 3: in activated.
-
-No new nodes added.
-
-Processing 3 (added earlier): skip.
-
-So the activated set is {0,1,2,3}.
-
-Now, count nodes in activated (excluding user_index=3) that have f[node][3] == '1'.
-
-nodes are 0,1,2.
-
-Check each:
-
-node 0: f[0][3] is '1' → yes. count +=1.
-
-node 1: f[1][3] is '1' → yes. count +=1.
-
-node 2: f[2][3] is '1' → yes. count +=1.
-
-Total count 3 → matches sample.
-
-Sample Input 2:
-
-4
-
 0110
-
 1010
-
 1100
-
 0000
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-user_index=3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Person 1's contacts are j=0 (no, f[0][0] is 0), j=1 (f[0][1] is 1 → included), j=2 (f[0][2] is 1 → included), j=3 (f[0][3] is 0. So initial contacts are 1,2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-activated is {1,2}.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-queue is deque([1,2]).
+    print('Tests passed 😎')
 
-Processing 1:
 
-current is 1.
+if __name__ == '__main__':
+    test()
 
-contacts where f[1][j] is '1: j=0, 1 (0), j=2 (f[1][2] is '1'), j=3 (0).
 
-So contacts are 0, 2.
+```
 
-Check contact 0: not in activated. Add to activated, add to queue.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-contact 2: already in activated.
+```
 
-So queue now has 2,0.
+Testing against sample input 2.
 
-Processing 2:
+```python
+from collections import deque
 
-current is 2.
 
-contacts where f[2][j] is '1': j=0,1,2 (0), j=3 (0). So contacts are 0,1.
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-contact 0: not in activated. Add to activated, add to queue.
+    f = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
 
-contact 1: already in activated.
+    user_index = n-1
 
-queue now has 0,0.
+    activated = set()
 
-Processing 0 (from queue):
+    # Get person 1's contacts (index 0)
+    initial_contacts = [j for j in range(n) if f[0][j] == '1']
 
-current is 0.
+    activated = set(initial_contacts)
 
-contacts: j=0 (0), j=1 (1), j=2 (1), j=3 (0).
+    queue = deque(initial_contacts)
 
-contact 1: in activated.
+    while queue:
 
-contact 2: in activated.
+        current = queue.popleft()
 
-No new nodes.
+        # If current is the user, skip processing
+        if current == user_index:
+            continue
 
-So activated set is {0,1,2}.
+        # Check all contacts of current
+        for contact in range(n):
 
-count nodes in activated (excluding user 3) that are connected to user.
+            if f[current][contact] == '1':
 
-user_index=3. f[0][3] is '0' (from first string, which is '0110'). So node 0's contact with user is '0'.
+                # If contact is not in activated and contact is not user (wait, no. Contact can be user, but we still add them to activated if they are not already)
+                if contact not in activated:
 
-node 1's contact with user: f[1][3] is '0' (second string is '1010' → third character is '0').
+                    activated.add(contact)
 
-node 2's contact with user: third string is '1100' → fourth character is 0.
+                    queue.append(contact)
 
-So none are connected. So count is 0. Which matches sample 2.
+                    # even if contact is user, add to activated but when processed, they are skipped.
+
+    # Now, count the number of nodes in activated (excluding user) that have f[i][user_index] == '1'
+
+    count = 0
+
+    for node in activated:
+
+        if node != user_index and f[node][user_index] == '1':
+
+            count +=1
+
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+0101
+1001
+0001
+1110
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample Input 3:
 

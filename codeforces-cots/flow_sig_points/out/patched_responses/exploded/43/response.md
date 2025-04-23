@@ -212,101 +212,221 @@ But since the original a is a string, perhaps building the result as a list of c
 
 So code:
 
-n = int(input())
+Testing against sample input 1.
 
-a = input().strip()
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-f = list(map(int, input().split()))  # f[0] is f(1), etc.
+    a = input_stream.readline().rstrip("\n").strip()
 
-original = list(a)
+    f = list(map(int, input_stream.readline().rstrip("\n").split()))  # f[0] is f(1), etc.
 
-f_val = [str(f[int(c)-1]) for c in original]  # list of characters
+    original = list(a)
 
-start = -1
+    f_val = [str(f[int(c)-1]) for c in original]  # list of characters
 
-for i in range(n):
+    start = -1
 
-    c = original[i]
+    for i in range(n):
 
-    c_f = f_val[i]
+        c = original[i]
 
-    if c_f > c:
+        c_f = f_val[i]
 
-        start = i
+        if c_f > c:
 
-        break
+            start = i
 
-if start == -1:
+            break
 
-    # no possible replacement
+    if start == -1:
 
-    print(''.join(original))
+        # no possible replacement
 
-    exit()
+        print(''.join(original), file=output_stream)
 
-# find end
+        return
 
-end = start
+    # find end
 
-for j in range(start+1, n):
+    end = start
 
-    c_j = original[j]
+    for j in range(start+1, n):
 
-    c_f_j = f_val[j]
+        c_j = original[j]
 
-    if c_f_j < c_j:
+        c_f_j = f_val[j]
 
-        break
+        if c_f_j < c_j:
 
-    end +=1
+            break
 
-# replace from start to end inclusive
+        end +=1
 
-result = original[:]
+    # replace from start to end inclusive
 
-for i in range(start, end+1):
+    result = original[:]
 
-    result[i] = f_val[i]
+    for i in range(start, end+1):
 
-print(''.join(result))
+        result[i] = f_val[i]
 
-Wait, but in this code, 'original' is a list of characters. 'f_val' is a list of characters. So when we compare c_f (which is a string) with c (a string character), the comparison is lexicographical. For example, '5' > '3' is correct. But in the code, the original digits are characters (strings), and f_val is a list of strings. So the comparison works.
+    print(''.join(result), file=output_stream)
 
-Yes.
 
-Testing the first example:
 
-Input: 1337, f(1)=1, f(3)=5, etc.
+def test():
+    import io
 
-original is ['1', '3', '3', '7']
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+11111
+9 8 7 6 5 4 3 2 1
+""",
+            "output": \
+"""\
+99999
+""",
+        }, 
+    ]
 
-f_val for each:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-1 → f[0] is 1 → '1'
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-3 → f[2] (since 3 is index 2 in 0-based for 1-9). Wait, wait, the input for f is given as f(1), f(2), ..., f(9). So for a digit x (1-9), f[x-1] gives the mapped value.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Yes. So for the first example, the third line is 1 2 5 4 6 6 3 1 9. So f(1) is 1, f(2)=2, f(3)=5, etc.
+    print('Tests passed 😎')
 
-So for the original digits '1', '3', '3', '7':
 
-f_val[0] is f(1-1=0) is 1 → '1'
+if __name__ == '__main__':
+    test()
 
-f_val[1] is f(3-1=2 → index 2 in f list) → 5 → '5'
 
-f_val[2] is 5 → '5'
+```
 
-f_val[3] is f(7-1=6 → index 6 in f list) →3 → '3'
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-So start is index 1, where '5' > '3'.
+```
 
-Then end starts at 1, and then check j=2 (original '3' → f_val is '5' >= '3' → include, end becomes 2.
+Testing against sample input 2.
 
-j=3: f_val is '3' < '7' → break. So end is 2.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-So replace indices 1-2. The result becomes ['1', '5', '5', '7'] → "1557". Correct.
+    a = input_stream.readline().rstrip("\n").strip()
 
-Second example: input 11111, f(1)=9. So all digits are '1', f_val is '9' for each. So start=0. Then end will go all the way to 4. So replaced all to 9s. Correct.
+    f = list(map(int, input_stream.readline().rstrip("\n").split()))  # f[0] is f(1), etc.
+
+    original = list(a)
+
+    f_val = [str(f[int(c)-1]) for c in original]  # list of characters
+
+    start = -1
+
+    for i in range(n):
+
+        c = original[i]
+
+        c_f = f_val[i]
+
+        if c_f > c:
+
+            start = i
+
+            break
+
+    if start == -1:
+
+        # no possible replacement
+
+        print(''.join(original), file=output_stream)
+
+        return
+
+    # find end
+
+    end = start
+
+    for j in range(start+1, n):
+
+        c_j = original[j]
+
+        c_f_j = f_val[j]
+
+        if c_f_j < c_j:
+
+            break
+
+        end +=1
+
+    # replace from start to end inclusive
+
+    result = original[:]
+
+    for i in range(start, end+1):
+
+        result[i] = f_val[i]
+
+    print(''.join(result), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+33
+1 1 1 1 1 1 1 1 1
+""",
+            "output": \
+"""\
+33
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: input 33, f(3) is 1. So original digits are '3' and '3', f_val is 1 and 1. So comparing '1' > '3'? No. So start remains -1. So output original. Correct.
 

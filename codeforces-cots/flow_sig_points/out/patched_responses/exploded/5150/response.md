@@ -267,24 +267,60 @@ So, how to compute this in Python.
 
 The code can be:
 
-n = int(input())
-s = 0
-while n > 0:
-    s += n % 3
-    n = n // 3
-print(s)
+Testing against sample input 1.
 
-Wait, but let's test this code for the sample inputs.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = 0
+    while n > 0:
+        s += n % 3
+        n = n // 3
+    print(s, file=output_stream)
 
-Sample 1: n=1.
 
-Loop:
 
-n=1 >0.
+def test():
+    import io
 
-s += 1%3 → 1. s=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-n becomes 0. Loop ends. Output 1. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2: n=4.
 

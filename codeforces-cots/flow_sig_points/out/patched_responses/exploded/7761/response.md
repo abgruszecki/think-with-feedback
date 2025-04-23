@@ -849,147 +849,138 @@ if (mask & (1 <<u)) and (mask & (1 <<v)):
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 from collections import deque
 
-n, k, l = map(int, input().split())
 
-x_list = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n, k, l = map(int, input_stream.readline().rstrip("\n").split())
 
-a_list = list(map(int, input().split()))
+    x_list = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-# Compute points where D[i] is 1
+    a_list = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-x_set = set(x_list)
+    # Compute points where D[i] is 1
 
-prev_p = 0
+    x_set = set(x_list)
 
-points = []
+    prev_p = 0
 
-for i in range(1, n+1):
+    points = []
 
-    current_p = 1 if i in x_set else 0
+    for i in range(1, n+1):
 
-    if current_p != prev_p:
+        current_p = 1 if i in x_set else 0
 
-        points.append(i)
+        if current_p != prev_p:
 
-    prev_p = current_p
+            points.append(i)
 
-m = len(points)
+        prev_p = current_p
 
-if m %2 !=0:
+    m = len(points)
 
-    print(-1)
+    if m %2 !=0:
 
-    exit()
+        print(-1, file=output_stream)
 
-a_set = set(a_list)
+        return
 
-allowed_pairs = []
+    a_set = set(a_list)
 
-for u in range(m):
+    allowed_pairs = []
 
-    for v in range(u+1, m):
+    for u in range(m):
 
-        if (points[v] - points[u]) in a_set:
+        for v in range(u+1, m):
 
-            allowed_pairs.append( (u, v) )
+            if (points[v] - points[u]) in a_set:
 
-# BFS
+                allowed_pairs.append( (u, v) )
 
-target = 0
+    # BFS
 
-initial_mask = (1 << m) -1
+    target = 0
 
-visited = {initial_mask: 0}
+    initial_mask = (1 << m) -1
 
-queue = deque([initial_mask])
+    visited = {initial_mask: 0}
 
-while queue:
+    queue = deque([initial_mask])
 
-    mask = queue.popleft()
+    while queue:
 
-    steps = visited[mask]
+        mask = queue.popleft()
 
-    if mask == target:
+        steps = visited[mask]
 
-        print(steps)
+        if mask == target:
 
-        exit()
+            print(steps, file=output_stream)
 
-    for u, v in allowed_pairs:
+            return
 
-        if (mask & (1 << u)) and (mask & (1 << v)):
+        for u, v in allowed_pairs:
 
-            new_mask = mask ^ ( (1 << u) | (1 << v) )
+            if (mask & (1 << u)) and (mask & (1 << v)):
 
-            if new_mask not in visited or steps +1 < visited.get(new_mask, float('inf')):
+                new_mask = mask ^ ( (1 << u) | (1 << v) )
 
-                visited[new_mask] = steps +1
+                if new_mask not in visited or steps +1 < visited.get(new_mask, float('inf')):
 
-                queue.append(new_mask)
+                    visited[new_mask] = steps +1
 
-print(-1)
+                    queue.append(new_mask)
 
-Wait, but the code might not handle the case where there are multiple ways to reach the same mask with different step counts. Hence, we need to ensure that once a mask is visited with a certain step count, any later steps with higher counts are ignored.
+    print(-1, file=output_stream)
 
-The current code uses a dictionary 'visited' which stores the minimal steps to reach each mask. When processing a new_mask, if new_mask is not in visited or steps+1 is less than the existing steps, it is added.
 
-This should work.
 
-Testing the first sample:
+def test():
+    import io
 
-points = [1,4,5,10]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2 1
+1 2
+3
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-allowed_pairs = (0,1) and (2,3).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The initial mask is 15 (1111).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing mask 15:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-steps is 0.
+    print('Tests passed 😎')
 
-For pair (0,1):
 
-new_mask = 15 ^ 3 → 12 (1100). Steps 1.
+if __name__ == '__main__':
+    test()
 
-Add to queue.
 
-For pair (2,3):
+```
 
-new_mask = 15 ^ (0b1100) → 3 (0011). Steps 1.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Add to queue.
-
-Next, processing mask 12 (1100):
-
-steps is 1.
-
-Check allowed pairs. Only (0,1) is in allowed_pairs, but in this mask, bits 0 and 1 are not set. So no.
-
-Other pairs: allowed_pairs includes (0,1) and (2,3). But in mask 12, bits 2 and 3 are set (mask 1100 is 12 in binary → 1100, which is bits 2 and 3 set for a 4-bit mask? Wait, no. Wait, the mask is a bitmask of m bits. For m=4, the bits are 0 (LSB), 1, 2, 3.
-
-So mask 12 is binary 1100 → bits 2 and 3 are set (bit 3 is the fourth bit). So the allowed pairs are (0,1), (0,2), (0,3), (1,2), (1,3), (2,3). But in the allowed_pairs list, only (0,1) and (2,3) are allowed.
-
-In mask 12, bits 2 and 3 are set (since 12 in binary is 1100). So pair (2,3) is available (u=2, v=3). So new_mask would be 12 ^ (1<<2 | 1<<3) → 12 ^ (4 +8) → 12 ^ 12 = 0. So steps is 2. Target reached.
-
-Thus, code would output 2.
-
-But in the BFS, after processing mask 15 (steps 0), the queue has masks 12 and 3.
-
-When processing mask 12 (steps 1), the code checks allowed pairs. For pair (2,3), which is allowed? points[2] is 5, points[3] is 10. 10-5=5, which is in the a_list. So this pair is allowed.
-
-Yes, allowed_pairs includes (2,3). So processing this pair:
-
-mask is 12 (binary 1100 → bits 2 and3 are set). So new_mask is 12 ^ ( (1<<2) | (1<<3) ) → 12 ^ (4 +8) → 12 ^12 =0. Steps becomes 1+1=2.
-
-Add new_mask 0 to the queue with steps 2.
-
-When mask 0 is processed, return steps 2.
-
-Thus, the code works.
-
-The code correctly handles the sample.
+```
 
 Now, testing the second sample input:
 

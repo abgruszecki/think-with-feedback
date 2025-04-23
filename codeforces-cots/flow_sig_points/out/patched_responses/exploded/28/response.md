@@ -180,85 +180,90 @@ But the second line is a list of m integers.
 
 In code:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-if m <n:
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-    print(0)
+    if m <n:
 
-else:
+        print(0, file=output_stream)
 
-    from collections import Counter
+    else:
 
-    counts = Counter(a)
+        from collections import Counter
 
-    max_d = m //n
+        counts = Counter(a)
 
-    for d in range(max_d, 0, -1):
+        max_d = m //n
 
-        total = 0
+        for d in range(max_d, 0, -1):
 
-        for c in counts.values():
+            total = 0
 
-            total += c //d
+            for c in counts.values():
 
-            if total >=n:  # early exit
+                total += c //d
 
-                break
+                if total >=n:  # early exit
 
-        if total >=n:
+                    break
 
-            print(d)
+            if total >=n:
 
-            exit()
+                print(d, file=output_stream)
 
-    print(0)
+                return
 
-Wait, but even better: during the summation, once total >=n, we can break early. So in the code, for each c in counts.values(), add c//d to total. If at any point total >=n, break and return yes.
+        print(0, file=output_stream)
 
-This could save some iterations. For example, if the first few counts contribute enough, we don't need to check the rest.
 
-Yes. So that's an optimization. So in the loop:
 
-total =0
+def test():
+    import io
 
-for c in counts.values():
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+100 1
+1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-    total += c//d
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-    if total >=n:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-        break
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-if total >=n: → yes.
+    print('Tests passed 😎')
 
-So the code is more efficient.
 
-This is especially useful when counts are large. For example, if there's a count that is very large, like 1e5, then for d=1, each count//d is the count itself. So the sum could reach n quickly.
+if __name__ == '__main__':
+    test()
 
-Thus, adding the early exit is a good idea.
 
-Now, let's test with the first sample input:
+```
 
-n=4, m=10 → max_d=10//4=2. For d=2:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-counts are 4 (type 1), 2 (type5?), 3 (type2?), 1 (type7). Wait, the counts from the first sample are:
-
-Looking at the input:
-
-1 5 2 1 1 1 2 5 7 2 → sorted as [1,5,2,1,1,1,2,5,7,2]. So Counter would be {1:4, 5:2, 2:3,7:1}.
-
-counts.values() → [4,2,3,1] (order may vary, but in Python 3.7+ Counter preserves insertion order. However, the order does not matter here).
-
-For d=2:
-
-4//2=2, sum is 2. Then 2//2=1 → sum 3. Then 3//2=1 → sum 4. At this point, sum is 4 which is >=n=4. So loop breaks. So returns 2.
-
-Yes.
-
-So the code works.
+```
 
 Another test case: n=3, m=9. counts is [9]. For d=3: 9//3=3 → sum 3 >=3. So output is 3.
 

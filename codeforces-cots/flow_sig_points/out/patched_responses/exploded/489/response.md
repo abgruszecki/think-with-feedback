@@ -373,37 +373,90 @@ Now, considering that in Python, for large n and m, creating a list of (n+1) ele
 
 So the code should be correct.
 
-Testing the code with the sample inputs.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
+    rows = [(0, 0)] * (n + 1)
+    cols = [(0, 0)] * (m + 1)
+    current_time = 0
 
-n=3, m=3, k=3.
+    for _ in range(k):
+        parts = input_stream.readline().rstrip("\n").split()
+        op_type = int(parts[0])
+        idx = int(parts[1])
+        a = int(parts[2])
+        current_time += 1
+        if op_type == 1:
+            rows[idx] = (current_time, a)
+        else:
+            cols[idx] = (current_time, a)
 
-rows = [ (0,0) ] *4 → indexes 0,1,2,3.
+    for i in range(1, n + 1):
+        row_time, row_color = rows[i]
+        output = []
+        for j in range(1, m + 1):
+            col_time, col_color = cols[j]
+            if row_time > col_time:
+                output.append(str(row_color))
+            else:
+                output.append(str(col_color))
+        print(' '.join(output), file=output_stream)
 
-Processing the three steps:
 
-Step 1: row 1 → rows[1] becomes (1,3).
 
-Step 2: column 2 → cols[2] becomes (2,1).
+def test():
+    import io
 
-Step3: row2 → rows[2] becomes (3,2).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 3 5
+1 1 1
+1 3 1
+1 5 1
+2 1 1
+2 3 1
+""",
+            "output": \
+"""\
+1 1 1
+1 0 1
+1 1 1
+1 0 1
+1 1 1
+""",
+        }, 
+    ]
 
-Then, for row 1, j from 1 to 3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For j=1: col 1's time is 0. So row's time 1>0 → color3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-j=2: col 2's time 2>1 → color1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-j=3: col3's time 0 → color3.
+    print('Tests passed 😎')
 
-So the first row is 3 1 3.
 
-Which matches.
+if __name__ == '__main__':
+    test()
 
-Yes.
 
-Thus, code is correct.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

@@ -77,28 +77,127 @@ If all four are true, output 'Correct'; else, 'Too weak'.
 
 So, in code:
 
-password = input().strip()
+Testing against sample input 1.
 
-if len(password) <5:
-    print("Too weak")
-else:
-    has_upper = any(c.isupper() for c in password)
-    has_lower = any(c.islower() for c in password)
-    has_digit = any(c.isdigit() for c in password)
-    if has_upper and has_lower and has_digit:
-        print("Correct")
+```python
+def main(input_stream, output_stream):
+    password = input_stream.readline().rstrip("\n").strip()
+
+    if len(password) <5:
+        print("Too weak", file=output_stream)
     else:
-        print("Too weak")
+        has_upper = any(c.isupper() for c in password)
+        has_lower = any(c.islower() for c in password)
+        has_digit = any(c.isdigit() for c in password)
+        if has_upper and has_lower and has_digit:
+            print("Correct", file=output_stream)
+        else:
+            print("Too weak", file=output_stream)
 
-This should handle all cases.
 
-Testing the examples:
 
-First example input: 'abacaba' (length 7).
+def test():
+    import io
 
-Check: has_upper? No. So output 'Too weak'.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+X12345
+""",
+            "output": \
+"""\
+Too weak
+""",
+        }, 
+    ]
 
-Second example: 'X12345' (length 6). Has upper (X), but no lowercase. So output 'Too weak'.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    password = input_stream.readline().rstrip("\n").strip()
+
+    if len(password) <5:
+        print("Too weak", file=output_stream)
+    else:
+        has_upper = any(c.isupper() for c in password)
+        has_lower = any(c.islower() for c in password)
+        has_digit = any(c.isdigit() for c in password)
+        if has_upper and has_lower and has_digit:
+            print("Correct", file=output_stream)
+        else:
+            print("Too weak", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+CONTEST_is_STARTED!!11
+""",
+            "output": \
+"""\
+Correct
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: 'CONTEST_is_STARTED!!11' — has uppercase (CONTEST, STARTED), lowercase (is?), digits (11). Wait, the password is "CONTEST_is_STARTED!!11". Let's check: uppercase letters (C, O, N, T, E, S, T, etc.), lowercase (the 'is' part, 's' maybe?), and digits '11' at the end.
 

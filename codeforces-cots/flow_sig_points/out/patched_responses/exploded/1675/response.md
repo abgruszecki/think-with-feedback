@@ -58,43 +58,123 @@ So the code would be straightforward.
 
 In Python, code:
 
-n = int(input())
-a = list(map(int, input().split()))
-s = sum(a)
-target_parity = s % 2
-count = 0
-for num in a:
-    if num % 2 == target_parity:
-        count +=1
-print(count)
+Testing against sample input 1.
 
-Testing this code:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    s = sum(a)
+    target_parity = s % 2
+    count = 0
+    for num in a:
+        if num % 2 == target_parity:
+            count +=1
+    print(count, file=output_stream)
 
-First example:
 
-Input 1 and 1 → sum is 1 (odd). Target parity is 1. Check 1 → yes. Output 1.
 
-Second example:
+def test():
+    import io
 
-Sum is 28 → even. So count all even numbers. Let's see the input array:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10
+1 2 2 3 4 4 4 2 2 2
+""",
+            "output": \
+"""\
+8
+""",
+        }, 
+    ]
 
-1 (odd) → no.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Then 2,2 (even → yes), 3 (odd → no), 4,4,4 (even → yes), 2,2,2 (yes). So total 2+2+3 (for the first 2,2; then 3 4's, then 3 2's?) Wait in the input, the list is [1,2,2,3,4,4,4,2,2,2] → that's 10 elements. Let's count even numbers:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Indices 1,2,4,5,6,7,8,9 (assuming 0-based). Wait no, wait the array is 1,2,2,3,4,4,4,2,2,2. So elements are:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Element 1: 1 → odd → no.
+    print('Tests passed 😎')
 
-Elements 2 and 3 (0-based) are 2 and 2 → even.
 
-Then 3 is 3 → no.
+if __name__ == '__main__':
+    test()
 
-Elements 4,5,6 are 4,4,4 → even.
 
-Elements 7,8,9 (0-based) are 2,2,2 → even.
+```
 
-So total even numbers: 2 (positions 1 and 2), 3 (positions 4,5,6), 3 (positions 7,8,9) → total 2+3+3 = 8. Which matches.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    s = sum(a)
+    target_parity = s % 2
+    count = 0
+    for num in a:
+        if num % 2 == target_parity:
+            count +=1
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+11
+2 2 2 2 2 2 2 2 2 2 99
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: sum is 119 (odd). So count the number of odd elements. The array is 10 2's (even) and one 99 (odd). So count 1. Which is correct.
 

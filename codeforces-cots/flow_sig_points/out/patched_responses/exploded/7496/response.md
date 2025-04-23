@@ -60,38 +60,66 @@ Yes.
 
 So the code can be written as:
 
-n = int(input())
-words = input().split()
+Testing against sample input 1.
 
-roots = set()
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    words = input_stream.readline().rstrip("\n").split()
 
-for word in words:
-    unique_chars = sorted(list(set(word)))
-    root = ''.join(unique_chars)
-    roots.add(root)
+    roots = set()
 
-print(len(roots))
+    for word in words:
+        unique_chars = sorted(list(set(word)))
+        root = ''.join(unique_chars)
+        roots.add(root)
 
-Wait, but wait, let's test this against the examples.
+    print(len(roots), file=output_stream)
 
-First example input:
 
-5
-a aa aaa ab abb
 
-Processing each word:
+def test():
+    import io
 
-"a": unique is {'a'}, sorted is ['a'], joined as "a".
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+amer arem mrea
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-"aa": same as above.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-"aaa": same.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-"ab": unique {'a','b'}, sorted as "ab".
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-"abb": same as "ab".
+    print('Tests passed 😎')
 
-So the roots are "a" and "ab", so the answer is 2. Correct.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

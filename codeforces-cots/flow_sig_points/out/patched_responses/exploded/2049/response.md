@@ -553,35 +553,82 @@ Then proceed as per the code.
 
 So putting all together.
 
-Testing sample input 1:
+Testing against sample input 1.
 
-Input:
+```python
+def main(input_stream, output_stream):
+    a, ta = map(int, input_stream.readline().rstrip("\n").split())
+    b, tb = map(int, input_stream.readline().rstrip("\n").split())
+    departure = input_stream.readline().rstrip("\n").strip()
+    h, m = map(int, departure.split(':'))
+    s_time = h * 60 + m
+    e_time = s_time + ta
 
-10 30
+    d_low = max(300, s_time - tb + 1)
+    d_high = min(e_time - 1, 1439)
 
-10 35
+    if d_low > d_high:
+        print(0, file=output_stream)
+    else:
+        x = d_low - 300
+        first_k = (x + b - 1) // b
+        first_d = 300 + first_k * b
+        if first_d > d_high:
+            print(0, file=output_stream)
+        else:
+            last_k = (d_high - 300) // b
+            last_d = 300 + last_k * b
+            if last_d < d_low:
+                print(0, file=output_stream)
+            else:
+                count = (last_d - first_d) // b + 1
+                print(count, file=output_stream)
 
-05:20
 
-S = 5*60 +20 =320.
 
-E=350.
+def test():
+    import io
 
-D_low= max(300, 320-35 +1) →320-35=285 →286. So max(300, 286) →300.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+60 120
+24 100
+13:00
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
 
-D_high= min(350-1=349, 1439) →349.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-x=300-300=0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-first_k = (0 +10-1)/10 →9//10=0 → first_D=300+0*10=300.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-300 <=349 → yes.
+    print('Tests passed 😎')
 
-last_k = (349-300)//10 →49//10=4 →4*10=40 →last_D=300+40=340.
 
-340 >=300 → yes.
+if __name__ == '__main__':
+    test()
 
-count = (340-300) //10 +1 →40//10=4 →4+1=5 → correct.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

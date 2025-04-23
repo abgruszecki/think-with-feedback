@@ -1279,169 +1279,136 @@ Implementing the logic for each group.
 
 So the code:
 
-n = int(input())
-a = list(map(int, input().split()))
+Testing against sample input 1.
 
-from collections import defaultdict
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-groups_dict = defaultdict(list)
-for i in range(n):
-    groups_dict[a[i]].append(i+1)  # 1-based index
+    from collections import defaultdict
 
-sorted_groups = sorted(groups_dict.items())
+    groups_dict = defaultdict(list)
+    for i in range(n):
+        groups_dict[a[i]].append(i+1)  # 1-based index
 
-current_pos = 1
-current_dir = None  # None, 'left', 'right'
-total_changes = 0
+    sorted_groups = sorted(groups_dict.items())
 
-for ai, computers in sorted_groups:
-    sorted_computers = sorted(computers)
-    left = sorted_computers[0]
-    right = sorted_computers[-1]
+    current_pos = 1
+    current_dir = None  # None, 'left', 'right'
+    total_changes = 0
 
-    # Option 1: process LTR
-    start_ltr = left
-    movement_required_ltr = (current_pos != start_ltr)
-    changes_ltr = 0
+    for ai, computers in sorted_groups:
+        sorted_computers = sorted(computers)
+        left = sorted_computers[0]
+        right = sorted_computers[-1]
 
-    if movement_required_ltr:
-        if current_pos < start_ltr:
-            movement_dir_ltr = 'right'
+        # Option 1: process LTR
+        start_ltr = left
+        movement_required_ltr = (current_pos != start_ltr)
+        changes_ltr = 0
+
+        if movement_required_ltr:
+            if current_pos < start_ltr:
+                movement_dir_ltr = 'right'
+            else:
+                movement_dir_ltr = 'left'
+            # compute movement changes
+            if current_dir is not None and movement_dir_ltr != current_dir:
+                changes_ltr += 1
+            # compute processing changes
+            processing_dir_ltr = 'right'
+            if movement_dir_ltr != processing_dir_ltr:
+                changes_ltr += 1
         else:
-            movement_dir_ltr = 'left'
-        # compute movement changes
-        if current_dir is not None and movement_dir_ltr != current_dir:
-            changes_ltr += 1
-        # compute processing changes
-        processing_dir_ltr = 'right'
-        if movement_dir_ltr != processing_dir_ltr:
-            changes_ltr += 1
-    else:
-        processing_dir_ltr = 'right'
-        if current_dir is not None and processing_dir_ltr != current_dir:
-            changes_ltr += 1
+            processing_dir_ltr = 'right'
+            if current_dir is not None and processing_dir_ltr != current_dir:
+                changes_ltr += 1
 
-    new_pos_ltr = right
-    new_dir_ltr = 'right'
+        new_pos_ltr = right
+        new_dir_ltr = 'right'
 
-    # Option 2: process RTL
-    start_rtl = right
-    movement_required_rtl = (current_pos != start_rtl)
-    changes_rtl = 0
+        # Option 2: process RTL
+        start_rtl = right
+        movement_required_rtl = (current_pos != start_rtl)
+        changes_rtl = 0
 
-    if movement_required_rtl:
-        if current_pos < start_rtl:
-            movement_dir_rtl = 'right'
+        if movement_required_rtl:
+            if current_pos < start_rtl:
+                movement_dir_rtl = 'right'
+            else:
+                movement_dir_rtl = 'left'
+            # compute movement changes
+            if current_dir is not None and movement_dir_rtl != current_dir:
+                changes_rtl += 1
+            # compute processing changes
+            processing_dir_rtl = 'left'
+            if movement_dir_rtl != processing_dir_rtl:
+                changes_rtl += 1
         else:
-            movement_dir_rtl = 'left'
-        # compute movement changes
-        if current_dir is not None and movement_dir_rtl != current_dir:
-            changes_rtl += 1
-        # compute processing changes
-        processing_dir_rtl = 'left'
-        if movement_dir_rtl != processing_dir_rtl:
-            changes_rtl += 1
-    else:
-        processing_dir_rtl = 'left'
-        if current_dir is not None and processing_dir_rtl != current_dir:
-            changes_rtl += 1
+            processing_dir_rtl = 'left'
+            if current_dir is not None and processing_dir_rtl != current_dir:
+                changes_rtl += 1
 
-    new_pos_rtl = left
-    new_dir_rtl = 'left'
+        new_pos_rtl = left
+        new_dir_rtl = 'left'
 
-    # choose the option with minimal changes
-    if changes_ltr <= changes_rtl:
-        total_changes += changes_ltr
-        current_pos = new_pos_ltr
-        current_dir = new_dir_ltr
-    else:
-        total_changes += changes_rtl
-        current_pos = new_pos_rtl
-        current_dir = new_dir_rtl
+        # choose the option with minimal changes
+        if changes_ltr <= changes_rtl:
+            total_changes += changes_ltr
+            current_pos = new_pos_ltr
+            current_dir = new_dir_ltr
+        else:
+            total_changes += changes_rtl
+            current_pos = new_pos_rtl
+            current_dir = new_dir_rtl
 
-print(total_changes)
+    print(total_changes, file=output_stream)
 
-Testing this code on the first sample:
 
-Sample 1:
 
-n=3, a = [0,2,0]
+def test():
+    import io
 
-groups are {0: [1,3], 2: [2]}.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+4 2 3 0 1
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-sorted_groups are [(0, [1,3]), (2, [2])].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing first group (ai=0, computers [1,3]):
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-current_pos=1, current_dir=None.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Option1 (LTR):
+    print('Tests passed 😎')
 
-start_ltr=1.
 
-movement_required_ltr = false.
+if __name__ == '__main__':
+    test()
 
-processing_dir_ltr = 'right'.
 
-current_dir is None → changes_ltr=0.
+```
 
-new_pos=3, new_dir='right'.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Option2 (RTL):
-
-start_rtl=3.
-
-movement_required_rtl = true (1 !=3).
-
-movement_dir_rtl = 'right'.
-
-current_dir is None → movement changes_rtl=0.
-
-processing_dir_rtl is 'left'.
-
-movement_dir_rtl (right) != left → changes_rtl +=1.
-
-changes_rtl=1.
-
-So option1 is better. total_changes becomes 0. current_pos=3, current_dir='right'.
-
-Next group (ai=2, [2]).
-
-Option1 (LTR):
-
-start_ltr=2.
-
-movement_required_ltr = true (3 !=2).
-
-movement_dir_ltr = 'left'.
-
-current_dir is 'right' → movement changes_ltr=1.
-
-processing_dir_ltr is 'right'.
-
-movement_dir_ltr is left → changes_ltr +=1. total changes_ltr=2.
-
-option2 (RTL):
-
-start_rtl=2.
-
-movement_required_rtl = true (3 !=2).
-
-movement_dir_rtl = 'left'.
-
-current_dir is 'right' → movement changes_rtl=1.
-
-processing_dir_rtl is 'left'.
-
-movement_dir_rtl is left → processing changes_rtl=0.
-
-changes_rtl=1.
-
-So option2 is better. total_changes +=1 → total 1.
-
-current_pos=2, current_dir='left'.
-
-Thus, the output is 1, which matches the sample.
+```
 
 Another sample: sample 2:
 

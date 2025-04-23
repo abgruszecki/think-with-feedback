@@ -409,51 +409,79 @@ So in code, for allowed_ds, m is n/d, which is integer, so s::m will have exactl
 
 So the code can be written as:
 
+Testing against sample input 1.
+
+```python
 import math
 
-n = int(input())
-t = list(map(int, input().split()))
 
-divisors = set()
-for i in range(1, int(math.isqrt(n)) + 1):
-    if n % i == 0:
-        divisors.add(i)
-        divisors.add(n // i)
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    t = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-allowed_ds = [d for d in divisors if d >=3]
+    divisors = set()
+    for i in range(1, int(math.isqrt(n)) + 1):
+        if n % i == 0:
+            divisors.add(i)
+            divisors.add(n // i)
 
-max_sum = -float('inf')
+    allowed_ds = [d for d in divisors if d >=3]
 
-for d in allowed_ds:
-    m = n // d
-    for s in range(m):
-        current_sum = sum(t[s::m][:d])  # slice up to d elements to prevent issues if s + ... exceeds the list
-        if current_sum > max_sum:
-            max_sum = current_sum
+    max_sum = -float('inf')
 
-print(max_sum)
+    for d in allowed_ds:
+        m = n // d
+        for s in range(m):
+            current_sum = sum(t[s::m][:d])  # slice up to d elements to prevent issues if s + ... exceeds the list
+            if current_sum > max_sum:
+                max_sum = current_sum
 
-Wait, but in the case where s::m has more than d elements, but that's not possible here. Because for d elements, m =n/d, and s <m. So s + (d-1)*m = s + (d-1)*n/d. Since s < m =n/d → s <n/d → s + (d-1)*n/d < n/d + (d-1)*n/d = d*n/d =n. So all indices are within the list. So the slice t[s::m] will have exactly d elements. So the [:d] is redundant but safe.
+    print(max_sum, file=output_stream)
 
-Alternatively, since we know the slice will have exactly d elements, we can omit it. But including it doesn't hurt.
 
-But for code correctness, perhaps it's better to include it.
 
-Testing sample input 1:
+def test():
+    import io
 
-t = [1,2,-3,4,-5,5,2,3]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+1 -2 3 -4 5 -6
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
 
-allowed_ds =4 and 8.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For d=4, m=2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-s ranges from 0 to 1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-s=0: t[0::2] → [1, -3, -5, 2], sum 1-3-5+2 =-5.
+    print('Tests passed 😎')
 
-s=1: t[1::2] → [2,4,5,3], sum 14.
 
-So correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 3:
 

@@ -839,141 +839,171 @@ So, putting it all together.
 
 Now, code:
 
-n, k = map(int, input().split())
+Testing against sample input 1.
 
-x = list(input().strip())
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-base = x[:k]
+    x = list(input_stream.readline().rstrip("\n").strip())
 
-def generate_candidate(base, m):
+    base = x[:k]
 
-    k = len(base)
+    def generate_candidate(base, m):
 
-    return [base[i % k] for i in range(m)]
+        k = len(base)
 
-def is_ge(a, b):
+        return [base[i % k] for i in range(m)]
 
-    if len(a) != len(b):
+    def is_ge(a, b):
 
-        return len(a) > len(b)
+        if len(a) != len(b):
 
-    for ai, bi in zip(a, b):
+            return len(a) > len(b)
 
-        if ai > bi:
+        for ai, bi in zip(a, b):
 
-            return True
+            if ai > bi:
 
-        elif ai < bi:
+                return True
 
-            return False
+            elif ai < bi:
 
-    return True
+                return False
 
-current = generate_candidate(base, n)
+        return True
 
-if is_ge(current, x):
+    current = generate_candidate(base, n)
 
-    print(n)
+    if is_ge(current, x):
 
-    print(''.join(current))
+        print(n, file=output_stream)
 
-else:
-
-    # Increment base
-
-    def increment_base(digits):
-
-        carry = 1
-
-        for i in reversed(range(len(digits))):
-
-            new_d = int(digits[i]) + carry
-
-            if new_d >= 10:
-
-                digits[i] = '0'
-
-                carry = 1
-
-            else:
-
-                digits[i] = str(new_d)
-
-                carry = 0
-
-                break
-
-        if carry == 1:
-
-            return None
-
-        return digits
-
-    new_base = increment_base(base.copy())
-
-    if new_base is not None:
-
-        candidate = generate_candidate(new_base, n)
-
-        if is_ge(candidate, x):
-
-            print(n)
-
-            print(''.join(candidate))
-
-        else:
-
-            # Generate candidate of n+1 digits
-
-            candidate = generate_candidate(new_base, n+1)
-
-            print(n+1)
-
-            print(''.join(candidate))
+        print(''.join(current), file=output_stream)
 
     else:
 
-        # Overflow, create new_base as '1' followed by k-1 zeros.
+        # Increment base
 
-        new_base = ['1'] + ['0']*(k-1)
+        def increment_base(digits):
 
-        candidate = generate_candidate(new_base, n)
+            carry = 1
 
-        if is_ge(candidate, x):
+            for i in reversed(range(len(digits))):
 
-            print(n)
+                new_d = int(digits[i]) + carry
 
-            print(''.join(candidate))
+                if new_d >= 10:
+
+                    digits[i] = '0'
+
+                    carry = 1
+
+                else:
+
+                    digits[i] = str(new_d)
+
+                    carry = 0
+
+                    break
+
+            if carry == 1:
+
+                return None
+
+            return digits
+
+        new_base = increment_base(base.copy())
+
+        if new_base is not None:
+
+            candidate = generate_candidate(new_base, n)
+
+            if is_ge(candidate, x):
+
+                print(n, file=output_stream)
+
+                print(''.join(candidate), file=output_stream)
+
+            else:
+
+                # Generate candidate of n+1 digits
+
+                candidate = generate_candidate(new_base, n+1)
+
+                print(n+1, file=output_stream)
+
+                print(''.join(candidate), file=output_stream)
 
         else:
 
-            # Generate candidate of n+1 digits
+            # Overflow, create new_base as '1' followed by k-1 zeros.
 
-            candidate = generate_candidate(new_base, n+1)
+            new_base = ['1'] + ['0']*(k-1)
 
-            print(n+1)
+            candidate = generate_candidate(new_base, n)
 
-            print(''.join(candidate))
+            if is_ge(candidate, x):
 
-But wait, when generating the new_base in the overflow case, the new_base is ['1'] followed by k-1 '0's. So for example, k=2 → ['1', '0'], which is correct.
+                print(n, file=output_stream)
 
-But when generating the candidate for m= n+1, the length increases by one.
+                print(''.join(candidate), file=output_stream)
 
-This code should handle all cases.
+            else:
 
-Let's test the sample inputs.
+                # Generate candidate of n+1 digits
 
-Sample 1:
+                candidate = generate_candidate(new_base, n+1)
 
-Input:
+                print(n+1, file=output_stream)
 
-3 2
+                print(''.join(candidate), file=output_stream)
 
-353
 
-base is ['3','5'].
 
-Generate candidate of length 3: 3,5,3 → 353. Compare with x, which is 353. Equal. So output.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 2
+1234
+""",
+            "output": \
+"""\
+4
+1313
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

@@ -322,13 +322,83 @@ Yes.
 
 So the code is correct.
 
-Testing the examples:
+Testing against sample inputs 1, 2.
 
-First example: prints 'major' correctly.
+```python
+import itertools
 
-Second example: in one permutation (B, C#, F) → positions 10,1,5.
 
-d1 is (1-10) mod12 → -9 mod12 is 3. d2 is (5-1)=4. So 3 and4 → minor.
+def main(input_stream, output_stream):
+    note_order = {'C': 0, 'C#': 1, 'D': 2, 'D#': 3, 'E': 4, 'F': 5, 'F#': 6, 'G': 7, 'G#': 8, 'A': 9, 'B': 10, 'H': 11}
+    notes = input_stream.readline().rstrip("\n").split()
+    positions = [note_order[note] for note in notes]
+
+    for perm in itertools.permutations(positions):
+        x, y, z = perm
+        d1 = (y - x) % 12
+        d2 = (z - y) % 12
+        if d1 == 4 and d2 == 3:
+            print("major", file=output_stream)
+            return
+        elif d1 == 3 and d2 == 4:
+            print("minor", file=output_stream)
+            return
+
+    print("strange", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+C# B F
+""",
+            "output": \
+"""\
+minor
+""",
+        }, 
+        {
+            "input": \
+"""\
+A B H
+""",
+            "output": \
+"""\
+strange
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example: permutations of 9,10,11. All permutations have d1 and d2 values that don't meet 4 and3 or 3 and4.
 

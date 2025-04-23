@@ -671,89 +671,183 @@ print(answer)
 
 Yes.
 
-Testing this code with the first sample:
+Testing against sample input 1.
 
-Sample input 1:
+```python
+def main(input_stream, output_stream):
+    n, h = map(int, input_stream.readline().rstrip("\n").split())
+    segments = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n)]
 
-3 4
+    if n == 0:
+        print(h, file=output_stream)
+        return
 
-segments: [2,5], [7,9], [10,11]
+    # Compute gaps between consecutive segments
+    gaps = []
+    for i in range(n-1):
+        next_x1 = segments[i+1][0]
+        curr_x2 = segments[i][1]
+        gaps.append(next_x1 - curr_x2)
 
-gaps:
+    # Compute prefix sums of segment lengths
+    prefix_sum = [0] * (n + 1)
+    for i in range(n):
+        prefix_sum[i+1] = prefix_sum[i] + (segments[i][1] - segments[i][0])
 
-between 0 and1: 7-5=2
+    max_A = 0
+    current_gaps = 0
+    left = 0
 
-between 1 and2:10-9=1
+    for right in range(n):
+        if right > 0:
+            current_gaps += gaps[right - 1]
+        
+        # Adjust left pointer to ensure current_gaps <= h
+        while current_gaps > h and left < right:
+            current_gaps -= gaps[left]
+            left += 1
+        
+        current_A = prefix_sum[right + 1] - prefix_sum[left]
+        if current_A > max_A:
+            max_A = current_A
 
-gaps array is [2,1]
+    print(max_A + h, file=output_stream)
 
-prefix_sum is [0,3,5,6]
 
-Then sliding window:
 
-right=0:
+def test():
+    import io
 
-current_gaps=0
-
-current_A =3-0=3. max_A=3.
-
-right=1:
-
-current_gaps += gaps[0] → 2.
-
-2<=4.
-
-current_A=5-0=5. max_A=5.
-
-right=2:
-
-current_gaps += gaps[1] →2+1=3 <=4.
-
-current_A=6-0=6. max_A=6.
-
-answer is6+4=10.
-
-Which is correct.
-
-Sample input 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5 10
+5 7
+11 12
+16 20
+25 26
+30 33
+""",
+            "output": \
+"""\
+18
+""",
+        }, 
+    ]
 
-segments as before. gaps are [4,4,5,4].
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-prefix_sum is [0,2,3,7,8,11].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sliding window:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-left=0.
+    print('Tests passed 😎')
 
-right=0: current_gaps=0 → current_A=2. max=2.
 
-right=1: current_gaps=4. <=10. current_A=2+1=3. max=3.
+if __name__ == '__main__':
+    test()
 
-right=2: current_gaps=4+4=8. <=10. current_A=7. max=7.
 
-right=3: current_gaps=8+5=13>10.
+```
 
-enter loop:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-current_gaps=13 → subtract 4 (gaps[0]), left becomes1, current_gaps=9. 9<=10.
+```
 
-current_A=prefix_sum[4] - prefix_sum[1] →8-2=6. max remains7.
+Testing against sample input 2.
 
-right=4: current_gaps=9 +4=13>10.
+```python
+def main(input_stream, output_stream):
+    n, h = map(int, input_stream.readline().rstrip("\n").split())
+    segments = [tuple(map(int, input_stream.readline().rstrip("\n").split())) for _ in range(n)]
 
-enter loop:
+    if n == 0:
+        print(h, file=output_stream)
+        return
 
-subtract gaps[1] (4): current_gaps=9, left=2. subtract 5 (gaps[2] is 5?), wait, gaps is [4,4,5,4], so for left=1, the gaps are 4 (index 0). So when left=1, subtracting gaps[1] is 4 (from index1). current_gaps=9-4=5. left=2.
+    # Compute gaps between consecutive segments
+    gaps = []
+    for i in range(n-1):
+        next_x1 = segments[i+1][0]
+        curr_x2 = segments[i][1]
+        gaps.append(next_x1 - curr_x2)
 
-sum_gaps=5. <=10.
+    # Compute prefix sums of segment lengths
+    prefix_sum = [0] * (n + 1)
+    for i in range(n):
+        prefix_sum[i+1] = prefix_sum[i] + (segments[i][1] - segments[i][0])
 
-current_A=prefix_sum[5] - prefix_sum[2] →11-3=8. max=8.
+    max_A = 0
+    current_gaps = 0
+    left = 0
 
-So answer is8+10=18.
+    for right in range(n):
+        if right > 0:
+            current_gaps += gaps[right - 1]
+        
+        # Adjust left pointer to ensure current_gaps <= h
+        while current_gaps > h and left < right:
+            current_gaps -= gaps[left]
+            left += 1
+        
+        current_A = prefix_sum[right + 1] - prefix_sum[left]
+        if current_A > max_A:
+            max_A = current_A
 
-Correct.
+    print(max_A + h, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 1000000000
+1 1000000000
+""",
+            "output": \
+"""\
+1999999999
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, the code should work.
 </think>

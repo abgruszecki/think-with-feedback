@@ -385,43 +385,239 @@ Wait, but after processing the group and moving to next_start, the loop continue
 
 Yes. So this code should handle all cases.
 
-Now, let's test the code with the samples.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    w, m, k = map(int, input_stream.readline().rstrip("\n").split())
+    count = 0
+    current = m
+    remaining = w
 
-Input:
+    while True:
+        d = len(str(current))
+        next_start = 10 ** d
+        max_numbers = next_start - current
+        cost_per = d * k
+        
+        if cost_per > remaining:
+            break
+        
+        total_cost = max_numbers * cost_per
+        if total_cost <= remaining:
+            count += max_numbers
+            remaining -= total_cost
+            current = next_start
+        else:
+            possible = remaining // cost_per
+            count += possible
+            remaining -= possible * cost_per
+            break
+        
+        if remaining <= 0:
+            break
 
-9 1 1
+    print(count, file=output_stream)
 
-Code steps:
 
-current=1, d=1, next_start=10.
 
-max_numbers=9.
+def test():
+    import io
 
-cost_per=1*1=1.
-
-total_group_cost=9*1=9 <=9. So count +=9, remaining=0. current=10.
-
-Loop checks remaining, which is 0, breaks. Output 9. Correct.
-
-Sample 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 77 7 7
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
 
-current=7, d=1. next_start=10. max_numbers=3. cost_per=7.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-total_group_cost=21 <=77. count=3. remaining=77-21=56. current=10.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Next iteration: d=2. next_start=100. max_numbers=90. cost_per=14. total_group_cost=90*14=1260. 1260>56. So possible=56//14=4. count=3+4=7. remaining=56-4*14=0. break. Output 7. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sample3:
+    print('Tests passed 😎')
 
-114 5 14.
 
-current=5. d=1. next_start=10. max_numbers=5 (5,6,7,8,9). cost_per=14. total_group_cost=5*14=70 <=114. remaining becomes 44. current=10.
+if __name__ == '__main__':
+    test()
 
-d=2. next_start=100. max_numbers=90. cost_per=28. total_group_cost=90*28=2520>44. possible=44//28=1. 44-28=16. count becomes 5+1=6. break. Output 6. Correct.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    w, m, k = map(int, input_stream.readline().rstrip("\n").split())
+    count = 0
+    current = m
+    remaining = w
+
+    while True:
+        d = len(str(current))
+        next_start = 10 ** d
+        max_numbers = next_start - current
+        cost_per = d * k
+        
+        if cost_per > remaining:
+            break
+        
+        total_cost = max_numbers * cost_per
+        if total_cost <= remaining:
+            count += max_numbers
+            remaining -= total_cost
+            current = next_start
+        else:
+            possible = remaining // cost_per
+            count += possible
+            remaining -= possible * cost_per
+            break
+        
+        if remaining <= 0:
+            break
+
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+114 5 14
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    w, m, k = map(int, input_stream.readline().rstrip("\n").split())
+    count = 0
+    current = m
+    remaining = w
+
+    while True:
+        d = len(str(current))
+        next_start = 10 ** d
+        max_numbers = next_start - current
+        cost_per = d * k
+        
+        if cost_per > remaining:
+            break
+        
+        total_cost = max_numbers * cost_per
+        if total_cost <= remaining:
+            count += max_numbers
+            remaining -= total_cost
+            current = next_start
+        else:
+            possible = remaining // cost_per
+            count += possible
+            remaining -= possible * cost_per
+            break
+        
+        if remaining <= 0:
+            break
+
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 1 2
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample4: input 1 1 2.
 

@@ -550,97 +550,125 @@ Implementing the token split:
 
 In code:
 
-s = input().strip()
+Testing against sample input 1.
 
-tokens = []
-current_token = []
-current_type = 'name'  # first token is a name
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-for c in s:
-    if current_type == 'name':
-        if c.islower():
-            current_token.append(c)
+    tokens = []
+    current_token = []
+    current_type = 'name'  # first token is a name
+
+    for c in s:
+        if current_type == 'name':
+            if c.islower():
+                current_token.append(c)
+            else:
+                # end of name, start price
+                tokens.append(''.join(current_token))
+                current_token = [c]
+                current_type = 'price'
+        else:  # current_type is price
+            if c.islower():
+                # end of price, start name
+                tokens.append(''.join(current_token))
+                current_token = [c]
+                current_type = 'name'
+            else:
+                current_token.append(c)
+    # add the last token
+    tokens.append(''.join(current_token))
+
+    # now, collect all prices (odd indices)
+    prices = []
+    for i in range(1, len(tokens), 2):
+        prices.append(tokens[i])
+
+    total_cents = 0
+
+    for price_str in prices:
+        # parse into cents
+        split = price_str.rsplit('.', 1)
+        if len(split) == 2 and len(split[1]) == 2 and split[1].isdigit():
+            dollars_part, cents_part = split
+            cents = int(cents_part)
         else:
-            # end of name, start price
-            tokens.append(''.join(current_token))
-            current_token = [c]
-            current_type = 'price'
-    else:  # current_type is price
-        if c.islower():
-            # end of price, start name
-            tokens.append(''.join(current_token))
-            current_token = [c]
-            current_type = 'name'
-        else:
-            current_token.append(c)
-# add the last token
-tokens.append(''.join(current_token))
+            dollars_part = price_str
+            cents = 0
+        # process dollars_part
+        dollars = int(dollars_part.replace('.', ''))
+        total_cents += dollars * 100 + cents
 
-# now, collect all prices (odd indices)
-prices = []
-for i in range(1, len(tokens), 2):
-    prices.append(tokens[i])
+    # now format the total_cents into the correct format
 
-total_cents = 0
+    dollars = total_cents // 100
+    cents_val = total_cents % 100
 
-for price_str in prices:
-    # parse into cents
-    split = price_str.rsplit('.', 1)
-    if len(split) == 2 and len(split[1]) == 2 and split[1].isdigit():
-        dollars_part, cents_part = split
-        cents = int(cents_part)
+    def format_dollars(dollars):
+        if dollars == 0:
+            return '0'
+        s = str(dollars)
+        reversed_s = s[::-1]
+        chunks = []
+        for i in range(0, len(reversed_s), 3):
+            chunk = reversed_s[i:i+3]
+            chunks.append(chunk)
+        # reverse the chunks order and each chunk
+        formatted = '.'.join(chunk[::-1] for chunk in chunks[::-1])
+        return formatted
+
+    formatted_dollars = format_dollars(dollars)
+
+    if cents_val == 0:
+        print(formatted_dollars, file=output_stream)
     else:
-        dollars_part = price_str
-        cents = 0
-    # process dollars_part
-    dollars = int(dollars_part.replace('.', ''))
-    total_cents += dollars * 100 + cents
+        # cents must be two digits
+        print(f"{formatted_dollars}.{cents_val:02d}", file=output_stream)
 
-# now format the total_cents into the correct format
 
-dollars = total_cents // 100
-cents_val = total_cents % 100
 
-def format_dollars(dollars):
-    if dollars == 0:
-        return '0'
-    s = str(dollars)
-    reversed_s = s[::-1]
-    chunks = []
-    for i in range(0, len(reversed_s), 3):
-        chunk = reversed_s[i:i+3]
-        chunks.append(chunk)
-    # reverse the chunks order and each chunk
-    formatted = '.'.join(chunk[::-1] for chunk in chunks[::-1])
-    return formatted
+def test():
+    import io
 
-formatted_dollars = format_dollars(dollars)
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+a1b2c3.38
+""",
+            "output": \
+"""\
+6.38
+""",
+        }, 
+    ]
 
-if cents_val == 0:
-    print(formatted_dollars)
-else:
-    # cents must be two digits
-    print(f"{formatted_dollars}.{cents_val:02d}")
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Wait, but when dollars is zero and cents is non-zero, like 0.04, the formatted_dollars is '0', so the output is '0.04'.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Which is correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Testing sample input 3:
+    print('Tests passed 😎')
 
-input is 'aa0.01t0.03' → the prices are '0.01' and '0.03'.
 
-Parsing '0.01' → split into '0' and '01' → dollars_part is 0 → 0*100 +1 =1 cent.
+if __name__ == '__main__':
+    test()
 
-Parsing '0.03' → split into '0' and '03' → 0*100 +3 =3 cents. Total is 4 cents → 0.04.
 
-So dollars is 0, cents_val is 4. So formatted_dollars is '0', and cents is 04 → output is '0.04' → correct.
+```
 
-Sample input 1: sum is 4832 + 1239000 = 1243832 cents → dollars is 12438.32 → 12438 *100 +32 = 1243832.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-dollars = 12438, cents = 32.
-
-Formatting dollars: 12438 → reversed is '83421', split into 834, 21 → chunks ['834', '21'] → reversed chunks ['21', '834'] → each reversed → '12', '438' → joined as '12.438' → adding cents: '12.438.32' → correct.
+```
 
 Another test case: sample 2: input 'a1b2c3.38' → the prices are '1', '2', '3.38'.
 

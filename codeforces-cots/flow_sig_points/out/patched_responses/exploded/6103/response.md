@@ -629,113 +629,74 @@ Then generate the line as above.
 
 Thus, the code is:
 
-n = input().strip()
+Testing against sample input 1.
 
-for c in reversed(n):
+```python
+def main(input_stream, output_stream):
+    n = input_stream.readline().rstrip("\n").strip()
 
-    d = int(c)
+    for c in reversed(n):
 
-    if d >=5:
+        d = int(c)
 
-        left = '-O'
+        if d >=5:
 
-    else:
+            left = '-O'
 
-        left = 'O-'
+        else:
 
-    r = d %5
+            left = 'O-'
 
-    ichi = 'O'*r + '-' + 'O'*(4 - r)
+        r = d %5
 
-    print(left + '|' + ichi)
+        ichi = 'O'*r + '-' + 'O'*(4 - r)
 
-Yes, this should work.
+        print(left + '|' + ichi, file=output_stream)
 
-Testing with sample input 0:
 
-input is '0' → reversed is '0'.
 
-d=0 → O-.
+def test():
+    import io
 
-r=0 → ichi is 'OOOO' → but no, according to the code:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+13
+""",
+            "output": \
+"""\
+O-|OOO-O
+O-|O-OOO
+""",
+        }, 
+    ]
 
-r=0 → 'O'*0 → '', then '-', then 'O'*(4-0) → 'OOOO' → so ichi is '-OOOO'.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Thus, line is O-| + '-OOOO' → O-|-OOOO. Correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Another test case: digit 5 → left is '-O', remainder 0 → ichi is '-OOOO'. line is -O|-OOOO.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Yes.
+    print('Tests passed 😎')
 
-Another test case: digit 9 → 9 >=5 → left is '-O', remainder 4. ichi is 'OOOO-' + 'O'*(4-4=0) → 'OOOO-' + 'O'*0 → 'OOOO-'. Wait, no. Wait, r=9-5=4. 'O'*4 → 'OOOO', then '-', then 'O'*0 → ''. So ichi_part is 'OOOO-'. No. Wait, no. Wait, code is 'O'*r + '-' + 'O'*(4 -r).
 
-For r=4: 'O'*4 is 'OOOO', then '-', then 'O'*(0) → ''. So ichi_part is 'OOOO-' + '' → 'OOOO-'? Wait, no. 'O'*4 is 'OOOO', then '-', then 'O'*(0) is ''. So ichi_part is 'OOOO-' + '' → 'OOOO-'. But the sample for digit 9 would have ichi_part 'OOOO-', which is 5 characters. But in the code, the line for digit 9 would be '-O|OOOO-' → which is 9 characters (left_part is 2, | is 1, ichi_part is 5: total 8).
+if __name__ == '__main__':
+    test()
 
-Wait, no. Let me count:
 
-left_part is 2 characters ( '-O' ), then | is 1 character, then ichi_part is 5 characters. So total 2+1+5=8 characters. But sample input 2's line is 9 characters. Hmm, perhaps there's a mistake here.
+```
 
-Wait, in the first sample, the line is O-|OO-OO. Which is 2+1+5=8 characters. Oh wait, 2 (O-), 1 (|), 5 (OO-OO) → 8 characters. But the sample input 2's output shows O-|OO-OO as 9 characters. But perhaps I'm miscounting.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-O-|OO-OO → O - | O O - O O → which is 9 characters. So why?
-
-Wait, each part:
-
-left_part is 'O-' → 2 characters.
-
-| is 1.
-
-ichi_part is 'OO-OO' → 5 characters.
-
-Total 2+1+5=8. But O-|OO-OO is 9 characters. So there's a discrepancy here.
-
-Ah, I see. The code may have a mistake.
-
-Wait, let's count:
-
-For example, in the first sample's line:
-
-O-|OO-OO → characters are:
-
-O - | O O - O O → 9 characters.
-
-So the code must generate a line with 9 characters.
-
-But according to the code:
-
-left_part is 2 characters, then | (1), then ichi_part (5) → total 8. But the sample shows 9.
-
-Ah, so there's a mistake. How can this be?
-
-Wait, perhaps the code is missing a '-' in the left_part.
-
-Wait, for d <5, left_part is 'O-' (two characters). For d >=5, left_part is '-O' (two characters). Then the bar is | (one character). Then the ichi_part is 'O'*r + '-' + 'O'*(4-r) → which is (r) +1 + (4-r) =5 characters. So total 2+1+5=8 characters. But the sample input 2's line has 9 characters.
-
-So there's a problem here.
-
-Wait, the sample input 2's line is O-|OO-OO → 9 characters. So how is this possible?
-
-Let me count again:
-
-O - | O O - O O → that's O (1), - (2), | (3), O (4), O (5), - (6), O (7), O (8). Wait, no. The string is O-|OO-OO. Let's write each character:
-
-Index 0: O
-
-Index 1: -
-
-Index 2: |
-
-Index 3: O
-
-Index 4: O
-
-Index 5: -
-
-Index 6: O
-
-Index 7: O
-
-So total 8 characters. But sample input 2's output shows O-|OO-OO. Which is 8 characters, not 9. But the sample input's output shows it as a single line of 9 characters. Maybe the sample is formatted with a newline, but the actual length is 8.
+```
 
 But according to the problem's first sample input:
 

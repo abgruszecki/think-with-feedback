@@ -685,57 +685,107 @@ But wait, in the code, the indices for w are 0-based. So for a substring from i 
 
 Yes.
 
-Now, let's test the code against the sample input.
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    v = list(map(int, input_stream.readline().rstrip("\n").split()))
+    w = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-3
+    # Precompute max_j for each i (longest j where consecutive differences are ±1)
+    max_j = [i for i in range(n)]
+    for i in range(n):
+        for j in range(i + 1, n):
+            if abs(w[j] - w[j - 1]) != 1:
+                break
+            max_j[i] = j
 
-0 0 3
+    # Precompute valid[i][j]
+    valid = [[False] * n for _ in range(n)]
+    for i in range(n):
+        for j in range(i, n):
+            if j > max_j[i]:
+                valid[i][j] = False
+            else:
+                m = j - i + 1
+                if m <= 2:
+                    valid[i][j] = True
+                else:
+                    ok = True
+                    for k in range(i + 1, j):
+                        if 2 * w[k] < w[k - 1] + w[k + 1]:
+                            ok = False
+                            break
+                    valid[i][j] = ok
 
-1 2 1
+    # Initialize DP table
+    dp = [[0] * n for _ in range(n)]
 
-The max_j array would be:
+    for l in range(1, n + 1):
+        for i in range(n - l + 1):
+            j = i + l - 1
+            if i == j:
+                current_max = max(0, v[0])
+            else:
+                current_max = 0
+                # Check all possible splits
+                for k in range(i, j):
+                    current_max = max(current_max, dp[i][k] + dp[k + 1][j])
+                # Check if entire interval is valid
+                if valid[i][j]:
+                    m = l
+                    current_value = v[m - 1] if m <= len(v) else 0
+                    current_max = max(current_max, current_value)
+            dp[i][j] = current_max
 
-i=0: j can go up to 2.
+    print(dp[0][n - 1], file=output_stream)
 
-i=1: j can go up to 2 (since 2-1=1, 1-2=1? Wait, w is [1,2,1]. For i=0:
 
-j=0: valid.
 
-j=1: 2-1=1 → ok.
+def test():
+    import io
 
-j=2: 1-2= -1 → abs is 1 → ok. So max_j[0]=2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+1 4 5 6 7 1000
+2 1 1 2 2 3
+""",
+            "output": \
+"""\
+12
+""",
+        }, 
+    ]
 
-i=1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-j=1: valid.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-j=2: 1-2= -1 → abs is 1 → ok. So max_j[1] =2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-i=2:
+    print('Tests passed 😎')
 
-j=2: valid.
 
-So the valid intervals:
+if __name__ == '__main__':
+    test()
 
-i=0, j=0: valid.
 
-i=0, j=1: valid (length 2).
+```
 
-i=0, j=2: check convex condition. For k=1 (w[1] =2):
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-2*2 =4 >=1 (w[0]) +1 (w[2]) → 4 >=2 → yes. So valid.
-
-So valid[0][2] is True.
-
-Thus, during DP for interval 0-2:
-
-The splits would be k=0: dp[0][0] (0) + dp[1][2].
-
-dp[1][2] is for interval 1-2, which is valid (length 2). So v[1] =0. So dp[1][2] is max between splits and 0. Splitting into k=1 and k=2: sum is 0 +0=0. So dp[1][2] is 0. So the split sum is 0+0=0. The entire interval's value is v[2] =3. So dp[0][2] is 3.
-
-Thus, the code outputs 3, correct.
+```
 
 Sample Input 2:
 

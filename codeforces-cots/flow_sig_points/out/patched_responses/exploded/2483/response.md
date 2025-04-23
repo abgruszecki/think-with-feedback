@@ -262,49 +262,76 @@ So this approach works.
 
 Thus, the code can be written as:
 
+Testing against sample input 1.
+
+```python
 from collections import Counter
 
-n = int(input())
 
-a = list(map(int, input().split()))
-b = list(map(int, input().split()))
-c = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-count_a = Counter(a)
-count_b = Counter(b)
-count_c = Counter(c)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-first_error = (count_a - count_b).most_common(1)[0][0]
-second_error = (count_b - count_c).most_common(1)[0][0]
+    count_a = Counter(a)
+    count_b = Counter(b)
+    count_c = Counter(c)
 
-print(first_error)
-print(second_error)
+    first_error = (count_a - count_b).most_common(1)[0][0]
+    second_error = (count_b - count_c).most_common(1)[0][0]
 
-Wait, but in Python, the Counter subtraction might return multiple elements if there are multiple differences. But according to the problem statement, there is exactly one element that's removed each time. So the difference Counter should have exactly one element with a count of 1.
+    print(first_error, file=output_stream)
+    print(second_error, file=output_stream)
 
-So using most_common(1) will get that element.
 
-This code should work and is efficient.
 
-Testing the first sample:
+def test():
+    import io
 
-Input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+1 4 3 3 5 7
+3 7 5 4 3
+4 3 7 5
+""",
+            "output": \
+"""\
+1
+3
+""",
+        }, 
+    ]
 
-5
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-1 5 8 123 7
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-123 7 5 1
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-5 1 7
+    print('Tests passed 😎')
 
-count_a - count_b is {8:1}, so first_error is 8.
 
-count_b - count_c: count_b is {123:1,7:1,5:1,1:1}, count_c is {5:1,1:1,7:1}.
+if __name__ == '__main__':
+    test()
 
-count_b - count_c is {123:1}.
 
-So second_error is 123. Correct.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

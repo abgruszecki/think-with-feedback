@@ -159,59 +159,147 @@ But since n can be up to 100, even O(n log n) is acceptable.
 
 So code:
 
-n = int(input())
-grades = list(map(int, input().split()))
-current_sum = sum(grades)
-required = (9 * n + 1) // 2
+Testing against sample input 1.
 
-if current_sum >= required:
-    print(0)
-else:
-    deficit = required - current_sum
-    gains = [5 - g for g in grades if 5 - g > 0]
-    gains.sort(reverse=True)
-    count = 0
-    total = 0
-    for gain in gains:
-        total += gain
-        count +=1
-        if total >= deficit:
-            print(count)
-            exit()
-    # According to the problem statement, it's guaranteed that a solution exists.
-    # So this loop will always find a count.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    grades = list(map(int, input_stream.readline().rstrip("\n").split()))
+    current_sum = sum(grades)
+    required = (9 * n + 1) // 2
 
-But wait, in the case where all gains are zero? Like if all grades are 5. Then required sum is (9n+1)//2. But sum is 5n. Let's see for n=1: required sum is (9+1)/2=5. So 5 >=5. So output 0. So in the code, if current_sum is 5, which is equal to required, which is 5, then the code outputs 0. So that's correct.
+    if current_sum >= required:
+        print(0, file=output_stream)
+    else:
+        deficit = required - current_sum
+        gains = [5 - g for g in grades if 5 - g > 0]
+        gains.sort(reverse=True)
+        count = 0
+        total = 0
+        for gain in gains:
+            total += gain
+            count +=1
+            if total >= deficit:
+                print(count, file=output_stream)
+                return
+        # According to the problem statement, it's guaranteed that a solution exists.
+        # So this loop will always find a count.
 
-So this code should handle all cases.
 
-Testing the first sample:
 
-Input 3, [4,4,4].
+def test():
+    import io
 
-current_sum=12. required =14.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+5 4 5 5
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-deficit=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-gains are [1,1,1]. sorted descending.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-loop:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-gain=1: total=1, count=1. 1 <2.
+    print('Tests passed 😎')
 
-gain=1: total=2, count=2. which meets deficit. So output 2. Correct.
 
-Third sample:
+if __name__ == '__main__':
+    test()
 
-grades [5,3,3,5]. sum is 16. required 18. deficit 2.
 
-gains are [2,2]. sorted as [2,2]. take first gain: 2 >=2 → count=1.
+```
 
-So output 1. Correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Second sample:
+```
 
-grades [5,4,5,5]. sum is 5+4+5+5=19. required is (9*4+1)//2= (37)//2=18. 19 >=18 → output 0. Correct.
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    grades = list(map(int, input_stream.readline().rstrip("\n").split()))
+    current_sum = sum(grades)
+    required = (9 * n + 1) // 2
+
+    if current_sum >= required:
+        print(0, file=output_stream)
+    else:
+        deficit = required - current_sum
+        gains = [5 - g for g in grades if 5 - g > 0]
+        gains.sort(reverse=True)
+        count = 0
+        total = 0
+        for gain in gains:
+            total += gain
+            count +=1
+            if total >= deficit:
+                print(count, file=output_stream)
+                return
+        # According to the problem statement, it's guaranteed that a solution exists.
+        # So this loop will always find a count.
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+5 3 3 5
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case where deficit requires more than one gain.
 

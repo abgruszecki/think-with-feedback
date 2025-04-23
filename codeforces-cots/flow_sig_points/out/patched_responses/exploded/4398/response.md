@@ -103,29 +103,188 @@ Now, considering the data types. The problem note says to use 64-bit integers. F
 
 So the code is straightforward.
 
-Now, let's test the examples.
+Testing against sample input 1.
 
-First example:
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    pivot = s.index('^')
+    sum_torque = 0
+    for i, c in enumerate(s):
+        if c.isdigit():
+            sum_torque += (i - pivot) * int(c)
+    if sum_torque > 0:
+        print('right', file=output_stream)
+    elif sum_torque < 0:
+        print('left', file=output_stream)
+    else:
+        print('balance', file=output_stream)
 
-Input: =^== → s is length 4. pivot at index 1.
 
-All other characters are '=', so torque is zero. Sum is zero. Output balance. Correct.
 
-Second example: 9===^==1
+def test():
+    import io
 
-So the pivot is at index 4. The left has a '9' at index 0. The right has '1' at index 6.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+9===^==1
+""",
+            "output": \
+"""\
+left
+""",
+        }, 
+    ]
 
-Torque for left 9: (0-4)*9 = (-4)*9 = -36.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Torque for right 1: (6-4)*1 = 2*1=2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sum is -36 +2= -34. So sum is negative → output left. Which matches the example.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Third example: 2==^7== → pivot at index 3.
+    print('Tests passed 😎')
 
-Left: '2' at 0 → (0-3)*2 = -3*2 =-6.
 
-Right: '7' at 4 → (4-3)*7= 1*7=7. Sum is -6 +7=1. Positive → right. Correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    pivot = s.index('^')
+    sum_torque = 0
+    for i, c in enumerate(s):
+        if c.isdigit():
+            sum_torque += (i - pivot) * int(c)
+    if sum_torque > 0:
+        print('right', file=output_stream)
+    elif sum_torque < 0:
+        print('left', file=output_stream)
+    else:
+        print('balance', file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2==^7==
+""",
+            "output": \
+"""\
+right
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    pivot = s.index('^')
+    sum_torque = 0
+    for i, c in enumerate(s):
+        if c.isdigit():
+            sum_torque += (i - pivot) * int(c)
+    if sum_torque > 0:
+        print('right', file=output_stream)
+    elif sum_torque < 0:
+        print('left', file=output_stream)
+    else:
+        print('balance', file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+41^52==
+""",
+            "output": \
+"""\
+balance
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Fourth example: 41^52== → pivot at index 2.
 

@@ -271,145 +271,245 @@ Wait, but in Python, how to represent infinity? Use a very large number, like fl
 
 So code:
 
-n = int(input())
+Testing against sample input 1.
 
-s = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-c = list(map(int, input().split()))
+    s = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-left_min = [float('inf')] * n
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for j in range(n):
+    left_min = [float('inf')] * n
 
-    min_val = float('inf')
+    for j in range(n):
 
-    for i in range(j):
+        min_val = float('inf')
 
-        if s[i] < s[j]:
+        for i in range(j):
 
-            if c[i] < min_val:
+            if s[i] < s[j]:
 
-                min_val = c[i]
+                if c[i] < min_val:
 
-    if min_val != float('inf'):
+                    min_val = c[i]
 
-        left_min[j] = min_val
+        if min_val != float('inf'):
+
+            left_min[j] = min_val
+
+        else:
+
+            left_min[j] = None
+
+    right_min = [float('inf')] * n
+
+    for j in range(n):
+
+        min_val = float('inf')
+
+        for k in range(j+1, n):
+
+            if s[k] > s[j]:
+
+                if c[k] < min_val:
+
+                    min_val = c[k]
+
+        if min_val != float('inf'):
+
+            right_min[j] = min_val
+
+        else:
+
+            right_min[j] = None
+
+    min_total = float('inf')
+
+    for j in range(n):
+
+        if left_min[j] is not None and right_min[j] is not None:
+
+            current = left_min[j] + c[j] + right_min[j]
+
+            if current < min_total:
+
+                min_total = current
+
+    if min_total == float('inf'):
+
+        print(-1, file=output_stream)
 
     else:
 
-        left_min[j] = None
+        print(min_total, file=output_stream)
 
-right_min = [float('inf')] * n
 
-for j in range(n):
 
-    min_val = float('inf')
+def test():
+    import io
 
-    for k in range(j+1, n):
-
-        if s[k] > s[j]:
-
-            if c[k] < min_val:
-
-                min_val = c[k]
-
-    if min_val != float('inf'):
-
-        right_min[j] = min_val
-
-    else:
-
-        right_min[j] = None
-
-min_total = float('inf')
-
-for j in range(n):
-
-    if left_min[j] is not None and right_min[j] is not None:
-
-        current = left_min[j] + c[j] + right_min[j]
-
-        if current < min_total:
-
-            min_total = current
-
-if min_total == float('inf'):
-
-    print(-1)
-
-else:
-
-    print(min_total)
-
-Testing this against the sample inputs:
-
-First sample input:
-
-5
-
-2 4 5 4 10
-
-40 30 20 10 40
-
-left_min:
-
-j=0: no i, None.
-
-j=1: i=0 (s=2 <4, c=40 → left_min[1] =40.
-
-j=2: i can be 0 (40) and 1 (30). So min is 30.
-
-j=3: i must have s_i <4. i=0 (s=2, c=40). i=1 (s=4 not <4). i=2 (s=5 not). So left_min[3] =40.
-
-j=4: i can be 0,1,2,3. s_i are 2,4,5,4. All <10. The c_i are 40,30,20,10. The minimal is 10 (i=3). So left_min[4] =10.
-
-right_min:
-
-j=0: look for k>0 with s_k>2. All except j=0. The minimal c is 10 (index3). So right_min[0]=10.
-
-j=1: look for k>1 with s_k>4. k=2 (5, c=20), k=4 (10,40). Min is 20 (k=2) and 10 (k=3) → wait, wait. Let's re-examine:
-
-For j=1, s[j] is4. We need s[k] >4.
-
-k=2:5>4 →c=20.
-
-k=3:4 is not.
-
-k=4:10>4 →c=40.
-
-So the minimal is 20 (k=2).
-
-So right_min[1] =20.
-
-j=2: s[j]=5. k=3:4 → no. k=4:10>5 →c=40. So right_min[2]=40.
-
-j=3: s[j]=4. k=4:10>4 →c=40. right_min[3]=40.
-
-j=4: no k>4 → right_min[4] =None.
-
-So for j=3: left is 40, c_j is10, right is40 → sum 90.
-
-So code would output 90.
-
-Yes.
-
-Second sample input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
-
 100 101 100
+2 4 5
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-c is 2,4,5.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Check for each j:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-j=0: left is None.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-j=1: check i=0. s[0]=100 <101. c[i]=2. left_min[1]=2. right_min[j=1] must have k>1 with s[k]>101. s[2]=100 → no. So right_min[1] is None. So j=1 is invalid.
+    print('Tests passed 😎')
 
-j=2: i can be 0 and 1. s[i] 100 and 101. s[j]=100. So s_i must be <100. 100 is not <100, 101>100. So left_min[2] is None. So no j has both left and right.
 
-Output is -1.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    s = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    left_min = [float('inf')] * n
+
+    for j in range(n):
+
+        min_val = float('inf')
+
+        for i in range(j):
+
+            if s[i] < s[j]:
+
+                if c[i] < min_val:
+
+                    min_val = c[i]
+
+        if min_val != float('inf'):
+
+            left_min[j] = min_val
+
+        else:
+
+            left_min[j] = None
+
+    right_min = [float('inf')] * n
+
+    for j in range(n):
+
+        min_val = float('inf')
+
+        for k in range(j+1, n):
+
+            if s[k] > s[j]:
+
+                if c[k] < min_val:
+
+                    min_val = c[k]
+
+        if min_val != float('inf'):
+
+            right_min[j] = min_val
+
+        else:
+
+            right_min[j] = None
+
+    min_total = float('inf')
+
+    for j in range(n):
+
+        if left_min[j] is not None and right_min[j] is not None:
+
+            current = left_min[j] + c[j] + right_min[j]
+
+            if current < min_total:
+
+                min_total = current
+
+    if min_total == float('inf'):
+
+        print(-1, file=output_stream)
+
+    else:
+
+        print(min_total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10
+1 2 3 4 5 6 7 8 9 10
+10 13 11 14 15 12 13 13 18 13
+""",
+            "output": \
+"""\
+33
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample input:
 

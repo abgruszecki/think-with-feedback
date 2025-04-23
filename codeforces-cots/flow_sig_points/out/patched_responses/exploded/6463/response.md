@@ -399,39 +399,86 @@ But in Python, math.isqrt(n) returns the integer square root, which is the floor
 
 So code:
 
+Testing against sample inputs 1, 2.
+
+```python
 import math
 
-n = int(input())
 
-h = math.isqrt(n)
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-if h * h >=n:
+    h = math.isqrt(n)
 
-    print(2 * h)
+    if h * h >=n:
 
-elif h * (h +1) >=n:
+        print(2 * h, file=output_stream)
 
-    print(2 * h +1)
+    elif h * (h +1) >=n:
 
-else:
+        print(2 * h +1, file=output_stream)
 
-    h_new = h +1
+    else:
 
-    w = (n + h_new -1) // h_new
+        h_new = h +1
 
-    print(h_new + w)
+        w = (n + h_new -1) // h_new
 
-This should handle all cases.
+        print(h_new + w, file=output_stream)
 
-Testing with sample inputs:
 
-Sample 1:
 
-n=1 → h=1. 1*1 >=1 → print 2. Correct.
+def test():
+    import io
 
-Sample 2:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+        {
+            "input": \
+"""\
+4
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-n=2 →h=1. 1*1=1 <2. Check 1*2=2 >=2 → print 3. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3:
 

@@ -569,195 +569,321 @@ cross_count is sum for each x in group0, the number of y in group1 where y == ef
 
 So, code steps:
 
+Testing against sample input 1.
+
+```python
 import sys
-
 from collections import defaultdict
 
-n = int(sys.stdin.readline())
 
-a = list(map(int, sys.stdin.readline().split()))
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
-parents = list(map(int, sys.stdin.readline().split()))
+    a = list(map(int, input_stream.readline().split()))
 
-children = [[] for _ in range(n+1)]
+    parents = list(map(int, input_stream.readline().split()))
 
-for i in range(2, n+1):
+    children = [[] for _ in range(n+1)]
 
-    p = parents[i-2]
+    for i in range(2, n+1):
 
-    children[p].append(i)
+        p = parents[i-2]
 
-# Compute depth of each node
+        children[p].append(i)
 
-depth = [0]*(n+1)
+    # Compute depth of each node
 
-visited = [False]*(n+1)
+    depth = [0]*(n+1)
 
-from collections import deque
+    visited = [False]*(n+1)
 
-queue = deque([1])
+    from collections import deque
 
-visited[1] = True
+    queue = deque([1])
 
-while queue:
+    visited[1] = True
 
-    u = queue.popleft()
+    while queue:
 
-    for v in children[u]:
+        u = queue.popleft()
 
-        if not visited[v]:
+        for v in children[u]:
 
-            depth[v] = depth[u] + 1
+            if not visited[v]:
 
-            visited[v] = True
+                depth[v] = depth[u] + 1
 
-            queue.append(v)
+                visited[v] = True
 
-# Find leaves (nodes with no children)
+                queue.append(v)
 
-leaves = [u for u in range(1, n+1) if len(children[u]) == 0]
+    # Find leaves (nodes with no children)
 
-# Compute P (parity of root-to-leaf path)
+    leaves = [u for u in range(1, n+1) if len(children[u]) == 0]
 
-P = depth[leaves[0]] % 2
+    # Compute P (parity of root-to-leaf path)
 
-# Compute s_parity for each node
+    P = depth[leaves[0]] % 2
 
-s_parity = [ (P - depth[u]) % 2 for u in range(n+1) ]
+    # Compute s_parity for each node
 
-effective_xor = 0
+    s_parity = [ (P - depth[u]) % 2 for u in range(n+1) ]
 
-group0 = []
+    effective_xor = 0
 
-group1 = []
+    group0 = []
 
-for u in range(1, n+1):
+    group1 = []
 
-    if s_parity[u] == 0:
+    for u in range(1, n+1):
 
-        effective_xor ^= a[u-1]
+        if s_parity[u] == 0:
 
-        group0.append(a[u-1])
+            effective_xor ^= a[u-1]
 
-    else:
+            group0.append(a[u-1])
 
-        group1.append(a[u-1])
+        else:
 
-g0 = len(group0)
+            group1.append(a[u-1])
 
-g1 = len(group1)
+    g0 = len(group0)
 
-count_case1 = 0
+    g1 = len(group1)
 
-if effective_xor == 0:
+    count_case1 = 0
 
-    # compute combinations(g0,2) and combinations(g1,2)
+    if effective_xor == 0:
 
-    count_case1 = (g0 * (g0 -1)) //2 + (g1 * (g1 -1)) //2
+        # compute combinations(g0,2) and combinations(g1,2)
 
-# Compute cross_count
+        count_case1 = (g0 * (g0 -1)) //2 + (g1 * (g1 -1)) //2
 
-from collections import defaultdict
+    # Compute cross_count
 
-freq1 = defaultdict(int)
+    from collections import defaultdict
 
-for num in group1:
+    freq1 = defaultdict(int)
 
-    freq1[num] +=1
+    for num in group1:
 
-cross_count = 0
+        freq1[num] +=1
 
-for x in group0:
+    cross_count = 0
 
-    target = effective_xor ^ x
+    for x in group0:
 
-    cross_count += freq1.get(target, 0)
+        target = effective_xor ^ x
 
-total = count_case1 + cross_count
+        cross_count += freq1.get(target, 0)
 
-print(total)
+    total = count_case1 + cross_count
 
-Wait, but in the code, the group0 and group1 are lists of a values. For example, group0 contains a[u-1] for all u with s_parity 0.
+    print(total, file=output_stream)
 
-Yes.
 
-Testing the first sample input:
 
-Sample Input 1:
+def test():
+    import io
 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
-
-2 2 3
-
-1 1
-
-The tree is:
-
-1 is root, children are 2 and 3.
-
-Leaves are 2 and 3.
-
-depth of 2 and 3 is 1. P = 1 % 2 = 1.
-
-s_parity for node 1: (1 -0) mod 2 = 1 → contributes 0.
-
-nodes 2 and 3 have s_parity (1-1) mod2 =0 → contribute their a values.
-
-So effective_xor is 2 XOR 3 → which is 1.
-
-But in the original input, the effective_xor is 2 XOR 3 =1. Then, after swap, we need to have effective_xor zero.
-
-But according to the first example, after swapping nodes 1 and 3 (a[0] and a[2], which are 2 and 3), the new a values are [3, 2, 2].
-
-So group0 is nodes with s_parity 0. Those are nodes 2 and 3 (s_parity 0). Their a values are 2 and 3 → group0 is [2,3]. effective_xor is 2 XOR3 =1.
-
-In the code:
-
-group0 = [2,3], group1 = [2].
-
-effective_xor is 2^3 = 1.
-
-count_case1 is zero since effective_xor is 1 !=0.
-
-cross_count: for each x in group0 (2 and 3):
-
-x=2: target = 1 ^ 2 =3. freq1 is group1's a values, which is [2]. So 3 not in group1's freq1 → 0.
-
-x=3: target=1^3=2. group1 has 2 → add 1.
-
-cross_count=1.
-
-So total is 0+1=1, which matches the sample.
-
-Another sample:
-
-Sample Input 2:
-
-3
-
 1 2 3
-
 1 1
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-After processing:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Tree structure same as sample 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-P is 1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-group0: nodes 2 and 3. Their a values are 2 and 3 → effective_xor is 2^3 =1.
+    print('Tests passed 😎')
 
-count_case1=0.
 
-cross_count:
+if __name__ == '__main__':
+    test()
 
-for x in group0 (2 and3):
 
-x=2: target=1^2=3 → check group1 (which has a[0] =1, but group1 is s_parity 1 nodes. Only node 1 has s_parity 1. a[u-1] for node 1 is 1. So group1 is [1]. So target for x=2 is 3: no in group1.
+```
 
-x=3: target=1^3=2. group1 has 1 → no. So cross_count=0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Total is 0 → matches sample.
+```
+
+Testing against sample input 2.
+
+```python
+import sys
+from collections import defaultdict
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+
+    a = list(map(int, input_stream.readline().split()))
+
+    parents = list(map(int, input_stream.readline().split()))
+
+    children = [[] for _ in range(n+1)]
+
+    for i in range(2, n+1):
+
+        p = parents[i-2]
+
+        children[p].append(i)
+
+    # Compute depth of each node
+
+    depth = [0]*(n+1)
+
+    visited = [False]*(n+1)
+
+    from collections import deque
+
+    queue = deque([1])
+
+    visited[1] = True
+
+    while queue:
+
+        u = queue.popleft()
+
+        for v in children[u]:
+
+            if not visited[v]:
+
+                depth[v] = depth[u] + 1
+
+                visited[v] = True
+
+                queue.append(v)
+
+    # Find leaves (nodes with no children)
+
+    leaves = [u for u in range(1, n+1) if len(children[u]) == 0]
+
+    # Compute P (parity of root-to-leaf path)
+
+    P = depth[leaves[0]] % 2
+
+    # Compute s_parity for each node
+
+    s_parity = [ (P - depth[u]) % 2 for u in range(n+1) ]
+
+    effective_xor = 0
+
+    group0 = []
+
+    group1 = []
+
+    for u in range(1, n+1):
+
+        if s_parity[u] == 0:
+
+            effective_xor ^= a[u-1]
+
+            group0.append(a[u-1])
+
+        else:
+
+            group1.append(a[u-1])
+
+    g0 = len(group0)
+
+    g1 = len(group1)
+
+    count_case1 = 0
+
+    if effective_xor == 0:
+
+        # compute combinations(g0,2) and combinations(g1,2)
+
+        count_case1 = (g0 * (g0 -1)) //2 + (g1 * (g1 -1)) //2
+
+    # Compute cross_count
+
+    from collections import defaultdict
+
+    freq1 = defaultdict(int)
+
+    for num in group1:
+
+        freq1[num] +=1
+
+    cross_count = 0
+
+    for x in group0:
+
+        target = effective_xor ^ x
+
+        cross_count += freq1.get(target, 0)
+
+    total = count_case1 + cross_count
+
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8
+7 2 2 5 4 3 1 1
+1 1 1 4 4 5 6
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample Input3:
 

@@ -281,57 +281,141 @@ The code will:
 
 Thus, the code can be written as:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import deque
 
-n = int(sys.stdin.readline())
-a = list(map(int, sys.stdin.readline().split()))
-d = [-1] * (n+1)
-d[1] = 0
-q = deque([1])
 
-while q:
-    u = q.popleft()
-    for v in [u-1, u+1, a[u-1]]:
-        if 1 <= v <= n and d[v] == -1:
-            d[v] = d[u] +1
-            q.append(v)
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    a = list(map(int, input_stream.readline().split()))
+    d = [-1] * (n+1)
+    d[1] = 0
+    q = deque([1])
 
-print(' '.join(map(str, d[1:])))
+    while q:
+        u = q.popleft()
+        for v in [u-1, u+1, a[u-1]]:
+            if 1 <= v <= n and d[v] == -1:
+                d[v] = d[u] +1
+                q.append(v)
 
-Testing this code against the samples:
+    print(' '.join(map(str, d[1:])), file=output_stream)
 
-First sample:
 
-Input 3, a =2 2 3.
 
-d[1] =0.
+def test():
+    import io
 
-Process u=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+1 2 3 4 5
+""",
+            "output": \
+"""\
+0 1 2 3 4
+""",
+        }, 
+    ]
 
-neighbors 0 (invalid), 2 (d=1), a[0]=2 (same as 2). So 2 is added.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Then u=2. neighbors 1 (processed),3 (d=2), a[1]=2 (self). So 3 added.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing u=3: neighbors 2 (processed),4 (invalid), a[2]=3 (self). No new nodes.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Output is 0 1 2.
+    print('Tests passed 😎')
 
-Second sample:
 
-n=5, a =1 2 3 4 5.
+if __name__ == '__main__':
+    test()
 
-Process u=1.
 
-neighbors 0 (invalid), 2 (d=1), a[0]=1 (self). So 2 is added.
+```
 
-u=2: neighbors 1 (done),3 (d=2), a[1]=2 (self). 3 added.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-u=3: neighbors 2 (done),4 (d=3), a[2]=3 (self). 4 added.
+```
 
-u=4: neighbors 3 (done),5 (d=4), a[3]=4 (self). 5 added.
+Testing against sample input 2.
 
-Output 0 1 2 3 4.
+```python
+import sys
+from collections import deque
+
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    a = list(map(int, input_stream.readline().split()))
+    d = [-1] * (n+1)
+    d[1] = 0
+    q = deque([1])
+
+    while q:
+        u = q.popleft()
+        for v in [u-1, u+1, a[u-1]]:
+            if 1 <= v <= n and d[v] == -1:
+                d[v] = d[u] +1
+                q.append(v)
+
+    print(' '.join(map(str, d[1:])), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+4 4 4 4 7 7 7
+""",
+            "output": \
+"""\
+0 1 2 1 2 3 3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

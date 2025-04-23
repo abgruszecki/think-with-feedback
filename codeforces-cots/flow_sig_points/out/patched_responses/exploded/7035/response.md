@@ -147,71 +147,76 @@ Now, considering the input sizes. The input lines can be large (1e5 numbers per 
 
 So the code can be written as:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n, m = map(int, input().split())
 
-cities = list(map(int, input().split()))
-towers = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-max_r = 0
+    cities = list(map(int, input_stream.readline().rstrip("\n").split()))
+    towers = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for city in cities:
-    pos = bisect.bisect_left(towers, city)
-    current_min = float('inf')
-    if pos < m:
-        current_min = towers[pos] - city
-    if pos > 0:
-        current_min = min(current_min, city - towers[pos-1])
-    max_r = max(max_r, current_min)
+    max_r = 0
 
-print(max_r)
+    for city in cities:
+        pos = bisect.bisect_left(towers, city)
+        current_min = float('inf')
+        if pos < m:
+            current_min = towers[pos] - city
+        if pos > 0:
+            current_min = min(current_min, city - towers[pos-1])
+        max_r = max(max_r, current_min)
 
-But wait, in the code above, current_min is computed as the difference, which is correct. Because towers are sorted, and the city's position is x.
+    print(max_r, file=output_stream)
 
-But wait, the problem says that the distance must be <= r. So the distance is the absolute value. But since the code uses bisect_left, which gives the insertion point, and the towers are sorted, the code finds the minimal possible distance correctly.
 
-Wait, for example, if a city is at x=5, and the towers are at 3 and 7. Then bisect_left returns 1 (since 5 is inserted between 3 and7). So the code checks 7-5=2 and 5-3=2. The minimal is 2. Correct.
 
-Another example: city at 8, towers at 6 and 10. Insertion pos is 2 (since 8 is after 6 and 10). Wait, no. The towers list is [6,10]. bisect_left for 8 would return 1, since 6 <8 <10. So pos is 1, so check towers[1] (10-8=2) and towers[0] (8-6=2). So minimal is 2. Correct.
+def test():
+    import io
 
-Wait, but if the towers are [3,7], and city is 5, the code finds pos=1 (since 3<5<7). So current_min is 7-5=2 (pos<2, m=2). Then check pos>0: 5-3=2. So current_min is min(2,2)=2. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 3
+1 5 10 14 17
+4 11 15
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-What if the city is exactly at a tower's position? Like city is 3, towers are [2,3,4]. Then bisect_left returns 1. pos is 1. Check towers[1] (3-3=0) and towers[0] (3-2=1). So current_min is 0. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So the code is correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Now, what about the data types? All the input numbers can be up to 1e9, but in Python, integers are handled fine.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So the code should work correctly.
+    print('Tests passed 😎')
 
-But let's test the first example:
 
-Sample Input 1:
+if __name__ == '__main__':
+    test()
 
-3 2
 
--2 2 4
+```
 
--3 0
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Processing:
-
-Cities are [-2,2,4]
-
-Towers are [-3,0]
-
-For each city:
-
--2:
-
-bisect_left returns 1 (since -3 < -2 <0). pos=1. Check pos <2: 0 - (-2) =2. pos>0: -2 - (-3) =1. current_min is 1. max_r becomes 1.
-
-City 2: bisect_left in towers ([-3,0], 2) returns 2 (since both elements are <2). So pos=2. pos is not <2, so check pos>0: 2 -0=2. current_min is 2. max_r is now max(1,2)=2.
-
-City 4: bisect_left returns 2. So pos=2. Check pos>0: 4-0=4. So current_min is4. max_r becomes 4.
-
-Thus, output is 4. Correct.
+```
 
 So the code works.
 

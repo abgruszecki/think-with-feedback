@@ -41,53 +41,145 @@ So, in Python:
 
 Yes. So the code structure would be:
 
-n = int(input())
-s = input().strip()
-target = 'ACTG'
-min_ops = float('inf')
+Testing against sample input 1.
 
-for i in range(len(s) - 3):
-    current_sub = s[i:i+4]
-    total = 0
-    for j in range(4):
-        c = current_sub[j]
-        t = target[j]
-        # compute steps between c and t
-        c_ord = ord(c)
-        t_ord = ord(t)
-        diff = abs(c_ord - t_ord)
-        total += min(diff, 26 - diff)
-    if total < min_ops:
-        min_ops = total
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+    target = 'ACTG'
+    min_ops = float('inf')
 
-print(min_ops)
+    for i in range(len(s) - 3):
+        current_sub = s[i:i+4]
+        total = 0
+        for j in range(4):
+            c = current_sub[j]
+            t = target[j]
+            # compute steps between c and t
+            c_ord = ord(c)
+            t_ord = ord(t)
+            diff = abs(c_ord - t_ord)
+            total += min(diff, 26 - diff)
+        if total < min_ops:
+            min_ops = total
 
-Wait, that's the code. Let's test the first example:
+    print(min_ops, file=output_stream)
 
-Input:
-4
-ZCTH
 
-The substring is Z C T H.
 
-Compare to ACTG:
+def test():
+    import io
 
-Z -> A: ord('Z') is 90, ord('A') is 65. diff is 25. min(25, 1) → 1.
-C is already C → 0.
-T is already T → 0.
-H → G: diff is 1, so 1. Total is 1+0+0+1=2. Which matches the example.
-
-Second example:
-
-Input:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
 ZDATG
+""",
+            "output": \
+"""\
+5
+""",
+        }, 
+    ]
 
-Possible substrings are indexes 0-4 (ZDATG) and 1-4 (DAT... but length 5, so possible substrings are indices 0-3 (ZDAT) and 1-4 (DAT G). Let's see.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Looking for the best one. The second example's output is 5.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-The optimal is changing the substring starting at index 1: DATG → but need to get ACTG.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+    target = 'ACTG'
+    min_ops = float('inf')
+
+    for i in range(len(s) - 3):
+        current_sub = s[i:i+4]
+        total = 0
+        for j in range(4):
+            c = current_sub[j]
+            t = target[j]
+            # compute steps between c and t
+            c_ord = ord(c)
+            t_ord = ord(t)
+            diff = abs(c_ord - t_ord)
+            total += min(diff, 26 - diff)
+        if total < min_ops:
+            min_ops = total
+
+    print(min_ops, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+AFBAKC
+""",
+            "output": \
+"""\
+16
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Wait, the sample input is ZDATG. The substring that becomes ACTG is "DATG" → indexes 1-4. Let's see:
 

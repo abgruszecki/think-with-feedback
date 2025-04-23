@@ -1438,154 +1438,308 @@ But given time constraints, here's the code:
 
 Processing runs:
 
-s = input().strip()
-if not s:
-    print(0, 0)
-    exit()
+Testing against sample input 1.
 
-runs = []
-prev = s[0]
-count = 1
-for c in s[1:]:
-    if c == prev:
-        count +=1
-    else:
-        runs.append( (prev, count) )
-        prev = c
-        count =1
-runs.append( (prev, count) )
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    if not s:
+        print(0, 0, file=output_stream)
+        return
 
-m = len(runs)
-if m ==0:
-    print(0,0)
-    exit()
+    runs = []
+    prev = s[0]
+    count = 1
+    for c in s[1:]:
+        if c == prev:
+            count +=1
+        else:
+            runs.append( (prev, count) )
+            prev = c
+            count =1
+    runs.append( (prev, count) )
 
-# Compute prefix sums of run lengths
-prefix = [0]*(m+1)
-for i in range(m):
-    prefix[i+1] = prefix[i] + runs[i][1]
+    m = len(runs)
+    if m ==0:
+        print(0,0, file=output_stream)
+        return
 
-# Precompute even and odd counts for each run
-even_counts = []
-odd_counts = []
-for i in range(m):
-    start_i = prefix[i] +1
-    start_parity = start_i % 2
-    len_i = runs[i][1]
-    if start_parity ==0:
-        even_count = (len_i +1)//2
-        odd_count = len_i//2
-    else:
-        even_count = len_i//2
-        odd_count = (len_i +1)//2
-    even_counts.append(even_count)
-    odd_counts.append(odd_count)
+    # Compute prefix sums of run lengths
+    prefix = [0]*(m+1)
+    for i in range(m):
+        prefix[i+1] = prefix[i] + runs[i][1]
 
-# Generate run string
-run_chars = [r[0] for r in runs]
+    # Precompute even and odd counts for each run
+    even_counts = []
+    odd_counts = []
+    for i in range(m):
+        start_i = prefix[i] +1
+        start_parity = start_i % 2
+        len_i = runs[i][1]
+        if start_parity ==0:
+            even_count = (len_i +1)//2
+            odd_count = len_i//2
+        else:
+            even_count = len_i//2
+            odd_count = (len_i +1)//2
+        even_counts.append(even_count)
+        odd_counts.append(odd_count)
 
-# Manacher's algorithm to find all odd-length palindromes
-def manacher(s):
-    n = len(s)
-    d = [0]*n
-    l, r = 0, -1
-    for i in range(n):
-        k = 1 if i > r else min(d[l + r - i], r -i +1)
-        while 0 <= i -k and i +k < n and s[i-k] == s[i+k]:
-            k +=1
-        d[i] = k-1
-        if i +k -1 > r:
-            l = i -k +1
-            r = i +k -1
-    return d
+    # Generate run string
+    run_chars = [r[0] for r in runs]
 
-max_radius = manacher(run_chars)
+    # Manacher's algorithm to find all odd-length palindromes
+    def manacher(s):
+        n = len(s)
+        d = [0]*n
+        l, r = 0, -1
+        for i in range(n):
+            k = 1 if i > r else min(d[l + r - i], r -i +1)
+            while 0 <= i -k and i +k < n and s[i-k] == s[i+k]:
+                k +=1
+            d[i] = k-1
+            if i +k -1 > r:
+                l = i -k +1
+                r = i +k -1
+        return d
 
-even_multi = 0
-odd_multi =0
+    max_radius = manacher(run_chars)
 
-for i in range(len(run_chars)):
-    radius = max_radius[i]
-    for r in range(1, radius+1):
-        start = i -r
-        end = i +r
-        if start <0 or end >= len(run_chars):
-            continue
-        # Check if start and end are valid
-        if run_chars[start] != run_chars[end]:
-            continue  # This should not happen due to Manacher's algorithm
-        # Get even and odd counts for start and end
-        even_s = even_counts[start]
-        odd_s = odd_counts[start]
-        even_e = even_counts[end]
-        odd_e = odd_counts[end]
-        even_pairs = even_s * even_e + odd_s * odd_e
-        odd_pairs = even_s * odd_e + odd_s * even_e
-        even_multi += odd_pairs
-        odd_multi += even_pairs
+    even_multi = 0
+    odd_multi =0
 
-# Compute single-run contributions
-even_single = 0
-odd_single =0
-for i in range(m):
-    L = runs[i][1]
-    if L %2 ==0:
-        even_single += (L//2)**2
-        odd_single += (L//2) * (L//2 +1)
-    else:
-        even_single += (L**2 -1)//4
-        odd_single += ((L+1)//2)**2
+    for i in range(len(run_chars)):
+        radius = max_radius[i]
+        for r in range(1, radius+1):
+            start = i -r
+            end = i +r
+            if start <0 or end >= len(run_chars):
+                continue
+            # Check if start and end are valid
+            if run_chars[start] != run_chars[end]:
+                continue  # This should not happen due to Manacher's algorithm
+            # Get even and odd counts for start and end
+            even_s = even_counts[start]
+            odd_s = odd_counts[start]
+            even_e = even_counts[end]
+            odd_e = odd_counts[end]
+            even_pairs = even_s * even_e + odd_s * odd_e
+            odd_pairs = even_s * odd_e + odd_s * even_e
+            even_multi += odd_pairs
+            odd_multi += even_pairs
 
-# Total
-even_total = even_single + even_multi
-odd_total = odd_single + odd_multi
+    # Compute single-run contributions
+    even_single = 0
+    odd_single =0
+    for i in range(m):
+        L = runs[i][1]
+        if L %2 ==0:
+            even_single += (L//2)**2
+            odd_single += (L//2) * (L//2 +1)
+        else:
+            even_single += (L**2 -1)//4
+            odd_single += ((L+1)//2)**2
 
-print(even_total, odd_total)
+    # Total
+    even_total = even_single + even_multi
+    odd_total = odd_single + odd_multi
 
-But this code may have some errors. For example, the Manacher's algorithm's radius calculation may be off. 
+    print(even_total, odd_total, file=output_stream)
 
-Let's test it with sample input 1:
 
-Input: 'bb'
 
-runs = [('b',2)]
+def test():
+    import io
 
-prefix = [0,2]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+baab
+""",
+            "output": \
+"""\
+2 4
+""",
+        }, 
+    ]
 
-even_counts: start_i is 1 (prefix[0]+1=1). start_parity 1%2=1. len_i=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-even_count = 2//2=1 (since start_parity is odd and len_i even). 
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Wait, no. start_parity is 1 (odd). len_i=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-even_count = len_i //2 = 1. 
+    print('Tests passed 😎')
 
-odd_count = (2 +1)//2 = 1. 
 
-So even_counts[0] =1, odd_counts[0] =1. 
+if __name__ == '__main__':
+    test()
 
-run_chars = ['b']
 
-Manacher's algorithm on run_chars (length 1). 
+```
 
-max_radius = [0]. 
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Thus, no multi-run contributions. 
+```
 
-The single-run contributions:
+Testing against sample input 2.
 
-L=2, even: (2//2)^2=1, odd: (2//2)*(2//2 +1) = 1*2=2.
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    if not s:
+        print(0, 0, file=output_stream)
+        return
 
-Thus, even_single=1, odd_single=2. 
+    runs = []
+    prev = s[0]
+    count = 1
+    for c in s[1:]:
+        if c == prev:
+            count +=1
+        else:
+            runs.append( (prev, count) )
+            prev = c
+            count =1
+    runs.append( (prev, count) )
 
-The output is 1 2, which matches sample input 1.
+    m = len(runs)
+    if m ==0:
+        print(0,0, file=output_stream)
+        return
 
-Another sample input 2: 'baab' → runs [('b',1), ('a',2), ('b',1)]
+    # Compute prefix sums of run lengths
+    prefix = [0]*(m+1)
+    for i in range(m):
+        prefix[i+1] = prefix[i] + runs[i][1]
 
-even_counts:
+    # Precompute even and odd counts for each run
+    even_counts = []
+    odd_counts = []
+    for i in range(m):
+        start_i = prefix[i] +1
+        start_parity = start_i % 2
+        len_i = runs[i][1]
+        if start_parity ==0:
+            even_count = (len_i +1)//2
+            odd_count = len_i//2
+        else:
+            even_count = len_i//2
+            odd_count = (len_i +1)//2
+        even_counts.append(even_count)
+        odd_counts.append(odd_count)
 
-run 0: start_i =1 → parity 1. len=1.
+    # Generate run string
+    run_chars = [r[0] for r in runs]
 
-even_count=1//2=0. odd_count= (1+1)//2=1.
+    # Manacher's algorithm to find all odd-length palindromes
+    def manacher(s):
+        n = len(s)
+        d = [0]*n
+        l, r = 0, -1
+        for i in range(n):
+            k = 1 if i > r else min(d[l + r - i], r -i +1)
+            while 0 <= i -k and i +k < n and s[i-k] == s[i+k]:
+                k +=1
+            d[i] = k-1
+            if i +k -1 > r:
+                l = i -k +1
+                r = i +k -1
+        return d
 
-run 1: start_i=2 → parity
+    max_radius = manacher(run_chars)
+
+    even_multi = 0
+    odd_multi =0
+
+    for i in range(len(run_chars)):
+        radius = max_radius[i]
+        for r in range(1, radius+1):
+            start = i -r
+            end = i +r
+            if start <0 or end >= len(run_chars):
+                continue
+            # Check if start and end are valid
+            if run_chars[start] != run_chars[end]:
+                continue  # This should not happen due to Manacher's algorithm
+            # Get even and odd counts for start and end
+            even_s = even_counts[start]
+            odd_s = odd_counts[start]
+            even_e = even_counts[end]
+            odd_e = odd_counts[end]
+            even_pairs = even_s * even_e + odd_s * odd_e
+            odd_pairs = even_s * odd_e + odd_s * even_e
+            even_multi += odd_pairs
+            odd_multi += even_pairs
+
+    # Compute single-run contributions
+    even_single = 0
+    odd_single =0
+    for i in range(m):
+        L = runs[i][1]
+        if L %2 ==0:
+            even_single += (L//2)**2
+            odd_single += (L//2) * (L//2 +1)
+        else:
+            even_single += (L**2 -1)//4
+            odd_single += ((L+1)//2)**2
+
+    # Total
+    even_total = even_single + even_multi
+    odd_total = odd_single + odd_multi
+
+    print(even_total, odd_total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+babb
+""",
+            "output": \
+"""\
+2 5
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+

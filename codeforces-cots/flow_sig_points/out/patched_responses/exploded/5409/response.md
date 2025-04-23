@@ -645,14 +645,18 @@ For each call:
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import defaultdict
 
-def main():
-    n = int(sys.stdin.readline())
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
     procedures = defaultdict(lambda: defaultdict(list))  # name: {param_count: [param_list]}
     for _ in range(n):
-        line = sys.stdin.readline().strip()
+        line = input_stream.readline().strip()
         # Parse procedure
         if not line.startswith('void'):
             # According to problem statement, input is correct
@@ -668,16 +672,16 @@ def main():
         param_count = len(params)
         procedures[proc_name][param_count].append(params)
     
-    m = int(sys.stdin.readline())
+    m = int(input_stream.readline())
     variables = {}
     for _ in range(m):
-        line = sys.stdin.readline().strip()
+        line = input_stream.readline().strip()
         type_name, var_name = line.split(maxsplit=1)
         variables[var_name.strip()] = type_name.strip()
     
-    k = int(sys.stdin.readline())
+    k = int(input_stream.readline())
     for _ in range(k):
-        line = sys.stdin.readline().strip()
+        line = input_stream.readline().strip()
         # Parse call
         name_part, param_part = line.split('(', 1)
         proc_name = name_part.strip()
@@ -700,46 +704,72 @@ def main():
                         break
                 if valid:
                     count += 1
-        print(count)
+        print(count, file=output_stream)
 
-if __name__ == "__main__":
-    main()
 
-This code should handle all cases.
 
-Testing the first sample:
+def test():
+    import io
 
-Sample input 1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+void f(string,double,int)
+void f(int)
+void f  ( T  )
+void procedure(int,double)
+void f  (T, double,int)
+void f(string, T,T)
+4
+int a
+int x
+string  t
+double  val
+5
+f(t, a, a)
+f(t,val,a)
+f(val,a, val)
+solve300(val, val)
+f  (x)
+""",
+            "output": \
+"""\
+1
+3
+0
+0
+2
+""",
+        }, 
+    ]
 
-After parsing procedures:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-procedures['f'][2] has two entries: ['int', 'T'], ['T', 'T'].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-variables: a → int, s → string, x123 → double.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Calls:
+    print('Tests passed 😎')
 
-f(a, a): var_types are [int, int]. len=2.
 
-Check each param list in procedures['f'][2].
+if __name__ == '__main__':
+    test()
 
-For ['int', 'T']: check int == int → ok, then T → ok. valid.
 
-For ['T', 'T']: ok. So count 2.
+```
 
-Which matches the sample.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Second call: f(s, a).
-
-var_types [string, int]. len=2.
-
-Check each param list in procedures['f'][2].
-
-First param list ['int', 'T']: first param is int, variable is string → invalid.
-
-Second param list: ['T', 'T'] → both are T → valid. count 1.
-
-Thus, correct.
+```
 
 Sample 2:
 

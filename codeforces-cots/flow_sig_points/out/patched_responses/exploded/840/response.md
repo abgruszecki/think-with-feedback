@@ -486,11 +486,78 @@ Finally, output each E_current[i] mod MOD.
 
 But since in each step the E_current is kept mod MOD, this should handle everything.
 
-Testing this code against the samples:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    w = list(map(int, input_stream.readline().rstrip("\n").split()))
+    MOD = 998244353
 
-After processing one step, the E_current is [332748119, 332748119], which matches the sample.
+    e_current = [x % MOD for x in w]
+
+    for _ in range(m):
+        s = sum(e_current) % MOD
+        inv_s = pow(s, MOD - 2, MOD)
+        deltas = []
+        for i in range(n):
+            prob = (e_current[i] * inv_s) % MOD
+            if a[i]:
+                delta = prob
+            else:
+                delta = (-prob) % MOD
+            deltas.append(delta)
+        for i in range(n):
+            e_current[i] = (e_current[i] + deltas[i]) % MOD
+
+    print(' '.join(map(str, e_current)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 2
+1
+1
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

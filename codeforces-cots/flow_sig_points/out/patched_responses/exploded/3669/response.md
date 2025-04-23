@@ -539,60 +539,93 @@ Then, output for each a_i in a, sum_higher[a_i] +1.
 
 So code:
 
-n = int(input())
-a = list(map(int, input().split()))
+Testing against sample input 1.
 
-from collections import defaultdict
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-freq = defaultdict(int)
-for num in a:
-    freq[num] +=1
+    from collections import defaultdict
 
-sorted_ratings = sorted(freq.keys(), reverse=True)
-prefix_sum = []
-current_sum =0
-for r in sorted_ratings:
-    current_sum += freq[r]
-    prefix_sum.append(current_sum)
+    freq = defaultdict(int)
+    for num in a:
+        freq[num] +=1
 
-sum_higher = {}
-max_rating = 2000
-for x in range(1, max_rating +1):
-    left =0
-    right = len(sorted_ratings)-1
-    ans = len(sorted_ratings)  # default to all elements <=x
-    while left <= right:
-        mid = (left + right) //2
-        if sorted_ratings[mid] <=x:
-            ans = mid
-            right = mid -1
+    sorted_ratings = sorted(freq.keys(), reverse=True)
+    prefix_sum = []
+    current_sum =0
+    for r in sorted_ratings:
+        current_sum += freq[r]
+        prefix_sum.append(current_sum)
+
+    sum_higher = {}
+    max_rating = 2000
+    for x in range(1, max_rating +1):
+        left =0
+        right = len(sorted_ratings)-1
+        ans = len(sorted_ratings)  # default to all elements <=x
+        while left <= right:
+            mid = (left + right) //2
+            if sorted_ratings[mid] <=x:
+                ans = mid
+                right = mid -1
+            else:
+                left = mid +1
+        if ans ==0:
+            total =0
         else:
-            left = mid +1
-    if ans ==0:
-        total =0
-    else:
-        total = prefix_sum[ans-1] if ans-1 >=0 else 0
-    sum_higher[x] = total
+            total = prefix_sum[ans-1] if ans-1 >=0 else 0
+        sum_higher[x] = total
 
-# Now generate the output
-output = [sum_higher[num] +1 for num in a]
-print(' '.join(map(str, output)))
+    # Now generate the output
+    output = [sum_higher[num] +1 for num in a]
+    print(' '.join(map(str, output)), file=output_stream)
 
-But wait, in the case where the sorted_ratings list is empty? But n is at least 1, so the list can't be empty.
 
-Testing the sample inputs.
 
-Sample input 1:
+def test():
+    import io
 
-3
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-1 3 3
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum_higher for 1: 2 (sum of 3's frequency, which is 2)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sum_higher[3] is 0 (since no elements are higher than 3).
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So output is [2+1, 0+1, 0+1] → [3,1,1]. Correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 3:
 

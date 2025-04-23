@@ -151,72 +151,79 @@ But in code, perhaps for each word, compute the set of unique characters once, t
 
 So code outline:
 
-n = int(input())
-words = []
-for _ in range(n):
-    word = input().strip()
-    chars = set(word)
-    words.append( (word, chars) )
+Testing against sample input 1.
 
-max_total = 0
-from itertools import combinations_with_replacement
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    words = []
+    for _ in range(n):
+        word = input_stream.readline().rstrip("\n").strip()
+        chars = set(word)
+        words.append( (word, chars) )
 
-for c1, c2 in combinations_with_replacement('abcdefghijklmnopqrstuvwxyz', 2):
-    allowed = {c1, c2}
-    current_sum = 0
-    for word, chars in words:
-        if chars.issubset(allowed):
-            current_sum += len(word)
-    if current_sum > max_total:
-        max_total = current_sum
+    max_total = 0
+    from itertools import combinations_with_replacement
 
-print(max_total)
+    for c1, c2 in combinations_with_replacement('abcdefghijklmnopqrstuvwxyz', 2):
+        allowed = {c1, c2}
+        current_sum = 0
+        for word, chars in words:
+            if chars.issubset(allowed):
+                current_sum += len(word)
+        if current_sum > max_total:
+            max_total = current_sum
 
-Wait, but for the pair (c1, c2), allowed is {c1, c2}. But if c1 and c2 are the same (like (a,a)), then allowed is a singleton set {a}.
+    print(max_total, file=output_stream)
 
-Yes. So for a candidate pair (a,a), allowed is {a}, so any word whose characters are all a's will be included.
 
-Yes.
 
-This code should handle all possible cases. Let's test it against the examples.
+def test():
+    import io
 
-First example:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+a
+a
+bcbcb
+cdecdecdecdecdecde
+aaaa
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-Input:
-4
-abb
-cacc
-aaa
-bbb
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Each word's char sets:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-abb -> {'a', 'b'}
-cacc -> {'c', 'a'}
-aaa -> {'a'}
-bbb -> {'b'}
+    print('Tests passed 😎')
 
-Now, the candidate pairs:
 
-Check all possible pairs.
+if __name__ == '__main__':
+    test()
 
-The optimal pair is (a, b). Because:
 
-allowed set {a, b}.
+```
 
-Words that are subsets:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-abb (yes), aaa (yes), bbb (yes). cacc's set is {'c', 'a'}, which is not subset of {a, b}, so not included. So sum is 3 (abb) + 3 (aaa) +3 (bbb) = 9.
-
-Which matches the sample output.
-
-Another possible candidate pair is (a, a), which would include aaa, but also check words whose characters are a only. So that would sum len(aaa) + any other words that are a-only. But in the sample, only aaa is a-only. So sum is 3. But (a,b) gives 9.
-
-Similarly, candidate (a, c) would have sum of abb (no, because c not allowed?), but cacc's set is {c,a} which is allowed. But words that are subsets of {a,c} are cacc (4), aaa (3). So sum is 4+3=7. Which is less than 9.
-
-So the code would correctly choose 9.
+```
 
 Second example:
 

@@ -439,52 +439,127 @@ Check the four conditions in order.
 
 So, code:
 
-a, b, c, d, e, f = map(int, input().split())
+Testing against sample input 6.
 
-if c == 0 and d > 0:
-    print("Ron")
-elif a == 0 and b > 0 and c > 0 and d > 0:
-    print("Ron")
-elif e == 0 and f >0 and a>0 and b>0 and c>0 and d>0:
-    print("Ron")
-elif a>0 and c>0 and e>0 and (b*d*f) > (a*c*e):
-    print("Ron")
-else:
-    print("Hermione")
+```python
+def main(input_stream, output_stream):
+    a, b, c, d, e, f = map(int, input_stream.readline().rstrip("\n").split())
 
-Wait, but what about the case where spell 2 can generate gold from nothing (c=0, d>0), but also other conditions are true. For example, c=0 and d>0, and a=0, etc. But the code checks condition 1 first, so it will output Ron correctly.
+    if c == 0 and d > 0:
+        print("Ron", file=output_stream)
+    elif a == 0 and b > 0 and c > 0 and d > 0:
+        print("Ron", file=output_stream)
+    elif e == 0 and f >0 and a>0 and b>0 and c>0 and d>0:
+        print("Ron", file=output_stream)
+    elif a>0 and c>0 and e>0 and (b*d*f) > (a*c*e):
+        print("Ron", file=output_stream)
+    else:
+        print("Hermione", file=output_stream)
 
-Testing sample input 5:
 
-Input: 1 1 0 1 1 1 → c=0, d=1 → condition 1 is met → output Ron.
 
-Sample input 7:
+def test():
+    import io
 
-100 1 100 1 0 1 → e=0, f=1. a=100>0, b=1>0, c=100>0, d=1>0 → condition 3 is met → output Ron.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+100 1 100 1 0 1
+""",
+            "output": \
+"""\
+Ron
+""",
+        }, 
+    ]
 
-Sample input 4 (all zeros) → all conditions fail → output Hermione.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample input 6: 1 0 1 2 1 2 → conditions:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-c=1 !=0, a=1 !=0. So condition 1 not met.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Condition 2: a=1 !=0 → no.
+    print('Tests passed 😎')
 
-Condition3: e=1 !=0 → no.
 
-Condition4: a>0, c>0, e>0. Check (0 * 2 * 2) > (1*1*1) → 0>1 → no. So output Hermione.
+if __name__ == '__main__':
+    test()
 
-Sample input 2:
 
-100 50 50 200 200 100 → check conditions:
+```
 
-c=50 !=0 → condition1 no.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Condition2: a=100 !=0 → no.
+```
 
-Condition3: e=200 !=0 → no.
+Testing against sample input 2.
 
-Condition4: a>0, c>0, e>0. Check (50 * 200 * 100) > (100 *50 *200) → 50*200*100 = 1,000,000. 100*50*200 = 1,000,000. So 1e6 is not greater than 1e6 → false. So output Hermione.
+```python
+def main(input_stream, output_stream):
+    a, b, c, d, e, f = map(int, input_stream.readline().rstrip("\n").split())
+
+    if c == 0 and d > 0:
+        print("Ron", file=output_stream)
+    elif a == 0 and b > 0 and c > 0 and d > 0:
+        print("Ron", file=output_stream)
+    elif e == 0 and f >0 and a>0 and b>0 and c>0 and d>0:
+        print("Ron", file=output_stream)
+    elif a>0 and c>0 and e>0 and (b*d*f) > (a*c*e):
+        print("Ron", file=output_stream)
+    else:
+        print("Hermione", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+100 10 200 20 300 30
+""",
+            "output": \
+"""\
+Hermione
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample: input 1 (sample 1):
 

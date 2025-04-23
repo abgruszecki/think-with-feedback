@@ -43,9 +43,68 @@ So the final output would be ' '.join(map(str, arr)).
 
 Yes, that's all.
 
-Testing the first example: input is 5 numbers, sorted as per the output. The second example has 10 elements, sorted as 1s followed by 60s.
+Testing against sample input 1.
 
-What about leading or trailing spaces? The output says space-separated. When using ' '.join, there's no leading or trailing space. So that's correct.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    arr = [int(input_stream.readline().rstrip("\n")) for _ in range(n)]
+    arr.sort()
+    print(' '.join(map(str, arr)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10
+60
+1
+60
+1
+60
+1
+60
+1
+60
+1
+""",
+            "output": \
+"""\
+1 1 1 1 1 60 60 60 60 60
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Now, considering possible edge cases. For example, n=1: output is just the single element. For elements all the same, they stay in place. For elements in reverse order, sorted correctly.
 

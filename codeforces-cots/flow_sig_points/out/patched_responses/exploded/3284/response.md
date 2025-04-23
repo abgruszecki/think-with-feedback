@@ -664,135 +664,173 @@ Read all variables, sort them by length, then process as described.
 
 Now, code:
 
-class TrieNode:
-    __slots__ = ['children', 'taken']
-    def __init__(self):
-        self.children = {}
-        self.taken = False
+Testing against sample input 1.
 
-n = int(input())
-strings = [input().strip() for _ in range(n)]
-strings.sort(key=lambda x: len(x))
+```python
+def main(input_stream, output_stream):
+    class TrieNode:
+        __slots__ = ['children', 'taken']
+        def __init__(self):
+            self.children = {}
+            self.taken = False
 
-root = TrieNode()
-total = 0
+    n = int(input_stream.readline().rstrip("\n"))
+    strings = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
+    strings.sort(key=lambda x: len(x))
 
-for s in strings:
-    current = root
-    selected = None
-    for i in range(len(s)):
-        c = s[i]
-        if c not in current.children:
-            current.children[c] = TrieNode()
-        current = current.children[c]
-        if not current.taken:
-            selected = i + 1
+    root = TrieNode()
+    total = 0
+
+    for s in strings:
+        current = root
+        selected = None
+        for i in range(len(s)):
+            c = s[i]
+            if c not in current.children:
+                current.children[c] = TrieNode()
+            current = current.children[c]
+            if not current.taken:
+                selected = i + 1
+                current.taken = True
+                break
+        if selected is None:
+            selected = len(s)
             current.taken = True
-            break
-    if selected is None:
-        selected = len(s)
-        current.taken = True
-    total += selected
+        total += selected
 
-print(total)
+    print(total, file=output_stream)
 
-Testing this code on the samples.
 
-Sample 1:
 
-Input:
+def test():
+    import io
 
-3
-
-codeforces
-
-codehorses
-
-code
-
-sorted by length:
-
-code (4), codehorses (9), codeforces (10).
-
-Processing 'code':
-
-i=0: c. current is root. c not in children. create node. current becomes new node. current.taken is False. selected becomes 1. sum is 1.
-
-Processing 'codehorses':
-
-i=0: c. current is root's children[c], which is taken. i=1: o. current's children is empty. create node. selected becomes 2. sum is 3.
-
-Processing 'codeforces':
-
-i=0: c is taken. i=1: o. current's children has o? No, 'codehorses' created 'o' in the 'c' node's children. But 'codehorses' is 'codehorses', so the codehorses processing for i=0 is 'c' (taken), so i=1 is 'o' (codehorses's second character). So the 'o' node is created in 'c's children. So for codeforces's i=0: 'c' is taken. i=1: 'o' is now in 'c's children. current becomes 'o' node. which is taken (since codehorses's processing marked it as taken). So codeforces proceeds to i=2: 'd' is not in 'o's children. create 'd' node. current is 'd' node. taken is False. selected is 3. sum is 6.
-
-Yes. Correct.
-
-Sample 3:
-
-Input:
-
-3
-
-telegram
-
-digital
-
-resistance
-
-sorted by length: digital (6), telegram (8), resistance (10).
-
-Processing 'digital' (6):
-
-i=0: 'd' not in root. create node. selected is 1. sum 1.
-
-Processing 'telegram' (8):
-
-i=0: 't' not in root. create node. selected 1. sum 2.
-
-Processing 'resistance' (10): i=0: 'r' not in root. selected 1. sum 3.
-
-Correct.
-
-Sample 2:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
-
 abba
-
 abb
-
 ab
-
 aa
-
 aacada
+""",
+            "output": \
+"""\
+11
+""",
+        }, 
+    ]
 
-sorted by length: ab (2), aa (2), abb (3), abba (4), aacada (6).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing 'ab':
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=0: 'a' not in root. create node. selected 1. sum 1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Processing 'aa':
+    print('Tests passed 😎')
 
-i=0: 'a' exists. current is 'a' node, which is taken. So i=1: 'a' in 'a' node's children? No. create node. current is 'a' node's child 'a', marked as taken. selected 2. sum 3.
 
-Processing 'abb' (3):
+if __name__ == '__main__':
+    test()
 
-i=0: 'a' (taken). i=1: 'b' in 'a' node's children? No. create node. selected 2. sum 5.
 
-Processing 'abba' (4):
+```
 
-i=0: 'a' (taken). i=1: 'b' (taken). i=2: 'b' in 'b' node's children? No. create node. current is 'b' node's child 'b'. selected 3. sum 8.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Processing 'aacada' (6):
+```
 
-i=0: 'a' taken. i=1: 'a' in 'a' node's children? Yes (from 'aa' processing). current is 'a' node's child 'a' (taken). i=2: 'c' not in 'a' node's children (current is 'a' node's child 'a', which is a different node). So create 'c' node. selected 3. sum 11.
+Testing against sample input 2.
 
-Correct.
+```python
+def main(input_stream, output_stream):
+    class TrieNode:
+        __slots__ = ['children', 'taken']
+        def __init__(self):
+            self.children = {}
+            self.taken = False
+
+    n = int(input_stream.readline().rstrip("\n"))
+    strings = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
+    strings.sort(key=lambda x: len(x))
+
+    root = TrieNode()
+    total = 0
+
+    for s in strings:
+        current = root
+        selected = None
+        for i in range(len(s)):
+            c = s[i]
+            if c not in current.children:
+                current.children[c] = TrieNode()
+            current = current.children[c]
+            if not current.taken:
+                selected = i + 1
+                current.taken = True
+                break
+        if selected is None:
+            selected = len(s)
+            current.taken = True
+        total += selected
+
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+telegram
+digital
+resistance
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, this code should work.
 

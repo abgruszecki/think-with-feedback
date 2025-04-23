@@ -591,63 +591,98 @@ But note that in Python, when we read the inputs, the order of processing the pa
 
 So the code will be:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import defaultdict
 
-m, k = map(int, sys.stdin.readline().split())
-friends = defaultdict(set)
-all_users = set()
 
-for _ in range(m):
-    a, b = map(int, sys.stdin.readline().split())
-    friends[a].add(b)
-    friends[b].add(a)
-    all_users.add(a)
-    all_users.add(b)
+def main(input_stream, output_stream):
+    m, k = map(int, input_stream.readline().split())
+    friends = defaultdict(set)
+    all_users = set()
 
-sorted_users = sorted(all_users)
+    for _ in range(m):
+        a, b = map(int, input_stream.readline().split())
+        friends[a].add(b)
+        friends[b].add(a)
+        all_users.add(a)
+        all_users.add(b)
 
-for x in sorted_users:
-    friends_x = friends[x]
-    n = len(friends_x)
-    if n == 0:
-        print(f"{x}: 0")
-        continue
-    required = (k * n + 99) // 100
-    candidates = set()
-    for friend in friends_x:
-        candidates.update(friends[friend])
-    candidates -= friends_x
-    candidates.discard(x)
-    suggested = []
-    for y in candidates:
-        count = len(friends_x & friends[y])
-        if count >= required:
-            suggested.append(y)
-    suggested.sort()
-    print(f"{x}: {len(suggested)} {' '.join(map(str, suggested))}" if suggested else f"{x}: 0")
+    sorted_users = sorted(all_users)
 
-Wait, but in the output, even when len(suggested) is zero, it should print "x: 0". So the code uses a ternary operator to check if suggested is non-empty. If yes, format with the numbers, else output with 0.
+    for x in sorted_users:
+        friends_x = friends[x]
+        n = len(friends_x)
+        if n == 0:
+            print(f"{x}: 0", file=output_stream)
+            continue
+        required = (k * n + 99) // 100
+        candidates = set()
+        for friend in friends_x:
+            candidates.update(friends[friend])
+        candidates -= friends_x
+        candidates.discard(x)
+        suggested = []
+        for y in candidates:
+            count = len(friends_x & friends[y])
+            if count >= required:
+                suggested.append(y)
+        suggested.sort()
+        print(f"{x}: {len(suggested)} {' '.join(map(str, suggested))}" if suggested else f"{x}: 0", file=output_stream)
 
-This should work.
 
-Testing the first sample input:
 
-Sample Input 1 output:
+def test():
+    import io
 
-10: 1 42
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 100
+1 2
+1 3
+1 4
+2 3
+2 4
+""",
+            "output": \
+"""\
+1: 0
+2: 0
+3: 1 4
+4: 1 3
+""",
+        }, 
+    ]
 
-23: 1 39
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-39: 1 23
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-42: 1 10
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-58: 2 10 42
+    print('Tests passed 😎')
 
-Which the code should produce.
 
-Thus, the code should be correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Now, possible optimizations:
 

@@ -385,60 +385,189 @@ That's straightforward.
 
 So the code will be:
 
-n = int(input())
-a1, a2, a3 = map(int, input().split())
-b1, b2, b3 = map(int, input().split())
+Testing against sample input 3.
 
-max_win = min(a1, b2) + min(a2, b3) + min(a3, b1)
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a1, a2, a3 = map(int, input_stream.readline().rstrip("\n").split())
+    b1, b2, b3 = map(int, input_stream.readline().rstrip("\n").split())
 
-s = min(a1, b1 + b3) + min(a2, b1 + b2) + min(a3, b2 + b3)
-min_win = max(0, n - s)
+    max_win = min(a1, b2) + min(a2, b3) + min(a3, b1)
 
-print(min_win, max_win)
+    s = min(a1, b1 + b3) + min(a2, b1 + b2) + min(a3, b2 + b3)
+    min_win = max(0, n - s)
 
-Testing this against the examples:
+    print(min_win, max_win, file=output_stream)
 
-Sample input 3:
 
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+686
+479 178 29
+11 145 530
+""",
+            "output": \
+"""\
+22 334
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a1, a2, a3 = map(int, input_stream.readline().rstrip("\n").split())
+    b1, b2, b3 = map(int, input_stream.readline().rstrip("\n").split())
+
+    max_win = min(a1, b2) + min(a2, b3) + min(a3, b1)
+
+    s = min(a1, b1 + b3) + min(a2, b1 + b2) + min(a3, b2 + b3)
+    min_win = max(0, n - s)
+
+    print(min_win, max_win, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
+0 0 3
+3 0 0
+""",
+            "output": \
+"""\
+3 3
+""",
+        }, 
+    ]
 
-0 0 3 (a3=3)
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-3 0 0 (b1=3)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-max_win = min(0,0) + min(0,0) + min(3,3) →0+0+3=3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-s = min(0, 3+0) →0, min(0,3+0)=0, min(3,0+0=0) →0. s=0. min_win=3-0=3.
+    print('Tests passed 😎')
 
-Which matches the sample.
 
-Sample input 2:
+if __name__ == '__main__':
+    test()
 
-15
 
-5 5 5
+```
 
-5 5 5
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-max_win: min(5,5) + min(5,5) + min(5,5) →5+5+5=15.
+```
 
-s = min(5,5+5) →5, min(5,5+5=10) →5, min(5,5+5=10) →5. sum 5+5+5=15. min_win=15-15=0.
+Testing against sample input 4.
 
-Which matches sample.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a1, a2, a3 = map(int, input_stream.readline().rstrip("\n").split())
+    b1, b2, b3 = map(int, input_stream.readline().rstrip("\n").split())
 
-Sample input 4:
+    max_win = min(a1, b2) + min(a2, b3) + min(a3, b1)
 
-686 →n=686.
+    s = min(a1, b1 + b3) + min(a2, b1 + b2) + min(a3, b2 + b3)
+    min_win = max(0, n - s)
 
-a:479,178,29.
+    print(min_win, max_win, file=output_stream)
 
-b:11,145,530.
 
-max_win= min(479,145) →145. min(178,530) →178. min(29,11) →11. sum 145+178+11=334. Which matches sample's max.
 
-s: min(479, 11+530=541) →479. min(178,11+145=156) →156. min(29,145+530=675) →29. sum 479+156+29=664. min_win=686-664=22. Which matches sample.
+def test():
+    import io
 
-Thus, the code works.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+319
+10 53 256
+182 103 34
+""",
+            "output": \
+"""\
+119 226
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

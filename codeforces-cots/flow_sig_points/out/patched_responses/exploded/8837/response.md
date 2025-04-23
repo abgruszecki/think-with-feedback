@@ -315,15 +315,85 @@ else:
 
 This seems correct.
 
-Testing first sample:
+Testing against sample input 1.
 
-gaps after sort: 4,4,7.
+```python
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    n = int(input[0])
+    k = int(input[1])
+    x = int(input[2])
+    a = list(map(int, input[3:3+n]))
+    a.sort()
+    gaps = []
+    for i in range(n-1):
+        diff = a[i+1] - a[i]
+        if diff > x:
+            gaps.append(diff)
+    initial = len(gaps) + 1
+    if not gaps:
+        print(1, file=output_stream)
+        return
+    m_list = []
+    for d in gaps:
+        m = (d + x - 1) // x - 1
+        m_list.append(m)
+    m_list.sort()
+    res = 0
+    total = 0
+    for m in m_list:
+        if total + m <= k:
+            res += 1
+            total += m
+        else:
+            break
+    print(initial - res, file=output_stream)
 
-m_list: 1,1,2. sorted as 1,1,2.
 
-k=2. sum 1+1=2 → res=2. initial_groups 4-2=2.
 
-Yes.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+13 0 37
+20 20 80 70 70 70 420 5 1 5 1 60 90
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample: gaps 40 and 330. m_i for 40: (40+37-1)//37 -1 → (76)//37=2 → 2-1=1. For 330: (330 +37-1)/37 → 366/37=9.891, so 9 → 9-1=8. So m_list is [1,8]. sorted. sum is 1+8=9. but k=0, so can't take any. So res=0. initial_groups 2+1=3. 3-0=3.
 

@@ -72,23 +72,65 @@ But wait, what about when m is 0? The problem says m >=1, so we don't have to ha
 
 So the code:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-n, m = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-a = pow(2, m, MOD)
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-base = (a -1) % MOD
+    a = pow(2, m, MOD)
 
-ans = pow(base, n, MOD)
+    base = (a -1) % MOD
 
-print(ans)
+    ans = pow(base, n, MOD)
 
-That's it. The code handles all cases. Let's test the first sample:
+    print(ans, file=output_stream)
 
-Input 1 3:
 
-a = 8, base=7. ans=7^1 mod 1e9+7=7. Correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 2
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample: 2 2.
 

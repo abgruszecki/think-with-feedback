@@ -807,16 +807,20 @@ Handle the case where the determinant is negative by adding p and then mod p.
 
 So, the code:
 
+Testing against sample input 2.
+
+```python
 import sys
 from collections import deque
 
-def main():
-    n, m, p = map(int, sys.stdin.readline().split())
+
+def main(input_stream, output_stream):
+    n, m, p = map(int, input_stream.readline().split())
     edges = [[] for _ in range(n+1)]
     in_degree = [0] * (n+1)
     out_degree = [0] * (n+1)
     for _ in range(m):
-        a, b = map(int, sys.stdin.readline().split())
+        a, b = map(int, input_stream.readline().split())
         edges[a].append(b)
         in_degree[b] +=1
         out_degree[a] +=1
@@ -826,7 +830,7 @@ def main():
     sinks = sorted([u for u in range(1, n+1) if out_degree[u] ==0])
     k = len(sources)
     if k ==0:
-        print(0)
+        print(0, file=output_stream)
         return
 
     # Compute topological order using Kahn's algorithm
@@ -891,38 +895,55 @@ def main():
         return res
 
     det = determinant_mod(matrix, p)
-    print(det % p)
+    print(det % p, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4 1000003
+2 1
+2 4
+3 1
+3 4
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
 
 if __name__ == '__main__':
-    main()
+    test()
 
-This code should handle all the test cases.
 
-But let's test sample 2:
+```
 
-Sample 2 input:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-4 2 1000003
-
-4 1
-
-3 2
-
-Sources are 3,4 (sorted), sinks are 1,2 (sorted).
-
-matrix[0][0] is the number of paths from 3 to 1. There are none. So 0.
-
-matrix[0][1] is paths from 3 to 2: 1 (direct edge).
-
-matrix[1][0] is paths from4 to 1: 1 (direct edge).
-
-matrix[1][1] is paths from4 to 2: 0.
-
-matrix is [[0,1], [1,0]]
-
-determinant is 0*0 -1*1 = -1 mod 1e6+3 is 1000002.
-
-Which matches the sample.
+```
 
 Sample 5:
 

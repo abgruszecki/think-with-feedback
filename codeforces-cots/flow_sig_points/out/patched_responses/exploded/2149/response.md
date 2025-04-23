@@ -132,37 +132,75 @@ But for code efficiency, once a run of 7 is found, we can immediately print and 
 
 So code:
 
-s = input().strip()
+Testing against sample input 1.
 
-current_count = 1
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-for i in range(1, len(s)):
+    current_count = 1
 
-    if s[i] == s[i-1]:
+    for i in range(1, len(s)):
 
-        current_count += 1
+        if s[i] == s[i-1]:
 
-    else:
+            current_count += 1
 
-        current_count = 1
+        else:
 
-    if current_count >=7:
+            current_count = 1
 
-        print("YES")
+        if current_count >=7:
 
-        exit()
+            print("YES", file=output_stream)
 
-print("NO")
+            return
 
-Yes. Let's test some examples.
+    print("NO", file=output_stream)
 
-First example:
 
-Input: 001001
 
-The runs are 0, 0 (count 2), then 1 (count 1), 0 (1), 0 (2), 1 (1). Maximum run is 2 → output NO.
+def test():
+    import io
 
-The code would process and print NO.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1000000001
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: 1000000001. The 0's run starts at position 1. For each step:
 

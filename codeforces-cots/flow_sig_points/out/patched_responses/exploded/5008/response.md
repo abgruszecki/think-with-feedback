@@ -1123,41 +1123,93 @@ At the end, print(max(max_tight, max_loose)).
 
 But in Python, the initial max_loose is set to -inf, which is correct.
 
-Testing the first sample:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    import sys
+    n = int(input_stream.readline())
+    a = list(map(int, input_stream.readline().split()))
+    s = input_stream.readline().strip()
+    
+    max_tight = 0
+    max_loose = -float('inf')
+    
+    for i in reversed(range(n)):
+        current_bit = s[i]
+        ai = a[i]
+        new_tight = -float('inf')
+        new_loose = -float('inf')
+        
+        # Process tight transitions
+        if current_bit == '1':
+            # Option 1: set the bit, remains tight
+            candidate_tight = max_tight + ai
+            if candidate_tight > new_tight:
+                new_tight = candidate_tight
+            # Option 2: not set, becomes loose
+            candidate_loose = max_tight
+            if candidate_loose > new_loose:
+                new_loose = candidate_loose
+        else:
+            # Current bit is 0, cannot set, remains tight
+            if max_tight > new_tight:
+                new_tight = max_tight
+        
+        # Process loose transitions
+        candidate_loose = max_loose + max(ai, 0)
+        if candidate_loose > new_loose:
+            new_loose = candidate_loose
+        
+        max_tight, max_loose = new_tight, new_loose
+    
+    print(max(max_tight, max_loose), file=output_stream)
 
-n=2.
 
-a = [3,8]
 
-s = '10'.
+def test():
+    import io
 
-Processing i=1 (current_bit '0'):
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+17 0 10 2 1
+11010
+""",
+            "output": \
+"""\
+27
+""",
+        }, 
+    ]
 
-tight transitions:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-current_bit is 0. new_tight is 0.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-loose transitions: max_loose is -inf, so temp_loose is -inf + max(8,0) = -inf. new_loose remains -inf.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So after i=1: max_tight=0, max_loose=-inf.
+    print('Tests passed 😎')
 
-Then i=0 (current_bit '1'):
 
-ai=3.
+if __name__ == '__main__':
+    test()
 
-tight transitions:
 
-option1: 0+3=3. new_tight=3.
+```
 
-option2: new_loose becomes 0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-loose transitions: max_loose is -inf → temp_loose = -inf +3 →-inf. new_loose is max(0, -inf) →0.
-
-So max_loose is 0.
-
-Final max is max(3, 0) =3.
+```
 
 Sample 2:
 

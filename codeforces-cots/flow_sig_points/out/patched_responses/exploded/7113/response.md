@@ -352,70 +352,72 @@ Compute the total sum.
 
 So code:
 
-n, m = map(int, input().split())
+Testing against sample input 1.
 
-def compute_counts(num):
-    counts = [0]*5
-    counts[0] = num //5
-    for a in range(1,5):
-        counts[a] = (num - a) //5 +1
-    return counts
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-x_counts = compute_counts(n)
-y_counts = compute_counts(m)
+    def compute_counts(num):
+        counts = [0]*5
+        counts[0] = num //5
+        for a in range(1,5):
+            counts[a] = (num - a) //5 +1
+        return counts
 
-total =0
-for a in range(5):
-    b = (5 - a) %5
-    total += x_counts[a] * y_counts[b]
+    x_counts = compute_counts(n)
+    y_counts = compute_counts(m)
 
-print(total)
+    total =0
+    for a in range(5):
+        b = (5 - a) %5
+        total += x_counts[a] * y_counts[b]
 
-That's the code. Let's test the first sample:
+    print(total, file=output_stream)
 
-n=6, m=12.
 
-x_counts[0] =6//5=1.
 
-a=1: (6-1)//5 +1 =5//5=1 +1=2.
+def test():
+    import io
 
-a=2: (6-2)=4 →4//5=0 +1=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+11 14
+""",
+            "output": \
+"""\
+31
+""",
+        }, 
+    ]
 
-a=3:3 →0+1=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-a=4:2 →0+1=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So x_counts [1,2,1,1,1].
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-y_counts for m=12:
+    print('Tests passed 😎')
 
-counts[0] =12//5=2.
 
-a=1: (12-1)=11 →11//5=2 →2+1=3.
+if __name__ == '__main__':
+    test()
 
-a=2:12-2=10 →10//5=2 →3.
 
-a=3:12-3=9 →9//5=1 →2.
+```
 
-a=4:12-4=8 →8//5=1 →2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-y_counts [2,3,3,2,2].
-
-Sum for each a:
-
-a=0:1 *2 →2.
-
-a=1:2 *2 →4.
-
-a=2:1 *2 →2.
-
-a=3:1 *3 →3.
-
-a=4:1 *3 →3.
-
-Total 2+4+2+3+3=14.
-
-Correct.
+```
 
 So the code works.
 </think>

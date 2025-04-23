@@ -107,52 +107,125 @@ Then process as above.
 
 So the code:
 
-n = int(input())
-s = input().strip()
+Testing against sample input 1.
 
-ones = [i for i, c in enumerate(s) if c == '1']
-gaps = [ones[i+1] - ones[i] for i in range(len(ones)-1)]
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
 
-if len(set(gaps)) == 1:
-    print("YES")
-else:
-    print("NO")
+    ones = [i for i, c in enumerate(s) if c == '1']
+    gaps = [ones[i+1] - ones[i] for i in range(len(ones)-1)]
 
-That's simple. But wait, in Python, the input is read as input().strip(), which for the second line is correct.
+    if len(set(gaps)) == 1:
+        print("YES", file=output_stream)
+    else:
+        print("NO", file=output_stream)
 
-Yes, because the second line is a sequence of n characters, possibly with leading and trailing 0s. But when we read s, we need to take the entire line. For example, if the input is 3 and 101, then s is '101'.
 
-But the code uses enumerate(s) to get the correct indices.
 
-So the code should work.
+def test():
+    import io
 
-Testing the sample inputs.
-
-Sample 1:
-
-8
-
-00111000
-
-s is '00111000'
-
-ones = [2,3,4]
-
-gaps = [1,1]
-
-set is {1}, output YES.
-
-Sample2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 7
-
 1001011
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-s is '1001011'
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-ones are positions 0,3,5,6.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-gaps 3,2,1 → set size 3. Output NO.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = input_stream.readline().rstrip("\n").strip()
+
+    ones = [i for i, c in enumerate(s) if c == '1']
+    gaps = [ones[i+1] - ones[i] for i in range(len(ones)-1)]
+
+    if len(set(gaps)) == 1:
+        print("YES", file=output_stream)
+    else:
+        print("NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+1010100
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

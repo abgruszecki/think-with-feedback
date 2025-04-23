@@ -371,11 +371,81 @@ So, the approach would be to first check whether (n-1) is congruent to 0 mod 2. 
 
    Now, test this code.
 
-   Let's test the first sample input:
+Testing against sample input 1.
 
-   3
+```python
+import heapq
 
-   1 2 3 → the heap is [1,2,3]. len is3. len-1=2 even. So merge three. sum 6. total 6. output 6. Correct.
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    if n == 1:
+        print(0, file=output_stream)
+    else:
+        heapq.heapify(a)
+        total = 0
+        while len(a) > 1:
+            if len(a) >= 3 and (len(a) - 1) % 2 == 0:
+                x = heapq.heappop(a)
+                y = heapq.heappop(a)
+                z = heapq.heappop(a)
+                s = x + y + z
+                total += s
+                heapq.heappush(a, s)
+            else:
+                x = heapq.heappop(a)
+                y = heapq.heappop(a)
+                s = x + y
+                total += s
+                heapq.heappush(a, s)
+        print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+2 3 4 5
+""",
+            "output": \
+"""\
+19
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
    Another test case: n=4, a=[2,3,4,5] → output 19.
 

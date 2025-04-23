@@ -349,99 +349,117 @@ Let's code this.
 
 In Python:
 
-n = int(input())
+Testing against sample input 1.
 
-a = input().strip()
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-b = input().strip()
+    a = input_stream.readline().rstrip("\n").strip()
 
-count_1 = 0
+    b = input_stream.readline().rstrip("\n").strip()
 
-g1_0 = 0
+    count_1 = 0
 
-g1_1 = 0
+    g1_0 = 0
 
-x0 = 0
+    g1_1 = 0
 
-x1 = 0
+    x0 = 0
 
-for ai, bi in zip(a, b):
+    x1 = 0
 
-    if bi == '1':
+    for ai, bi in zip(a, b):
 
-        count_1 +=1
+        if bi == '1':
 
-        if ai == '0':
+            count_1 +=1
 
-            g1_0 +=1
+            if ai == '0':
 
-        else:
+                g1_0 +=1
 
-            g1_1 +=1
+            else:
 
-    else:
-
-        if ai == '0':
-
-            x0 +=1
+                g1_1 +=1
 
         else:
 
-            x1 +=1
+            if ai == '0':
 
-# Compute unchanged_pairs
+                x0 +=1
 
-unchanged = 0
+            else:
 
-# group1 internal pairs
+                x1 +=1
 
-unchanged += count_1 * (count_1 -1) // 2
+    # Compute unchanged_pairs
 
-# group0 internal pairs where a is same
+    unchanged = 0
 
-unchanged += (x0 * (x0 -1) //2) + (x1 * (x1 -1) //2)
+    # group1 internal pairs
 
-# cross pairs between group1 and group0 where a is same
+    unchanged += count_1 * (count_1 -1) // 2
 
-unchanged += (g1_0 * x0) + (g1_1 * x1)
+    # group0 internal pairs where a is same
 
-total_swaps = n * (n-1) //2
+    unchanged += (x0 * (x0 -1) //2) + (x1 * (x1 -1) //2)
 
-answer = total_swaps - unchanged
+    # cross pairs between group1 and group0 where a is same
 
-print(answer)
+    unchanged += (g1_0 * x0) + (g1_1 * x1)
 
-Yes. Let's test this code on the first sample.
+    total_swaps = n * (n-1) //2
 
-Sample 1:
+    answer = total_swaps - unchanged
 
-a = '01011', b='11001'
+    print(answer, file=output_stream)
 
-Loop over each character:
 
-i=0: a=0, b=1 → group1. ai is 0 → g1_0 +=1. count_1=1.
 
-i=1: a=1, b=1 → group1. ai=1 → g1_1 +=1. count_1=2.
+def test():
+    import io
 
-i=2: a=0, b=0 → group0. ai=0 →x0 +=1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+011000
+010011
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-i=3: a=1, b=0 → group0. ai=1 →x1 +=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=4: a=1, b=1 → group1. ai=1 →g1_1 +=1. count_1=3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So group1_0=1, group1_1=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-x0=1 (i=2), x1=1 (i=3).
+    print('Tests passed 😎')
 
-group1 internal pairs: 3*2/2=3.
 
-group0 internal: (1*0)/2 + (1*0)/2 →0.
+if __name__ == '__main__':
+    test()
 
-cross pairs: 1*1 + 2*1 →1+2=3.
 
-total unchanged=3+0+3=6.
+```
 
-total_swaps=5*4/2=10. 10-6=4. Correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

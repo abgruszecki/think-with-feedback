@@ -215,30 +215,69 @@ But need to handle the case where m_prime is 1. Because 1 is 2^0.
 
 So the code:
 
+Testing against sample input 1.
+
+```python
 import math
 
-a, m = map(int, input().split())
 
-r0 = a % m
-if r0 == 0:
-    print("Yes")
-else:
-    d = math.gcd(r0, m)
-    m_prime = m // d
-    if (m_prime & (m_prime - 1)) == 0:
-        print("Yes")
+def main(input_stream, output_stream):
+    a, m = map(int, input_stream.readline().rstrip("\n").split())
+
+    r0 = a % m
+    if r0 == 0:
+        print("Yes", file=output_stream)
     else:
-        print("No")
+        d = math.gcd(r0, m)
+        m_prime = m // d
+        if (m_prime & (m_prime - 1)) == 0:
+            print("Yes", file=output_stream)
+        else:
+            print("No", file=output_stream)
 
-Yes, this should handle all cases.
 
-Now let's test with the sample inputs.
 
-Sample 1:
+def test():
+    import io
 
-Input: 1 5
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 6
+""",
+            "output": \
+"""\
+Yes
+""",
+        }, 
+    ]
 
-r0 = 1%5=1 !=0. d = gcd(1,5)=1. m_prime=5/1=5. 5 is 101 in binary. 5 &4= 101 &100= 100 !=0 → so output No. Which matches.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

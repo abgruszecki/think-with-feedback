@@ -422,27 +422,89 @@ But in Python, for speed, the code can be optimized.
 
 But given that m is 3e5, and each edge is processed once, this code should be acceptable.
 
-Testing the first sample:
+Testing against sample input 1.
 
-n=3, m=3, edges sorted by w (all 1). So i=0, j=3.
+```python
+import sys
 
-temp is built for all three edges. For each edge:
 
-First edge (1,0,1): val =0+1=1. temp[1] =1.
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    edges = []
+    for _ in range(m):
+        u, v, w = map(int, input_stream.readline().split())
+        edges.append((w, u-1, v-1))
+    edges.sort()
+    
+    current_max = [0] * n
+    i = 0
+    while i < m:
+        current_w = edges[i][0]
+        j = i
+        while j < m and edges[j][0] == current_w:
+            j += 1
+        temp = {}
+        for k in range(i, j):
+            _, u, v = edges[k]
+            val = current_max[u] + 1
+            if v in temp:
+                if val > temp[v]:
+                    temp[v] = val
+            else:
+                temp[v] = val
+        for v in temp:
+            if temp[v] > current_max[v]:
+                current_max[v] = temp[v]
+        i = j
+    print(max(current_max), file=output_stream)
 
-Second edge (1,1,2): val=0+1=1. temp[2] =1.
 
-Third edge (1,2,0): val=0+1=1. temp[0] =1.
 
-Then, after processing, current_max becomes [1,1,1]. Max is 1.
+def test():
+    import io
 
-Yes.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 3
+1 2 1
+2 3 2
+3 1 3
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-Another test case where edges form a chain. For example, edges with weights 1,2,3,4. Each edge points to the next node. The answer should be 4. The code would process each group (each has one edge). For each step, the current_max of u is the previous max, leading to adding 1 each time. So current_max for each node would be 1, 2, 3, 4. The max is4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Thus, the code works.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So this should be the correct approach.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

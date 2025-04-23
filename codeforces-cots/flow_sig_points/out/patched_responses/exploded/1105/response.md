@@ -769,57 +769,165 @@ for i in 0 to 3:
 
 This code would correctly model the directions.
 
-Testing this with the second example:
+Testing against sample input 2.
 
-i=3:
+```python
+def main(input_stream, output_stream):
+    parts = []
+    for _ in range(4):
+        l, s, r, p = map(int, input_stream.readline().rstrip("\n").split())
+        parts.append((l, s, r, p))
 
-parts[3] p=1.
+    for i in range(4):
+        if parts[i][3] == 1:
+            # Check if any of the current part's car lights are green
+            if parts[i][0] or parts[i][1] or parts[i][2]:
+                print("YES", file=output_stream)
+                return
+            # Check other parts' lanes that lead to i
+            for j in range(4):
+                l, s, r, _ = parts[j]
+                # Check left lane of j leads to i
+                if (j - 1) % 4 == i and l == 1:
+                    print("YES", file=output_stream)
+                    return
+                # Check straight lane of j leads to i
+                if (j + 2) % 4 == i and s == 1:
+                    print("YES", file=output_stream)
+                    return
+                # Check right lane of j leads to i
+                if (j + 1) % 4 == i and r == 1:
+                    print("YES", file=output_stream)
+                    return
 
-Check parts[3]'s own lanes: 0,0,0 → no.
+    print("NO", file=output_stream)
 
-Check other parts:
 
-j=0:
 
-left leads to -1 mod4=3 → i=3. j=0's left is 0 → no.
+def test():
+    import io
 
-straight leads to 0+2=2 mod4 → not 3 → no.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 0 0 0
+0 0 0 1
+0 0 0 0
+1 0 1 0
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-right leads to 0+1=1 → no.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-j=1:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-left leads to 0 → no.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-straight leads to 1+2=3 → yes. j=1's s is 0 → no.
+    print('Tests passed 😎')
 
-right leads to 2 → no.
 
-j=2:
+if __name__ == '__main__':
+    test()
 
-left leads to 1 → no.
 
-straight leads to 4 mod4=0 → no.
+```
 
-right leads to 3 → yes. j=2's right is 0 → no.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-j=3:
+```
 
-left leads to 2 → no.
+Testing against sample input 1.
 
-straight leads to 5 mod4=1 → no.
+```python
+def main(input_stream, output_stream):
+    parts = []
+    for _ in range(4):
+        l, s, r, p = map(int, input_stream.readline().rstrip("\n").split())
+        parts.append((l, s, r, p))
 
-right leads to 4 mod4=0 → no.
+    for i in range(4):
+        if parts[i][3] == 1:
+            # Check if any of the current part's car lights are green
+            if parts[i][0] or parts[i][1] or parts[i][2]:
+                print("YES", file=output_stream)
+                return
+            # Check other parts' lanes that lead to i
+            for j in range(4):
+                l, s, r, _ = parts[j]
+                # Check left lane of j leads to i
+                if (j - 1) % 4 == i and l == 1:
+                    print("YES", file=output_stream)
+                    return
+                # Check straight lane of j leads to i
+                if (j + 2) % 4 == i and s == 1:
+                    print("YES", file=output_stream)
+                    return
+                # Check right lane of j leads to i
+                if (j + 1) % 4 == i and r == 1:
+                    print("YES", file=output_stream)
+                    return
 
-So no lanes lead to i=3. Thus, output is NO, which is correct.
+    print("NO", file=output_stream)
 
-In the first example:
 
-i=0's p=1:
 
-parts[0]'s l=1 → accident. code returns YES.
+def test():
+    import io
 
-So this model works.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0 1 1 0
+1 0 1 0
+1 1 0 0
+0 0 0 1
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: third input.
 

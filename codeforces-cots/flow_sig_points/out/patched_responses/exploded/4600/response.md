@@ -1097,19 +1097,81 @@ After struggling for a long time, I realize that the correct solution is to comp
 
 Alternatively, the correct approach is to compute the required steps for each position i as the maximum between (a[i] +1) and the steps for i-1 plus 1. The sum of all steps is the answer. Let's test this.
 
-First sample:
+Testing against sample input 1.
 
-steps[1] =2.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    steps = [0] * (n + 2)  # steps[i] is the required steps for position i
 
-steps[2] =max(3, 2+1) →3.
+    for i in range(n-1, -1, -1):
+        required = a[i] + 1 if a[i] >= 0 else 0
+        steps[i] = max(required, steps[i+1] + 1)
 
-steps[3] =max(4,3+1) →4.
+    total = 0
+    prev = 0
+    for i in range(n):
+        current = steps[i]
+        if current > prev:
+            total += current - prev
+        prev = current
 
-steps[4] =max(5,4+1) →5.
+    print(total, file=output_stream)
 
-steps[5] =max(6,5+1) →6.
 
-Sum 2+3+4+5+6=20. Not correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+-1 -5 -4 -1 -4 -7
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 54, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 47, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '0'
+Got: '6'
+
+```
 
 Thus, this approach is wrong.
 

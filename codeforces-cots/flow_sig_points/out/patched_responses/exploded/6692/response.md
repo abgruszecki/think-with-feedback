@@ -624,89 +624,87 @@ Then, print(count['R'], count['B'], count['Y'], count['G']).
 
 So the code can be written as follows:
 
-s = input().strip()
+Testing against sample input 1.
 
-base = [None] *4
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-for i, c in enumerate(s):
+    base = [None] *4
 
-    if c != '!':
+    for i, c in enumerate(s):
 
-        pos = i %4
+        if c != '!':
 
-        if base[pos] is None:
+            pos = i %4
 
-            base[pos] = c
+            if base[pos] is None:
 
-        else:
+                base[pos] = c
 
-            # since input is valid, no conflict
+            else:
 
-            assert base[pos] == c
+                # since input is valid, no conflict
 
-count = {'R':0, 'B':0, 'Y':0, 'G':0}
+                assert base[pos] == c
 
-for i, c in enumerate(s):
+    count = {'R':0, 'B':0, 'Y':0, 'G':0}
 
-    if c == '!':
+    for i, c in enumerate(s):
 
-        pos = i %4
+        if c == '!':
 
-        color = base[pos]
+            pos = i %4
 
-        count[color] +=1
+            color = base[pos]
 
-print(count['R'], count['B'], count['Y'], count['G'])
+            count[color] +=1
 
-But what about the case where the base is not filled completely? According to the problem statement, the input is valid, so the base must be filled. So the code can proceed under the assumption that after the first loop, all base elements are filled.
+    print(count['R'], count['B'], count['Y'], count['G'], file=output_stream)
 
-Testing the code:
 
-Sample Input 1:
 
-RYBGRYBGR
+def test():
+    import io
 
-All characters are non-'!', so base is filled as:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+!RGYB
+""",
+            "output": \
+"""\
+0 1 0 0
+""",
+        }, 
+    ]
 
-positions0 mod0 → R
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-position1 mod1 → Y → but wait, the input is "RYBGRYBGR".
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Let's index the input:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-0: R → mod0 → base[0] = R.
+    print('Tests passed 😎')
 
-1: Y → mod1 → base[1] = Y.
 
-2: B → mod2 → base[2] = B.
+if __name__ == '__main__':
+    test()
 
-3: G → mod3 → base[3] = G.
 
-So base is R, Y, B, G.
+```
 
-Then, no '!'s, so output is 0 0 0 0 → which matches sample.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-But wait, according to the first sample's input, the output is 0 0 0 0, but according to the code's base, the colors are R, Y, B, G. Because the input is RYBGRYBGR.
-
-But the code's base is filled as follows:
-
-index0: R → mod0 → base[0] = R.
-
-index1: Y → mod1 → base[1] = Y.
-
-index2: B → mod2 → base[2] = B.
-
-index3: G → mod3 → base[3] = G.
-
-So for the input "RYBGRYBGR", which is R Y B G R Y B G R.
-
-So the code's base is R, Y, B, G.
-
-But the sample output is 0 0 0 0.
-
-Yes, because there are no '!'s.
-
-So the code works.
+```
 
 Another test case: input "!RGYB" → sample output 0 1 0 0.
 

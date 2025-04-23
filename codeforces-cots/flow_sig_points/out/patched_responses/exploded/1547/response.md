@@ -261,83 +261,266 @@ So sum_before after processing all operations is the total sum.
 
 So the code can be written as:
 
-n = int(input())
+Testing against sample input 1.
 
-s = input().strip()
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-sum_before =0
+    s = input_stream.readline().rstrip("\n").strip()
 
-required_x =0
+    sum_before =0
 
-for op in s:
+    required_x =0
 
-    if op == '-':
+    for op in s:
 
-        # calculate 1 - sum_before
+        if op == '-':
 
-        candidate = 1 - sum_before
+            # calculate 1 - sum_before
 
-        if candidate > required_x:
+            candidate = 1 - sum_before
 
-            required_x = candidate
+            if candidate > required_x:
 
-    # update sum_before with current op's effect
+                required_x = candidate
 
-    if op == '+':
+        # update sum_before with current op's effect
 
-        sum_before +=1
+        if op == '+':
 
-    else:
+            sum_before +=1
 
-        sum_before -=1
+        else:
 
-# required_x is the maximum of all 1 - sum_before for '-'
+            sum_before -=1
 
-x = max(0, required_x)
+    # required_x is the maximum of all 1 - sum_before for '-'
 
-final = x + sum_before
+    x = max(0, required_x)
 
-print(final)
+    final = x + sum_before
 
-Wait, let's test this code with the examples.
+    print(final, file=output_stream)
 
-First example:
 
-Input 3, s = '---'
 
-Processing each op:
+def test():
+    import io
 
-Op1: '-'
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+++++
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-sum_before starts at 0. Since op is '-', candidate is 1-0=1. required_x becomes 1. Then sum_before becomes -1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Op2: '-'
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sum_before is -1. candidate is 1 - (-1) =2. required_x is 2. sum becomes -2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Op3: '-'
+    print('Tests passed 😎')
 
-sum_before is -2. candidate is 1 - (-2) =3. required_x is 3. sum becomes -3.
 
-x is max(0,3) =3. sum_before is -3. final =3 + (-3) =0. Correct.
+if __name__ == '__main__':
+    test()
 
-Second example: 4 '++++'
 
-each op is '+'. No '-'s. So required_x remains 0.
+```
 
-sum_before after each op:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-0+1=1, then 2, 3,4. sum_before is4.
+```
 
-x is 0. final is 0+4=4. Correct.
+Testing against sample input 2.
 
-Third example: 2 '-+'
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-Processing first op '-': sum_before 0. candidate 1. required_x=1. sum becomes -1.
+    s = input_stream.readline().rstrip("\n").strip()
 
-Second op '+', sum becomes 0.
+    sum_before =0
 
-x is 1. sum_before is 0. 1+0=1. Correct.
+    required_x =0
+
+    for op in s:
+
+        if op == '-':
+
+            # calculate 1 - sum_before
+
+            candidate = 1 - sum_before
+
+            if candidate > required_x:
+
+                required_x = candidate
+
+        # update sum_before with current op's effect
+
+        if op == '+':
+
+            sum_before +=1
+
+        else:
+
+            sum_before -=1
+
+    # required_x is the maximum of all 1 - sum_before for '-'
+
+    x = max(0, required_x)
+
+    final = x + sum_before
+
+    print(final, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+-+
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    s = input_stream.readline().rstrip("\n").strip()
+
+    sum_before =0
+
+    required_x =0
+
+    for op in s:
+
+        if op == '-':
+
+            # calculate 1 - sum_before
+
+            candidate = 1 - sum_before
+
+            if candidate > required_x:
+
+                required_x = candidate
+
+        # update sum_before with current op's effect
+
+        if op == '+':
+
+            sum_before +=1
+
+        else:
+
+            sum_before -=1
+
+    # required_x is the maximum of all 1 - sum_before for '-'
+
+    x = max(0, required_x)
+
+    final = x + sum_before
+
+    print(final, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+++-++
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Fourth example:5 '++-++'
 

@@ -424,67 +424,84 @@ Now, coding:
 
 So here's the code:
 
+Testing against sample input 1.
+
+```python
 import heapq
 
-n, k = map(int, input().split())
-p = list(map(int, input().split()))
-c = list(map(int, input().split()))
-knights = sorted( ( (p[i], c[i], i) for i in range(n) ), key=lambda x: x[0] )
 
-answers = [0]*n
-heap = []
-sum_heap = 0
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
+    knights = sorted( ( (p[i], c[i], i) for i in range(n) ), key=lambda x: x[0] )
 
-for knight in knights:
-    _, ci, original_i = knight
-    ans = ci + sum_heap
-    answers[original_i] = ans
-    if k ==0:
-        continue
-    if len(heap) < k:
-        heapq.heappush(heap, ci)
-        sum_heap += ci
-    else:
-        if ci > heap[0]:
-            sum_heap -= heapq.heappop(heap)
+    answers = [0]*n
+    heap = []
+    sum_heap = 0
+
+    for knight in knights:
+        _, ci, original_i = knight
+        ans = ci + sum_heap
+        answers[original_i] = ans
+        if k ==0:
+            continue
+        if len(heap) < k:
             heapq.heappush(heap, ci)
             sum_heap += ci
+        else:
+            if ci > heap[0]:
+                sum_heap -= heapq.heappop(heap)
+                heapq.heappush(heap, ci)
+                sum_heap += ci
 
-print(' '.join(map(str, answers)))
+    print(' '.join(map(str, answers)), file=output_stream)
 
-Testing this code against the first example:
 
-Input:
 
-4 2
+def test():
+    import io
 
-4 5 9 7
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 1
+1 2 3 4 5
+1 2 3 4 5
+""",
+            "output": \
+"""\
+1 3 5 7 9
+""",
+        }, 
+    ]
 
-1 2 11 33
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sorted knights are in order 4 (c=1),5 (2),7 (33),9 (11). 
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Processing:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-original_i=0:
+    print('Tests passed 😎')
 
-ans=1+0=1. heap has [1], sum 1.
 
-original_i=1: ans=2+1=3. heap [1,2], sum 3.
+if __name__ == '__main__':
+    test()
 
-original_i=3 (since sorted knight 7's original index is 3): ans=33+3=36. Then, since heap is size 2 (k=2), compare 33>1. replace 1 with 33. sum becomes 3-1 +33=35. heap is [2,33].
 
-original_i=2 (sorted knight 9's original index is 2): ans=11 +35=46. Then, add 11. Compare 11>2. sum becomes 35-2 +11=44. heap becomes [11,33]. 
+```
 
-So answers array:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-original indexes 0,1,3,2 → answers[0] =1, answers[1]=3, answers[3]=36, answers[2]=46. So the output is 1 3 46 36, which matches.
-
-Yes.
-
-So this code should work. 
-
-But wait, when k=0, the code skips adding anything to the heap. So sum_heap remains 0. For each knight, ans is ci + 0 → correct.
+```
 
 Another test case where k is larger than the number of possible victims. For example, if k=3 but a knight has only 2 victims. Then, sum all 2. 
 

@@ -1163,174 +1163,663 @@ Then, for each run, track the current possible states and their minimal totals.
 
 The code outline is:
 
-n = int(input())
-a = list(map(int, input().split()))
+Testing against sample input 1.
 
-runs = []
-prev = a[0]
-count = 1
-for num in a[1:]:
-    if num == prev:
-        count +=1
-    else:
-        runs.append(prev)
-        prev = num
-        count = 1
-runs.append(prev)
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-# Now process runs.
+    runs = []
+    prev = a[0]
+    count = 1
+    for num in a[1:]:
+        if num == prev:
+            count +=1
+        else:
+            runs.append(prev)
+            prev = num
+            count = 1
+    runs.append(prev)
 
-from collections import defaultdict
+    # Now process runs.
 
-dp = defaultdict(lambda: float('inf'))
-dp[(None, None)] = 0
+    from collections import defaultdict
 
-for x in runs:
-    new_dp = defaultdict(lambda: float('inf'))
+    dp = defaultdict(lambda: float('inf'))
+    dp[(None, None)] = 0
+
+    for x in runs:
+        new_dp = defaultdict(lambda: float('inf'))
+        for (w, b), s in dp.items():
+            # Assign x to white
+            new_w = x
+            new_b = b
+            if w is None:
+                add = 1
+            else:
+                add = 0 if new_w == w else 1
+            new_s = s + add
+            key = (new_w, new_b)
+            if new_s < new_dp[key]:
+                new_dp[key] = new_s
+
+            # Assign x to black
+            new_b = x
+            new_w = w
+            if b is None:
+                add = 1
+            else:
+                add = 0 if new_b == b else 1
+            new_s = s + add
+            key = (new_w, new_b)
+            if new_s < new_dp[key]:
+                new_dp[key] = new_s
+        dp = new_dp
+
+    # After processing all runs, compute the minimal sum, adding the number of non-empty colors.
+
+    min_total = float('inf')
     for (w, b), s in dp.items():
-        # Assign x to white
-        new_w = x
-        new_b = b
-        if w is None:
-            add = 1
+        # count non-empty colors
+        count = 0
+        if w is not None:
+            count +=1
+        if b is not None:
+            count +=1
+        if count ==0:
+            total = s
         else:
-            add = 0 if new_w == w else 1
-        new_s = s + add
-        key = (new_w, new_b)
-        if new_s < new_dp[key]:
-            new_dp[key] = new_s
+            total = s + count
+        if total < min_total:
+            min_total = total
 
-        # Assign x to black
-        new_b = x
-        new_w = w
-        if b is None:
-            add = 1
-        else:
-            add = 0 if new_b == b else 1
-        new_s = s + add
-        key = (new_w, new_b)
-        if new_s < new_dp[key]:
-            new_dp[key] = new_s
-    dp = new_dp
+    print(min_total, file=output_stream)
 
-# After processing all runs, compute the minimal sum, adding the number of non-empty colors.
 
-min_total = float('inf')
-for (w, b), s in dp.items():
-    # count non-empty colors
-    count = 0
-    if w is not None:
-        count +=1
-    if b is not None:
-        count +=1
-    if count ==0:
-        total = s
-    else:
-        total = s + count
-    if total < min_total:
-        min_total = total
 
-print(min_total)
+def test():
+    import io
 
-But wait, the code adds 'count' (number of non-empty colors) to s. But according to the model, the sum is s (transitions) + count (which is 0, 1, or 2).
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+1 2 1 2 1 2 1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-But in the code, the transitions sum is s, which is the sum of transitions_white and transitions_black. But the segments for each color is transitions_white + 1 (if non-empty) and transitions_black + 1 (if non-empty). So the total is (transitions_white + 1) * (w is not None) + (transitions_black + 1) * (b is not None).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Which is equivalent to s + count.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Because s is transitions_white + transitions_black. count is 0, 1, or 2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Thus, the code correctly calculates the total as s + count.
+    print('Tests passed 😎')
 
-But will this code handle the sample inputs correctly?
 
-Let's test sample 1:
+if __name__ == '__main__':
+    test()
 
-Sample 1:
 
-Input: 6
+```
 
-1 2 3 1 2 2
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 105, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 98, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '2'
+Got: '4'
 
-Runs: [1, 2, 3, 1, 2]
+```
 
-Processing each run:
+In the first sample, the optimal assignment is to white: [1,1,2,2], black: [2,3].
 
-Initial state: (None, None), s=0.
+The transitions_white is 1 (1→2), transitions_black is 1 (2→3). sum is 2. count is 2. total is 4.
 
-Process x=1:
+So, the code should find a state where s is 2 and count is 2.
 
-Assign to white: new state (1, None), s=1.
+But how does the code reach this.
 
-Assign to black: new state (None, 1), s=1.
+Looking at the code's steps:
 
-dp has two states.
+After processing the first run (1), the states are (1, None) and (None, 1), s=1.
 
-Process x=2:
+Second run (2):
 
-For state (1, None):
+The states after processing are four, each s=2.
 
-Assign to white: new_w=2, s=1 +1=2. State (2, None).
+Third run (3):
 
-Assign to black: new_b=2, s=1 +1=2. State (1, 2).
+Each state adds 1 to s, leading to s=3.
 
-For state (None, 1):
+Fourth run (1):
 
-Assign to white: new_w=2, s=1 +1=2. State (2, 1).
+Each state adds 1 to s, leading to s=4.
 
-Assign to black: new_b=2, s=1 + (2 !=1) → 1+1=2. State (None, 2).
+Fifth run (2):
 
-So new_dp has four states: (2, None) →2, (1,2) →2, (2,1) →2, (None, 2) →2.
+Each state adds 1 to s, leading to s=5.
 
-Process x=3:
+Finally, the code considers the count for each state.
 
-For each state:
+For example, a state like (2,3) would have s=5. count is 2 → total 7.
 
-State (2, None):
+But the optimal state in the sample is (2,3) for white and black. But how is that captured.
 
-Assign to white: x=3. new_w=3. s=2 + (3 !=2) →3. State (3, None).
+Ah, perhaps the code's approach isn't considering the possibility of merging runs in the same color.
 
-Assign to black: new_b=3. s=2 + (3 !=None →1) →3. State (2,3).
+For example, in the first sample's optimal assignment, the white sequence has two runs: 1 and 2. So when the fourth run (1) is processed and assigned to white, the previous white value is 3 (from third run). So it adds 1 to s. This is not optimal.
 
-State (1,2):
+Thus, the code's approach of processing runs and assigning entire runs to colors may not capture the optimal assignment where a run is split between colors.
 
-Assign to white: x=3. s=2 + (3 !=1 →1) →3. State (3,2).
+Wait, no. The code processes runs as a single unit. Each run must be assigned to a single color. But in the sample, the optimal solution assigns the first run (1) to white, the fourth run (1) to white. But the fourth run is a run of 1s.
 
-Assign to black: new_b=3. s=2 + (3 !=2 →1) →3. State (1,3).
+So the code's approach of assigning entire runs to a color can capture this.
 
-State (2,1):
+But in the code's processing:
 
-Assign to white: s=2 + (3 !=2 →1) →3. State (3,1).
+The first run (1) is assigned to white.
 
-Assign to black: new_b=3. s=2 + (3 !=1 →1) →3. State (2,3).
+The fourth run (1) is assigned to white. Since previous white run was 3 (from third run), adding 1 to s.
 
-State (None,2):
+This leads to a higher s.
 
-Assign to white: x=3. s=2 +1 →3. State (3, 2).
+But the sample's optimal assignment splits the fourth run into white and black.
 
-Assign to black: new_b=3. s=2 + (3 !=2 →1) →3. State (None,3).
+But the code's approach forces each run to be assigned entirely to one color.
 
-New_dp will have various states with s=3.
+Thus, the code may not find the optimal solution, as it processes runs as a whole and can't split them.
 
-Process x=1:
+This is a problem.
 
-For each state:
+The code's approach assumes that each run is assigned entirely to one color. But the optimal solution may require splitting a run into different colors.
 
-For example, state (3, None):
+For example, in the first sample, the fourth run is [1], and the sixth run is [2, 2]. The optimal assignment has the fourth run's 1 assigned to white and the sixth run's 2s to white. But according to the code's approach, the fourth run is processed as a single unit, so it must be assigned to either white or black.
 
-Assign to white: x=1. new_w=1. s=3 + (1 !=3 →1) →4. State (1, None).
+But in reality, the fourth run's 1 is part of the white sequence, but the sixth run's 2s are part of white as well. The code's approach processes the sixth run (2) and assigns it to white, which is allowed.
 
-Assign to black: new_b=1. s=3 +1 (since black was None) →4. State (3,1).
+Wait, no. The sixth run is processed as a single unit. So if it's assigned to white, then all elements in that run are added to white.
 
-Similarly, all other states are processed, adding 1 to s.
+So the code's approach is correct in this case.
 
-Process x=2:
+But why does the code not find the sample's optimal solution.
 
-For each state, assign to white or black.
+Let's trace the code for the first sample:
 
-After processing all runs, the final states are considered, and the minimal s + count is computed.
+Runs: [1,2,3,1,2].
 
-But this approach may not capture the optimal assignment from the sample.
+Processing:
+
+After processing the first run (1), the states are (1, None) and (None, 1), each s=1.
+
+Processing run 2 (2):
+
+States are four, each s=2.
+
+Processing run 3 (3):
+
+States are various, each s=3.
+
+Processing run 4 (1):
+
+For each state, assigning to white or black.
+
+For example, take state (3, 2), s=3.
+
+Assign to white: x=1. s=3 +1 →4. State (1, 2).
+
+Assign to black: x=1. s=3 +1 →4. State (3, 1).
+
+Processing run 5 (2):
+
+For state (1, 2):
+
+Assign to white: x=2. s=4 + (2 !=1 →1) →5. State (2, 2).
+
+Assign to black: x=2. s=4 + (2 !=2 →0) →4. State (1, 2).
+
+So for this state, the new state after assigning to black is (1, 2) with s=4.
+
+This is better.
+
+So, in this case, the code would have a state (1,2) with s=4.
+
+Now, the count for this state is 2 (both colors are non-empty). So total is 4 + 2 =6.
+
+But the sample's optimal is 4.
+
+So the code's approach is not capturing this.
+
+This suggests that the code's approach of processing runs as a whole is not sufficient to find the optimal solution.
+
+The problem is that the code's approach forces entire runs to be assigned to one color, but the optimal solution may split a run into different colors.
+
+Thus, the code's approach is incorrect.
+
+This means that the runs-based approach is not suitable for this problem.
+
+So, the initial idea of processing each element individually with a dynamic programming approach is necessary.
+
+But how to manage the state space.
+
+After some research, I found a solution approach that uses dynamic programming with O(1) states per step. The key insight is to track the last two colors used and their values.
+
+The idea is to track the following state variables:
+
+- The last color used (0 or 1).
+
+- The value of the last element in each color.
+
+But we can track two possibilities: the last element in color 0 and color 1.
+
+Additionally, for each step, we can track two possible states: the current element was assigned to color 0 or color 1.
+
+This way, the state is represented by the last value of each color, but the decision for the current element is only based on the previous state.
+
+This approach reduces the state to two possible options: the previous element was assigned to color 0 or 1.
+
+Here's the detailed approach:
+
+We maintain two dictionaries (or variables) for each possible previous assignment:
+
+- prev_0: last value of color 0.
+
+- prev_1: last value of color 1.
+
+For each element x, we can choose to assign it to color 0 or 1.
+
+For each choice, we calculate the additional segments:
+
+If assigning to color 0:
+
+- If the previous assignment to color 0 is None, then add 1 segment.
+
+- Else, add 1 if x != prev_0.
+
+The same applies for color 1.
+
+We track the minimal total segments for each possible assignment.
+
+The state after processing x is:
+
+- If assigned to color 0: new_prev_0 = x, new_prev_1 = prev_1.
+
+- If assigned to color 1: new_prev_1 = x, new_prev_0 = prev_0.
+
+Thus, for each step, we can track two possible states: the current element was assigned to color 0 or 1, and the previous values of each color.
+
+This reduces the state to two possibilities per step, which is manageable.
+
+Let's model this:
+
+Initialize:
+
+prev_0 = None
+
+prev_1 = None
+
+total_0 = 0 (segments if last element is in color 0)
+
+total_1 = 0 (segments if last element is in color 1)
+
+For each element x in the array:
+
+   new_total_0 = min(
+       (total_0 + (1 if (prev_0 is not None and x != prev_0) else 0)),  # previous was 0, assign to 0
+       (total_1 + (1 if (x != prev_0) else 0))  # previous was 1, assign to 0
+   )
+
+   new_total_1 = min(
+       (total_1 + (1 if (prev_1 is not None and x != prev_1) else 0)),  # previous was 1, assign to 1
+       (total_0 + (1 if (x != prev_1) else 0))  # previous was 0, assign to 1
+   )
+
+   new_prev_0 = x if new_total_0 comes from assigning to 0 else prev_0
+
+Wait, no. This approach is not capturing the correct transitions.
+
+Let me think again.
+
+We need to track, for each possible current assignment (color 0 or 1), the minimal total segments up to that point.
+
+At each step, for each possible previous assignment to color 0 or 1, we can transition to the current assignment.
+
+Thus, for each step, we can track two variables: the minimal total if the current element is assigned to color 0, and the minimal total if assigned to color 1.
+
+The minimal total for assigning current x to 0 is the minimum between:
+
+- the previous element was assigned to 0 and x is the same as previous 0 → total_0.
+
+- the previous element was assigned to 0 and x is different → total_0 + 1.
+
+- the previous element was assigned to 1 and x is the same as previous 0 → total_1 + 0.
+
+- the previous element was assigned to 1 and x is different from previous 0 → total_1 + 1.
+
+Wait, but previous 0 and previous 1 are tracked separately.
+
+Wait, for the previous assignment to color 0, the last value of color 0 is known.
+
+So, when assigning x to color 0, the segments for color 0 will increase by 1 if x is different from the previous color 0's value.
+
+But what about the previous assignment to color 1?
+
+The previous assignment to color 1's value is stored as prev_1.
+
+So, when considering whether to assign x to color 0, we can look at both possibilities:
+
+- The previous element was assigned to color 0. Then, the previous color 0's value is prev_0.
+
+- The previous element was assigned to color 1. Then, the previous color 0's value is still prev_0 (unchanged).
+
+But this is not correct. The previous color 0's value is only changed if we assign the current element to color 0.
+
+Thus, the state should track the last values of both colors.
+
+So, for each step, we need to track:
+
+- The last value of color 0 (prev_0).
+
+- The last value of color 1 (prev_1).
+
+- The total segments so far.
+
+But this brings us back to the original problem of tracking (prev_0, prev_1) pairs.
+
+But we can model this with two possible states: one where the previous element was assigned to color 0, and another where it was assigned to color 1.
+
+This is known as a state machine approach.
+
+Here's the idea:
+
+At each step, the previous element could have been assigned to either color 0 or color 1. For each possibility, we track:
+
+- The last value of color 0.
+
+- The last value of color 1.
+
+- The total segments.
+
+But to manage this, we can track two possible states:
+
+State A: the previous element was assigned to color 0.
+
+State B: the previous element was assigned to color 1.
+
+For each state, we track the last values of both colors and the total segments.
+
+When processing the next element, we can transition from State A or B to either color 0 or 1.
+
+But this approach still tracks two possible states per step, which is manageable.
+
+Let's model it:
+
+We use two variables to represent the state after processing the previous element:
+
+- When the previous element was assigned to color 0:
+
+   - prev_0 is the value of the previous element.
+
+   - prev_1 remains the same as before.
+
+   - total segments is the sum up to that point.
+
+- When the previous element was assigned to color 1:
+
+   - prev_1 is the value of the previous element.
+
+   - prev_0 remains the same as before.
+
+   - total segments is the sum up to that point.
+
+But how to track the prev_0 and prev_1 for each state.
+
+An alternative approach is to track two possible states:
+
+- (prev_0, prev_1, total) when the previous element was assigned to color 0.
+
+- (prev_0, prev_1, total) when the previous element was assigned to color 1.
+
+But for each step, we can derive new states from these two.
+
+This way, the number of states per step is two, which is manageable.
+
+Let's see how this works.
+
+Initialize:
+
+After processing zero elements, the states are:
+
+- State 0: previous element was color 0. But since there are no elements, this state is invalid.
+
+- State 1: previous element was color 1. Also invalid.
+
+Alternatively, we can start with two initial states: one where no elements have been processed (prev_0=None, prev_1=None, total=0), and the previous assignment is None.
+
+But perhaps it's better to track the possible states after each step.
+
+For example, after processing the first element:
+
+If the first element is assigned to color 0:
+
+   prev_0 = x, prev_1 = None, total = 1.
+
+If assigned to color 1:
+
+   prev_0 = None, prev_1 = x, total = 1.
+
+These are the two possible states.
+
+For the second element, we can transition from each of these states.
+
+From the first state (prev_0=x1, prev_1=None, total=1):
+
+Assign to color 0:
+
+   new_prev_0 = x2.
+
+   add = 1 if x2 != x1 else 0.
+
+   new_total = 1 + add.
+
+   new_prev_1 remains None.
+
+Assign to color 1:
+
+   new_prev_1 = x2.
+
+   add = 1 (since prev_1 is None).
+
+   new_total = 1 + 1 = 2.
+
+So new state after assignment to color 1 is (prev_0=x1, prev_1=x2, total=2).
+
+From the second state (prev_0=None, prev_1=x1, total=1):
+
+Assign to color 0:
+
+   new_prev_0 = x2.
+
+   add = 1 (since prev_0 was None).
+
+   new_total = 1 +1 =2.
+
+Assign to color 1:
+
+   new_prev_1 = x2.
+
+   add = 1 if x2 != x1 else 0.
+
+   new_total = 1 + add.
+
+Thus, after processing the second element, there are four possible states, but some may have the same (prev_0, prev_1) pairs. We can track only the minimal total for each (prev_0, prev_1) pair.
+
+But this again leads to a possible explosion of states.
+
+Thus, this approach may not be feasible.
+
+Another Idea: Track only the best possible state for each possible previous assignment.
+
+For example, for each step, track two options:
+
+- The best state if the current element is assigned to color 0.
+
+- The best state if the current element is assigned to color 1.
+
+These two options can be computed based on the previous step's two options.
+
+Let's define:
+
+- dp0: the minimal total segments when the current element is assigned to color 0.
+
+   This tracks the last value of color 0 and the last value of color 1.
+
+- dp1: the minimal total segments when the current element is assigned to color 1.
+
+   This tracks the last value of color 0 and the last value of color 1.
+
+But to compute dp0 and dp1 for the current step, we need to consider the previous step's dp0 and dp1.
+
+So, for each new element x:
+
+new_dp0 = min(
+    dp0 + (1 if x != last_0_0 else 0),  # previous assignment was to 0, and we assign to 0 again
+    dp1 + (1 if x != last_0_1 else 0)   # previous assignment was to 1, and we assign to 0
+)
+
+Similarly for new_dp1:
+
+new_dp1 = min(
+    dp0 + (1 if x != last_1_0 else 0),  # previous assignment was to 0, and assign to 1
+    dp1 + (1 if x != last_1_1 else 0)   # previous assignment was to 1, and assign to 1
+)
+
+But this requires tracking the last values of both colors for each dp0 and dp1.
+
+Thus, the state must track not only the total segments but also the last values.
+
+So, each dp0 and dp1 must track:
+
+- The last value of color 0.
+
+- The last value of color 1.
+
+But this brings us back to the original problem.
+
+However, for each step, the previous assignment was either to color 0 or 1. Thus, when the previous assignment was to color 0, the last value of color 0 is the previous element's value. The last value of color 1 remains unchanged.
+
+Similarly, if the previous assignment was to color 1, the last value of color 1 is the previous element's value, and the last value of color 0 remains unchanged.
+
+Thus, for each step, we can track two possibilities:
+
+- The previous assignment was to color 0. Thus, last_0 is x_prev, last_1 is the same as before.
+
+- The previous assignment was to color 1. Thus, last_1 is x_prev, last_0 is the same as before.
+
+Thus, we can track four variables:
+
+- For previous assignment to color 0:
+
+   last_0_0: x_prev.
+
+   last_1_0: previous last_1.
+
+   total_0: total segments.
+
+- For previous assignment to color 1:
+
+   last_0_1: previous last_0.
+
+   last_1_1: x_prev.
+
+   total_1: total segments.
+
+For each new element x, we can compute the new states as follows:
+
+new_total_0 can come from:
+
+- Assigning to color 0 from previous color 0: if the previous color was 0, then last_0 was x_prev, and x is now assigned to 0. So, add 1 if x != x_prev.
+
+- Assigning to color 0 from previous color 1: last_0 is unchanged, and last_1 was x_prev. So, add 1 if x != last_0.
+
+Similarly for new_total_1.
+
+But this approach requires tracking the last values for each previous assignment.
+
+Thus, the variables that need to be tracked are:
+
+- For each possible previous assignment (color 0 or 1), track last_0, last_1, and total segments.
+
+At each step, these variables can be updated based on the current element.
+
+The code for this would look like:
+
+prev_0_last_0 = None
+prev_0_last_1 = None
+prev_0_total = float('inf')
+
+prev_1_last_0 = None
+prev_1_last_1 = None
+prev_1_total = float('inf')
+
+For the first element x:
+
+current_0_last_0 = x
+current_0_last_1 = None
+current_0_total = 1
+
+current_1_last_0 = None
+current_1_last_1 = x
+current_1_total = 1
+
+For subsequent elements x:
+
+new_0_total = min(
+    prev_0_total + (x != prev_0_last_0 if prev_0_last_0 is not None else 1),
+    prev_1_total + (x != prev_1_last_0 if prev_1_last_0 is not None else 1)
+)
+new_0_last_0 = x
+new_0_last_1 = prev_0_last_1 if prev_0_total < prev_1_total else prev_1_last_1
+
+new_1_total = min(
+    prev_0_total + (x != prev_0_last_1 if prev_0_last_1 is not None else 1),
+    prev_1_total + (x != prev_1_last_1 if prev_1_last_1 is not None else 1)
+)
+new_1_last_1 = x
+new_1_last_0 = prev_0_last_0 if prev_0_total < prev_1_total else prev_1_last_0
+
+prev_0_last_0, prev_0_last_1, prev_0_total = new_0_last_0, new_0_last_1, new_0_total
+prev_1_last_0, prev_1_last_1, prev_1_total = new_1_last_0, new_1_last_1, new_1_total
+
+But this is getting complicated and may not capture the correct transitions.
+
+Alternatively, perhaps we can model the problem by tracking the last values for each color, regardless of which color was last used.
+
+Thus, for each step, the state is (last_0, last_1) and the minimal total segments. But to keep track of the minimal totals, we can track two variables: the best possible state where the previous assignment was color 0 and the best where it was color 1.
+
+But I'm not sure.
+
+Given the time constraints, perhaps the correct approach is to implement the dynamic programming approach with states tracked as (last_0, last_1) and manage the states efficiently.
+
+Here's the Python code that implements this approach, using a dictionary to track the minimal total for each (last_0, last_1) pair:
 
 In the first sample, the optimal assignment is to white: [1,1,2,2], black: [2,3].
 

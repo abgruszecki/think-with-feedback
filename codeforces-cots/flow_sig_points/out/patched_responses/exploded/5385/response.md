@@ -332,120 +332,254 @@ Convert to decimal.
 
 So the code:
 
-a, c = map(int, input().split())
+Testing against sample input 1.
 
-def decimal_to_ternary(n):
-    if n ==0:
-        return [0]
-    digits = []
-    while n>0:
-        digits.append(n%3)
-        n = n//3
-    digits.reverse()
-    return digits
+```python
+def main(input_stream, output_stream):
+    a, c = map(int, input_stream.readline().rstrip("\n").split())
 
-a_ter = decimal_to_ternary(a)
-c_ter = decimal_to_ternary(c)
+    def decimal_to_ternary(n):
+        if n ==0:
+            return [0]
+        digits = []
+        while n>0:
+            digits.append(n%3)
+            n = n//3
+        digits.reverse()
+        return digits
 
-max_len = max(len(a_ter), len(c_ter))
+    a_ter = decimal_to_ternary(a)
+    c_ter = decimal_to_ternary(c)
 
-a_ter_padded = [0]*(max_len - len(a_ter)) + a_ter
-c_ter_padded = [0]*(max_len - len(c_ter)) + c_ter
+    max_len = max(len(a_ter), len(c_ter))
 
-b_ter = []
-for a_digit, c_digit in zip(a_ter_padded, c_ter_padded):
-    b_digit = (c_digit - a_digit) %3
-    b_ter.append(b_digit)
+    a_ter_padded = [0]*(max_len - len(a_ter)) + a_ter
+    c_ter_padded = [0]*(max_len - len(c_ter)) + c_ter
 
-def ternary_to_decimal(digits):
-    total =0
-    power =0
-    for d in reversed(digits):
-        total += d * (3**power)
-        power +=1
-    return total
+    b_ter = []
+    for a_digit, c_digit in zip(a_ter_padded, c_ter_padded):
+        b_digit = (c_digit - a_digit) %3
+        b_ter.append(b_digit)
 
-print(ternary_to_decimal(b_ter))
+    def ternary_to_decimal(digits):
+        total =0
+        power =0
+        for d in reversed(digits):
+            total += d * (3**power)
+            power +=1
+        return total
 
-Testing this code against sample inputs:
+    print(ternary_to_decimal(b_ter), file=output_stream)
 
-Sample 1:
 
-Input 14 34.
 
-a_ter: 14 → 112 → [1,1,2]
+def test():
+    import io
 
-c_ter:34 → 1021 → [1,0,2,1]
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+50 34
+""",
+            "output": \
+"""\
+14
+""",
+        }, 
+    ]
 
-max_len is 4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-a_ter padded becomes [0,1,1,2]
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-c_ter padded is [1,0,2,1]
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-b_ter digits:
+    print('Tests passed 😎')
 
-1-0=1 mod3 →1
 
-0-1= -1 mod3 →2
+if __name__ == '__main__':
+    test()
 
-2-1=1 →1
 
-1-2= -1 →2.
+```
 
-b_ter is [1,2,1,2]. Convert to decimal: 1*3^3 +2*3^2 +1*3 +2=27 +18 +3 +2=50. Correct.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Sample 2:
+```
 
-Input 50 34.
+Testing against sample input 2.
 
-a_ter is 50 →1212 → [1,2,1,2]
+```python
+def main(input_stream, output_stream):
+    a, c = map(int, input_stream.readline().rstrip("\n").split())
 
-c_ter is 34 →1021 → [1,0,2,1]
+    def decimal_to_ternary(n):
+        if n ==0:
+            return [0]
+        digits = []
+        while n>0:
+            digits.append(n%3)
+            n = n//3
+        digits.reverse()
+        return digits
 
-max_len is 4.
+    a_ter = decimal_to_ternary(a)
+    c_ter = decimal_to_ternary(c)
 
-a_ter_padded is [1,2,1,2]
+    max_len = max(len(a_ter), len(c_ter))
 
-c_ter_padded is [1,0,2,1]
+    a_ter_padded = [0]*(max_len - len(a_ter)) + a_ter
+    c_ter_padded = [0]*(max_len - len(c_ter)) + c_ter
 
-b_ter digits:
+    b_ter = []
+    for a_digit, c_digit in zip(a_ter_padded, c_ter_padded):
+        b_digit = (c_digit - a_digit) %3
+        b_ter.append(b_digit)
 
-1-1=0
+    def ternary_to_decimal(digits):
+        total =0
+        power =0
+        for d in reversed(digits):
+            total += d * (3**power)
+            power +=1
+        return total
 
-0-2 =-2 →1 mod3.
+    print(ternary_to_decimal(b_ter), file=output_stream)
 
-2-1=1 →1.
 
-1-2 =-1 →2 mod3.
 
-So digits [0,1,1,2]. Convert to decimal: 0*3^3 +1*3^2 +1*3 +2 =0 +9 +3 +2=14. Correct.
+def test():
+    import io
 
-Sample 3:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+387420489 225159023
+""",
+            "output": \
+"""\
+1000000001
+""",
+        }, 
+    ]
 
-Input 387420489 225159023.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-The expected output is 1000000001.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Let's see:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-a=387420489. Let's compute its ternary.
+    print('Tests passed 😎')
 
-387420489 is 3^19? Let me check: 3^19 is 1162261467, which is larger than 387420489. Wait, 3^18 is 387,420,489. Oh right! So 3^18 is exactly 387420489. So a is 1 followed by 18 zeros. So its ternary is [1, 0, 0, ..., 0] (19 digits).
 
-c is 225159023. Let's compute its ternary.
+if __name__ == '__main__':
+    test()
 
-But perhaps not. The sample output is 1000000001 in decimal. Let's see what this is in ternary.
 
-1000000001 in decimal is converted to ternary. Let's compute:
+```
 
-We can think that 1000000001 = 3^9 + 0*3^8 + ... + 0*3^1 + 1*3^0.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-But perhaps it's easier to compute via code, but perhaps I'll skip that.
+```
 
-But according to the problem statement, the code should handle large numbers. So the code must be efficient.
+Testing against sample input 3.
 
-But in Python, this code should handle numbers up to 1e9, which is manageable.
+```python
+def main(input_stream, output_stream):
+    a, c = map(int, input_stream.readline().rstrip("\n").split())
+
+    def decimal_to_ternary(n):
+        if n ==0:
+            return [0]
+        digits = []
+        while n>0:
+            digits.append(n%3)
+            n = n//3
+        digits.reverse()
+        return digits
+
+    a_ter = decimal_to_ternary(a)
+    c_ter = decimal_to_ternary(c)
+
+    max_len = max(len(a_ter), len(c_ter))
+
+    a_ter_padded = [0]*(max_len - len(a_ter)) + a_ter
+    c_ter_padded = [0]*(max_len - len(c_ter)) + c_ter
+
+    b_ter = []
+    for a_digit, c_digit in zip(a_ter_padded, c_ter_padded):
+        b_digit = (c_digit - a_digit) %3
+        b_ter.append(b_digit)
+
+    def ternary_to_decimal(digits):
+        total =0
+        power =0
+        for d in reversed(digits):
+            total += d * (3**power)
+            power +=1
+        return total
+
+    print(ternary_to_decimal(b_ter), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 3's code will process a_ter as [1,0,0,...0] (18 zeros?), wait no: 3^18 is 387,420,489. So the ternary representation is 1 followed by 18 zeros. So a_ter is [1] followed by 18 zeros. So len 19.
 

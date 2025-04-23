@@ -26,19 +26,62 @@ Read n from input. Then read the array as a list of integers. Then loop from i=1
 
 So the code would be something like:
 
-n = int(input())
-a = list(map(int, input().split()))
-count = 0
-for i in range(1, n-1):
-    if (a[i] > a[i-1] and a[i] > a[i+1]) or (a[i] < a[i-1] and a[i] < a[i+1]):
-        count +=1
-print(count)
+Testing against sample input 1.
 
-Wait, but for n < 2, like n=1 or n=2, there are no elements to check. For example, if n=1, then no elements. If n=2, then elements 0 and 1, but the loop runs from 1 to n-2. Since n=2, n-1 is 1, but the range is 1 to n-1 (since n-2 is 0), so range(1, 0) is empty. So the loop doesn't run. So that's correct.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    count = 0
+    for i in range(1, n-1):
+        if (a[i] > a[i-1] and a[i] > a[i+1]) or (a[i] < a[i-1] and a[i] < a[i+1]):
+            count +=1
+    print(count, file=output_stream)
 
-So this code should handle all cases. Let's test the examples.
 
-First example: input 3, 1 2 3. The loop runs for i=1 (0-based). Check a[1] (2) compared to 1 and 3. 2 is not greater than both (3 is bigger), and not less than both (1 is smaller). So no increment. Output 0. Correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+1 5 2 5
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: input 4, 1 5 2 5. Loop runs for i=1 and i=2.
 

@@ -825,229 +825,202 @@ Compute dp arrays for x from 1 to k:
 
 So:
 
-n, l, k = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, l, k = map(int, input_stream.readline().rstrip("\n").split())
 
-MOD = 10**9 +7
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-m_full = l //n
+    MOD = 10**9 +7
 
-r = l %n
+    m_full = l //n
 
-s = r if r !=0 else 0
+    r = l %n
 
-sorted_a = sorted(a)
+    s = r if r !=0 else 0
 
-# Compute dp arrays
+    sorted_a = sorted(a)
 
-dp = []
+    # Compute dp arrays
 
-if k >=1:
+    dp = []
 
-    # x=1
+    if k >=1:
 
-    dp1 = [1]*n
+        # x=1
 
-    dp.append(dp1)
+        dp1 = [1]*n
 
-for x in range(2, k+1):
+        dp.append(dp1)
 
-    prev_dp = dp[x-2]
+    for x in range(2, k+1):
 
-    current = []
+        prev_dp = dp[x-2]
 
-    prefix =0
+        current = []
 
-    for i in range(n):
+        prefix =0
 
-        prefix += prev_dp[i]
+        for i in range(n):
 
-        prefix %= MOD
+            prefix += prev_dp[i]
 
-        current.append(prefix)
+            prefix %= MOD
 
-    dp.append(current)
+            current.append(prefix)
 
-# Compute cnt array
+        dp.append(current)
 
-cnt = [0]*(k+1)
+    # Compute cnt array
 
-if k >=1:
+    cnt = [0]*(k+1)
 
-    cnt[1] = sum(dp[0]) % MOD
+    if k >=1:
 
-for x in range(2, k+1):
+        cnt[1] = sum(dp[0]) % MOD
 
-    if x-1 < len(dp):
+    for x in range(2, k+1):
 
-        cnt[x] = sum(dp[x-1]) % MOD
+        if x-1 < len(dp):
 
-# Compute total_full
+            cnt[x] = sum(dp[x-1]) % MOD
 
-total_full =0
+    # Compute total_full
 
-max_x_full = min(k, m_full)
+    total_full =0
 
-for x in range(1, max_x_full+1):
+    max_x_full = min(k, m_full)
 
-    if x-1 >= len(dp):
+    for x in range(1, max_x_full+1):
 
-        continue
-
-    current_cnt = cnt[x]
-
-    start_count = max(0, m_full -x +1)
-
-    total_full = (total_full + current_cnt * start_count) % MOD
-
-# Compute contribution_partial
-
-contribution_partial =0
-
-if s >0:
-
-    sorted_partial = sorted(a[:s])
-
-    count_partial_ge = [0]*n
-
-    for i in range(n):
-
-        v = sorted_a[i]
-
-        idx = bisect.bisect_left(sorted_partial, v)
-
-        count_partial_ge[i] = len(sorted_partial) - idx
-
-    max_x_partial = min(k, m_full +1)
-
-    for x in range(1, max_x_partial +1):
-
-        if x >k:
+        if x-1 >= len(dp):
 
             continue
 
-        if x ==1:
+        current_cnt = cnt[x]
 
-            contrib = s
+        start_count = max(0, m_full -x +1)
 
-        else:
+        total_full = (total_full + current_cnt * start_count) % MOD
 
-            if x-1 > len(dp):
+    # Compute contribution_partial
+
+    contribution_partial =0
+
+    if s >0:
+
+        sorted_partial = sorted(a[:s])
+
+        count_partial_ge = [0]*n
+
+        for i in range(n):
+
+            v = sorted_a[i]
+
+            idx = bisect.bisect_left(sorted_partial, v)
+
+            count_partial_ge[i] = len(sorted_partial) - idx
+
+        max_x_partial = min(k, m_full +1)
+
+        for x in range(1, max_x_partial +1):
+
+            if x >k:
 
                 continue
 
-            # x-1 is the length of the sequence before the partial block
+            if x ==1:
 
-            # so need dp[x-2]
-
-            if (x-2) >= len(dp):
-
-                contrib =0
+                contrib = s
 
             else:
 
-                dp_prev = dp[x-2]
+                if x-1 > len(dp):
 
-                sum_val =0
+                    continue
 
-                for i in range(n):
+                # x-1 is the length of the sequence before the partial block
 
-                    sum_val += dp_prev[i] * count_partial_ge[i]
+                # so need dp[x-2]
 
-                    sum_val %= MOD
+                if (x-2) >= len(dp):
 
-                contrib = sum_val
+                    contrib =0
 
-        # Check if the starting position is valid
+                else:
 
-        # t = m_full -x +1 >=0 ?
+                    dp_prev = dp[x-2]
 
-        t = m_full -x +1
+                    sum_val =0
 
-        if t >=0:
+                    for i in range(n):
 
-            contribution_partial = (contribution_partial + contrib) % MOD
+                        sum_val += dp_prev[i] * count_partial_ge[i]
 
-ans = (total_full + contribution_partial) % MOD
+                        sum_val %= MOD
 
-print(ans)
+                    contrib = sum_val
 
-Wait, but for x in 1..max_x_partial:
+            # Check if the starting position is valid
 
-When x ==1, the contribution is s, and the starting t is m_full -1 +1 = m_full. But the partial block is block m_full, which is present only if r>0. So for x=1, the starting block is m_full, which is valid. So the code adds s for x=1.
+            # t = m_full -x +1 >=0 ?
 
-But for x=1, the condition t >=0 is m_full -x +1 = m_full -1 +1 =m_full >=0 → always true. So the code's condition is correct.
+            t = m_full -x +1
 
-But when x exceeds m_full +1, the code doesn't process it.
+            if t >=0:
 
-But the code's loop is x in 1..max_x_partial, where max_x_partial is min(k, m_full+1). So no need for the 't >=0' check. Because x is up to m_full+1.
+                contribution_partial = (contribution_partial + contrib) % MOD
 
-So the code's loop is correct.
+    ans = (total_full + contribution_partial) % MOD
 
-So the code is:
+    print(ans, file=output_stream)
 
-But now, the code needs to handle edge cases, such as when k=0 (but the problem states that k>=1?), no, the constraints say 1<=n, k, n*k <=1e6. So k is at least 1.
 
-But the code must handle cases where k=1.
 
-Testing the first sample input:
+def test():
+    import io
 
-Sample Input 1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 10 3
+1 2 3 4 5
+""",
+            "output": \
+"""\
+25
+""",
+        }, 
+    ]
 
-3 5 3
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-5 9 1
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Sample Output: 10
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-In this case:
+    print('Tests passed 😎')
 
-n=3, l=5, so m_full=5//3=1 (full blocks of 3 elements), r=5%3=2, s=2.
 
-sorted_a is [1,5,9].
+if __name__ == '__main__':
+    test()
 
-The full blocks is 1. So the full contribution is for x from 1 to min(3,1):
 
-x=1: (1-1+1) =1, cnt[1] =3 → contribution 3*1=3.
+```
 
-x=2: (1-2+1) =0 → no contribution.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-x=3: (1-3+1) → -1 → no.
-
-So total_full =3.
-
-For the partial block:
-
-max_x_partial = min(3, 1+1) =2.
-
-x=1: contribution is s=2.
-
-x=2:
-
-sum_val is sum of dp[0][i] * count_partial_ge[i].
-
-dp[0] is [1,1,1].
-
-sorted_partial is [5,9] (a[:s] is [5,9], sorted is [5,9].
-
-For each i in sorted_a:
-
-i=0: sorted_a[i] =1. count_partial_ge[i] is 2 (both 5 and9 >=1).
-
-i=1: sorted_a[i] =5. count_partial_ge[i] is 2 (5 and9 >=5).
-
-i=2: sorted_a[i] =9. count_partial_ge[i] is 1 (9 >=9).
-
-So sum_val =1*2 +1*2 +1*1 = 2+2+1=5.
-
-x=2's contribution is 5 *1 =5.
-
-So contribution_partial is 2+5=7.
-
-Total is 3+7=10 → matches sample output.
-
-So the code works.
+```
 
 Another test case:
 

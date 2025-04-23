@@ -995,93 +995,131 @@ But since the input can be up to 2e5 strings, and each string's length is up to 
 
 So code:
 
+Testing against sample input 1.
+
+```python
 from collections import defaultdict
 
-n = int(input())
 
-strings = input().split()
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-freq = defaultdict(int)
+    strings = input_stream.readline().rstrip("\n").split()
 
-# precompute for each string its length, sum, prefix sums.
+    freq = defaultdict(int)
 
-str_info = []
+    # precompute for each string its length, sum, prefix sums.
 
-for s in strings:
+    str_info = []
 
-    m = len(s)
+    for s in strings:
 
-    digits = list(map(int, s))
+        m = len(s)
 
-    sum_total = sum(digits)
+        digits = list(map(int, s))
 
-    prefix_sums = [0]*(m+1)
+        sum_total = sum(digits)
 
-    for i in range(m):
+        prefix_sums = [0]*(m+1)
 
-        prefix_sums[i+1] = prefix_sums[i] + digits[i]
+        for i in range(m):
 
-    str_info.append( (m, sum_total, prefix_sums) )
+            prefix_sums[i+1] = prefix_sums[i] + digits[i]
 
-    # update frequency map
+        str_info.append( (m, sum_total, prefix_sums) )
 
-    freq[(m, sum_total)] +=1
+        # update frequency map
 
-total =0
+        freq[(m, sum_total)] +=1
 
-# process case1
+    total =0
 
-for m, sum_total, prefix_sums in str_info:
+    # process case1
 
-    possible_bs = [b for b in range(1, m+1) if (m +b) %2 ==0]
+    for m, sum_total, prefix_sums in str_info:
 
-    for b in possible_bs:
+        possible_bs = [b for b in range(1, m+1) if (m +b) %2 ==0]
 
-        k = (m + b) //2
+        for b in possible_bs:
 
-        sum_first_part = prefix_sums[k]
+            k = (m + b) //2
 
-        required_sum_t = 2 * sum_first_part - sum_total
+            sum_first_part = prefix_sums[k]
 
-        # look up freq for (b, required_sum_t)
+            required_sum_t = 2 * sum_first_part - sum_total
 
-        total += freq.get( (b, required_sum_t), 0 )
+            # look up freq for (b, required_sum_t)
 
-# process case2
+            total += freq.get( (b, required_sum_t), 0 )
 
-for m, sum_total, prefix_sums in str_info:
+    # process case2
 
-    max_l = m //2
+    for m, sum_total, prefix_sums in str_info:
 
-    for l in range(1, max_l +1):
+        max_l = m //2
 
-        a = m - 2*l
+        for l in range(1, max_l +1):
 
-        if a <0:
+            a = m - 2*l
 
-            continue
+            if a <0:
 
-        sum_prefix = prefix_sums[l]
+                continue
 
-        required_sum_i = sum_total - 2 * sum_prefix
+            sum_prefix = prefix_sums[l]
 
-        # look up freq for (a, required_sum_i)
+            required_sum_i = sum_total - 2 * sum_prefix
 
-        total += freq.get( (a, required_sum_i), 0 )
+            # look up freq for (a, required_sum_i)
 
-print(total)
+            total += freq.get( (a, required_sum_i), 0 )
 
-This should work.
+    print(total, file=output_stream)
 
-Let's test this code against the examples.
 
-First example:
 
-Input 10:
+def test():
+    import io
 
-5 93746 59 3746 593 746 5937 46 59374 6
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
+2 22 222 2222 22222
+""",
+            "output": \
+"""\
+13
+""",
+        }, 
+    ]
 
-The code should compute the correct answer.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

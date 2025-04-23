@@ -535,45 +535,78 @@ Then process as per the algorithm.
 
 So code:
 
-n, k = map(int, input().split())
-c_part = list(map(int, input().split()))
-c = c_part[0]
-holidays = c_part[1:] if c > 0 else []
-holidays.append(n + 1)
+Testing against sample input 1.
 
-last = 0
-count = 0
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    c_part = list(map(int, input_stream.readline().rstrip("\n").split()))
+    c = c_part[0]
+    holidays = c_part[1:] if c > 0 else []
+    holidays.append(n + 1)
 
-for h in holidays:
-    # While we can add a present before h
-    while last + k < h:
-        next_day = last + k
-        if next_day > n:
-            break
-        count += 1
-        last = next_day
-    # Check if current h is within n
-    if h <= n:
-        count += 1
-        last = h
+    last = 0
+    count = 0
 
-print(count)
+    for h in holidays:
+        # While we can add a present before h
+        while last + k < h:
+            next_day = last + k
+            if next_day > n:
+                break
+            count += 1
+            last = next_day
+        # Check if current h is within n
+        if h <= n:
+            count += 1
+            last = h
 
-Wait, but what if the holidays list is empty? For example, when c=0. Then the holidays list becomes [n+1], and the code processes that. Which is correct.
+    print(count, file=output_stream)
 
-Testing this code with the sample inputs:
 
-Sample1:
 
-5 2
+def test():
+    import io
 
-1 3 → c_part = [1,3]. holidays = [3,6].
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 1
+3 6 7 8
+""",
+            "output": \
+"""\
+10
+""",
+        }, 
+    ]
 
-Processing h=3:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-loop runs since 0+2=2 <3 → yes. add 2 (count=1), last=2. 2+2=4 not <3. loop ends. h=3 is added (count=2). last=3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-h=6: loop 3+2=5 <6 → yes. add5 (count=3). last=5. loop ends. h=6>5 → not added. total 3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample2:
 

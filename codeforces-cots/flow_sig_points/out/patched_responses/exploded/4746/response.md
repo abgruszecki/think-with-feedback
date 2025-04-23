@@ -296,47 +296,76 @@ for p in participants:
 
 Yes, that should work.
 
-Testing with the first sample:
+Testing against sample input 1.
 
-Input:
+```python
+def main(input_stream, output_stream):
+    n, t1, t2, k = map(int, input_stream.readline().rstrip("\n").split())
+    participants = []
+    for i in range(n):
+        a, b = map(int, input_stream.readline().rstrip("\n").split())
+        num1 = a * t1 * (100 - k) + b * t2 * 100
+        num2 = b * t1 * (100 - k) + a * t2 * 100
+        max_num = max(num1, num2)
+        participants.append((-max_num, i + 1, max_num))
+    participants.sort()
+    for p in participants:
+        index = p[1]
+        total = p[2]
+        integer = total // 100
+        decimal_part = total % 100
+        print(f"{index} {integer}.{decimal_part:02d}", file=output_stream)
 
-2 3 3 50
 
-2 4
 
-4 2
+def test():
+    import io
 
-For participant 1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 1 1 1
+544 397
+280 101
+280 101
+693 970
+""",
+            "output": \
+"""\
+4 1656.07
+1 937.03
+2 379.99
+3 379.99
+""",
+        }, 
+    ]
 
-a=2, b=4.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-num1 = 2 *3*50 +4*3*100 = 2*3 is 6, multiplied by 50 (100-50) gives 300. 4*3*100 is 1200. Total 1500.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-num2 =4*3*50 +2*3*100 → 4*3=12 *50=600 + 600 → 1200. So max_num=1500.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-participant entry is (-1500, 1, 1500).
+    print('Tests passed 😎')
 
-Participant 2:
 
-a=4, b=2.
+if __name__ == '__main__':
+    test()
 
-num1=4*3*50 +2*3*100 →600 + 600=1200.
 
-num2=2*3*50 +4*3*100 →300 + 1200=1500. So max_num=1500.
+```
 
-entry is (-1500, 2, 1500).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-When sorted, the list will have the two entries sorted by the first element ( -1500 ), then by the index. Since both have the same first element (-1500), the second element (index) is compared. 1 comes before 2.
-
-So the sorted list is [ (-1500, 1, 1500), (-1500, 2, 1500) ].
-
-Output:
-
-1 15.00
-
-2 15.00
-
-Which matches the first sample.
+```
 
 Another test case: the second sample input:
 

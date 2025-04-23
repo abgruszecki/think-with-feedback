@@ -531,64 +531,85 @@ Then, compute the LIS of the negated list.
 
 So the code:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n = int(input())
-entry_rays = list(map(int, input().split()))
-exit_rays = list(map(int, input().split()))
 
-entry_pos = [0] * (n + 1)
-for idx in range(n):
-    r = entry_rays[idx]
-    entry_pos[r] = idx + 1
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    entry_rays = list(map(int, input_stream.readline().rstrip("\n").split()))
+    exit_rays = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-exit_pos = [0] * (n + 1)
-for idx in range(n):
-    r = exit_rays[idx]
-    exit_pos[r] = idx + 1
+    entry_pos = [0] * (n + 1)
+    for idx in range(n):
+        r = entry_rays[idx]
+        entry_pos[r] = idx + 1
 
-exit_sequence = [exit_pos[r] for r in entry_rays]
-negated = [-x for x in exit_sequence]
+    exit_pos = [0] * (n + 1)
+    for idx in range(n):
+        r = exit_rays[idx]
+        exit_pos[r] = idx + 1
 
-lis = []
-for num in negated:
-    idx = bisect.bisect_left(lis, num)
-    if idx < len(lis):
-        lis[idx] = num
-    else:
-        lis.append(num)
+    exit_sequence = [exit_pos[r] for r in entry_rays]
+    negated = [-x for x in exit_sequence]
 
-print(len(lis))
+    lis = []
+    for num in negated:
+        idx = bisect.bisect_left(lis, num)
+        if idx < len(lis):
+            lis[idx] = num
+        else:
+            lis.append(num)
 
-Yes, that's the code. 
+    print(len(lis), file=output_stream)
 
-Testing the sample inputs:
 
-First sample:
 
-5
+def test():
+    import io
 
-1 4 5 2 3
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+3 1 2
+2 3 1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-3 4 2 1 5
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-exit_sequence would be for each entry_rays element:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-1 → exit_pos[1] =4.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-4 → exit_pos[4] =2.
+    print('Tests passed 😎')
 
-5 → exit_pos[5] =5.
 
-2 → exit_pos[2] =3.
+if __name__ == '__main__':
+    test()
 
-3 → exit_pos[3] =1.
 
-So exit_sequence is [4,2,5,3,1]. 
+```
 
-negated is [-4,-2,-5,-3,-1].
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Processing as above gives lis length 3. 
+```
 
 Second sample:
 

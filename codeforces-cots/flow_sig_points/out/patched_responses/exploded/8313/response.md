@@ -325,69 +325,70 @@ Thus, this approach is better.
 
 So the code would be:
 
-n = int(input())
-p = list(map(int, input().split()))
+Testing against sample input 1.
 
-ans = []
-for a in range(1, n+1):
-    visited = [False] * (n+1)
-    current = a
-    while True:
-        if visited[current]:
-            ans.append(str(current))
-            break
-        visited[current] = True
-        current = p[current -1]
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    p = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-print(' '.join(ans))
+    ans = []
+    for a in range(1, n+1):
+        visited = [False] * (n+1)
+        current = a
+        while True:
+            if visited[current]:
+                ans.append(str(current))
+                break
+            visited[current] = True
+            current = p[current -1]
 
-Wait, but in Python, for each a, creating a new list of size n+1 (1001 elements) 1000 times is 1000*1000 = 1e6 elements. But each is a boolean, which is just one byte. So 1e6 booleans is about 1MB, which is acceptable.
+    print(' '.join(ans), file=output_stream)
 
-But for n=1000, creating a list of 1001 elements 1000 times would take up 1e6 elements, which is manageable.
 
-But in Python, list creation is O(n) time. So for each a, creating a visited list is O(n) time. So the total time would be O(n^2) time. For n=1e3, that's 1e6 operations. Which is acceptable.
 
-But perhaps we can optimize by reusing a single visited array and resetting it for each a. But in Python, creating a new list each time is more straightforward and avoids potential bugs.
+def test():
+    import io
 
-In any case, for n=1e3, this code should work within the time limit.
-
-Testing the first sample:
-
-Input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
+1 2 3
+""",
+            "output": \
+"""\
+1 2 3
+""",
+        }, 
+    ]
 
-2 3 2
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Processing a=1:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-visited is all False.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-current=1: mark as True.
+    print('Tests passed 😎')
 
-current becomes 2: mark as True.
 
-current becomes 3: mark as True.
+if __name__ == '__main__':
+    test()
 
-current becomes 2: already True. Append 2.
 
-a=2:
+```
 
-current=2 → mark as True.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-current is 3 → mark True.
-
-current is 2 → already True. Append 2.
-
-a=3:
-
-current=3 → mark True.
-
-current is 2 → mark True.
-
-current is 3 → already True. Append 3.
-
-So output is 2 2 3, which matches.
+```
 
 Second sample:
 

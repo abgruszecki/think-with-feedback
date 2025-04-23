@@ -286,13 +286,81 @@ Finally, if the intersection is not empty, output possible; else, impossible.
 
 This is O(m * k), where k is the average size of the S_i's. For m=50 and each S_i up to 1e4, this is manageable.
 
-Testing sample input 1:
+Testing against sample input 1.
 
-Stores for day 1: {1,2,3}
+```python
+def main(input_stream, output_stream):
+    m, n = map(int, input_stream.readline().rstrip("\n").split())
+    if m == 0:
+        print("possible", file=output_stream)
+        return
 
-Day 2: {3,4,5}
+    # Read the first day's stores
+    s1 = list(map(int, input_stream.readline().rstrip("\n").split()))
+    common = set(s1[1:])
 
-Intersection is {3}, so possible.
+    for _ in range(m-1):
+        si = list(map(int, input_stream.readline().rstrip("\n").split()))
+        current_set = set(si[1:])
+        common &= current_set
+        if not common:
+            break
+
+    print("possible" if common else "impossible", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10 10
+1 1
+1 2
+1 3
+1 4
+1 5
+1 6
+1 7
+1 8
+1 9
+1 10
+""",
+            "output": \
+"""\
+impossible
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2:
 

@@ -605,73 +605,103 @@ Then process each character.
 
 So code:
 
-n = int(input())
-forbidden = [input().strip() for _ in range(n)]
-w = input().strip()
-letter = input().strip().lower()
+Testing against sample input 1.
 
-mask = [False] * len(w)
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    forbidden = [input_stream.readline().rstrip("\n").strip() for _ in range(n)]
+    w = input_stream.readline().rstrip("\n").strip()
+    letter = input_stream.readline().rstrip("\n").strip().lower()
 
-for s in forbidden:
-    s_len = len(s)
-    s_lower = s.lower()
-    for i in range(len(w) - s_len + 1):
-        substring = w[i:i+s_len].lower()
-        if substring == s_lower:
-            for j in range(i, i + s_len):
-                if j < len(mask):
-                    mask[j] = True
+    mask = [False] * len(w)
 
-result = []
-for i in range(len(w)):
-    c = w[i]
-    if mask[i]:
-        original = c
-        is_upper = original.isupper()
-        desired = letter.upper() if is_upper else letter
-        if desired != original:
-            result.append(desired)
-        else:
-            if is_upper:
-                for ord_c in range(ord('A'), ord('Z') + 1):
-                    candidate = chr(ord_c)
-                    if candidate != original:
-                        result.append(candidate)
-                        break
+    for s in forbidden:
+        s_len = len(s)
+        s_lower = s.lower()
+        for i in range(len(w) - s_len + 1):
+            substring = w[i:i+s_len].lower()
+            if substring == s_lower:
+                for j in range(i, i + s_len):
+                    if j < len(mask):
+                        mask[j] = True
+
+    result = []
+    for i in range(len(w)):
+        c = w[i]
+        if mask[i]:
+            original = c
+            is_upper = original.isupper()
+            desired = letter.upper() if is_upper else letter
+            if desired != original:
+                result.append(desired)
             else:
-                for ord_c in range(ord('a'), ord('z') + 1):
-                    candidate = chr(ord_c)
-                    if candidate != original:
-                        result.append(candidate)
-                        break
-    else:
-        result.append(c)
+                if is_upper:
+                    for ord_c in range(ord('A'), ord('Z') + 1):
+                        candidate = chr(ord_c)
+                        if candidate != original:
+                            result.append(candidate)
+                            break
+                else:
+                    for ord_c in range(ord('a'), ord('z') + 1):
+                        candidate = chr(ord_c)
+                        if candidate != original:
+                            result.append(candidate)
+                            break
+        else:
+            result.append(c)
 
-print(''.join(result))
+    print(''.join(result), file=output_stream)
 
-Testing this code against the samples.
 
-First sample:
 
-Input:
+def test():
+    import io
 
-3
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+hello
+party
+abefglghjdhfgj
+IVan
+petrsmatchwin
+a
+""",
+            "output": \
+"""\
+petrsmatchwin
+""",
+        }, 
+    ]
 
-bers
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-ucky
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-elu
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-PetrLoveLuckyNumbers
+    print('Tests passed 😎')
 
-t
 
-The code should process the forbidden substrings and mask the required positions.
+if __name__ == '__main__':
+    test()
 
-Then, in the replaced positions, the code replaces with 't' (lowercase) or 'T' (uppercase) where possible.
 
-Which gives the correct output.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another sample:
 

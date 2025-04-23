@@ -35,19 +35,73 @@ Now, for reading input. Since n can be up to 100, reading lines via a loop is fi
 
 But since the elements are read one per line, yes. So code steps:
 
-n = int(input())
-arr = [int(input()) for _ in range(n)]
-counts = [0] * 101
-for num in arr:
-    counts[num] +=1
-result = []
-for i in range(1, 101):
-    result.extend([i] * counts[i])
-print(' '.join(map(str, result)))
+Testing against sample input 1.
 
-Yes, that's the code. Let's test against the examples.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    arr = [int(input_stream.readline().rstrip("\n")) for _ in range(n)]
+    counts = [0] * 101
+    for num in arr:
+        counts[num] +=1
+    result = []
+    for i in range(1, 101):
+        result.extend([i] * counts[i])
+    print(' '.join(map(str, result)), file=output_stream)
 
-First example input: 5 numbers. The code reads them, counts. Then builds the list correctly. Output is the space-separated numbers.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+10
+100
+1
+100
+1
+100
+1
+100
+1
+100
+1
+""",
+            "output": \
+"""\
+1 1 1 1 1 100 100 100 100 100
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: 10 numbers, alternating 100 and 1. The counts for 1 would be 5, and 100 would be 5. So the sorted array is five 1s followed by five 100s.
 

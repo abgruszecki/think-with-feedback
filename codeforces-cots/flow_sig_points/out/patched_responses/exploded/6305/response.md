@@ -634,45 +634,123 @@ But what about when m is 0? Then, the sum S is 1 (only a=0 is considered). But i
 
 Thus, the code will handle it.
 
-Now, let's test the first example:
+Testing against sample input 1.
 
-Input:
+```python
+MOD = 998244353
 
-3 3
+MAX = 2 * 10**5 + 5
 
-1 3 1
+# Precompute factorial and inverse factorial modulo MOD
 
-h = [1,3,1]
+fact = [1] * MAX
 
-Check for j from 0 to 2 (0-based):
+for i in range(1, MAX):
+    fact[i] = fact[i-1] * i % MOD
 
-j=0: h[0]=1, next h[1] =3 → not equal. m increases.
+inv_fact = [1] * MAX
 
-j=1: h[1]=3, next h[2]=1 → not equal. m increases.
+inv_fact[MAX-1] = pow(fact[MAX-1], MOD-2, MOD)
 
-j=2: h[2] =1, next h[0] =1 → equal. no increment.
+for i in range(MAX-2, -1, -1):
+    inv_fact[i] = inv_fact[i+1] * (i+1) % MOD
 
-So m=2.
+inv_two = pow(2, MOD-2, MOD)
 
-c=3-2=1.
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    ptr = 0
+    n = int(input[ptr])
+    ptr +=1
+    k = int(input[ptr])
+    ptr +=1
+    h = list(map(int, input[ptr:ptr+n]))
+    ptr +=n
+    
+    # Compute m
+    m = 0
+    for i in range(n):
+        j = (i+1) % n
+        if h[i] != h[j]:
+            m +=1
+    
+    if m ==0:
+        print(0, file=output_stream)
+        return
+    
+    c = (k -2) % MOD
+    
+    # Precompute pow_c up to m
+    pow_c = [1]*(m+1)
+    for i in range(1, m+1):
+        pow_c[i] = pow_c[i-1] * c % MOD
+    
+    S =0
+    max_a = m //2
+    for a in range(0, max_a +1):
+        rem = m - 2*a
+        if rem <0:
+            continue
+        # Compute term = C(m, 2a) * C(2a, a) * c^rem
+        # which is fact[m] / (a! a! rem! ) 
+        term = fact[m]
+        term = term * inv_fact[a] % MOD
+        term = term * inv_fact[a] % MOD
+        term = term * inv_fact[rem] % MOD
+        term = term * pow_c[rem] % MOD
+        S = (S + term) % MOD
+    
+    km = pow(k, m, MOD)
+    numerator = (km - S) % MOD
+    part = numerator * inv_two % MOD
+    part = part * pow(k, n -m, MOD) % MOD
+    print(part, file=output_stream)
 
-So S is sum for a=0 and a=1.
 
-a=0:
 
-term = (2! ) / (0! 0! 2! ) * 1^2 → (2/(1*1*2)) *1 → (2/2) *1 =1.
+def test():
+    import io
 
-a=1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5
+1 1 4 2 2
+""",
+            "output": \
+"""\
+1000
+""",
+        }, 
+    ]
 
-(2! )/(1! 1! 0! ) * 1^0 → (2/(1*1*1)) *1 → 2*1=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-So S=1+2=3.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-pow(k, m) =3^2=9.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-(9-3)/2 =3. multiply by 3^{3-2} =3^1=3 → 3*3=9 → which matches the example.
+    print('Tests passed 😎')
 
-So code works.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example: input 3 3 1 3 1 → m=2.
 

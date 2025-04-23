@@ -133,23 +133,63 @@ Yes.
 
 So the code becomes:
 
-n, k = map(int, input().split())
+Testing against sample input 1.
 
-if k ==1:
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-    print(n)
+    if k ==1:
 
-else:
+        print(n, file=output_stream)
 
-    print( (1 << (n.bit_length())) -1 )
+    else:
 
-Wait, but let's test the sample inputs.
+        print( (1 << (n.bit_length())) -1 , file=output_stream)
 
-Sample 1:
 
-n=4, k=3.
 
-The code outputs (1 <<3) -1=7. Which matches the sample.
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 6
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

@@ -610,76 +610,103 @@ But since the dummy prev (0) is only present in the initial step, and for steps 
 
 Thus, the code can be structured as follows:
 
-MOD = 998244353
+Testing against sample input 1.
 
-n, m, k = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-adj = [[] for _ in range(n+1)]
-for _ in range(m):
-    a, b = map(int, input().split())
-    adj[a].append(b)
-    adj[b].append(a)
+    n, m, k = map(int, input_stream.readline().rstrip("\n").split())
 
-prev_dp = [[0]*(n+1) for _ in range(n+1)]
-for s in range(1, n+1):
-    prev_dp[s][0] = 1  # initial state: (s, dummy)
+    adj = [[] for _ in range(n+1)]
+    for _ in range(m):
+        a, b = map(int, input_stream.readline().rstrip("\n").split())
+        adj[a].append(b)
+        adj[b].append(a)
 
-for step in range(1, k+1):
-    curr_dp = [[0]*(n+1) for _ in range(n+1)]
-    for current in range(1, n+1):
-        for prev in range(0, n+1):
-            if prev_dp[current][prev] == 0:
-                continue
-            if prev == 0:  # initial step, current is s, prev is dummy
-                for neighbor in adj[current]:
-                    curr_dp[neighbor][current] = (curr_dp[neighbor][current] + prev_dp[current][prev]) % MOD
-            else:
-                for neighbor in adj[current]:
-                    if neighbor != prev:
+    prev_dp = [[0]*(n+1) for _ in range(n+1)]
+    for s in range(1, n+1):
+        prev_dp[s][0] = 1  # initial state: (s, dummy)
+
+    for step in range(1, k+1):
+        curr_dp = [[0]*(n+1) for _ in range(n+1)]
+        for current in range(1, n+1):
+            for prev in range(0, n+1):
+                if prev_dp[current][prev] == 0:
+                    continue
+                if prev == 0:  # initial step, current is s, prev is dummy
+                    for neighbor in adj[current]:
                         curr_dp[neighbor][current] = (curr_dp[neighbor][current] + prev_dp[current][prev]) % MOD
-    prev_dp = curr_dp
+                else:
+                    for neighbor in adj[current]:
+                        if neighbor != prev:
+                            curr_dp[neighbor][current] = (curr_dp[neighbor][current] + prev_dp[current][prev]) % MOD
+        prev_dp = curr_dp
 
-result = 0
-for s in range(1, n+1):
-    for prev in range(1, n+1):
-        result = (result + prev_dp[s][prev]) % MOD
+    result = 0
+    for s in range(1, n+1):
+        for prev in range(1, n+1):
+            result = (result + prev_dp[s][prev]) % MOD
 
-print(result)
+    print(result, file=output_stream)
 
-But wait, in the initial setup, for prev_dp[s][0] = 1, which represents the initial state of being at s with dummy prev. For step 1, we transition to (neighbor, s), and so on. After k steps, the prev_dp[s][prev] is the number of paths that ended at s with previous prev, and started at s (since the initial state was s).
 
-But wait, no. Because in the initial state, the dummy prev (0) represents any starting city. For example, when current is s and prev is 0, it means that the path started at s and has taken 0 steps. So after k steps, the current city is the final city, and the sum over all prev of prev_dp[s][prev] is the number of paths that started at s and ended at s after k steps.
 
-Thus, the code correctly sums over all s and their possible prev values.
+def test():
+    import io
 
-But let's test this code against the first sample input.
-
-Sample Input 1:
-
-4 5 2
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 5 3
+1 3
+4 2
 4 1
-2 3
-3 1
-4 3
-2 4
+2 1
+3 4
+""",
+            "output": \
+"""\
+12
+""",
+        }, 
+    ]
 
-The code after k=2 steps:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-prev_dp will be for step 2. The answer is the sum over s=1-4 of prev_dp[s][prev].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-For k=2, let's see:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Step 1:
+    print('Tests passed 😎')
 
-prev_dp is initialized for step 0: each s has prev_dp[s][0] =1.
 
-Step 1:
+if __name__ == '__main__':
+    test()
 
-For each current s in 1-4:
 
-prev is 0. So we loop through all neighbors of s.
+```
 
-For s=1:
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 76, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 69, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '12'
+Got: '24'
+
+```
 
 neighbors are 4, 3, 2 (since roads are 4-1, 3-1, 2-1 (from sample input). Wait, sample input's roads are:
 

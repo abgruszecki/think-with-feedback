@@ -473,102 +473,100 @@ Similarly for the (d-1)th finite differences of A and B.
 
 So the code would look like:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-d = int(input())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-A = list(map(int, input().split()))
-B = list(map(int, input().split()))
+    d = int(input_stream.readline().rstrip("\n"))
 
-max_k = d  # since delta is for k=d, and c_A and c_B are for k=d-1
+    A = list(map(int, input_stream.readline().rstrip("\n").split()))
+    B = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-# Precompute inverses up to max_k
-inv = [1] * (max_k + 2)
-for i in range(2, max_k +1):
-    inv[i] = pow(i, MOD-2, MOD)
+    max_k = d  # since delta is for k=d, and c_A and c_B are for k=d-1
 
-def compute_sum(values, k):
-    # Compute sum_{i=0}^k (-1)^(k-i) * C(k, i) * values[i]
-    current_comb = 1
-    total = 0
-    for i in range(0, k+1):
-        # compute sign: (-1)^(k-i)
-        exponent = (k - i) % 2
-        sign_mod = 1 if exponent == 0 else MOD-1
-        term = (sign_mod * current_comb) % MOD
-        term = (term * values[i]) % MOD
-        total = (total + term) % MOD
-        if i < k:
-            # compute current_comb for i+1
-            numerator = (k - i) % MOD
-            denominator = inv[i+1]  # since i+1 <=k <=max_k
-            current_comb = (current_comb * numerator) % MOD
-            current_comb = (current_comb * denominator) % MOD
-    return total
+    # Precompute inverses up to max_k
+    inv = [1] * (max_k + 2)
+    for i in range(2, max_k +1):
+        inv[i] = pow(i, MOD-2, MOD)
 
-delta = compute_sum(A, d)
+    def compute_sum(values, k):
+        # Compute sum_{i=0}^k (-1)^(k-i) * C(k, i) * values[i]
+        current_comb = 1
+        total = 0
+        for i in range(0, k+1):
+            # compute sign: (-1)^(k-i)
+            exponent = (k - i) % 2
+            sign_mod = 1 if exponent == 0 else MOD-1
+            term = (sign_mod * current_comb) % MOD
+            term = (term * values[i]) % MOD
+            total = (total + term) % MOD
+            if i < k:
+                # compute current_comb for i+1
+                numerator = (k - i) % MOD
+                denominator = inv[i+1]  # since i+1 <=k <=max_k
+                current_comb = (current_comb * numerator) % MOD
+                current_comb = (current_comb * denominator) % MOD
+        return total
 
-c_A = compute_sum(A, d-1)
-c_B = compute_sum(B, d-1)
+    delta = compute_sum(A, d)
 
-# compute s = (c_B - c_A) * inv(delta) mod MOD
+    c_A = compute_sum(A, d-1)
+    c_B = compute_sum(B, d-1)
 
-delta_inv = pow(delta, MOD-2, MOD)
-s = ((c_B - c_A) * delta_inv) % MOD
+    # compute s = (c_B - c_A) * inv(delta) mod MOD
 
-print(s)
+    delta_inv = pow(delta, MOD-2, MOD)
+    s = ((c_B - c_A) * delta_inv) % MOD
 
-Wait, but what if delta is zero? But according to the problem statement, the leading coefficients of A and B are not divisible by MOD. The leading coefficient a_d is equal to the d-th finite difference divided by d! mod MOD. Since delta is d! a_d mod MOD, then delta = d! a_d mod MOD. Since a_d is not divisible by MOD, and MOD is a prime, d! is not divisible by MOD only if d < MOD. For MOD=1e9+7, d is up to 2.5e6, which is less than MOD. So d! is not divisible by MOD. So delta = d! a_d mod MOD. Since a_d is non-zero mod MOD (problem statement), then delta is non-zero mod MOD. Therefore, delta is invertible. So division is possible.
+    print(s, file=output_stream)
 
-So this code should handle all cases.
 
-Testing the first example:
 
-Sample input 1:
+def test():
+    import io
 
-1
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+1 4 9
+100 121 144
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
 
-1000000006 0
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-2 3
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-d=1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Compute delta = sum for k=1 (d=1):
+    print('Tests passed 😎')
 
-i ranges from 0 to 1.
 
-For i=0:
+if __name__ == '__main__':
+    test()
 
-sign = (-1)^(1-0) = -1 → MOD-1.
 
-current_comb is 1.
+```
 
-term = (MOD-1) *1 * A[0] → (1e9+6) * (1) → (1e9+6 * 1) mod MOD.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-A[0] is 1e9+6 → which is -1 mod MOD. So term is (MOD-1) * (-1) mod MOD → (-1) * (-1) = 1 mod MOD.
-
-For i=0: term is 1.
-
-For i=1:
-
-sign is (-1)^(1-1) → 0 → 1.
-
-current_comb is C(1,1) = 1.
-
-term = 1 * 1 * A[1] → 1 *0 → 0.
-
-sum_delta = 1 +0=1 mod MOD.
-
-So delta is 1.
-
-c_A is computed for k=d-1=0. So sum is A[0] (since k=0, the sum is (-1)^0 * C(0,0) * A[0] → 1 *1 *A[0] → A[0] mod MOD. Which is 1e9+6 → -1 mod MOD.
-
-c_B is sum for k=0: B[0] → 2 mod MOD.
-
-So delta =1, c_A = -1, c_B = 2.
-
-s = (2 - (-1)) / 1 → 3 → which is correct.
+```
 
 So code works for this case.
 

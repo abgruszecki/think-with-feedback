@@ -869,23 +869,87 @@ Yes.
 
 Thus, the code handles all cases.
 
-Testing the sample input:
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    a = input_stream.readline().rstrip("\n").strip()
+    b = input_stream.readline().rstrip("\n").strip()
 
-a = '01011' (length 5)
+    len_a = len(a)
+    len_b = len(b)
 
-b = '0110' (length 4)
+    for i in range(len_a + 1):
+        current_s = a[i:]
+        current_len = len(current_s)
+        if current_len == 0 and len_b == 0:
+            print("YES", file=output_stream)
+            return
+        if current_len == 0 and len_b > 0:
+            continue  # Can't append to empty string and then remove to get non-empty
+        parity = current_s.count('1') % 2
+        max_k = len_b + 1  # Sufficient to cover possible needed appends
+        for k in range(0, max_k + 1):
+            appends = ''
+            if k > 0:
+                appends = str(parity) + '0' * (k - 1)
+            extended = current_s + appends
+            if len(extended) < len_b:
+                continue
+            m = len(extended) - len_b
+            if m < 0:
+                continue
+            candidate = extended[m:]
+            if candidate == b:
+                print("YES", file=output_stream)
+                return
 
-For i=2, current_s is a[2:] → '011'.
+    print("NO", file=output_stream)
 
-current_s.count('1') is 2 → parity_p is 0.
 
-k=1:
 
-appends is '0' + 0 zeros → '0'.
+def test():
+    import io
 
-extended is '011' + '0' → '0110' (length 4). candidate is '0110' → matches b. So returns YES.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0011
+1110
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

@@ -265,47 +265,161 @@ Yes.
 
 So code in Python:
 
-s = input().strip()
+Testing against sample input 1.
 
-n = len(s)
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-diff = 0
+    n = len(s)
 
-for i in range(n//2):
+    diff = 0
 
-    if s[i] != s[n-1 -i]:
+    for i in range(n//2):
 
-        diff +=1
+        if s[i] != s[n-1 -i]:
 
-if diff ==1:
+            diff +=1
 
-    print("YES")
+    if diff ==1:
 
-elif diff ==0:
+        print("YES", file=output_stream)
 
-    if n %2 ==1:
+    elif diff ==0:
 
-        print("YES")
+        if n %2 ==1:
+
+            print("YES", file=output_stream)
+
+        else:
+
+            print("NO", file=output_stream)
 
     else:
 
-        print("NO")
+        print("NO", file=output_stream)
 
-else:
 
-    print("NO")
 
-Testing sample inputs:
+def test():
+    import io
 
-Sample1: abccaa → loop i=0,1,2 (since n=6, n//2=3 → i runs 0,1,2). Check:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+abbcca
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-i=0: a and a → same.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i=1: b and a → different → diff=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-i=2: c and c → same. So diff is 1 → YES.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sample2: abbcca → n=6. i=0: a and a → same. i=1: b and c → different (diff=1). i=2: b and c → different (diff=2). So answer NO.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    n = len(s)
+
+    diff = 0
+
+    for i in range(n//2):
+
+        if s[i] != s[n-1 -i]:
+
+            diff +=1
+
+    if diff ==1:
+
+        print("YES", file=output_stream)
+
+    elif diff ==0:
+
+        if n %2 ==1:
+
+            print("YES", file=output_stream)
+
+        else:
+
+            print("NO", file=output_stream)
+
+    else:
+
+        print("NO", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+abcda
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3: abcda → n=5. loop runs for i=0,1,2 (but n//2 is 2). Wait, wait for n=5, n//2 is 2 (5//2=2 in integer division). So for i in 0,1,2? Wait, no. Because n//2 is 2 for n=5. So the loop runs for i in 0,1,2? But the pairs are (0,4), (1,3). The middle index is 2. So the loop should run for i from 0 to (n//2 -1) ?
 

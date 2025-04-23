@@ -882,93 +882,203 @@ Yes.
 
 So the code would be:
 
-MOD = 998244353
+Testing against sample input 1.
 
-n = int(input())
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
 
-s = input().strip()
+    n = int(input_stream.readline().rstrip("\n"))
 
-if n ==0:
+    s = input_stream.readline().rstrip("\n").strip()
 
-    print(0)
+    if n ==0:
 
-else:
-
-    c_first = s[0]
-
-    c_last = s[-1]
-
-    left_len = 1
-
-    for i in range(1, n):
-
-        if s[i] == c_first:
-
-            left_len +=1
-
-        else:
-
-            break
-
-    right_len =1
-
-    for i in range(n-2, -1, -1):
-
-        if s[i] == c_last:
-
-            right_len +=1
-
-        else:
-
-            break
-
-    if c_first != c_last:
-
-        ans = (left_len + right_len +1) % MOD
+        print(0, file=output_stream)
 
     else:
 
-        ans = (left_len + right_len +1 + left_len * right_len) % MOD
+        c_first = s[0]
 
-    print(ans)
+        c_last = s[-1]
 
-But wait, in the case where the entire string is the same character, but the problem states that there are at least two different characters, so left_len and right_len won't cover the entire string. So no problem.
+        left_len = 1
 
-Let's test this code with the first example:
+        for i in range(1, n):
 
-Input:
+            if s[i] == c_first:
 
-4
+                left_len +=1
 
-abaa
+            else:
 
-left_len: first character is 'a'. s[0] is 'a', s[1] is 'b' → loop breaks. So left_len=1.
+                break
 
-right_len: last character is 'a'. s[3] is 'a', s[2] is 'a' (i=2). Then i=1, which is 'b' → break. So right_len=2.
+        right_len =1
 
-c_first == c_last. ans =1+2+1 +1*2=6 → correct.
+        for i in range(n-2, -1, -1):
 
-Third example:
+            if s[i] == c_last:
 
-2
+                right_len +=1
 
-az
+            else:
 
-left_len=1 (only 'a').
+                break
 
-right_len=1 (only 'z').
+        if c_first != c_last:
 
-ans=1+1+1=3 → correct.
+            ans = (left_len + right_len +1) % MOD
 
-Second example:
+        else:
 
+            ans = (left_len + right_len +1 + left_len * right_len) % MOD
+
+        print(ans, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 7
-
 aacdeee
+""",
+            "output": \
+"""\
+6
+""",
+        }, 
+    ]
 
-c_first is 'a', c_last is 'e'. left_len=2, right_len=3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-ans=2+3+1=6 → correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    MOD = 998244353
+
+    n = int(input_stream.readline().rstrip("\n"))
+
+    s = input_stream.readline().rstrip("\n").strip()
+
+    if n ==0:
+
+        print(0, file=output_stream)
+
+    else:
+
+        c_first = s[0]
+
+        c_last = s[-1]
+
+        left_len = 1
+
+        for i in range(1, n):
+
+            if s[i] == c_first:
+
+                left_len +=1
+
+            else:
+
+                break
+
+        right_len =1
+
+        for i in range(n-2, -1, -1):
+
+            if s[i] == c_last:
+
+                right_len +=1
+
+            else:
+
+                break
+
+        if c_first != c_last:
+
+            ans = (left_len + right_len +1) % MOD
+
+        else:
+
+            ans = (left_len + right_len +1 + left_len * right_len) % MOD
+
+        print(ans, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+az
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another test case: n=3, s='aba'. left_len=1, right_len=1. c_first is 'a', c_last is 'a. So ans=1+1+1 +1*1= 4. What are the valid ways?
 

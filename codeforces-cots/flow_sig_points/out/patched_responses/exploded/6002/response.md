@@ -643,45 +643,181 @@ But in the code, the loop runs y from 0 to S//4. So for large S, this could be u
 
 But given that S can be up to 4e6, this is 1e6 iterations, which is manageable.
 
-Now, let's test the code with the sample inputs.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    S = sum(a)
+    a.sort(reverse=True)
 
-Input:
+    prefix_max4 = [0] * (n + 1)
+    prefix_max3 = [0] * (n + 1)
+    prefix_sum = [0] * (n + 1)
 
-5
+    for i in range(1, n + 1):
+        prefix_max4[i] = prefix_max4[i - 1] + max(a[i - 1] - 4, 0)
+        prefix_max3[i] = prefix_max3[i - 1] + max(a[i - 1] - 3, 0)
+        prefix_sum[i] = prefix_sum[i - 1] + a[i - 1]
 
-1 2 2 4 3
+    min_swaps = float('inf')
+    max_y = S // 4
+    for y in range(0, max_y + 1):
+        remaining = S - 4 * y
+        if remaining < 0:
+            continue
+        if remaining % 3 != 0:
+            continue
+        x = remaining // 3
+        if x < 0 or x + y > n:
+            continue
+        total = prefix_max4[y]
+        if y + x <= n:
+            total += prefix_max3[y + x] - prefix_max3[y]
+            total += prefix_sum[n] - prefix_sum[y + x]
+        else:
+            continue
+        if total < min_swaps:
+            min_swaps = total
 
-sum S=12.
+    if min_swaps != float('inf'):
+        print(min_swaps, file=output_stream)
+    else:
+        print(-1, file=output_stream)
 
-y can be from 0 to 3 (12//4=3).
 
-Loop:
 
-y=0:
+def test():
+    import io
 
-remaining=12 →x=4. x+y=4 <=5. sum_4=0. sum_3 is prefix_max3[4] - prefix_max3[0] = sum of first 4 elements (4,3,2,2) max(a-3,0). 4-3=1, 3-3=0, 2-3=0, 2-3=0. sum is 1. sum_0 = sum of elements 4 to 4 (indexes 4 and 5? Wait, prefix_sum is [0,4,7,9,11,12]. prefix_sum[5] - prefix_sum[4] =12-11=1. So sum_0=1. Total 0+1+1=2.
-
-y=3:
-
-4*3=12 → remaining=0 →x=0. x+y=3 <=5. sum_4 is prefix_max4[3] → sum of max(4-4,0), 3-4 (0), 2-4 (0) →0. sum_3 is prefix_max3[3] - prefix_max3[3] =0. sum_0 is 12 - prefix_sum[3] =12-9=3. Total 0+0+3=3.
-
-Other y's are invalid.
-
-So min_swaps is 2.
-
-Sample 2:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
+4 1 1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-4 1 1 → sum 6.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-y can be 0,1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-y=0: x=2. x+y=2<=3. sum_4=0. sum_3 is sum of first 2 elements (4 and1). max(4-3,0) is 1, max(1-3,0) →0. sum_3=1. sum_0 is sum of 1 (third element is 1). So total=1+1=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Which is correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    S = sum(a)
+    a.sort(reverse=True)
+
+    prefix_max4 = [0] * (n + 1)
+    prefix_max3 = [0] * (n + 1)
+    prefix_sum = [0] * (n + 1)
+
+    for i in range(1, n + 1):
+        prefix_max4[i] = prefix_max4[i - 1] + max(a[i - 1] - 4, 0)
+        prefix_max3[i] = prefix_max3[i - 1] + max(a[i - 1] - 3, 0)
+        prefix_sum[i] = prefix_sum[i - 1] + a[i - 1]
+
+    min_swaps = float('inf')
+    max_y = S // 4
+    for y in range(0, max_y + 1):
+        remaining = S - 4 * y
+        if remaining < 0:
+            continue
+        if remaining % 3 != 0:
+            continue
+        x = remaining // 3
+        if x < 0 or x + y > n:
+            continue
+        total = prefix_max4[y]
+        if y + x <= n:
+            total += prefix_max3[y + x] - prefix_max3[y]
+            total += prefix_sum[n] - prefix_sum[y + x]
+        else:
+            continue
+        if total < min_swaps:
+            min_swaps = total
+
+    if min_swaps != float('inf'):
+        print(min_swaps, file=output_stream)
+    else:
+        print(-1, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+0 3 0 4
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

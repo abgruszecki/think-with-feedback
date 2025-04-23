@@ -343,66 +343,112 @@ But if n is 0, then all ants are zero. So all queries return 0.
 
 So code outline:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import deque
 
-n, t = map(int, sys.stdin.readline().split())
-queries = [tuple(map(int, sys.stdin.readline().split())) for _ in range(t)]
 
-ants = {}
-if n >0:
-    ants[(0,0)] = n
+def main(input_stream, output_stream):
+    n, t = map(int, input_stream.readline().split())
+    queries = [tuple(map(int, input_stream.readline().split())) for _ in range(t)]
 
-queue = deque()
-in_queue = {}
+    ants = {}
+    if n >0:
+        ants[(0,0)] = n
 
-if (0,0) in ants and ants[(0,0)] >=4:
-    queue.append( (0,0) )
-    in_queue[ (0,0) ] = True
+    queue = deque()
+    in_queue = {}
 
-while queue:
-    x, y = queue.popleft()
-    del in_queue[ (x,y) ]
+    if (0,0) in ants and ants[(0,0)] >=4:
+        queue.append( (0,0) )
+        in_queue[ (0,0) ] = True
 
-    current = ants.get( (x,y), 0 )
-    s = current //4
+    while queue:
+        x, y = queue.popleft()
+        del in_queue[ (x,y) ]
 
-    if s ==0:
-        continue
+        current = ants.get( (x,y), 0 )
+        s = current //4
 
-    # update current cell's ants
-    ants[ (x,y) ] = current %4
+        if s ==0:
+            continue
 
-    # distribute to neighbors
-    deltas = [ (1,0), (-1,0), (0,1), (0,-1) ]
-    for dx, dy in deltas:
-        nx = x + dx
-        ny = y + dy
+        # update current cell's ants
+        ants[ (x,y) ] = current %4
 
-        # add s to neighbor
-        neighbor = (nx, ny)
-        ants[neighbor] = ants.get(neighbor, 0) + s
+        # distribute to neighbors
+        deltas = [ (1,0), (-1,0), (0,1), (0,-1) ]
+        for dx, dy in deltas:
+            nx = x + dx
+            ny = y + dy
 
-        # check if neighbor should be added to queue
-        if ants[neighbor] >=4 and (neighbor not in in_queue or not in_queue.get(neighbor, False)):
-            queue.append( neighbor )
-            in_queue[ neighbor ] = True
+            # add s to neighbor
+            neighbor = (nx, ny)
+            ants[neighbor] = ants.get(neighbor, 0) + s
 
-# process queries
-for x, y in queries:
-    print( ants.get( (x,y), 0 ) )
+            # check if neighbor should be added to queue
+            if ants[neighbor] >=4 and (neighbor not in in_queue or not in_queue.get(neighbor, False)):
+                queue.append( neighbor )
+                in_queue[ neighbor ] = True
 
-Wait, but in the code, after dequeuing (x,y), we check current = ants.get( (x,y), 0 ). But after processing, ants[x,y] is set to current %4. But suppose that current was 5, which is current//4=1. So subtract 4, leaving 1. So ants[(x,y)] becomes 1. But after processing, any new ants added to (x,y) from neighbor splits can cause it to have >=4 again, leading to re-adding to the queue.
+    # process queries
+    for x, y in queries:
+        print( ants.get( (x,y), 0 ) , file=output_stream)
 
-But in the code, after processing (x,y), if the new ants in (x,y) (current %4) is 1, then even if ants are added later from splits in other cells, the code will check if the neighbor (x,y) in this case has >=4 ants. For example, if (x,y) has 1 ant, then a split from a neighbor adds 3, making 4. Then, (x,y) is added to the queue again.
 
-So the code should handle that.
 
-Testing this code with the first sample:
+def test():
+    import io
 
-Sample 1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 5
+0 -2
+0 -1
+0 0
+0 1
+0 2
+""",
+            "output": \
+"""\
+0
+1
+2
+1
+0
+""",
+        }, 
+    ]
 
-n=1, t=3. The ants = { (0,0):1 }, which is less than 4. So queue is empty. So all queries return 0 except (0,0) which returns 1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

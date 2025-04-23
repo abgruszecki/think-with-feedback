@@ -440,11 +440,14 @@ Compare the sums, then the sequences, then the last tech.
 
 So the code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-def main():
 
-    data = sys.stdin.read().split()
+def main(input_stream, output_stream):
+    data = input_stream.read().split()
 
     n = int(data[0])
 
@@ -482,61 +485,183 @@ def main():
 
     if sum1 > sum2:
 
-        print("first")
+        print("first", file=output_stream)
 
     elif sum2 > sum1:
 
-        print("second")
+        print("second", file=output_stream)
 
     else:
 
         if first_seq > second_seq:
 
-            print("first")
+            print("first", file=output_stream)
 
         elif first_seq < second_seq:
 
-            print("second")
+            print("second", file=output_stream)
 
         else:
 
-            print("first" if last_tech == 'first' else "second")
+            print("first" if last_tech == 'first' else "second", file=output_stream)
 
-if __name__ == "__main__":
 
-    main()
 
-This should handle all cases efficiently.
+def test():
+    import io
 
-Testing the sample inputs:
-
-First sample input:
-
-5
-
-1
-
-2
-
--3
-
--4
-
-3 → data is ['5', '1', '2', '-3', '-4', '3']
-
-sum1 is 1+2+3=6, sum2 is 3+4=7. sum2>sum1 → output 'second'.
-
-Second sample:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
-
 -1
-
 -2
+3
+""",
+            "output": \
+"""\
+first
+""",
+        }, 
+    ]
 
-3 → data is ['3', '-1', '-2', '3']
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-sum1 is 3, sum2 is 1+2=3. sequences are [3] vs [1,2]. [3] is compared to [1,2]. First element 3>1 → first_seq is larger. So output 'first'.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import sys
+
+
+def main(input_stream, output_stream):
+    data = input_stream.read().split()
+
+    n = int(data[0])
+
+    sum1 = 0
+
+    sum2 = 0
+
+    first_seq = []
+
+    second_seq = []
+
+    last_tech = ''
+
+    for num in data[1:n+1]:
+
+        ai = int(num)
+
+        if ai > 0:
+
+            sum1 += ai
+
+            first_seq.append(ai)
+
+            last_tech = 'first'
+
+        else:
+
+            val = -ai
+
+            sum2 += val
+
+            second_seq.append(val)
+
+            last_tech = 'second'
+
+    if sum1 > sum2:
+
+        print("first", file=output_stream)
+
+    elif sum2 > sum1:
+
+        print("second", file=output_stream)
+
+    else:
+
+        if first_seq > second_seq:
+
+            print("first", file=output_stream)
+
+        elif first_seq < second_seq:
+
+            print("second", file=output_stream)
+
+        else:
+
+            print("first" if last_tech == 'first' else "second", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+4
+-4
+""",
+            "output": \
+"""\
+second
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

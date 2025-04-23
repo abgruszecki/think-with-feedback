@@ -699,42 +699,80 @@ The code then selects the best.
 
 So here's the code:
 
-x, y, n = map(int, input().split())
+Testing against sample input 1.
 
-best_dx = None
-best_b = None
-best_a = None
+```python
+def main(input_stream, output_stream):
+    x, y, n = map(int, input_stream.readline().rstrip("\n").split())
 
-for b in range(1, n + 1):
-    a_floor = (x * b) // y
-    for delta in (0, 1):
-        a = a_floor + delta
-        dx = abs(a * y - x * b)
-        if best_dx is None:
-            best_dx, best_b, best_a = dx, b, a
-        else:
-            # Compare using cross multiplication
-            current_cmp = dx * best_b
-            best_cmp = best_dx * b
-            if current_cmp < best_cmp:
+    best_dx = None
+    best_b = None
+    best_a = None
+
+    for b in range(1, n + 1):
+        a_floor = (x * b) // y
+        for delta in (0, 1):
+            a = a_floor + delta
+            dx = abs(a * y - x * b)
+            if best_dx is None:
                 best_dx, best_b, best_a = dx, b, a
-            elif current_cmp == best_cmp:
-                if b < best_b:
+            else:
+                # Compare using cross multiplication
+                current_cmp = dx * best_b
+                best_cmp = best_dx * b
+                if current_cmp < best_cmp:
                     best_dx, best_b, best_a = dx, b, a
-                elif b == best_b and a < best_a:
-                    best_dx, best_b, best_a = dx, b, a
+                elif current_cmp == best_cmp:
+                    if b < best_b:
+                        best_dx, best_b, best_a = dx, b, a
+                    elif b == best_b and a < best_a:
+                        best_dx, best_b, best_a = dx, b, a
 
-print(f"{best_a}/{best_b}")
+    print(f"{best_a}/{best_b}", file=output_stream)
 
-Now, let's test this code.
 
-Test case 1:
 
-Input:3 7 6 → output 2/5.
+def test():
+    import io
 
-The code loops b from 1 to 6.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7 2 4
+""",
+            "output": \
+"""\
+7/2
+""",
+        }, 
+    ]
 
-At b=5, a=2 gives dx=1, which is better than previous best.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Test case 2:
 

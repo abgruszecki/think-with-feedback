@@ -594,63 +594,64 @@ For the sum, we can iterate through the sorted array with their indices (1-based
 
 So the code would look like:
 
-n = int(input())
-a = list(map(int, input().split()))
-a.sort()
-total = 0
-for i in range(n):
-    idx = i + 1  # 1-based
-    total += a[i] * (idx + 1)
-total -= a[-1]
-print(total)
+Testing against sample input 1.
 
-Wait, but wait:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a.sort()
+    total = 0
+    for i in range(n):
+        idx = i + 1  # 1-based
+        total += a[i] * (idx + 1)
+    total -= a[-1]
+    print(total, file=output_stream)
 
-For each element in the sorted array, index i (0-based in Python), 1-based index is i+1. So (i+1 +1) = i+2. So the multiplier is (i+2) ?
 
-Wait, no. The formula is sum(a_i*(i+1)) where i is 1-based. Because in the code:
 
-When sorted, the first element is a[0] in 0-based, which is i=1 in 1-based. So the multiplier is (1+1) =2. For the first element (i=0 in 0-based, which is 1-based index 1), the multiplier is 1+1=2.
+def test():
+    import io
 
-Wait, the formula was sum(a_i*(i+1)) where i is the 1-based index. So in code:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1
+10
+""",
+            "output": \
+"""\
+10
+""",
+        }, 
+    ]
 
-for each element in the sorted array, 0-based index j:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-i = j +1 (1-based index).
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-multiplier is i +1 → (j+1) +1 = j+2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-So for each element a[j], the term is a[j] * (j +2).
+    print('Tests passed 😎')
 
-So the code should be:
 
-sorted_a = sorted(a)
+if __name__ == '__main__':
+    test()
 
-sum_ = sum( (i+2)*x for i, x in enumerate(sorted_a) )
 
-result = sum_ - sorted_a[-1]
+```
 
-print(result)
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-But wait, let's test with the first example:
-
-sorted_a is [1,3,5].
-
-enumerate gives indices 0,1,2.
-
-terms:
-
-0: (0+2)*1 =2.
-
-1: (1+2)*3=9.
-
-2: (2+2)*5=20.
-
-sum_ =2+9+20=31.
-
-subtract 5 →26.
-
-Which is correct.
+```
 
 Yes.
 

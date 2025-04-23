@@ -129,13 +129,82 @@ At the end, check if the stack is empty. If yes, output Yes, else No.
 
 This seems straightforward.
 
-Testing all the examples again with this code:
+Testing against sample inputs 1, 2, 3.
 
-Example 1: "-++-" → stack becomes empty → Yes.
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+    stack = []
+    for c in s:
+        if stack and stack[-1] == c:
+            stack.pop()
+        else:
+            stack.append(c)
+    print("Yes" if not stack else "No", file=output_stream)
 
-Example 2: "+-" → stack has two elements → No.
 
-Example3: "++" → stack empty → Yes.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
++-
+""",
+            "output": \
+"""\
+No
+""",
+        }, 
+        {
+            "input": \
+"""\
+++
+""",
+            "output": \
+"""\
+Yes
+""",
+        }, 
+        {
+            "input": \
+"""\
+-
+""",
+            "output": \
+"""\
+No
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Example4: "-" → stack not empty → No.
 

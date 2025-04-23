@@ -761,117 +761,156 @@ Now, integrating this into the code.
 
 So the code becomes:
 
+Testing against sample input 1.
+
+```python
 import sys
 import math
 import bisect
 
-n = int(sys.stdin.readline())
-a = list(map(int, sys.stdin.readline().split()))
 
-# Precompute GCD matrix
-gcd_matrix = [[False]*n for _ in range(n)]
-for i in range(n):
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    a = list(map(int, input_stream.readline().split()))
+
+    # Precompute GCD matrix
+    gcd_matrix = [[False]*n for _ in range(n)]
+    for i in range(n):
+        for j in range(n):
+            if math.gcd(a[i], a[j]) >1:
+                gcd_matrix[i][j] = True
+            else:
+                gcd_matrix[i][j] = False
+
+    # Precompute compatible lists
+    compatible = [[] for _ in range(n)]
     for j in range(n):
-        if math.gcd(a[i], a[j]) >1:
-            gcd_matrix[i][j] = True
-        else:
-            gcd_matrix[i][j] = False
+        for m in range(n):
+            if gcd_matrix[m][j]:
+                compatible[j].append(m)
+        compatible[j].sort()
 
-# Precompute compatible lists
-compatible = [[] for _ in range(n)]
-for j in range(n):
+    left_child = [[False]*n for _ in range(n)]
+    right_child = [[False]*n for _ in range(n)]
+
+    # Base case: length 1
+    for i in range(n):
+        # left_child[i][i] can be True if j = i+1 is valid and compatible
+        j = i +1
+        if j < n and i in compatible[j]:
+            left_child[i][i] = True
+        # right_child[i][i] can be True if j = i-1 is valid and compatible
+        j = i-1
+        if j >=0 and i in compatible[j]:
+            right_child[i][i] = True
+
+    # Fill DP tables for lengths >=2
+    for length in range(2, n+1):
+        for l in range(n):
+            r = l + length -1
+            if r >=n:
+                continue
+            
+            # Compute left_child[l][r] (parent is r+1)
+            j = r +1
+            if j <n:
+                # find all m in compatible[j] that are in [l..r]
+                candidates = compatible[j]
+                left_pos = bisect.bisect_left(candidates, l)
+                right_pos = bisect.bisect_right(candidates, r)
+                # iterate in reverse order
+                for m in reversed(candidates[left_pos:right_pos]):
+                    # check if left and right subtrees are valid
+                    left_valid = True
+                    if m > l:
+                        if not left_child[l][m-1]:
+                            continue
+                    right_valid = True
+                    if m < r:
+                        if not right_child[m+1][r]:
+                            continue
+                    left_child[l][r] = True
+                    break
+            
+            # Compute right_child[l][r] (parent is l-1)
+            j = l-1
+            if j >=0:
+                candidates = compatible[j]
+                left_pos = bisect.bisect_left(candidates, l)
+                right_pos = bisect.bisect_right(candidates, r)
+                # iterate in reverse order
+                for m in reversed(candidates[left_pos:right_pos]):
+                    left_valid = True
+                    if m > l:
+                        if not left_child[l][m-1]:
+                            continue
+                    right_valid = True
+                    if m < r:
+                        if not right_child[m+1][r]:
+                            continue
+                    right_child[l][r] = True
+                    break
+
+    # Check if any root exists
     for m in range(n):
-        if gcd_matrix[m][j]:
-            compatible[j].append(m)
-    compatible[j].sort()
+        left_ok = True
+        if m >0:
+            if not left_child[0][m-1]:
+                left_ok = False
+        right_ok = True
+        if m <n-1:
+            if not right_child[m+1][n-1]:
+                right_ok = False
+        if left_ok and right_ok:
+            print("Yes", file=output_stream)
+            return
 
-left_child = [[False]*n for _ in range(n)]
-right_child = [[False]*n for _ in range(n)]
+    print("No", file=output_stream)
 
-# Base case: length 1
-for i in range(n):
-    # left_child[i][i] can be True if j = i+1 is valid and compatible
-    j = i +1
-    if j < n and i in compatible[j]:
-        left_child[i][i] = True
-    # right_child[i][i] can be True if j = i-1 is valid and compatible
-    j = i-1
-    if j >=0 and i in compatible[j]:
-        right_child[i][i] = True
 
-# Fill DP tables for lengths >=2
-for length in range(2, n+1):
-    for l in range(n):
-        r = l + length -1
-        if r >=n:
-            continue
-        
-        # Compute left_child[l][r] (parent is r+1)
-        j = r +1
-        if j <n:
-            # find all m in compatible[j] that are in [l..r]
-            candidates = compatible[j]
-            left_pos = bisect.bisect_left(candidates, l)
-            right_pos = bisect.bisect_right(candidates, r)
-            # iterate in reverse order
-            for m in reversed(candidates[left_pos:right_pos]):
-                # check if left and right subtrees are valid
-                left_valid = True
-                if m > l:
-                    if not left_child[l][m-1]:
-                        continue
-                right_valid = True
-                if m < r:
-                    if not right_child[m+1][r]:
-                        continue
-                left_child[l][r] = True
-                break
-        
-        # Compute right_child[l][r] (parent is l-1)
-        j = l-1
-        if j >=0:
-            candidates = compatible[j]
-            left_pos = bisect.bisect_left(candidates, l)
-            right_pos = bisect.bisect_right(candidates, r)
-            # iterate in reverse order
-            for m in reversed(candidates[left_pos:right_pos]):
-                left_valid = True
-                if m > l:
-                    if not left_child[l][m-1]:
-                        continue
-                right_valid = True
-                if m < r:
-                    if not right_child[m+1][r]:
-                        continue
-                right_child[l][r] = True
-                break
 
-# Check if any root exists
-for m in range(n):
-    left_ok = True
-    if m >0:
-        if not left_child[0][m-1]:
-            left_ok = False
-    right_ok = True
-    if m <n-1:
-        if not right_child[m+1][n-1]:
-            right_ok = False
-    if left_ok and right_ok:
-        print("Yes")
-        exit()
+def test():
+    import io
 
-print("No")
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+7 17
+""",
+            "output": \
+"""\
+No
+""",
+        }, 
+    ]
 
-This code should handle the problem efficiently with the optimizations.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Now, let's test the code against the examples.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-First example:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-6
-3 6 9 18 36 108
+    print('Tests passed 😎')
 
-The compatible[j] for j=0 (3) would have m's where a[m] and 3 have GCD>1. But in this case, j is the parent in different contexts. However, during the DP steps, the code should correctly compute left_child and right_child.
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Another example:
 

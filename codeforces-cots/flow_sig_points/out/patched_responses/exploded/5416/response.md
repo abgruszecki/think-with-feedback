@@ -895,47 +895,149 @@ Thus, the code can proceed as described.
 
 Now, implementing the code.
 
-But let's test with the first sample:
+Testing against sample input 1.
 
-Sample 1:
+```python
+import sys
+from sys import stdin
+from collections import defaultdict
 
-input:
 
+class DSU:
+    def __init__(self, size):
+        self.parent = list(range(size))
+        self.rank = [0] * size
+    
+    def find(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
+    
+    def union(self, x, y):
+        x_root = self.find(x)
+        y_root = self.find(y)
+        if x_root == y_root:
+            return
+        if self.rank[x_root] < self.rank[y_root]:
+            self.parent[x_root] = y_root
+        else:
+            self.parent[y_root] = x_root
+            if self.rank[x_root] == self.rank[y_root]:
+                self.rank[x_root] += 1
+
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    if (n % 2) != (m % 2):
+        print(0, file=output_stream)
+        return
+    k = int(input_stream.readline())
+    preserved = dict()
+    sum_fixed_row = [0] * n
+    sum_fixed_col = [0] * m
+    preserved_in_row = [0] * n
+    preserved_in_col = [0] * m
+    for _ in range(k):
+        a, b, c = input_stream.readline().split()
+        a = int(a) - 1
+        b = int(b) - 1
+        val = 1 if c == '-1' else 0
+        sum_fixed_row[a] += val
+        sum_fixed_col[b] += val
+        preserved_in_row[a] += 1
+        preserved_in_col[b] += 1
+        preserved[(a, b)] = True
+    # Check rows with all preserved and sum_fixed_row not 1 mod 2
+    for i in range(n):
+        if preserved_in_row[i] == m:
+            if (sum_fixed_row[i] % 2) != 1:
+                print(0, file=output_stream)
+                return
+    for j in range(m):
+        if preserved_in_col[j] == n:
+            if (sum_fixed_col[j] % 2) != 1:
+                print(0, file=output_stream)
+                return
+    sum_r = [(1 - (sum_fixed_row[i] % 2)) % 2 for i in range(n)]
+    sum_c = [(1 - (sum_fixed_col[j] % 2)) % 2 for j in range(m)]
+    # Build DSU for rows and columns
+    dsu = DSU(n + m)
+    for i in range(n):
+        for j in range(m):
+            if (i, j) not in preserved:
+                row_node = i
+                col_node = n + j
+                dsu.union(row_node, col_node)
+    # Collect components
+    components = defaultdict(list)
+    for node in range(n + m):
+        root = dsu.find(node)
+        components[root].append(node)
+    # Check each component's sum_r and sum_c
+    for nodes in components.values():
+        rows = []
+        cols = []
+        for node in nodes:
+            if node < n:
+                rows.append(node)
+            else:
+                cols.append(node - n)
+        s_r = sum(sum_r[i] for i in rows)
+        s_c = sum(sum_c[j] for j in cols)
+        if (s_r + s_c) % 2 != 0:
+            print(0, file=output_stream)
+            return
+    c = len(components)
+    E = n * m - k
+    exponent = E - (n + m - c)
+    p = int(input_stream.readline())
+    print(pow(2, exponent, p), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2 2
-
-0
-
+1
+1 1 -1
 100
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-So n=2, m=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-No preserved cells.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sum_fixed_row = [0, 0]
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-sum_fixed_col = [0, 0]
+    print('Tests passed 😎')
 
-sum_r = [1, 1], sum_c = [1, 1]
 
-Check rows and columns: no rows or columns have all cells preserved.
+if __name__ == '__main__':
+    test()
 
-DSU edges: all four cells are unknown.
 
-So for each cell (0,0): union 0 and 2 (0 is row 0, 2 is column 0).
+```
 
-Cell (0,1): union 0 and 3 (column 1).
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Cell (1,0): union 1 and 2 (row1 and column0).
-
-Cell (1,1): union 1 and 3 (row1 and column1).
-
-This connects all rows and columns into a single component.
-
-Thus, c=1.
-
-Exponent = (4) - (2 + 2 -1) →4 -3=1. 2^1=2. Output is 2 mod 100 →2.
-
-Which matches the sample.
+```
 
 Sample 2:
 

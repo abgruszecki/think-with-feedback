@@ -734,199 +734,293 @@ The code steps are as described.
 
 So, the code would be:
 
+Testing against sample input 1.
+
+```python
 import heapq
 
-n, m = map(int, input().split())
 
-a = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-c = list(map(int, input().split()))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-heap = []
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-for i in range(n):
+    heap = []
 
-    if a[i] >0:
+    for i in range(n):
 
-        heapq.heappush(heap, (c[i], i))
+        if a[i] >0:
 
-for _ in range(m):
+            heapq.heappush(heap, (c[i], i))
 
-    t, d = map(int, input().split())
+    for _ in range(m):
 
-    t -=1
+        t, d = map(int, input_stream.readline().rstrip("\n").split())
 
-    total =0
+        t -=1
 
-    # Step 1: take from preferred type.
+        total =0
 
-    take = min(a[t], d)
+        # Step 1: take from preferred type.
 
-    total += take * c[t]
+        take = min(a[t], d)
 
-    a[t] -= take
+        total += take * c[t]
 
-    d -= take
-
-    if d ==0:
-
-        print(total)
-
-        continue
-
-    # Step 2: take from the heap.
-
-    while d>0:
-
-        # Find the next valid entry.
-
-        while heap:
-
-            current_c, current_i = heapq.heappop(heap)
-
-            if a[current_i] >0:
-
-                # found a valid entry.
-
-                break
-
-        else:
-
-            # No more valid entries.
-
-            total =0
-
-            break
-
-        take = min(d, a[current_i])
-
-        total += take * current_c
-
-        a[current_i] -= take
+        a[t] -= take
 
         d -= take
 
-        # Push back if remaining.
+        if d ==0:
 
-        if a[current_i] >0:
+            print(total, file=output_stream)
 
-            heapq.heappush(heap, (current_c, current_i))
+            continue
 
-    # After processing, if d==0, output total. else 0.
+        # Step 2: take from the heap.
 
-    print(total if d ==0 else 0)
+        while d>0:
 
-Wait, but in the code, after processing step 2, if d==0, then output total. Else, output 0.
+            # Find the next valid entry.
 
-But in the code, during step 2 processing:
+            while heap:
 
-If the heap is exhausted, then total is set to 0 and break. So, d will still be >0, and the code prints 0.
+                current_c, current_i = heapq.heappop(heap)
 
-Else, after taking from the heap, d is reduced by take. So, the loop continues until d is 0.
+                if a[current_i] >0:
 
-So, the code correctly outputs 0 if after step 2, d>0.
+                    # found a valid entry.
 
-This code should handle all cases.
+                    break
 
-But in Python, the heapq module is efficient enough for large inputs?
+            else:
 
-But for m=1e5, and each customer requiring a few heap operations, yes.
+                # No more valid entries.
 
-Now, let's test it against the sample inputs.
+                total =0
 
-First sample input:
+                break
 
-After initial processing, the heap is built with all 8 entries.
+            take = min(d, a[current_i])
 
-First customer: t=2 (0-based 1) d=8.
+            total += take * current_c
 
-Step 1: take 6 (a[1] is 6), total becomes 6*3=18. d=2.
+            a[current_i] -= take
 
-Step 2: process the heap.
+            d -= take
 
-Heap entries after initial step 1 are all 8 types except a[1] is 0. So, when the heap is processed:
+            # Push back if remaining.
 
-The first popped entry is (2,3) (type 4, a=1). take 1 dish. total becomes 18+2=20. a[3] becomes 0.
+            if a[current_i] >0:
 
-Then, d=1. Next popped entry is (2,5) (type 5, a=5). take 1, total becomes 22. a[5] becomes 4. Push back (2,5) into heap.
+                heapq.heappush(heap, (current_c, current_i))
 
-d=0. So output 22.
+        # After processing, if d==0, output total. else 0.
 
-Which matches the sample.
+        print(total if d ==0 else 0, file=output_stream)
 
-Second customer: t=1 (0-based 0), d=4.
 
-a[0] is 8. take 4. a[0] becomes 4. total is 4*6=24. output 24.
 
-Third customer: t=4 (0-based 3) which has a_i=0. So step 1 takes 0. Then step 2:
+def test():
+    import io
 
-The remaining d=7.
-
-Process heap:
-
-Popped entries until find a valid one.
-
-The current heap has entries like (2,5), (2,7), etc.
-
-First valid entry is (2,5) (type 5, a=4). take min(7,4)=4. total +=4*2=8. d=3. a[5] becomes 0. Push nothing.
-
-Next popped entry is (2,7) (type 8, a=5). take 3. total +=3*2=6. a[7] becomes 2. Push back (2,7) into heap. d=0. total is 14.
-
-Which matches the sample.
-
-Fourth customer: t=3 (0-based 2), d=4.
-
-a[2] is 2. step 1 takes 2. total +=2*3=6. d=2.
-
-step 2: process heap.
-
-Heap entries include (2,7) (a=2), (3,2) (a=0), etc.
-
-Next valid entry is (2,7). take 2. total +=2*2=4. a[7] becomes 0. d=0. total is 10.
-
-Fifth customer: t=6 (0-based 5) which is a_i=0. step 1 takes 0.
-
-step 2: process heap.
-
-Current available types are type 0 (a=4), type 6 (a=7), type 4 (a=4), and others.
-
-The first valid entry is (2,5) is gone. The next valid entries:
-
-The heap may have (3,6) (type 7, c=3, a=7). Wait, after previous steps, let's see.
-
-But in the fifth customer's step 2, the code process:
-
-The current heap is built from the previous steps. For example, after the fourth customer, the heap has (3,6) (type 7, a=7), and (6,0) (type 1, a=4), etc.
-
-When processing step 2:
-
-The first popped entry is (3,6) (type 7, a=7). take 7 dishes. sum +=7*3=21. a[6] becomes 0. d is now 10-7=3.
-
-Then, popped next entries until valid.
-
-Next valid entry is (6,0) (type 0, a=4). take 3. sum +=3*6=18. a[0] becomes 1. Push back (6,0) into heap. d=0. total is 21+18=39.
-
-Which matches the sample.
-
-Thus, the code works.
-
-Now, edge cases.
-
-Second sample input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 6 6
+6 6 6 6 6 6
+6 66 666 6666 66666 666666
+1 6
+2 6
+3 6
+4 6
+5 6
+6 66
+""",
+            "output": \
+"""\
+36
+396
+3996
+39996
+399996
+0
+""",
+        }, 
+    ]
 
-a = [6,6,6,6,6,6]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-c = [6,66,666,6666,66666,666666]
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Each customer orders their own type. The first five customers order 6 dishes each. The sixth orders 66.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The first five customers take all their preferred type's dishes (6 each), sum is 6*6=36, 6*66=396, etc. The sixth customer has d=66, but after the first five customers, the sixth type has a=6. So step 1 takes 6. d becomes 60. Step 2: no more dishes (all types are exhausted). sum is 0.
+    print('Tests passed 😎')
 
-So code outputs 36, 396, 3996, 39996, 399996, 0.
 
-Which matches the sample.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import heapq
+
+
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    heap = []
+
+    for i in range(n):
+
+        if a[i] >0:
+
+            heapq.heappush(heap, (c[i], i))
+
+    for _ in range(m):
+
+        t, d = map(int, input_stream.readline().rstrip("\n").split())
+
+        t -=1
+
+        total =0
+
+        # Step 1: take from preferred type.
+
+        take = min(a[t], d)
+
+        total += take * c[t]
+
+        a[t] -= take
+
+        d -= take
+
+        if d ==0:
+
+            print(total, file=output_stream)
+
+            continue
+
+        # Step 2: take from the heap.
+
+        while d>0:
+
+            # Find the next valid entry.
+
+            while heap:
+
+                current_c, current_i = heapq.heappop(heap)
+
+                if a[current_i] >0:
+
+                    # found a valid entry.
+
+                    break
+
+            else:
+
+                # No more valid entries.
+
+                total =0
+
+                break
+
+            take = min(d, a[current_i])
+
+            total += take * current_c
+
+            a[current_i] -= take
+
+            d -= take
+
+            # Push back if remaining.
+
+            if a[current_i] >0:
+
+                heapq.heappush(heap, (current_c, current_i))
+
+        # After processing, if d==0, output total. else 0.
+
+        print(total if d ==0 else 0, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 6
+6 6 6 6 6 6
+6 66 666 6666 66666 666666
+1 6
+2 13
+3 6
+4 11
+5 6
+6 6
+""",
+            "output": \
+"""\
+36
+11058
+99996
+4333326
+0
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample input:
 

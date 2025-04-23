@@ -180,37 +180,73 @@ answer = min(time_a, time_opposite)
 
 So the code can be written as:
 
-n, a = map(int, input().split())
+Testing against sample input 1.
 
-if a % 2 ==0:
+```python
+def main(input_stream, output_stream):
+    n, a = map(int, input_stream.readline().rstrip("\n").split())
 
-    opposite = n -a +1
+    if a % 2 ==0:
 
-    time_a = (n -a) //2 +1
+        opposite = n -a +1
 
-    time_opposite = (opposite +1) //2
+        time_a = (n -a) //2 +1
 
-else:
+        time_opposite = (opposite +1) //2
 
-    opposite = n - (a-1)
+    else:
 
-    time_a = (a +1) //2
+        opposite = n - (a-1)
 
-    time_opposite = (n - opposite) //2 +1
+        time_a = (a +1) //2
 
-print(min(time_a, time_opposite))
+        time_opposite = (n - opposite) //2 +1
 
-Wait, but for the opposite when a is even, the opposite is odd. So time_opposite is (opposite +1)//2. Correct.
+    print(min(time_a, time_opposite), file=output_stream)
 
-And when a is odd, the opposite is even. So time_opposite is (n - opposite) //2 +1. Because opposite is even.
 
-Yes.
 
-Testing this code against the examples.
+def test():
+    import io
 
-Sample 1: n=4, a=2.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 5
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-a is even. opposite=4-2+1=3. time_a= (4-2)//2 +1=1+1=2. time_opposite=(3+1)/2=2. min 2. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2: n=8, a=5. a is odd. opposite=8-4=4. time_a=(5+1)/2=3. time_opposite=(8-4)/2 +1=2+1=3. min 3. Correct.
 

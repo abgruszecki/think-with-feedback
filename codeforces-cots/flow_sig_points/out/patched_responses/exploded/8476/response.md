@@ -1026,71 +1026,104 @@ So, the code must read these correctly.
 
 In Python:
 
+Testing against sample input 1.
+
+```python
 import math
 
-p, q = map(int, input().split())
 
-n = int(input())
+def main(input_stream, output_stream):
+    p, q = map(int, input_stream.readline().rstrip("\n").split())
 
-a = list(map(int, input().split()))
+    n = int(input_stream.readline().rstrip("\n"))
 
-if len(a) != n:
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-    print("NO")
+    if len(a) != n:
 
-    exit()
+        print("NO", file=output_stream)
 
-# Simplify p and q
+        return
 
-g = math.gcd(p, q)
+    # Simplify p and q
 
-p_simplified = p // g
+    g = math.gcd(p, q)
 
-q_simplified = q // g
+    p_simplified = p // g
 
-current_num = a[-1]
+    q_simplified = q // g
 
-current_den = 1
+    current_num = a[-1]
 
-for i in range(n-2, -1, -1):
+    current_den = 1
 
-    a_i = a[i]
+    for i in range(n-2, -1, -1):
 
-    new_num = a_i * current_num + current_den
+        a_i = a[i]
 
-    new_den = current_num
+        new_num = a_i * current_num + current_den
 
-    g = math.gcd(new_num, new_den)
+        new_den = current_num
 
-    current_num = new_num // g
+        g = math.gcd(new_num, new_den)
 
-    current_den = new_den // g
+        current_num = new_num // g
 
-if current_num == p_simplified and current_den == q_simplified:
+        current_den = new_den // g
 
-    print("YES")
+    if current_num == p_simplified and current_den == q_simplified:
 
-else:
+        print("YES", file=output_stream)
 
-    print("NO")
+    else:
 
-But wait, comparing current_num == p_simplified and current_den == q_simplified is equivalent to current_num * q_simplified == current_den * p_simplified, but with cross-multiplication. 
+        print("NO", file=output_stream)
 
-But the code uses the direct comparison of numerator and denominator. 
 
-This should be correct. 
 
-But why not compute cross-product to avoid possible issues with simplifying fractions? 
+def test():
+    import io
 
-For example, if current_num / current_den equals p_simplified / q_simplified, then current_num * q_simplified == current_den * p_simplified. 
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+9 4
+3
+2 3 1
+""",
+            "output": \
+"""\
+YES
+""",
+        }, 
+    ]
 
-But since current_num and current_den are reduced to their simplest form (since after each step, they are divided by their gcd), and p_simplified and q_simplified are also in simplest form, the two fractions are equal if and only if current_num == p_simplified and current_den == q_simplified. 
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Thus, the code is correct. 
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Testing the samples:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-First sample: current_num=9, current_den=4. p_simplified=9, q_simplified=4 → YES. 
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample: current_num=9, current_den=4 → YES. 
 

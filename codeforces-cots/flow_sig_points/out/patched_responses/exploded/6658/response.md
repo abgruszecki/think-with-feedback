@@ -985,55 +985,209 @@ The code steps are:
 
 But since mod can be up to 1e9, we need to handle large numbers, but Python can handle it.
 
-Testing this code with the samples:
+Testing against sample input 1.
 
-Sample 1: n=2, m=100.
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-k=0. The answer is sum dp_prev[0], which is 1. 1 mod 100 is 1. Correct.
+    if n == 1:
+        print(1 % m, file=output_stream)
+    else:
+        k = n - 2
+        dp_prev = [1, 0, 0]
+        for i in range(1, k + 1):
+            current = [
+                (dp_prev[0] + dp_prev[1] + dp_prev[2]) % m,
+                dp_prev[0] % m,
+                dp_prev[1] % m
+            ]
+            dp_prev = current
+        total = (dp_prev[0] + dp_prev[1] + dp_prev[2]) % m
+        print(total, file=output_stream)
 
-Sample 2: n=3, m=10.
 
-k=1. The code will compute:
 
-dp_prev is initialized to [1,0,0].
+def test():
+    import io
 
-For i=1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 10
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-dp_current[0] = 1 +0 +0 =1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-dp_current[1] =1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-dp_current[2] =0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sum is 1+1+0=2. 2 mod 10 is 2. Correct.
+    print('Tests passed 😎')
 
-Sample 3: n=4, m=3271890.
 
-k=2.
+if __name__ == '__main__':
+    test()
 
-For i=1:
 
-dp_prev is [1,0,0].
+```
 
-i=1:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-current[0] =1+0+0=1.
+```
 
-current[1] =1.
+Testing against sample input 2.
 
-current[2] =0.
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
 
-dp_prev is [1,1,0].
+    if n == 1:
+        print(1 % m, file=output_stream)
+    else:
+        k = n - 2
+        dp_prev = [1, 0, 0]
+        for i in range(1, k + 1):
+            current = [
+                (dp_prev[0] + dp_prev[1] + dp_prev[2]) % m,
+                dp_prev[0] % m,
+                dp_prev[1] % m
+            ]
+            dp_prev = current
+        total = (dp_prev[0] + dp_prev[1] + dp_prev[2]) % m
+        print(total, file=output_stream)
 
-i=2:
 
-current[0] =1+1+0=2.
 
-current[1] =1.
+def test():
+    import io
 
-current[2] =1.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 3271890
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
 
-sum is 2+1+1=4 mod 3271890 →4. Correct.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 3.
+
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+
+    if n == 1:
+        print(1 % m, file=output_stream)
+    else:
+        k = n - 2
+        dp_prev = [1, 0, 0]
+        for i in range(1, k + 1):
+            current = [
+                (dp_prev[0] + dp_prev[1] + dp_prev[2]) % m,
+                dp_prev[0] % m,
+                dp_prev[1] % m
+            ]
+            dp_prev = current
+        total = (dp_prev[0] + dp_prev[1] + dp_prev[2]) % m
+        print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+17 123456
+""",
+            "output": \
+"""\
+32347
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 52, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 45, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '32347'
+Got: '10609'
+
+```
 
 Sample 4: n=17, m=123456.
 

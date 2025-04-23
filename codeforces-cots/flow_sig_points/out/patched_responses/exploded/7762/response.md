@@ -411,83 +411,213 @@ Take the maximum.
 
 So the code:
 
-s = input().strip()
+Testing against sample input 2.
 
-n = len(s)
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
 
-original_count = 0
+    n = len(s)
 
-for j in range(n-1):
+    original_count = 0
 
-    if s[j] == 'V' and s[j+1] == 'K':
+    for j in range(n-1):
 
-        original_count +=1
+        if s[j] == 'V' and s[j+1] == 'K':
 
-max_count = original_count
+            original_count +=1
 
-for i in range(n):
+    max_count = original_count
 
-    original_contribution = 0
+    for i in range(n):
 
-    if i > 0:
+        original_contribution = 0
 
-        if s[i-1] == 'V' and s[i] == 'K':
+        if i > 0:
 
-            original_contribution +=1
+            if s[i-1] == 'V' and s[i] == 'K':
 
-    if i < n-1:
+                original_contribution +=1
 
-        if s[i] == 'V' and s[i+1] == 'K':
+        if i < n-1:
 
-            original_contribution +=1
+            if s[i] == 'V' and s[i+1] == 'K':
 
-    new_char = 'K' if s[i] == 'V' else 'V'
+                original_contribution +=1
 
-    new_contribution = 0
+        new_char = 'K' if s[i] == 'V' else 'V'
 
-    if i > 0:
+        new_contribution = 0
 
-        if s[i-1] == 'V' and new_char == 'K':
+        if i > 0:
 
-            new_contribution +=1
+            if s[i-1] == 'V' and new_char == 'K':
 
-    if i < n-1:
+                new_contribution +=1
 
-        if new_char == 'V' and s[i+1] == 'K':
+        if i < n-1:
 
-            new_contribution +=1
+            if new_char == 'V' and s[i+1] == 'K':
 
-    delta = new_contribution - original_contribution
+                new_contribution +=1
 
-    current = original_count + delta
+        delta = new_contribution - original_contribution
 
-    if current > max_count:
+        current = original_count + delta
 
-        max_count = current
+        if current > max_count:
 
-print(max_count)
+            max_count = current
 
-Yes. Let's test this code with the sample inputs.
+    print(max_count, file=output_stream)
 
-Sample 2 input: "VV".
 
-original_count is 0.
 
-For i=0:
+def test():
+    import io
 
-original_contribution: left is none. right is VV: 0. so original_contribution=0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+V
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-new_char is K. right pair (0,1) becomes KV. contribution 0. delta is 0. current 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-For i=1:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-original_contribution: left pair (0,1) is VV: 0. right none. original_contribution=0.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-new_char is K. left pair (0,1) becomes VK: contribution 1. delta is 1. current 0+1=1. So max becomes 1.
+    print('Tests passed 😎')
 
-Thus, output is 1. Correct.
 
-Sample input 4: the code will find that changing a certain position gives delta 1, leading to 3.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 4.
+
+```python
+def main(input_stream, output_stream):
+    s = input_stream.readline().rstrip("\n").strip()
+
+    n = len(s)
+
+    original_count = 0
+
+    for j in range(n-1):
+
+        if s[j] == 'V' and s[j+1] == 'K':
+
+            original_count +=1
+
+    max_count = original_count
+
+    for i in range(n):
+
+        original_contribution = 0
+
+        if i > 0:
+
+            if s[i-1] == 'V' and s[i] == 'K':
+
+                original_contribution +=1
+
+        if i < n-1:
+
+            if s[i] == 'V' and s[i+1] == 'K':
+
+                original_contribution +=1
+
+        new_char = 'K' if s[i] == 'V' else 'V'
+
+        new_contribution = 0
+
+        if i > 0:
+
+            if s[i-1] == 'V' and new_char == 'K':
+
+                new_contribution +=1
+
+        if i < n-1:
+
+            if new_char == 'V' and s[i+1] == 'K':
+
+                new_contribution +=1
+
+        delta = new_contribution - original_contribution
+
+        current = original_count + delta
+
+        if current > max_count:
+
+            max_count = current
+
+    print(max_count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+KVKV
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 5: "KVKV". Original string is K V K V. The original count is 1 (positions 1-2: VK). After flipping each position:
 

@@ -177,61 +177,87 @@ prev_right is updated to curr[1].
 
 So code:
 
-n = int(input())
+Testing against sample input 1.
 
-if n == 0:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-    print(0)
+    if n == 0:
 
-else:
+        print(0, file=output_stream)
 
-    # read first magnet
+    else:
 
-    first = input().strip()
+        # read first magnet
 
-    prev_right = first[1]
+        first = input_stream.readline().rstrip("\n").strip()
 
-    groups = 1
+        prev_right = first[1]
 
-    for _ in range(n-1):
+        groups = 1
 
-        curr = input().strip()
+        for _ in range(n-1):
 
-        current_left = curr[0]
+            curr = input_stream.readline().rstrip("\n").strip()
 
-        if prev_right == current_left:
+            current_left = curr[0]
 
-            groups +=1
+            if prev_right == current_left:
 
-        prev_right = curr[1]
+                groups +=1
 
-    print(groups)
+            prev_right = curr[1]
 
-Yes, this way, we don't store all the magnets. We only track the previous right character. So the space is O(1), except for the input processing. But in practice, reading the input lines all at once is handled by Python's input() function. However, for the purposes of code efficiency, this approach is better because it avoids storing all the strings. But for n=1e5, even storing all strings is acceptable in Python, but this code is more memory-efficient.
+        print(groups, file=output_stream)
 
-So this code should work.
 
-Testing the first sample:
 
-n=6.
+def test():
+    import io
 
-First magnet is '10' → prev_right = '0'.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+01
+01
+10
+10
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-groups =1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Next 5 steps:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Second magnet '10' → current left '1'. prev_right '0' != '1' → no change. groups remains 1. prev_right becomes '0'.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Third '10' → same as before. groups remains 1. prev_right '0'.
+    print('Tests passed 😎')
 
-Fourth '01' → current left '0'. prev_right '0' → equal → groups becomes 2. prev_right '1'.
 
-Fifth '10' → current left '1'. prev_right '1' → equal → groups 3. prev_right '0'.
+if __name__ == '__main__':
+    test()
 
-Sixth '10' → current left '1'. prev_right '0' → not equal. groups remains 3. prev_right '0'.
 
-So total 3. Correct.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second sample:
 

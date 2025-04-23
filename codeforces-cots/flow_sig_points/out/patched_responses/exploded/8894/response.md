@@ -94,107 +94,162 @@ Because using sys.stdin.readline() in a loop for 5e5 times may be slow. So bette
 
 So here's the code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-data = sys.stdin.read().split()
-n = int(data[0])
-orders = []
-idx = 1
-for i in range(n):
-    l = int(data[idx])
-    r = int(data[idx+1])
-    orders.append( (r, l) )
-    idx +=2
 
-orders.sort()
+def main(input_stream, output_stream):
+    data = input_stream.read().split()
+    n = int(data[0])
+    orders = []
+    idx = 1
+    for i in range(n):
+        l = int(data[idx])
+        r = int(data[idx+1])
+        orders.append( (r, l) )
+        idx +=2
 
-count =0
-last_end = -1
+    orders.sort()
 
-for r, l in orders:
-    if l > last_end:
-        count +=1
-        last_end = r
+    count =0
+    last_end = -1
 
-print(count)
+    for r, l in orders:
+        if l > last_end:
+            count +=1
+            last_end = r
 
-This approach is faster because it reads all the data in one go.
+    print(count, file=output_stream)
 
-Yes, this should work.
 
-Testing the sample inputs.
 
-First sample:
+def test():
+    import io
 
-Input is 2 lines after n=2:
-
-7 11 and 4 7.
-
-After data is read, the first two elements after n are 7 and 11 (as data[1] and data[2]), then 4 and 7 (data[3],4).
-
-So orders would be [(11,7), (7,4)]? Wait no, no. Wait the code appends (r, l). So for the first line, the l is 7, r is 11. So the tuple is (11,7). The second line l is 4, r is7. So tuple is (7,4). So orders is [ (11,7), (7,4) ] ?
-
-Wait no, wait the code in the loop:
-
-for i in range(n):
-
-    l = int(data[idx])
-
-    r = int(data[idx+1])
-
-    orders.append( (r, l) )
-
-Yes. So the first line's l is data[1], which is 7, r is data[2], which is 11. So the tuple is (11,7).
-
-The second line's l is data[3], which is 4, r is data[4],7. So tuple (7,4). So orders is [ (11,7), (7,4) ].
-
-Then we sort orders. When sorted by r, the order is (7,4) and (11,7). So the sorted list is [ (7,4), (11,7) ].
-
-Then iteration:
-
-First element: r=7, l=4. Check if l (4) > last_end (-1). Yes. count becomes 1. last_end is 7.
-
-Next element: r=11, l=7. Check if 7>7. No. So count remains 1. So output is 1. Correct.
-
-Second sample input:
-
-5 lines:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5
 1 2
-
 2 3
-
 3 4
-
 4 5
-
 5 6
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-After parsing, the orders list will have tuples (2,1), (3,2), (4,3), (5,4), (6,5). After sorting, they are in order (2,1), (3,2), (4,3), (5,4), (6,5). Iteration:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-count starts 0, last_end -1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-First: l=1 > -1 → count 1, last_end 2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Next: l=2 → 2 not >2 → no.
+    print('Tests passed 😎')
 
-Next: l=3>2 → count 2, last_end 3's r is 3.
 
-Wait wait. Wait, the tuples in orders are (r, l). So when sorted, the first tuple is (2,1), then (3,2), (4,3), etc. So during iteration:
+if __name__ == '__main__':
+    test()
 
-For each tuple (r, l) in the sorted list:
 
-Check if l > last_end.
+```
 
-So first (r=2, l=1). l=1 > last_end (-1) → yes. count 1. last_end 2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Second tuple (3,2). l=2 >2? No. So skip.
+```
 
-Third (4,3): l=3>2 → yes. count 2. last_end 4.
+Testing against sample input 2.
 
-Fourth (5,4): l=4>4? No. Skip.
+```python
+import sys
 
-Fifth (6,5): l=5>4 → yes. count 3. last_end 6. So output 3. Correct.
+
+def main(input_stream, output_stream):
+    data = input_stream.read().split()
+    n = int(data[0])
+    orders = []
+    idx = 1
+    for i in range(n):
+        l = int(data[idx])
+        r = int(data[idx+1])
+        orders.append( (r, l) )
+        idx +=2
+
+    orders.sort()
+
+    count =0
+    last_end = -1
+
+    for r, l in orders:
+        if l > last_end:
+            count +=1
+            last_end = r
+
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6
+4 8
+1 5
+4 7
+2 5
+1 3
+6 8
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

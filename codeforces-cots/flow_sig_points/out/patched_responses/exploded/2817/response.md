@@ -437,47 +437,161 @@ But how to handle the char_to_value efficiently.
 
 In Python, the code can be written as:
 
-char_to_value = {}
+Testing against sample input 1.
 
-for c in '0123456789':
-    char_to_value[c] = int(c)
+```python
+def main(input_stream, output_stream):
+    char_to_value = {}
 
-for c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
-    char_to_value[c] = 10 + ord(c) - ord('A')
+    for c in '0123456789':
+        char_to_value[c] = int(c)
 
-for c in 'abcdefghijklmnopqrstuvwxyz':
-    char_to_value[c] = 36 + ord(c) - ord('a')
+    for c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
+        char_to_value[c] = 10 + ord(c) - ord('A')
 
-char_to_value['-'] = 62
-char_to_value['_'] = 63
+    for c in 'abcdefghijklmnopqrstuvwxyz':
+        char_to_value[c] = 36 + ord(c) - ord('a')
 
-pow3 = [1,3,9,27,81,243,729]
+    char_to_value['-'] = 62
+    char_to_value['_'] = 63
 
-MOD = 10**9 +7
+    pow3 = [1,3,9,27,81,243,729]
 
-s = input().strip()
+    MOD = 10**9 +7
 
-result =1
+    s = input_stream.readline().rstrip("\n").strip()
 
-for c in s:
-    t = char_to_value[c]
-    ones = bin(t).count('1')
-    zeros =6 - ones
-    result = (result * pow3[zeros]) % MOD
+    result =1
 
-print(result)
+    for c in s:
+        t = char_to_value[c]
+        ones = bin(t).count('1')
+        zeros =6 - ones
+        result = (result * pow3[zeros]) % MOD
 
-But wait, what if a character is not in the allowed set? According to the problem statement, the input consists of allowed characters. So the code can assume that all characters in s are present in the dictionary.
+    print(result, file=output_stream)
 
-Testing this code against the samples.
 
-Sample 1:
 
-Input z. The code processes 'z' as 36 +25=61. bin(61) is '0b111101' → 5 ones. zeros=1. pow3[1]=3. result is 3.
+def test():
+    import io
 
-Sample 2:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+V_V
+""",
+            "output": \
+"""\
+9
+""",
+        }, 
+    ]
 
-Input V_V. Each V is 31 (binary 11111 → but in 6 bits 011111, which has 5 ones. So zeros 1. '_' is 63, 6 ones → zeros 0. So 3*1*3=9.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    char_to_value = {}
+
+    for c in '0123456789':
+        char_to_value[c] = int(c)
+
+    for c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
+        char_to_value[c] = 10 + ord(c) - ord('A')
+
+    for c in 'abcdefghijklmnopqrstuvwxyz':
+        char_to_value[c] = 36 + ord(c) - ord('a')
+
+    char_to_value['-'] = 62
+    char_to_value['_'] = 63
+
+    pow3 = [1,3,9,27,81,243,729]
+
+    MOD = 10**9 +7
+
+    s = input_stream.readline().rstrip("\n").strip()
+
+    result =1
+
+    for c in s:
+        t = char_to_value[c]
+        ones = bin(t).count('1')
+        zeros =6 - ones
+        result = (result * pow3[zeros]) % MOD
+
+    print(result, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+Codeforces
+""",
+            "output": \
+"""\
+130653412
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3: 'Codeforces' → let's see.
 

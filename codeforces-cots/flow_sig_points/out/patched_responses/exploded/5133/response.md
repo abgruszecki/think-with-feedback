@@ -181,30 +181,71 @@ So putting it all together.
 
 Now, code:
 
-n, k = map(int, input().split())
-t = input().strip()
+Testing against sample input 1.
 
-# Compute prefix function
-pi = [0] * n
-for i in range(1, n):
-    j = pi[i-1]
-    while j > 0 and t[i] != t[j]:
-        j = pi[j-1]
-    if t[i] == t[j]:
-        j += 1
-    pi[i] = j
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    t = input_stream.readline().rstrip("\n").strip()
 
-p = pi[-1]
-result = t + t[p:] * (k-1)
-print(result)
+    # Compute prefix function
+    pi = [0] * n
+    for i in range(1, n):
+        j = pi[i-1]
+        while j > 0 and t[i] != t[j]:
+            j = pi[j-1]
+        if t[i] == t[j]:
+            j += 1
+        pi[i] = j
 
-Testing this code with the first example:
+    p = pi[-1]
+    result = t + t[p:] * (k-1)
+    print(result, file=output_stream)
 
-Input:
-3 4
-aba
 
-pi is [0,0,1]. p=1. t[p:] is 'ba'. So result is 'aba' + 'ba'*3 → 'ababababa' → correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2
+cat
+""",
+            "output": \
+"""\
+catcat
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: 3 2, cat. p is 0. result is 'cat' + 'cat' → 'catcat'.
 

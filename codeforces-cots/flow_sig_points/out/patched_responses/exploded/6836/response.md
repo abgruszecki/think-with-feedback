@@ -29,27 +29,63 @@ Wait, first line is n. Then next n lines are the three numbers each.
 
 So code outline:
 
-n = int(input())
-count = 0
-for _ in range(n):
-    a, b, c = map(int, input().split())
-    if a + b + c >= 2:
-        count +=1
-print(count)
+Testing against sample input 1.
 
-Yes, that's the code. Simple and efficient.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    count = 0
+    for _ in range(n):
+        a, b, c = map(int, input_stream.readline().rstrip("\n").split())
+        if a + b + c >= 2:
+            count +=1
+    print(count, file=output_stream)
 
-Testing with the examples:
 
-First example:
 
-3
+def test():
+    import io
 
-1 1 0 --> sum 2 --> count 1
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+1 0 0
+0 1 1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-1 1 1 --> sum 3 --> count 2
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-1 0 0 --> sum 1 --> no. Total 2. Which matches the sample output.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example:
 

@@ -1032,59 +1032,159 @@ Yes.
 
 So the code would look like:
 
+Testing against sample input 1.
+
+```python
 import math
 
-x, y = map(int, input().split())
 
-distance_squared = x**2 + y**2
+def main(input_stream, output_stream):
+    x, y = map(int, input_stream.readline().rstrip("\n").split())
 
-sqrt_val = math.isqrt(distance_squared)
+    distance_squared = x**2 + y**2
 
-if sqrt_val * sqrt_val == distance_squared:
+    sqrt_val = math.isqrt(distance_squared)
 
-    print("black")
+    if sqrt_val * sqrt_val == distance_squared:
 
-else:
-
-    distance = math.sqrt(distance_squared)
-
-    ring = int(distance)
-
-    same_sign = (x >=0 and y >=0) or (x <=0 and y <=0)
-
-    if ring %2 ==0:
-
-        print("black" if same_sign else "white")
+        print("black", file=output_stream)
 
     else:
 
-        print("white" if same_sign else "black")
+        distance = math.sqrt(distance_squared)
 
-Let's test this code with the samples.
+        ring = int(distance)
 
-First sample:
+        same_sign = (x >=0 and y >=0) or (x <=0 and y <=0)
 
-Input: -2 1 → x=-2, y=1.
+        if ring %2 ==0:
 
-distance_squared = 4 +1=5.
+            print("black" if same_sign else "white", file=output_stream)
 
-sqrt_val = 2 (2*2=4 <5).
+        else:
 
-2*2 !=5 → proceed.
+            print("white" if same_sign else "black", file=output_stream)
 
-distance = sqrt(5) ~2.236. ring=2.
 
-same_sign: x is negative, y positive → false.
 
-ring even → same_sign is false → output white. Correct.
+def test():
+    import io
 
-Second sample:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 1
+""",
+            "output": \
+"""\
+black
+""",
+        }, 
+    ]
 
-Input: 2 1 → same_sign true.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-distance_squared 5. sqrt_val 2 → 2^2=4 !=5.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-ring even (2). same_sign true → black. Correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+import math
+
+
+def main(input_stream, output_stream):
+    x, y = map(int, input_stream.readline().rstrip("\n").split())
+
+    distance_squared = x**2 + y**2
+
+    sqrt_val = math.isqrt(distance_squared)
+
+    if sqrt_val * sqrt_val == distance_squared:
+
+        print("black", file=output_stream)
+
+    else:
+
+        distance = math.sqrt(distance_squared)
+
+        ring = int(distance)
+
+        same_sign = (x >=0 and y >=0) or (x <=0 and y <=0)
+
+        if ring %2 ==0:
+
+            print("black" if same_sign else "white", file=output_stream)
+
+        else:
+
+            print("white" if same_sign else "black", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 3
+""",
+            "output": \
+"""\
+black
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

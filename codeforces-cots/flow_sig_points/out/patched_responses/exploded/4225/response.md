@@ -427,33 +427,179 @@ Wait, but the other boy (the one assigned to one girl) would have a_i,j for that
 
 So the code is correct.
 
-Testing the examples:
+Testing against sample input 1.
 
-First example:
+```python
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    ptr = 0
+    n, m = int(input[ptr]), int(input[ptr+1])
+    ptr += 2
+    b = list(map(int, input[ptr:ptr+n]))
+    ptr += n
+    g = list(map(int, input[ptr:ptr+m]))
+    
+    sum_b = sum(b)
+    sum_g = sum(g)
+    max_b = max(b)
+    min_g = min(g)
+    
+    if max_b > min_g:
+        print(-1, file=output_stream)
+        return
+    
+    if min_g == max_b:
+        total = sum_b * m + sum_g - max_b * m
+        print(total, file=output_stream)
+        return
+    
+    # Find next_max_b
+    next_max_b = -1
+    for bi in b:
+        if bi < max_b and bi > next_max_b:
+            next_max_b = bi
+    
+    if next_max_b == -1:
+        print(-1, file=output_stream)
+        return
+    
+    sum_assigned = (m-1)*max_b + next_max_b
+    total = sum_b * m + sum_g - sum_assigned
+    print(total, file=output_stream)
 
-3 2
 
-b = [1,2,1] → max_b is 2. min_g is 3.
 
-So, min_g > max_b. So we need to check if there is a boy with b_i < 2. Yes, the first and third boy have 1.
+def test():
+    import io
 
-next_max_b is 1.
-
-sum_assigned = (2-1)*2 +1 → 1*2 +1 =3.
-
-sum(b) is 1+2+1=4.
-
-sum(g) is 3+4=7.
-
-total is 2*4 +7 -3 →8+7-3=12. Which matches the example.
-
-Second example:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 2 2
+0 1
+1 0
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-b = [0,1] → max_b is 1. min_g is 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-max_b (1) > min_g (0) → impossible. So output -1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read().split()
+    ptr = 0
+    n, m = int(input[ptr]), int(input[ptr+1])
+    ptr += 2
+    b = list(map(int, input[ptr:ptr+n]))
+    ptr += n
+    g = list(map(int, input[ptr:ptr+m]))
+    
+    sum_b = sum(b)
+    sum_g = sum(g)
+    max_b = max(b)
+    min_g = min(g)
+    
+    if max_b > min_g:
+        print(-1, file=output_stream)
+        return
+    
+    if min_g == max_b:
+        total = sum_b * m + sum_g - max_b * m
+        print(total, file=output_stream)
+        return
+    
+    # Find next_max_b
+    next_max_b = -1
+    for bi in b:
+        if bi < max_b and bi > next_max_b:
+            next_max_b = bi
+    
+    if next_max_b == -1:
+        print(-1, file=output_stream)
+        return
+    
+    sum_assigned = (m-1)*max_b + next_max_b
+    total = sum_b * m + sum_g - sum_assigned
+    print(total, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2 3
+1 0
+1 1 2
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third example:
 

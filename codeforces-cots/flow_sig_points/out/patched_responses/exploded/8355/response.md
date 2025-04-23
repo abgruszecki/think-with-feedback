@@ -1409,135 +1409,139 @@ The first element of the resulting vector is the answer.
 
 So, the code:
 
-MOD = 10**9 +7
+Testing against sample input 1.
 
-N, M = map(int, input().split())
+```python
+def main(input_stream, output_stream):
+    MOD = 10**9 +7
 
-if N < M:
+    N, M = map(int, input_stream.readline().rstrip("\n").split())
 
-    print(1 % MOD)
+    if N < M:
 
-else:
+        print(1 % MOD, file=output_stream)
 
-    def multiply(a, b):
+    else:
 
-        res = [[0] * M for _ in range(M)]
+        def multiply(a, b):
+
+            res = [[0] * M for _ in range(M)]
+
+            for i in range(M):
+
+                for k in range(M):
+
+                    if a[i][k]:
+
+                        for j in range(M):
+
+                            res[i][j] = (res[i][j] + a[i][k] * b[k][j]) % MOD
+
+            return res
+
+        def matrix_pow(mat, power):
+
+            result = [[0]*M for _ in range(M)]
+
+            # Identity matrix
+
+            for i in range(M):
+
+                result[i][i] =1
+
+            while power >0:
+
+                if power %2 ==1:
+
+                    result = multiply(result, mat)
+
+                mat = multiply(mat, mat)
+
+                power //=2
+
+            return result
+
+        # Build the transformation matrix.
+
+        mat = [[0]*M for _ in range(M)]
 
         for i in range(M):
 
-            for k in range(M):
+            if i ==0:
 
-                if a[i][k]:
+                mat[i][0] =1
 
-                    for j in range(M):
+                mat[i][M-1] +=1
 
-                        res[i][j] = (res[i][j] + a[i][k] * b[k][j]) % MOD
+            else:
 
-        return res
+                mat[i][i-1] =1
 
-    def matrix_pow(mat, power):
+        k = N - (M-1)
 
-        result = [[0]*M for _ in range(M)]
+        mat_pow = matrix_pow(mat, k)
 
-        # Identity matrix
+        # Initial vector is [1, 1, ..., 1]
+
+        # Multiply the initial vector by mat_pow.
+
+        # The initial vector is [S(M-1), S(M-2), ..., S(0)] = [1,1,...,1]
+
+        # The result is [S(M-1 +k), S(M-2 +k), ..., S(k)] = [S(N), S(N-1), ..., S(N-M+1)]
+
+        res = [0] * M
 
         for i in range(M):
 
-            result[i][i] =1
+            for j in range(M):
 
-        while power >0:
+                res[i] = (res[i] + mat_pow[j][i]) % MOD
 
-            if power %2 ==1:
+        print(res[0] % MOD, file=output_stream)
 
-                result = multiply(result, mat)
 
-            mat = multiply(mat, mat)
 
-            power //=2
+def test():
+    import io
 
-        return result
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-    # Build the transformation matrix.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-    mat = [[0]*M for _ in range(M)]
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-    for i in range(M):
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-        if i ==0:
+    print('Tests passed 😎')
 
-            mat[i][0] =1
 
-            mat[i][M-1] +=1
+if __name__ == '__main__':
+    test()
 
-        else:
 
-            mat[i][i-1] =1
+```
 
-    k = N - (M-1)
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-    mat_pow = matrix_pow(mat, k)
-
-    # Initial vector is [1, 1, ..., 1]
-
-    # Multiply the initial vector by mat_pow.
-
-    # The initial vector is [S(M-1), S(M-2), ..., S(0)] = [1,1,...,1]
-
-    # The result is [S(M-1 +k), S(M-2 +k), ..., S(k)] = [S(N), S(N-1), ..., S(N-M+1)]
-
-    res = [0] * M
-
-    for i in range(M):
-
-        for j in range(M):
-
-            res[i] = (res[i] + mat_pow[j][i]) % MOD
-
-    print(res[0] % MOD)
-
-But wait, the initial vector is [1, 1, ..., 1], which when multiplied by mat_pow gives:
-
-result[i] = sum_{j} initial[j] * mat_pow[j][i]
-
-But since initial[j] is 1 for all j, this is sum_{j} mat_pow[j][i].
-
-So the code can compute the resulting vector as the sum of each column of the matrix_pow.
-
-Thus, the code computes the sum of each column and takes the first element.
-
-This is what the code does.
-
-Testing this code for the samples:
-
-Sample Input 1:
-
-4 2.
-
-M=2, N=4.
-
-k=4-1=3.
-
-mat_pow is T^3.
-
-The matrix T is:
-
-[1,1]
-
-[1,0]
-
-T^3 is:
-
-[3, 2]
-
-[2, 1]
-
-Sum of columns:
-
-For column 0: 3+2=5 → res[0] =5.
-
-For column 1:2+1=3 → res[1]=3.
-
-So the code outputs res[0] =5.
+```
 
 Sample Input 2:
 

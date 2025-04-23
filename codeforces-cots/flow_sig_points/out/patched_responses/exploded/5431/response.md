@@ -1071,41 +1071,185 @@ Yes.
 
 Thus, the code should work.
 
-Now, let's test this code with the samples.
+Testing against sample input 1.
 
-Sample 1:
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-Input:
+    if n == 0:
+        print(0, file=output_stream)
+        return
 
+    # Precompute left array and sum_left
+    left = [a[0]]
+    sum_left = [0] * n
+    sum_left[0] = left[0] - a[0]
+    for i in range(1, n):
+        next_left = max(a[i], left[i-1] + 1)
+        left.append(next_left)
+        sum_left[i] = sum_left[i-1] + (next_left - a[i])
+
+    # Precompute right array and sum_right
+    right = [0] * n
+    sum_right = [0] * n
+    right[-1] = a[-1]
+    sum_right[-1] = right[-1] - a[-1]
+    for i in range(n-2, -1, -1):
+        next_right = max(a[i], right[i+1] + 1)
+        right[i] = next_right
+        sum_right[i] = sum_right[i+1] + (next_right - a[i])
+
+    min_requests = float('inf')
+
+    for i in range(n):
+        l_val = left[i]
+        r_val = right[i]
+        peak = max(l_val, r_val)
+        current_sum = sum_left[i] + sum_right[i]
+        subtract = (l_val - a[i]) + (r_val - a[i])
+        add = peak - a[i]
+        total = current_sum - subtract + add
+        if total < min_requests:
+            min_requests = total
+
+    print(min_requests, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5
-
-1 4 3 2 5
-
-left array: [1,4,5,6,7]
-
-sum_left: [0, 0, 2, 6, 8]
-
-right array: [9,8,7,6,5]
-
-sum_right: [20, 12,8,4,0]
-
-For i=3:
-
-sum_left[3] =6, sum_right[3] =4.
-
-current_total =6+4 - (6-2 +6-2) + (6-2) →10 - (4+4) +4 →2 +4=6.
-
-Sample 2:
-
-Input:
-
-5
-
 1 2 2 2 1
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-sum_left for i=2 is1, sum_right[i=2] is1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-current_total=2 - (1+1) +1 →1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    if n == 0:
+        print(0, file=output_stream)
+        return
+
+    # Precompute left array and sum_left
+    left = [a[0]]
+    sum_left = [0] * n
+    sum_left[0] = left[0] - a[0]
+    for i in range(1, n):
+        next_left = max(a[i], left[i-1] + 1)
+        left.append(next_left)
+        sum_left[i] = sum_left[i-1] + (next_left - a[i])
+
+    # Precompute right array and sum_right
+    right = [0] * n
+    sum_right = [0] * n
+    right[-1] = a[-1]
+    sum_right[-1] = right[-1] - a[-1]
+    for i in range(n-2, -1, -1):
+        next_right = max(a[i], right[i+1] + 1)
+        right[i] = next_right
+        sum_right[i] = sum_right[i+1] + (next_right - a[i])
+
+    min_requests = float('inf')
+
+    for i in range(n):
+        l_val = left[i]
+        r_val = right[i]
+        peak = max(l_val, r_val)
+        current_sum = sum_left[i] + sum_right[i]
+        subtract = (l_val - a[i]) + (r_val - a[i])
+        add = peak - a[i]
+        total = current_sum - subtract + add
+        if total < min_requests:
+            min_requests = total
+
+    print(min_requests, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+10 20 40 50 70 90 30
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 

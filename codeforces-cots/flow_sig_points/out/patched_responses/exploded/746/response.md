@@ -707,11 +707,14 @@ Process each j.
 
 Now, the code:
 
+Testing against sample input 1.
+
+```python
 import sys
 
-def main():
 
-    n = int(sys.stdin.readline())
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
 
     sum_w =0
 
@@ -725,7 +728,7 @@ def main():
 
     for _ in range(n):
 
-        w, h = map(int, sys.stdin.readline().split())
+        w, h = map(int, input_stream.readline().split())
 
         sum_w += w
 
@@ -779,39 +782,54 @@ def main():
 
         results.append(current_w * current_h)
 
-    print(' '.join(map(str, results)))
+    print(' '.join(map(str, results)), file=output_stream)
 
-if __name__ == "__main__":
 
-    main()
 
-Yes, this should work.
+def test():
+    import io
 
-Testing this code with the sample inputs.
-
-Sample Input 1:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 3
+2 1
+1 2
+2 1
+""",
+            "output": \
+"""\
+6 4 6
+""",
+        }, 
+    ]
 
-1 10
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-5 5
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-10 1
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-sum_w is 1+5+10=16.
+    print('Tests passed 😎')
 
-max_h is 10, count_max=1.
 
-second_max is 5.
+if __name__ == '__main__':
+    test()
 
-For j=0: current_w=15. h_j=10. count_max=1. So current_h=5. 15*5=75.
 
-j=1: current_w=11. h_j=5 <10. current_h=10. 11*10=110.
+```
 
-j=2: current_w=6. h_j=1<10. current_h=10. 6*10=60.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Output is 75 110 60.
+```
 
 Sample Input 2:
 

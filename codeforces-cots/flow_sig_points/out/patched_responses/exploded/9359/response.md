@@ -661,13 +661,119 @@ But when n=3 and m=1, the start is (0,0), end is (2,0). The sum layers are 2 (st
 
 So the code is correct.
 
-Testing the first sample:
+Testing against sample inputs 1, 2.
 
-In code, layer_counts for sum 3 is 2. The minimal count is 2. Correct.
+```python
+import sys
+from collections import defaultdict
 
-Second sample:
 
-The code computes the layer counts. The sample's answer is 1. So there's a layer with one cell. The code finds it.
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    grid = [input_stream.readline().strip() for _ in range(n)]
+
+    # Compute reachability from start (0,0)
+    reachable_from_start = [[False]*m for _ in range(n)]
+    reachable_from_start[0][0] = grid[0][0] == '.'  # Always true per problem statement
+
+    for i in range(n):
+        for j in range(m):
+            if (i == 0 and j == 0) or grid[i][j] == '#':
+                continue
+            up = reachable_from_start[i-1][j] if i > 0 else False
+            left = reachable_from_start[i][j-1] if j > 0 else False
+            reachable_from_start[i][j] = up or left
+
+    # Check if end is not reachable
+    if not reachable_from_start[-1][-1]:
+        print(0, file=output_stream)
+        sys.exit()
+
+    # Compute reachability to end (n-1, m-1)
+    reachable_to_end = [[False]*m for _ in range(n)]
+    reachable_to_end[-1][-1] = grid[-1][-1] == '.'  # Always true
+
+    for i in range(n-1, -1, -1):
+        for j in range(m-1, -1, -1):
+            if (i == n-1 and j == m-1) or grid[i][j] == '#':
+                continue
+            down = reachable_to_end[i+1][j] if i < n-1 else False
+            right = reachable_to_end[i][j+1] if j < m-1 else False
+            reachable_to_end[i][j] = down or right
+
+    # Count cells in each layer
+    layer_counts = defaultdict(int)
+    for i in range(n):
+        for j in range(m):
+            if (i == 0 and j == 0) or (i == n-1 and j == m-1):
+                continue
+            if reachable_from_start[i][j] and reachable_to_end[i][j]:
+                s = i + j + 2  # sum of (i+1) + (j+1)
+                if 3 <= s <= (n + m - 1):
+                    layer_counts[s] += 1
+
+    print(min(layer_counts.values()) if layer_counts else 0, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 4
+....
+#.#.
+....
+.#..
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+        {
+            "input": \
+"""\
+3 4
+....
+.##.
+....
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample:
 

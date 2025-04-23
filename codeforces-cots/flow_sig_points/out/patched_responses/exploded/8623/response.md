@@ -159,30 +159,72 @@ Read b, compute the number of divisors, and print that.
 
 So the code would be:
 
-b = int(input())
-if b ==0:
-    print(0)
-else:
-    res =1
-    n =b
-    i=2
-    while i*i <=n:
-        if n%i ==0:
-            cnt =0
-            while n%i ==0:
-                cnt +=1
-                n =n//i
-            res *= cnt +1
-        i +=1
-    if n >1:
-        res *=2
-    print(res)
+Testing against sample input 1.
 
-Yes. That should work.
+```python
+def main(input_stream, output_stream):
+    b = int(input_stream.readline().rstrip("\n"))
+    if b ==0:
+        print(0, file=output_stream)
+    else:
+        res =1
+        n =b
+        i=2
+        while i*i <=n:
+            if n%i ==0:
+                cnt =0
+                while n%i ==0:
+                    cnt +=1
+                    n =n//i
+                res *= cnt +1
+            i +=1
+        if n >1:
+            res *=2
+        print(res, file=output_stream)
 
-Testing sample input 1:
 
-Input is 1. Then, the code starts with i=2. The loop condition is i*i <=1: 2*2=4 >1. So loop doesn't run. Then, n is 1, which is not greater than 1. So res remains 1. Output 1. Correct.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 2: 2. The code starts with i=2. 2*2 <=2? 4>2? No. So enter loop. Check if 2 divides 2. Yes. cnt increments to 1. n becomes 1. res *=1+1=2. Then, exit loop. n is 1, so no more factors. So res is 2. Output 2. Correct.
 

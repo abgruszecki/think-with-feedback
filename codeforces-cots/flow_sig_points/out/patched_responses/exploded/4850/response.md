@@ -511,31 +511,71 @@ while True:
 
 print(days)
 
-Testing sample input2:
+Testing against sample input 2.
 
-c=12, v0=4, v1=12, a=4, l=1.
+```python
+def main(input_stream, output_stream):
+    c, v0, v1, a, l = map(int, input_stream.readline().rstrip("\n").split())
+    current = v0
+    days = 1
+    if current >= c:
+        print(days, file=output_stream)
+    else:
+        while True:
+            days += 1
+            s = v0 + a * (days - 1)
+            s = min(s, v1)
+            possible_new = s - l
+            needed = c - current
+            add = min(possible_new, needed)
+            current += add
+            if current >= c:
+                break
+        print(days, file=output_stream)
 
-day1: current=4. days=1.
 
-Loop:
 
-days=2.
+def test():
+    import io
 
-s =4 +4*(2-1) =8. min(8,12)=8.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+15 1 100 0 0
+""",
+            "output": \
+"""\
+15
+""",
+        }, 
+    ]
 
-possible_new=8-1=7.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-needed=12-4=8. add min(7,8) →7. current becomes 11. days=2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Loop again:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-days=3.
+    print('Tests passed 😎')
 
-s=4+4*(3-1) =4+8=12. possible_new=12-1=11.
 
-needed=12-11=1. add 1. current=12. break. days=3.
+if __name__ == '__main__':
+    test()
 
-Thus, output 3. Correct.
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample3:
 
@@ -551,21 +591,71 @@ days=2. s=1 +0*(2-1) =1. possible_new=1-0=1. add min(1,14) →1. current=2. days
 
 After 14 loops, days is 15. current=15. exit.
 
-Sample1:
+Testing against sample input 1.
 
-c=5, v0=5. current=5. days=1. output 1.
+```python
+def main(input_stream, output_stream):
+    c, v0, v1, a, l = map(int, input_stream.readline().rstrip("\n").split())
+    current = v0
+    days = 1
+    if current >= c:
+        print(days, file=output_stream)
+    else:
+        while True:
+            days += 1
+            s = v0 + a * (days - 1)
+            s = min(s, v1)
+            possible_new = s - l
+            needed = c - current
+            add = min(possible_new, needed)
+            current += add
+            if current >= c:
+                break
+        print(days, file=output_stream)
 
-Another test case:
 
-input 5 3 10 0 1.
 
-c=5. v0=3. a=0. l=1.
+def test():
+    import io
 
-Day1: current=3. Not enough.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+12 4 12 4 1
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-Day2: s=3+0*(2-1) =3. possible_new=3-1=2. add 2. current=5. days=2. output 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Which is correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, the code should handle all cases.
 </think>

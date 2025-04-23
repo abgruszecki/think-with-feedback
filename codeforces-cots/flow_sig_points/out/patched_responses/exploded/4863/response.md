@@ -589,103 +589,254 @@ Now, let's code this.
 
 Sample code:
 
-n, k = map(int, input().split())
+Testing against sample input 1.
 
-a = list(map(int, input().split()))
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-low = min(a)
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-high = max(a)
+    low = min(a)
 
-ans = high
+    high = max(a)
 
-def check_case1(x):
+    ans = high
 
-    count =0
+    def check_case1(x):
 
-    for num in a:
+        count =0
 
-        if count %2 ==0:  # next is odd
+        for num in a:
 
-            if num <=x:
+            if count %2 ==0:  # next is odd
 
-                count +=1
+                if num <=x:
 
-        else:  # next is even, take any
+                    count +=1
 
-            count +=1
-
-        if count >=k:
-
-            return True
-
-    return count >=k
-
-def check_case2(x):
-
-    count =0
-
-    for num in a:
-
-        if count %2 ==1:  # next is even
-
-            if num <=x:
+            else:  # next is even, take any
 
                 count +=1
 
-        else:  # next is odd, take any
+            if count >=k:
 
-            count +=1
+                return True
 
-        if count >=k:
+        return count >=k
 
-            return True
+    def check_case2(x):
 
-    return count >=k
+        count =0
 
-while low <= high:
+        for num in a:
 
-    mid = (low + high) //2
+            if count %2 ==1:  # next is even
 
-    if check_case1(mid) or check_case2(mid):
+                if num <=x:
 
-        ans = mid
+                    count +=1
 
-        high = mid -1
+            else:  # next is odd, take any
 
-    else:
+                count +=1
 
-        low = mid +1
+            if count >=k:
 
-print(ans)
+                return True
 
-Let's test this code against the examples.
+        return count >=k
 
-First example:
+    while low <= high:
 
-Input:
+        mid = (low + high) //2
 
-4 2
+        if check_case1(mid) or check_case2(mid):
 
-1 2 3 4
+            ans = mid
 
-The code's binary search proceeds as explained earlier. The answer is 1.
+            high = mid -1
 
-Second example:
+        else:
 
+            low = mid +1
+
+    print(ans, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4 3
+1 2 3 4
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-1 2 3 4 → output 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Third example:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample inputs 2, 3.
+
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    low = min(a)
+
+    high = max(a)
+
+    ans = high
+
+    def check_case1(x):
+
+        count =0
+
+        for num in a:
+
+            if count %2 ==0:  # next is odd
+
+                if num <=x:
+
+                    count +=1
+
+            else:  # next is even, take any
+
+                count +=1
+
+            if count >=k:
+
+                return True
+
+        return count >=k
+
+    def check_case2(x):
+
+        count =0
+
+        for num in a:
+
+            if count %2 ==1:  # next is even
+
+                if num <=x:
+
+                    count +=1
+
+            else:  # next is odd, take any
+
+                count +=1
+
+            if count >=k:
+
+                return True
+
+        return count >=k
+
+    while low <= high:
+
+        mid = (low + high) //2
+
+        if check_case1(mid) or check_case2(mid):
+
+            ans = mid
+
+            high = mid -1
+
+        else:
+
+            low = mid +1
+
+    print(ans, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5 3
+5 3 4 2 6
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+        {
+            "input": \
+"""\
+6 4
+5 3 50 2 4 5
+""",
+            "output": \
+"""\
+3
+""",
+        }, 
+    ]
 
-5 3 4 2 6 → output 2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Let's see:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Check for x=2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Case1: can we form a subsequence of 3 elements where odd positions are <=2.
 

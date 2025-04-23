@@ -1160,97 +1160,140 @@ Sample code:
 
 Read the two strings.
 
-def compute_a_b(s):
+Testing against sample input 1.
 
-    a = 0
+```python
+def main(input_stream, output_stream):
+    def compute_a_b(s):
 
-    b = 0
+        a = 0
 
-    for c in s:
+        b = 0
 
-        d = int(c)
+        for c in s:
 
-        new_a = a + b
+            d = int(c)
 
-        new_b = a + d
+            new_a = a + b
 
-        a, b = new_a, new_b
+            new_b = a + d
 
-    return a, b
+            a, b = new_a, new_b
 
-s1 = input().strip()
+        return a, b
 
-s2 = input().strip()
+    s1 = input_stream.readline().rstrip("\n").strip()
 
-a1, b1 = compute_a_b(s1)
+    s2 = input_stream.readline().rstrip("\n").strip()
 
-a2, b2 = compute_a_b(s2)
+    a1, b1 = compute_a_b(s1)
 
-A = a1 - a2
+    a2, b2 = compute_a_b(s2)
 
-B = b1 - b2
+    A = a1 - a2
 
-if A == 0 and B ==0:
+    B = b1 - b2
 
-    print("=")
+    if A == 0 and B ==0:
 
-else:
-
-    if A ==0:
-
-        if B >0:
-
-            print(">")
-
-        else:
-
-            print("<")
-
-    elif A >0:
-
-        if B >=0:
-
-            print(">")
-
-        else:
-
-            C = B*B + A*B - A*A
-
-            if C <0:
-
-                print(">")
-
-            else:
-
-                print("<")
+        print("=", file=output_stream)
 
     else:
 
-        if B <=0:
+        if A ==0:
 
-            print("<")
+            if B >0:
 
-        else:
-
-            A_abs = -A
-
-            C = B*B - A_abs*B - A_abs*A_abs
-
-            if C >0:
-
-                print(">")
+                print(">", file=output_stream)
 
             else:
 
-                print("<")
+                print("<", file=output_stream)
 
-Testing this code with the example where A=1, B=3:
+        elif A >0:
 
-The code outputs ">", correct.
+            if B >=0:
 
-The earlier problematic example where A=1, B=3, the code will output ">" because B is positive.
+                print(">", file=output_stream)
 
-Another example where A=1, B=-1:
+            else:
+
+                C = B*B + A*B - A*A
+
+                if C <0:
+
+                    print(">", file=output_stream)
+
+                else:
+
+                    print("<", file=output_stream)
+
+        else:
+
+            if B <=0:
+
+                print("<", file=output_stream)
+
+            else:
+
+                A_abs = -A
+
+                C = B*B - A_abs*B - A_abs*A_abs
+
+                if C >0:
+
+                    print(">", file=output_stream)
+
+                else:
+
+                    print("<", file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+00100
+11
+""",
+            "output": \
+"""\
+=
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+ example where A=1, B=-1:
 
 The code will compute B is negative, then compute C= (-1)^2 +1*(-1) -1=1-1-1=-1 <0 → output ">", which is correct.
 

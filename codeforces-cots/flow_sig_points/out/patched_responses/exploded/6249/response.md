@@ -560,37 +560,109 @@ print(alternative_sorted[0])
 
 This should work.
 
-Testing the first example:
+Testing against sample input 1.
 
-After processing the races, the drivers are Hamilton, Vettel, Webber.
+```python
+def main(input_stream, output_stream):
+    t = int(input_stream.readline().rstrip("\n"))
+    drivers = {}
 
-Original_sorted will be sorted based on their points, then position counts.
+    points_original = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]
 
-Vettel's points are 54 (18+18+18). So he is first.
+    for _ in range(t):
+        n = int(input_stream.readline().rstrip("\n"))
+        for i in range(n):
+            name = input_stream.readline().rstrip("\n").strip()
+            if name not in drivers:
+                drivers[name] = {
+                    'points': 0,
+                    'position_counts': [0] * 50
+                }
+            driver = drivers[name]
+            if i < 10:
+                driver['points'] += points_original[i] if i < len(points_original) else 0
+            pos = i + 1
+            driver['position_counts'][pos - 1] += 1
 
-Alternative_sorted is sorted by number of wins (counts[0]). Hamilton has counts[0] =2 (from first and third race). Vettel has 0. So Hamilton is first.
+    all_drivers = list(drivers.keys())
 
-Hence output is Vettel and Hamilton.
+    # Determine original champion
+    original_sorted = sorted(all_drivers, key=lambda name: (
+        -drivers[name]['points'], 
+        *tuple(-count for count in drivers[name]['position_counts'])
+    ))
 
-Now, code.
+    # Determine alternative champion
+    alternative_sorted = sorted(all_drivers, key=lambda name: (
+        -drivers[name]['position_counts'][0],
+        -drivers[name]['points'],
+        *tuple(-count for count in drivers[name]['position_counts'][1:])
+    ))
 
-But wait, for the alternative key, the code must have the order of comparison as:
+    print(original_sorted[0], file=output_stream)
+    print(alternative_sorted[0], file=output_stream)
 
-number of wins (counts[0]) → points → counts[1], counts[2], etc.
 
-Which is correctly captured by the key (-counts[0], -points, -counts[1], ...).
 
-Yes.
+def test():
+    import io
 
-So the code should work.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+7
+Prost
+Surtees
+Nakajima
+Schumacher
+Button
+DeLaRosa
+Buemi
+8
+Alonso
+Prost
+NinoFarina
+JimClark
+DeLaRosa
+Nakajima
+Patrese
+Surtees
+""",
+            "output": \
+"""\
+Prost
+Prost
+""",
+        }, 
+    ]
 
-Now, possible issues:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-- Drivers not present in all races. But the code correctly accumulates data from all races.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-- Case sensitivity: the problem says that names are case-sensitive, so 'Hamilton' and 'hamilton' are different. The code uses the name as given, which is correct.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-- The code uses a list of 50 elements for position counts, even if the maximum position in a race is 50. So for a race with n=50, the 50th driver is position 50, which is index 49 in the list. Correct.
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Now, code.
 

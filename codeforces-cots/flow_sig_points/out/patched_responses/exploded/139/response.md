@@ -762,47 +762,69 @@ This is efficient and runs in O(n) time, which is acceptable for n up to 2e5.
 
 Thus, the code would be:
 
-n = int(input())
-a = list(map(int, input().split()))
+Testing against sample input 1.
 
-original_count = sum(1 for i in range(n) if a[i] == i + 1)
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-current = 1
-max_k = 0
-for num in a:
-    if num == current:
-        current += 1
-max_k = current - 1
+    original_count = sum(1 for i in range(n) if a[i] == i + 1)
 
-print(max(original_count, max_k))
+    current = 1
+    max_k = 0
+    for num in a:
+        if num == current:
+            current += 1
+    max_k = current - 1
 
-This should handle all cases correctly.
+    print(max(original_count, max_k), file=output_stream)
 
-Testing the second sample:
 
-Input:
 
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
-
 4 2 3 1
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-original_count is 2 (elements 2 and3).
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-max_k is1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Output is 2.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-First sample:
+    print('Tests passed 😎')
 
-7
 
-2 1 4 2 5 3 7
+if __name__ == '__main__':
+    test()
 
-original_count is 2 (elements5 and7).
 
-max_k is3. Max is3.
+```
 
-So the code works.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

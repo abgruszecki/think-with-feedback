@@ -1719,71 +1719,100 @@ For each node u, when you visit its neighbors v, the cost to reach v is:
 
 Thus, the code is:
 
+Testing against sample input 1.
+
+```python
 import sys
 from collections import deque
 
-n, m = map(int, sys.stdin.readline().split())
-adj = [[] for _ in range(n+1)]
-out_degree = [0] * (n+1)
-for _ in range(m):
-    u, v = map(int, sys.stdin.readline().split())
-    adj[u].append(v)
-    out_degree[u] +=1
-s, t = map(int, sys.stdin.readline().split())
 
-if s == t:
-    print(0)
-    sys.exit()
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().split())
+    adj = [[] for _ in range(n+1)]
+    out_degree = [0] * (n+1)
+    for _ in range(m):
+        u, v = map(int, input_stream.readline().split())
+        adj[u].append(v)
+        out_degree[u] +=1
+    s, t = map(int, input_stream.readline().split())
 
-INF = float('inf')
-distance = [INF] * (n+1)
-distance[s] = 0
-deq = deque()
-deq.append(s)
+    if s == t:
+        print(0, file=output_stream)
+        sys.exit()
 
-while deq:
-    u = deq.popleft()
-    if u == t:
-        break
-    for v in adj[u]:
-        new_dist = distance[u] + (1 if out_degree[u] >= 2 else 0)
-        if new_dist < distance[v]:
-            distance[v] = new_dist
-            if out_degree[u] >= 2:
-                deq.append(v)
-            else:
-                deq.appendleft(v)
+    INF = float('inf')
+    distance = [INF] * (n+1)
+    distance[s] = 0
+    deq = deque()
+    deq.append(s)
 
-if distance[t] == INF:
-    print(-1)
-else:
-    print(distance[t])
+    while deq:
+        u = deq.popleft()
+        if u == t:
+            break
+        for v in adj[u]:
+            new_dist = distance[u] + (1 if out_degree[u] >= 2 else 0)
+            if new_dist < distance[v]:
+                distance[v] = new_dist
+                if out_degree[u] >= 2:
+                    deq.append(v)
+                else:
+                    deq.appendleft(v)
 
-Testing this code on sample 1:
+    if distance[t] == INF:
+        print(-1, file=output_stream)
+    else:
+        print(distance[t], file=output_stream)
 
-Sample 1:
 
-Nodes 1's out_degree is 2.
 
-Processing:
+def test():
+    import io
 
-distance[1] =0.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 5
+1 2
+2 1
+1 3
+2 4
+3 4
+1 4
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-Neighbors 2 and 3. new_dist =0 +1=1.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Thus, distance[2] and 3 are set to 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-When processing 2, which has out_degree 2:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-neighbors 1 and4. new_dist =1+1=2 for 1, which is higher than 0. For 4: new_dist=2. So distance[4]=2.
+    print('Tests passed 😎')
 
-When processing 3:
 
-out_degree is 2. new_dist for 4 is 1+1=2.
+if __name__ == '__main__':
+    test()
 
-Thus, the code's answer is 2. But sample's answer is 1.
 
-Thus, this code is incorrect.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, the correct code must use a different model.
 

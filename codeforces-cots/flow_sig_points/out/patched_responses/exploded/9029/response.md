@@ -315,106 +315,80 @@ Yes.
 
 So the code:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n = int(input())
-a = list(map(int, input().split()))
 
-first = {}
-for i in range(n):
-    if a[i] not in first:
-        first[a[i]] = i
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-last = {}
-for i in range(n-1, -1, -1):
-    if a[i] not in last:
-        last[a[i]] = i
+    first = {}
+    for i in range(n):
+        if a[i] not in first:
+            first[a[i]] = i
 
-sorted_first = sorted(first.values())
+    last = {}
+    for i in range(n-1, -1, -1):
+        if a[i] not in last:
+            last[a[i]] = i
 
-total = 0
-for q in last:
-    r = last[q]
-    cnt = bisect.bisect_left(sorted_first, r)
-    total += cnt
+    sorted_first = sorted(first.values())
 
-print(total)
+    total = 0
+    for q in last:
+        r = last[q]
+        cnt = bisect.bisect_left(sorted_first, r)
+        total += cnt
 
-Testing this code against the samples.
+    print(total, file=output_stream)
 
-First sample:
 
-Input:
 
-5
+def test():
+    import io
 
-1 5 4 1 3
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+7
+1 2 1 1 1 3 2
+""",
+            "output": \
+"""\
+7
+""",
+        }, 
+    ]
 
-First occurrence:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-1:0,5:1,4:2,3:4.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Last occurrence:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-1:3,5:1,4:2,1:3,3:4.
+    print('Tests passed 😎')
 
-Wait, wait for last_occurrence:
 
-When building last, processing from right to left (indices 4,3,2,1,0).
+if __name__ == '__main__':
+    test()
 
-At index4:3 → added to last.
 
-index3:1 → added.
+```
 
-index2:4 → added.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-index1:5 → added.
-
-index0:1 → already in last.
-
-So last_occurrence is:
-
-3:4,
-
-1:3,
-
-4:2,
-
-5:1,
-
-Wait no, wait the array is [1,5,4,1,3]. So indices 0:1, 1:5, 2:4, 3:1, 4:3.
-
-Processing from 4 to 0:
-
-i=4:3 → not in last → add 4.
-
-i=3:1 → not in last → add3.
-
-i=2:4 → not in last → add2.
-
-i=1:5 → not in last → add1.
-
-i=0:1 → already in last.
-
-Thus, last_occurrence for 3 is4,1 is3,4 is2,5 is1.
-
-So the last_occurrence dictionary has entries for 1,5,4,3.
-
-So when q is in [1,5,4,3], their last_occurrence are 3,1,2,4.
-
-The sorted_first list is [0,1,2,4].
-
-For each q:
-
-q=1: r=3 → bisect_left([0,1,2,4],3) returns 3 (since 3 is inserted after 2, index3). So cnt=3.
-
-q=5: r=1 → bisect_left returns1 (elements 0,1, but 1 is found at index1, so cnt=1? Wait, the list is [0,1,2,4]. For r=1, the first element >=1 is at index1. So bisect_left returns1. So cnt=1. Because the elements before index1 are 0, so count is1.
-
-q=4: r=2 → bisect_left([0,1,2,4], 2) returns2. So elements before index2 are 0,1 → count2.
-
-q=3: r=4 → bisect_left([0,1,2,4],4) returns3 (since 4 is found at index3, so elements before are 0,1,2 → count3.
-
-Sum 3+1+2+3=9. Which is correct.
+```
 
 Sample 2:
 

@@ -144,25 +144,137 @@ print(count)
 
 Yes. That's the code.
 
-Testing the sample inputs.
+Testing against sample input 1.
 
-First sample input:
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-5 4
+    pointer = 0
+    count = 0
 
-2 4 5 2 4
+    for cost in c:
+        if pointer >= m:
+            break
+        if a[pointer] >= cost:
+            count += 1
+            pointer += 1
 
-5 3 4 6 → code processes each cost in order.
+    print(count, file=output_stream)
 
-The code should output 3.
 
-Second sample input:
 
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 5 2
-
 20 40 50 20 40
+19 20
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-19 20 → first cost is 20. a[0] is 19 <20. So pointer remains 0. Next cost 40: a[0] 19 <40. Continue. All steps, pointer is 0. So count remains 0.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
+Testing against sample input 2.
+
+```python
+def main(input_stream, output_stream):
+    n, m = map(int, input_stream.readline().rstrip("\n").split())
+    c = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+
+    pointer = 0
+    count = 0
+
+    for cost in c:
+        if pointer >= m:
+            break
+        if a[pointer] >= cost:
+            count += 1
+            pointer += 1
+
+    print(count, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+6 4
+4 8 15 16 23 42
+1000 1000 1000 1000
+""",
+            "output": \
+"""\
+4
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Third sample: 6 games, 4 bills. All a are 1000. So each of first 4 games: cost 4,8,15,16 → 1000 >= each. So count increases to 4. Then no more bills. So output is 4.
 

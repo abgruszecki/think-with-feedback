@@ -831,135 +831,133 @@ Keep track of the minimal sum.
 
 Thus, the code:
 
-import sys
+Testing against sample input 1.
 
+```python
+import sys
 from itertools import permutations
 
-lines = [line.strip() for line in sys.stdin if line.strip()]
 
-n = int(lines[0])
+def main(input_stream, output_stream):
+    lines = [line.strip() for line in input_stream if line.strip()]
 
-current = 1
+    n = int(lines[0])
 
-pieces = []
+    current = 1
 
-for _ in range(4):
+    pieces = []
 
-    piece = lines[current:current + n]
+    for _ in range(4):
 
-    pieces.append(piece)
+        piece = lines[current:current + n]
 
-    current +=n
+        pieces.append(piece)
 
-precomp = []
+        current +=n
 
-for piece in pieces:
+    precomp = []
 
-    cost0 = 0
+    for piece in pieces:
 
-    cost1 = 0
+        cost0 = 0
 
-    for i in range(n):
+        cost1 = 0
 
-        row = piece[i]
+        for i in range(n):
 
-        for j in range(n):
+            row = piece[i]
 
-            cell = int(row[j])
+            for j in range(n):
 
-            e0 = (i + j) % 2
+                cell = int(row[j])
 
-            e1 = (i + j + 1) % 2
+                e0 = (i + j) % 2
 
-            if cell != e0:
+                e1 = (i + j + 1) % 2
 
-                cost0 +=1
+                if cell != e0:
 
-            if cell != e1:
+                    cost0 +=1
 
-                cost1 +=1
+                if cell != e1:
 
-    precomp.append( (cost0, cost1) )
+                    cost1 +=1
 
-min_total = float('inf')
+        precomp.append( (cost0, cost1) )
 
-for perm in permutations([0,1,2,3]):
+    min_total = float('inf')
 
-    a, b, c, d = perm
+    for perm in permutations([0,1,2,3]):
 
-    sum_s0 = precomp[a][0] + precomp[b][1] + precomp[c][1] + precomp[d][0]
+        a, b, c, d = perm
 
-    sum_s1 = precomp[a][1] + precomp[b][0] + precomp[c][0] + precomp[d][1]
+        sum_s0 = precomp[a][0] + precomp[b][1] + precomp[c][1] + precomp[d][0]
 
-    current_min = min(sum_s0, sum_s1)
+        sum_s1 = precomp[a][1] + precomp[b][0] + precomp[c][0] + precomp[d][1]
 
-    if current_min < min_total:
+        current_min = min(sum_s0, sum_s1)
 
-        min_total = current_min
+        if current_min < min_total:
 
-print(min_total)
+            min_total = current_min
 
-This code should handle all cases correctly.
+    print(min_total, file=output_stream)
 
-Testing it against the sample inputs:
 
-First sample input:
 
-1
+def test():
+    import io
 
-0
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+101
+010
+101
+101
+000
+101
+010
+101
+011
+010
+101
+010
+""",
+            "output": \
+"""\
+2
+""",
+        }, 
+    ]
 
-0
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-1
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-0
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-The four pieces are:
+    print('Tests passed 😎')
 
-Piece0: ["0"]
 
-Piece1: ["0"]
+if __name__ == '__main__':
+    test()
 
-Piece2: ["1"]
 
-Piece3: ["0"]
+```
 
-precomp for each piece:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-For each piece (n=1), i and j are 0.
-
-For piece0:
-
-cell is 0.
-
-e0 = (0+0) mod 2 = 0 → cell == e0 → cost0 += 0.
-
-e1 = (0+0+1) mod 2 = 1 → cell != e1 → cost1 += 1.
-
-So precomp[0] = (0, 1)
-
-piece1: same as piece0 → precomp[1] = (0, 1)
-
-piece2: cell is 1.
-
-e0 is 0 → 1 != 0 → cost0 +=1.
-
-e1 is 1 → 1 == 1 → cost1 +=0.
-
-precomp[2] = (1, 0)
-
-piece3: cell is 0 → same as piece0: (0,1).
-
-precomp is [ (0,1), (0,1), (1,0), (0,1) ]
-
-Now, permutations of indices [0,1,2,3].
-
-For each permutation, compute sum_s0 and sum_s1.
-
-Looking for the minimal sum.
-
-The correct answer is 1.
+```
 
 Let's see.
 

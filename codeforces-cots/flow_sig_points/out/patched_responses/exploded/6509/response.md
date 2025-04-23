@@ -668,93 +668,214 @@ Thus, the code can be modified as follows.
 
 Here's the revised code with these optimizations:
 
-n = int(input())
+Testing against sample input 1.
 
-intervals = []
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-for idx in range(n):
+    intervals = []
 
-    l, r = map(int, input().split())
+    for idx in range(n):
 
-    intervals.append( (l, r, idx+1) )
+        l, r = map(int, input_stream.readline().rstrip("\n").split())
 
-intervals.sort(key=lambda x: (x[0], x[1]))
+        intervals.append( (l, r, idx+1) )
 
-starts = []
-ends = []
-original_indices = []
-for x in intervals:
-    starts.append(x[0])
-    ends.append(x[1])
-    original_indices.append(x[2])
+    intervals.sort(key=lambda x: (x[0], x[1]))
 
-original_valid = True
-prev_end = -1
-for s, e in zip(starts, ends):
-    if s < prev_end:
-        original_valid = False
-        break
-    prev_end = e
+    starts = []
+    ends = []
+    original_indices = []
+    for x in intervals:
+        starts.append(x[0])
+        ends.append(x[1])
+        original_indices.append(x[2])
 
-if original_valid:
-    print(n)
-    print(' '.join(map(str, sorted(original_indices))))
-else:
-    candidates = []
-    for i in range(n):
-        current_valid = True
-        prev = -1
-        for j in range(n):
-            if j == i:
-                continue
-            s_j = starts[j]
-            e_j = ends[j]
-            if s_j < prev:
-                current_valid = False
-                break
-            prev = e_j
-        if current_valid:
-            candidates.append(original_indices[i])
-    candidates.sort()
-    print(len(candidates))
-    if candidates:
-        print(' '.join(map(str, candidates)))
+    original_valid = True
+    prev_end = -1
+    for s, e in zip(starts, ends):
+        if s < prev_end:
+            original_valid = False
+            break
+        prev_end = e
 
-This code precomputes the starts and ends arrays, which are lists of integers. This makes accessing them faster than tuples.
+    if original_valid:
+        print(n, file=output_stream)
+        print(' '.join(map(str, sorted(original_indices))), file=output_stream)
+    else:
+        candidates = []
+        for i in range(n):
+            current_valid = True
+            prev = -1
+            for j in range(n):
+                if j == i:
+                    continue
+                s_j = starts[j]
+                e_j = ends[j]
+                if s_j < prev:
+                    current_valid = False
+                    break
+                prev = e_j
+            if current_valid:
+                candidates.append(original_indices[i])
+        candidates.sort()
+        print(len(candidates), file=output_stream)
+        if candidates:
+            print(' '.join(map(str, candidates)), file=output_stream)
 
-Another possible optimization: using early termination in the inner loop. For example, once current_valid is False, we break the loop. So this reduces the number of steps per i.
 
-But this is already handled in the code.
 
-Another optimization is to precompute the starts and ends as lists of integers, which are stored in contiguous memory and accessed faster.
+def test():
+    import io
 
-This should significantly speed up the code.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4
+3 10
+20 30
+1 3
+1 39
+""",
+            "output": \
+"""\
+1
+4
+""",
+        }, 
+    ]
 
-Testing this code with the samples:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Sample 1:
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-After sorting, starts = [1,3,20], ends = [3,10,30]. original_valid is True. So output 3 and sorted original_indices (3,1,2) sorted gives 1,2,3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Sample 2:
+    print('Tests passed 😎')
 
-starts = [1,1,3,20], ends = [3,39,10,30]. original_valid checks:
 
-prev_end starts at -1. first s=1 >=-1, prev_end=3. next s=1 <3 → invalid. So original_valid is False.
+if __name__ == '__main__':
+    test()
 
-Checking each i:
 
-i=0 (original index 3, which is group3). starts[j] for j=0 is 1 (i=0 is skipped). Then j=1 (s=1), prev_end is -1 → 1 >=-1 → prev becomes 39. j=2 (s=3 <39 → invalid. So current_valid is False.
+```
 
-i=1 (group4). Check j=0 (s=1 → prev becomes 3), j=2 (s=3 → ok, prev becomes10), j=3 (s=20 → ok. So current_valid is True. So group4 is added.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Other i's may not be valid.
+```
 
-So code works.
+Testing against sample input 2.
 
-Thus, the code should work, and with the optimizations, it should be fast enough for n=5000.
+```python
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-So this is the final code.
+    intervals = []
+
+    for idx in range(n):
+
+        l, r = map(int, input_stream.readline().rstrip("\n").split())
+
+        intervals.append( (l, r, idx+1) )
+
+    intervals.sort(key=lambda x: (x[0], x[1]))
+
+    starts = []
+    ends = []
+    original_indices = []
+    for x in intervals:
+        starts.append(x[0])
+        ends.append(x[1])
+        original_indices.append(x[2])
+
+    original_valid = True
+    prev_end = -1
+    for s, e in zip(starts, ends):
+        if s < prev_end:
+            original_valid = False
+            break
+        prev_end = e
+
+    if original_valid:
+        print(n, file=output_stream)
+        print(' '.join(map(str, sorted(original_indices))), file=output_stream)
+    else:
+        candidates = []
+        for i in range(n):
+            current_valid = True
+            prev = -1
+            for j in range(n):
+                if j == i:
+                    continue
+                s_j = starts[j]
+                e_j = ends[j]
+                if s_j < prev:
+                    current_valid = False
+                    break
+                prev = e_j
+            if current_valid:
+                candidates.append(original_indices[i])
+        candidates.sort()
+        print(len(candidates), file=output_stream)
+        if candidates:
+            print(' '.join(map(str, candidates)), file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+1 5
+2 6
+3 7
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

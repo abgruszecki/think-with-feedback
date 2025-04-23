@@ -603,60 +603,96 @@ Yes.
 
 So the code can be written as:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n, k = map(int, input().split())
-a = list(map(int, input().split()))
-a.sort()
 
-# Compute unique elements and counts
-unique = []
-counts = []
-if not a:
-    pass  # but n >=1
-current = a[0]
-cnt =1
-for num in a[1:]:
-    if num == current:
-        cnt +=1
-    else:
-        unique.append(current)
-        counts.append(cnt)
-        current = num
-        cnt =1
-unique.append(current)
-counts.append(cnt)
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
+    a.sort()
 
-# Compute prefix_sums
-prefix_sums = [0]
-for c in counts:
-    prefix_sums.append(prefix_sums[-1] + c *n)
+    # Compute unique elements and counts
+    unique = []
+    counts = []
+    if not a:
+        pass  # but n >=1
+    current = a[0]
+    cnt =1
+    for num in a[1:]:
+        if num == current:
+            cnt +=1
+        else:
+            unique.append(current)
+            counts.append(cnt)
+            current = num
+            cnt =1
+    unique.append(current)
+    counts.append(cnt)
 
-# Find i using bisect
-i = bisect.bisect_left(prefix_sums, k)
-# x is unique[i-1]
-x = unique[i-1]
-sum_prev = prefix_sums[i-1]
-k_prime = k - sum_prev
-count_x = counts[i-1]
-j = (k_prime -1) // count_x
-y = a[j]
+    # Compute prefix_sums
+    prefix_sums = [0]
+    for c in counts:
+        prefix_sums.append(prefix_sums[-1] + c *n)
 
-print(x, y)
+    # Find i using bisect
+    i = bisect.bisect_left(prefix_sums, k)
+    # x is unique[i-1]
+    x = unique[i-1]
+    sum_prev = prefix_sums[i-1]
+    k_prime = k - sum_prev
+    count_x = counts[i-1]
+    j = (k_prime -1) // count_x
+    y = a[j]
 
-This should handle all cases correctly.
+    print(x, y, file=output_stream)
 
-Let's test the example where array is [1,1,2], k=5.
 
-sorted array is [1,1,2]. unique is [1,2], counts [2,1], prefix_sums [0,6,9]. bisect_left(prefix_sums,5) is 1. sum_prev=0, k_prime=5, count_x=2. j=(5-1)//2=2. a[2] is 2. So output is 1 2. Correct.
 
-Another example:
+def test():
+    import io
 
-array [1,3,5], k=2. prefix_sums [0,3,6,9]. bisect_left([0,3,6,9],2) is 1. x=1. sum_prev=0. k_prime=2. count_x=1. j= (2-1)//1=1. a[1] is3. output 1 3. Correct.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3 2
+3 1 5
+""",
+            "output": \
+"""\
+1 3
+""",
+        }, 
+    ]
 
-Sample input 1:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-array [2,1] sorted to [1,2]. unique [1,2], counts [1,1]. prefix_sums [0, 2,4]. k=4. bisect_left([0,2,4],4) returns 2. i-1=1. x=2. sum_prev=2. k_prime=4-2=2. count_x=1. j=(2-1)//1=1. a[1] is2. output 2 2. Correct.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Thus, this code should handle all cases.
 </think>

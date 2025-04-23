@@ -362,43 +362,84 @@ But in code, for very large n, calculating S(n) is O(1) using the formula.
 
 So the code would look something like:
 
+Testing against sample input 2.
+
+```python
 import math
 
-x = int(input())
 
-target = abs(x)
+def main(input_stream, output_stream):
+    x = int(input_stream.readline().rstrip("\n"))
 
-if target ==0:
+    target = abs(x)
 
-    print(0)
+    if target ==0:
 
-else:
-
-    n = math.ceil( (math.sqrt(8 * target +1) -1)/2 )
-
-    s = n*(n+1)//2
-
-    if (s - target) %2 ==0:
-
-        print(n)
+        print(0, file=output_stream)
 
     else:
 
-        if (n+1) %2 ==1:
+        n = math.ceil( (math.sqrt(8 * target +1) -1)/2 )
 
-            print(n+1)
+        s = n*(n+1)//2
+
+        if (s - target) %2 ==0:
+
+            print(n, file=output_stream)
 
         else:
 
-            print(n+2)
+            if (n+1) %2 ==1:
 
-But wait, let's test some examples.
+                print(n+1, file=output_stream)
 
-Sample input 2:
+            else:
 
-target=2.
+                print(n+2, file=output_stream)
 
-n is computed as (sqrt(17)-1)/2. sqrt(17) is ~4.123. (4.123-1)/2 ~1.56. ceil is 2. S(2) =3. 3-2=1 (odd). So else block. (n+1) is 3, which is odd. So return 3. Correct.
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+0
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample input 6: target=6.
 

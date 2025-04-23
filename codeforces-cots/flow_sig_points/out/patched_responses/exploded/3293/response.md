@@ -496,41 +496,72 @@ Wait, no: the input constraints say a <= b. So yes, b - a is non-negative.
 
 Thus, the code is correct.
 
-Testing sample input 1:
+Testing against sample input 1.
 
-n=5, a=1, b=2.
+```python
+def main(input_stream, output_stream):
+    MOD = 1234567891
 
-term_a = 1^5 mod MOD = 1.
+    n, a, b = map(int, input_stream.readline().rstrip("\n").split())
 
-term_ba = (2-1) = 1 → 1^5 mod MOD = 1.
+    term_a = pow(a, n, MOD)
+    term_ba = pow(b - a, n, MOD)
+    term_b = pow(b, n, MOD)
 
-term_b = 2^5 mod MOD = 32.
+    numerator = (term_b - term_a - term_ba) % MOD
+    numerator = (numerator + MOD) % MOD  # Ensure non-negative
 
-numerator = 32 -1 -1 =30 → 30 mod MOD is 30.
+    denominator = term_b % MOD
+    inv_denominator = pow(denominator, MOD - 2, MOD)
 
-denominator =32.
+    result = (numerator * inv_denominator) % MOD
 
-inv_denominator = pow(32, MOD-2, MOD) → compute 32^{-1} mod MOD.
+    print(result, file=output_stream)
 
-Let me compute 32 * x ≡ 1 mod MOD.
 
-Using extended Euclidean algorithm, but in Python, pow(32, MOD-2, MOD) gives the inverse.
 
-The inverse of 32 mod MOD is 386802469.
+def test():
+    import io
 
-32 * 386802469 = 123,456,789,  32 * 386802469 = 12375678928 → which mod 1234567891.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+1 228 239
+""",
+            "output": \
+"""\
+0
+""",
+        }, 
+    ]
 
-Wait, perhaps it's easier to let Python compute it.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-But in any case, 30 * inv(32) mod MOD = 30 * 386802469 mod MOD.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-But 30 * 386802469 = 11,604,074,070 → mod 1234567891.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Compute 11,604,074,070 divided by 1234567891.
+    print('Tests passed 😎')
 
-But regardless, the sample output is 848765426, which is what the code should compute.
 
-Thus, the code is correct.
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
+
 </think>
 
 ```python

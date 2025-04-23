@@ -1063,13 +1063,17 @@ But dynamic allocation is possible.
 
 Thus, the code:
 
+Testing against sample input 1.
+
+```python
 import sys
 from sys import stdin
 import math
 
-def main():
+
+def main(input_stream, output_stream):
     sys.setrecursionlimit(1 << 25)
-    m = int(stdin.readline())
+    m = int(input_stream.readline())
     max_level = 20
     max_node = m + 1
     depth = [0] * (max_node + 1)
@@ -1084,7 +1088,7 @@ def main():
     v = 1
     D = 0
     count = 1
-    print(1)  # The initial state after node 1 is added. But according to the problem statement, the first query corresponds to level 1. Wait, wait.
+    print(1, file=output_stream)  # The initial state after node 1 is added. But according to the problem statement, the first query corresponds to level 1. Wait, wait.
 
     # Wait, the problem says: i-th line (1 ≤ i ≤ m) describes the i-th level and contains yi — the parent of class i+1. Initially, there's class 1. Then, for each level i from 1 to m, we add node i+1. So the number of nodes after m levels is m+1.
 
@@ -1121,7 +1125,7 @@ def main():
     # Then, for each of the m queries:
 
     for i in range(1, m+1):
-        yi = int(stdin.readline())
+        yi = int(input_stream.readline())
         current_node = i+1
         parent = yi
         depth[current_node] = depth[parent] + 1
@@ -1169,123 +1173,67 @@ def main():
         else:
             pass  # count remains
         
-        print(count)
+        print(count, file=output_stream)
 
-But wait, in the initial state, after node 1 is added (before any queries), the output is nothing. Then, after processing the first query (adding node 2), the output is printed. The first sample input has four queries, and the first output line is 2.
 
-In the code above, the loop runs for m queries. For each query, after adding the new node (current_node = i+1), the code computes the count and prints it.
 
-Yes. So for the first sample input with m=4, the code will output four lines.
+def test():
+    import io
 
-Now, the code for get_dist may be a bit slow for m=3e5. Let's optimize it.
-
-But in Python, with m=3e5 and get_dist being O(log m) per call, this is O(m log m) time, which is acceptable.
-
-But the code may need to be optimized for speed.
-
-Alternative approach: Precompute the LCA and distance functions using binary lifting.
-
-Another optimization is to compute the LCA in a more efficient way.
-
-But for now, the code as written should work.
-
-Testing the first sample:
-
-Sample input:
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 4
 1
 1
 2
-1
+3
+""",
+            "output": \
+"""\
+2
+2
+2
+2
+""",
+        }, 
+    ]
 
-Queries:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Level 1: add node 2 as child of 1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-dist_u = distance(2, u=1) is 1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-dist_v = distance(2, v=1) is 1.
+    print('Tests passed 😎')
 
-candidate =1 > D=0.
 
-D becomes 1.
+if __name__ == '__main__':
+    test()
 
-u and v become 2 and 1.
 
-count=2.
+```
 
-Output is 2.
+<RUN_SNIPPET>
+```output
+Traceback (most recent call last):
+  File "/workdir/snippet.py", line 150, in <module>
+    test()
+    ~~~~^^
+  File "/workdir/snippet.py", line 143, in test
+    assert real_output == expected_output, \
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Test case 0 failed.
+Expected: '2\n2\n2\n2'
+Got: '1\n2\n2\n2\n2'
 
-Level 2: add node 3 as child of 1.
-
-dist_u = distance(3, u=2) → LCA is 1.
-
-distance: 2 (3-1-2).
-
-dist_v = distance(3, v=1) → 1.
-
-candidate is 2 > D=1.
-
-D becomes 2.
-
-u becomes 3, v becomes 2.
-
-count=2.
-
-Output 2.
-
-Level 3: add node 4 as child of 2.
-
-distance to u=3 is 3 (4-2-1-3).
-
-distance to v=2 is 1 (4-2).
-
-candidate is 3> D=2.
-
-D becomes 3.
-
-u becomes 4, v becomes 3.
-
-count=2.
-
-Output 2.
-
-Level4: add node5 as child of 1.
-
-distance to u=4:
-
-path 5-1-2-4 → depth 5 is 1, depth 4 is 3.
-
-LCA of 5 and 4 is 1.
-
-distance is (1 +3) - 2*0 =4? Wait, depth of 5 is 1 (parent is 1, depth 0 +1 =1). Depth of 4 is 3 (1→2→4: 0+1=1 for 2, 1+1=2 for 4? Wait, no. Let's recheck.
-
-When node 2 is added, parent is 1 (depth 0 → depth 1).
-
-Node 4's parent is 2 (depth 1 → depth 2).
-
-So depth of node 4 is 2.
-
-Thus, when calculating distance between node 5 and 4:
-
-depth of 5 is 1, depth of 4 is 2.
-
-LCA is 1.
-
-distance is 1 +2 - 2*0=3.
-
-Thus, dist_u =3, dist_v= distance(5,3) is 2 (5-1-3).
-
-candidate is 3 == D=3.
-
-count +=1 → 3.
-
-Output 3.
-
-Which matches the sample.
-
-Thus, the code works for the first sample.
+```
 
 The second sample:
 

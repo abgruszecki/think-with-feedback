@@ -863,55 +863,164 @@ Process the queries using Mo's algorithm, maintaining count and product_primes.
 
 Output the answers in the original order.
 
-But let's test this code with the sample input.
+Testing against sample input 1.
 
-Sample Input 1:
+```python
+import sys
+import math
 
-10
 
-1 2 3 4 5 6 7 8 9 10
+MOD = 10**9 + 7
 
+def main(input_stream, output_stream):
+    n = int(input_stream.readline())
+    a = list(map(int, input_stream.readline().split()))
+    q = int(input_stream.readline())
+    queries = []
+    for i in range(q):
+        l, r = map(int, input_stream.readline().split())
+        queries.append((l, r, i))
+    
+    max_a = 10**6
+    spf = list(range(max_a + 1))
+    for i in range(2, int(math.sqrt(max_a)) + 1):
+        if spf[i] == i:
+            for j in range(i * i, max_a + 1, i):
+                if spf[j] == j:
+                    spf[j] = i
+
+    # Factorize each element into distinct primes
+    primes_list = []
+    for x in a:
+        if x == 1:
+            primes_list.append(set())
+            continue
+        factors = set()
+        tmp = x
+        while tmp > 1:
+            p = spf[tmp]
+            factors.add(p)
+            while tmp % p == 0:
+                tmp //= p
+        primes_list.append(factors)
+    
+    # Precompute prefix product and inverse prefix
+    prefix = [1] * (n + 1)
+    for i in range(1, n + 1):
+        prefix[i] = (prefix[i-1] * a[i-1]) % MOD
+    inv_prefix = [1] * (n + 1)
+    for i in range(n + 1):
+        inv_prefix[i] = pow(prefix[i], MOD-2, MOD)
+    
+    # Precompute term and inv_term for all primes up to 1e6
+    max_p = 10**6
+    term = [0] * (max_p + 1)
+    inv_term = [0] * (max_p + 1)
+    for p in range(2, max_p + 1):
+        if spf[p] == p:
+            term[p] = ((p-1) * pow(p, MOD-2, MOD)) % MOD
+            inv_term[p] = (pow(p-1, MOD-2, MOD) * p) % MOD
+    
+    # Mo's algorithm setup
+    block_size = int(math.sqrt(n)) + 1
+    queries.sort(key=lambda x: (x[0] // block_size, x[1] if (x[0] // block_size) % 2 == 0 else -x[1]))
+    
+    current_l = 1
+    current_r = 0
+    product_primes = 1
+    count = [0] * (max_p + 2)
+    answers = [0] * q
+    
+    for l, r, idx in queries:
+        # Move current_l to l
+        while current_l > l:
+            current_l -= 1
+            for p in primes_list[current_l - 1]:
+                if count[p] == 0:
+                    product_primes = (product_primes * term[p]) % MOD
+                count[p] += 1
+        while current_r < r:
+            current_r += 1
+            for p in primes_list[current_r - 1]:
+                if count[p] == 0:
+                    product_primes = (product_primes * term[p]) % MOD
+                count[p] += 1
+        while current_l < l:
+            for p in primes_list[current_l - 1]:
+                count[p] -= 1
+                if count[p] == 0:
+                    product_primes = (product_primes * inv_term[p]) % MOD
+            current_l += 1
+        while current_r > r:
+            for p in primes_list[current_r - 1]:
+                count[p] -= 1
+                if count[p] == 0:
+                    product_primes = (product_primes * inv_term[p]) % MOD
+            current_r -= 1
+        
+        product_mod = (prefix[r] * inv_prefix[l-1]) % MOD
+        res = (product_mod * product_primes) % MOD
+        answers[idx] = res
+    
+    for ans in answers:
+        print(ans, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
 7
+24 63 13 52 6 10 1
+6
+3 5
+4 7
+1 7
+2 4
+3 6
+2 6
+""",
+            "output": \
+"""\
+1248
+768
+12939264
+11232
+9984
+539136
+""",
+        }, 
+    ]
 
-1 1
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-3 8
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-5 6
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-4 8
+    print('Tests passed 😎')
 
-8 10
 
-7 9
+if __name__ == '__main__':
+    test()
 
-7 10
 
-Sample Output:
+```
 
-1
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-4608
-
-8
-
-1536
-
-192
-
-144
-
-1152
-
-Let's see:
-
-For the first query, l=1, r=1: a[0] is 1, no primes. product_primes is 1. product_mod is 1. So 1*1=1.
-
-In the code, the product_primes is 1, and the product_mod is 1.
-
-Yes.
-
-So the code seems correct.
+```
 
 But in Python, the main problem is speed. For 2e5 queries, each requiring O(1) steps after processing, but each step requiring moving l and r through elements and processing their primes.
 

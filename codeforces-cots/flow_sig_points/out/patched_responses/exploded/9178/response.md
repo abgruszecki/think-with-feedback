@@ -623,343 +623,185 @@ Now, code:
 
 Read n and k.
 
-n, k = map(int, input().split())
+Testing against sample input 1.
 
-if n ==1:
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-    print(0)
+    if n == 1:
+        print(0, file=output_stream)
+        return
 
-    exit()
+    S = n - 1
+    K = k - 1
 
-S = n-1
-
-K =k-1
-
-# Compute m_max
-
-m_max = int( ( ( (8*S +1)**0.5 -1 ) ) // 2 )
-
-if m_max > K:
-
-    m_max = K
-
-# compute sum_max(m_max)
-
-current_sum_max = m_max * (2*K - m_max +1) // 2
-
-if current_sum_max < S:
-
-    print(-1)
-
-else:
-
-    # binary search between 1 and m_max
-
-    low =1
-
-    high = m_max
-
-    ans = -1
-
+    # Find m_max using binary search
+    low, high = 0, 2 * 10**18
+    m_max = 0
     while low <= high:
-
-        mid = (low + high) //2
-
-        s_max = mid*(2*K -mid +1) //2
-
-        if s_max >= S:
-
-            ans = mid
-
-            high = mid -1
-
+        mid = (low + high) // 2
+        sum_min = mid * (mid + 1) // 2
+        if sum_min <= S:
+            m_max = mid
+            low = mid + 1
         else:
-
-            low = mid +1
-
-    print(ans if ans !=-1 else -1)
-
-Wait, but sum_max(m_max) >=S, so the binary search must find ans.
-
-But need to make sure.
-
-So the code should work.
-
-Test case where K is 3 (k=4), S=3.
-
-m_max is 2. sum_max(2) is 2*(6-2+1)/2 = 2*5/2=5 >=3. So binary search.
-
-low=1, high=2.
-
-mid=1: sum_max(1) =3 → 3>=3. ans=1. high=0.
-
-Loop ends. answer is 1.
-
-But sum_min(1) is 1. So S=3 >=1. So yes. But sum_max(1) is3. So 3 >=3. So m=1 is possible. But wait, sum_max(1) is 3, which is exactly S. So the answer is 1.
-
-But according to the first sample, the answer was 2. Wait, no. Wait the first sample's input was:
-
-4 3 → n=4, k=3. So K=k-1=2.
-
-S=3.
-
-Then m_max is (sqrt(25) -1)/2=2.
-
-sum_max(m_max=2) =2*(2*2 -2 +1)/2=2*(3)/2=3 ==3. So sum_max(2) is 3.
-
-So binary search between 1 and 2.
-
-Mid=1: sum_max(1) =2 → 2 <3. So no. low=2.
-
-mid=2: sum_max(2)=3 >=3. ans=2. high=1. loop ends. So answer is 2. Which is correct.
-
-So code works.
-
-Another example: when K=4, S=4.
-
-m_max = (sqrt(33)-1)/2= (5.744-1)/2= 2.372 → m_max=2.
-
-sum_max(2) is 2*(8 -2 +1)/2=2*7/2=7 >=4.
-
-binary search:
-
-low=1, high=2.
-
-mid=1: sum_max(1) =4 →4 >=4. ans=1. high=0. return 1.
-
-sum_min(1)=1 <=4. So valid. Answer is1. Which is correct.
-
-Thus, the code works.
-
-So, in code:
-
-The code should handle all the cases correctly.
-
-So the code is:
-
-Read n and k.
-
-If n ==1: print 0.
-
-Else:
-
-Compute S =n-1.
-
-Compute K =k-1.
-
-Compute m_max as (sqrt(8*S +1) -1) //2, then clamp to K.
-
-If sum_max(m_max) <S: print -1.
-
-Else binary search for the minimal m in 1..m_max where sum_max(m) >=S.
-
-Print m.
-
-Now, code.
-
-But in Python, for very large numbers, the square root might be imprecise. So perhaps, we can compute m_max via binary search.
-
-Alternatively, use integer square root.
-
-But in Python, for S up to 1e18, 8*S+1 is up to 8e18+1. The square root is about 2.8e9. So for m_max up to 2.8e9, which is manageable.
-
-But in Python, the calculation of (8*S +1)**0.5 can have floating point precision issues.
-
-For example, for S=1e18, 8*S+1 is 8e18+1. The square root is 894427190.999... So using integer conversion may lead to off-by-one errors.
-
-So a better way to compute m_max is to perform binary search for the largest m where sum_min(m) <=S.
-
-sum_min(m) = m(m+1)/2 <=S.
-
-We can binary search m in 0 to 2e9 (since S is up to 1e18, m_max is up to around 4.4e9 for S=1e18). Wait, sum_min(m) = m(m+1)/2 <=S → m^2 ≈ 2S → m ~ sqrt(2S) → which is up to 1e9 for S=1e18 (since sqrt(1e18)=1e9).
-
-So binary search for m_max as the largest m where m(m+1)/2 <= S.
-
-This would be more accurate.
-
-So the code can be adjusted.
-
-So:
-
-Compute m_max via binary search.
-
-low =0, high = 2e18 (some large number).
-
-find the largest m where m(m+1)/2 <= S.
-
-Similarly.
-
-So code steps for m_max:
-
-low =0
-
-high = int( (2*S)**0.5 ) +2  # initial high value.
-
-m_max =0
-
-while low <= high:
-
-    mid = (low + high) //2
-
-    sum_min = mid*(mid+1)//2
-
-    if sum_min <=S:
-
-        m_max =mid
-
-        low=mid +1
-
+            high = mid - 1
+
+    # Clamp m_max to K
+    if m_max > K:
+        m_max = K
+
+    # Check if sum_max(m_max) >= S
+    sum_max_mmax = m_max * (2 * K - m_max + 1) // 2
+    if sum_max_mmax < S:
+        print(-1, file=output_stream)
     else:
+        # Binary search for minimal m where sum_max(m) >= S
+        low, high, ans = 1, m_max, -1
+        while low <= high:
+            mid = (low + high) // 2
+            current_sum = mid * (2 * K - mid + 1) // 2
+            if current_sum >= S:
+                ans = mid
+                high = mid - 1
+            else:
+                low = mid + 1
+        print(ans, file=output_stream)
 
-        high=mid-1
 
-Then, clamp m_max to K.
 
-This is more accurate.
+def test():
+    import io
 
-But since S can be up to 1e18, the binary search for m_max would take about 60 steps, which is manageable.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+5 5
+""",
+            "output": \
+"""\
+1
+""",
+        }, 
+    ]
 
-So the code can be adjusted accordingly.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-This is safer to avoid floating point inaccuracies.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So let's rewrite the code:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Read n and k.
+    print('Tests passed 😎')
 
-if n ==1:
 
-    print(0)
+if __name__ == '__main__':
+    test()
 
-    exit()
 
-S =n-1
+```
 
-K =k-1
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-if K ==0:
+```
 
-    # then no splitters available. So S must be 0, which is not possible here.
+Testing against sample input 2.
 
-    print(-1)
+```python
+def main(input_stream, output_stream):
+    n, k = map(int, input_stream.readline().rstrip("\n").split())
 
-    exit()
+    if n == 1:
+        print(0, file=output_stream)
+        return
 
-# compute m_max as the maximum m where m*(m+1)/2 <=S.
+    S = n - 1
+    K = k - 1
 
-low =0
-
-high = 2*10**18  # arbitrary large number.
-
-m_max =0
-
-while low <=high:
-
-    mid = (low + high) //2
-
-    s_min = mid*(mid+1)//2
-
-    if s_min <= S:
-
-        m_max =mid
-
-        low=mid +1
-
-    else:
-
-        high=mid-1
-
-# clamp to K.
-
-if m_max > K:
-
-    m_max = K
-
-# compute sum_max for m_max.
-
-sum_max_mmax = m_max*(2*K - m_max +1) //2
-
-if sum_max_mmax < S:
-
-    print(-1)
-
-else:
-
-    # binary search for minimal m where sum_max(m) >= S.
-
-    low =1
-
-    high =m_max
-
-    ans =-1
-
-    while low <=high:
-
-        mid = (low + high) //2
-
-        s_max = mid*(2*K - mid +1) //2
-
-        if s_max >=S:
-
-            ans=mid
-
-            high=mid -1
-
+    # Find m_max using binary search
+    low, high = 0, 2 * 10**18
+    m_max = 0
+    while low <= high:
+        mid = (low + high) // 2
+        sum_min = mid * (mid + 1) // 2
+        if sum_min <= S:
+            m_max = mid
+            low = mid + 1
         else:
+            high = mid - 1
 
-            low =mid+1
+    # Clamp m_max to K
+    if m_max > K:
+        m_max = K
 
-    print(ans)
+    # Check if sum_max(m_max) >= S
+    sum_max_mmax = m_max * (2 * K - m_max + 1) // 2
+    if sum_max_mmax < S:
+        print(-1, file=output_stream)
+    else:
+        # Binary search for minimal m where sum_max(m) >= S
+        low, high, ans = 1, m_max, -1
+        while low <= high:
+            mid = (low + high) // 2
+            current_sum = mid * (2 * K - mid + 1) // 2
+            if current_sum >= S:
+                ans = mid
+                high = mid - 1
+            else:
+                low = mid + 1
+        print(ans, file=output_stream)
 
-Yes, this code should work.
 
-Testing the first sample:
 
-Sample 1:
+def test():
+    import io
 
-n=4, k=3.
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 4
+""",
+            "output": \
+"""\
+-1
+""",
+        }, 
+    ]
 
-S=3, K=2.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Compute m_max.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-sum_min(m) = m(m+1)/2 <=3.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Possible m:
+    print('Tests passed 😎')
 
-m=2: 2*3/2=3 <=3 → yes.
 
-m=3: 3*4/2=6>3. So m_max=2.
+if __name__ == '__main__':
+    test()
 
-Clamp to K=2.
 
-sum_max(m_max)=2*(4-2 +1)/2 → 2*3=6/2=3 >=3. So proceed.
+```
 
-Binary search between 1-2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-mid=1: s_max= 1*(4-1 +1)/2= (4*1)/2=2 <3 → no. low=2.
-
-mid=2: s_max=3 >=3 → ans=2. Return 2.
-
-Sample 2:
-
-n=5, k=5 → K=4.
-
-S=4.
-
-Compute m_max.
-
-sum_min(m) =m(m+1)/2 <=4.
-
-Possible m=2: 3 → sum=3. m=3: 6>4. So m_max=2.
-
-sum_max(2) =2*(8-2+1)/2=2*7/2=7 >=4.
-
-Binary search between 1-2.
-
-mid=1: s_max=4 >=4 → ans=1. high=0.
-
-Return 1.
+```
 
 Sample3:
 

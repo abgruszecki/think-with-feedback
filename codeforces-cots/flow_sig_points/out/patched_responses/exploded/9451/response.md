@@ -61,34 +61,70 @@ sum(1 for c in word if c in vowels) → sum all these per word, then sum for the
 
 So code:
 
-vowels = {'a', 'e', 'i', 'o', 'u'}
+Testing against sample input 1.
 
-counts = []
-for _ in range(3):
-    line = input().split()
-    total = 0
-    for word in line:
-        total += sum(1 for c in word if c in vowels)
-    counts.append(total)
+```python
+def main(input_stream, output_stream):
+    vowels = {'a', 'e', 'i', 'o', 'u'}
 
-if counts == [5,7,5]:
-    print("YES")
-else:
-    print("NO")
+    counts = []
+    for _ in range(3):
+        line = input_stream.readline().rstrip("\n").split()
+        total = 0
+        for word in line:
+            total += sum(1 for c in word if c in vowels)
+        counts.append(total)
 
-Wait, but what if the lines have leading/trailing spaces? For example, the first sample input:
+    if counts == [5,7,5]:
+        print("YES", file=output_stream)
+    else:
+        print("NO", file=output_stream)
 
-Sample Input 1:
 
-on  codeforces
-beta round is running
-a rustling of keys
 
-Each line may have leading or trailing spaces, but split() handles that. So the code would correctly process the words.
+def test():
+    import io
 
-Testing sample input 1:
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+how many gallons
+of edo s rain did you drink
+cuckoo
+""",
+            "output": \
+"""\
+NO
+""",
+        }, 
+    ]
 
-First line: 'on  codeforces' → split into ['on', 'codeforces'] → 'on' has two vowels (o), 'codeforces' has o, e, o, e → 4. Total 6? Wait, but sample output says YES. Wait wait, what's the problem here.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Wait, wait, the first sample's first line is 'on codeforces' → 'on' has two vowels (o). codeforces: 'codeforces' → let's see: c o d e f o r c e s. The vowels are o, e, o, e → four. So total 2+4=6. But according to the sample output, the first line's count is 5. So that can't be right. Wait, maybe I made a mistake.
 

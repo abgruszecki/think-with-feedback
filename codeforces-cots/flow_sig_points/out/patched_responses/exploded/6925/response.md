@@ -690,75 +690,112 @@ But in Python, sieve for 5e5 is feasible.
 
 Now, code:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n = int(input())
 
-if n ==1:
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-    print() # but according to problem statement, n>=2.
+    if n ==1:
 
-spf = list(range(n+1))  # Initialize spf to i for all i.
+        print(file=output_stream) # but according to problem statement, n>=2.
 
-primes = []
-for i in range(2, n+1):
-    if spf[i] == i:
-        primes.append(i)
-        for j in range(i*i, n+1, i):
-            if spf[j] == j:
-                spf[j] = i
-    else:
-        continue
+    spf = list(range(n+1))  # Initialize spf to i for all i.
 
-m = 1 + len(primes)
-if m >=n:
-    # All k from 2 to n are <=m. So output 1s.
-    print(' '.join(['1']*(n-1)))
-else:
-    # Compute count_p for each prime.
-    from collections import defaultdict
-    count = defaultdict(int)
-    for x in range(2, n+1):
-        if spf[x] != x:
-            p = spf[x]
-            count[p] +=1
-
-    # Create count_list in the order of primes.
-    count_list = []
-    for p in primes:
-        count_list.append(count.get(p,0))
-
-    # Compute prefix sums.
-    prefix = []
-    s =0
-    for c in count_list:
-        s += c
-        prefix.append(s)
-
-    # Generate result.
-    res = []
-    for k in range(2, n+1):
-        if k <= m:
-            res.append(1)
+    primes = []
+    for i in range(2, n+1):
+        if spf[i] == i:
+            primes.append(i)
+            for j in range(i*i, n+1, i):
+                if spf[j] == j:
+                    spf[j] = i
         else:
-            s_k = k - m
-            # Find the first index where prefix >= s_k.
-            idx = bisect.bisect_left(prefix, s_k)
-            res.append(primes[idx])
+            continue
 
-    print(' '.join(map(str, res)))
+    m = 1 + len(primes)
+    if m >=n:
+        # All k from 2 to n are <=m. So output 1s.
+        print(' '.join(['1']*(n-1)), file=output_stream)
+    else:
+        # Compute count_p for each prime.
+        from collections import defaultdict
+        count = defaultdict(int)
+        for x in range(2, n+1):
+            if spf[x] != x:
+                p = spf[x]
+                count[p] +=1
 
-But let's test this code with the examples.
+        # Create count_list in the order of primes.
+        count_list = []
+        for p in primes:
+            count_list.append(count.get(p,0))
 
-First example:
+        # Compute prefix sums.
+        prefix = []
+        s =0
+        for c in count_list:
+            s += c
+            prefix.append(s)
 
-n=2.
+        # Generate result.
+        res = []
+        for k in range(2, n+1):
+            if k <= m:
+                res.append(1)
+            else:
+                s_k = k - m
+                # Find the first index where prefix >= s_k.
+                idx = bisect.bisect_left(prefix, s_k)
+                res.append(primes[idx])
 
-primes is [2].
+        print(' '.join(map(str, res)), file=output_stream)
 
-m=1 +1=2. Since 2 >=2 (n=2), output '1'.
 
-Which matches.
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+3
+""",
+            "output": \
+"""\
+1 1
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: n=3.
 

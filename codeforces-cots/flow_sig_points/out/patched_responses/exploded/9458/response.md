@@ -494,74 +494,101 @@ But in code, the prefix_sum is a list. For example, for sorted_gaps [0,1,1,2,4],
 
 Now, code in Python:
 
+Testing against sample input 1.
+
+```python
 import bisect
 
-n = int(input())
-s = list(map(int, input().split()))
-s.sort()
-queries = []
-q = int(input())
-for _ in range(q):
-    l, r = map(int, input().split())
-    queries.append((l, r))
 
-if n == 1:
-    res = []
-    for l, r in queries:
-        res.append(r - l + 1)
-    print(' '.join(map(str, res)))
-else:
-    # Compute gaps
-    gaps = []
-    for i in range(n-1):
-        gaps.append(s[i+1] - s[i])
-    sorted_gaps = sorted(gaps)
-    # Compute prefix sum
-    prefix_sum = []
-    total = 0
-    for gap in sorted_gaps:
-        total += gap
-        prefix_sum.append(total)
-    total_sum = sum(gaps)  # which is s[-1] - s[0]
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+    s = list(map(int, input_stream.readline().rstrip("\n").split()))
+    s.sort()
+    queries = []
+    q = int(input_stream.readline().rstrip("\n"))
+    for _ in range(q):
+        l, r = map(int, input_stream.readline().rstrip("\n").split())
+        queries.append((l, r))
 
-    res = []
-    for l, r in queries:
-        L = r - l
-        pos = bisect.bisect_right(sorted_gaps, L)
-        C = len(sorted_gaps) - pos
-        if pos == 0:
-            sum_S = total_sum
-        else:
-            sum_S = total_sum - prefix_sum[pos-1]
-        ans = (C +1) * (r - l + 1) + (s[-1] - s[0] - sum_S)
-        res.append(ans)
-    print(' '.join(map(str, res)))
+    if n == 1:
+        res = []
+        for l, r in queries:
+            res.append(r - l + 1)
+        print(' '.join(map(str, res)), file=output_stream)
+    else:
+        # Compute gaps
+        gaps = []
+        for i in range(n-1):
+            gaps.append(s[i+1] - s[i])
+        sorted_gaps = sorted(gaps)
+        # Compute prefix sum
+        prefix_sum = []
+        total = 0
+        for gap in sorted_gaps:
+            total += gap
+            prefix_sum.append(total)
+        total_sum = sum(gaps)  # which is s[-1] - s[0]
 
-But wait, when n=1, s has one element. So s[-1] - s[0] is zero, but since n is 1, the code path for n==1 is separate.
+        res = []
+        for l, r in queries:
+            L = r - l
+            pos = bisect.bisect_right(sorted_gaps, L)
+            C = len(sorted_gaps) - pos
+            if pos == 0:
+                sum_S = total_sum
+            else:
+                sum_S = total_sum - prefix_sum[pos-1]
+            ans = (C +1) * (r - l + 1) + (s[-1] - s[0] - sum_S)
+            res.append(ans)
+        print(' '.join(map(str, res)), file=output_stream)
 
-Yes.
 
-Testing this code with the first sample input:
 
-Sample Input 1:
+def test():
+    import io
 
-6
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+2
+1 500000000000000000
+2
+1000000000000000000 1000000000000000000
+0 1000000000000000000
+""",
+            "output": \
+"""\
+2 1500000000000000000
+""",
+        }, 
+    ]
 
-3 1 4 1 5 9 → sorted s becomes [1,1,3,4,5,9]
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-gaps are [0,2,1,1,4]. sorted_gaps becomes [0,1,1,2,4], prefix_sum [0,1,2,4,8].
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Queries:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-7 7 → L=0.
+    print('Tests passed 😎')
 
-pos = bisect.bisect_right([0,1,1,2,4], 0) → returns 1. C=5-1=4. sum_S = 8 - prefix_sum[0] (0) →8. ans = (4+1)*1 + (9-1 -8) →5*1 +0=5.
 
-Second query 0 2 → L=2. pos = bisect_right([0,1,1,2,4], 2) → returns 4. C=5-4=1. sum_S=8-4 (prefix_sum[3] is 0+1+1+2=4). 8-4=4. ans= (1+1)*3 + (9-1-4) →2*3 +4=6+4=10.
+if __name__ == '__main__':
+    test()
 
-Third query 8 17 → L=9. bisect_right on [0,1,1,2,4] returns 5. C=0. sum_S=8 - prefix_sum[4] (8) →0. ans=1*10 + (9-1 -0) →10+8=18.
 
-Which matches.
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Sample 2:
 

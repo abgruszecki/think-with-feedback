@@ -683,89 +683,108 @@ Process as above.
 
 So the code:
 
+Testing against sample input 2.
+
+```python
 import bisect
 
-n, m, ta, tb, k = map(int, input().split())
 
-a = list(map(int, input().split()))
+def main(input_stream, output_stream):
+    n, m, ta, tb, k = map(int, input_stream.readline().rstrip("\n").split())
 
-b = list(map(int, input().split()))
+    a = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-max_time = -1
+    b = list(map(int, input_stream.readline().rstrip("\n").split()))
 
-has_impossible = False
+    max_time = -1
 
-max_x = min(k, n)
+    has_impossible = False
 
-for x in range(max_x +1):
+    max_x = min(k, n)
 
-    if x >= n:
+    for x in range(max_x +1):
 
-        has_impossible = True
+        if x >= n:
 
-        continue
+            has_impossible = True
 
-    a_i = a[x]
+            continue
 
-    arrival_B = a_i + ta
+        a_i = a[x]
 
-    pos = bisect.bisect_left(b, arrival_B)
+        arrival_B = a_i + ta
 
-    available = m - pos
+        pos = bisect.bisect_left(b, arrival_B)
 
-    y = k - x
+        available = m - pos
 
-    if available <= y:
+        y = k - x
 
-        has_impossible = True
+        if available <= y:
+
+            has_impossible = True
+
+        else:
+
+            arrival_C = b[pos + y] + tb
+
+            if arrival_C > max_time:
+
+                max_time = arrival_C
+
+    if has_impossible:
+
+        print(-1, file=output_stream)
 
     else:
 
-        arrival_C = b[pos + y] + tb
+        print(max_time, file=output_stream)
 
-        if arrival_C > max_time:
 
-            max_time = arrival_C
 
-if has_impossible:
+def test():
+    import io
 
-    print(-1)
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 3 2 3 1
+1 999999998 999999999 1000000000
+3 4 1000000000
+""",
+            "output": \
+"""\
+1000000003
+""",
+        }, 
+    ]
 
-else:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-    print(max_time)
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-This should handle all cases.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Testing the second sample input:
+    print('Tests passed 😎')
 
-Sample input 2:
 
-2 2 4 4 2
+if __name__ == '__main__':
+    test()
 
-a = [1, 10]
 
-b = [10, 20]
+```
 
-max_x = min(2,2) =2. x runs 0,1,2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-x=0:
-
-a_i=1. arrival_B=5. pos in b where >=5 is 0. available=2-0=2.
-
-y=2-0=2. available=2 <=2 → has_impossible=True.
-
-x=1:
-
-a_i=10. arrival_B=14. pos in b is 1 (since 10<14, 20>=14. pos=1. available=2-1=1.
-
-y=2-1=1. available=1 <=1 → has_impossible=True.
-
-x=2:
-
-x >=2 → has_impossible=True.
-
-So output is -1.
+```
 
 Sample 3:
 

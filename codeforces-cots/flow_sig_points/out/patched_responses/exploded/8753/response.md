@@ -597,57 +597,94 @@ But according to the problem statement, the input ensures that x_j is the winner
 
 Thus, the code correctly sets conqueror[x_m] to 0.
 
-Testing the code:
+Testing against sample input 1.
 
-Sample input 1:
+```python
+def main(input_stream, output_stream):
+    import sys
+    input = input_stream.read
+    data = input().split()
+    idx = 0
+    n = int(data[idx])
+    idx += 1
+    m = int(data[idx])
+    idx += 1
+    
+    parent = list(range(n + 2))  # parent[0] unused, 1..n+1
+    conqueror = [0] * (n + 1)  # 1-based
+    
+    def find(u):
+        while parent[u] != u:
+            parent[u] = parent[parent[u]]
+            u = parent[u]
+        return u
+    
+    for _ in range(m):
+        l = int(data[idx])
+        idx += 1
+        r = int(data[idx])
+        idx += 1
+        x = int(data[idx])
+        idx += 1
+        
+        current = find(l)
+        while current <= r:
+            if current != x:
+                conqueror[current] = x
+                parent[current] = current + 1
+                current = find(current + 1)
+            else:
+                current = find(x + 1)
+    
+    print(' '.join(map(str, conqueror[1:n+1])), file=output_stream)
 
-4 3
 
-1 2 1
 
-1 3 3
+def test():
+    import io
 
-1 4 4
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+8 4
+3 5 4
+3 7 6
+2 8 8
+1 8 1
+""",
+            "output": \
+"""\
+0 8 4 6 4 8 6 1
+""",
+        }, 
+    ]
 
-After processing:
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Fight1: l=1, r=2, x=1.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-current starts at find(1) →1.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-1 is x, so current becomes find(2). find(2) →2. 2 <=2 and not x. conqueror[2] =1. parent[2] =3. current becomes find(3) →3>2 → loop ends.
+    print('Tests passed 😎')
 
-Fight2: l=1, r=3, x=3.
 
-current starts at find(1) →1. 1 is not x=3. conqueror[1] =3. parent[1] =2. current becomes find(2) →3 (since parent[2] =3). 3 <=3 and is x. so current becomes find(4) →4>3 → loop ends.
+if __name__ == '__main__':
+    test()
 
-Fight3: l=1, r=4, x=4.
 
-current starts at find(1) →2 (parent[1]=2, find(2) →3, parent[3]=3. find(2) →3. Wait, parent[1] =2, but parent[2] =3. So find(1) would be 3.
+```
 
-Wait, let's see:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-parent[1] =2.
-
-find(1) → parent[1] is 2. find(2) → parent[2] is3. find(3) →3. So current is3.
-
-3 is <=4, not x=4. So conqueror[3] =4. parent[3] =4. current becomes find(4) →4. 4 is x=4. So current becomes find(5) →5>4. loop ends.
-
-Thus, the conqueror array is [0,1,3,4,0], but indices 1-4 are [3,1,4,0], which matches the sample.
-
-Thus, the code works.
-
-But how does the code handle the find function?
-
-Now, let's see about the code's efficiency. For each node, each find and union is O(alpha(n)), which is acceptable.
-
-But in Python, with 3e5 elements and 3e5 operations, this should pass within the time constraints, provided that the code is optimized.
-
-But path compression in Python can be slow if implemented naively, but with the code written as a loop, it's manageable.
-
-Another potential optimization: pre-allocate the parent list as a list of integers, and access it via indices.
-
-So, the code is correct and efficient.
+```
 
 Thus, the code should solve the problem.
 </think>

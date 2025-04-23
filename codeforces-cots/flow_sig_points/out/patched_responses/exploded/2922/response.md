@@ -157,61 +157,143 @@ Yes.
 
 So the code would be:
 
+Testing against sample input 2.
+
+```python
 import math
 
-n = int(input())
 
-min_perim = float('inf')
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
 
-max_a = int(math.isqrt(n))  # integer square root
+    min_perim = float('inf')
 
-for a in range(1, max_a + 1):
+    max_a = int(math.isqrt(n))  # integer square root
 
-    b = (n + a - 1) // a  # equivalent to ceil(n / a)
+    for a in range(1, max_a + 1):
 
-    perim = 2 * (a + b)
+        b = (n + a - 1) // a  # equivalent to ceil(n / a)
 
-    if perim < min_perim:
+        perim = 2 * (a + b)
 
-        min_perim = perim
+        if perim < min_perim:
 
-print(min_perim)
+            min_perim = perim
 
-Wait, but what if the actual minimal a is larger than sqrt(n)?
+    print(min_perim, file=output_stream)
 
-For example, consider n=5. The sqrt is ~2.236. So a can be up to 2.
 
-For a=2: b=3 (ceil(5/2) =3). perim 2*(5)=10.
 
-But maybe a=3? Then ceil(5/3)=2. 3*2=6 >=5. perim 2*(5) =10. So same as before.
+def test():
+    import io
 
-But the loop only checks a up to 2. So how do we capture a=3?
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+22
+""",
+            "output": \
+"""\
+20
+""",
+        }, 
+    ]
 
-Ah, but for a=3, the corresponding a would be 3, but in the loop, we only go up to sqrt(n), which for n=5 is 2. So we miss a=3. But in that case, the minimal perimeter is 10, which is captured by a=2, b=3.
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Wait, but when a is 3, b is 2 (since 3 >=2). So in the loop, when a is 2, we compute b=3, which gives the same perimeter as a=3 and b=2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-So even if the actual a is larger than sqrt(n), the loop would have already considered the equivalent pair (a, b) where a is smaller than sqrt(n) and b is larger.
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-Because in the code, we loop a from 1 to sqrt(n), and for each a, compute the minimal b. So even if the optimal a is larger than sqrt(n), the corresponding b would be smaller than a, but since we're covering all possible a's up to sqrt(n), we would have considered the pair (b, a) when a was in the loop.
+    print('Tests passed 😎')
 
-So for example, in the case of a=3, which is larger than sqrt(5)~2.236, but the pair (a=2, b=3) is considered in the loop when a=2, giving the same perimeter as (3,2). So the code works.
 
-Therefore, the code is correct.
+if __name__ == '__main__':
+    test()
 
-Testing the code against the examples:
 
-First example: N=4.
+```
 
-max_a = 2.
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-Loop a=1, 2.
+```
 
-a=1: b=4. perim 10.
+Testing against sample input 1.
 
-a=2: ceil(4/2) =2. perim 8. So minimal.
+```python
+import math
 
-Output is 8. Correct.
+
+def main(input_stream, output_stream):
+    n = int(input_stream.readline().rstrip("\n"))
+
+    min_perim = float('inf')
+
+    max_a = int(math.isqrt(n))  # integer square root
+
+    for a in range(1, max_a + 1):
+
+        b = (n + a - 1) // a  # equivalent to ceil(n / a)
+
+        perim = 2 * (a + b)
+
+        if perim < min_perim:
+
+            min_perim = perim
+
+    print(min_perim, file=output_stream)
+
+
+
+def test():
+    import io
+
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+11
+""",
+            "output": \
+"""\
+14
+""",
+        }, 
+    ]
+
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
+
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
+
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
+
+    print('Tests passed 😎')
+
+
+if __name__ == '__main__':
+    test()
+
+
+```
+
+<RUN_SNIPPET>
+```output
+Tests passed 😎
+
+```
 
 Second example: N=11.
 

@@ -1233,93 +1233,102 @@ But for Python, even with that, it's manageable. However, for very large inputs,
 
 So the code would look like:
 
+Testing against sample input 2.
+
+```python
 import sys
 
-n, q = map(int, sys.stdin.readline().split())
 
-delta = 0
+def main(input_stream, output_stream):
+    n, q = map(int, input_stream.readline().split())
 
-swap_count = 0
+    delta = 0
 
-mod = n
+    swap_count = 0
 
-for _ in range(q):
+    mod = n
 
-    parts = sys.stdin.readline().split()
+    for _ in range(q):
 
-    if parts[0] == '1':
+        parts = input_stream.readline().split()
 
-        x = int(parts[1])
+        if parts[0] == '1':
 
-        if swap_count:
+            x = int(parts[1])
 
-            delta = (delta - x) % mod
+            if swap_count:
+
+                delta = (delta - x) % mod
+
+            else:
+
+                delta = (delta + x) % mod
 
         else:
 
-            delta = (delta + x) % mod
+            swap_count ^= 1
 
-    else:
+            delta = (-delta) % mod
 
-        swap_count ^= 1
+    result = []
 
-        delta = (-delta) % mod
+    for i in range(n):
 
-result = []
+        current = (i + delta) % mod
 
-for i in range(n):
+        if swap_count:
 
-    current = (i + delta) % mod
+            current ^= 1
 
-    if swap_count:
+        result.append(current + 1)
 
-        current ^= 1
+    print(' '.join(map(str, result)), file=output_stream)
 
-    result.append(current + 1)
 
-print(' '.join(map(str, result)))
 
-This should handle the large input efficiently.
+def test():
+    import io
 
-Testing this code with the samples should work.
-
-Another test case:
-
-Sample 2:
-
-Input:
-
-2 3
-
-1 1
-
+    TEST_CASES = [
+        {
+            "input": \
+"""\
+4 2
 2
+1 3
+""",
+            "output": \
+"""\
+1 4 3 2
+""",
+        }, 
+    ]
 
-1 -2
+    for i, test_case in enumerate(TEST_CASES):
+        in_stream = io.StringIO(test_case["input"])
+        expected_output = test_case["output"].rstrip()
 
-Output:1 2.
+        out_stream = io.StringIO()
+        main(in_stream, out_stream)
+        real_output = out_stream.getvalue().rstrip()
 
-Code steps:
+        assert real_output == expected_output, \
+            f'Test case {i} failed.\nExpected: {expected_output!r}\nGot: {real_output!r}'
 
-n=2, q=3.
+    print('Tests passed 😎')
 
-delta=0, swap=0.
 
-Command 1: type 1 x=1. swap is 0 → delta +=1 →1 mod2=1.
+if __name__ == '__main__':
+    test()
 
-Command 2: swap becomes 1. delta =-1 mod2=1.
 
-Command3: type1 x=-2. swap is 1 → delta -= (-2) →1 +2=3 mod2=1.
+```
 
-For each i in 0,1:
+<RUN_SNIPPET>
+```output
+Tests passed 😎
 
-current = (0+1) mod2=1 → swap_count 1 →1^1=0 →0+1=1.
-
-i=1: (1+1) mod2=0 →0^1=1 →2.
-
-Output:1 2.
-
-Correct.
+```
 
 Thus, the code should be correct.
 </think>
