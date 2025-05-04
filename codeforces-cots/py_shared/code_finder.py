@@ -122,6 +122,7 @@ def find_final_answer_block(
     response: str,
     offset: int,
 ) -> str | None:
+    # NOTE this guy finds specifically fenced code blocks, it ignores inline code.
     # early exit on valid input
     if offset == len(response):
         return None

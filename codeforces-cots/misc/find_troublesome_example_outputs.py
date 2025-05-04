@@ -1,9 +1,12 @@
+#!/usr/bin/env python3
 from dataclasses import dataclass
 import json
 from pathlib import Path
 
+from tqdm import tqdm
 
-root_outd = Path('./out+v2')
+
+root_outd = Path('./out')
 outf = root_outd/'x--troublesome-example-outputs.jsonl'
 
 
@@ -81,9 +84,10 @@ def analyze(
 
 if __name__ == '__main__':
     import datasets
-    ds = datasets.load_dataset('open-r1/codeforces-cots', 'solutions_py', split='train[:1000]')
+    ds = datasets.load_dataset('open-r1/codeforces-cots', 'solutions_py', split='train')
+    outf.parent.mkdir(parents=True, exist_ok=True)
     with outf.open('w') as fh:
-        for idx, r in enumerate(ds):
+        for idx, r in enumerate(tqdm(ds)):
             res = Result(
                 needs_checker=False,
                 is_troublesome=False,
@@ -98,7 +102,7 @@ if __name__ == '__main__':
                     'id': r['id'],
                     'needs_checker': res.needs_checker,
                     'is_troublesome': res.is_troublesome,
-                    'prompt': r['prompt'],
-                    'examples': r['examples'],
+                    # 'prompt': r['prompt'],
+                    # 'examples': r['examples'],
                 }
                 print(json.dumps(r), file=fh)

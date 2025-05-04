@@ -1,0 +1,5 @@
+<simulation type="code">
+Another test case: "())(" → balance goes to 1 after first (, then 0, then -1. So during the third character, balance is -1. So output is NO. Which is correct.
+
+What about a valid string like "()()()"? The code processes each, balance never negative and ends at 0. YES.
+</simulation>

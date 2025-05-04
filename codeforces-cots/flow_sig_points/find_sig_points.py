@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 import json
 from pathlib import Path
-from typing import Any, Callable, Iterator
+from typing import Annotated, Any, Callable, Iterator
 
 from loguru import logger
 import numpy as np
 from tqdm import tqdm
 from pydantic import BaseModel
 import regex as reg # regex is compatible with the re module
+import typer
 
 from py_shared import code_finder, ser
+
+
+app = typer.Typer()
 
 
 class SigPointData(BaseModel):
@@ -19,6 +23,7 @@ class SigPointData(BaseModel):
     text_len: int = 0
     extra: dict[str, Any] = {}
     text: str = ''
+
 
 flow_outd = Path(__file__).parent/'out'
 
@@ -113,7 +118,8 @@ reflection_par_rx = reg.compile(
 
 
 def processed_response_gen(
-    response: str
+    response: str,
+    only_code: bool = False,
 ) -> Iterator[SigPointData]:
     # We search for multiple regexes in a pretty long string, so this may get slow.
     # When it does, we can try combining all the regexes into just one like this:
@@ -165,68 +171,69 @@ def processed_response_gen(
                 continue
             yield pt, m
 
-    # Find simulation start points, but only if they're not inside code blocks
-    for pt, m in finditer_notin_code_blocks(simulation_start_rx, response):
-        prefix_g = m.group('prefix')
-        results.append(SigPointData(
-            offset=pt,
-            type='sim',
-            extra={
-                'prefix_len': len(prefix_g) if prefix_g else 0,
-                'line_len': len(m.group(0)),
-            },
-        ))
+    if not only_code:
+        # Find simulation start points, but only if they're not inside code blocks
+        for pt, m in finditer_notin_code_blocks(simulation_start_rx, response):
+            prefix_g = m.group('prefix')
+            results.append(SigPointData(
+                offset=pt,
+                type='sim',
+                extra={
+                    'prefix_len': len(prefix_g) if prefix_g else 0,
+                    'line_len': len(m.group(0)),
+                },
+            ))
 
-    # Find simulation case points, but only if they're not inside code blocks
-    for pt, m in finditer_notin_code_blocks(simulation_case_rx, response):
-        prefix_g = m.group('prefix')
-        num = m.group('num')
-        extra_num = None
-        if not num:
-            extra_num = numerator_rx.search(m.group(0))
-            if extra_num:
-                extra_num = extra_num.group('num')
-        results.append(SigPointData(
-            offset=pt,
-            type='case',
-            extra={
-                'prefix_len': len(prefix_g) if prefix_g else 0,
-                'line_len': len(m.group(0)),
-                'marker': m.group('marker'),
-                'num': num,
-                'extra_num': extra_num,
-            },
-        ))
+        # Find simulation case points, but only if they're not inside code blocks
+        for pt, m in finditer_notin_code_blocks(simulation_case_rx, response):
+            prefix_g = m.group('prefix')
+            num = m.group('num')
+            extra_num = None
+            if not num:
+                extra_num = numerator_rx.search(m.group(0))
+                if extra_num:
+                    extra_num = extra_num.group('num')
+            results.append(SigPointData(
+                offset=pt,
+                type='case',
+                extra={
+                    'prefix_len': len(prefix_g) if prefix_g else 0,
+                    'line_len': len(m.group(0)),
+                    'marker': m.group('marker'),
+                    'num': num,
+                    'extra_num': extra_num,
+                },
+            ))
 
-    # Find thinks_end, but only if they're not inside code blocks
-    for pt, m in finditer_notin_code_blocks(thinks_end_rx, response):
-        results.append(SigPointData(
-            offset=pt,
-            type='response-proper',
-        ))
+        # Find thinks_end, but only if they're not inside code blocks
+        for pt, m in finditer_notin_code_blocks(thinks_end_rx, response):
+            results.append(SigPointData(
+                offset=pt,
+                type='response-proper',
+            ))
 
-    # Find paragraphs containing "correct" or "fail" and the start of the next paragraph
-    for pt, m in finditer_notin_code_blocks(reflection_par_rx, response, lambda m: m.end()):
-        results.append(SigPointData(
-            offset=pt,
-            type='post-reflection',
-            extra={
-                'keyword': m.group('kw'),
-            },
-        ))
+        # Find paragraphs containing "correct" or "fail" and the start of the next paragraph
+        for pt, m in finditer_notin_code_blocks(reflection_par_rx, response, lambda m: m.end()):
+            results.append(SigPointData(
+                offset=pt,
+                type='post-reflection',
+                extra={
+                    'keyword': m.group('kw'),
+                },
+            ))
 
     results.sort(key=lambda x: x.offset)
 
     # cut the response at each sig point
     res_iter = iter(results)
     loop = True
-    cur_item: SigPointData = next(res_iter) # 1st point is the start
+    cur_item: SigPointData = next(res_iter) # the start is always the first point
     # NOTE we only yield _some_ of the points
     while loop:
         try:
             next_item = next(res_iter)
             next_item.rel_offset = next_item.offset - cur_item.offset
-            if next_item.rel_offset == 0:
+            if not only_code and next_item.rel_offset == 0:
                 # if the points have the same offset we de-duplicate them
                 # note that the point types come in a specific order,
                 # matching how they were inserted into the list,
@@ -261,28 +268,32 @@ def processed_response_gen(
         yield cur_item
         cur_item = next_item # type: ignore
 
-if __name__ == '__main__':
-    from sys import argv
-    data_src = 'checkables'
-    if len(argv) > 1:
-        arg = argv[1]
-        assert arg in ('checkables', 'unfiltered-ds', 'checkables-wrong', 'checkables-stream-full')
-        data_src = arg
 
-    if data_src == 'checkables':
+@app.command()
+def main(
+    data_source: Annotated[str, typer.Option()] = 'checkables',
+):
+    valid_data_sources = ('checkables', 'unfiltered-ds', 'checkables-wrong', 'checkables-stream-full')
+    if data_source not in valid_data_sources:
+        raise typer.BadParameter(
+            f'should be one of: {", ".join(valid_data_sources)}',
+            param_hint='--data-source',
+        )
+
+    if data_source == 'checkables':
         data = ser.jsonl_loadf(opt_dep_checkables_f)
         data_len = len(data)
         data_gen = ((r['idx'], r) for r in data)
         get_response = lambda r: r['generation']
         tag = ''
-    elif data_src == 'unfiltered-ds':
+    elif data_source == 'unfiltered-ds':
         import datasets
         ds: Any = datasets.load_dataset('open-r1/codeforces-cots', 'solutions_py', split='train[:1000]')
         data_len = len(ds)
         data_gen = ((idx, r) for idx, r in enumerate(ds))
         get_response = lambda r: r['generation']
         tag = '+unfiltered-ds'
-    elif data_src == 'checkables-wrong':
+    elif data_source == 'checkables-wrong':
         data = ser.jsonl_loadf(opt_dep_checkables_wrong_f)
         data_len = len(data)
         data_gen = ((r['idx'], r) for r in data)
@@ -290,7 +301,7 @@ if __name__ == '__main__':
         # NOTE right now we're not tagging the step output dir here, these tags propagate way too much.
         # I think I'd rather tag the output dir.
         tag = ''
-    elif data_src == 'checkables-stream-full':
+    elif data_source == 'checkables-stream-full':
         # TODO this is yet another kludge on top of all the other kludges...
         dep_ds_checker_types_f = flow_outd/'fetch_extract_checker_type/checker-types.jsonl'
         wanted_indices = set()
@@ -315,3 +326,7 @@ if __name__ == '__main__':
             for p in processed_response_gen(get_response(in_r)):
                 r.update(p.model_dump())
                 print(json.dumps(r), file=fh)
+
+
+if __name__ == '__main__':
+    app()

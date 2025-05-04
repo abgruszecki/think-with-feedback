@@ -1,0 +1,19 @@
+Yes, that should do it. Let's check if any edge cases are missed.
+
+Another test case: "())(" → balance goes to 1 after first (, then 0, then -1. So during the third character, balance is -1. So output is NO. Which is correct.
+
+What about a valid string like "()()()"? The code processes each, balance never negative and ends at 0. YES.
+
+So this code should handle all cases correctly. The time is O(n) and space is O(1), which is optimal.
+</think>
+
+```python
+s = input().strip()
+balance = 0
+for c in s:
+    balance += 1 if c == '(' else -1
+    if balance < 0:
+        print("NO")
+        exit()
+print("YES" if balance == 0 else "NO")
+```

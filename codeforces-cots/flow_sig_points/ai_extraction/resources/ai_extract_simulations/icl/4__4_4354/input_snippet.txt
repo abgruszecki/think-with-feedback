@@ -1,0 +1,14 @@
+But even if the inputs have leading zeros (but the problem says they don't), but since the input is guaranteed, it's safe. So this code would work.
+
+But in some cases, the sum might be 0, but since a and b are at least 1, the sum is at least 2. So no problem.
+
+So this is the optimal solution. The code is straightforward, runs in O(n) time (where n is the number of digits) for converting the strings to integers, and the addition is O(1) in Python, then converting back to a string is O(n) again. For 500-digit numbers, this is negligible. So even for the maximum input, this code would work within the time constraints, as per the problem's time limit of 2 seconds. The memory usage is also acceptable, as Python handles big integers efficiently.
+
+Thus, the correct solution is to read the two numbers as integers, add them, and print the result.
+</think>
+
+```python
+a = int(input())
+b = int(input())
+print(a + b)
+```

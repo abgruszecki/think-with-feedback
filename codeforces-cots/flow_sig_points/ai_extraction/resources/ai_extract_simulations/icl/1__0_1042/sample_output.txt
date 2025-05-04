@@ -1,0 +1,7 @@
+<simulation type="code">
+Testing the examples:
+
+For input 5: bin(5)[2:] → '101', correct.
+
+For input 13: bin(13)[2:] → '1101', correct.
+</simulation>

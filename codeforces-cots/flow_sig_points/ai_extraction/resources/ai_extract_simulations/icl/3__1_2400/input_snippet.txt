@@ -1,0 +1,16 @@
+Yes, that should work. Let me check the examples.
+
+First example input: "VK-Cup-2012!". The list comprehension will take all characters except '2','0','1','2'. So the result is "VK-Cup-!".
+
+Second example input: "Go,Codeforces!" has no digits, so the output is the same as input.
+
+Another test case: input is "1234", output is empty string. Which is handled correctly.
+
+So this code should work. It's efficient because even for the maximum input size of 100 characters, it's O(n) time and O(n) space, which is well within the constraints. There's no way to optimize further here since we need to check every character. The list comprehension is efficient in Python, and joining is O(n) as well. So this solution is optimal.
+
+Therefore, the code should be as written.
+</think>
+
+```python
+print(''.join(c for c in input() if not c.isdigit()))
+```
