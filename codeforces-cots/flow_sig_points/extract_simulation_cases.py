@@ -208,8 +208,8 @@ def total_cost(
 
 
 async def async_main(
-    partial_run: bool = True,
-    use_openrouter: bool = False,
+    partial_run: bool,
+    use_openrouter: bool,
 ):
     if use_openrouter:
         model = 'openai/'+openai_model

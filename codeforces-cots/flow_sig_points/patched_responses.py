@@ -48,6 +48,7 @@ def gen_patched_responses(
         r['candidate_sim'] = bool(start)
         replacements_by_idx[idx].append(r)
 
+    patched_responses_num = 0
     for in_r in dep_ds_rows:
         idx = in_r['idx']
         if idx not in replacements_by_idx:
@@ -80,9 +81,9 @@ def gen_patched_responses(
             else:
                 output = replace_r.get('stderr', '') # timeouts have no stderr
                 if (
-                    not status.startswith('fail:')
-                    or 'AssertionError: Test case' not in output
-                    or "Got: ''" in output
+                    not status.startswith('fail:')                 # exclude timeouts,
+                    or 'AssertionError: Test case' not in output   # and errors from outside of test cases,
+                    or "Got: ''" in output                         # and empty output, a sign of bad code extraction
                 ):
                     logger.debug('Bad output: {}/{}', idx, offset)
                     if snippet_id not in seen_snippets:
@@ -116,17 +117,20 @@ def gen_patched_responses(
         print(response[cur_pos:], file=out_buf)
         patched_response = out_buf.getvalue()
 
+        patched_responses_num += 1
         r = {
             'idx': idx,
             'original_response': response,
             'patched_response': patched_response,
         }
         yield r
+    logger.info('# of patchable responses: {}', len(replacements_by_idx))
+    logger.info('# of successfully patched responses: {}', patched_responses_num)
 
 
 @app.command()
 def main():
-    _, flow_outd, step_outd = step_dirs(__file__)
+    flowd, flow_outd, step_outd = step_dirs(__file__)
 
     dep_replacements_f = flow_outd/'simulation_replacements/processed-report.jsonl'
     dep_ds_f = flow_outd/'fetch_process_solutions_py/report.jsonl'

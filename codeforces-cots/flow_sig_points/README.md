@@ -12,8 +12,19 @@ Basic chain:
    - These are named badly.
    - The former script makes prepares a dataset for the latter to execute.
 
-# Notes
-(Partially manual) steps to extract simulation data from wrong responses to checkable problems.
+Generating patched responses:
+
+1. fetch_process_solutions_py.py
+1. fetch_extract_checker_type.py
+1. find_sig_points.py checkables-stream-full && find_interest_items.py && extend_sig_points_with_interests.py
+1. extract_simulation_snippets.py
+1. sudo ../scripts/step.sh simulation_replacements.py all
+1. patched_responses.py
+
+# "WIP"
+Why "WIP"? Because these steps are partially manual and it frustrates me but I need to work on other things.
+
+Steps to extract simulation data from wrong responses to checkable problems.
 
 1. Copy the current `out` since these steps will overwrite it with incompatible data
    - (They should probably be writing to a different output dir instead...)
@@ -33,4 +44,12 @@ Basic chain:
        --input-data $postprocess_simulation_cases_output \
        --verification-report $docker_exec_report
    ```
-   Sorry if GH can't display this.
+
+
+# Notes
+## 2024.04.24
+There's a lot of kludges in these scripts.
+They're starting to have variants where they expect different steps to be executed before.
+They're also starting to serve in different script chains, and do slightly different things in each of them.
+
+Maybe the most sure sign that something is off is that I'm starting to get lost in what scripts to run.

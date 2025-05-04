@@ -1,0 +1,32 @@
+That's really simple. But is there any case where this might not work? Like when n is 1? Let's see. bin(1) is '0b1', so [2:] is '1', which is correct.
+
+What about edge cases like n=1e6? Let's compute 1e6 in binary. Well, bin(1000000) is '0b11110100001001000000', which when sliced gives the correct binary.
+
+This approach is O(1) time because converting an integer to binary in Python is done efficiently, even for large numbers. Since the maximum n is 1e6, which is manageable, this method should work within the time constraints. The built-in functions are optimized in C, so they're much faster than any manual implementation.
+
+Another approach would be to manually compute the binary digits by dividing n by 2 each time and collecting the remainders. But that's more code and possibly less efficient. For example:
+
+res = []
+while n > 0:
+    res.append(str(n % 2))
+    n = n // 2
+res.reverse()
+print(''.join(res))
+
+But this would also work and has O(log n) time complexity, which is acceptable. But why write all that code when Python's built-in does it more efficiently?
+
+So the optimal approach is to use bin() and slice off the first two characters. It's the fastest and most memory-efficient way. The code is straightforward and will handle all test cases within the constraints.
+
+Testing the examples:
+
+For input 5: bin(5)[2:] → '101', correct.
+
+For input 13: bin(13)[2:] → '1101', correct.
+
+So the code should work.
+</think>
+
+```python
+n = int(input())
+print(bin(n)[2:])
+```

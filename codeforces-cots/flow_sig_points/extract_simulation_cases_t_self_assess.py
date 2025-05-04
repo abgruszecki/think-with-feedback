@@ -176,6 +176,7 @@ async def process_prompt(in_r, semaphore, api: tuple[str, AsyncOpenAI]):
                     'n': response_idx,
                     'response': response_str,
                 }
+                # TODO fix this return, this function used to be a generator...
                 return r, usage
         except Exception:
             logger.exception('Exn at prompt {}/{}', in_r['idx'], in_r['offset'])

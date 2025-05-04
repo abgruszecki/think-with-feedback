@@ -1,0 +1,9 @@
+<simulation type="code">
+Yes, that should work. Let me check the examples.
+
+First example input: "VK-Cup-2012!". The list comprehension will take all characters except '2','0','1','2'. So the result is "VK-Cup-!".
+
+Second example input: "Go,Codeforces!" has no digits, so the output is the same as input.
+
+Another test case: input is "1234", output is empty string. Which is handled correctly.
+</simulation>

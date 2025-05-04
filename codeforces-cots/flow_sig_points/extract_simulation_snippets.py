@@ -25,53 +25,49 @@ def remove_indent(code: str) -> str:
 
 
 _number_rx = re.compile(r'\d+')
-_numerator_list = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth']
-def numerator_to_int(s: str) -> int | None:
+_numeral_list = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth']
+def numeral_to_int(s: str) -> int | None:
     if m := _number_rx.search(s):
         return int(m.group(0))
     s_low = s.lower()
-    for i, n_str in enumerate(_numerator_list):
+    for i, n_str in enumerate(_numeral_list):
         if s_low == n_str:
             return i + 1
     return None
 
 
-def gen_processed_extended_sigpts(
-    dep_ds_f: Path,
-    dep_ext_sigpts_f: Path,
-) -> Iterator[dict]:
-    ds_by_idx = {in_r['idx']: in_r for in_r in ser.jsonl_streamf(dep_ds_f)}
+def finalize_row(
+    in_r: dict,
+    code: str,
+    candidate_offset: int | None,
+    ds_by_idx: dict[int, dict] | None,
+):
+    raw_numerals = in_r.get('nums', None)
+    if raw_numerals is None:
+        if basic_raw_numeral := in_r['extra'].get('num'):
+            raw_numerals = [basic_raw_numeral]
+    numerals = []
+    for num_str in raw_numerals or []:
+        if num := numeral_to_int(num_str):
+            if num in numerals:
+                continue
+            numerals.append(num)
+        else:
+            logger.warning('Bad numeral: {}/{}, num={}', in_r['idx'], in_r['offset'], num_str)
 
-    def make_r(
-        in_r: dict,
-        code: str,
-        candidate_offset: int | None,
-    ):
-        raw_numerators = in_r.get('nums', None)
-        if raw_numerators is None:
-            if basic_raw_numerator := in_r['extra'].get('num'):
-                raw_numerators = [basic_raw_numerator]
-        numerators = []
-        for num_str in raw_numerators or []:
-            if num := numerator_to_int(num_str):
-                if num in numerators:
-                    continue
-                numerators.append(num)
-            else:
-                logger.warning('Bad numerator: {}/{}, num={}', in_r['idx'], in_r['offset'], num_str)
+    idx = in_r['idx']
+    offset = in_r['offset']
+    cleaned_code = remove_indent(code)
 
-        idx = in_r['idx']
-        offset = in_r['offset']
-        cleaned_code = remove_indent(code)
-
-        r = {
-            'idx': idx,
-            'offset': offset,
-            'merge_count': in_r.get('merge_count'),
-            'nums': numerators,
-            'candidate_offset': candidate_offset,
-            'code': cleaned_code,
-        }
+    r = {
+        'idx': idx,
+        'offset': offset,
+        'merge_count': in_r.get('merge_count'),
+        'nums': numerals,
+        'candidate_offset': candidate_offset,
+        'code': cleaned_code,
+    }
+    if ds_by_idx:
         in_r_inputs = ds_by_idx[in_r['idx']]['inputs']
         # TODO this fits better in extract_simulation_cases.py I guess??
         for k in (
@@ -83,8 +79,14 @@ def gen_processed_extended_sigpts(
         ):
             r[k] = in_r_inputs[k]
 
-        r['text'] = in_r['text']
-        return r
+    r['text'] = in_r['text']
+    return r
+
+def gen_snippet_rows(
+    dep_ds_f: Path,
+    dep_ext_sigpts_f: Path,
+) -> Iterator[dict]:
+    ds_by_idx = {in_r['idx']: in_r for in_r in ser.jsonl_streamf(dep_ds_f)}
 
     def gen_processed_batch(batch: list[dict]) -> Iterator[dict]:
         last_code = None
@@ -121,7 +123,7 @@ def gen_processed_extended_sigpts(
             else:
                 logger.error('Bad row type passed to emit: {}/{}, type={}', in_r['idx'], in_r['offset'], in_r['type'])
                 return
-            yield make_r(in_r, code, candidate_offset=last_code_offset)
+            yield finalize_row(in_r, code, candidate_offset=last_code_offset, ds_by_idx=ds_by_idx)
 
         def merged_buffered_rows() -> dict:
             assert buffered_rows
@@ -169,8 +171,7 @@ def gen_processed_extended_sigpts(
 
             in_text_len = len(in_r['text'])
             in_is_bufferable = (
-                tp == 'sim' and in_text_len < 100 # and not in_r['extra'].get('is_also_case')
-                or tp == 'case' and in_text_len < 80
+                tp == 'sim' and in_text_len < 100 or tp == 'case' and in_text_len < 80
             )
 
             if in_is_bufferable or buffered_rows:
@@ -184,7 +185,7 @@ def gen_processed_extended_sigpts(
                     raise ValueError('Missing case for row {}/{}', in_r['idx'], in_r['offset'])
 
                 # emit the buffer if we cannot merge the current row
-                # TODO maybe row/buffer pairs with the same numerator should always be merged?
+                # TODO maybe row/buffer pairs with the same numeral should always be merged?
                 if (
                     buffer_tp != in_tp
                     # too many cases in the buffer (don't want to make the model count too much)
@@ -238,7 +239,7 @@ def main():
     out_f = flow_outd/f'extract_simulation_snippets{tag_suffix}' / 'result.jsonl'
     out_f.parent.mkdir(parents=True, exist_ok=True)
 
-    ser.jsonl_dumpf(gen_processed_extended_sigpts(dep_ds_f, dep_ext_sigpts_f), out_f)
+    ser.jsonl_dumpf(gen_snippet_rows(dep_ds_f, dep_ext_sigpts_f), out_f)
 
 
 

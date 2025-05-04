@@ -11,7 +11,7 @@ app = typer.Typer()
 @app.command()
 def main():
     tag = 'self-assess'
-    flowd, flow_outd, step_outd = step_dirs(__file__, tag)
+    flowd, flow_outd, step_outd = step_dirs(__file__, tag=tag)
     dep_ds_f = flow_outd/'fetch_process_solutions_py/report.jsonl'
     dep_cases_stepd = flow_outd/f'extract_simulation_cases+{tag}'
 

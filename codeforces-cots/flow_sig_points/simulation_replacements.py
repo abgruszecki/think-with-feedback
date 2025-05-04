@@ -50,14 +50,22 @@ def gen_replacement_snippets(
         code = in_r['code']
         examples = in_r['examples']
         nums = in_r['nums']
+        if not examples:
+            logger.warning('No examples for row: {}', idx)
+            continue
         if not nums:
             continue
 
+        has_index_error = False
         try:
-            used_examples = [examples[i] for i in nums]
+            used_examples = [examples[i-1] for i in nums]
         except IndexError:
+            has_index_error = True
             index_errors += 1
-            continue
+            used_examples = [examples[0]]
+            nums = [1]
+            logger.warning('Index error for row: {}', idx)
+            # continue
 
         snippet = make_replacement_snippet(code, used_examples, key)
 
@@ -67,10 +75,11 @@ def gen_replacement_snippets(
             'candidate_offset': in_r['candidate_offset'],
             'reasoning_len': len(in_r['text']),
             'nums': nums,
+            'has_index_error': has_index_error,
             'code': snippet,
         }
         yield r
-    logger.warning('Num of rows filtered on index errors: {} / {}', index_errors, total_rows)
+    logger.warning('Num of rows with index errors: {} / {}', index_errors, total_rows)
 
 
 def exec_replacement_snippets(
@@ -129,43 +138,68 @@ def gen_processed_report(
         yield r
 
 
+class StepCtx():
+    def __init__(self):
+        _, flow_outd, step_outd = step_dirs(__file__)
+        self.flow_outd = flow_outd
+        self.step_outd = step_outd
 
-@app.command()
-def main(
+        self.dep_snippets_f = flow_outd/'extract_simulation_snippets/result.jsonl'
+
+        self.out_replacement_snippets_f = step_outd/'replacement-snippets.jsonl'
+
+        self.out_workdir_root = step_outd/'check-workdirs'
+        self.out_report_f = step_outd/'report.jsonl'
+
+        self.out_processed_report_f = step_outd/'processed-report.jsonl'
+
+
+@app.command('make-replacement-snippets')
+def cmd_make_replacement_snippets():
+    ctx = StepCtx()
+    ser.jsonl_dumpf(
+        gen_replacement_snippets(ser.jsonl_streamf(ctx.dep_snippets_f)),
+        ctx.out_replacement_snippets_f
+    )
+    logger.success('Wrote: {}', cwd_rel(ctx.out_replacement_snippets_f))
+
+
+@app.command('exec-replacement-snippets')
+def cmd_exec_replacement_snippets(
     max_workers: int | None = None,
 ):
-    _, flow_outd, step_outd = step_dirs(__file__)
-
-    dep_snippets_f = flow_outd/'extract_simulation_snippets/result.jsonl'
-
-    out_replacement_snippets_f = step_outd/'replacement-snippets.jsonl'
-    ser.jsonl_dumpf(
-        gen_replacement_snippets(ser.jsonl_streamf(dep_snippets_f)),
-        out_replacement_snippets_f
-    )
-    logger.success('Wrote: {}', cwd_rel(out_replacement_snippets_f))
-
-    out_workdir_root = step_outd/'check-workdirs'
-    out_report_f = step_outd/'report.jsonl'
+    ctx = StepCtx()
     exec_replacement_snippets(
-        ser.jsonl_streamf(out_replacement_snippets_f),
-        out_workdir_root,
-        out_report_f,
-        max_workers=max_workers,
+        ser.jsonl_streamf(ctx.out_replacement_snippets_f),
+        ctx.out_workdir_root,
+        ctx.out_report_f,
+        max_workers,
     )
-    logger.success('Wrote: {}', cwd_rel(out_report_f))
+    logger.success('Wrote: {}', cwd_rel(ctx.out_report_f))
 
+
+@app.command('postprocess-report')
+def cmd_postprocess_report():
+    ctx = StepCtx()
     replacement_snippet_rows_by_key = {}
-    for r in ser.jsonl_streamf(out_replacement_snippets_f):
+    for r in ser.jsonl_streamf(ctx.out_replacement_snippets_f):
         key = row_key(r['idx'], r['offset'])
         replacement_snippet_rows_by_key[key] = r
     processed_report_rows_gen = gen_processed_report(
-        ser.jsonl_streamf(out_report_f),
+        ser.jsonl_streamf(ctx.out_report_f),
         replacement_snippet_rows_by_key,
     )
-    out_processed_report_f = step_outd/'processed-report.jsonl'
-    ser.jsonl_dumpf(processed_report_rows_gen, out_processed_report_f)
-    logger.success('Wrote: {}', cwd_rel(out_processed_report_f))
+    ser.jsonl_dumpf(processed_report_rows_gen, ctx.out_processed_report_f)
+    logger.success('Wrote: {}', cwd_rel(ctx.out_processed_report_f))
+
+
+@app.command('all')
+def cmd_all(
+    max_workers: int | None = None,
+):
+    cmd_make_replacement_snippets()
+    cmd_exec_replacement_snippets(max_workers)
+    cmd_postprocess_report()
 
 
 if __name__ == '__main__':
