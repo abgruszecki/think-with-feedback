@@ -22,6 +22,7 @@ class ExecItem:
     snippet: str
 
 
+# TODO use KeyCols at first chance
 def row_key(idx, offset):
     return f'{idx}_{offset}'
 
@@ -31,7 +32,7 @@ def make_replacement_snippet(
     examples: list[dict],
     row_key: str,
 ) -> str:
-    instrumented_code = io_abstractinator.go2(code, row_key)
+    instrumented_code = io_abstractinator.process_string(code, row_key)
     test_code = test_code_maker2.make_test_code(instrumented_code, examples)
     return test_code
 

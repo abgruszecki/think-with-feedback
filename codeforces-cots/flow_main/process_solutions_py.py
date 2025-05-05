@@ -15,7 +15,6 @@ from py_shared.test_code_maker import make_test_code
 from py_shared.code_finder import find_code, looks_like_answer
 from py_shared.ser import json_dumpf, str_dumpf
 
-
 app = typer.Typer()
 
 
@@ -157,8 +156,9 @@ def main(
         tag = 'full'
 
     # TODO use tqdm here? on ds?
+    from tqdm import tqdm
     write_rows(
-        gen_rows(ds),
+        gen_rows(tqdm(ds)),
         only_report,
         tag,
     )
