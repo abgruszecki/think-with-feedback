@@ -6,17 +6,11 @@ from loguru import logger
 import tree_sitter_python as tspython
 from tree_sitter import Language, Parser, Tree, Node, Query
 
-
-newlines_rx = re.compile(r'(\n+(?!$)|^(?=\w))')
-
 py_language = Language(tspython.language())
 py_parser = Parser(py_language)
 
-#   (call
-#     function: (identifier) @func
-#     arguments: (argument_list) @args
-#     (#any-of? @func "input" "print" "exit")
-#   ) @call
+
+newlines_rx = re.compile(r'(\n+(?!$)|^(?=\w))')
 
 _sig_calls_query_str = """
 [
@@ -30,7 +24,7 @@ _sig_calls_query_str = """
   )
 ]
 """
-sig_calls_q: Query = py_language.query(_sig_calls_query_str)
+_sig_calls_q: Query = py_language.query(_sig_calls_query_str)
 
 _main_boilerplate_query_str = """
 (if_statement
@@ -49,11 +43,10 @@ _main_boilerplate_query_str = """
   )))
 ) @main_if
 """
-main_boilerplate_q = py_language.query(_main_boilerplate_query_str)
+_main_boilerplate_q = py_language.query(_main_boilerplate_query_str)
 
 
-# TODO replace `stdin` and `stdout` too
-def virtualize(
+def _virtualize(
     root_nodes: list[Node],
     src_bytes: bytes,
 ) -> str:
@@ -64,7 +57,7 @@ def virtualize(
 
     IMPORTANT: assumes root_nodes are consecutive.
     """
-    global ctx
+    global _ctx
     # We need to sort matches as tree-sitter doesn't guarantee order (according to Gemini).
     first_input_assignment = None
     processed_matches: list[tuple[
@@ -76,7 +69,7 @@ def virtualize(
     for _, captures in (
         m
         for node in root_nodes
-        for m in sig_calls_q.matches(node)
+        for m in _sig_calls_q.matches(node)
     ):
         # NOTE first arg may be the "pattern index" and it seems to always be 0
         # captures = {}
@@ -106,11 +99,11 @@ def virtualize(
                 }
             elif parent_tp == 'assignment' and parent.child(0) == ident_n:
                 if ident_n.text in (b'print', b'exit'):
-                    logger.error('Code assigns to `{}`!!! (ctx={})', ident_n.text.decode(), ctx)
+                    logger.error('Code assigns to `{}`!!! (ctx={})', ident_n.text.decode(), _ctx)
                     continue
 
                 if not first_input_assignment:
-                    logger.debug('Found assignment to `input` (ctx={})', ctx)
+                    logger.debug('Found assignment to `input` (ctx={})', _ctx)
                     first_input_assignment = parent
                     continue
             else:
@@ -130,7 +123,7 @@ def virtualize(
                 logger.warning(
                     'Symbol to be replaced is being assigned to: sym=`{}`, ctx={}',
                     ident.text.decode(),
-                    ctx,
+                    _ctx,
                 )
                 continue
 
@@ -209,8 +202,8 @@ def virtualize(
     return out_buf.getvalue()
 
 
-def extract_main_name_from_boilerplate(node) -> bytes | None:
-    matches = main_boilerplate_q.matches(node)
+def _extract_main_name_from_boilerplate(node) -> bytes | None:
+    matches = _main_boilerplate_q.matches(node)
     # pairs = list(zip(captures['main_fn'], captures['main_args']))
     if not matches:
         return None
@@ -234,14 +227,14 @@ def extract_main_name_from_boilerplate(node) -> bytes | None:
 
 
 type StatementKind = Literal['definition', 'instruction']
-split_toplevels_t = tuple[
+_SplitToplevelsNT = tuple[
     list[Node], # initial imports
     list[tuple[StatementKind, Node]], # other statements
 ]
-def split_toplevels(node) -> split_toplevels_t:
-    global ctx
+def _split_toplevels(node) -> _SplitToplevelsNT:
+    global _ctx
     if node.type != 'module':
-        logger.warning('Unexpected node type `{}` (ctx={})', node.type, ctx)
+        logger.warning('Unexpected node type `{}` (ctx={})', node.type, _ctx)
 
     import_node_types = [
         'import_statement',
@@ -271,22 +264,8 @@ def split_toplevels(node) -> split_toplevels_t:
     return initial_imports, statements
 
 
-def fracture(
-    tops: split_toplevels_t,
-) -> tuple[list[Node], list[Node], list[Node]]:
-    defs = []
-    instructs = []
-    for kind, node in tops[1]:
-        if kind == 'definition':
-            defs.append(node)
-        elif kind == 'instruction':
-            instructs.append(node)
-        else:
-            raise ValueError(f'Unexpected: {kind=!r}')
-    return tops[0], defs, instructs
 
-
-def is_def_main(node) -> bool:
+def _is_def_main(node) -> bool:
     if node.type == 'decorated_definition':
         node = node.children[1]
 
@@ -295,21 +274,17 @@ def is_def_main(node) -> bool:
 
     return node.child_by_field_name('name').text == b'main'
 
-# is_def_main(py_parser.parse(b'def main(): pass').root_node.child(0))
-# is_def_main(py_parser.parse(b'@foo\ndef main(): pass').root_node.child(0))
-# is_def_main(py_parser.parse(b'@foo\ndef mains(): pass').root_node.child(0))
 
-
-def preprocess_program(
-    tops: split_toplevels_t,
-) -> None | tuple[split_toplevels_t, Literal['exprs']] | tuple[split_toplevels_t, Literal['defs'], bytes]:
-    global ctx
+def _preprocess_program(
+    tops: _SplitToplevelsNT,
+) -> None | tuple[_SplitToplevelsNT, Literal['exprs']] | tuple[_SplitToplevelsNT, Literal['defs'], bytes]:
+    global _ctx
     imports, stmts_with_kinds = tops
     main_name = None
     for kind, n in stmts_with_kinds:
         if kind != 'definition':
             continue
-        if is_def_main(n):
+        if _is_def_main(n):
             main_name = b'main'
             break
 
@@ -322,14 +297,14 @@ def preprocess_program(
             continue
 
         instruction_count += 1
-        extraction = extract_main_name_from_boilerplate(n)
+        extraction = _extract_main_name_from_boilerplate(n)
         if extraction is None:
             new_stmts_with_kinds.append((kind, n))
             continue
 
         if extraction:
             if found_main_boilerplate:
-                logger.warning('Multiple main boilerplates found (ctx={})', ctx)
+                logger.warning('Multiple main boilerplates found (ctx={})', _ctx)
                 return None
             # do not add the boilerplate to the processed list
             found_main_boilerplate = True
@@ -345,8 +320,8 @@ def preprocess_program(
         return ((imports, new_stmts_with_kinds), 'exprs')
 
 
-def process_toplevels1(
-    tops: split_toplevels_t,
+def _process_toplevels1(
+    tops: _SplitToplevelsNT,
     src_bytes: bytes,
 ) -> str:
     imports, stmts_with_kinds = tops
@@ -358,14 +333,14 @@ def process_toplevels1(
     if imports:
         print('\n', file=out_buf)
     print('def main(input_stream, output_stream):', file=out_buf)
-    s = virtualize([stmt for _, stmt in stmts_with_kinds], src_bytes)
+    s = _virtualize([stmt for _, stmt in stmts_with_kinds], src_bytes)
     print(newlines_rx.sub(r'\g<0>    ', s), file=out_buf)
 
     return out_buf.getvalue()
 
 
-def process_toplevels2(
-    tops: split_toplevels_t,
+def _process_toplevels2(
+    tops: _SplitToplevelsNT,
     src_bytes: bytes,
     main_name: bytes,
 ) -> str:
@@ -403,7 +378,7 @@ def process_toplevels2(
         print('def ', main_name.decode(), '(input_stream, output_stream):', sep='', file=out_buf)
         print('    ', end='', file=out_buf)
         body_node = n.child_by_field_name('body')
-        print(virtualize([body_node], src_bytes), file=out_buf)
+        print(_virtualize([body_node], src_bytes), file=out_buf)
 
     return out_buf.getvalue()
 
@@ -414,25 +389,29 @@ def process_toplevels2(
 from pathlib import Path
 import re
 
-py_indent_re = re.compile(rb'^ *')
+
+_py_indent_re = re.compile(rb'^ *')
+
 
 # Used for logging; if needed can be done via contextvars or loguru binds
-ctx = None
+_ctx = None
 
-def remove_indent(code: bytes) -> bytes:
+
+def _remove_indent(code: bytes) -> bytes:
     # NOTE This should now be done when extracting code snippets.
     # TODO should we instead just warn on leading indents?
     out_buf = BytesIO()
     first_indent: bytes | None = None
     for line in code.splitlines():
         if first_indent is None:
-            first_indent = py_indent_re.match(line).group(0)
+            first_indent = _py_indent_re.match(line).group(0)
         out_buf.write(line.removeprefix(first_indent))
         out_buf.write(b'\n')
     return out_buf.getvalue()
 
-def really_go(
-    tops: split_toplevels_t,
+
+def _process_toplevels(
+    tops: _SplitToplevelsNT,
     src_bytes: bytes,
 ) -> str:
     # debug code
@@ -444,79 +423,72 @@ def really_go(
     #     print(f'# {kind=}')
     #     print(n.text.decode())
 
-    prepro_res = preprocess_program(tops)
+    prepro_res = _preprocess_program(tops)
     if prepro_res is None:
-        logger.error('Unrecognized toplevel type (ctx={})', ctx)
+        logger.error('Unrecognized toplevel type (ctx={})', _ctx)
         return None
     prepro_tops = prepro_res[0]
     prepro_type = prepro_res[1]
 
     if prepro_type == 'exprs':
-        res = process_toplevels1(prepro_tops, src_bytes)
+        res = _process_toplevels1(prepro_tops, src_bytes)
     elif prepro_type == 'defs':
         main_name = prepro_res[2]
         if main_name != b'main':
             # NOTE we could rename the def to `main`, but recursion is a problem, so we bail instead.
-            logger.error('Unexpected main name (ctx={})', ctx)
+            logger.error('Unexpected main name (ctx={})', _ctx)
             return None
-        res = process_toplevels2(prepro_tops, src_bytes, main_name)
+        res = _process_toplevels2(prepro_tops, src_bytes, main_name)
     else:
         raise ValueError(f'Unexpected: {prepro_type=!r}')
 
     return res
 
-def go(file: str):
-    global ctx
-    ctx = 'file'
 
-    contents = remove_indent(Path(file).read_bytes())
+def process_file(file: str | Path):
+    global _ctx
+    _ctx = 'file'
+
+    contents = _remove_indent(Path(file).read_bytes())
     tree = py_parser.parse(contents)
     if tree.root_node.has_error:
         # TODO only bail if the top node is ERROR?
         logger.error('Syntax error in file: {}', file)
         return None
-    tops = split_toplevels(tree.root_node)
+    tops = _split_toplevels(tree.root_node)
 
-    return really_go(tops, contents)
+    return _process_toplevels(tops, contents)
 
-def go2(in_: str, ctx_ = None):
-    global ctx
-    ctx = ctx_ or 'row'
 
-    contents = remove_indent(in_.encode())
+def process_string(in_: str, ctx_ = None):
+    global _ctx
+    _ctx = ctx_ or 'row'
+
+    contents = _remove_indent(in_.encode())
     tree = py_parser.parse(contents)
     if tree.root_node.has_error:
         # TODO only bail if the top node is ERROR?
-        logger.error('Syntax error in row: {}', ctx)
+        logger.error('Syntax error in row: {}', _ctx)
         return None
-    tops = split_toplevels(tree.root_node)
+    tops = _split_toplevels(tree.root_node)
 
-    return really_go(tops, contents)
+    return _process_toplevels(tops, contents)
 
-# TODO put the tests (incl. this code) in a separate top-level dir
-def test():
-    test_dir = Path(__file__).parent / 'test_resources' / Path(__file__).stem
-    for file in test_dir.glob('*/sample.py'):
-        res = go(file)
 
-        out_f = file.parent / 'got.py'
-        out_f.write_text(res)
-        expected_f = file.parent / 'expected.py'
-        if not expected_f.exists():
-            logger.error('Expected file does not exist: {}', expected_f.parent.stem)
-            continue
-        expected = expected_f.read_text()
+def go(file: str | Path):
+    import warnings
+    warnings.warn("The 'go' function is deprecated. Use 'process_file' instead.", DeprecationWarning, stacklevel=2)
+    return process_file(file)
 
-        if res.rstrip() != expected.rstrip():
-            logger.error('Test failed: {}', file.parent.stem)
 
+def go2(in_: str, ctx_ = None):
+    import warnings
+    warnings.warn("The 'go2' function is deprecated. Use 'process_string' instead.", DeprecationWarning, stacklevel=2)
+    return process_string(in_, ctx_)
 
 
 import os
 if __name__ == '__main__' and 'NOGO' not in os.environ:
     import sys
     arg = sys.argv[1]
-    if arg == 'test':
-        test()
-    else:
-        print(go(arg))
+    print(go(arg))
