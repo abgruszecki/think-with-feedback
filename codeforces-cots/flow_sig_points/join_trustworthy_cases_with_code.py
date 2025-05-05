@@ -10,8 +10,8 @@ from loguru import logger
 
 from py_shared import ser
 
-step_data_t = namedtuple('step_data_t', ['flowd', 'flow_outd', 'step_outd'])
-def _dirs(file_attr, tag: str|None = None) -> step_data_t:
+StepDataNT = namedtuple('StepDataNT', ['flowd', 'flow_outd', 'step_outd'])
+def _dirs(file_attr, tag: str|None = None) -> StepDataNT:
     p = Path(file_attr)
     flowd = p.parent
     flow_outd = flowd/'out'
@@ -20,7 +20,7 @@ def _dirs(file_attr, tag: str|None = None) -> step_data_t:
         tag_suffix = tag if tag.startswith('+') else ('+'+tag)
     step_outd = flow_outd/(p.stem+tag_suffix)
     step_outd.mkdir(parents=True, exist_ok=True)
-    return step_data_t(flowd, flow_outd, step_outd)
+    return StepDataNT(flowd, flow_outd, step_outd)
 
 # TODO outdated code, +checkables are the default now
 base_tag_suffix = '+checkables'

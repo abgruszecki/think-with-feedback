@@ -10,7 +10,6 @@ from py_shared import ser
 from py_shared.misc import step_dirs, cwd_rel
 from py_shared.json_finder import find_json
 
-
 app = typer.Typer()
 
 

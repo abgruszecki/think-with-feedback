@@ -9,13 +9,12 @@ from py_shared import ser
 from py_shared.misc import cwd_rel, step_dirs
 import flow_sig_points.find_interest_items as find_interest_items
 
-
 app = typer.Typer()
 
 
 @app.command()
 def main():
-    _, flow_outd, substep_outd = step_dirs(__file__)
+    _, _, substep_outd = step_dirs(__file__)
     subflow_outd = substep_outd.parent
 
     dep_f = subflow_outd/'find_code_sig_points/result.jsonl'

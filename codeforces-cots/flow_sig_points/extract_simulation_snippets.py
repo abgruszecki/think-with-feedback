@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 from io import StringIO
-import json
-import os
 from pathlib import Path
 import re
 from typing import Iterator, Literal
@@ -9,6 +7,7 @@ from typing import Iterator, Literal
 from loguru import logger
 
 from py_shared import ser
+import py_shared.flow as fl
 
 
 py_indent_re = re.compile(r'^ *')
@@ -228,16 +227,12 @@ def gen_snippet_rows(
 
 
 def main():
-    tag_suffix = ''
-    if tag := os.environ.get('STEP_TAG'):
-        tag_suffix = f'+{tag}'
-    flowd = Path(__file__).parent
-    flow_outd = flowd/'out'
-    dep_ds_f = flow_outd/'fetch_process_solutions_py/report.jsonl'
-    dep_ext_sigpts_f = flow_outd/f'extend_sig_points_with_interests{tag_suffix}' / 'result.jsonl'
+    sd = fl.dirs(__file__)
 
-    out_f = flow_outd/f'extract_simulation_snippets{tag_suffix}' / 'result.jsonl'
-    out_f.parent.mkdir(parents=True, exist_ok=True)
+    dep_ds_f = sd.flow_outd/'fetch_process_solutions_py/report.jsonl'
+    dep_ext_sigpts_f = sd.flow_outd/'extend_sig_points_with_interests'/'result.jsonl'
+
+    out_f = sd.flow_outd/'extract_simulation_snippets'/'result.jsonl'
 
     ser.jsonl_dumpf(gen_snippet_rows(dep_ds_f, dep_ext_sigpts_f), out_f)
 

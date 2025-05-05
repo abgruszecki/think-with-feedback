@@ -8,16 +8,13 @@ from pathlib import Path
 from loguru import logger
 
 from py_shared import ser
+import py_shared.flow as fl
 
 
-flow_outd = Path(__file__).parent/'out'
-step_outd = flow_outd/'select_checkable_wrong_responses'
-step_outd.mkdir(parents=True, exist_ok=True)
-
-dep_ds_f = flow_outd/'fetch_process_solutions_py/report.jsonl'
-dep_check_report_f = flow_outd/'fetch_exec_checkable_answers/report.jsonl'
-
-outf = step_outd/'report.jsonl'
+ctx = fl.dirs(__file__)
+dep_ds_f = ctx.flow_outd/'fetch_process_solutions_py/report.jsonl'
+dep_check_report_f = ctx.flow_outd/'fetch_exec_checkable_answers/report.jsonl'
+outf = ctx.step_outd/'report.jsonl'
 
 
 def _failures_by_idx_gen():

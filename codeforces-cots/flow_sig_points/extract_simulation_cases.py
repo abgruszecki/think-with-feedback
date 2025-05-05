@@ -10,20 +10,14 @@ from loguru import logger
 import typer
 from tqdm import tqdm
 from openai import AsyncOpenAI
-from openai.types.chat.chat_completion import CompletionUsage
+from openai.types.completion_usage import CompletionUsage
 
-
-def jsonl_streamf(pathlike):
-    with open(pathlike, 'r') as fh:
-        for line in fh:
-            yield json.loads(line)
-
+import py_shared.flow as fl
 
 app = typer.Typer()
 
 
-flowd = Path(__file__).parent
-flow_outd = flowd/'out'
+flowd, flow_outd, step_outd = fl.step_dirs(__file__)
 dep_f = flow_outd/f'extract_simulation_snippets/result.jsonl'
 
 run_outd = flow_outd/f'extract_simulation_cases'/datetime.now().strftime('%Y%m%dT%H%M%S')
@@ -233,7 +227,7 @@ async def async_main(
 
     prompts = []
     with open(out_prompts_f, 'w') as prompts_fh:
-        for in_r in jsonl_streamf(dep_f):
+        for in_r in fl.ser.jsonl_streamf(dep_f):
             r = { k: in_r[k] for k in ('idx', 'offset') }
             r_inputs = r['inputs'] = {}
             r_inputs['reasoning'] = in_r['text'][:3000]
@@ -249,7 +243,7 @@ async def async_main(
             r['prompt'] = make_prompt(**r_inputs)
             prompts.append(r)
             print(json.dumps(r), file=prompts_fh)
-    logger.success('Wrote: {}', out_prompts_f.relative_to(flowd))
+    logger.success('Wrote: {}', fl.cwd_rel(out_prompts_f))
 
     semaphore = asyncio.Semaphore(20)
     tasks = []

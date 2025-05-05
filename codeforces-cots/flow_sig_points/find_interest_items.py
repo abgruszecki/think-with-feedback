@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
-import os
-from pathlib import Path
-import json
 from typing import Iterable, Iterator
 
 from loguru import logger
 import typer
 
 from py_shared import ser
-from py_shared.misc import cwd_rel, step_dirs
-
+import py_shared.flow as fl
 
 app = typer.Typer()
 
@@ -162,14 +158,14 @@ def gen_interest_item_rows(
 
 @app.command()
 def main():
-    _, flow_outd, step_outd = step_dirs(__file__)
-    dep_f = flow_outd/'find_sig_points/result.jsonl'
-    out_f = step_outd/'result.jsonl'
+    ctx = fl.dirs(__file__)
+    dep_f = ctx.flow_outd/'find_sig_points/result.jsonl'
+    out_f = ctx.step_outd/'result.jsonl'
 
     with out_f.open('w') as out_fh:
         for r in gen_interest_item_rows(ser.jsonl_streamf(dep_f)):
             print(ser.json.dumps(r), file=out_fh)
-    logger.success('Wrote: {}', cwd_rel(out_f))
+    logger.success('Wrote: {}', fl.cwd_rel(out_f))
 
 
 if __name__ == '__main__':

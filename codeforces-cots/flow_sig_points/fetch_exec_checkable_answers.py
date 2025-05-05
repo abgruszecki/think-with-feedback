@@ -4,15 +4,12 @@ from pathlib import Path
 
 from loguru import logger
 
-
-def path2rel(p: Path) -> str:
-    return str(p.relative_to(Path.cwd(), walk_up=True))
+import py_shared.flow as fl
 
 
-flowd = Path(__file__).parent
-dep_outf = flowd.parent/'flow_main/out/exec_checkable_answers/report.jsonl'
-outf = flowd/'out/fetch_exec_checkable_answers/report.jsonl'
-outf.parent.mkdir(parents=True, exist_ok=True)
+ctx = fl.dirs(__file__)
+dep_outf = ctx.flowd.parent/'flow_main/out/exec_checkable_answers/report.jsonl'
+outf = ctx.flow_outd/'fetch_exec_checkable_answers/report.jsonl'
 
 shutil.copy(dep_outf, outf)
-logger.success('Copied {} to {}', path2rel(dep_outf), path2rel(outf))
+logger.success('Copied {} to {}', fl.cwd_rel(dep_outf), fl.cwd_rel(outf))

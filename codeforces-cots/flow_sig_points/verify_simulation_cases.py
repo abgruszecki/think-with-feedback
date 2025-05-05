@@ -10,10 +10,10 @@ from dockerinator.run_in_containers import run_items_in_workdir_containers, Exec
 from py_shared import ser
 from py_shared.misc import step_dirs
 
-
-item_t = namedtuple('item_t', ['code', 'examples'])
-
 app = typer.Typer()
+
+
+ItemNT = namedtuple('ItemNT', ['code', 'examples'])
 
 
 @app.command()
@@ -40,10 +40,10 @@ def main(
             'input': r['input'],
             'output': r['output'],
         }]
-        items.append((item_t(code, examples), key))
+        items.append((ItemNT(code, examples), key))
 
     def prepare_workdir(
-        item: item_t,
+        item: ItemNT,
         local_workdir: Path
     ):
         assert local_workdir.exists(), f'expected to exist: {local_workdir}'

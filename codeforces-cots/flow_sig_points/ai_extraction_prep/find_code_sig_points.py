@@ -9,7 +9,6 @@ from py_shared import ser
 from py_shared.misc import cwd_rel, step_dirs
 import flow_sig_points.find_sig_points as find_sig_points
 
-
 app = typer.Typer()
 
 

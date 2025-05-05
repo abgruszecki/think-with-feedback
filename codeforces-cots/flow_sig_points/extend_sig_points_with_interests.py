@@ -6,23 +6,9 @@ from typing import Iterable, Iterator
 import typer
 
 from py_shared import ser
-
+import py_shared.flow as fl
 
 app = typer.Typer()
-
-
-tag_suffix = ''
-if tag := os.environ.get('STEP_TAG'):
-    tag_suffix = f'+{tag}'
-flow_outd = Path(__file__).parent/'out'
-step_outd = flow_outd/f'extend_sig_points_with_interests{tag_suffix}'
-step_outd.mkdir(parents=True, exist_ok=True)
-
-dep_interest_f = flow_outd/f'find_interest_items{tag_suffix}' / 'result.jsonl'
-dep_sig_points_f = flow_outd/f'find_sig_points{tag_suffix}' / 'result.jsonl'
-
-out_simless_indices_f = step_outd / 'ds-simless-row-indices.json'
-out_result_f = step_outd / 'result.jsonl'
 
 
 def gen_extended_sig_point_rows(
@@ -52,6 +38,14 @@ def gen_extended_sig_point_rows(
 
 @app.command()
 def main():
+    ctx = fl.dirs(__file__)
+
+    dep_interest_f = ctx.flow_outd/'find_interest_items/result.jsonl'
+    dep_sig_points_f = ctx.flow_outd/'find_sig_points/result.jsonl'
+
+    out_simless_indices_f = ctx.step_outd/'ds-simless-row-indices.json'
+    out_result_f = ctx.step_outd/'result.jsonl'
+
     all_indices = set()
     interest_indices = set()
     with out_result_f.open('w') as out_fh:

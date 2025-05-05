@@ -22,6 +22,7 @@ from py_shared.misc import step_dirs, cwd_rel
 
 app = typer.Typer()
 
+
 type Jsonable = str|int|bool|list['Jsonable']|dict[str, 'Jsonable']
 type JsonableDict = dict[str, Jsonable]
 
@@ -40,6 +41,8 @@ class KeyCols():
 
 
 ## PRELUDE: vLLM API ##
+# I think this'd be nicer if it was in a separate, late-imported module.
+# That way, we'd only import vLLM (slow) just before we need it.
 from vllm import LLM, RequestOutput, CompletionOutput, SamplingParams
 type ModelHandle = LLM
 

@@ -11,10 +11,9 @@ import typer
 from py_shared import ser
 from py_shared.misc import step_dirs
 
-
-item_t = namedtuple('item_t', ['code', 'examples'])
-
 app = typer.Typer()
+
+ItemNT = namedtuple('ItemNT', ['code', 'examples'])
 
 
 def gen_joined_rows(

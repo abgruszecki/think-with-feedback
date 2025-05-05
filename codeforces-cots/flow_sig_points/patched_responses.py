@@ -8,8 +8,7 @@ from loguru import logger
 import typer
 
 from py_shared import ser
-from py_shared.misc import step_dirs, cwd_rel
-
+import py_shared.flow as fl
 
 app = typer.Typer()
 
@@ -130,13 +129,13 @@ def gen_patched_responses(
 
 @app.command()
 def main():
-    flowd, flow_outd, step_outd = step_dirs(__file__)
+    ctx = fl.dirs(__file__)
 
-    dep_replacements_f = flow_outd/'simulation_replacements/processed-report.jsonl'
-    dep_ds_f = flow_outd/'fetch_process_solutions_py/report.jsonl'
+    dep_replacements_f = ctx.flow_outd/'simulation_replacements'/'processed-report.jsonl'
+    dep_ds_f = ctx.flow_outd/'fetch_process_solutions_py'/'report.jsonl'
 
-    out_f = step_outd/'result.jsonl'
-    out_exploded_root = step_outd/'exploded'
+    out_f = ctx.step_outd/'result.jsonl'
+    out_exploded_root = ctx.step_outd/'exploded'
     out_exploded_root.mkdir(parents=True, exist_ok=True)
 
     with out_f.open('w') as out_fh:
@@ -149,8 +148,7 @@ def main():
             out_exploded_dir.mkdir(parents=True, exist_ok=True)
             (out_exploded_dir/'original-response.md').write_text(r['original_response'])
             (out_exploded_dir/'patched-response.md').write_text(r['patched_response'])
-
-    logger.success('Wrote: {}', cwd_rel(out_f))
+    logger.success('Wrote: {}', fl.cwd_rel(out_f))
 
 
 if __name__ == '__main__':

@@ -11,7 +11,7 @@ import regex as reg # regex is compatible with the re module
 import typer
 
 from py_shared import code_finder, ser
-
+import py_shared.flow as fl
 
 app = typer.Typer()
 
@@ -23,21 +23,6 @@ class SigPointData(BaseModel):
     text_len: int = 0
     extra: dict[str, Any] = {}
     text: str = ''
-
-
-flow_outd = Path(__file__).parent/'out'
-
-def make_outf(tag: str = '') -> Path:
-    tag_suffix = ''
-    if tag:
-        tag_suffix = '+'+tag
-    step_outd = flow_outd/f'find_sig_points{tag_suffix}'
-    step_outd.mkdir(parents=True, exist_ok=True)
-    return step_outd / 'result.jsonl'
-
-opt_dep_checkables_f = flow_outd/'extract_checkable_responses'/'clean-result.jsonl'
-opt_dep_checkables_wrong_f = flow_outd/'select_checkable_wrong_responses'/'report.jsonl'
-opt_dep_process_solutions_py_f = flow_outd/'fetch_process_solutions_py/report.jsonl'
 
 
 # Observations
@@ -275,10 +260,15 @@ def main(
 ):
     valid_data_sources = ('checkables', 'unfiltered-ds', 'checkables-wrong', 'checkables-stream-full')
     if data_source not in valid_data_sources:
-        raise typer.BadParameter(
-            f'should be one of: {", ".join(valid_data_sources)}',
-            param_hint='--data-source',
-        )
+        raise typer.BadParameter(f'--data-source should be one of: {valid_data_sources!r}; was: {data_source!r}')
+
+    ctx = fl.dirs(__file__)
+
+    opt_dep_checkables_f = ctx.flow_outd/'extract_checkable_responses'/'clean-result.jsonl'
+    opt_dep_checkables_wrong_f = ctx.flow_outd/'select_checkable_wrong_responses'/'report.jsonl'
+    opt_dep_process_solutions_py_f = ctx.flow_outd/'fetch_process_solutions_py/report.jsonl'
+
+    outf = ctx.step_outd/'result.jsonl'
 
     if data_source == 'checkables':
         data = ser.jsonl_loadf(opt_dep_checkables_f)
@@ -303,7 +293,7 @@ def main(
         tag = ''
     elif data_source == 'checkables-stream-full':
         # TODO this is yet another kludge on top of all the other kludges...
-        dep_ds_checker_types_f = flow_outd/'fetch_extract_checker_type/checker-types.jsonl'
+        dep_ds_checker_types_f = ctx.flow_outd/'fetch_extract_checker_type/checker-types.jsonl'
         wanted_indices = set()
         for r in ser.jsonl_streamf(dep_ds_checker_types_f):
             if r.get('type') == 'diff':
@@ -316,7 +306,6 @@ def main(
         get_response = lambda r: r['inputs']['response']
         tag = ''
 
-    outf = make_outf(tag)
     with outf.open('w') as fh:
         for idx, in_r in tqdm(data_gen, total=data_len):
             r = {
@@ -324,7 +313,7 @@ def main(
                 'id': in_r['id'],
             }
             for p in processed_response_gen(get_response(in_r)):
-                r.update(p.model_dump())
+                r.update(p.model_dump(mode='json'))
                 print(json.dumps(r), file=fh)
 
 

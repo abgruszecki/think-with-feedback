@@ -12,6 +12,8 @@ from py_shared import ser
 from py_shared.test_code_maker2 import make_test_code
 from py_shared.misc import step_dirs
 
+app = typer.Typer()
+
 
 @dataclass
 class Item:
@@ -21,9 +23,6 @@ class Item:
     case_idx: int
     code: str
     examples: list[dict]
-
-
-app = typer.Typer()
 
 
 py_indent_re = re.compile(r'^ *')

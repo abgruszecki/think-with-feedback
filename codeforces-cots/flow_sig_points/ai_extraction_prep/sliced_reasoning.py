@@ -12,7 +12,6 @@ import typer
 from py_shared import ser
 from py_shared.misc import step_dirs
 
-
 app = typer.Typer()
 
 

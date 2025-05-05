@@ -105,13 +105,13 @@ def main(
     extend_run: Path | None = None,
     force: bool = False,
 ):
-    sd = fl.dirs(__file__, has_runs=True, extend_run=extend_run, force=force)
+    ctx = fl.dirs(__file__, has_runs=True, extend_run=extend_run, force=force)
 
-    dep_patches_f = sd.run_outd/'ai_patched_snippets/result.jsonl'
-    dep_slices_f = sd.flow_outd/'ai_extraction_prep/sliced_reasoning/result.jsonl'
-    dep_sigpts_f = sd.flow_outd/'ai_extraction_prep/extend_sig_points_with_interests/result.jsonl'
+    dep_patches_f = ctx.run_outd/'ai_patched_snippets/result.jsonl'
+    dep_slices_f = ctx.flow_outd/'ai_extraction_prep/sliced_reasoning/result.jsonl'
+    dep_sigpts_f = ctx.flow_outd/'ai_extraction_prep/extend_sig_points_with_interests/result.jsonl'
 
-    out_f = sd.step_outd/'result.jsonl'
+    out_f = ctx.step_outd/'result.jsonl'
 
     sigpts_by_idx: dict[int, list[SigptRow]] = defaultdict(list)
     for r in fl.ser.model_jsonl_streamf(SigptRow, dep_sigpts_f):
@@ -178,9 +178,11 @@ def main(
             patchlist_iter = iter(patchlist)
             patch_r: PatchRow | None = next(patchlist_iter) # assuming patchlist is not empty
             cur_sigpt_rows = sigpts_by_idx[idx]
+            did_insert_test = False
             for i, sigpt_row in enumerate(cur_sigpt_rows):
                 if patch_r and sigpt_row.offset == patch_r.offset:
-                    processed_response, did_insert_test = process_patch_response(patch_r)
+                    processed_response, just_inserted_test = process_patch_response(patch_r)
+                    did_insert_test = did_insert_test or just_inserted_test
                     out_buf.write(processed_response)
                     if i == len(cur_sigpt_rows) - 1:
                         if m := thinks_end_rx.search(sigpt_row.text):
@@ -213,7 +215,7 @@ def main(
 
 @app.command()
 def explode_out_rows(
-    run_outd: Annotated[Path, fl.InputDirArg()] = None,
+    run_outd: Annotated[Path | None, fl.InputDirArg()] = None,
 ) -> None:
     # get step_outd
     sd = fl.dirs(__file__, has_runs=True, extend_run=run_outd or 'last', force=True)
