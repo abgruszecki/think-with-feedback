@@ -5,9 +5,8 @@ Basic chain:
 1. extract_checkable_responses.py
 1. find_sig_points.py && find_interest_items.py && extend_sig_points_with_interests.py
 1. extract_simulation_snippets.py
-1. extract_simulation_cases.py
-   - (this step uses a model)
 1. extract_simulation_cases.py && postprocess_simulation_cases.py
+   - (the first script uses a model)
 1. join_trustworthy_cases_with_code.py && verify_simulation_cases.py
    - These are named badly.
    - The former script makes prepares a dataset for the latter to execute.

@@ -17,6 +17,8 @@ from openai.types.completion_usage import CompletionUsage
 from py_shared import ser
 from py_shared.misc import step_dirs, cwd_rel
 
+app = typer.Typer()
+
 
 ## PRELUDE: OpenAI API ##
 type ModelHandle = tuple[str, AsyncOpenAI]
@@ -113,6 +115,7 @@ def make_prompt(response: str) -> str:
 
 
 ## PRELUDE: Types ##
+# TODO use pydantic models at first chance
 class InRow(TypedDict):
     idx: int
     offset: int
@@ -121,6 +124,7 @@ class InRow(TypedDict):
     examples: list[dict]
     text: str
 
+# TODO use KeyCols at first chance
 InRowKeysNT = namedtuple('InRowKeysNT', ['key', 'idx', 'offset'])
 in_row_key_cols = InRowKeysNT._fields[1:]
 def mk_key(in_r: InRow) -> InRowKeysNT:
@@ -132,9 +136,6 @@ def mk_key(in_r: InRow) -> InRowKeysNT:
         offset=offset,
     )
 ## END PRELUDE: Types ##
-
-
-app = typer.Typer()
 
 
 def _count_usage(counter: UsageCounter, usage: CompletionUsage | None):

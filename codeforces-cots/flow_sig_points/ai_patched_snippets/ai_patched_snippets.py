@@ -6,6 +6,7 @@ which adapt the output of previous steps for this script.
 This script is intended to run on a single H100.
 """
 from collections import namedtuple
+from dataclasses import dataclass
 from os import environ
 from pathlib import Path
 import re
@@ -19,8 +20,23 @@ from py_shared import ser
 from py_shared.code_finder import find_final_answer_block
 from py_shared.misc import step_dirs, cwd_rel
 
+app = typer.Typer()
+
 type Jsonable = str|int|bool|list['Jsonable']|dict[str, 'Jsonable']
 type JsonableDict = dict[str, Jsonable]
+
+@dataclass
+class KeyCols():
+    names: tuple[str, ...]
+
+    def values(self, r: dict[str, Any]) -> tuple[Any, ...]:
+        return tuple(r[n] for n in self.names)
+
+    def kvs(self, r: dict[str, Any]) -> dict[str, Any]:
+        return { n: r[n] for n in self.names }
+
+    def key(self, r: dict[str, Any], *, sep: str) -> str:
+        return sep.join(str(r[n]) for n in self.names)
 
 
 ## PRELUDE: vLLM API ##
@@ -188,17 +204,16 @@ def make_prompt(
 ## END PRELUDE: Prompt ##
 
 
-app = typer.Typer()
-
-
 acceptable_failure_rx = re.compile(r'test\b.*\bfail', re.IGNORECASE)
+# !!! should exactly match the regex in patched_reasoning.py !!!
 thinks_end_rx = re.compile(r'\n*</think>\n*')
-keycols = ('idx', 'offset')
+keycols = KeyCols(('idx', 'offset'))
 
 model_ref = Path.home()/'models/Qwen3-32B'
 model_extra_kwargs: JsonableDict = { 'max_model_len': 10240 }
 # model_ref = Path.home()/'models/Qwen3-14B'
 # model_extra_kwargs: JsonableDict = {}
+
 
 def find_code(
     response: str,
@@ -220,13 +235,13 @@ def gen_prompt_rows(
 ) -> Iterator[dict]:
     def _gen_cot_kvs():
         for in_r in cot_rows:
-            key_tup = tuple(in_r[k] for k in keycols)
+            key_tup = keycols.values(in_r)
             yield key_tup, in_r
     cot_rows_by_key = dict(_gen_cot_kvs())
 
     for data_r in data_rows:
-        key_tup = tuple(data_r[k] for k in keycols)
-        key = '/'.join(map(str, key_tup))
+        key_tup = keycols.values(data_r)
+        key = keycols.key(data_r, sep='/')
         status: str = data_r['status']
         if status == 'fail:timeout':
             continue
@@ -248,7 +263,7 @@ def gen_prompt_rows(
 
         sim_snippets = data_r['inputs']['simulations']
 
-        r = { k: data_r[k] for k in keycols }
+        r = keycols.kvs(data_r)
         r['inputs'] = inputs = {
             'cot_snippet': cot_snippet,
             'simulation_snippets': sim_snippets,
@@ -270,7 +285,7 @@ def process_prompt_row_(
     res = process_prompt_row(
         in_row=in_r,
         api=api,
-        key_fn=lambda r: '/'.join(str(r[k]) for k in keycols),
+        key_fn=lambda r: keycols.key(r, sep='/'),
         prompt_fn=prompt_fn,
         icl_shots=icl_shots,
         system_prompts=system_prompts,
@@ -279,43 +294,12 @@ def process_prompt_row_(
         return None
 
     in_r, meta, response = res
-    r = { k: in_r[k] for k in keycols }
+    r = keycols.kvs(in_r)
     r['inputs'] = in_r['inputs']
     r['prompt'] = in_r['prompt']
     r['response_meta'] = meta
     r['response'] = response
     return r
-
-
-marker_tag_rx = re.compile(r'\n?\n?<test-with-result/>\n?\n?')
-def replace_marker_tag(
-    response: str,
-    test_code: str,
-    test_exit_code: int,
-    test_output: str,
-) -> str:
-    import io
-    b = io.StringIO()
-
-    m = marker_tag_rx.search(response)
-    if m is None:
-        # TODO warn?
-        return response
-    b.write(response[:m.start()])
-    b.write('\n\n```python\n')
-    b.write(test_code)
-    if test_code[-1] != '\n':
-        b.write('\n')
-    b.write('```\n\n')
-    b.write('<run-test/>\n\n')
-    print('Exit code: ', test_exit_code, '. Output:', sep='', file=b)
-    b.write('```\n')
-    b.write(test_output)
-    if test_output[-1] != '\n':
-        b.write('\n')
-    b.write('```\n\n')
-    b.write(response[m.end():])
-    return b.getvalue()
 
 
 def InputDirOption(decl):
@@ -355,8 +339,6 @@ def main(
     ser.json_dumpf(config, out_config_f)
     logger.info('Wrote step config: {}', cwd_rel(out_config_f))
 
-    api = make_model_handle(model_ref, model_extra_kwargs)
-
     if use_icl:
         icl_data = ser.json_loadf(rsrc_icl_f)
         icl_shots = [( make_prompt(**r['inputs']), r['response'] ) for r in icl_data[:use_icl]]
@@ -373,6 +355,8 @@ def main(
     ))
     ser.jsonl_dumpf(prompts, out_prompts_f)
     logger.success('Wrote: {}', cwd_rel(out_prompts_f))
+
+    api = make_model_handle(model_ref, model_extra_kwargs)
 
     sys_prompts = ['/nothink'] # this disables Qwen3 thinking
     with open(out_f, 'w') as out_fh:
@@ -399,7 +383,7 @@ def _intr_explode_result(
     out_root.mkdir(parents=True, exist_ok=True)
 
     for r in ser.jsonl_streamf(result_f):
-        key_filename = '_'.join(str(r[k]) for k in keycols)
+        key_filename = keycols.key(r, sep='_')
         out_d = out_root/key_filename
         out_d.mkdir(exist_ok=True)
         (out_d/'prompt.md').write_text(r['prompt'])

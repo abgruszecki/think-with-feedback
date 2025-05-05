@@ -2,6 +2,8 @@ from io import StringIO
 import re
 import sys
 
+from loguru import logger
+
 
 TESTS_PREFIX = \
     '''\
@@ -69,8 +71,8 @@ def gen_instrumented_code_parts(code: str):
         if is_first:
             first_offset = offset
             is_first = False
-        if offset < first_offset:
-            print(f'Bad offset {offset} < first_offset ({first_offset}); line: {line!r}', file=sys.stderr)
+        # if offset < first_offset:
+        #     logger.warning('Bad offset ({}) < first_offset ({}); line: {!r}', offset, first_offset, line)
         # TODO this is a temporary hack in case lines with bad offsets show up.
         resolved_offset = min(first_offset, offset)
         # trim the leading whitespace
@@ -81,7 +83,6 @@ def gen_instrumented_code_parts(code: str):
             yield line
         else:
             # Grug virtualize standard streams
-            # TODO also handle `exit()`
             yield sys_stdout_rx.sub('output_stream', sys_stdin_rx.sub('input_stream', line))
 
 def gen_test_code_parts(examples: list[dict]):

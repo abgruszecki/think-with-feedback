@@ -12,14 +12,13 @@ from py_shared import ser
 from py_shared.code_finder import find_final_answer_block
 from py_shared.misc import step_dirs
 
+app = typer.Typer()
+
 
 @dataclass
 class Item:
     key: str
     code: str
-
-
-app = typer.Typer()
 
 
 keycols = ('idx', 'offset')
