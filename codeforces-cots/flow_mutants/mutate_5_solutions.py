@@ -68,7 +68,7 @@ def main():
     # Pick 5 random examples
     selected = random.sample(all_lines, NUM_MUTATIONS)
 
-    print("✅ Selected problems for mutation:")
+    print("Selected problems for mutation:")
     for item in selected:
         idx = int(item["idx"])
         cf_problem = item.get("problem") or item.get("url") or "Unknown"

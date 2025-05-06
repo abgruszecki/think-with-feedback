@@ -65,7 +65,7 @@
 #             "dataset_index": i
 #         }
 
-#         print(f"✅ Saved: {shot_id} → {row['title']} ({row['contest_name']})")
+#         print(f"Saved: {shot_id} → {row['title']} ({row['contest_name']})")
 #         used_indices.add(i)
 #         count += 1
 
@@ -115,7 +115,7 @@ for i in DESIRED_INDICES:
         "contest_start_year": row['contest_start_year'],
     }
 
-    print(f"✅ Saved {shot_id}: {row['title']}")
+    print(f"Saved {shot_id}: {row['title']}")
 
 # Save the mapping file
 with open(out_base / "mapping.json", "w", encoding="utf-8") as f:

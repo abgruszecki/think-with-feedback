@@ -39,7 +39,7 @@ def extract_mutant_snippet(pid: int) -> str | None:
     subdir = str(pid).zfill(5)
     mutant_file = MUTANT_BASE / subdir / "candidate_2.py"
     if not mutant_file.exists():
-        print(f"❌ Mutant file not found for ID {pid}: {mutant_file}", file=sys.stderr)
+        print(f"Mutant file not found for ID {pid}: {mutant_file}", file=sys.stderr)
         return None
 
     snippet = []
@@ -54,7 +54,7 @@ def extract_mutant_snippet(pid: int) -> str | None:
             snippet.append(line)
 
     if not snippet:
-        print(f"⚠️  No valid test_program found for ID {pid}", file=sys.stderr)
+        print(f"No valid test_program found for ID {pid}", file=sys.stderr)
         return None
 
     return "\n".join(snippet)
@@ -65,7 +65,7 @@ def generate_prompt(pid: int, mutant_code: str):
     out_file = out_dir / "prompt.md"
 
     if not in_file.exists():
-        print(f"❌ Original prompt.md not found for ID {pid}: {in_file}", file=sys.stderr)
+        print(f"Original prompt.md not found for ID {pid}: {in_file}", file=sys.stderr)
         return
 
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -80,7 +80,7 @@ def generate_prompt(pid: int, mutant_code: str):
 
     final_prompt = "\n\n".join([INTRO.rstrip(), original_md, closing_filled]) + "\n"
     out_file.write_text(final_prompt, encoding="utf-8")
-    print(f"✅ Generated: {out_file}")
+    print(f"Generated: {out_file}")
 
 def main():
     for pid in PROBLEM_IDS:

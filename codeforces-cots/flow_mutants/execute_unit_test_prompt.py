@@ -55,7 +55,7 @@ for idx in SELECTED:
     # Debug print: absolute path and existence
     print(f"Checking prompt at: {prompt_path}  → exists? {prompt_path.exists()}", file=sys.stderr)
     if not prompt_path.exists():
-        print(f"⚠️  Missing prompt.md for index {idx}", file=sys.stderr)
+        print(f"Missing prompt.md for index {idx}", file=sys.stderr)
         continue
 
     # Build messages
@@ -94,4 +94,4 @@ for idx in SELECTED:
     with json_file.open("w", encoding="utf-8") as f_json:
         json.dump(response.model_dump(mode="json"), f_json, indent=2)
 
-print(f"\n✅ All selected prompts sent. Results in: {OUT_DIR}")
+print(f"\nAll selected prompts sent. Results in: {OUT_DIR}")

@@ -34,7 +34,7 @@ import time
 for pid in PROBLEM_IDS:
     prompt_path = Path(f"mutant_fixing/cot-{pid}/prompt.md")
     if not prompt_path.exists():
-        print(f"[{pid}] ❌ prompt.md not found at {prompt_path}")
+        print(f"[{pid}] prompt.md not found at {prompt_path}")
         continue
 
     prompt = read_file(prompt_path)
@@ -60,4 +60,4 @@ for pid in PROBLEM_IDS:
             f.write("</think>\n\n")
         f.write(msg.content)
 
-    print(f"[{pid}] ✅ Wrote response.md")
+    print(f"[{pid}] Wrote response.md")

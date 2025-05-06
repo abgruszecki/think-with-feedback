@@ -25,11 +25,11 @@ def main():
                 out_path = OUT_DIR / f"{idx}.py"
                 with out_path.open("w", encoding="utf-8") as wf:
                     wf.write(code)
-                print(f"✅ Extracted idx={idx} → {out_path}")
+                print(f"Extracted idx={idx} → {out_path}")
 
     missing = DESIRED_IDX - {int(p.stem) for p in OUT_DIR.glob("*.py")}
     if missing:
-        print(f"⚠️  Warning: could not find entries for indices: {sorted(missing)}")
+        print(f"Warning: could not find entries for indices: {sorted(missing)}")
 
 if __name__ == "__main__":
     main()
