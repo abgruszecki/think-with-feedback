@@ -1,0 +1,32 @@
+{
+  "cot-17": {
+    "dataset_index": 17,
+    "title": "Fox and Box Accumulation",
+    "contest_name": "Codeforces Round 228 (Div. 1)",
+    "contest_start_year": 2014
+  },
+  "cot-116": {
+    "dataset_index": 116,
+    "title": "Bouquet (Easy Version)",
+    "contest_name": "Codeforces Round 961 (Div. 2)",
+    "contest_start_year": 2024
+  },
+  "cot-319": {
+    "dataset_index": 319,
+    "title": "Group Photo",
+    "contest_name": "Contest 2050 and Codeforces Round 718 (Div. 1 + Div. 2)",
+    "contest_start_year": 2021
+  },
+  "cot-740": {
+    "dataset_index": 740,
+    "title": "Quest",
+    "contest_name": "VK Cup 2015 - \u0420\u0430\u0443\u043d\u0434 3",
+    "contest_start_year": 2015
+  },
+  "cot-873": {
+    "dataset_index": 873,
+    "title": "Anton and Letters",
+    "contest_name": "Codeforces Round 253 (Div. 2)",
+    "contest_start_year": 2014
+  }
+}

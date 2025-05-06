@@ -1,6 +1,6 @@
 from io import BytesIO, StringIO
 import re
-from typing import Literal
+from typing import Literal, TypeAlias
 
 from loguru import logger
 import tree_sitter_python as tspython
@@ -226,13 +226,13 @@ def _extract_main_name_from_boilerplate(node) -> bytes | None:
     return main_fn.text
 
 
-type StatementKind = Literal['definition', 'instruction']
-_SplitToplevelsNT = tuple[
-    list[Node], # initial imports
-    list[tuple[StatementKind, Node]], # other statements
+StatementKind: TypeAlias = Literal['definition', 'instruction']
+split_toplevels_t: TypeAlias = tuple[
+    list[Node],                    # initial imports
+    list[tuple[StatementKind, Node]]  # other statements
 ]
-def _split_toplevels(node) -> _SplitToplevelsNT:
-    global _ctx
+def split_toplevels(node) -> split_toplevels_t:
+    global ctx
     if node.type != 'module':
         logger.warning('Unexpected node type `{}` (ctx={})', node.type, _ctx)
 

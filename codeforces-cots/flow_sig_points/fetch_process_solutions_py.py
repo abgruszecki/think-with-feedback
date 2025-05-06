@@ -9,9 +9,14 @@ import typer
 app = typer.Typer()
 
 
-def path2rel(p: Path) -> str:
-    return str(p.relative_to(Path.cwd(), walk_up=True))
+# def path2rel(p: Path) -> str:
+#     return str(p.relative_to(Path.cwd(), walk_up=True))
 
+def path2rel(p: Path) -> str:
+    try:
+        return str(p.relative_to(Path.cwd()))
+    except ValueError:
+        return str(p.resolve())  # fallback to absolute path
 
 flowd = Path(__file__).parent
 def _dep_outf(full: bool):

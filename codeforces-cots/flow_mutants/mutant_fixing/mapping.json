@@ -1,0 +1,32 @@
+{
+  "cot-377": {
+    "title": "Rock-paper-scissors",
+    "contest_name": "School Personal Contest #3 (Winter Computer School 2010/11) - Codeforces Beta Round 45 (ACM-ICPC Rules)",
+    "contest_start_year": 2010,
+    "dataset_index": 376
+  },
+  "cot-180": {
+    "title": "Turtle Puzzle: Rearrange and Negate",
+    "contest_name": "Codeforces Round 929 (Div. 3)",
+    "contest_start_year": 2024,
+    "dataset_index": 179
+  },
+  "cot-355": {
+    "title": "Football Betting",
+    "contest_name": "Codeforces Raif ML Round 1",
+    "contest_start_year": 2021,
+    "dataset_index": 354
+  },
+  "cot-386": {
+    "title": "Strange Table",
+    "contest_name": "Codeforces Round 710 (Div. 3)",
+    "contest_start_year": 2021,
+    "dataset_index": 385
+  },
+  "cot-174": {
+    "title": "Presents",
+    "contest_name": "Codeforces Beta Round 50",
+    "contest_start_year": 2011,
+    "dataset_index": 173
+  }
+}

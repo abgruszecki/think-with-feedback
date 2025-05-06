@@ -2,7 +2,7 @@
 scriptd=$(dirname "$(realpath "$0")")
 rootd=$(dirname "$scriptd")
 
-source "$rootd/.venv/bin/activate"
+# source "$rootd/.venv/bin/activate"
 
 cmd=$1
 shift
