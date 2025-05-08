@@ -23,9 +23,11 @@ from py_shared.misc import step_dirs, cwd_rel
 app = typer.Typer()
 
 
+# TODO use py_shared.flow here
 type Jsonable = str|int|bool|list['Jsonable']|dict[str, 'Jsonable']
 type JsonableDict = dict[str, Jsonable]
 
+# TODO use py_shared.flow here
 @dataclass
 class KeyCols():
     names: tuple[str, ...]
@@ -144,7 +146,7 @@ def process_prompt_row(
     except Exception:
         logger.exception('Exn at row: {}', key)
         return None
-## END PRELUDE: OpenAI API ##
+## END PRELUDE: vLLM API ##
 
 
 ## PRELUDE: Prompt ##
@@ -305,6 +307,7 @@ def process_prompt_row_(
     return r
 
 
+# TODO use py_shared.flow here
 def InputDirOption(decl):
     return typer.Option(..., decl, exists=True, file_okay=False, dir_okay=True, readable=True)
 @app.command()

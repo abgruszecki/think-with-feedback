@@ -25,7 +25,7 @@ class Item:
     examples: list[dict]
 
 
-py_indent_re = re.compile(r'^ *')
+py_indent_rx = re.compile(r'^ *')
 
 
 @app.command()
@@ -114,7 +114,7 @@ def main(
                 first_indent = None
                 for line in str(item.code).splitlines():
                     if first_indent is None:
-                        first_indent = py_indent_re.match(line).group(0)
+                        first_indent = py_indent_rx.match(line).group(0)
                     print(line.removeprefix(first_indent), file=fh)
         else:
             test_code = make_test_code(item.code, item.examples)
