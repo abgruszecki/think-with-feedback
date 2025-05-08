@@ -1,0 +1,13 @@
+# This script is intended to be sourced, not executed.
+
+venv_dir=.venv
+if test -d "$venv_dir"
+then
+    source "$venv_dir/bin/activate"
+else
+    echo >&2 "Not activating venv; missing dir: $venv_dir"
+    echo >&2 "(Sorry, this script must be sourced from the codeforces-cots directory.)"
+    return 1
+fi
+
+export PYTHONPATH="$PYTHONPATH:$PWD"
