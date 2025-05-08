@@ -32,13 +32,18 @@ class SolutionsInputs(pydantic.BaseModel):
     memory_limit: float|None
     input_format: str|None
     output_format: str|None
-    examples: list[dict]
+    examples: list['IOExample']
     problem_notes: str|None
 
     # problem metadata
     title: str
     contest_name: str
     contest_start_year: int
+
+
+class IOExample(pydantic.BaseModel):
+    input: str
+    output: str
 
 
 def make_rendered(row: SolutionsRow, out):

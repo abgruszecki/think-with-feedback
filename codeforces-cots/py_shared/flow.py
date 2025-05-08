@@ -81,7 +81,7 @@ def dirs(
     tag: str | None = None,
     no_subflow: bool = False,
     has_runs: bool = False,
-    # TODO it doesn't make sense to pass 'last' here. Pass a bool instead.
+    # TODO it doesn't make sense to pass 'last' here. Pass a bool instead. Or anotther arg?
     extend_run: str | Path | None = None,
     force: bool = False,
 ) -> StepDirs:
@@ -131,16 +131,22 @@ def dirs(
         step_outd_symlink.unlink(missing_ok=True)
         step_outd_symlink.symlink_to(step_outd, target_is_directory=True)
 
-    last_run_outd_symlink: Path | None = None
+    last_step_outd_symlink: Path | None = None
     def _resolve_outd() -> Path:
-        nonlocal last_run_outd_symlink
+        nonlocal last_step_outd_symlink
         resolved_outd = step_outd
         if has_runs:
-            last_run_outd_symlink = step_outd/'last'
+            last_step_outd_symlink = step_outd/'last'
             if extend_run:
+                # This special-cases paths which end in "last", which is kludgy.
+                # TODO find a better way to specify the last run.
                 if extend_run.name == 'last':
-                    # resolved_outd = last_run_outd_symlink.readlink()
-                    raise NotImplementedError('There is a bug in this code path. I think.')
+                    # This is the code that was here and it's just wrong.
+                    # Return the last step's outd as the resolved outd only makes sense
+                    # if the last step was the same as the current one.
+                    # resolved_outd = last_step_outd_symlink.readlink()
+                    # return resolved_outd
+                    raise NotImplementedError('There is a bug in this code path.')
                 else:
                     extend_run_relpath = extend_run.resolve().relative_to(step_outd.resolve())
                     assert len(extend_run_relpath.parts) == 1, f'Not a run dir: {extend_run}'
@@ -157,9 +163,9 @@ def dirs(
     resolved_outd = _resolve_outd()
     resolved_outd.mkdir(parents=True, exist_ok=True)
     if has_runs:
-        assert last_run_outd_symlink
-        last_run_outd_symlink.unlink(missing_ok=True)
-        last_run_outd_symlink.symlink_to(resolved_outd, target_is_directory=True)
+        assert last_step_outd_symlink
+        last_step_outd_symlink.unlink(missing_ok=True)
+        last_step_outd_symlink.symlink_to(resolved_outd, target_is_directory=True)
     last_outd_symlink = flow_outd/'last'
     last_outd_symlink.unlink(missing_ok=True)
     last_outd_symlink.symlink_to(resolved_outd, target_is_directory=True)

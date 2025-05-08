@@ -8,9 +8,11 @@ from pathlib import Path
 import re
 from typing import Iterable
 
+from loguru import logger
 import typer
 
-from py_shared.schema.solutions_py import SolutionsInputs, SolutionsRow, make_rendered
+import py_shared.flow as fl
+from py_shared.schema.solutions_py import SolutionsInputs, SolutionsRow, IOExample, make_rendered
 from py_shared.test_code_maker import make_test_code
 from py_shared.code_finder import find_code, looks_like_answer
 from py_shared.ser import json_dumpf, str_dumpf
@@ -41,6 +43,17 @@ def gen_rows(input_gen):
             # Yes, there are some rows with no problem statement...
             continue
 
+        structured_examples: list[IOExample] = []
+        for example in in_row.get('examples') or []:
+            try:
+                structured_examples.append(IOExample(
+                    input=example['input'],
+                    output=example['output'],
+                ))
+            except IndexError:
+                logger.warning('Skipping example (at row {}): {}', idx, example)
+                continue
+
         response: str = in_row['generation']
 
         has_extra_backticks_in_thinks = False
@@ -70,7 +83,7 @@ def gen_rows(input_gen):
                 memory_limit=in_row['memory_limit'],
                 input_format=in_row['input_format'],
                 output_format=in_row['output_format'],
-                examples=in_row['examples'] or [],
+                examples=structured_examples,
                 problem_notes=in_row['note'],
 
                 title=in_row['title'],
@@ -135,6 +148,7 @@ def write_rows(
                 if r.final_answer is not None:
                     with (code_outd/'final_answer.py').open('w') as fh:
                         print(make_test_code(r.final_answer, r.inputs.examples), file=fh)
+    logger.success('Wrote: {}', fl.cwd_rel(outf))
 
 
 @app.command()
@@ -142,8 +156,9 @@ def main(
     range: str = 'normal',
     only_report: bool = False,
 ):
-    if range not in ('normal', 'full'):
-        raise typer.BadParameter(f'Expected --range to be one of: "normal", "full"; got: {range}')
+    valid_ranges = ('normal', 'full')
+    if range not in valid_ranges:
+        raise typer.BadParameter(f'Expected --range to be one of {valid_ranges!r}; got: {range!r}')
 
     import datasets
     ds_range = ''
@@ -155,7 +170,6 @@ def main(
     if range == 'full':
         tag = 'full'
 
-    # TODO use tqdm here? on ds?
     from tqdm import tqdm
     write_rows(
         gen_rows(tqdm(ds)),
